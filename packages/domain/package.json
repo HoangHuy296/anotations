@@ -1,0 +1,33 @@
+{
+  "name": "@fieldframe/domain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./provider-config": {
+      "types": "./dist/provider-config.d.ts",
+      "default": "./dist/provider-config.js"
+    },
+    "./provider-readiness": {
+      "types": "./dist/provider-readiness.d.ts",
+      "default": "./dist/provider-readiness.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "fieldframe",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.10.0",
+  "scripts": {
+    "dev": "pnpm --filter @fieldframe/web dev",
+    "dev:worker": "pnpm --filter @fieldframe/worker dev",
+    "build": "pnpm --filter @fieldframe/domain build && pnpm --filter @fieldframe/queue build && pnpm --filter @fieldframe/web build && pnpm --filter @fieldframe/worker build",
+    "start": "pnpm --filter @fieldframe/web start",
+    "lint": "pnpm --filter @fieldframe/web lint && pnpm --filter @fieldframe/worker lint && pnpm --filter @fieldframe/domain lint && pnpm --filter @fieldframe/queue lint",
+    "typecheck": "pnpm --filter @fieldframe/web typecheck && pnpm --filter @fieldframe/worker typecheck && pnpm --filter @fieldframe/domain typecheck && pnpm --filter @fieldframe/queue typecheck",
+    "db:generate": "prisma generate",
+    "db:validate": "prisma validate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3"
+  },
+  "devDependencies": {
+    "dotenv": "^17.4.2",
+    "prisma": "^6.19.3",
+    "tsx": "^4.22.4",
+    "typescript": "^5"
+  }
+}

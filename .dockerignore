@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+.git/
+.next/
+apps/*/.next/
+apps/*/dist/
+packages/*/dist/
+.env*
+!.env.example
+*.log*
+coverage/
+specs/
+docs/
+.data/
