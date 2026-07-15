@@ -26,12 +26,17 @@ export const treeQuerySchema = z.object({
 });
 
 export const importPreviewSchema = z.object({
+  sourceConnectionId: z.string().cuid(),
   owner: repositorySegment,
   repo: repositorySegment,
   branch: z.string().trim().min(1).max(255),
   rootPath: z.string().trim().max(1024).default(""),
   name: z.string().trim().min(2).max(80),
   mode: z.enum(["preview", "persist"]).default("preview"),
+});
+
+export const sourceConnectionQuerySchema = z.object({
+  sourceConnectionId: z.string().cuid(),
 });
 
 export function normalizeRepositoryPath(path: string) {

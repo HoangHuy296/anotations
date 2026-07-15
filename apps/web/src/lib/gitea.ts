@@ -75,11 +75,10 @@ export class GiteaClientError extends Error {
   }
 }
 
-function getConfiguration() {
-  const baseUrlValue = process.env.GITEA_BASE_URL?.trim();
-  const token = process.env.GITEA_ACCESS_TOKEN?.trim();
+export type GiteaConnection = { baseUrl: string; token: string };
 
-  if (!baseUrlValue || !token) {
+function getBaseUrl(baseUrlValue: string) {
+  if (!baseUrlValue.trim()) {
     throw new GiteaClientError(
       "configuration",
       "Gitea server configuration is incomplete.",
@@ -88,7 +87,7 @@ function getConfiguration() {
 
   let baseUrl: URL;
   try {
-    baseUrl = new URL(baseUrlValue);
+    baseUrl = new URL(baseUrlValue.trim());
   } catch {
     throw new GiteaClientError(
       "configuration",
@@ -110,11 +109,19 @@ function getConfiguration() {
   baseUrl.search = "";
   baseUrl.hash = "";
 
-  return { baseUrl, token };
+  return baseUrl;
 }
 
-export function getGiteaConnectionDescriptor() {
-  const { baseUrl } = getConfiguration();
+function getConfiguration(connection: GiteaConnection) {
+  const token = connection.token.trim();
+  if (!token) {
+    throw new GiteaClientError("configuration", "Gitea server configuration is incomplete.");
+  }
+  return { baseUrl: getBaseUrl(connection.baseUrl), token };
+}
+
+export function getGiteaConnectionDescriptor(baseUrlValue: string) {
+  const baseUrl = getBaseUrl(baseUrlValue);
   const apiSuffix = "/api/v1/";
   const pathname = baseUrl.pathname.endsWith(apiSuffix)
     ? baseUrl.pathname.slice(0, -apiSuffix.length) || "/"
@@ -156,8 +163,8 @@ async function readBoundedJson(response: Response) {
   }
 }
 
-async function requestJson(path: string, query?: URLSearchParams) {
-  const { baseUrl, token } = getConfiguration();
+async function requestJson(connection: GiteaConnection, path: string, query?: URLSearchParams) {
+  const { baseUrl, token } = getConfiguration(connection);
   const url = new URL(path.replace(/^\/+/, ""), baseUrl);
   if (query) {
     url.search = query.toString();
@@ -213,8 +220,8 @@ async function requestJson(path: string, query?: URLSearchParams) {
   };
 }
 
-async function requestFile(path: string, query?: URLSearchParams) {
-  const { baseUrl, token } = getConfiguration();
+async function requestFile(connection: GiteaConnection, path: string, query?: URLSearchParams) {
+  const { baseUrl, token } = getConfiguration(connection);
   const url = new URL(path.replace(/^\/+/, ""), baseUrl);
   if (query) {
     url.search = query.toString();
@@ -301,13 +308,14 @@ function normalizeRepository(
   };
 }
 
-export const giteaClient = {
+export function createGiteaClient(connection: GiteaConnection) {
+  return {
   async listRepositories(input: { page: number; limit: number }) {
     const query = new URLSearchParams({
       page: String(input.page),
       limit: String(input.limit),
     });
-    const response = await requestJson("user/repos", query);
+    const response = await requestJson(connection, "user/repos", query);
     const parsed = z.array(repositorySchema).safeParse(response.body);
 
     if (!parsed.success) {
@@ -326,7 +334,7 @@ export const giteaClient = {
   },
 
   async getRepository(owner: string, repo: string) {
-    const response = await requestJson(
+    const response = await requestJson(connection,
       `repos/${encodeSegment(owner)}/${encodeSegment(repo)}`,
     );
     const parsed = repositorySchema.safeParse(response.body);
@@ -343,7 +351,7 @@ export const giteaClient = {
 
   async getTree(owner: string, repo: string, ref: string): Promise<GiteaTreeResult> {
     const query = new URLSearchParams({ recursive: "true" });
-    const response = await requestJson(
+    const response = await requestJson(connection,
       `repos/${encodeSegment(owner)}/${encodeSegment(repo)}/git/trees/${encodeSegment(ref)}`,
       query,
     );
@@ -382,12 +390,13 @@ export const giteaClient = {
     ref: string,
   ) {
     const encodedPath = filePath.split("/").map(encodeSegment).join("/");
-    return requestFile(
+    return requestFile(connection,
       `repos/${encodeSegment(owner)}/${encodeSegment(repo)}/raw/${encodedPath}`,
       new URLSearchParams({ ref }),
     );
   },
-};
+  };
+}
 
 export function findImageCandidates(
   tree: GiteaTreeResult,

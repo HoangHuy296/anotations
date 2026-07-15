@@ -1,15 +1,14 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { canImportDatasets } from "@/lib/auth";
 import { persistDatasetImport } from "@/lib/dataset-import";
 import { isDatabaseConfigured } from "@/lib/db";
 import {
   findImageCandidates,
-  giteaClient,
   MAX_IMPORT_IMAGES,
 } from "@/lib/gitea";
 import {
   giteaErrorResponse,
   readBoundedJsonRequest,
+  requireOwnedGiteaClient,
   requireApiActor,
   zodFieldErrors,
 } from "@/lib/gitea-route";
@@ -25,14 +24,6 @@ export async function POST(request: Request) {
   if ("response" in auth) {
     return auth.response;
   }
-  if (!canImportDatasets(auth.actor)) {
-    return apiError(
-      403,
-      "FORBIDDEN",
-      "Reviewer or administrator access is required to import datasets.",
-    );
-  }
-
   const body = await readBoundedJsonRequest(request);
   if (!body.success) {
     return body.response;
@@ -48,6 +39,14 @@ export async function POST(request: Request) {
     );
   }
 
+  const gitea = await requireOwnedGiteaClient(
+    auth.actor,
+    parsed.data.sourceConnectionId,
+  );
+  if (!gitea) {
+    return apiError(404, "GITEA_NOT_FOUND", "The requested source connection was not found.");
+  }
+
   const rootPath = normalizeRepositoryPath(parsed.data.rootPath);
   if (rootPath === null) {
     return apiError(
@@ -60,8 +59,8 @@ export async function POST(request: Request) {
 
   try {
     const [repository, tree] = await Promise.all([
-      giteaClient.getRepository(parsed.data.owner, parsed.data.repo),
-      giteaClient.getTree(
+      gitea.client.getRepository(parsed.data.owner, parsed.data.repo),
+      gitea.client.getTree(
         parsed.data.owner,
         parsed.data.repo,
         parsed.data.branch,
@@ -106,6 +105,8 @@ export async function POST(request: Request) {
       try {
         const result = await persistDatasetImport({
           actor: auth.actor,
+          sourceConnectionId: gitea.connection.id,
+          sourceConnectionBaseUrl: gitea.connection.baseUrl,
           repository,
           dataset: {
             name: parsed.data.name,

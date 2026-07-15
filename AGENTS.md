@@ -69,7 +69,14 @@ configuration through:
 - MinIO object metadata accessible to the browser.
 
 All provider and MinIO access is server-side only. Browser code accesses only
-authorized application routes and never calls private providers directly.
+authorized application routes and never calls private providers directly,
+except for a backend-generated, short-lived, object-scoped MinIO presigned
+upload or view URL. This controlled capability is not a credential: it must
+not permit listing, bucket administration, access to another object, or reuse
+beyond its expiry. For a presigned POST upload only, the browser may receive
+the provider-required signed form fields transiently to submit that one form;
+they must not be returned as separate application data, persisted, logged, or
+reused. The browser must never receive provider credentials.
 
 ## Implementation rules
 

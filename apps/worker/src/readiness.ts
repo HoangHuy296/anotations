@@ -7,8 +7,10 @@ import {
   createWorkerQueue,
   ensureBucket,
 } from "./providers/index.js";
+import { createFoundationWorker } from "./queue/bullmq-worker.js";
 
 export async function startWorkerReadiness() {
+  let closeOnError: (() => Promise<void>) | undefined;
   try {
     const config = getWorkerConfig();
     const db = createWorkerDatabase(config);
@@ -27,19 +29,30 @@ export async function startWorkerReadiness() {
       }),
     ];
 
-    if (results.some((result) => !result.ready)) {
+    closeOnError = async () => {
       await Promise.allSettled([queue.close(), connection.quit(), db.$disconnect()]);
+    };
+    if (results.some((result) => !result.ready)) {
+      await closeOnError();
       throw new Error("Provider readiness failed.");
     }
 
+    const foundationWorker = createFoundationWorker({ config, db });
+    closeOnError = async () => {
+      await Promise.allSettled([foundationWorker.close(), queue.close(), connection.quit(), db.$disconnect()]);
+    };
+    await foundationWorker.worker.waitUntilReady();
+    await Promise.allSettled([queue.close(), connection.quit()]);
+
     const shutdown = async () => {
-      await Promise.allSettled([queue.close(), connection.quit(), db.$disconnect()]);
+      await closeOnError?.();
       process.exit(0);
     };
     process.once("SIGTERM", shutdown);
     process.once("SIGINT", shutdown);
     console.info("Fieldframe worker ready.");
   } catch (error: unknown) {
+    await closeOnError?.();
     console.error(getSafeStartupMessage(error));
     process.exitCode = 1;
   }

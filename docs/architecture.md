@@ -29,6 +29,26 @@ Browser
 | Private worker | Repository cloning, long-running processing, retry-safe work, and durable Job updates | Browser request serving or a duplicate public API |
 
 The private worker belongs to the same product repository but runs as a private execution process. The public product remains the Next.js application; do not add a separate public backend, frontend, or modality-specific workspace application.
+## Direct Upload Exception
+
+The browser must not call private source providers directly.
+
+However, the browser may upload files directly to MinIO using backend-generated presigned URLs.
+
+This is an allowed exception because:
+- The backend validates the authenticated user.
+- The backend validates Dataset ownership.
+- The backend generates a short-lived presigned URL.
+- The URL is scoped to a single object key.
+- A presigned POST may include provider-required signed form fields only for
+  that immediate form submission; they are not separate application metadata
+  and must not be persisted or logged by browser code.
+- The browser never receives MinIO credentials.
+- The browser never receives provider tokens.
+- PostgreSQL stores metadata only.
+- Binary files are stored in MinIO only.
+
+The browser must call `complete-upload` after the object is uploaded so the backend can verify the object and create Asset metadata in PostgreSQL.
 
 ## Locked implementation structure
 
@@ -95,9 +115,14 @@ Viewport pan, zoom, in-progress pointer state, and other transient canvas intera
 
 ## Security and trust rules
 
-1. Browser clients call only authorized Next.js application routes.
-2. Provider access, MinIO access, Redis access, and database access are server-side only.
-3. Tokens, private URLs, MinIO credentials, Redis credentials, database credentials, encrypted values, and server-only configuration must not enter props, client state, URLs, logs, public errors, or queue payloads.
+1. Browser clients call only authorized Next.js application routes. The sole
+   controlled exception is a backend-generated, short-lived, object-scoped
+   MinIO presigned upload or view URL issued after route authorization. It is
+   a constrained capability, not a provider credential, and must not permit
+   object listing, bucket administration, cross-object access, or reuse after
+   expiry.
+2. Provider access, MinIO access, Redis access, and database access are server-side only; browser code never receives provider credentials. The controlled presigned URL exception in rule 1 does not change this rule.
+3. Tokens, private URLs, MinIO credentials, Redis credentials, database credentials, encrypted values, and server-only configuration must not enter props, client state, URLs, logs, public errors, or queue payloads. The only exceptions are the short-lived, object-scoped presigned URL and, for one presigned POST submission, its required signed form fields; neither may be logged or persisted by browser code or returned as separate application metadata.
 4. The backend validates and authorizes every request before writing metadata or creating a Job.
 5. The private worker receives no browser requests and obtains work only from an authorized queue delivery plus the durable Job lookup.
 6. Provider and storage errors are sanitized before reaching the browser.

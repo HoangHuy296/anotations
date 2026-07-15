@@ -6,7 +6,6 @@ import {
   Modality,
   RepoProvider,
   RepoVisibility,
-  UserRole,
 } from "@internal/db";
 
 import type { RequestActor } from "@/lib/auth";
@@ -19,6 +18,8 @@ import type {
 
 type PersistDatasetImportInput = {
   actor: RequestActor;
+  sourceConnectionId: string;
+  sourceConnectionBaseUrl: string;
   repository: GiteaRepositorySummary;
   dataset: {
     name: string;
@@ -33,31 +34,11 @@ function sourceFingerprint(branch: string, image: GiteaImageCandidate) {
 }
 
 export async function persistDatasetImport(input: PersistDatasetImportInput) {
-  const connectionDescriptor = getGiteaConnectionDescriptor();
+  const connectionDescriptor = getGiteaConnectionDescriptor(input.sourceConnectionBaseUrl);
 
   return db.$transaction(
     async (transaction) => {
-      // Prisma's custom-output client currently omits model delegates from the
-      // interactive transaction type, although the runtime transaction exposes
-      // the same delegates as the root client.
       const client = transaction as unknown as typeof db;
-      const user = await client.user.upsert({
-        where: { email: input.actor.email },
-        update: {
-          name: input.actor.name,
-          role: input.actor.role,
-        },
-        create: {
-          email: input.actor.email,
-          name: input.actor.name,
-          role:
-            input.actor.role === UserRole.ADMIN
-              ? UserRole.ADMIN
-              : UserRole.LABELER,
-        },
-        select: { id: true },
-      });
-
       const repository = await client.externalRepository.upsert({
         where: {
           provider_baseUrl_fullName: {
@@ -86,14 +67,14 @@ export async function persistDatasetImport(input: PersistDatasetImportInput) {
           visibility: input.repository.private
             ? RepoVisibility.PRIVATE
             : RepoVisibility.PUBLIC,
-          createdById: user.id,
+          createdById: input.actor.id,
         },
         select: { id: true },
       });
 
       const existingDataset = await client.dataset.findFirst({
         where: {
-          ownerId: user.id,
+          ownerId: input.actor.id,
           externalRepositoryId: repository.id,
           sourceBranch: input.dataset.branch,
           sourceRootPath: input.dataset.rootPath,
@@ -105,15 +86,16 @@ export async function persistDatasetImport(input: PersistDatasetImportInput) {
       const dataset = existingDataset
         ? await client.dataset.update({
             where: { id: existingDataset.id },
-            data: { name: input.dataset.name },
+            data: { name: input.dataset.name, sourceConnectionId: input.sourceConnectionId },
             select: { id: true, name: true },
           })
         : await client.dataset.create({
             data: {
-              ownerId: user.id,
+              ownerId: input.actor.id,
               name: input.dataset.name,
               sourceMode: DatasetSourceMode.EXTERNAL_REF,
               externalRepositoryId: repository.id,
+              sourceConnectionId: input.sourceConnectionId,
               sourceBranch: input.dataset.branch,
               sourceRootPath: input.dataset.rootPath,
             },

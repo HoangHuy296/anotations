@@ -1,8 +1,11 @@
 import { Export } from "@phosphor-icons/react/dist/ssr";
+import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { getRequestActor } from "@/lib/auth";
 
-export default function ExportsPage() {
+export default async function ExportsPage() {
+  if (!(await getRequestActor())) redirect("/unauthorized");
   return (
     <AppShell currentPath="/exports">
       <div className="grid min-h-[calc(100dvh-64px)] place-items-center px-4 py-8">

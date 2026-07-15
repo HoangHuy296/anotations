@@ -10,6 +10,8 @@ import { DatasetSidebar } from "@/components/workspace/dataset-sidebar";
 import { PropertiesPanel } from "@/components/workspace/properties-panel";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { db, isDatabaseConfigured } from "@/lib/db";
+import { getRequestActor } from "@/lib/auth";
+import { requireDatasetPermission } from "@/lib/authorization";
 import { imageStatusOptions } from "@/lib/image-status";
 
 export const metadata: Metadata = {
@@ -68,6 +70,11 @@ export default async function WorkspacePage({
   if (!isDatabaseConfigured()) {
     return <WorkspaceSetupState />;
   }
+
+  const actor = await getRequestActor();
+  if (!actor) notFound();
+  const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
+  if (!access || access.forbidden) notFound();
 
   const search = firstValue(query.q)?.trim().slice(0, 100) ?? "";
   const requestedStatus = firstValue(query.status);

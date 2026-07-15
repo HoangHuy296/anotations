@@ -9,10 +9,12 @@ import {
   TrendUp,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getRequestActor } from "@/lib/auth";
 
 const metrics = [
   {
@@ -65,7 +67,8 @@ const datasets = [
   },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  if (!(await getRequestActor())) redirect("/unauthorized");
   return (
     <AppShell currentPath="/dashboard">
       <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">

@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 import { apiError } from "@/lib/api-response";
+import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { giteaClient } from "@/lib/gitea";
 import {
   giteaErrorResponse,
+  requireDatasetGiteaClient,
   requireApiActor,
 } from "@/lib/gitea-route";
 import { localStorageProvider } from "@/lib/storage/local-storage";
@@ -34,6 +35,7 @@ export async function GET(
     where: { id: parsedId.data, modality: "IMAGE" },
     select: {
       id: true,
+      datasetId: true,
       sourcePath: true,
       mimeType: true,
       sourceFingerprint: true,
@@ -55,12 +57,20 @@ export async function GET(
   if (!image) {
     return apiError(404, "GITEA_NOT_FOUND", "The image was not found.");
   }
+  const access = await requireDatasetPermission(auth.actor, image.datasetId, "dataset.read");
+  if (!access || access.forbidden) {
+    return apiError(access?.forbidden ? 403 : 404, access?.forbidden ? "FORBIDDEN" : "GITEA_NOT_FOUND", "The image was not found.");
+  }
 
   const sourcePath = image.sourcePath;
   const repository = image.dataset.externalRepository;
   const ref = image.dataset.sourceBranch ?? repository?.defaultBranch;
   if (!repository || !sourcePath || !ref) {
     return apiError(409, "GITEA_NOT_FOUND", "The image has no external source.");
+  }
+  const gitea = await requireDatasetGiteaClient(image.datasetId);
+  if (!gitea) {
+    return apiError(409, "GITEA_NOT_FOUND", "The image source connection is unavailable.");
   }
 
   const storageKey = `images/${image.id}/${image.sourceFingerprint}`;
@@ -70,7 +80,7 @@ export async function GET(
     let cacheStatus = "HIT";
 
     if (!bytes) {
-      bytes = await giteaClient.getFileContent(
+      bytes = await gitea.getFileContent(
         repository.owner ?? "",
         repository.repo,
         sourcePath,

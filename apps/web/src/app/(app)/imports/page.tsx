@@ -1,9 +1,18 @@
 import { TrayArrowDown } from "@phosphor-icons/react/dist/ssr";
+import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { ImportForm } from "@/components/imports/import-form";
+import { getRequestActor } from "@/lib/auth";
+import { db } from "@/lib/db";
 
-export default function ImportsPage() {
+export default async function ImportsPage() {
+  const actor = await getRequestActor();
+  if (!actor) redirect("/unauthorized");
+  const connections = await db.sourceConnection.findMany({
+    where: { userId: actor.id, provider: "GITEA", status: "ACTIVE", revokedAt: null, tokenEncrypted: { not: null } },
+    select: { id: true, name: true },
+  });
   return (
     <AppShell currentPath="/imports">
       <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -24,7 +33,7 @@ export default function ImportsPage() {
           </p>
         </header>
         <div className="mt-7">
-          <ImportForm />
+          <ImportForm connections={connections} />
         </div>
       </div>
     </AppShell>

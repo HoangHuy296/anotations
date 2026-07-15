@@ -35,6 +35,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-fieldframe}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-change-me}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:?Set MINIO_CORS_ALLOWED_ORIGIN in .env before starting Compose.}
     volumes:
       - minio-data:/data
     healthcheck:
@@ -43,6 +44,8 @@ services:
       timeout: 3s
       retries: 12
       start_period: 10s
+    ports:
+      - "${MINIO_PUBLIC_PORT:-9000}:9000"
 
   web:
     build:
@@ -54,6 +57,9 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-fieldframe}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-change-me}
       MINIO_BUCKET: ${MINIO_BUCKET:-fieldframe}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:?Set MINIO_CORS_ALLOWED_ORIGIN in .env before starting Compose.}
+      UPLOAD_CAPABILITY_SECRET: ${UPLOAD_CAPABILITY_SECRET:?Set UPLOAD_CAPABILITY_SECRET in .env before starting Compose.}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env before starting Compose.}

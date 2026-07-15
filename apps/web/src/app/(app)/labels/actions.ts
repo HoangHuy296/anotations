@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { canManageLabels, getRequestActor } from "@/lib/auth";
+import { getRequestActor } from "@/lib/auth";
+import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import {
   labelIdSchema,
@@ -89,7 +90,7 @@ export async function createLabelAction(
 
   const actor = await getRequestActor();
 
-  if (!canManageLabels(actor)) {
+  if (!actor) {
     return unauthorizedResult();
   }
 
@@ -98,6 +99,8 @@ export async function createLabelAction(
   if (!parsed.success) {
     return invalidInputResult(parsed.error.flatten().fieldErrors);
   }
+  const access = await requireDatasetPermission(actor, parsed.data.datasetId, "label.manage");
+  if (!access || access.forbidden) return unauthorizedResult();
 
   try {
     if (await hasCaseInsensitiveNameConflict(parsed.data.datasetId, parsed.data.name)) {
@@ -137,7 +140,7 @@ export async function updateLabelAction(
 
   const actor = await getRequestActor();
 
-  if (!canManageLabels(actor)) {
+  if (!actor) {
     return unauthorizedResult();
   }
 
@@ -154,6 +157,10 @@ export async function updateLabelAction(
   if (!parsed.success) {
     return invalidInputResult(parsed.error.flatten().fieldErrors);
   }
+  const existing = await db.label.findFirst({ where: { id: parsedId.data, datasetId: parsed.data.datasetId }, select: { id: true } });
+  if (!existing) return { success: false, message: "This label no longer exists." };
+  const access = await requireDatasetPermission(actor, parsed.data.datasetId, "label.manage");
+  if (!access || access.forbidden) return unauthorizedResult();
 
   try {
     if (
@@ -205,7 +212,7 @@ export async function deleteLabelAction(
 
   const actor = await getRequestActor();
 
-  if (!canManageLabels(actor)) {
+  if (!actor) {
     return unauthorizedResult();
   }
 
@@ -219,10 +226,11 @@ export async function deleteLabelAction(
   }
 
   try {
-    const label = await db.label.findUnique({
+    const label = await db.label.findFirst({
       where: { id: parsedId.data },
       select: {
         name: true,
+        datasetId: true,
         _count: {
           select: { annotations: true },
         },
@@ -235,6 +243,8 @@ export async function deleteLabelAction(
         message: "This label no longer exists.",
       };
     }
+    const access = await requireDatasetPermission(actor, label.datasetId, "label.manage");
+    if (!access || access.forbidden) return unauthorizedResult();
 
     if (label._count.annotations > 0) {
       return {

@@ -5,7 +5,8 @@ import { AppShell } from "@/components/layout/app-shell";
 import { DeleteLabelButton } from "@/components/labels/delete-label-button";
 import { LabelForm } from "@/components/labels/label-form";
 import { Badge } from "@/components/ui/badge";
-import { canManageLabels, getRequestActor } from "@/lib/auth";
+import { getRequestActor } from "@/lib/auth";
+import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
 
 type LabelSummary = {
@@ -47,8 +48,7 @@ export default async function LabelsPage() {
     );
   }
 
-  const { labels, actor, dataset } = data;
-  const canManage = canManageLabels(actor);
+  const { labels, actor, dataset, canManage } = data;
 
   return (
     <AppShell currentPath="/labels">
@@ -205,15 +205,14 @@ async function loadLabelPageData() {
   }
 
   try {
-    const [datasets, actor] = await Promise.all([
-      db.dataset.findMany({
-        where: { deletedAt: null },
+    const actor = await getRequestActor();
+    if (!actor) return { labels: [], actor: null, dataset: null, canManage: false };
+    const datasets = await db.dataset.findMany({
+        where: { deletedAt: null, archivedAt: null, OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] },
         orderBy: { updatedAt: "desc" },
         take: 1,
         select: { id: true, name: true },
-      }),
-      getRequestActor(),
-    ]);
+      });
     const dataset = datasets[0] ?? null;
     const labels: LabelSummary[] = dataset
       ? await db.label.findMany({
@@ -227,7 +226,8 @@ async function loadLabelPageData() {
       }) as LabelSummary[]
       : [];
 
-    return { labels, actor, dataset };
+    const access = dataset ? await requireDatasetPermission(actor, dataset.id, "label.manage") : null;
+    return { labels, actor, dataset, canManage: Boolean(access && !access.forbidden) };
   } catch (error: unknown) {
     console.error("Label page data could not be loaded.", error);
     return null;

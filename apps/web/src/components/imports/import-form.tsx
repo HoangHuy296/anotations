@@ -43,7 +43,7 @@ type ApiEnvelope<T> = {
 const inputClassName =
   "mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:bg-zinc-100";
 
-export function ImportForm() {
+export function ImportForm({ connections }: { connections: Array<{ id: string; name: string | null }> }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [preview, setPreview] = useState<ImportPreview | null>(null);
@@ -100,6 +100,7 @@ export function ImportForm() {
     const payload = {
       owner: String(formData.get("owner") ?? ""),
       repo: String(formData.get("repo") ?? ""),
+      sourceConnectionId: String(formData.get("sourceConnectionId") ?? ""),
       branch: String(formData.get("branch") ?? ""),
       rootPath: String(formData.get("rootPath") ?? ""),
       name: String(formData.get("name") ?? ""),
@@ -116,6 +117,18 @@ export function ImportForm() {
           Repository source
         </p>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <Field label="Source connection">
+            <select
+              className={inputClassName}
+              defaultValue={lastPayload?.sourceConnectionId}
+              disabled={isPending}
+              name="sourceConnectionId"
+              required
+            >
+              <option value="">Select your active Gitea connection</option>
+              {connections.map((connection) => <option key={connection.id} value={connection.id}>{connection.name ?? "Gitea connection"}</option>)}
+            </select>
+          </Field>
           <Field label="Owner">
             <input
               className={inputClassName}

@@ -27,5 +27,12 @@ export const labelSchema = z.object({
 });
 
 export const labelIdSchema = z.string().cuid("Invalid label identifier.");
+export const labelMutationSchema = z.object({
+  name: labelSchema.shape.name,
+  color: labelSchema.shape.color,
+  description: labelSchema.shape.description.default(""),
+  hotkey: labelSchema.shape.hotkey.default(""),
+});
+export function normalizeLabelName(name: string) { return name.trim().toLocaleLowerCase("en-US"); }
 
 export type LabelInput = z.input<typeof labelSchema>;

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { apiError, apiSuccess } from "@/lib/api-response";
+import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import {
   readBoundedJsonRequest,
@@ -44,6 +45,10 @@ export async function PATCH(
     return apiError(503, "INTERNAL_ERROR", "Database access is not configured.");
   }
 
+  const image = await db.asset.findFirst({ where: { id: parsedId.data, modality: "IMAGE", deletedAt: null }, select: { datasetId: true } });
+  if (!image) return apiError(404, "GITEA_NOT_FOUND", "The image was not found.");
+  const access = await requireDatasetPermission(auth.actor, image.datasetId, "dataset.update");
+  if (!access || access.forbidden) return apiError(access?.forbidden ? 403 : 404, access?.forbidden ? "FORBIDDEN" : "GITEA_NOT_FOUND", "The image was not found.");
   const result = await db.asset.updateMany({
     where: {
       id: parsedId.data,

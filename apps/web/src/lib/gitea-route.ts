@@ -1,11 +1,12 @@
 import "server-only";
 
-import { UserRole } from "@internal/db";
 import type { ZodError } from "zod";
 
 import { apiError } from "@/lib/api-response";
+import { requireOwnedSourceConnection, resolveDatasetSourceConnection } from "@/lib/authorization";
 import { getRequestActor, type RequestActor } from "@/lib/auth";
-import { GiteaClientError } from "@/lib/gitea";
+import { decryptSourceToken } from "@/lib/source-connection-crypto";
+import { createGiteaClient, GiteaClientError } from "@/lib/gitea";
 
 export async function requireApiActor(): Promise<
   { actor: RequestActor } | { response: Response }
@@ -25,14 +26,39 @@ export async function requireApiActor(): Promise<
   return { actor };
 }
 
-export function canBrowseGitea(actor: RequestActor) {
-  const browsableRoles = new Set<UserRole>([
-    UserRole.ADMIN,
-    UserRole.REVIEWER,
-    UserRole.LABELER,
-  ]);
+export async function requireOwnedGiteaClient(actor: RequestActor, sourceConnectionId: string) {
+  const connection = await requireOwnedSourceConnection(actor, sourceConnectionId);
+  if (!connection || !connection.tokenEncrypted) return null;
 
-  return browsableRoles.has(actor.role);
+  try {
+    const token = decryptSourceToken(connection.tokenEncrypted);
+    return {
+      connection: { id: connection.id, baseUrl: connection.baseUrl },
+      client: createGiteaClient({ baseUrl: connection.baseUrl, token }),
+    };
+  } catch {
+    // Never disclose whether the stored ciphertext/key is malformed to callers.
+    return null;
+  }
+}
+
+/**
+ * Resolves the dataset-selected connection only after dataset authorization.
+ * It is intentionally server-only and returns no connection data to browsers.
+ */
+export async function requireDatasetGiteaClient(datasetId: string) {
+  const dataset = await resolveDatasetSourceConnection(datasetId);
+  const connection = dataset?.sourceConnection;
+  if (!connection?.tokenEncrypted) return null;
+
+  try {
+    return createGiteaClient({
+      baseUrl: connection.baseUrl,
+      token: decryptSourceToken(connection.tokenEncrypted),
+    });
+  } catch {
+    return null;
+  }
 }
 
 export function zodFieldErrors(error: ZodError) {

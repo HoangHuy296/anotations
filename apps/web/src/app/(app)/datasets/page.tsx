@@ -7,12 +7,14 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { AssetStatus } from "@internal/db";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { connection } from "next/server";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db, isDatabaseConfigured } from "@/lib/db";
+import { getRequestActor } from "@/lib/auth";
 
 type DatasetSummary = {
   id: string;
@@ -32,6 +34,9 @@ type DatasetStatusCount = {
 export default async function DatasetsPage() {
   await connection();
 
+  const actor = await getRequestActor();
+  if (!actor) redirect("/unauthorized");
+
   if (!isDatabaseConfigured()) {
     return <DatasetSetupState />;
   }
@@ -40,6 +45,7 @@ export default async function DatasetsPage() {
   try {
     const [datasets, statusCounts] = await Promise.all([
       db.dataset.findMany({
+        where: { deletedAt: null, archivedAt: null, OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] },
         orderBy: { updatedAt: "desc" },
         include: {
           externalRepository: {
@@ -52,7 +58,7 @@ export default async function DatasetsPage() {
       }),
       db.asset.groupBy({
         by: ["datasetId", "status"],
-        where: { modality: "IMAGE" },
+        where: { modality: "IMAGE", dataset: { OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] } },
         _count: { _all: true },
       }),
     ]);

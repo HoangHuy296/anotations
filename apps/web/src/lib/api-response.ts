@@ -9,6 +9,11 @@ export type ApiErrorCode =
   | "GITEA_NOT_FOUND"
   | "GITEA_RATE_LIMITED"
   | "GITEA_RESPONSE_INVALID"
+  | "UPLOAD_CONFLICT"
+  | "UPLOAD_NOT_READY"
+  | "UNSUPPORTED_MEDIA"
+  | "INVALID_MEDIA"
+  | "ASSET_UNAVAILABLE"
   | "INTERNAL_ERROR";
 
 export function apiError(

@@ -1,12 +1,11 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
-import { giteaClient } from "@/lib/gitea";
 import {
-  canBrowseGitea,
   giteaErrorResponse,
+  requireOwnedGiteaClient,
   requireApiActor,
   zodFieldErrors,
 } from "@/lib/gitea-route";
-import { repositoryListQuerySchema } from "@/lib/validation/gitea";
+import { repositoryListQuerySchema, sourceConnectionQuerySchema } from "@/lib/validation/gitea";
 
 export const dynamic = "force-dynamic";
 
@@ -15,16 +14,13 @@ export async function GET(request: Request) {
   if ("response" in auth) {
     return auth.response;
   }
-  if (!canBrowseGitea(auth.actor)) {
-    return apiError(403, "FORBIDDEN", "You cannot browse Gitea repositories.");
-  }
-
   const url = new URL(request.url);
   const parsed = repositoryListQuerySchema.safeParse({
     page: url.searchParams.get("page") ?? undefined,
     limit: url.searchParams.get("limit") ?? undefined,
   });
 
+  const source = sourceConnectionQuerySchema.safeParse({ sourceConnectionId: url.searchParams.get("sourceConnectionId") });
   if (!parsed.success) {
     return apiError(
       400,
@@ -33,9 +29,13 @@ export async function GET(request: Request) {
       zodFieldErrors(parsed.error),
     );
   }
+  if (!source.success) return apiError(400, "INVALID_REQUEST", "A source connection is required.", zodFieldErrors(source.error));
+
+  const gitea = await requireOwnedGiteaClient(auth.actor, source.data.sourceConnectionId);
+  if (!gitea) return apiError(404, "GITEA_NOT_FOUND", "The requested source connection was not found.");
 
   try {
-    const result = await giteaClient.listRepositories(parsed.data);
+    const result = await gitea.client.listRepositories(parsed.data);
     return apiSuccess({
       items: result.repositories,
       pagination: {

@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:auth-ownership": "node --env-file=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/auth-ownership/**/*.test.ts",
+    "test:dataset-metadata": "node --env-file=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/dataset-metadata/**/*.test.ts",
+    "test:direct-upload": "node --env-file=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/direct-upload/**/*.test.ts",
+    "test:job-queue": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/job-queue/**/*.test.ts"
   },
   "dependencies": {
     "@fieldframe/domain": "workspace:*",

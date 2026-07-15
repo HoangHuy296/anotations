@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node --import tsx src/index.ts",
     "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:queue": "node --env-file-if-exists=../../.env --import tsx --test tests/queue/**/*.test.ts"
   },
   "dependencies": {
     "@fieldframe/domain": "workspace:*",

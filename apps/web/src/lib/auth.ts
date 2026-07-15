@@ -1,71 +1,89 @@
 import "server-only";
 
+import { createHash, randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
+import { promisify } from "node:util";
+
 import { UserRole } from "@internal/db";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { db } from "@/lib/db";
 
-const INTERNAL_EMAIL_HEADER = "x-fieldframe-auth-email";
-const INTERNAL_VERIFIED_HEADER = "x-fieldframe-proxy-verified";
-const DEFAULT_DEVELOPMENT_EMAIL = "developer@localhost";
+const scrypt = promisify(scryptCallback);
+const SESSION_COOKIE = "fieldframe_session";
+const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14;
 
-export type RequestActor = {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-};
+export type RequestActor = { id: string; email: string; name: string; role: UserRole };
+export type SafeUser = RequestActor;
 
-function normalizeEmail(value: string | null) {
-  const email = value?.trim().toLowerCase();
-  return email && email.includes("@") ? email : null;
+export const sessionCookieName = SESSION_COOKIE;
+
+function digest(value: string) { return createHash("sha256").update(value).digest("hex"); }
+function normalizeEmail(value: string) { return value.trim().toLowerCase(); }
+
+export async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const hash = Buffer.from(await scrypt(password, salt, 64) as ArrayBuffer).toString("hex");
+  return `scrypt$${salt}$${hash}`;
+}
+
+export async function verifyPassword(password: string, stored: string | null) {
+  if (!stored) return false;
+  const [algorithm, salt, expected] = stored.split("$");
+  if (algorithm !== "scrypt" || !salt || !expected) return false;
+  const actual = Buffer.from(await scrypt(password, salt, 64) as ArrayBuffer);
+  const expectedBuffer = Buffer.from(expected, "hex");
+  return actual.length === expectedBuffer.length && timingSafeEqual(actual, expectedBuffer);
+}
+
+export function cookieOptions(expiresAt: Date) {
+  return { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/", expires: expiresAt };
+}
+
+async function sessionContext() {
+  try {
+    const requestHeaders = await headers();
+    return { userAgent: requestHeaders.get("user-agent")?.slice(0, 512) ?? null, ipAddress: requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null };
+  } catch {
+    // Server-side integration calls have no request context; no client data is inferred.
+    return { userAgent: null, ipAddress: null };
+  }
+}
+
+export async function createSession(userId: string) {
+  const token = randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  const context = await sessionContext();
+  await db.authSession.create({ data: { userId, refreshTokenHash: digest(token), expiresAt, ...context } });
+  return { token, expiresAt };
 }
 
 export async function getRequestActor(): Promise<RequestActor | null> {
-  const requestHeaders = await headers();
-  const verified = requestHeaders.get(INTERNAL_VERIFIED_HEADER) === "1";
-  const email = verified
-    ? normalizeEmail(requestHeaders.get(INTERNAL_EMAIL_HEADER))
-    : null;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  return token ? getActorFromSessionToken(token) : null;
+}
 
-  if (!email) {
-    return null;
-  }
-
-  if (
-    process.env.NODE_ENV !== "production" &&
-    email === DEFAULT_DEVELOPMENT_EMAIL
-  ) {
-    return {
-      id: "00000000-0000-0000-0000-000000000000",
-      email,
-      name: "Local Developer",
-      role: UserRole.ADMIN,
-    };
-  }
-
-  const user = await db.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      role: true,
-    },
+/** Server-only token resolver shared by request handlers and integration tests. */
+export async function getActorFromSessionToken(token: string): Promise<RequestActor | null> {
+  const session = await db.authSession.findFirst({
+    where: { refreshTokenHash: digest(token), revokedAt: null, deletedAt: null, expiresAt: { gt: new Date() } },
+    select: { user: { select: { id: true, email: true, name: true, role: true } } },
   });
-
-  return user
-    ? {
-        ...user,
-        name: user.name ?? user.email,
-      }
-    : null;
+  return session ? { ...session.user, name: session.user.name ?? session.user.email } : null;
 }
 
-export function canManageLabels(actor: RequestActor | null) {
-  return actor?.role === UserRole.ADMIN || actor?.role === UserRole.REVIEWER;
+export async function rotateSession() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+  const replacement = randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  const result = await db.authSession.updateMany({ where: { refreshTokenHash: digest(token), revokedAt: null, deletedAt: null, expiresAt: { gt: new Date() } }, data: { refreshTokenHash: digest(replacement), expiresAt } });
+  return result.count === 1 ? { token: replacement, expiresAt } : null;
 }
 
-export function canImportDatasets(actor: RequestActor | null) {
-  return actor?.role === UserRole.ADMIN || actor?.role === UserRole.REVIEWER;
+export async function revokeSession() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return;
+  await db.authSession.updateMany({ where: { refreshTokenHash: digest(token), revokedAt: null }, data: { revokedAt: new Date() } });
 }
+
+export { normalizeEmail };
