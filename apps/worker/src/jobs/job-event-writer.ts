@@ -1,6 +1,7 @@
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
+import { z } from "zod";
 
-export const jobEventKinds = ["QUEUE_ENQUEUED", "QUEUE_DELIVERY_PENDING", "QUEUE_RECEIVED", "QUEUE_SKIPPED"] as const;
+export const jobEventKinds = ["QUEUE_ENQUEUED", "QUEUE_DELIVERY_PENDING", "QUEUE_RECEIVED", "QUEUE_SKIPPED", "JOB_CLAIMED", "JOB_HEARTBEAT", "JOB_PROGRESS", "JOB_COMPLETED", "JOB_FAILED", "JOB_CANCELED"] as const;
 export type JobEventKind = (typeof jobEventKinds)[number];
 export type JobEventReason = "MALFORMED_PAYLOAD" | "UNKNOWN_JOB" | "NOT_QUEUED" | "CANCELED" | "INACTIVE_DATASET" | "UNSUPPORTED_TYPE" | "TRANSPORT_CONFLICT";
 

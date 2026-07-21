@@ -2,11 +2,13 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env before starting Compose.}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env before starting Compose.}
-      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env before starting Compose.}
+      POSTGRES_USER: fieldframe
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-8dded31253ab6a500b97e1948a4cae910cf7f9c088fe9ea9dc75b472fa5df4d5}
+      POSTGRES_DB: fieldframe
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -17,7 +19,7 @@ services:
   redis:
     image: redis:7-alpine
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env before starting Compose.}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-U596K12nuf9bkP1LNC0szoTtmFwL300rBVWVyq9qr/c=}
     command:
       ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
     volumes:
@@ -31,11 +33,10 @@ services:
 
   minio:
     image: minio/minio:RELEASE.2025-04-22T22-12-26Z
-    command: server /data --console-address ":9001"
+    command: server /data --address ":9000" --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-fieldframe}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-change-me}
-      MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:?Set MINIO_CORS_ALLOWED_ORIGIN in .env before starting Compose.}
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-admin_dev_user}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-super_secret_password_123}
     volumes:
       - minio-data:/data
     healthcheck:
@@ -44,26 +45,24 @@ services:
       timeout: 3s
       retries: 12
       start_period: 10s
-    ports:
-      - "${MINIO_PUBLIC_PORT:-9000}:9000"
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-fieldframe}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-change-me}
-      MINIO_BUCKET: ${MINIO_BUCKET:-fieldframe}
-      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
-      MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:?Set MINIO_CORS_ALLOWED_ORIGIN in .env before starting Compose.}
-      UPLOAD_CAPABILITY_SECRET: ${UPLOAD_CAPABILITY_SECRET:?Set UPLOAD_CAPABILITY_SECRET in .env before starting Compose.}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin_dev_user}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-super_secret_password_123}
+      MINIO_BUCKET: ${MINIO_BUCKET:-annotation-assets}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env before starting Compose.}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-U596K12nuf9bkP1LNC0szoTtmFwL300rBVWVyq9qr/c=}
       BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe}
+      SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-wSA2xXBH4KiKxAjt9b38M8bqk6QbYzbs0p9AZkUp+4I=}
+      GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
+      GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
     depends_on:
       postgres:
         condition: service_healthy
@@ -79,15 +78,18 @@ services:
       context: .
       dockerfile: apps/worker/Dockerfile
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin_dev_user}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-super_secret_password_123}
       MINIO_BUCKET: ${MINIO_BUCKET:-annotation-assets}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
-      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env before starting Compose.}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-U596K12nuf9bkP1LNC0szoTtmFwL300rBVWVyq9qr/c=}
       BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe}
+      SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-wSA2xXBH4KiKxAjt9b38M8bqk6QbYzbs0p9AZkUp+4I=}
+      GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
+      GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}  
     depends_on:
       postgres:
         condition: service_healthy
@@ -95,8 +97,100 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+  # Gitea PostgreSQL
+  gitea-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gitea
+      POSTGRES_PASSWORD: ${GITEA_DB_PASSWORD:?GITEA_DB_PASSWORD is required}
+      POSTGRES_DB: gitea
+    volumes:
+      - gitea-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+  gitea:
+    image: docker.gitea.com/gitea:1.27.0
+    restart: unless-stopped
+
+    environment:
+      USER_UID: ${GITEA_USER_UID:-1000}
+      USER_GID: ${GITEA_USER_GID:-1000}
+
+      # Application
+      GITEA__DEFAULT__APP_NAME: FieldFrame Git Service
+      GITEA__DEFAULT__RUN_MODE: prod
+
+      # Database
+      GITEA__database__DB_TYPE: postgres
+      GITEA__database__HOST: gitea-postgres:5432
+      GITEA__database__NAME: gitea
+      GITEA__database__USER: gitea
+      GITEA__database__PASSWD: ${GITEA_DB_PASSWORD:?GITEA_DB_PASSWORD is required}
+      GITEA__database__SSL_MODE: disable
+
+      # HTTP server
+      GITEA__server__PROTOCOL: http
+      GITEA__server__DOMAIN: localhost
+      GITEA__server__HTTP_ADDR: 0.0.0.0
+      GITEA__server__HTTP_PORT: 3000
+      GITEA__server__ROOT_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
+
+      # SSH clone URLs
+      GITEA__server__SSH_DOMAIN: localhost
+      GITEA__server__SSH_PORT: ${GITEA_SSH_PORT:-2222}
+      GITEA__server__DISABLE_SSH: "false"
+
+      # Git LFS for image/video/audio repositories
+      GITEA__server__LFS_START_SERVER: "true"
+
+      # Initial setup
+      GITEA__security__INSTALL_LOCK: "true"
+
+      # Local development:
+      # Cho phép tạo user từ giao diện Gitea.
+      # Production nên đổi thành true.
+      GITEA__service__DISABLE_REGISTRATION: ${GITEA_DISABLE_REGISTRATION:-false}
+
+      # Có thể đặt true nếu chỉ muốn authenticated users xem repositories.
+      GITEA__service__REQUIRE_SIGNIN_VIEW: ${GITEA_REQUIRE_SIGNIN_VIEW:-false}
+
+    volumes:
+      - gitea-data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
+    ports:
+      - "${GITEA_HTTP_PORT:-3100}:3000"
+      - "${GITEA_SSH_PORT:-2222}:22"
+
+    depends_on:
+      gitea-postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://localhost:3000/api/healthz >/dev/null 2>&1 || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
 volumes:
   postgres-data:
   redis-data:
   minio-data:
+  
+  gitea-data:
+  gitea-postgres-data:

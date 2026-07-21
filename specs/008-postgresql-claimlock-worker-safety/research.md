@@ -1,14 +1,14 @@
 # Research: PostgreSQL Claim Lock and Worker Safety
 
-## Decision: Use Prisma `Job.updateManyAndReturn` for the claim compare-and-set
+## Decision: Use the approved parameterized raw `UPDATE … RETURNING` for `claimJob` only
 
-**Rationale**: The generated Prisma client in this repository exposes `Job.updateManyAndReturn`. On PostgreSQL it provides the required guarded update-and-return behavior in one database statement, so a claim can atomically test eligibility and persist ownership without a read-then-write race. This respects the repository rule against raw SQL.
+**Rationale**: Architecture governance approved a narrow raw-SQL exception only for `job.repository.ts#claimJob()`. A tagged Prisma `$queryRaw` executes one parameterized PostgreSQL `UPDATE … RETURNING`, allowing the database clock and `COALESCE` timestamp preservation to participate in the same compare-and-set mutation. Heartbeat, progress, completion, failure, and cancellation remain Prisma Client mutations.
 
 **Alternatives considered**:
 
 - Read Job then update it: rejected because concurrent workers can both observe eligibility.
 - Transaction containing a read followed by update: rejected because it is more complex and does not by itself guarantee the requested one guarded update pattern.
-- Raw `UPDATE … RETURNING`: functionally valid but rejected for this plan because governance disallows raw SQL without separate approval; Prisma provides an equivalent.
+- Prisma `updateManyAndReturn`: not selected for claim because the approved exact SQL shape requires database-clock timestamp preservation in the single statement.
 
 ## Decision: Treat the lock token as a short-lived server-only capability
 

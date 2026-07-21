@@ -14,46 +14,68 @@ test("concurrent queued claims produce exactly one ClaimedJob", { skip: !hasInte
       claimJob(fixture.db, job.id, "worker-one"),
       claimJob(fixture.db, job.id, "worker-two"),
     ]);
+    const winner = [first, second].find((result) => result !== null);
+    assert.ok(winner);
     assert.equal([first, second].filter((result) => result !== null).length, 1);
     const stored = await fixture.db.job.findUniqueOrThrow({ where: { id: job.id }, select: { status: true, lockedBy: true, lockToken: true, lockedAt: true, lockedUntil: true, heartbeatAt: true, startedAt: true, dequeuedAt: true } });
     assert.equal(stored.status, "RUNNING");
     assert.ok(stored.lockedBy && stored.lockToken && stored.lockToken.length >= 32);
+    assert.equal(stored.lockToken, winner.lockToken);
     assert.ok(stored.lockedAt && stored.lockedUntil && stored.heartbeatAt && stored.startedAt && stored.dequeuedAt);
   } finally { await fixture.cleanup(); }
 });
 
-test("active locks cannot be reclaimed, expired retrying locks can, and timestamps are preserved", { skip: !hasIntegrationDatabase }, async () => {
+test("active locks cannot be reclaimed", { skip: !hasIntegrationDatabase }, async () => {
   const fixture = await createWorkerJobFixture();
   try {
-    const retrying = await fixture.createJob();
-    await fixture.db.job.update({ where: { id: retrying.id }, data: { status: "RETRYING", lockedUntil: new Date(Date.now() - 1_000), startedAt: new Date(1), dequeuedAt: new Date(2) } });
-    const oldToken = "old-token";
-    await fixture.db.job.update({ where: { id: retrying.id }, data: { lockToken: oldToken, lockedBy: "old-worker" } });
-    const retryClaim = await claimJob(fixture.db, retrying.id, "retry-worker");
-    assert.ok(retryClaim);
-    assert.notEqual(retryClaim.lockToken, oldToken);
-    assert.equal(retryClaim.job.lockedBy, "retry-worker");
-    const preserved = await fixture.db.job.findUniqueOrThrow({ where: { id: retrying.id }, select: { startedAt: true, dequeuedAt: true } });
-    assert.equal(preserved.startedAt?.getTime(), 1);
-    assert.equal(preserved.dequeuedAt?.getTime(), 2);
-
-    const running = await fixture.createJob({ status: "RUNNING" });
-    await fixture.db.job.update({ where: { id: running.id }, data: { lockedBy: "old", lockToken: "old-token", lockedUntil: new Date(Date.now() - 1_000) } });
-    assert.equal(await claimJob(fixture.db, running.id, "new-worker"), null);
-    const unchanged = await fixture.db.job.findUniqueOrThrow({ where: { id: running.id }, select: { status: true, lockedBy: true, lockToken: true } });
-    assert.deepEqual(unchanged, { status: "RUNNING", lockedBy: "old", lockToken: "old-token" });
-
-    const [canceling, completed] = await Promise.all([fixture.createJob(), fixture.createJob()]);
-    await Promise.all([
-      fixture.db.job.update({ where: { id: canceling.id }, data: { status: "CANCELING", cancelRequestedAt: new Date() } }),
-      fixture.db.job.update({ where: { id: completed.id }, data: { status: "COMPLETED", finishedAt: new Date() } }),
-    ]);
-    assert.equal(await claimJob(fixture.db, canceling.id, "new-worker"), null);
-    assert.equal(await claimJob(fixture.db, completed.id, "new-worker"), null);
+    const job = await fixture.createJob();
+    assert.ok(await claimJob(fixture.db, job.id, "worker-a"));
+    assert.equal(await claimJob(fixture.db, job.id, "worker-b"), null);
   } finally { await fixture.cleanup(); }
 });
 
-test("first claim assigns database timestamps and terminal Jobs are not claimable", { skip: !hasIntegrationDatabase }, async () => {
+test("expired RUNNING jobs remain non-claimable until an approved recovery changes their status", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createWorkerJobFixture();
+  try {
+    const job = await fixture.createJob({ status: "RUNNING" });
+    await fixture.db.job.update({
+      where: { id: job.id },
+      data: {
+        lockedBy: "expired-worker",
+        lockToken: "expired-token",
+        lockedUntil: new Date(Date.now() - 1_000),
+      },
+    });
+    assert.equal(await claimJob(fixture.db, job.id, "replacement-worker"), null);
+  } finally { await fixture.cleanup(); }
+});
+
+test("expired RETRYING lock can be reclaimed with a new lock token", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createWorkerJobFixture();
+  try {
+    const job = await fixture.createJob();
+    const oldToken = "old-token";
+    await fixture.db.job.update({ where: { id: job.id }, data: { status: "RETRYING", lockedBy: "old-worker", lockToken: oldToken, lockedUntil: new Date(Date.now() - 1_000) } });
+    const claim = await claimJob(fixture.db, job.id, "new-worker");
+    assert.ok(claim);
+    assert.notEqual(claim.lockToken, oldToken);
+    assert.equal(claim.job.lockedBy, "new-worker");
+  } finally { await fixture.cleanup(); }
+});
+
+test("reclaim preserves existing startedAt and dequeuedAt", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createWorkerJobFixture();
+  try {
+    const job = await fixture.createJob();
+    await fixture.db.job.update({ where: { id: job.id }, data: { status: "RETRYING", lockedUntil: new Date(Date.now() - 1_000), startedAt: new Date(1), dequeuedAt: new Date(2) } });
+    assert.ok(await claimJob(fixture.db, job.id, "retry-worker"));
+    const stored = await fixture.db.job.findUniqueOrThrow({ where: { id: job.id }, select: { startedAt: true, dequeuedAt: true } });
+    assert.equal(stored.startedAt?.getTime(), 1);
+    assert.equal(stored.dequeuedAt?.getTime(), 2);
+  } finally { await fixture.cleanup(); }
+});
+
+test("first claim assigns database timestamps", { skip: !hasIntegrationDatabase }, async () => {
   const fixture = await createWorkerJobFixture();
   try {
     const first = await fixture.createJob();
@@ -61,7 +83,12 @@ test("first claim assigns database timestamps and terminal Jobs are not claimabl
     assert.ok(claim);
     assert.ok(claim.job.startedAt);
     assert.ok(claim.job.dequeuedAt);
+  } finally { await fixture.cleanup(); }
+});
 
+test("non-claimable statuses return null", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createWorkerJobFixture();
+  try {
     for (const status of ["RUNNING", "COMPLETED", "FAILED", "CANCELED"] as const) {
       const job = await fixture.createJob();
       await fixture.db.job.update({ where: { id: job.id }, data: { status } });

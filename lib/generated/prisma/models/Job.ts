@@ -59,10 +59,6 @@ export type JobMinAggregateOutputType = {
   modality: $Enums.Modality | null
   status: $Enums.JobStatus | null
   stage: $Enums.JobStage | null
-  queueName: string | null
-  queueJobId: string | null
-  enqueuedAt: Date | null
-  dequeuedAt: Date | null
   priority: $Enums.JobPriority | null
   priorityValue: number | null
   trigger: $Enums.JobTrigger | null
@@ -92,6 +88,10 @@ export type JobMinAggregateOutputType = {
   idempotencyKey: string | null
   resultStorageKey: string | null
   resultFilename: string | null
+  queueName: string | null
+  queueJobId: string | null
+  enqueuedAt: Date | null
+  dequeuedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -105,10 +105,6 @@ export type JobMaxAggregateOutputType = {
   modality: $Enums.Modality | null
   status: $Enums.JobStatus | null
   stage: $Enums.JobStage | null
-  queueName: string | null
-  queueJobId: string | null
-  enqueuedAt: Date | null
-  dequeuedAt: Date | null
   priority: $Enums.JobPriority | null
   priorityValue: number | null
   trigger: $Enums.JobTrigger | null
@@ -138,6 +134,10 @@ export type JobMaxAggregateOutputType = {
   idempotencyKey: string | null
   resultStorageKey: string | null
   resultFilename: string | null
+  queueName: string | null
+  queueJobId: string | null
+  enqueuedAt: Date | null
+  dequeuedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -151,10 +151,6 @@ export type JobCountAggregateOutputType = {
   modality: number
   status: number
   stage: number
-  queueName: number
-  queueJobId: number
-  enqueuedAt: number
-  dequeuedAt: number
   priority: number
   priorityValue: number
   trigger: number
@@ -188,6 +184,10 @@ export type JobCountAggregateOutputType = {
   idempotencyKey: number
   resultStorageKey: number
   resultFilename: number
+  queueName: number
+  queueJobId: number
+  enqueuedAt: number
+  dequeuedAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -227,10 +227,6 @@ export type JobMinAggregateInputType = {
   modality?: true
   status?: true
   stage?: true
-  queueName?: true
-  queueJobId?: true
-  enqueuedAt?: true
-  dequeuedAt?: true
   priority?: true
   priorityValue?: true
   trigger?: true
@@ -260,6 +256,10 @@ export type JobMinAggregateInputType = {
   idempotencyKey?: true
   resultStorageKey?: true
   resultFilename?: true
+  queueName?: true
+  queueJobId?: true
+  enqueuedAt?: true
+  dequeuedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -273,10 +273,6 @@ export type JobMaxAggregateInputType = {
   modality?: true
   status?: true
   stage?: true
-  queueName?: true
-  queueJobId?: true
-  enqueuedAt?: true
-  dequeuedAt?: true
   priority?: true
   priorityValue?: true
   trigger?: true
@@ -306,6 +302,10 @@ export type JobMaxAggregateInputType = {
   idempotencyKey?: true
   resultStorageKey?: true
   resultFilename?: true
+  queueName?: true
+  queueJobId?: true
+  enqueuedAt?: true
+  dequeuedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -319,10 +319,6 @@ export type JobCountAggregateInputType = {
   modality?: true
   status?: true
   stage?: true
-  queueName?: true
-  queueJobId?: true
-  enqueuedAt?: true
-  dequeuedAt?: true
   priority?: true
   priorityValue?: true
   trigger?: true
@@ -356,6 +352,10 @@ export type JobCountAggregateInputType = {
   idempotencyKey?: true
   resultStorageKey?: true
   resultFilename?: true
+  queueName?: true
+  queueJobId?: true
+  enqueuedAt?: true
+  dequeuedAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -456,10 +456,6 @@ export type JobGroupByOutputType = {
   modality: $Enums.Modality | null
   status: $Enums.JobStatus
   stage: $Enums.JobStage
-  queueName: string | null
-  queueJobId: string | null
-  enqueuedAt: Date | null
-  dequeuedAt: Date | null
   priority: $Enums.JobPriority
   priorityValue: number
   trigger: $Enums.JobTrigger
@@ -493,6 +489,10 @@ export type JobGroupByOutputType = {
   idempotencyKey: string | null
   resultStorageKey: string | null
   resultFilename: string | null
+  queueName: string | null
+  queueJobId: string | null
+  enqueuedAt: Date | null
+  dequeuedAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: JobCountAggregateOutputType | null
@@ -529,10 +529,6 @@ export type JobWhereInput = {
   modality?: Prisma.EnumModalityNullableFilter<"Job"> | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFilter<"Job"> | $Enums.JobStage
-  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
-  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
-  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   priority?: Prisma.EnumJobPriorityFilter<"Job"> | $Enums.JobPriority
   priorityValue?: Prisma.IntFilter<"Job"> | number
   trigger?: Prisma.EnumJobTriggerFilter<"Job"> | $Enums.JobTrigger
@@ -566,6 +562,10 @@ export type JobWhereInput = {
   idempotencyKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultFilename?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
+  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
@@ -586,10 +586,6 @@ export type JobOrderByWithRelationInput = {
   modality?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
-  queueName?: Prisma.SortOrderInput | Prisma.SortOrder
-  queueJobId?: Prisma.SortOrderInput | Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -623,6 +619,10 @@ export type JobOrderByWithRelationInput = {
   idempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   resultFilename?: Prisma.SortOrderInput | Prisma.SortOrder
+  queueName?: Prisma.SortOrderInput | Prisma.SortOrder
+  queueJobId?: Prisma.SortOrderInput | Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   dataset?: Prisma.DatasetOrderByWithRelationInput
@@ -647,10 +647,6 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   modality?: Prisma.EnumModalityNullableFilter<"Job"> | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFilter<"Job"> | $Enums.JobStage
-  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
-  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
-  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   priority?: Prisma.EnumJobPriorityFilter<"Job"> | $Enums.JobPriority
   priorityValue?: Prisma.IntFilter<"Job"> | number
   trigger?: Prisma.EnumJobTriggerFilter<"Job"> | $Enums.JobTrigger
@@ -684,6 +680,10 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   idempotencyKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultFilename?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
+  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
@@ -704,10 +704,6 @@ export type JobOrderByWithAggregationInput = {
   modality?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
-  queueName?: Prisma.SortOrderInput | Prisma.SortOrder
-  queueJobId?: Prisma.SortOrderInput | Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -741,6 +737,10 @@ export type JobOrderByWithAggregationInput = {
   idempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   resultFilename?: Prisma.SortOrderInput | Prisma.SortOrder
+  queueName?: Prisma.SortOrderInput | Prisma.SortOrder
+  queueJobId?: Prisma.SortOrderInput | Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.JobCountOrderByAggregateInput
@@ -762,10 +762,6 @@ export type JobScalarWhereWithAggregatesInput = {
   modality?: Prisma.EnumModalityNullableWithAggregatesFilter<"Job"> | $Enums.Modality | null
   status?: Prisma.EnumJobStatusWithAggregatesFilter<"Job"> | $Enums.JobStatus
   stage?: Prisma.EnumJobStageWithAggregatesFilter<"Job"> | $Enums.JobStage
-  queueName?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
-  queueJobId?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
-  enqueuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
-  dequeuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
   priority?: Prisma.EnumJobPriorityWithAggregatesFilter<"Job"> | $Enums.JobPriority
   priorityValue?: Prisma.IntWithAggregatesFilter<"Job"> | number
   trigger?: Prisma.EnumJobTriggerWithAggregatesFilter<"Job"> | $Enums.JobTrigger
@@ -799,6 +795,10 @@ export type JobScalarWhereWithAggregatesInput = {
   idempotencyKey?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
   resultStorageKey?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
   resultFilename?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  queueName?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  queueJobId?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  enqueuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
+  dequeuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
 }
@@ -809,10 +809,6 @@ export type JobCreateInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -844,6 +840,10 @@ export type JobCreateInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -864,10 +864,6 @@ export type JobUncheckedCreateInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -901,6 +897,10 @@ export type JobUncheckedCreateInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
@@ -913,10 +913,6 @@ export type JobUpdateInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -948,6 +944,10 @@ export type JobUpdateInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -968,10 +968,6 @@ export type JobUncheckedUpdateInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -1005,6 +1001,10 @@ export type JobUncheckedUpdateInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
@@ -1020,10 +1020,6 @@ export type JobCreateManyInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1057,6 +1053,10 @@ export type JobCreateManyInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1067,10 +1067,6 @@ export type JobUpdateManyMutationInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -1102,6 +1098,10 @@ export type JobUpdateManyMutationInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1115,10 +1115,6 @@ export type JobUncheckedUpdateManyInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -1152,6 +1148,10 @@ export type JobUncheckedUpdateManyInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1180,10 +1180,6 @@ export type JobCountOrderByAggregateInput = {
   modality?: Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
-  queueName?: Prisma.SortOrder
-  queueJobId?: Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -1217,6 +1213,10 @@ export type JobCountOrderByAggregateInput = {
   idempotencyKey?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   resultFilename?: Prisma.SortOrder
+  queueName?: Prisma.SortOrder
+  queueJobId?: Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1242,10 +1242,6 @@ export type JobMaxOrderByAggregateInput = {
   modality?: Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
-  queueName?: Prisma.SortOrder
-  queueJobId?: Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -1275,6 +1271,10 @@ export type JobMaxOrderByAggregateInput = {
   idempotencyKey?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   resultFilename?: Prisma.SortOrder
+  queueName?: Prisma.SortOrder
+  queueJobId?: Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1288,10 +1288,6 @@ export type JobMinOrderByAggregateInput = {
   modality?: Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
-  queueName?: Prisma.SortOrder
-  queueJobId?: Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -1321,6 +1317,10 @@ export type JobMinOrderByAggregateInput = {
   idempotencyKey?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   resultFilename?: Prisma.SortOrder
+  queueName?: Prisma.SortOrder
+  queueJobId?: Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -1637,10 +1637,6 @@ export type JobCreateWithoutCreatedByInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1672,6 +1668,10 @@ export type JobCreateWithoutCreatedByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -1690,10 +1690,6 @@ export type JobUncheckedCreateWithoutCreatedByInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1727,6 +1723,10 @@ export type JobUncheckedCreateWithoutCreatedByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
@@ -1749,10 +1749,6 @@ export type JobCreateWithoutCanceledByInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1784,6 +1780,10 @@ export type JobCreateWithoutCanceledByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -1802,10 +1802,6 @@ export type JobUncheckedCreateWithoutCanceledByInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1839,6 +1835,10 @@ export type JobUncheckedCreateWithoutCanceledByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
@@ -1883,10 +1883,6 @@ export type JobScalarWhereInput = {
   modality?: Prisma.EnumModalityNullableFilter<"Job"> | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFilter<"Job"> | $Enums.JobStage
-  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
-  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
-  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   priority?: Prisma.EnumJobPriorityFilter<"Job"> | $Enums.JobPriority
   priorityValue?: Prisma.IntFilter<"Job"> | number
   trigger?: Prisma.EnumJobTriggerFilter<"Job"> | $Enums.JobTrigger
@@ -1920,6 +1916,10 @@ export type JobScalarWhereInput = {
   idempotencyKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultFilename?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
+  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
 }
@@ -1946,10 +1946,6 @@ export type JobCreateWithoutEventsInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1981,6 +1977,10 @@ export type JobCreateWithoutEventsInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2000,10 +2000,6 @@ export type JobUncheckedCreateWithoutEventsInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2037,6 +2033,10 @@ export type JobUncheckedCreateWithoutEventsInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
@@ -2064,10 +2064,6 @@ export type JobUpdateWithoutEventsInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2099,6 +2095,10 @@ export type JobUpdateWithoutEventsInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -2118,10 +2118,6 @@ export type JobUncheckedUpdateWithoutEventsInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2155,6 +2151,10 @@ export type JobUncheckedUpdateWithoutEventsInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
@@ -2166,10 +2166,6 @@ export type JobCreateWithoutExternalRepositoryInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2201,6 +2197,10 @@ export type JobCreateWithoutExternalRepositoryInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2220,10 +2220,6 @@ export type JobUncheckedCreateWithoutExternalRepositoryInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2256,6 +2252,10 @@ export type JobUncheckedCreateWithoutExternalRepositoryInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
@@ -2294,10 +2294,6 @@ export type JobCreateWithoutSourceConnectionInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2329,6 +2325,10 @@ export type JobCreateWithoutSourceConnectionInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2348,10 +2348,6 @@ export type JobUncheckedCreateWithoutSourceConnectionInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2384,6 +2380,10 @@ export type JobUncheckedCreateWithoutSourceConnectionInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
@@ -2422,10 +2422,6 @@ export type JobCreateWithoutDatasetInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2457,6 +2453,10 @@ export type JobCreateWithoutDatasetInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
@@ -2475,10 +2475,6 @@ export type JobUncheckedCreateWithoutDatasetInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2512,6 +2508,10 @@ export type JobUncheckedCreateWithoutDatasetInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
@@ -2550,10 +2550,6 @@ export type JobCreateWithoutAiTasksInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2585,6 +2581,10 @@ export type JobCreateWithoutAiTasksInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2604,10 +2604,6 @@ export type JobUncheckedCreateWithoutAiTasksInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2641,6 +2637,10 @@ export type JobUncheckedCreateWithoutAiTasksInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
@@ -2668,10 +2668,6 @@ export type JobUpdateWithoutAiTasksInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2703,6 +2699,10 @@ export type JobUpdateWithoutAiTasksInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -2722,10 +2722,6 @@ export type JobUncheckedUpdateWithoutAiTasksInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2759,6 +2755,10 @@ export type JobUncheckedUpdateWithoutAiTasksInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
@@ -2772,10 +2772,6 @@ export type JobCreateManyCreatedByInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2809,6 +2805,10 @@ export type JobCreateManyCreatedByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2821,10 +2821,6 @@ export type JobCreateManyCanceledByInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2858,6 +2854,10 @@ export type JobCreateManyCanceledByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -2868,10 +2868,6 @@ export type JobUpdateWithoutCreatedByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2903,6 +2899,10 @@ export type JobUpdateWithoutCreatedByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -2921,10 +2921,6 @@ export type JobUncheckedUpdateWithoutCreatedByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2958,6 +2954,10 @@ export type JobUncheckedUpdateWithoutCreatedByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
@@ -2972,10 +2972,6 @@ export type JobUncheckedUpdateManyWithoutCreatedByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3009,6 +3005,10 @@ export type JobUncheckedUpdateManyWithoutCreatedByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -3019,10 +3019,6 @@ export type JobUpdateWithoutCanceledByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3054,6 +3050,10 @@ export type JobUpdateWithoutCanceledByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -3072,10 +3072,6 @@ export type JobUncheckedUpdateWithoutCanceledByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3109,6 +3105,10 @@ export type JobUncheckedUpdateWithoutCanceledByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
@@ -3123,10 +3123,6 @@ export type JobUncheckedUpdateManyWithoutCanceledByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3160,6 +3156,10 @@ export type JobUncheckedUpdateManyWithoutCanceledByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -3173,10 +3173,6 @@ export type JobCreateManyExternalRepositoryInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -3209,6 +3205,10 @@ export type JobCreateManyExternalRepositoryInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -3219,10 +3219,6 @@ export type JobUpdateWithoutExternalRepositoryInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3254,6 +3250,10 @@ export type JobUpdateWithoutExternalRepositoryInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -3273,10 +3273,6 @@ export type JobUncheckedUpdateWithoutExternalRepositoryInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3309,6 +3305,10 @@ export type JobUncheckedUpdateWithoutExternalRepositoryInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
@@ -3324,10 +3324,6 @@ export type JobUncheckedUpdateManyWithoutExternalRepositoryInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3360,6 +3356,10 @@ export type JobUncheckedUpdateManyWithoutExternalRepositoryInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -3373,10 +3373,6 @@ export type JobCreateManySourceConnectionInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -3409,6 +3405,10 @@ export type JobCreateManySourceConnectionInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -3419,10 +3419,6 @@ export type JobUpdateWithoutSourceConnectionInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3454,6 +3450,10 @@ export type JobUpdateWithoutSourceConnectionInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -3473,10 +3473,6 @@ export type JobUncheckedUpdateWithoutSourceConnectionInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3509,6 +3505,10 @@ export type JobUncheckedUpdateWithoutSourceConnectionInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
@@ -3524,10 +3524,6 @@ export type JobUncheckedUpdateManyWithoutSourceConnectionInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3560,6 +3556,10 @@ export type JobUncheckedUpdateManyWithoutSourceConnectionInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -3572,10 +3572,6 @@ export type JobCreateManyDatasetInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -3609,6 +3605,10 @@ export type JobCreateManyDatasetInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -3619,10 +3619,6 @@ export type JobUpdateWithoutDatasetInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3654,6 +3650,10 @@ export type JobUpdateWithoutDatasetInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
@@ -3672,10 +3672,6 @@ export type JobUncheckedUpdateWithoutDatasetInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3709,6 +3705,10 @@ export type JobUncheckedUpdateWithoutDatasetInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
@@ -3723,10 +3723,6 @@ export type JobUncheckedUpdateManyWithoutDatasetInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3760,6 +3756,10 @@ export type JobUncheckedUpdateManyWithoutDatasetInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -3813,10 +3813,6 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   modality?: boolean
   status?: boolean
   stage?: boolean
-  queueName?: boolean
-  queueJobId?: boolean
-  enqueuedAt?: boolean
-  dequeuedAt?: boolean
   priority?: boolean
   priorityValue?: boolean
   trigger?: boolean
@@ -3850,6 +3846,10 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   idempotencyKey?: boolean
   resultStorageKey?: boolean
   resultFilename?: boolean
+  queueName?: boolean
+  queueJobId?: boolean
+  enqueuedAt?: boolean
+  dequeuedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
@@ -3871,10 +3871,6 @@ export type JobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   modality?: boolean
   status?: boolean
   stage?: boolean
-  queueName?: boolean
-  queueJobId?: boolean
-  enqueuedAt?: boolean
-  dequeuedAt?: boolean
   priority?: boolean
   priorityValue?: boolean
   trigger?: boolean
@@ -3908,6 +3904,10 @@ export type JobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   idempotencyKey?: boolean
   resultStorageKey?: boolean
   resultFilename?: boolean
+  queueName?: boolean
+  queueJobId?: boolean
+  enqueuedAt?: boolean
+  dequeuedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
@@ -3926,10 +3926,6 @@ export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   modality?: boolean
   status?: boolean
   stage?: boolean
-  queueName?: boolean
-  queueJobId?: boolean
-  enqueuedAt?: boolean
-  dequeuedAt?: boolean
   priority?: boolean
   priorityValue?: boolean
   trigger?: boolean
@@ -3963,6 +3959,10 @@ export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   idempotencyKey?: boolean
   resultStorageKey?: boolean
   resultFilename?: boolean
+  queueName?: boolean
+  queueJobId?: boolean
+  enqueuedAt?: boolean
+  dequeuedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
@@ -3981,10 +3981,6 @@ export type JobSelectScalar = {
   modality?: boolean
   status?: boolean
   stage?: boolean
-  queueName?: boolean
-  queueJobId?: boolean
-  enqueuedAt?: boolean
-  dequeuedAt?: boolean
   priority?: boolean
   priorityValue?: boolean
   trigger?: boolean
@@ -4018,11 +4014,15 @@ export type JobSelectScalar = {
   idempotencyKey?: boolean
   resultStorageKey?: boolean
   resultFilename?: boolean
+  queueName?: boolean
+  queueJobId?: boolean
+  enqueuedAt?: boolean
+  dequeuedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "createdById" | "canceledById" | "type" | "modality" | "status" | "stage" | "queueName" | "queueJobId" | "enqueuedAt" | "dequeuedAt" | "priority" | "priorityValue" | "trigger" | "provider" | "sourceConnectionId" | "externalRepositoryId" | "input" | "state" | "summary" | "progress" | "totalItems" | "processedItems" | "successItems" | "failedItems" | "skippedItems" | "error" | "errorCode" | "errorDetails" | "lockedBy" | "lockToken" | "lockedAt" | "lockedUntil" | "heartbeatAt" | "startedAt" | "finishedAt" | "runAfter" | "attempts" | "maxAttempts" | "cancelRequestedAt" | "canceledAt" | "idempotencyKey" | "resultStorageKey" | "resultFilename" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
+export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "createdById" | "canceledById" | "type" | "modality" | "status" | "stage" | "priority" | "priorityValue" | "trigger" | "provider" | "sourceConnectionId" | "externalRepositoryId" | "input" | "state" | "summary" | "progress" | "totalItems" | "processedItems" | "successItems" | "failedItems" | "skippedItems" | "error" | "errorCode" | "errorDetails" | "lockedBy" | "lockToken" | "lockedAt" | "lockedUntil" | "heartbeatAt" | "startedAt" | "finishedAt" | "runAfter" | "attempts" | "maxAttempts" | "cancelRequestedAt" | "canceledAt" | "idempotencyKey" | "resultStorageKey" | "resultFilename" | "queueName" | "queueJobId" | "enqueuedAt" | "dequeuedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
 export type JobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -4068,15 +4068,6 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     modality: $Enums.Modality | null
     status: $Enums.JobStatus
     stage: $Enums.JobStage
-    /**
-     * *
-     *    * Queue transport metadata only. PostgreSQL remains the Job state authority;
-     *    * BullMQ payloads contain only this Job's id.
-     */
-    queueName: string | null
-    queueJobId: string | null
-    enqueuedAt: Date | null
-    dequeuedAt: Date | null
     priority: $Enums.JobPriority
     priorityValue: number
     trigger: $Enums.JobTrigger
@@ -4141,6 +4132,10 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
      */
     resultStorageKey: string | null
     resultFilename: string | null
+    queueName: string | null
+    queueJobId: string | null
+    enqueuedAt: Date | null
+    dequeuedAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["job"]>
@@ -4581,10 +4576,6 @@ export interface JobFieldRefs {
   readonly modality: Prisma.FieldRef<"Job", 'Modality'>
   readonly status: Prisma.FieldRef<"Job", 'JobStatus'>
   readonly stage: Prisma.FieldRef<"Job", 'JobStage'>
-  readonly queueName: Prisma.FieldRef<"Job", 'String'>
-  readonly queueJobId: Prisma.FieldRef<"Job", 'String'>
-  readonly enqueuedAt: Prisma.FieldRef<"Job", 'DateTime'>
-  readonly dequeuedAt: Prisma.FieldRef<"Job", 'DateTime'>
   readonly priority: Prisma.FieldRef<"Job", 'JobPriority'>
   readonly priorityValue: Prisma.FieldRef<"Job", 'Int'>
   readonly trigger: Prisma.FieldRef<"Job", 'JobTrigger'>
@@ -4618,6 +4609,10 @@ export interface JobFieldRefs {
   readonly idempotencyKey: Prisma.FieldRef<"Job", 'String'>
   readonly resultStorageKey: Prisma.FieldRef<"Job", 'String'>
   readonly resultFilename: Prisma.FieldRef<"Job", 'String'>
+  readonly queueName: Prisma.FieldRef<"Job", 'String'>
+  readonly queueJobId: Prisma.FieldRef<"Job", 'String'>
+  readonly enqueuedAt: Prisma.FieldRef<"Job", 'DateTime'>
+  readonly dequeuedAt: Prisma.FieldRef<"Job", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Job", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Job", 'DateTime'>
 }

@@ -1,5 +1,7 @@
 import { Worker } from "bullmq";
 import { Redis } from "ioredis";
+import { randomBytes } from "node:crypto";
+
 
 import type { ProviderConfig } from "@fieldframe/domain";
 import { fieldframeQueueName } from "@fieldframe/queue";
@@ -7,7 +9,9 @@ import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
 import { routeQueueDelivery } from "./queue-router.js";
 
+
 export function createFoundationWorker(input: { config: ProviderConfig; db: PrismaClient }) {
+  const workerId = `worker-${randomBytes(12).toString("hex")}`;
   const connection = new Redis({
     host: input.config.REDIS_HOST,
     port: input.config.REDIS_PORT,
@@ -16,7 +20,7 @@ export function createFoundationWorker(input: { config: ProviderConfig; db: Pris
   });
   const worker = new Worker(
     fieldframeQueueName,
-    async (delivery) => routeQueueDelivery({ db: input.db, payload: delivery.data }),
+    async (delivery) => routeQueueDelivery({ db: input.db, payload: delivery.data, workerId }),
     { connection, prefix: input.config.BULLMQ_PREFIX },
   );
 

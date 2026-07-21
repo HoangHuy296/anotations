@@ -24,7 +24,7 @@ Add durable worker ownership primitives before any workflow processor is introdu
 
 **Constraints**:
 
-- Claim MUST use one atomic PostgreSQL guarded `UPDATE … RETURNING` operation or Prisma's equivalent single-statement `updateManyAndReturn`; no read-then-write claim and no raw SQL without separate approval.
+- Claim MUST use one atomic PostgreSQL guarded `UPDATE … RETURNING` operation. The approved narrow raw-SQL exception applies only to `job.repository.ts#claimJob()` through parameterized Prisma `$queryRaw`; no read-then-write claim is permitted. All other lifecycle mutations remain Prisma Client operations.
 - Claim predicate: Job id, `QUEUED`/`RETRYING` status, and absent/expired lease only. Successful claim sets `RUNNING`, worker id, fresh token, timestamps, and a five-minute lease.
 - Every lifecycle mutation requires `jobId` plus current unexpired `lockToken`; no token goes to a browser, queue payload, log, public error, or Job event.
 - `cancelJob` only acknowledges a pre-existing authorized cancellation request (`CANCELING` or non-null `cancelRequestedAt`); it must not originate cancellation.
@@ -42,7 +42,7 @@ The checked-in Spec Kit constitution is an uncustomized placeholder. The reposit
 | --- | --- | --- |
 | PostgreSQL is canonical | Pass | Claims, leases, progress, and terminal state are guarded Job mutations. |
 | Redis/BullMQ is transport only | Pass | Payload remains `{ jobId }`; no token or state is queued. |
-| Prisma only; no raw SQL | Pass | Use existing Prisma `Job.updateManyAndReturn`, verified in the generated client, for a single guarded mutation. |
+| Prisma Client with approved claim exception | Pass | `claimJob()` alone uses parameterized `$queryRaw` `UPDATE … RETURNING`; heartbeat/progress/terminal mutations use Prisma Client. |
 | No schema/migration/dependency change | Pass | Existing lock and lifecycle fields are sufficient. |
 | Private worker boundary | Pass | No Route Handler, public port, or browser contract is added. |
 | No premature business workflow | Pass | A successful claim records ownership only; it does not clone, import, export, or create artifacts. |
@@ -91,7 +91,7 @@ apps/
 ## Implementation Approach
 
 1. Define server-only Zod/internal input shapes and safe return results for claim and lifecycle operations. Generate a fresh opaque token with Node crypto only after preparing a claim attempt; return it only on successful private claim.
-2. Implement `claimJob` through one Prisma `Job.updateManyAndReturn` call. Its guarded `where` includes the Job id, eligible status, and null/expired lease. Its data update sets the complete ownership/lease transition in that same statement; an empty returned list means no claim.
+2. Implement `claimJob` through the approved single parameterized raw SQL `UPDATE … RETURNING` in `job.repository.ts`. It has no pre-read; its predicate includes Job id, eligible status, and null/expired lease. Database `NOW()` plus `COALESCE("startedAt", NOW())` / `COALESCE("dequeuedAt", NOW())` preserve timestamps atomically; an empty returned list means no claim.
 3. Implement heartbeat, progress, complete, fail, and cancellation acknowledgement as independent guarded `updateMany`/`updateManyAndReturn` mutations. Every `where` includes id, `lockToken`, unexpired lease, and the operation's allowed lifecycle state.
 4. Clear `lockedBy`, `lockToken`, `lockedAt`, `lockedUntil`, and heartbeat ownership fields only when a valid current owner records a terminal transition. Keep existing cancellation request fields as evidence; `cancelJob` also requires `CANCELING` or a non-null request time.
 5. Integrate queue routing so strict `{ jobId }` receipt is followed by an ownership claim before any future handler could run. In this phase, a successful claim stops after safe observation; no business handler is dispatched.

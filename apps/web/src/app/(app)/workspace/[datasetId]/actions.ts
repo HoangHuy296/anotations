@@ -25,9 +25,11 @@ export async function createAnnotationAction(input: unknown) {
       geometry: parsed.data.geometry,
       status: parsed.data.status,
     },
-    select: { id: true, version: true },
+    select: { id: true, revision: true },
   });
-  return { ok: true, status: 201, annotation };
+  // Keep the action contract stable while mapping optimistic-concurrency
+  // versioning to the schema's canonical `revision` field.
+  return { ok: true, status: 201, annotation: { id: annotation.id, version: annotation.revision } };
 }
 
 export async function updateAnnotationAction(input: unknown) {
@@ -42,7 +44,7 @@ export async function updateAnnotationAction(input: unknown) {
   if (!access) return { ok: false, status: 404 };
   if (access.forbidden) return { ok: false, status: 403 };
   if (!(await validateAnnotationReferences(parsed.data.datasetId, existing.assetId, existing.assetVersionId, existing.labelId))) return { ok: false, status: 404 };
-  const updated = await db.annotation.updateMany({ where: { id: parsed.data.annotationId, datasetId: parsed.data.datasetId, version: parsed.data.version }, data: { geometry: parsed.data.geometry, version: { increment: 1 }, updatedById: actor.id, ...(parsed.data.status ? { status: parsed.data.status } : {}) } });
+  const updated = await db.annotation.updateMany({ where: { id: parsed.data.annotationId, datasetId: parsed.data.datasetId, revision: parsed.data.version }, data: { geometry: parsed.data.geometry, revision: { increment: 1 }, updatedById: actor.id, ...(parsed.data.status ? { status: parsed.data.status } : {}) } });
   return updated.count === 1 ? { ok: true, status: 200 } : { ok: false, status: 409 };
 }
 
@@ -54,6 +56,6 @@ export async function reviewAnnotationAction(input: unknown) {
   const access = await assertAnnotationPermission(actor, parsed.data.datasetId, "annotation.review");
   if (!access) return { ok: false, status: 404 };
   if (access.forbidden) return { ok: false, status: 403 };
-  const updated = await db.annotation.updateMany({ where: { id: parsed.data.annotationId, datasetId: parsed.data.datasetId, version: parsed.data.version }, data: { status: parsed.data.status, reviewedById: actor.id, version: { increment: 1 } } });
+  const updated = await db.annotation.updateMany({ where: { id: parsed.data.annotationId, datasetId: parsed.data.datasetId, revision: parsed.data.version }, data: { status: parsed.data.status, reviewedById: actor.id, revision: { increment: 1 } } });
   return updated.count === 1 ? { ok: true, status: 200 } : { ok: false, status: 409 };
 }

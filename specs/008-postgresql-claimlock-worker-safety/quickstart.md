@@ -29,8 +29,8 @@ Run the database/Redis integration suite through the established short-lived Com
 # Verification record — 2026-07-16
 
 The existing migrations were deployed to the local Compose PostgreSQL database;
-no migration file or Prisma schema was changed. The worker queue suite passed
-against the Compose PostgreSQL and Redis services (10/10 tests), including
+no migration file was created by Phase 008. The worker queue suite passed
+against the Compose PostgreSQL and Redis services (15/15 tests), including
 concurrent claims, expired/stale-token refusals, terminal transitions,
 cancellation acknowledgement, duplicate delivery, and no token leakage in
 JobEvents.
@@ -42,18 +42,17 @@ pnpm --filter @fieldframe/worker build
 pnpm --filter @fieldframe/worker typecheck
 pnpm --filter @fieldframe/web typecheck
 pnpm --filter @fieldframe/web lint
-docker run --rm --network anotations_default --env-file .env \
-  -v "$PWD/.env:/workspace/.env:ro" \
-  -v "$PWD/apps/worker/src:/workspace/apps/worker/src:ro" \
-  -v "$PWD/apps/worker/tests:/workspace/apps/worker/tests:ro" \
-  -v "$PWD/packages/queue:/workspace/packages/queue:ro" \
-  -v "$PWD/packages/domain:/workspace/packages/domain:ro" \
-  -v "$PWD/lib/generated:/workspace/lib/generated:ro" \
-  anotations-worker pnpm --filter @fieldframe/worker test:queue
+docker compose exec -T worker pnpm --filter @fieldframe/worker test:queue
 ```
 
 The test uses two distinct private worker identities against the same durable
 Job and confirms exactly one PostgreSQL claim. It does not dispatch business
-work. On 2026-07-16 the private `worker` service was rebuilt and recreated
-alone, then a second temporary worker using the same image completed the live
-BullMQ smoke test. The temporary worker was removed after the test.
+work. It also explicitly proves an expired `RUNNING` Job remains unclaimable
+until a later approved recovery policy transitions its status.
+
+## Commit boundary
+
+Phase 008 creates no schema or migration change. Any unrelated working-tree
+changes to `prisma/schema.prisma` (including Dataset metadata or Annotation
+revision work) must be reviewed and committed separately from the Phase 008
+claim-lock files.

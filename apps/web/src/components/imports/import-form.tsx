@@ -104,6 +104,7 @@ export function ImportForm({ connections }: { connections: Array<{ id: string; n
       branch: String(formData.get("branch") ?? ""),
       rootPath: String(formData.get("rootPath") ?? ""),
       name: String(formData.get("name") ?? ""),
+      primaryModality: "IMAGE",
     };
     setPreview(null);
     setLastPayload(payload);

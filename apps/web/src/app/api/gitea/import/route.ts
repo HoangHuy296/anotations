@@ -112,6 +112,7 @@ export async function POST(request: Request) {
             name: parsed.data.name,
             branch: parsed.data.branch,
             rootPath,
+            primaryModality: parsed.data.primaryModality,
           },
           images,
         });
@@ -140,6 +141,7 @@ export async function POST(request: Request) {
         name: parsed.data.name,
         branch: parsed.data.branch,
         rootPath,
+        primaryModality: parsed.data.primaryModality,
       },
       repository,
       summary: {

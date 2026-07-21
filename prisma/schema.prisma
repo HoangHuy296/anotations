@@ -6,7 +6,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   // If your project does not use prisma.config.ts, uncomment this:
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 /**
@@ -47,7 +47,7 @@ model User {
   tracksCreated VideoObjectTrack[] @relation("TrackCreatedBy")
 
   externalRepositories ExternalRepository[] @relation("ExternalRepositoryCreatedBy")
-  sourceConnections     SourceConnection[]  @relation("SourceConnectionOwner")
+  sourceConnections    SourceConnection[]   @relation("SourceConnectionOwner")
 
   jobsCreated  Job[] @relation("JobCreatedBy")
   jobsCanceled Job[] @relation("JobCanceledBy")
@@ -69,8 +69,8 @@ model AuthSession {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   @@index([userId])
@@ -348,15 +348,6 @@ model Job {
   status JobStatus @default(QUEUED)
   stage  JobStage  @default(WAITING)
 
-  /**
-   * Queue transport metadata only. PostgreSQL remains the Job state authority;
-   * BullMQ payloads contain only this Job's id.
-   */
-  queueName  String?
-  queueJobId String?
-  enqueuedAt DateTime?
-  dequeuedAt DateTime?
-
   priority      JobPriority @default(NORMAL)
   priorityValue Int         @default(50)
 
@@ -428,9 +419,14 @@ model Job {
   resultStorageKey String?
   resultFilename   String?
 
-  dataset  Dataset @relation("DatasetJobs", fields: [datasetId], references: [id], onDelete: Cascade)
-  createdBy User   @relation("JobCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  canceledBy User? @relation("JobCanceledBy", fields: [canceledById], references: [id], onDelete: SetNull)
+  dataset    Dataset @relation("DatasetJobs", fields: [datasetId], references: [id], onDelete: Cascade)
+  createdBy  User    @relation("JobCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  canceledBy User?   @relation("JobCanceledBy", fields: [canceledById], references: [id], onDelete: SetNull)
+
+  queueName  String?   @db.VarChar(100)
+  queueJobId String?   @db.VarChar(100)
+  enqueuedAt DateTime?
+  dequeuedAt DateTime?
 
   sourceConnection   SourceConnection?   @relation(fields: [sourceConnectionId], references: [id], onDelete: SetNull)
   externalRepository ExternalRepository? @relation("ExternalRepositoryJobs", fields: [externalRepositoryId], references: [id], onDelete: SetNull)
@@ -442,16 +438,13 @@ model Job {
   updatedAt DateTime @updatedAt
 
   @@unique([datasetId, idempotencyKey])
-
   @@index([datasetId, status])
   @@index([createdById])
   @@index([canceledById])
-
   @@index([status, runAfter])
   @@index([status, priorityValue, createdAt])
   @@index([status, heartbeatAt])
   @@index([lockedUntil])
-
   @@index([sourceConnectionId])
   @@index([externalRepositoryId])
   @@index([type, status])
@@ -502,12 +495,12 @@ model ExternalRepository {
   homepageUrl   String?
 
   createdById String?
-  createdBy   User? @relation("ExternalRepositoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?   @relation("ExternalRepositoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   datasets      Dataset[]
   assets        Asset[]
   assetVersions AssetVersion[]
-  jobs          Job[] @relation("ExternalRepositoryJobs")
+  jobs          Job[]          @relation("ExternalRepositoryJobs")
 
   metadata Json @default("{}")
 
@@ -532,10 +525,10 @@ model SourceConnection {
   accountUsername   String?
   accountEmail      String?
 
-  tokenEncrypted        String? @db.Text
-  refreshTokenEncrypted String? @db.Text
+  tokenEncrypted        String?   @db.Text
+  refreshTokenEncrypted String?   @db.Text
   tokenExpiresAt        DateTime?
-  scopes                Json    @default("[]")
+  scopes                Json      @default("[]")
 
   status    SourceConnectionStatus @default(ACTIVE)
   revokedAt DateTime?
@@ -563,7 +556,7 @@ model SourceConnection {
  */
 
 model Dataset {
-  id          String      @id @default(cuid())
+  id          String  @id @default(cuid())
   ownerId     String
   name        String
   description String?
@@ -600,13 +593,13 @@ model Dataset {
   assetVersions AssetVersion[]
   labels        Label[]
   annotations   Annotation[]
-  jobs Job[] @relation("DatasetJobs")
+  jobs          Job[]          @relation("DatasetJobs")
   aiTasks       AiTask[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
   archivedAt DateTime?
-  deletedAt DateTime?
+  deletedAt  DateTime?
 
   @@index([ownerId])
   @@index([ownerId, primaryModality])
@@ -677,7 +670,7 @@ model Asset {
   sourceUrl         String?
   sourceFingerprint String
 
-  cacheStatus    CacheStatus @default(NOT_CACHED)
+  cacheStatus    CacheStatus      @default(NOT_CACHED)
   cacheProvider  StorageProvider?
   cacheBucket    String?
   cacheKey       String?
@@ -711,15 +704,14 @@ model Asset {
   textDocument TextDocument?
   audioAsset   AudioAsset?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
   archivedAt DateTime?
-  deletedAt DateTime?
+  deletedAt  DateTime?
 
   @@unique([storageProvider, storageBucket, storageKey])
   @@unique([cacheProvider, cacheBucket, cacheKey])
   @@unique([datasetId, sourceFingerprint])
-
   @@index([sourceFingerprint])
   @@index([datasetId, modality])
   @@index([datasetId, batchIndex])
@@ -774,7 +766,7 @@ model AssetVersion {
   storageKey      String?
   checksum        String?
 
-  cacheStatus    CacheStatus @default(NOT_CACHED)
+  cacheStatus    CacheStatus      @default(NOT_CACHED)
   cacheProvider  StorageProvider?
   cacheBucket    String?
   cacheKey       String?
@@ -807,7 +799,6 @@ model AssetVersion {
   @@unique([storageProvider, storageBucket, storageKey])
   @@unique([cacheProvider, cacheBucket, cacheKey])
   @@unique([datasetId, sourceFingerprint])
-
   @@index([assetId])
   @@index([datasetId])
   @@index([datasetId, isCurrent])
@@ -883,7 +874,7 @@ model Annotation {
   properties Json @default("{}")
 
   status   AnnotationStatus @default(DRAFT)
-  version  Int              @default(1)
+  revision Int              @default(1)
 
   frameIndex     Int?
   timestampMs    Int?
@@ -919,8 +910,8 @@ model Annotation {
   track        VideoObjectTrack? @relation(fields: [trackId], references: [id], onDelete: SetNull)
   audioSpeaker AudioSpeaker?     @relation(fields: [speakerId], references: [id], onDelete: SetNull)
 
-  fromAnnotation Annotation?  @relation("TextRelationFrom", fields: [fromAnnotationId], references: [id], onDelete: SetNull)
-  toAnnotation   Annotation?  @relation("TextRelationTo", fields: [toAnnotationId], references: [id], onDelete: SetNull)
+  fromAnnotation Annotation? @relation("TextRelationFrom", fields: [fromAnnotationId], references: [id], onDelete: SetNull)
+  toAnnotation   Annotation? @relation("TextRelationTo", fields: [toAnnotationId], references: [id], onDelete: SetNull)
 
   outgoingTextRelations Annotation[] @relation("TextRelationFrom")
   incomingTextRelations Annotation[] @relation("TextRelationTo")
@@ -935,17 +926,13 @@ model Annotation {
   @@index([assetVersionId])
   @@index([labelId])
   @@index([createdById])
-
   @@index([assetId, frameIndex])
   @@index([trackId, frameIndex])
   @@index([assetId, timestampMs])
-
   @@index([assetId, startMs, endMs])
-
   @@index([assetId, startChar, endChar])
   @@index([assetId, tokenIndex])
   @@index([fromAnnotationId, toAnnotationId])
-
   @@index([speakerId])
 }
 
@@ -954,24 +941,24 @@ model Annotation {
  */
 
 model ImageAsset {
-  id           String @id @default(cuid())
-  assetId      String @unique
+  id           String  @id @default(cuid())
+  assetId      String  @unique
   thumbnailKey String?
-  exif         Json   @default("{}")
+  exif         Json    @default("{}")
 
   asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
 }
 
 model VideoAsset {
-  id              String @id @default(cuid())
-  assetId         String @unique
+  id      String @id @default(cuid())
+  assetId String @unique
 
   fps             Float?
   totalFrames     Int?
   codec           String?
   thumbnailKey    String?
   frameStorageKey String?
-  metadata        Json   @default("{}")
+  metadata        Json    @default("{}")
 
   asset  Asset              @relation(fields: [assetId], references: [id], onDelete: Cascade)
   tracks VideoObjectTrack[]
@@ -980,7 +967,7 @@ model VideoAsset {
 }
 
 model VideoObjectTrack {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   videoAssetId String
   labelId      String?
   createdById  String?
@@ -1010,8 +997,8 @@ model TextDocument {
 
   content      String?
   language     String?
-  tokenization Json   @default("{}")
-  metadata     Json   @default("{}")
+  tokenization Json    @default("{}")
+  metadata     Json    @default("{}")
 
   asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
 
@@ -1027,7 +1014,7 @@ model AudioAsset {
   codec       String?
   bitRate     Int?
   waveformKey String?
-  metadata    Json   @default("{}")
+  metadata    Json    @default("{}")
 
   asset    Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
   speakers AudioSpeaker[]
@@ -1043,7 +1030,7 @@ model AudioSpeaker {
   name       String?
   role       String?
   color      String?
-  properties Json   @default("{}")
+  properties Json    @default("{}")
 
   audioAsset  AudioAsset   @relation(fields: [audioAssetId], references: [id], onDelete: Cascade)
   annotations Annotation[]
@@ -1051,8 +1038,8 @@ model AudioSpeaker {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([audioAssetId])
   @@unique([audioAssetId, externalId])
+  @@index([audioAssetId])
 }
 
 /**
@@ -1095,9 +1082,9 @@ model AiTask {
   modelName    String?
   modelVersion String?
 
-  input   Json @default("{}")
+  input   Json  @default("{}")
   output  Json?
-  summary Json @default("{}")
+  summary Json  @default("{}")
 
   error        String? @db.Text
   errorCode    String?
@@ -1106,8 +1093,8 @@ model AiTask {
   resultStorageKey String?
 
   dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  asset     Asset?   @relation(fields: [assetId], references: [id], onDelete: SetNull)
-  job       Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  asset     Asset?  @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  job       Job?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
   createdBy User    @relation("AiTaskCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
 
   createdAt DateTime @default(now())

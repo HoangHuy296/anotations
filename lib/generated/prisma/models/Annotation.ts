@@ -27,7 +27,7 @@ export type AggregateAnnotation = {
 }
 
 export type AnnotationAvgAggregateOutputType = {
-  version: number | null
+  revision: number | null
   frameIndex: number | null
   timestampMs: number | null
   startMs: number | null
@@ -41,7 +41,7 @@ export type AnnotationAvgAggregateOutputType = {
 }
 
 export type AnnotationSumAggregateOutputType = {
-  version: number | null
+  revision: number | null
   frameIndex: number | null
   timestampMs: number | null
   startMs: number | null
@@ -67,7 +67,7 @@ export type AnnotationMinAggregateOutputType = {
   type: $Enums.AnnotationType | null
   source: $Enums.AnnotationSource | null
   status: $Enums.AnnotationStatus | null
-  version: number | null
+  revision: number | null
   frameIndex: number | null
   timestampMs: number | null
   trackId: string | null
@@ -102,7 +102,7 @@ export type AnnotationMaxAggregateOutputType = {
   type: $Enums.AnnotationType | null
   source: $Enums.AnnotationSource | null
   status: $Enums.AnnotationStatus | null
-  version: number | null
+  revision: number | null
   frameIndex: number | null
   timestampMs: number | null
   trackId: string | null
@@ -139,7 +139,7 @@ export type AnnotationCountAggregateOutputType = {
   geometry: number
   properties: number
   status: number
-  version: number
+  revision: number
   frameIndex: number
   timestampMs: number
   trackId: number
@@ -164,7 +164,7 @@ export type AnnotationCountAggregateOutputType = {
 
 
 export type AnnotationAvgAggregateInputType = {
-  version?: true
+  revision?: true
   frameIndex?: true
   timestampMs?: true
   startMs?: true
@@ -178,7 +178,7 @@ export type AnnotationAvgAggregateInputType = {
 }
 
 export type AnnotationSumAggregateInputType = {
-  version?: true
+  revision?: true
   frameIndex?: true
   timestampMs?: true
   startMs?: true
@@ -204,7 +204,7 @@ export type AnnotationMinAggregateInputType = {
   type?: true
   source?: true
   status?: true
-  version?: true
+  revision?: true
   frameIndex?: true
   timestampMs?: true
   trackId?: true
@@ -239,7 +239,7 @@ export type AnnotationMaxAggregateInputType = {
   type?: true
   source?: true
   status?: true
-  version?: true
+  revision?: true
   frameIndex?: true
   timestampMs?: true
   trackId?: true
@@ -276,7 +276,7 @@ export type AnnotationCountAggregateInputType = {
   geometry?: true
   properties?: true
   status?: true
-  version?: true
+  revision?: true
   frameIndex?: true
   timestampMs?: true
   trackId?: true
@@ -400,7 +400,7 @@ export type AnnotationGroupByOutputType = {
   geometry: runtime.JsonValue
   properties: runtime.JsonValue
   status: $Enums.AnnotationStatus
-  version: number
+  revision: number
   frameIndex: number | null
   timestampMs: number | null
   trackId: string | null
@@ -460,7 +460,7 @@ export type AnnotationWhereInput = {
   geometry?: Prisma.JsonFilter<"Annotation">
   properties?: Prisma.JsonFilter<"Annotation">
   status?: Prisma.EnumAnnotationStatusFilter<"Annotation"> | $Enums.AnnotationStatus
-  version?: Prisma.IntFilter<"Annotation"> | number
+  revision?: Prisma.IntFilter<"Annotation"> | number
   frameIndex?: Prisma.IntNullableFilter<"Annotation"> | number | null
   timestampMs?: Prisma.IntNullableFilter<"Annotation"> | number | null
   trackId?: Prisma.StringNullableFilter<"Annotation"> | string | null
@@ -510,7 +510,7 @@ export type AnnotationOrderByWithRelationInput = {
   geometry?: Prisma.SortOrder
   properties?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  version?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
   frameIndex?: Prisma.SortOrderInput | Prisma.SortOrder
   timestampMs?: Prisma.SortOrderInput | Prisma.SortOrder
   trackId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -563,7 +563,7 @@ export type AnnotationWhereUniqueInput = Prisma.AtLeast<{
   geometry?: Prisma.JsonFilter<"Annotation">
   properties?: Prisma.JsonFilter<"Annotation">
   status?: Prisma.EnumAnnotationStatusFilter<"Annotation"> | $Enums.AnnotationStatus
-  version?: Prisma.IntFilter<"Annotation"> | number
+  revision?: Prisma.IntFilter<"Annotation"> | number
   frameIndex?: Prisma.IntNullableFilter<"Annotation"> | number | null
   timestampMs?: Prisma.IntNullableFilter<"Annotation"> | number | null
   trackId?: Prisma.StringNullableFilter<"Annotation"> | string | null
@@ -613,7 +613,7 @@ export type AnnotationOrderByWithAggregationInput = {
   geometry?: Prisma.SortOrder
   properties?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  version?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
   frameIndex?: Prisma.SortOrderInput | Prisma.SortOrder
   timestampMs?: Prisma.SortOrderInput | Prisma.SortOrder
   trackId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -658,7 +658,7 @@ export type AnnotationScalarWhereWithAggregatesInput = {
   geometry?: Prisma.JsonWithAggregatesFilter<"Annotation">
   properties?: Prisma.JsonWithAggregatesFilter<"Annotation">
   status?: Prisma.EnumAnnotationStatusWithAggregatesFilter<"Annotation"> | $Enums.AnnotationStatus
-  version?: Prisma.IntWithAggregatesFilter<"Annotation"> | number
+  revision?: Prisma.IntWithAggregatesFilter<"Annotation"> | number
   frameIndex?: Prisma.IntNullableWithAggregatesFilter<"Annotation"> | number | null
   timestampMs?: Prisma.IntNullableWithAggregatesFilter<"Annotation"> | number | null
   trackId?: Prisma.StringNullableWithAggregatesFilter<"Annotation"> | string | null
@@ -688,7 +688,7 @@ export type AnnotationCreateInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -734,7 +734,7 @@ export type AnnotationUncheckedCreateInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -766,7 +766,7 @@ export type AnnotationUpdateInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -812,7 +812,7 @@ export type AnnotationUncheckedUpdateInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -851,7 +851,7 @@ export type AnnotationCreateManyInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -881,7 +881,7 @@ export type AnnotationUpdateManyMutationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -914,7 +914,7 @@ export type AnnotationUncheckedUpdateManyInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -966,7 +966,7 @@ export type AnnotationCountOrderByAggregateInput = {
   geometry?: Prisma.SortOrder
   properties?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  version?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
   frameIndex?: Prisma.SortOrder
   timestampMs?: Prisma.SortOrder
   trackId?: Prisma.SortOrder
@@ -989,7 +989,7 @@ export type AnnotationCountOrderByAggregateInput = {
 }
 
 export type AnnotationAvgOrderByAggregateInput = {
-  version?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
   frameIndex?: Prisma.SortOrder
   timestampMs?: Prisma.SortOrder
   startMs?: Prisma.SortOrder
@@ -1015,7 +1015,7 @@ export type AnnotationMaxOrderByAggregateInput = {
   type?: Prisma.SortOrder
   source?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  version?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
   frameIndex?: Prisma.SortOrder
   timestampMs?: Prisma.SortOrder
   trackId?: Prisma.SortOrder
@@ -1050,7 +1050,7 @@ export type AnnotationMinOrderByAggregateInput = {
   type?: Prisma.SortOrder
   source?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  version?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
   frameIndex?: Prisma.SortOrder
   timestampMs?: Prisma.SortOrder
   trackId?: Prisma.SortOrder
@@ -1073,7 +1073,7 @@ export type AnnotationMinOrderByAggregateInput = {
 }
 
 export type AnnotationSumOrderByAggregateInput = {
-  version?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
   frameIndex?: Prisma.SortOrder
   timestampMs?: Prisma.SortOrder
   startMs?: Prisma.SortOrder
@@ -1600,7 +1600,7 @@ export type AnnotationCreateWithoutCreatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -1644,7 +1644,7 @@ export type AnnotationUncheckedCreateWithoutCreatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -1686,7 +1686,7 @@ export type AnnotationCreateWithoutUpdatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -1730,7 +1730,7 @@ export type AnnotationUncheckedCreateWithoutUpdatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -1772,7 +1772,7 @@ export type AnnotationCreateWithoutReviewedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -1816,7 +1816,7 @@ export type AnnotationUncheckedCreateWithoutReviewedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -1884,7 +1884,7 @@ export type AnnotationScalarWhereInput = {
   geometry?: Prisma.JsonFilter<"Annotation">
   properties?: Prisma.JsonFilter<"Annotation">
   status?: Prisma.EnumAnnotationStatusFilter<"Annotation"> | $Enums.AnnotationStatus
-  version?: Prisma.IntFilter<"Annotation"> | number
+  revision?: Prisma.IntFilter<"Annotation"> | number
   frameIndex?: Prisma.IntNullableFilter<"Annotation"> | number | null
   timestampMs?: Prisma.IntNullableFilter<"Annotation"> | number | null
   trackId?: Prisma.StringNullableFilter<"Annotation"> | string | null
@@ -1946,7 +1946,7 @@ export type AnnotationCreateWithoutDatasetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -1990,7 +1990,7 @@ export type AnnotationUncheckedCreateWithoutDatasetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -2048,7 +2048,7 @@ export type AnnotationCreateWithoutAssetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2092,7 +2092,7 @@ export type AnnotationUncheckedCreateWithoutAssetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -2150,7 +2150,7 @@ export type AnnotationCreateWithoutAssetVersionInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2194,7 +2194,7 @@ export type AnnotationUncheckedCreateWithoutAssetVersionInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -2252,7 +2252,7 @@ export type AnnotationCreateWithoutLabelInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2296,7 +2296,7 @@ export type AnnotationUncheckedCreateWithoutLabelInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -2354,7 +2354,7 @@ export type AnnotationCreateWithoutOutgoingTextRelationsInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2399,7 +2399,7 @@ export type AnnotationUncheckedCreateWithoutOutgoingTextRelationsInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -2435,7 +2435,7 @@ export type AnnotationCreateWithoutIncomingTextRelationsInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2480,7 +2480,7 @@ export type AnnotationUncheckedCreateWithoutIncomingTextRelationsInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -2516,7 +2516,7 @@ export type AnnotationCreateWithoutFromAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2561,7 +2561,7 @@ export type AnnotationUncheckedCreateWithoutFromAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -2602,7 +2602,7 @@ export type AnnotationCreateWithoutToAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2647,7 +2647,7 @@ export type AnnotationUncheckedCreateWithoutToAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -2699,7 +2699,7 @@ export type AnnotationUpdateWithoutOutgoingTextRelationsInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2744,7 +2744,7 @@ export type AnnotationUncheckedUpdateWithoutOutgoingTextRelationsInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2786,7 +2786,7 @@ export type AnnotationUpdateWithoutIncomingTextRelationsInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -2831,7 +2831,7 @@ export type AnnotationUncheckedUpdateWithoutIncomingTextRelationsInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2894,7 +2894,7 @@ export type AnnotationCreateWithoutTrackInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2939,7 +2939,7 @@ export type AnnotationUncheckedCreateWithoutTrackInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -2996,7 +2996,7 @@ export type AnnotationCreateWithoutAudioSpeakerInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -3041,7 +3041,7 @@ export type AnnotationUncheckedCreateWithoutAudioSpeakerInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -3104,7 +3104,7 @@ export type AnnotationCreateManyCreatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -3140,7 +3140,7 @@ export type AnnotationCreateManyUpdatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -3176,7 +3176,7 @@ export type AnnotationCreateManyReviewedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -3206,7 +3206,7 @@ export type AnnotationUpdateWithoutCreatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3250,7 +3250,7 @@ export type AnnotationUncheckedUpdateWithoutCreatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3288,7 +3288,7 @@ export type AnnotationUncheckedUpdateManyWithoutCreatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3318,7 +3318,7 @@ export type AnnotationUpdateWithoutUpdatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3362,7 +3362,7 @@ export type AnnotationUncheckedUpdateWithoutUpdatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3400,7 +3400,7 @@ export type AnnotationUncheckedUpdateManyWithoutUpdatedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3430,7 +3430,7 @@ export type AnnotationUpdateWithoutReviewedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3474,7 +3474,7 @@ export type AnnotationUncheckedUpdateWithoutReviewedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3512,7 +3512,7 @@ export type AnnotationUncheckedUpdateManyWithoutReviewedByInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3548,7 +3548,7 @@ export type AnnotationCreateManyDatasetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -3578,7 +3578,7 @@ export type AnnotationUpdateWithoutDatasetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3622,7 +3622,7 @@ export type AnnotationUncheckedUpdateWithoutDatasetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3660,7 +3660,7 @@ export type AnnotationUncheckedUpdateManyWithoutDatasetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3696,7 +3696,7 @@ export type AnnotationCreateManyAssetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -3726,7 +3726,7 @@ export type AnnotationUpdateWithoutAssetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3770,7 +3770,7 @@ export type AnnotationUncheckedUpdateWithoutAssetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3808,7 +3808,7 @@ export type AnnotationUncheckedUpdateManyWithoutAssetInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3844,7 +3844,7 @@ export type AnnotationCreateManyAssetVersionInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -3874,7 +3874,7 @@ export type AnnotationUpdateWithoutAssetVersionInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -3918,7 +3918,7 @@ export type AnnotationUncheckedUpdateWithoutAssetVersionInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3956,7 +3956,7 @@ export type AnnotationUncheckedUpdateManyWithoutAssetVersionInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3992,7 +3992,7 @@ export type AnnotationCreateManyLabelInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -4022,7 +4022,7 @@ export type AnnotationUpdateWithoutLabelInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4066,7 +4066,7 @@ export type AnnotationUncheckedUpdateWithoutLabelInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4104,7 +4104,7 @@ export type AnnotationUncheckedUpdateManyWithoutLabelInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4141,7 +4141,7 @@ export type AnnotationCreateManyFromAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -4177,7 +4177,7 @@ export type AnnotationCreateManyToAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -4206,7 +4206,7 @@ export type AnnotationUpdateWithoutFromAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4251,7 +4251,7 @@ export type AnnotationUncheckedUpdateWithoutFromAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4289,7 +4289,7 @@ export type AnnotationUncheckedUpdateManyWithoutFromAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4318,7 +4318,7 @@ export type AnnotationUpdateWithoutToAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4363,7 +4363,7 @@ export type AnnotationUncheckedUpdateWithoutToAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4401,7 +4401,7 @@ export type AnnotationUncheckedUpdateManyWithoutToAnnotationInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4437,7 +4437,7 @@ export type AnnotationCreateManyTrackInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   isKeyframe?: boolean
@@ -4466,7 +4466,7 @@ export type AnnotationUpdateWithoutTrackInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4511,7 +4511,7 @@ export type AnnotationUncheckedUpdateWithoutTrackInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4549,7 +4549,7 @@ export type AnnotationUncheckedUpdateManyWithoutTrackInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4585,7 +4585,7 @@ export type AnnotationCreateManyAudioSpeakerInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
-  version?: number
+  revision?: number
   frameIndex?: number | null
   timestampMs?: number | null
   trackId?: string | null
@@ -4614,7 +4614,7 @@ export type AnnotationUpdateWithoutAudioSpeakerInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -4659,7 +4659,7 @@ export type AnnotationUncheckedUpdateWithoutAudioSpeakerInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4697,7 +4697,7 @@ export type AnnotationUncheckedUpdateManyWithoutAudioSpeakerInput = {
   geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  version?: Prisma.IntFieldUpdateOperationsInput | number
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
   frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4773,7 +4773,7 @@ export type AnnotationSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   geometry?: boolean
   properties?: boolean
   status?: boolean
-  version?: boolean
+  revision?: boolean
   frameIndex?: boolean
   timestampMs?: boolean
   trackId?: boolean
@@ -4824,7 +4824,7 @@ export type AnnotationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   geometry?: boolean
   properties?: boolean
   status?: boolean
-  version?: boolean
+  revision?: boolean
   frameIndex?: boolean
   timestampMs?: boolean
   trackId?: boolean
@@ -4872,7 +4872,7 @@ export type AnnotationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   geometry?: boolean
   properties?: boolean
   status?: boolean
-  version?: boolean
+  revision?: boolean
   frameIndex?: boolean
   timestampMs?: boolean
   trackId?: boolean
@@ -4920,7 +4920,7 @@ export type AnnotationSelectScalar = {
   geometry?: boolean
   properties?: boolean
   status?: boolean
-  version?: boolean
+  revision?: boolean
   frameIndex?: boolean
   timestampMs?: boolean
   trackId?: boolean
@@ -4942,7 +4942,7 @@ export type AnnotationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AnnotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "assetId" | "assetVersionId" | "labelId" | "createdById" | "updatedById" | "reviewedById" | "modality" | "type" | "source" | "geometry" | "properties" | "status" | "version" | "frameIndex" | "timestampMs" | "trackId" | "isKeyframe" | "isInterpolated" | "startMs" | "endMs" | "startChar" | "endChar" | "startToken" | "endToken" | "tokenIndex" | "sentenceIndex" | "textValue" | "fromAnnotationId" | "toAnnotationId" | "speakerId" | "createdAt" | "updatedAt", ExtArgs["result"]["annotation"]>
+export type AnnotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "assetId" | "assetVersionId" | "labelId" | "createdById" | "updatedById" | "reviewedById" | "modality" | "type" | "source" | "geometry" | "properties" | "status" | "revision" | "frameIndex" | "timestampMs" | "trackId" | "isKeyframe" | "isInterpolated" | "startMs" | "endMs" | "startChar" | "endChar" | "startToken" | "endToken" | "tokenIndex" | "sentenceIndex" | "textValue" | "fromAnnotationId" | "toAnnotationId" | "speakerId" | "createdAt" | "updatedAt", ExtArgs["result"]["annotation"]>
 export type AnnotationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
@@ -5027,7 +5027,7 @@ export type $AnnotationPayload<ExtArgs extends runtime.Types.Extensions.Internal
      */
     properties: runtime.JsonValue
     status: $Enums.AnnotationStatus
-    version: number
+    revision: number
     frameIndex: number | null
     timestampMs: number | null
     trackId: string | null
@@ -5497,7 +5497,7 @@ export interface AnnotationFieldRefs {
   readonly geometry: Prisma.FieldRef<"Annotation", 'Json'>
   readonly properties: Prisma.FieldRef<"Annotation", 'Json'>
   readonly status: Prisma.FieldRef<"Annotation", 'AnnotationStatus'>
-  readonly version: Prisma.FieldRef<"Annotation", 'Int'>
+  readonly revision: Prisma.FieldRef<"Annotation", 'Int'>
   readonly frameIndex: Prisma.FieldRef<"Annotation", 'Int'>
   readonly timestampMs: Prisma.FieldRef<"Annotation", 'Int'>
   readonly trackId: Prisma.FieldRef<"Annotation", 'String'>

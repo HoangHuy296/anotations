@@ -9,7 +9,7 @@
     "start": "node --import tsx src/index.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test:queue": "node --env-file-if-exists=../../.env --import tsx --test tests/queue/**/*.test.ts"
+    "test:queue": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/queue/**/*.test.ts"
   },
   "dependencies": {
     "@fieldframe/domain": "workspace:*",
@@ -17,7 +17,8 @@
     "@prisma/client": "^6.19.3",
     "bullmq": "^5.79.3",
     "ioredis": "5.10.1",
-    "minio": "^8.0.5"
+    "minio": "^8.0.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^20",

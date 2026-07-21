@@ -25,6 +25,7 @@ type PersistDatasetImportInput = {
     name: string;
     branch: string;
     rootPath: string;
+    primaryModality: Modality | null;
   };
   images: GiteaImageCandidate[];
 };
@@ -93,6 +94,7 @@ export async function persistDatasetImport(input: PersistDatasetImportInput) {
             data: {
               ownerId: input.actor.id,
               name: input.dataset.name,
+              primaryModality: input.dataset.primaryModality,
               sourceMode: DatasetSourceMode.EXTERNAL_REF,
               externalRepositoryId: repository.id,
               sourceConnectionId: input.sourceConnectionId,
@@ -123,6 +125,9 @@ export async function persistDatasetImport(input: PersistDatasetImportInput) {
               },
               create: {
                 datasetId: dataset.id,
+                // This scanner only produces image candidates. Future
+                // modality-aware import workers must detect each candidate
+                // independently and create the matching metadata child row.
                 modality: Modality.IMAGE,
                 filename: image.filename,
                 mimeType: image.mimeType,

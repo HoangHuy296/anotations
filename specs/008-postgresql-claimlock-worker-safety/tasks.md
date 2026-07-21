@@ -30,7 +30,7 @@
 
 ### Implementation for User Story 1
 
-- [X] T010 [US1] Implement `claimJob(jobId, workerId)` as one guarded PostgreSQL `updateManyAndReturn` compare-and-set mutation for only `QUEUED`/`RETRYING` Jobs whose lease is absent or expired in `apps/worker/src/jobs/job-claim-lock.ts`
+- [X] T010 [US1] Implement `claimJob(jobId, workerId)` as the approved single parameterized PostgreSQL `UPDATE … RETURNING` compare-and-set mutation for only `QUEUED`/`RETRYING` Jobs whose lease is absent or expired in `apps/worker/src/jobs/job.repository.ts`; do not extend raw SQL to other lifecycle mutations.
 - [X] T011 [US1] Generate fresh opaque lock tokens and set `RUNNING`, `lockedBy`, `lockedAt`, `lockedUntil`, `heartbeatAt`, and preserved `startedAt`/`dequeuedAt` values only in the successful claim mutation in `apps/worker/src/jobs/job-claim-lock.ts`
 - [X] T012 [US1] Add a private per-process worker identity and inject it into the BullMQ worker factory without adding it to the queue payload in `apps/worker/src/queue/bullmq-worker.ts`
 - [X] T013 [US1] Invoke the private claim immediately after the existing strict `{ jobId }` receipt validation and stop processing on a neutral claim refusal in `apps/worker/src/queue/queue-router.ts`

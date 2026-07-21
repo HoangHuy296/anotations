@@ -1,3 +1,4 @@
+import { Modality } from "@internal/db";
 import { z } from "zod";
 
 const repositorySegment = z
@@ -32,6 +33,9 @@ export const importPreviewSchema = z.object({
   branch: z.string().trim().min(1).max(255),
   rootPath: z.string().trim().max(1024).default(""),
   name: z.string().trim().min(2).max(80),
+  // UI/default only. Asset modality is determined per candidate and never
+  // inferred from Dataset.primaryModality.
+  primaryModality: z.union([z.literal(Modality.IMAGE), z.null()]).optional().default(null),
   mode: z.enum(["preview", "persist"]).default("preview"),
 });
 
