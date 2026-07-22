@@ -210,8 +210,8 @@ export type AudioSpeakerWhereInput = {
   properties?: Prisma.JsonFilter<"AudioSpeaker">
   createdAt?: Prisma.DateTimeFilter<"AudioSpeaker"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AudioSpeaker"> | Date | string
-  audioAsset?: Prisma.XOR<Prisma.AudioAssetScalarRelationFilter, Prisma.AudioAssetWhereInput>
   annotations?: Prisma.AnnotationListRelationFilter
+  audioAsset?: Prisma.XOR<Prisma.AudioAssetScalarRelationFilter, Prisma.AudioAssetWhereInput>
 }
 
 export type AudioSpeakerOrderByWithRelationInput = {
@@ -224,8 +224,8 @@ export type AudioSpeakerOrderByWithRelationInput = {
   properties?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  audioAsset?: Prisma.AudioAssetOrderByWithRelationInput
   annotations?: Prisma.AnnotationOrderByRelationAggregateInput
+  audioAsset?: Prisma.AudioAssetOrderByWithRelationInput
 }
 
 export type AudioSpeakerWhereUniqueInput = Prisma.AtLeast<{
@@ -242,8 +242,8 @@ export type AudioSpeakerWhereUniqueInput = Prisma.AtLeast<{
   properties?: Prisma.JsonFilter<"AudioSpeaker">
   createdAt?: Prisma.DateTimeFilter<"AudioSpeaker"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AudioSpeaker"> | Date | string
-  audioAsset?: Prisma.XOR<Prisma.AudioAssetScalarRelationFilter, Prisma.AudioAssetWhereInput>
   annotations?: Prisma.AnnotationListRelationFilter
+  audioAsset?: Prisma.XOR<Prisma.AudioAssetScalarRelationFilter, Prisma.AudioAssetWhereInput>
 }, "id" | "audioAssetId_externalId">
 
 export type AudioSpeakerOrderByWithAggregationInput = {
@@ -285,8 +285,8 @@ export type AudioSpeakerCreateInput = {
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  audioAsset: Prisma.AudioAssetCreateNestedOneWithoutSpeakersInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAudioSpeakerInput
+  audioAsset: Prisma.AudioAssetCreateNestedOneWithoutSpeakersInput
 }
 
 export type AudioSpeakerUncheckedCreateInput = {
@@ -311,8 +311,8 @@ export type AudioSpeakerUpdateInput = {
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  audioAsset?: Prisma.AudioAssetUpdateOneRequiredWithoutSpeakersNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAudioSpeakerNestedInput
+  audioAsset?: Prisma.AudioAssetUpdateOneRequiredWithoutSpeakersNestedInput
 }
 
 export type AudioSpeakerUncheckedUpdateInput = {
@@ -691,8 +691,8 @@ export type AudioSpeakerSelect<ExtArgs extends runtime.Types.Extensions.Internal
   properties?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  audioAsset?: boolean | Prisma.AudioAssetDefaultArgs<ExtArgs>
   annotations?: boolean | Prisma.AudioSpeaker$annotationsArgs<ExtArgs>
+  audioAsset?: boolean | Prisma.AudioAssetDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.AudioSpeakerCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["audioSpeaker"]>
 
@@ -736,8 +736,8 @@ export type AudioSpeakerSelectScalar = {
 
 export type AudioSpeakerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "audioAssetId" | "externalId" | "name" | "role" | "color" | "properties" | "createdAt" | "updatedAt", ExtArgs["result"]["audioSpeaker"]>
 export type AudioSpeakerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  audioAsset?: boolean | Prisma.AudioAssetDefaultArgs<ExtArgs>
   annotations?: boolean | Prisma.AudioSpeaker$annotationsArgs<ExtArgs>
+  audioAsset?: boolean | Prisma.AudioAssetDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.AudioSpeakerCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AudioSpeakerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -750,8 +750,8 @@ export type AudioSpeakerIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types
 export type $AudioSpeakerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AudioSpeaker"
   objects: {
-    audioAsset: Prisma.$AudioAssetPayload<ExtArgs>
     annotations: Prisma.$AnnotationPayload<ExtArgs>[]
+    audioAsset: Prisma.$AudioAssetPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1157,8 +1157,8 @@ readonly fields: AudioSpeakerFieldRefs;
  */
 export interface Prisma__AudioSpeakerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  audioAsset<T extends Prisma.AudioAssetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AudioAssetDefaultArgs<ExtArgs>>): Prisma.Prisma__AudioAssetClient<runtime.Types.Result.GetResult<Prisma.$AudioAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   annotations<T extends Prisma.AudioSpeaker$annotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AudioSpeaker$annotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  audioAsset<T extends Prisma.AudioAssetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AudioAssetDefaultArgs<ExtArgs>>): Prisma.Prisma__AudioAssetClient<runtime.Types.Result.GetResult<Prisma.$AudioAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

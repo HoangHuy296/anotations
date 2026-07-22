@@ -278,9 +278,9 @@ export type SourceConnectionWhereInput = {
   metadata?: Prisma.JsonFilter<"SourceConnection">
   createdAt?: Prisma.DateTimeFilter<"SourceConnection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SourceConnection"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   datasets?: Prisma.DatasetListRelationFilter
   jobs?: Prisma.JobListRelationFilter
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type SourceConnectionOrderByWithRelationInput = {
@@ -302,9 +302,9 @@ export type SourceConnectionOrderByWithRelationInput = {
   metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   datasets?: Prisma.DatasetOrderByRelationAggregateInput
   jobs?: Prisma.JobOrderByRelationAggregateInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type SourceConnectionWhereUniqueInput = Prisma.AtLeast<{
@@ -330,9 +330,9 @@ export type SourceConnectionWhereUniqueInput = Prisma.AtLeast<{
   metadata?: Prisma.JsonFilter<"SourceConnection">
   createdAt?: Prisma.DateTimeFilter<"SourceConnection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"SourceConnection"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   datasets?: Prisma.DatasetListRelationFilter
   jobs?: Prisma.JobListRelationFilter
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId_provider_externalAccountId">
 
 export type SourceConnectionOrderByWithAggregationInput = {
@@ -401,9 +401,9 @@ export type SourceConnectionCreateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutSourceConnectionsInput
   datasets?: Prisma.DatasetCreateNestedManyWithoutSourceConnectionInput
   jobs?: Prisma.JobCreateNestedManyWithoutSourceConnectionInput
+  user: Prisma.UserCreateNestedOneWithoutSourceConnectionsInput
 }
 
 export type SourceConnectionUncheckedCreateInput = {
@@ -447,9 +447,9 @@ export type SourceConnectionUpdateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutSourceConnectionsNestedInput
   datasets?: Prisma.DatasetUpdateManyWithoutSourceConnectionNestedInput
   jobs?: Prisma.JobUpdateManyWithoutSourceConnectionNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutSourceConnectionsNestedInput
 }
 
 export type SourceConnectionUncheckedUpdateInput = {
@@ -811,8 +811,8 @@ export type SourceConnectionCreateWithoutJobsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutSourceConnectionsInput
   datasets?: Prisma.DatasetCreateNestedManyWithoutSourceConnectionInput
+  user: Prisma.UserCreateNestedOneWithoutSourceConnectionsInput
 }
 
 export type SourceConnectionUncheckedCreateWithoutJobsInput = {
@@ -871,8 +871,8 @@ export type SourceConnectionUpdateWithoutJobsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutSourceConnectionsNestedInput
   datasets?: Prisma.DatasetUpdateManyWithoutSourceConnectionNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutSourceConnectionsNestedInput
 }
 
 export type SourceConnectionUncheckedUpdateWithoutJobsInput = {
@@ -915,8 +915,8 @@ export type SourceConnectionCreateWithoutDatasetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutSourceConnectionsInput
   jobs?: Prisma.JobCreateNestedManyWithoutSourceConnectionInput
+  user: Prisma.UserCreateNestedOneWithoutSourceConnectionsInput
 }
 
 export type SourceConnectionUncheckedCreateWithoutDatasetsInput = {
@@ -975,8 +975,8 @@ export type SourceConnectionUpdateWithoutDatasetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutSourceConnectionsNestedInput
   jobs?: Prisma.JobUpdateManyWithoutSourceConnectionNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutSourceConnectionsNestedInput
 }
 
 export type SourceConnectionUncheckedUpdateWithoutDatasetsInput = {
@@ -1144,9 +1144,9 @@ export type SourceConnectionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   datasets?: boolean | Prisma.SourceConnection$datasetsArgs<ExtArgs>
   jobs?: boolean | Prisma.SourceConnection$jobsArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.SourceConnectionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sourceConnection"]>
 
@@ -1217,9 +1217,9 @@ export type SourceConnectionSelectScalar = {
 
 export type SourceConnectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "provider" | "authType" | "baseUrl" | "name" | "externalAccountId" | "accountUsername" | "accountEmail" | "tokenEncrypted" | "refreshTokenEncrypted" | "tokenExpiresAt" | "scopes" | "status" | "revokedAt" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["sourceConnection"]>
 export type SourceConnectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   datasets?: boolean | Prisma.SourceConnection$datasetsArgs<ExtArgs>
   jobs?: boolean | Prisma.SourceConnection$jobsArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.SourceConnectionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SourceConnectionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1232,9 +1232,9 @@ export type SourceConnectionIncludeUpdateManyAndReturn<ExtArgs extends runtime.T
 export type $SourceConnectionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SourceConnection"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     datasets: Prisma.$DatasetPayload<ExtArgs>[]
     jobs: Prisma.$JobPayload<ExtArgs>[]
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1649,9 +1649,9 @@ readonly fields: SourceConnectionFieldRefs;
  */
 export interface Prisma__SourceConnectionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   datasets<T extends Prisma.SourceConnection$datasetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SourceConnection$datasetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobs<T extends Prisma.SourceConnection$jobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SourceConnection$jobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

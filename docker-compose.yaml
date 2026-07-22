@@ -8,7 +8,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -19,9 +19,11 @@ services:
   redis:
     image: redis:7-alpine
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-U596K12nuf9bkP1LNC0szoTtmFwL300rBVWVyq9qr/c=}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
     command:
       ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    ports:
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis-data:/data
     healthcheck:
@@ -39,27 +41,38 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-super_secret_password_123}
     volumes:
       - minio-data:/data
+
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live"]
       interval: 5s
       timeout: 3s
       retries: 12
       start_period: 10s
+    ports:
+      - "${MINIO_PUBLIC_PORT:-9000}:9000"
 
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
     environment:
+      DEV_AUTH_EMAIL: operator@example.com
+      SEED_ADMIN_EMAIL: operator@example.com
+      SEED_ADMIN_NAME: Development Operator
       DATABASE_URL: ${DATABASE_URL_DOCKER}
-      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:-http://localhost:3000}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin_dev_user}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-super_secret_password_123}
       MINIO_BUCKET: ${MINIO_BUCKET:-annotation-assets}
-      REDIS_HOST: ${REDIS_HOST:-redis}
+      UPLOAD_CAPABILITY_SECRET: ${UPLOAD_CAPABILITY_SECRET:-voGHsMGx9e+1E2vLkuSkO8H2tH/5pkYz1DgFlJ0u9wE=}
+      REDIS_HOST: redis
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-U596K12nuf9bkP1LNC0szoTtmFwL300rBVWVyq9qr/c=}
-      BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe}
+      REDIS_DB: ${REDIS_DB:-0}
+      BULLMQ_PREFIX: ${BULLMQ_PREFIX:-annotation-platform}
+      EXPORT_QUEUE_NAME: ${EXPORT_QUEUE_NAME:-export-dataset}
       SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-wSA2xXBH4KiKxAjt9b38M8bqk6QbYzbs0p9AZkUp+4I=}
       GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
@@ -79,14 +92,16 @@ services:
       dockerfile: apps/worker/Dockerfile
     environment:
       DATABASE_URL: ${DATABASE_URL_DOCKER}
-      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+      MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin_dev_user}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-super_secret_password_123}
       MINIO_BUCKET: ${MINIO_BUCKET:-annotation-assets}
-      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_HOST: redis
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-U596K12nuf9bkP1LNC0szoTtmFwL300rBVWVyq9qr/c=}
-      BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe}
+      REDIS_DB: ${REDIS_DB:-0}
+      BULLMQ_PREFIX: ${BULLMQ_PREFIX:-annotation-platform}
+      EXPORT_QUEUE_NAME: ${EXPORT_QUEUE_NAME:-export-dataset}
       SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-wSA2xXBH4KiKxAjt9b38M8bqk6QbYzbs0p9AZkUp+4I=}
       GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}  

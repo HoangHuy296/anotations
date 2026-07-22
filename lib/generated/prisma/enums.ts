@@ -327,6 +327,15 @@ export const JobEventLevel = {
 export type JobEventLevel = (typeof JobEventLevel)[keyof typeof JobEventLevel]
 
 
+export const PreparedImportStatus = {
+  PREPARING: 'PREPARING',
+  COMMITTED: 'COMMITTED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type PreparedImportStatus = (typeof PreparedImportStatus)[keyof typeof PreparedImportStatus]
+
+
 export const AiTaskStatus = {
   QUEUED: 'QUEUED',
   RUNNING: 'RUNNING',

@@ -30,6 +30,7 @@ export async function POST(request: Request) {
   }
   const capability = verifyUploadCapability(providers.config, parsed.data.fileId);
   if (!capability) return apiError(400, "INVALID_REQUEST", "Upload completion capability is invalid or expired.");
+  if (capability.preparedImportId || capability.preparedImportItemId) return apiError(400, "INVALID_REQUEST", "This upload must be completed through its prepared import.");
 
   const access = await requireDatasetPermission(actor, capability.datasetId, "asset.upload");
   if (!access) return apiError(404, "GITEA_NOT_FOUND", "The dataset was not found.");

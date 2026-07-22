@@ -21,6 +21,23 @@ const progressInputSchema = jobReferenceSchema.extend({
   if (value.totalItems !== undefined && value.totalItems !== null && value.processedItems !== undefined && value.processedItems > value.totalItems) context.addIssue({ code: "custom", message: "processedItems cannot exceed totalItems." });
   if (value.processedItems !== undefined && (value.successItems ?? 0) + (value.failedItems ?? 0) + (value.skippedItems ?? 0) > value.processedItems) context.addIssue({ code: "custom", message: "Outcome counts cannot exceed processedItems." });
 });
+const completionInputSchema = jobReferenceSchema.extend({
+  resultStorageKey: z.string().min(1).max(1_024).optional(),
+  resultFilename: z.string().min(1).max(255).regex(/^[^/\\]+$/).optional(),
+  stage: z.literal("FINISHED").optional(),
+  summary: z.object({
+    message: z.string().max(500).optional(),
+    outcome: z.literal("completed").optional(),
+    completedAt: z.string().datetime().optional(),
+    resultCount: z.number().int().nonnegative().optional(),
+  }).strict().optional(),
+  progress: z.number().int().min(0).max(100).optional(),
+  totalItems: z.number().int().nonnegative().nullable().optional(),
+  processedItems: z.number().int().nonnegative().optional(),
+  successItems: z.number().int().nonnegative().optional(),
+  failedItems: z.number().int().nonnegative().optional(),
+  skippedItems: z.number().int().nonnegative().optional(),
+}).strict();
 
 export type ClaimResult = { kind: "claimed"; jobId: string; lockToken: string } | { kind: "refused" };
 export type LeaseMutationResult = { kind: "updated" } | { kind: "refused" };
@@ -62,12 +79,16 @@ export async function updateJobProgress(db: PrismaClient, input: unknown): Promi
 function terminalData(status: JobStatus, now: Date) { return { status, finishedAt: now, lockedBy: null, lockToken: null, lockedAt: null, lockedUntil: null, heartbeatAt: null } as const; }
 
 export async function completeJob(db: PrismaClient, input: unknown): Promise<LeaseMutationResult> {
-  const parsed = jobReferenceSchema.safeParse(input);
+  const parsed = completionInputSchema.safeParse(input);
   if (!parsed.success) return { kind: "refused" };
   const now = new Date();
-  const updated = await db.job.updateMany({ where: { ...currentLeaseWhere(parsed.data.jobId, parsed.data.lockToken, now), status: "RUNNING" }, data: terminalData("COMPLETED", now) });
+  const { jobId, lockToken, ...completion } = parsed.data;
+  const updated = await db.job.updateMany({
+    where: { ...currentLeaseWhere(jobId, lockToken, now), status: "RUNNING" },
+    data: { ...terminalData("COMPLETED", now), ...completion },
+  });
   if (updated.count !== 1) return { kind: "refused" };
-  await writeSafeJobEvent(db, { jobId: parsed.data.jobId, kind: "JOB_COMPLETED" });
+  await writeSafeJobEvent(db, { jobId, kind: "JOB_COMPLETED" });
   return { kind: "updated" };
 }
 

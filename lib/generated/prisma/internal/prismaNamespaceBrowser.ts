@@ -56,6 +56,8 @@ export const ModelName = {
   ExternalRepository: 'ExternalRepository',
   SourceConnection: 'SourceConnection',
   Dataset: 'Dataset',
+  PreparedImport: 'PreparedImport',
+  PreparedImportItem: 'PreparedImportItem',
   DatasetMember: 'DatasetMember',
   Asset: 'Asset',
   AssetVersion: 'AssetVersion',
@@ -124,6 +126,10 @@ export const JobScalarFieldEnum = {
   modality: 'modality',
   status: 'status',
   stage: 'stage',
+  queueName: 'queueName',
+  queueJobId: 'queueJobId',
+  enqueuedAt: 'enqueuedAt',
+  dequeuedAt: 'dequeuedAt',
   priority: 'priority',
   priorityValue: 'priorityValue',
   trigger: 'trigger',
@@ -157,12 +163,9 @@ export const JobScalarFieldEnum = {
   idempotencyKey: 'idempotencyKey',
   resultStorageKey: 'resultStorageKey',
   resultFilename: 'resultFilename',
-  queueName: 'queueName',
-  queueJobId: 'queueJobId',
-  enqueuedAt: 'enqueuedAt',
-  dequeuedAt: 'dequeuedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  retryOfJobId: 'retryOfJobId'
 } as const
 
 export type JobScalarFieldEnum = (typeof JobScalarFieldEnum)[keyof typeof JobScalarFieldEnum]
@@ -254,6 +257,44 @@ export const DatasetScalarFieldEnum = {
 } as const
 
 export type DatasetScalarFieldEnum = (typeof DatasetScalarFieldEnum)[keyof typeof DatasetScalarFieldEnum]
+
+
+export const PreparedImportScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  jobId: 'jobId',
+  createdById: 'createdById',
+  status: 'status',
+  expectedItemCount: 'expectedItemCount',
+  deadlineAt: 'deadlineAt',
+  committedAt: 'committedAt',
+  idempotencyKey: 'idempotencyKey',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PreparedImportScalarFieldEnum = (typeof PreparedImportScalarFieldEnum)[keyof typeof PreparedImportScalarFieldEnum]
+
+
+export const PreparedImportItemScalarFieldEnum = {
+  id: 'id',
+  preparedImportId: 'preparedImportId',
+  logicalPath: 'logicalPath',
+  normalizedPath: 'normalizedPath',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  modality: 'modality',
+  position: 'position',
+  fingerprint: 'fingerprint',
+  storageKey: 'storageKey',
+  assetId: 'assetId',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PreparedImportItemScalarFieldEnum = (typeof PreparedImportItemScalarFieldEnum)[keyof typeof PreparedImportItemScalarFieldEnum]
 
 
 export const DatasetMemberScalarFieldEnum = {

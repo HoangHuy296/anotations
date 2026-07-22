@@ -80,6 +80,19 @@ export type SourceConnection = Prisma.SourceConnectionModel
  */
 export type Dataset = Prisma.DatasetModel
 /**
+ * Model PreparedImport
+ * *
+ * * Durable browser-to-MinIO import preparation. It stores only bounded metadata
+ * * and private object references; no binary, browser handle, or local path is
+ * * ever persisted.
+ */
+export type PreparedImport = Prisma.PreparedImportModel
+/**
+ * Model PreparedImportItem
+ * 
+ */
+export type PreparedImportItem = Prisma.PreparedImportItemModel
+/**
  * Model DatasetMember
  * 
  */

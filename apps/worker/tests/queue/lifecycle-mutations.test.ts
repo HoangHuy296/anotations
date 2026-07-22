@@ -73,4 +73,13 @@ test("complete, fail, and cancellation acknowledgement require an active current
     assert.deepEqual(await cancelJob(fourth.fixture.db, { jobId: fourth.job.id, lockToken: fourth.token }), { kind: "updated" });
     assert.equal((await fourth.fixture.db.job.findUniqueOrThrow({ where: { id: fourth.job.id }, select: { status: true } })).status, "CANCELED");
   } finally { await fourth.fixture.cleanup(); }
+
+  const expired = await claimedFixture();
+  try {
+    await expired.fixture.db.job.update({ where: { id: expired.job.id }, data: { status: "CANCELING", cancelRequestedAt: new Date(), lockedUntil: new Date(Date.now() - 1_000) } });
+    const eventCount = await expired.fixture.db.jobEvent.count({ where: { jobId: expired.job.id } });
+    assert.deepEqual(await cancelJob(expired.fixture.db, { jobId: expired.job.id, lockToken: expired.token }), { kind: "refused" });
+    assert.equal((await expired.fixture.db.job.findUniqueOrThrow({ where: { id: expired.job.id }, select: { status: true } })).status, "CANCELING");
+    assert.equal(await expired.fixture.db.jobEvent.count({ where: { jobId: expired.job.id } }), eventCount);
+  } finally { await expired.fixture.cleanup(); }
 });

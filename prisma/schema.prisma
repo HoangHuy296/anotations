@@ -5,13 +5,699 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // If your project does not use prisma.config.ts, uncomment this:
   url      = env("DATABASE_URL")
 }
 
-/**
- * USER / AUTH
- */
+model User {
+  id                   String               @id @default(cuid())
+  email                String               @unique
+  passwordHash         String?
+  name                 String?
+  role                 UserRole
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  aiTasksCreated       AiTask[]             @relation("AiTaskCreatedBy")
+  annotationsCreated   Annotation[]         @relation("AnnotationCreatedBy")
+  annotationsReviewed  Annotation[]         @relation("AnnotationReviewedBy")
+  annotationsUpdated   Annotation[]         @relation("AnnotationUpdatedBy")
+  uploadedAssets       Asset[]              @relation("AssetUploadedBy")
+  sessions             AuthSession[]
+  ownedDatasets        Dataset[]            @relation("DatasetOwner")
+  memberships          DatasetMember[]
+  externalRepositories ExternalRepository[] @relation("ExternalRepositoryCreatedBy")
+  jobsCanceled         Job[]                @relation("JobCanceledBy")
+  jobsCreated          Job[]                @relation("JobCreatedBy")
+  preparedImports      PreparedImport[]     @relation("PreparedImportCreatedBy")
+  sourceConnections    SourceConnection[]   @relation("SourceConnectionOwner")
+  tracksCreated        VideoObjectTrack[]   @relation("TrackCreatedBy")
+}
+
+model AuthSession {
+  id               String    @id @default(cuid())
+  userId           String
+  refreshTokenHash String    @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Job {
+  id                   String              @id @default(cuid())
+  datasetId            String
+  createdById          String
+  canceledById         String?
+  type                 JobType
+  modality             Modality?
+  status               JobStatus           @default(QUEUED)
+  stage                JobStage            @default(WAITING)
+  queueName            String?
+  queueJobId           String?
+  enqueuedAt           DateTime?
+  dequeuedAt           DateTime?
+  priority             JobPriority         @default(NORMAL)
+  priorityValue        Int                 @default(50)
+  trigger              JobTrigger          @default(USER)
+  provider             RepoProvider?
+  sourceConnectionId   String?
+  externalRepositoryId String?
+  /// *
+  ///    * Task-specific request payload.
+  ///    * Do not store secrets here.
+  input                Json                @default("{}")
+  /// *
+  ///    * Runtime checkpoint.
+  ///    * Worker can update this while running.
+  state                Json                @default("{}")
+  /// *
+  ///    * Realtime/final summary for frontend.
+  summary              Json                @default("{}")
+  progress             Int                 @default(0)
+  totalItems           Int?
+  processedItems       Int                 @default(0)
+  successItems         Int                 @default(0)
+  failedItems          Int                 @default(0)
+  skippedItems         Int                 @default(0)
+  error                String?
+  errorCode            String?
+  errorDetails         Json?
+  /// *
+  ///    * Worker locking.
+  lockedBy             String?
+  lockToken            String?
+  lockedAt             DateTime?
+  lockedUntil          DateTime?
+  heartbeatAt          DateTime?
+  startedAt            DateTime?
+  finishedAt           DateTime?
+  runAfter             DateTime?
+  attempts             Int                 @default(0)
+  maxAttempts          Int                 @default(3)
+  /// *
+  ///    * Soft cancel.
+  cancelRequestedAt    DateTime?
+  canceledAt           DateTime?
+  /// *
+  ///    * Prevent duplicate jobs.
+  ///    * For clone repo, generate from dataset/repo/ref/rootPath/modality/sourceMode.
+  idempotencyKey       String?
+  /// *
+  ///    * Output result if job creates a file.
+  resultStorageKey     String?
+  resultFilename       String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  retryOfJobId         String?             @unique
+  aiTasks              AiTask[]
+  canceledBy           User?               @relation("JobCanceledBy", fields: [canceledById], references: [id])
+  createdBy            User                @relation("JobCreatedBy", fields: [createdById], references: [id])
+  dataset              Dataset             @relation("DatasetJobs", fields: [datasetId], references: [id], onDelete: Cascade)
+  externalRepository   ExternalRepository? @relation("ExternalRepositoryJobs", fields: [externalRepositoryId], references: [id])
+  retryOfJob           Job?                @relation("JobRetryLineage", fields: [retryOfJobId], references: [id], onDelete: Restrict)
+  retrySuccessor       Job?                @relation("JobRetryLineage")
+  sourceConnection     SourceConnection?   @relation(fields: [sourceConnectionId], references: [id])
+  events               JobEvent[]
+  preparedImport       PreparedImport?
+
+  @@unique([datasetId, idempotencyKey])
+  @@index([datasetId, status])
+  @@index([createdById])
+  @@index([canceledById])
+  @@index([status, runAfter])
+  @@index([status, priorityValue, createdAt])
+  @@index([status, heartbeatAt])
+  @@index([lockedUntil])
+  @@index([sourceConnectionId])
+  @@index([externalRepositoryId])
+  @@index([type, status])
+  @@index([queueName, queueJobId])
+}
+
+model JobEvent {
+  id        String        @id @default(cuid())
+  jobId     String
+  level     JobEventLevel @default(INFO)
+  stage     JobStage?
+  message   String
+  data      Json          @default("{}")
+  createdAt DateTime      @default(now())
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([jobId, createdAt])
+  @@index([level])
+}
+
+model ExternalRepository {
+  id             String         @id @default(cuid())
+  provider       RepoProvider
+  visibility     RepoVisibility @default(PUBLIC)
+  /// *
+  ///    * Normalized base URL.
+  ///    * Use empty string for provider default, e.g. github.com / huggingface.co.
+  baseUrl        String         @default("")
+  owner          String?
+  repo           String
+  fullName       String
+  externalRepoId String?
+  repoType       String?
+  defaultBranch  String?
+  description    String?
+  homepageUrl    String?
+  createdById    String?
+  metadata       Json           @default("{}")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  assets         Asset[]
+  assetVersions  AssetVersion[]
+  datasets       Dataset[]
+  createdBy      User?          @relation("ExternalRepositoryCreatedBy", fields: [createdById], references: [id])
+  jobs           Job[]          @relation("ExternalRepositoryJobs")
+
+  @@unique([provider, baseUrl, fullName])
+  @@index([provider])
+  @@index([createdById])
+}
+
+model SourceConnection {
+  id                    String                 @id @default(cuid())
+  userId                String
+  provider              RepoProvider
+  authType              RepoAuthType           @default(TOKEN)
+  baseUrl               String                 @default("")
+  name                  String?
+  externalAccountId     String?
+  accountUsername       String?
+  accountEmail          String?
+  tokenEncrypted        String?
+  refreshTokenEncrypted String?
+  tokenExpiresAt        DateTime?
+  scopes                Json                   @default("[]")
+  status                SourceConnectionStatus @default(ACTIVE)
+  revokedAt             DateTime?
+  metadata              Json                   @default("{}")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  datasets              Dataset[]
+  jobs                  Job[]
+  user                  User                   @relation("SourceConnectionOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, externalAccountId])
+  @@index([userId])
+  @@index([provider])
+  @@index([provider, baseUrl])
+  @@index([status])
+  @@index([tokenExpiresAt])
+}
+
+model Dataset {
+  id                   String              @id @default(cuid())
+  ownerId              String
+  name                 String
+  description          String?
+  type                 DatasetType         @default(MULTI_MODAL)
+  primaryModality      Modality?
+  metadata             Json                @default("{}")
+  sourceMode           DatasetSourceMode   @default(UPLOAD)
+  externalRepositoryId String?
+  sourceConnectionId   String?
+  sourceRootPath       String?
+  sourceBranch         String?
+  lockedRevision       String?
+  currentRevision      String?
+  includePatterns      Json                @default("[]")
+  excludePatterns      Json                @default("[]")
+  lastSyncedAt         DateTime?
+  syncStatus           AssetSyncStatus     @default(SYNCED)
+  syncSummary          Json                @default("{}")
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  archivedAt           DateTime?
+  deletedAt            DateTime?
+  aiTasks              AiTask[]
+  annotations          Annotation[]
+  assets               Asset[]
+  assetVersions        AssetVersion[]
+  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
+  owner                User                @relation("DatasetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  sourceConnection     SourceConnection?   @relation(fields: [sourceConnectionId], references: [id])
+  members              DatasetMember[]
+  jobs                 Job[]               @relation("DatasetJobs")
+  labels               Label[]
+  preparedImports      PreparedImport?
+
+  @@index([ownerId])
+  @@index([ownerId, primaryModality])
+  @@index([type])
+  @@index([primaryModality])
+  @@index([sourceMode])
+  @@index([externalRepositoryId])
+  @@index([sourceConnectionId])
+  @@index([currentRevision])
+}
+
+/// *
+///  * Durable browser-to-MinIO import preparation. It stores only bounded metadata
+///  * and private object references; no binary, browser handle, or local path is
+///  * ever persisted.
+model PreparedImport {
+  id                String               @id @default(cuid())
+  datasetId         String               @unique
+  jobId             String               @unique
+  createdById       String
+  status            PreparedImportStatus @default(PREPARING)
+  expectedItemCount Int
+  deadlineAt        DateTime
+  committedAt       DateTime?
+  idempotencyKey    String
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  createdBy         User                 @relation("PreparedImportCreatedBy", fields: [createdById], references: [id])
+  dataset           Dataset              @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  job               Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  items             PreparedImportItem[]
+
+  @@unique([createdById, idempotencyKey])
+  @@index([status, deadlineAt])
+  @@index([createdById, createdAt])
+}
+
+model PreparedImportItem {
+  id               String         @id @default(cuid())
+  preparedImportId String
+  logicalPath      String
+  normalizedPath   String
+  filename         String
+  mimeType         String
+  sizeBytes        BigInt
+  modality         Modality
+  position         Int
+  fingerprint      String
+  storageKey       String         @unique
+  assetId          String?        @unique
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  asset            Asset?         @relation(fields: [assetId], references: [id])
+  preparedImport   PreparedImport @relation(fields: [preparedImportId], references: [id], onDelete: Cascade)
+
+  @@unique([preparedImportId, normalizedPath])
+  @@unique([preparedImportId, position])
+  @@index([preparedImportId, completedAt])
+  @@index([assetId])
+}
+
+model DatasetMember {
+  id        String            @id @default(cuid())
+  datasetId String
+  userId    String
+  role      DatasetMemberRole @default(LABELER)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  dataset   Dataset           @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([datasetId, userId])
+  @@index([userId])
+  @@index([datasetId])
+  @@index([datasetId, role])
+}
+
+model Asset {
+  id                   String              @id @default(cuid())
+  datasetId            String
+  uploadedById         String?
+  modality             Modality
+  filename             String
+  originalFilename     String?
+  mimeType             String
+  sizeBytes            BigInt?
+  width                Int?
+  height               Int?
+  durationMs           Int?
+  textLength           Int?
+  sourceMode           DatasetSourceMode   @default(UPLOAD)
+  storageProvider      StorageProvider?
+  storageBucket        String?
+  storageKey           String?
+  checksum             String?
+  externalRepositoryId String?
+  sourceProvider       RepoProvider?
+  sourceBranch         String?
+  sourceRevision       String?
+  sourcePath           String?
+  sourceFileSha        String?
+  sourceBlobSha        String?
+  sourceLfsOid         String?
+  sourceEtag           String?
+  sourceUrl            String?
+  sourceFingerprint    String
+  cacheStatus          CacheStatus         @default(NOT_CACHED)
+  cacheProvider        StorageProvider?
+  cacheBucket          String?
+  cacheKey             String?
+  cacheChecksum        String?
+  cachedAt             DateTime?
+  cacheExpiresAt       DateTime?
+  cacheError           String?
+  currentVersionId     String?
+  syncStatus           AssetSyncStatus     @default(SYNCED)
+  lastSyncedAt         DateTime?
+  syncSummary          Json                @default("{}")
+  status               AssetStatus         @default(NEW)
+  batchIndex           Int                 @default(0)
+  orderIndex           Int                 @default(0)
+  description          String?
+  metadata             Json                @default("{}")
+  revision             Int                 @default(1)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  archivedAt           DateTime?
+  deletedAt            DateTime?
+  aiTasks              AiTask[]
+  annotations          Annotation[]
+  dataset              Dataset             @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
+  uploadedBy           User?               @relation("AssetUploadedBy", fields: [uploadedById], references: [id])
+  versions             AssetVersion[]
+  audioAsset           AudioAsset?
+  imageAsset           ImageAsset?
+  preparedImportItem   PreparedImportItem?
+  textDocument         TextDocument?
+  videoAsset           VideoAsset?
+
+  @@unique([storageProvider, storageBucket, storageKey])
+  @@unique([cacheProvider, cacheBucket, cacheKey])
+  @@unique([datasetId, sourceFingerprint])
+  @@index([sourceFingerprint])
+  @@index([datasetId, modality])
+  @@index([datasetId, batchIndex])
+  @@index([datasetId, batchIndex, orderIndex])
+  @@index([datasetId, filename])
+  @@index([datasetId, status])
+  @@index([datasetId, syncStatus])
+  @@index([datasetId, cacheStatus])
+  @@index([uploadedById])
+  @@index([externalRepositoryId])
+  @@index([sourceProvider])
+  @@index([sourceRevision])
+  @@index([sourcePath])
+  @@index([sourceFileSha])
+  @@index([sourceBlobSha])
+  @@index([sourceLfsOid])
+  @@index([currentVersionId])
+}
+
+model AssetVersion {
+  id                   String              @id @default(cuid())
+  assetId              String
+  datasetId            String
+  versionNumber        Int
+  isCurrent            Boolean             @default(false)
+  modality             Modality
+  sourceMode           DatasetSourceMode
+  externalRepositoryId String?
+  sourceProvider       RepoProvider?
+  sourceBranch         String?
+  sourceRevision       String?
+  sourcePath           String?
+  sourceFileSha        String?
+  sourceBlobSha        String?
+  sourceLfsOid         String?
+  sourceEtag           String?
+  sourceUrl            String?
+  sourceFingerprint    String
+  storageProvider      StorageProvider?
+  storageBucket        String?
+  storageKey           String?
+  checksum             String?
+  cacheStatus          CacheStatus         @default(NOT_CACHED)
+  cacheProvider        StorageProvider?
+  cacheBucket          String?
+  cacheKey             String?
+  cacheChecksum        String?
+  cachedAt             DateTime?
+  cacheExpiresAt       DateTime?
+  cacheError           String?
+  filename             String
+  originalFilename     String?
+  mimeType             String
+  sizeBytes            BigInt?
+  width                Int?
+  height               Int?
+  durationMs           Int?
+  textLength           Int?
+  syncStatus           AssetSyncStatus     @default(SYNCED)
+  metadata             Json                @default("{}")
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  annotations          Annotation[]
+  asset                Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  dataset              Dataset             @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
+
+  @@unique([assetId, versionNumber])
+  @@unique([storageProvider, storageBucket, storageKey])
+  @@unique([cacheProvider, cacheBucket, cacheKey])
+  @@unique([datasetId, sourceFingerprint])
+  @@index([assetId])
+  @@index([datasetId])
+  @@index([datasetId, isCurrent])
+  @@index([externalRepositoryId])
+  @@index([sourceRevision])
+  @@index([sourcePath])
+  @@index([sourceFileSha])
+  @@index([sourceBlobSha])
+  @@index([sourceLfsOid])
+  @@index([syncStatus])
+  @@index([cacheStatus])
+  @@index([sourceFingerprint])
+}
+
+model Label {
+  id             String             @id @default(cuid())
+  datasetId      String
+  modality       Modality?
+  scope          LabelScope         @default(OBJECT)
+  name           String
+  normalizedName String
+  color          String
+  description    String?
+  hotkey         String?
+  properties     Json               @default("{}")
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  annotations    Annotation[]
+  dataset        Dataset            @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  videoTracks    VideoObjectTrack[] @relation("TrackLabel")
+
+  @@unique([datasetId, normalizedName])
+  @@index([datasetId])
+  @@index([datasetId, scope])
+  @@index([datasetId, modality])
+}
+
+model Annotation {
+  id                    String            @id @default(cuid())
+  datasetId             String
+  assetId               String
+  assetVersionId        String?
+  labelId               String?
+  createdById           String
+  updatedById           String?
+  reviewedById          String?
+  modality              Modality
+  type                  AnnotationType
+  source                AnnotationSource  @default(MANUAL)
+  /// *
+  ///    * Canonical geometry payload.
+  ///    * Validate this with Zod/application schemas.
+  geometry              Json              @default("{}")
+  /// *
+  ///    * Metadata, model provenance, confidence, notes, custom fields.
+  properties            Json              @default("{}")
+  status                AnnotationStatus  @default(DRAFT)
+  revision              Int               @default(1)
+  frameIndex            Int?
+  timestampMs           Int?
+  trackId               String?
+  isKeyframe            Boolean           @default(false)
+  isInterpolated        Boolean           @default(false)
+  startMs               Int?
+  endMs                 Int?
+  startChar             Int?
+  endChar               Int?
+  startToken            Int?
+  endToken              Int?
+  tokenIndex            Int?
+  sentenceIndex         Int?
+  textValue             String?
+  fromAnnotationId      String?
+  toAnnotationId        String?
+  speakerId             String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  asset                 Asset             @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  assetVersion          AssetVersion?     @relation(fields: [assetVersionId], references: [id])
+  createdBy             User              @relation("AnnotationCreatedBy", fields: [createdById], references: [id])
+  dataset               Dataset           @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  fromAnnotation        Annotation?       @relation("TextRelationFrom", fields: [fromAnnotationId], references: [id])
+  outgoingTextRelations Annotation[]      @relation("TextRelationFrom")
+  label                 Label?            @relation(fields: [labelId], references: [id])
+  reviewedBy            User?             @relation("AnnotationReviewedBy", fields: [reviewedById], references: [id])
+  audioSpeaker          AudioSpeaker?     @relation(fields: [speakerId], references: [id])
+  toAnnotation          Annotation?       @relation("TextRelationTo", fields: [toAnnotationId], references: [id])
+  incomingTextRelations Annotation[]      @relation("TextRelationTo")
+  track                 VideoObjectTrack? @relation(fields: [trackId], references: [id])
+  updatedBy             User?             @relation("AnnotationUpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([datasetId, modality])
+  @@index([datasetId, status])
+  @@index([assetId, type])
+  @@index([assetId, status, createdAt])
+  @@index([assetVersionId])
+  @@index([labelId])
+  @@index([createdById])
+  @@index([assetId, frameIndex])
+  @@index([trackId, frameIndex])
+  @@index([assetId, timestampMs])
+  @@index([assetId, startMs, endMs])
+  @@index([assetId, startChar, endChar])
+  @@index([assetId, tokenIndex])
+  @@index([fromAnnotationId, toAnnotationId])
+  @@index([speakerId])
+}
+
+model ImageAsset {
+  id           String  @id @default(cuid())
+  assetId      String  @unique
+  thumbnailKey String?
+  exif         Json    @default("{}")
+  asset        Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+}
+
+model VideoAsset {
+  id              String             @id @default(cuid())
+  assetId         String             @unique
+  fps             Float?
+  totalFrames     Int?
+  codec           String?
+  thumbnailKey    String?
+  frameStorageKey String?
+  metadata        Json               @default("{}")
+  asset           Asset              @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  tracks          VideoObjectTrack[]
+
+  @@index([assetId])
+}
+
+model VideoObjectTrack {
+  id           String           @id @default(cuid())
+  videoAssetId String
+  labelId      String?
+  createdById  String?
+  name         String?
+  color        String?
+  properties   Json             @default("{}")
+  status       AnnotationStatus @default(DRAFT)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  annotations  Annotation[]
+  createdBy    User?            @relation("TrackCreatedBy", fields: [createdById], references: [id])
+  label        Label?           @relation("TrackLabel", fields: [labelId], references: [id])
+  videoAsset   VideoAsset       @relation(fields: [videoAssetId], references: [id], onDelete: Cascade)
+
+  @@index([videoAssetId])
+  @@index([labelId])
+  @@index([createdById])
+}
+
+model TextDocument {
+  id           String  @id @default(cuid())
+  assetId      String  @unique
+  content      String?
+  language     String?
+  tokenization Json    @default("{}")
+  metadata     Json    @default("{}")
+  asset        Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+}
+
+model AudioAsset {
+  id          String         @id @default(cuid())
+  assetId     String         @unique
+  sampleRate  Int?
+  channels    Int?
+  codec       String?
+  bitRate     Int?
+  waveformKey String?
+  metadata    Json           @default("{}")
+  asset       Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  speakers    AudioSpeaker[]
+
+  @@index([assetId])
+}
+
+model AudioSpeaker {
+  id           String       @id @default(cuid())
+  audioAssetId String
+  externalId   String?
+  name         String?
+  role         String?
+  color        String?
+  properties   Json         @default("{}")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  annotations  Annotation[]
+  audioAsset   AudioAsset   @relation(fields: [audioAssetId], references: [id], onDelete: Cascade)
+
+  @@unique([audioAssetId, externalId])
+  @@index([audioAssetId])
+}
+
+model AiTask {
+  id               String       @id @default(cuid())
+  externalTaskId   String?      @unique
+  datasetId        String
+  assetId          String?
+  jobId            String?
+  createdById      String
+  provider         String
+  type             AiTaskType
+  status           AiTaskStatus @default(QUEUED)
+  modality         Modality?
+  modelName        String?
+  modelVersion     String?
+  input            Json         @default("{}")
+  output           Json?
+  summary          Json         @default("{}")
+  error            String?
+  errorCode        String?
+  errorDetails     Json?
+  resultStorageKey String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  asset            Asset?       @relation(fields: [assetId], references: [id])
+  createdBy        User         @relation("AiTaskCreatedBy", fields: [createdById], references: [id])
+  dataset          Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  job              Job?         @relation(fields: [jobId], references: [id])
+
+  @@index([datasetId])
+  @@index([assetId])
+  @@index([jobId])
+  @@index([createdById])
+  @@index([status])
+  @@index([provider])
+  @@index([type])
+}
 
 enum UserRole {
   ADMIN
@@ -26,60 +712,6 @@ enum DatasetMemberRole {
   LABELER
   REVIEWER
 }
-
-model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String?
-  name         String?
-  role         UserRole @default(LABELER)
-
-  ownedDatasets Dataset[]       @relation("DatasetOwner")
-  memberships   DatasetMember[]
-  sessions      AuthSession[]
-
-  uploadedAssets Asset[] @relation("AssetUploadedBy")
-
-  annotationsCreated  Annotation[] @relation("AnnotationCreatedBy")
-  annotationsUpdated  Annotation[] @relation("AnnotationUpdatedBy")
-  annotationsReviewed Annotation[] @relation("AnnotationReviewedBy")
-
-  tracksCreated VideoObjectTrack[] @relation("TrackCreatedBy")
-
-  externalRepositories ExternalRepository[] @relation("ExternalRepositoryCreatedBy")
-  sourceConnections    SourceConnection[]   @relation("SourceConnectionOwner")
-
-  jobsCreated  Job[] @relation("JobCreatedBy")
-  jobsCanceled Job[] @relation("JobCanceledBy")
-
-  aiTasksCreated AiTask[] @relation("AiTaskCreatedBy")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model AuthSession {
-  id               String    @id @default(cuid())
-  userId           String
-  refreshTokenHash String    @unique
-  userAgent        String?
-  ipAddress        String?
-  expiresAt        DateTime
-  revokedAt        DateTime?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@index([userId])
-  @@index([expiresAt])
-}
-
-/**
- * CORE ENUMS
- */
 
 enum Modality {
   IMAGE
@@ -189,23 +821,19 @@ enum AnnotationType {
   POLYLINE
   SEGMENTATION_MASK
   KEYPOINT
-
   IMAGE_CLASSIFICATION
   VIDEO_CLASSIFICATION
-
   OBJECT_TRACK
   ACTION
   EVENT
   SCENE
   SHOT_BOUNDARY
-
   NAMED_ENTITY_RECOGNITION
   POS_TAG
   TEXT_RELATION
   TEXT_CLASSIFICATION
   SENTIMENT
   INTENT
-
   TRANSCRIPT
   AUDIO_CLASSIFICATION
   SPEAKER_DIARIZATION
@@ -242,24 +870,17 @@ enum StorageProvider {
   EXTERNAL
 }
 
-/**
- * JOB ENGINE
- */
-
 enum JobType {
   CLONE_REPOSITORY
   IMPORT_DATASET
   SYNC_REPOSITORY
   EXPORT_DATASET
-
   GENERATE_THUMBNAILS
   EXTRACT_VIDEO_METADATA
   EXTRACT_VIDEO_FRAMES
   GENERATE_AUDIO_WAVEFORM
-
   AUTO_TRANSCRIBE_AUDIO
   AUTO_LABEL_DATASET
-
   AI_PREANNOTATE_ASSET
   AI_PREANNOTATE_DATASET
   AI_TASK_SYNC
@@ -277,38 +898,30 @@ enum JobStatus {
 
 enum JobStage {
   WAITING
-
   VALIDATING_INPUT
   PREPARING_WORKSPACE
-
   CLONING_REPOSITORY
   CHECKING_OUT_REVISION
   SCANNING_FILES
   FILTERING_FILES
-
   PARSING_IMPORT_FILE
   VALIDATING_IMPORT_ROWS
   MAPPING_LABELS
-
   UPLOADING_OBJECTS
   WRITING_ASSETS
   WRITING_ANNOTATIONS
   WRITING_METADATA
-
   EXTRACTING_METADATA
   GENERATING_THUMBNAILS
   EXTRACTING_FRAMES
   GENERATING_WAVEFORM
-
   CREATING_AI_TASK
   WAITING_AI_RESULT
   FETCHING_AI_RESULT
   VALIDATING_AI_RESULT
   WRITING_AI_SUGGESTIONS
-
   EXPORTING_DATASET
   WRITING_EXPORT_FILE
-
   CLEANING_UP
   FINISHED
 }
@@ -335,716 +948,11 @@ enum JobEventLevel {
   ERROR
 }
 
-model Job {
-  id String @id @default(cuid())
-
-  datasetId    String
-  createdById  String
-  canceledById String?
-
-  type     JobType
-  modality Modality?
-
-  status JobStatus @default(QUEUED)
-  stage  JobStage  @default(WAITING)
-
-  priority      JobPriority @default(NORMAL)
-  priorityValue Int         @default(50)
-
-  trigger JobTrigger @default(USER)
-
-  provider             RepoProvider?
-  sourceConnectionId   String?
-  externalRepositoryId String?
-
-  /**
-   * Task-specific request payload.
-   * Do not store secrets here.
-   */
-  input Json @default("{}")
-
-  /**
-   * Runtime checkpoint.
-   * Worker can update this while running.
-   */
-  state Json @default("{}")
-
-  /**
-   * Realtime/final summary for frontend.
-   */
-  summary Json @default("{}")
-
-  progress       Int  @default(0)
-  totalItems     Int?
-  processedItems Int  @default(0)
-  successItems   Int  @default(0)
-  failedItems    Int  @default(0)
-  skippedItems   Int  @default(0)
-
-  error        String? @db.Text
-  errorCode    String?
-  errorDetails Json?
-
-  /**
-   * Worker locking.
-   */
-  lockedBy    String?
-  lockToken   String?
-  lockedAt    DateTime?
-  lockedUntil DateTime?
-  heartbeatAt DateTime?
-
-  startedAt  DateTime?
-  finishedAt DateTime?
-  runAfter   DateTime?
-
-  attempts    Int @default(0)
-  maxAttempts Int @default(3)
-
-  /**
-   * Soft cancel.
-   */
-  cancelRequestedAt DateTime?
-  canceledAt        DateTime?
-
-  /**
-   * Prevent duplicate jobs.
-   * For clone repo, generate from dataset/repo/ref/rootPath/modality/sourceMode.
-   */
-  idempotencyKey String?
-
-  /**
-   * Output result if job creates a file.
-   */
-  resultStorageKey String?
-  resultFilename   String?
-
-  dataset    Dataset @relation("DatasetJobs", fields: [datasetId], references: [id], onDelete: Cascade)
-  createdBy  User    @relation("JobCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  canceledBy User?   @relation("JobCanceledBy", fields: [canceledById], references: [id], onDelete: SetNull)
-
-  queueName  String?   @db.VarChar(100)
-  queueJobId String?   @db.VarChar(100)
-  enqueuedAt DateTime?
-  dequeuedAt DateTime?
-
-  sourceConnection   SourceConnection?   @relation(fields: [sourceConnectionId], references: [id], onDelete: SetNull)
-  externalRepository ExternalRepository? @relation("ExternalRepositoryJobs", fields: [externalRepositoryId], references: [id], onDelete: SetNull)
-
-  events  JobEvent[]
-  aiTasks AiTask[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([datasetId, idempotencyKey])
-  @@index([datasetId, status])
-  @@index([createdById])
-  @@index([canceledById])
-  @@index([status, runAfter])
-  @@index([status, priorityValue, createdAt])
-  @@index([status, heartbeatAt])
-  @@index([lockedUntil])
-  @@index([sourceConnectionId])
-  @@index([externalRepositoryId])
-  @@index([type, status])
-  @@index([queueName, queueJobId])
+enum PreparedImportStatus {
+  PREPARING
+  COMMITTED
+  EXPIRED
 }
-
-model JobEvent {
-  id      String        @id @default(cuid())
-  jobId   String
-  level   JobEventLevel @default(INFO)
-  stage   JobStage?
-  message String        @db.Text
-  data    Json          @default("{}")
-
-  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@index([jobId])
-  @@index([jobId, createdAt])
-  @@index([level])
-}
-
-/**
- * EXTERNAL REPOSITORY AND SOURCE CONNECTION
- */
-
-model ExternalRepository {
-  id         String         @id @default(cuid())
-  provider   RepoProvider
-  visibility RepoVisibility @default(PUBLIC)
-
-  /**
-   * Normalized base URL.
-   * Use empty string for provider default, e.g. github.com / huggingface.co.
-   */
-  baseUrl String @default("")
-
-  owner    String?
-  repo     String
-  fullName String
-
-  externalRepoId String?
-  repoType       String?
-
-  defaultBranch String?
-  description   String?
-  homepageUrl   String?
-
-  createdById String?
-  createdBy   User?   @relation("ExternalRepositoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-
-  datasets      Dataset[]
-  assets        Asset[]
-  assetVersions AssetVersion[]
-  jobs          Job[]          @relation("ExternalRepositoryJobs")
-
-  metadata Json @default("{}")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([provider, baseUrl, fullName])
-  @@index([provider])
-  @@index([createdById])
-}
-
-model SourceConnection {
-  id     String @id @default(cuid())
-  userId String
-
-  provider RepoProvider
-  authType RepoAuthType @default(TOKEN)
-  baseUrl  String       @default("")
-
-  name              String?
-  externalAccountId String?
-  accountUsername   String?
-  accountEmail      String?
-
-  tokenEncrypted        String?   @db.Text
-  refreshTokenEncrypted String?   @db.Text
-  tokenExpiresAt        DateTime?
-  scopes                Json      @default("[]")
-
-  status    SourceConnectionStatus @default(ACTIVE)
-  revokedAt DateTime?
-
-  metadata Json @default("{}")
-
-  user User @relation("SourceConnectionOwner", fields: [userId], references: [id], onDelete: Cascade)
-
-  datasets Dataset[]
-  jobs     Job[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, provider, externalAccountId])
-  @@index([userId])
-  @@index([provider])
-  @@index([provider, baseUrl])
-  @@index([status])
-  @@index([tokenExpiresAt])
-}
-
-/**
- * DATASET / MEMBERSHIP
- */
-
-model Dataset {
-  id          String  @id @default(cuid())
-  ownerId     String
-  name        String
-  description String?
-
-  type            DatasetType @default(MULTI_MODAL)
-  primaryModality Modality?
-
-  metadata Json @default("{}")
-
-  sourceMode DatasetSourceMode @default(UPLOAD)
-
-  externalRepositoryId String?
-  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id], onDelete: SetNull)
-
-  sourceConnectionId String?
-  sourceConnection   SourceConnection? @relation(fields: [sourceConnectionId], references: [id], onDelete: SetNull)
-
-  sourceRootPath  String?
-  sourceBranch    String?
-  lockedRevision  String?
-  currentRevision String?
-
-  includePatterns Json @default("[]")
-  excludePatterns Json @default("[]")
-
-  lastSyncedAt DateTime?
-  syncStatus   AssetSyncStatus @default(SYNCED)
-  syncSummary  Json            @default("{}")
-
-  owner   User            @relation("DatasetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members DatasetMember[]
-
-  assets        Asset[]
-  assetVersions AssetVersion[]
-  labels        Label[]
-  annotations   Annotation[]
-  jobs          Job[]          @relation("DatasetJobs")
-  aiTasks       AiTask[]
-
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  archivedAt DateTime?
-  deletedAt  DateTime?
-
-  @@index([ownerId])
-  @@index([ownerId, primaryModality])
-  @@index([type])
-  @@index([primaryModality])
-  @@index([sourceMode])
-  @@index([externalRepositoryId])
-  @@index([sourceConnectionId])
-  @@index([currentRevision])
-}
-
-model DatasetMember {
-  id        String            @id @default(cuid())
-  datasetId String
-  userId    String
-  role      DatasetMemberRole @default(LABELER)
-
-  dataset Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([datasetId, userId])
-  @@index([userId])
-  @@index([datasetId])
-  @@index([datasetId, role])
-}
-
-/**
- * ASSET
- */
-
-model Asset {
-  id           String  @id @default(cuid())
-  datasetId    String
-  uploadedById String?
-
-  modality         Modality
-  filename         String
-  originalFilename String?
-  mimeType         String
-  sizeBytes        BigInt?
-
-  width      Int?
-  height     Int?
-  durationMs Int?
-  textLength Int?
-
-  sourceMode DatasetSourceMode @default(UPLOAD)
-
-  storageProvider StorageProvider?
-  storageBucket   String?
-  storageKey      String?
-  checksum        String?
-
-  externalRepositoryId String?
-  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id], onDelete: SetNull)
-
-  sourceProvider    RepoProvider?
-  sourceBranch      String?
-  sourceRevision    String?
-  sourcePath        String?
-  sourceFileSha     String?
-  sourceBlobSha     String?
-  sourceLfsOid      String?
-  sourceEtag        String?
-  sourceUrl         String?
-  sourceFingerprint String
-
-  cacheStatus    CacheStatus      @default(NOT_CACHED)
-  cacheProvider  StorageProvider?
-  cacheBucket    String?
-  cacheKey       String?
-  cacheChecksum  String?
-  cachedAt       DateTime?
-  cacheExpiresAt DateTime?
-  cacheError     String?
-
-  currentVersionId String?
-
-  syncStatus   AssetSyncStatus @default(SYNCED)
-  lastSyncedAt DateTime?
-  syncSummary  Json            @default("{}")
-
-  status      AssetStatus @default(NEW)
-  batchIndex  Int         @default(0)
-  orderIndex  Int         @default(0)
-  description String?
-  metadata    Json        @default("{}")
-  revision    Int         @default(1)
-
-  dataset    Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  uploadedBy User?   @relation("AssetUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
-
-  versions    AssetVersion[]
-  annotations Annotation[]
-  aiTasks     AiTask[]
-
-  imageAsset   ImageAsset?
-  videoAsset   VideoAsset?
-  textDocument TextDocument?
-  audioAsset   AudioAsset?
-
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  archivedAt DateTime?
-  deletedAt  DateTime?
-
-  @@unique([storageProvider, storageBucket, storageKey])
-  @@unique([cacheProvider, cacheBucket, cacheKey])
-  @@unique([datasetId, sourceFingerprint])
-  @@index([sourceFingerprint])
-  @@index([datasetId, modality])
-  @@index([datasetId, batchIndex])
-  @@index([datasetId, batchIndex, orderIndex])
-  @@index([datasetId, filename])
-  @@index([datasetId, status])
-  @@index([datasetId, syncStatus])
-  @@index([datasetId, cacheStatus])
-  @@index([uploadedById])
-  @@index([externalRepositoryId])
-  @@index([sourceProvider])
-  @@index([sourceRevision])
-  @@index([sourcePath])
-  @@index([sourceFileSha])
-  @@index([sourceBlobSha])
-  @@index([sourceLfsOid])
-  @@index([currentVersionId])
-}
-
-/**
- * ASSET VERSION
- */
-
-model AssetVersion {
-  id        String @id @default(cuid())
-  assetId   String
-  datasetId String
-
-  versionNumber Int
-  isCurrent     Boolean @default(false)
-
-  modality Modality
-
-  sourceMode DatasetSourceMode
-
-  externalRepositoryId String?
-  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id], onDelete: SetNull)
-
-  sourceProvider    RepoProvider?
-  sourceBranch      String?
-  sourceRevision    String?
-  sourcePath        String?
-  sourceFileSha     String?
-  sourceBlobSha     String?
-  sourceLfsOid      String?
-  sourceEtag        String?
-  sourceUrl         String?
-  sourceFingerprint String
-
-  storageProvider StorageProvider?
-  storageBucket   String?
-  storageKey      String?
-  checksum        String?
-
-  cacheStatus    CacheStatus      @default(NOT_CACHED)
-  cacheProvider  StorageProvider?
-  cacheBucket    String?
-  cacheKey       String?
-  cacheChecksum  String?
-  cachedAt       DateTime?
-  cacheExpiresAt DateTime?
-  cacheError     String?
-
-  filename         String
-  originalFilename String?
-  mimeType         String
-  sizeBytes        BigInt?
-  width            Int?
-  height           Int?
-  durationMs       Int?
-  textLength       Int?
-
-  syncStatus AssetSyncStatus @default(SYNCED)
-  metadata   Json            @default("{}")
-
-  asset   Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  dataset Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-
-  annotations Annotation[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([assetId, versionNumber])
-  @@unique([storageProvider, storageBucket, storageKey])
-  @@unique([cacheProvider, cacheBucket, cacheKey])
-  @@unique([datasetId, sourceFingerprint])
-  @@index([assetId])
-  @@index([datasetId])
-  @@index([datasetId, isCurrent])
-  @@index([externalRepositoryId])
-  @@index([sourceRevision])
-  @@index([sourcePath])
-  @@index([sourceFileSha])
-  @@index([sourceBlobSha])
-  @@index([sourceLfsOid])
-  @@index([syncStatus])
-  @@index([cacheStatus])
-  @@index([sourceFingerprint])
-}
-
-/**
- * LABEL TAXONOMY
- */
-
-model Label {
-  id        String     @id @default(cuid())
-  datasetId String
-  modality  Modality?
-  scope     LabelScope @default(OBJECT)
-
-  name           String
-  normalizedName String
-  color          String
-  description    String?
-  hotkey         String?
-  properties     Json    @default("{}")
-
-  dataset Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-
-  annotations Annotation[]
-  videoTracks VideoObjectTrack[] @relation("TrackLabel")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([datasetId, normalizedName])
-  @@index([datasetId])
-  @@index([datasetId, scope])
-  @@index([datasetId, modality])
-}
-
-/**
- * UNIFIED ANNOTATION MODEL
- */
-
-model Annotation {
-  id             String  @id @default(cuid())
-  datasetId      String
-  assetId        String
-  assetVersionId String?
-  labelId        String?
-  createdById    String
-  updatedById    String?
-  reviewedById   String?
-
-  modality Modality
-  type     AnnotationType
-  source   AnnotationSource @default(MANUAL)
-
-  /**
-   * Canonical geometry payload.
-   * Validate this with Zod/application schemas.
-   */
-  geometry Json @default("{}")
-
-  /**
-   * Metadata, model provenance, confidence, notes, custom fields.
-   */
-  properties Json @default("{}")
-
-  status   AnnotationStatus @default(DRAFT)
-  revision Int              @default(1)
-
-  frameIndex     Int?
-  timestampMs    Int?
-  trackId        String?
-  isKeyframe     Boolean @default(false)
-  isInterpolated Boolean @default(false)
-
-  startMs Int?
-  endMs   Int?
-
-  startChar     Int?
-  endChar       Int?
-  startToken    Int?
-  endToken      Int?
-  tokenIndex    Int?
-  sentenceIndex Int?
-  textValue     String?
-
-  fromAnnotationId String?
-  toAnnotationId   String?
-
-  speakerId String?
-
-  dataset      Dataset       @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  asset        Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  assetVersion AssetVersion? @relation(fields: [assetVersionId], references: [id], onDelete: SetNull)
-  label        Label?        @relation(fields: [labelId], references: [id], onDelete: SetNull)
-
-  createdBy  User  @relation("AnnotationCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-  updatedBy  User? @relation("AnnotationUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
-  reviewedBy User? @relation("AnnotationReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
-
-  track        VideoObjectTrack? @relation(fields: [trackId], references: [id], onDelete: SetNull)
-  audioSpeaker AudioSpeaker?     @relation(fields: [speakerId], references: [id], onDelete: SetNull)
-
-  fromAnnotation Annotation? @relation("TextRelationFrom", fields: [fromAnnotationId], references: [id], onDelete: SetNull)
-  toAnnotation   Annotation? @relation("TextRelationTo", fields: [toAnnotationId], references: [id], onDelete: SetNull)
-
-  outgoingTextRelations Annotation[] @relation("TextRelationFrom")
-  incomingTextRelations Annotation[] @relation("TextRelationTo")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([datasetId, modality])
-  @@index([datasetId, status])
-  @@index([assetId, type])
-  @@index([assetId, status, createdAt])
-  @@index([assetVersionId])
-  @@index([labelId])
-  @@index([createdById])
-  @@index([assetId, frameIndex])
-  @@index([trackId, frameIndex])
-  @@index([assetId, timestampMs])
-  @@index([assetId, startMs, endMs])
-  @@index([assetId, startChar, endChar])
-  @@index([assetId, tokenIndex])
-  @@index([fromAnnotationId, toAnnotationId])
-  @@index([speakerId])
-}
-
-/**
- * IMAGE / VIDEO / TEXT / AUDIO DETAILS
- */
-
-model ImageAsset {
-  id           String  @id @default(cuid())
-  assetId      String  @unique
-  thumbnailKey String?
-  exif         Json    @default("{}")
-
-  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
-}
-
-model VideoAsset {
-  id      String @id @default(cuid())
-  assetId String @unique
-
-  fps             Float?
-  totalFrames     Int?
-  codec           String?
-  thumbnailKey    String?
-  frameStorageKey String?
-  metadata        Json    @default("{}")
-
-  asset  Asset              @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  tracks VideoObjectTrack[]
-
-  @@index([assetId])
-}
-
-model VideoObjectTrack {
-  id           String  @id @default(cuid())
-  videoAssetId String
-  labelId      String?
-  createdById  String?
-
-  name       String?
-  color      String?
-  properties Json             @default("{}")
-  status     AnnotationStatus @default(DRAFT)
-
-  videoAsset VideoAsset @relation(fields: [videoAssetId], references: [id], onDelete: Cascade)
-  label      Label?     @relation("TrackLabel", fields: [labelId], references: [id], onDelete: SetNull)
-  createdBy  User?      @relation("TrackCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-
-  annotations Annotation[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([videoAssetId])
-  @@index([labelId])
-  @@index([createdById])
-}
-
-model TextDocument {
-  id      String @id @default(cuid())
-  assetId String @unique
-
-  content      String?
-  language     String?
-  tokenization Json    @default("{}")
-  metadata     Json    @default("{}")
-
-  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
-
-  @@index([assetId])
-}
-
-model AudioAsset {
-  id      String @id @default(cuid())
-  assetId String @unique
-
-  sampleRate  Int?
-  channels    Int?
-  codec       String?
-  bitRate     Int?
-  waveformKey String?
-  metadata    Json    @default("{}")
-
-  asset    Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
-  speakers AudioSpeaker[]
-
-  @@index([assetId])
-}
-
-model AudioSpeaker {
-  id           String @id @default(cuid())
-  audioAssetId String
-
-  externalId String?
-  name       String?
-  role       String?
-  color      String?
-  properties Json    @default("{}")
-
-  audioAsset  AudioAsset   @relation(fields: [audioAssetId], references: [id], onDelete: Cascade)
-  annotations Annotation[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([audioAssetId, externalId])
-  @@index([audioAssetId])
-}
-
-/**
- * AI TASK
- */
 
 enum AiTaskStatus {
   QUEUED
@@ -1063,48 +971,4 @@ enum AiTaskType {
   CLASSIFY_TEXT
   CLASSIFY_AUDIO
   CUSTOM
-}
-
-model AiTask {
-  id             String  @id @default(cuid())
-  externalTaskId String? @unique
-
-  datasetId   String
-  assetId     String?
-  jobId       String?
-  createdById String
-
-  provider String
-  type     AiTaskType
-  status   AiTaskStatus @default(QUEUED)
-  modality Modality?
-
-  modelName    String?
-  modelVersion String?
-
-  input   Json  @default("{}")
-  output  Json?
-  summary Json  @default("{}")
-
-  error        String? @db.Text
-  errorCode    String?
-  errorDetails Json?
-
-  resultStorageKey String?
-
-  dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  asset     Asset?  @relation(fields: [assetId], references: [id], onDelete: SetNull)
-  job       Job?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
-  createdBy User    @relation("AiTaskCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([datasetId])
-  @@index([assetId])
-  @@index([jobId])
-  @@index([createdById])
-  @@index([status])
-  @@index([provider])
-  @@index([type])
 }

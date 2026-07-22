@@ -12,6 +12,7 @@ const providerConfigSchema = z.object({
   REDIS_HOST: z.string().min(1),
   REDIS_PORT: z.coerce.number().int().min(1).max(65535),
   REDIS_PASSWORD: z.string().min(1),
+  REDIS_DB: z.coerce.number().int().min(0).max(15).default(0),
   BULLMQ_PREFIX: z.string().min(1),
 });
 

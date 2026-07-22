@@ -1,62 +1,53 @@
-import { AssetStatus } from "@internal/db";
+import type { AssetStatus } from "@internal/db";
 
 export const imageStatusOptions = [
-  AssetStatus.NEW,
-  AssetStatus.PROCESSING,
-  AssetStatus.READY,
-  AssetStatus.IN_PROGRESS,
-  AssetStatus.COMPLETED,
-  AssetStatus.NEEDS_REVIEW,
-  AssetStatus.REVIEWED,
-  AssetStatus.REJECTED,
-  AssetStatus.SKIPPED,
-  AssetStatus.ARCHIVED,
-  AssetStatus.FAILED,
-] as const;
+  "NEW", "PROCESSING", "READY", "IN_PROGRESS", "COMPLETED", "NEEDS_REVIEW",
+  "REVIEWED", "REJECTED", "SKIPPED", "ARCHIVED", "FAILED",
+] as const satisfies readonly AssetStatus[];
 
 export const imageStatusPresentation = {
-  [AssetStatus.NEW]: {
+  NEW: {
     label: "New",
     variant: "neutral" as const,
   },
-  [AssetStatus.PROCESSING]: {
+  PROCESSING: {
     label: "Processing",
     variant: "info" as const,
   },
-  [AssetStatus.READY]: {
+  READY: {
     label: "Ready",
     variant: "info" as const,
   },
-  [AssetStatus.IN_PROGRESS]: {
+  IN_PROGRESS: {
     label: "In progress",
     variant: "warning" as const,
   },
-  [AssetStatus.COMPLETED]: {
+  COMPLETED: {
     label: "Completed",
     variant: "success" as const,
   },
-  [AssetStatus.NEEDS_REVIEW]: {
+  NEEDS_REVIEW: {
     label: "Needs review",
     variant: "warning" as const,
   },
-  [AssetStatus.REVIEWED]: {
+  REVIEWED: {
     label: "Reviewed",
     variant: "success" as const,
   },
-  [AssetStatus.REJECTED]: {
+  REJECTED: {
     label: "Rejected",
     variant: "danger" as const,
   },
-  [AssetStatus.SKIPPED]: {
+  SKIPPED: {
     label: "Skipped",
     variant: "neutral" as const,
   },
-  [AssetStatus.ARCHIVED]: {
+  ARCHIVED: {
     label: "Archived",
     variant: "neutral" as const,
   },
-  [AssetStatus.FAILED]: {
+  FAILED: {
     label: "Failed",
     variant: "danger" as const,
   },
-};
+} satisfies Record<AssetStatus, { label: string; variant: "neutral" | "info" | "warning" | "success" | "danger" }>;

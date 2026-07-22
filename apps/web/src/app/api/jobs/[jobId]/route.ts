@@ -11,11 +11,15 @@ export async function GET(_: Request, context: { params: Promise<{ jobId: string
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
   const { jobId } = await context.params;
   const access = await readAuthorizedJob(actor, jobId);
-  if (!access.ok) return apiError(access.status, access.status === 403 ? "FORBIDDEN" : "GITEA_NOT_FOUND", "The job was not found.");
+  if (!access.ok) return apiError(
+    access.status,
+    access.status === 403 ? "FORBIDDEN" : "JOB_NOT_FOUND",
+    access.status === 403 ? "You do not have permission to read this job." : "The job was not found.",
+  );
   const job = await db.job.findUnique({ where: { id: access.job.id }, select: {
     id: true, datasetId: true, type: true, status: true, stage: true, progress: true, totalItems: true,
-    processedItems: true, successItems: true, failedItems: true, skippedItems: true, createdAt: true, updatedAt: true,
+    processedItems: true, successItems: true, failedItems: true, skippedItems: true, summary: true, createdAt: true, updatedAt: true,
   } });
-  if (!job) return apiError(404, "GITEA_NOT_FOUND", "The job was not found.");
+  if (!job) return apiError(404, "JOB_NOT_FOUND", "The job was not found.");
   return apiSuccess(toSafeJobStatus(job));
 }

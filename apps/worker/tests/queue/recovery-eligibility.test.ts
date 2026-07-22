@@ -24,7 +24,7 @@ test("recovery considers only active, queued, uncancelled, supported candidates"
     const [eligible, cancelled, unsupported, inactive] = await Promise.all([
       db.job.create({ data: { datasetId: active.id, createdById: ownerId, type: "EXPORT_DATASET", status: "QUEUED" } }),
       db.job.create({ data: { datasetId: active.id, createdById: ownerId, type: "EXPORT_DATASET", status: "QUEUED", cancelRequestedAt: new Date() } }),
-      db.job.create({ data: { datasetId: active.id, createdById: ownerId, type: "IMPORT_DATASET", status: "QUEUED" } }),
+      db.job.create({ data: { datasetId: active.id, createdById: ownerId, type: "CLONE_REPOSITORY", status: "QUEUED" } }),
       db.job.create({ data: { datasetId: archived.id, createdById: ownerId, type: "EXPORT_DATASET", status: "QUEUED" } }),
     ]);
     const called: string[] = [];

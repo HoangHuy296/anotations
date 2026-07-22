@@ -53,7 +53,10 @@ export async function enqueueExistingJob(
   try {
     await client.queue.add("durable-job", jobQueuePayloadSchema.parse({ jobId: job.id }), { jobId: deliveryId });
     const stamp = await db.job.updateMany({
-      where: { id: job.id, status: JobStatus.QUEUED, cancelRequestedAt: null, enqueuedAt: null, queueName: null, queueJobId: null },
+      // A private worker may claim or even finish this Job immediately after
+      // queue.add(). Transport stamping records that delivery fact and must not
+      // lose the race solely because the authoritative lifecycle advanced.
+      where: { id: job.id, enqueuedAt: null, queueName: null, queueJobId: null },
       data: { queueName, queueJobId: deliveryId, enqueuedAt: new Date() },
     });
     if (!stamp.count) {

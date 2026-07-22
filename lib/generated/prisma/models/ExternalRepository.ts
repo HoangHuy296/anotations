@@ -266,10 +266,10 @@ export type ExternalRepositoryWhereInput = {
   metadata?: Prisma.JsonFilter<"ExternalRepository">
   createdAt?: Prisma.DateTimeFilter<"ExternalRepository"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ExternalRepository"> | Date | string
-  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  datasets?: Prisma.DatasetListRelationFilter
   assets?: Prisma.AssetListRelationFilter
   assetVersions?: Prisma.AssetVersionListRelationFilter
+  datasets?: Prisma.DatasetListRelationFilter
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   jobs?: Prisma.JobListRelationFilter
 }
 
@@ -290,10 +290,10 @@ export type ExternalRepositoryOrderByWithRelationInput = {
   metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  createdBy?: Prisma.UserOrderByWithRelationInput
-  datasets?: Prisma.DatasetOrderByRelationAggregateInput
   assets?: Prisma.AssetOrderByRelationAggregateInput
   assetVersions?: Prisma.AssetVersionOrderByRelationAggregateInput
+  datasets?: Prisma.DatasetOrderByRelationAggregateInput
+  createdBy?: Prisma.UserOrderByWithRelationInput
   jobs?: Prisma.JobOrderByRelationAggregateInput
 }
 
@@ -318,10 +318,10 @@ export type ExternalRepositoryWhereUniqueInput = Prisma.AtLeast<{
   metadata?: Prisma.JsonFilter<"ExternalRepository">
   createdAt?: Prisma.DateTimeFilter<"ExternalRepository"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ExternalRepository"> | Date | string
-  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  datasets?: Prisma.DatasetListRelationFilter
   assets?: Prisma.AssetListRelationFilter
   assetVersions?: Prisma.AssetVersionListRelationFilter
+  datasets?: Prisma.DatasetListRelationFilter
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   jobs?: Prisma.JobListRelationFilter
 }, "id" | "provider_baseUrl_fullName">
 
@@ -385,10 +385,10 @@ export type ExternalRepositoryCreateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
-  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
   assets?: Prisma.AssetCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
   jobs?: Prisma.JobCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -409,9 +409,9 @@ export type ExternalRepositoryUncheckedCreateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -431,10 +431,10 @@ export type ExternalRepositoryUpdateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
-  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
   assets?: Prisma.AssetUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
   jobs?: Prisma.JobUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -455,9 +455,9 @@ export type ExternalRepositoryUncheckedUpdateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -723,9 +723,9 @@ export type ExternalRepositoryCreateWithoutCreatedByInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
   assets?: Prisma.AssetCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
   jobs?: Prisma.JobCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -745,9 +745,9 @@ export type ExternalRepositoryUncheckedCreateWithoutCreatedByInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -815,10 +815,10 @@ export type ExternalRepositoryCreateWithoutJobsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
-  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
   assets?: Prisma.AssetCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
 }
 
 export type ExternalRepositoryUncheckedCreateWithoutJobsInput = {
@@ -838,9 +838,9 @@ export type ExternalRepositoryUncheckedCreateWithoutJobsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
 }
 
 export type ExternalRepositoryCreateOrConnectWithoutJobsInput = {
@@ -875,10 +875,10 @@ export type ExternalRepositoryUpdateWithoutJobsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
-  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
   assets?: Prisma.AssetUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
 }
 
 export type ExternalRepositoryUncheckedUpdateWithoutJobsInput = {
@@ -898,9 +898,9 @@ export type ExternalRepositoryUncheckedUpdateWithoutJobsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
 }
 
 export type ExternalRepositoryCreateWithoutDatasetsInput = {
@@ -919,9 +919,9 @@ export type ExternalRepositoryCreateWithoutDatasetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
   assets?: Prisma.AssetCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutExternalRepositoryInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
   jobs?: Prisma.JobCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -979,9 +979,9 @@ export type ExternalRepositoryUpdateWithoutDatasetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
   assets?: Prisma.AssetUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUpdateManyWithoutExternalRepositoryNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
   jobs?: Prisma.JobUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -1023,9 +1023,9 @@ export type ExternalRepositoryCreateWithoutAssetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
-  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
   jobs?: Prisma.JobCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -1046,8 +1046,8 @@ export type ExternalRepositoryUncheckedCreateWithoutAssetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -1083,9 +1083,9 @@ export type ExternalRepositoryUpdateWithoutAssetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
-  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
   jobs?: Prisma.JobUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -1106,8 +1106,8 @@ export type ExternalRepositoryUncheckedUpdateWithoutAssetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -1127,9 +1127,9 @@ export type ExternalRepositoryCreateWithoutAssetVersionsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
-  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
   assets?: Prisma.AssetCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetCreateNestedManyWithoutExternalRepositoryInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutExternalRepositoriesInput
   jobs?: Prisma.JobCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -1150,8 +1150,8 @@ export type ExternalRepositoryUncheckedCreateWithoutAssetVersionsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   assets?: Prisma.AssetUncheckedCreateNestedManyWithoutExternalRepositoryInput
+  datasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutExternalRepositoryInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutExternalRepositoryInput
 }
 
@@ -1187,9 +1187,9 @@ export type ExternalRepositoryUpdateWithoutAssetVersionsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
-  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
   assets?: Prisma.AssetUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutExternalRepositoriesNestedInput
   jobs?: Prisma.JobUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -1210,8 +1210,8 @@ export type ExternalRepositoryUncheckedUpdateWithoutAssetVersionsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -1249,9 +1249,9 @@ export type ExternalRepositoryUpdateWithoutCreatedByInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
   assets?: Prisma.AssetUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUpdateManyWithoutExternalRepositoryNestedInput
   jobs?: Prisma.JobUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -1271,9 +1271,9 @@ export type ExternalRepositoryUncheckedUpdateWithoutCreatedByInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutExternalRepositoryNestedInput
+  datasets?: Prisma.DatasetUncheckedUpdateManyWithoutExternalRepositoryNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutExternalRepositoryNestedInput
 }
 
@@ -1301,16 +1301,16 @@ export type ExternalRepositoryUncheckedUpdateManyWithoutCreatedByInput = {
  */
 
 export type ExternalRepositoryCountOutputType = {
-  datasets: number
   assets: number
   assetVersions: number
+  datasets: number
   jobs: number
 }
 
 export type ExternalRepositoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  datasets?: boolean | ExternalRepositoryCountOutputTypeCountDatasetsArgs
   assets?: boolean | ExternalRepositoryCountOutputTypeCountAssetsArgs
   assetVersions?: boolean | ExternalRepositoryCountOutputTypeCountAssetVersionsArgs
+  datasets?: boolean | ExternalRepositoryCountOutputTypeCountDatasetsArgs
   jobs?: boolean | ExternalRepositoryCountOutputTypeCountJobsArgs
 }
 
@@ -1327,13 +1327,6 @@ export type ExternalRepositoryCountOutputTypeDefaultArgs<ExtArgs extends runtime
 /**
  * ExternalRepositoryCountOutputType without action
  */
-export type ExternalRepositoryCountOutputTypeCountDatasetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.DatasetWhereInput
-}
-
-/**
- * ExternalRepositoryCountOutputType without action
- */
 export type ExternalRepositoryCountOutputTypeCountAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AssetWhereInput
 }
@@ -1343,6 +1336,13 @@ export type ExternalRepositoryCountOutputTypeCountAssetsArgs<ExtArgs extends run
  */
 export type ExternalRepositoryCountOutputTypeCountAssetVersionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AssetVersionWhereInput
+}
+
+/**
+ * ExternalRepositoryCountOutputType without action
+ */
+export type ExternalRepositoryCountOutputTypeCountDatasetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DatasetWhereInput
 }
 
 /**
@@ -1370,10 +1370,10 @@ export type ExternalRepositorySelect<ExtArgs extends runtime.Types.Extensions.In
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  createdBy?: boolean | Prisma.ExternalRepository$createdByArgs<ExtArgs>
-  datasets?: boolean | Prisma.ExternalRepository$datasetsArgs<ExtArgs>
   assets?: boolean | Prisma.ExternalRepository$assetsArgs<ExtArgs>
   assetVersions?: boolean | Prisma.ExternalRepository$assetVersionsArgs<ExtArgs>
+  datasets?: boolean | Prisma.ExternalRepository$datasetsArgs<ExtArgs>
+  createdBy?: boolean | Prisma.ExternalRepository$createdByArgs<ExtArgs>
   jobs?: boolean | Prisma.ExternalRepository$jobsArgs<ExtArgs>
   _count?: boolean | Prisma.ExternalRepositoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["externalRepository"]>
@@ -1439,10 +1439,10 @@ export type ExternalRepositorySelectScalar = {
 
 export type ExternalRepositoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "provider" | "visibility" | "baseUrl" | "owner" | "repo" | "fullName" | "externalRepoId" | "repoType" | "defaultBranch" | "description" | "homepageUrl" | "createdById" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["externalRepository"]>
 export type ExternalRepositoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  createdBy?: boolean | Prisma.ExternalRepository$createdByArgs<ExtArgs>
-  datasets?: boolean | Prisma.ExternalRepository$datasetsArgs<ExtArgs>
   assets?: boolean | Prisma.ExternalRepository$assetsArgs<ExtArgs>
   assetVersions?: boolean | Prisma.ExternalRepository$assetVersionsArgs<ExtArgs>
+  datasets?: boolean | Prisma.ExternalRepository$datasetsArgs<ExtArgs>
+  createdBy?: boolean | Prisma.ExternalRepository$createdByArgs<ExtArgs>
   jobs?: boolean | Prisma.ExternalRepository$jobsArgs<ExtArgs>
   _count?: boolean | Prisma.ExternalRepositoryCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1456,10 +1456,10 @@ export type ExternalRepositoryIncludeUpdateManyAndReturn<ExtArgs extends runtime
 export type $ExternalRepositoryPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ExternalRepository"
   objects: {
-    createdBy: Prisma.$UserPayload<ExtArgs> | null
-    datasets: Prisma.$DatasetPayload<ExtArgs>[]
     assets: Prisma.$AssetPayload<ExtArgs>[]
     assetVersions: Prisma.$AssetVersionPayload<ExtArgs>[]
+    datasets: Prisma.$DatasetPayload<ExtArgs>[]
+    createdBy: Prisma.$UserPayload<ExtArgs> | null
     jobs: Prisma.$JobPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1468,8 +1468,8 @@ export type $ExternalRepositoryPayload<ExtArgs extends runtime.Types.Extensions.
     visibility: $Enums.RepoVisibility
     /**
      * *
-     *    * Normalized base URL.
-     *    * Use empty string for provider default, e.g. github.com / huggingface.co.
+     * * Normalized base URL.
+     * * Use empty string for provider default, e.g. github.com / huggingface.co.
      */
     baseUrl: string
     owner: string | null
@@ -1878,10 +1878,10 @@ readonly fields: ExternalRepositoryFieldRefs;
  */
 export interface Prisma__ExternalRepositoryClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  createdBy<T extends Prisma.ExternalRepository$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ExternalRepository$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  datasets<T extends Prisma.ExternalRepository$datasetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ExternalRepository$datasetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assets<T extends Prisma.ExternalRepository$assetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ExternalRepository$assetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assetVersions<T extends Prisma.ExternalRepository$assetVersionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ExternalRepository$assetVersionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  datasets<T extends Prisma.ExternalRepository$datasetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ExternalRepository$datasetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdBy<T extends Prisma.ExternalRepository$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ExternalRepository$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   jobs<T extends Prisma.ExternalRepository$jobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ExternalRepository$jobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2324,49 +2324,6 @@ export type ExternalRepositoryDeleteManyArgs<ExtArgs extends runtime.Types.Exten
 }
 
 /**
- * ExternalRepository.createdBy
- */
-export type ExternalRepository$createdByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
-}
-
-/**
- * ExternalRepository.datasets
- */
-export type ExternalRepository$datasetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Dataset
-   */
-  select?: Prisma.DatasetSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Dataset
-   */
-  omit?: Prisma.DatasetOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.DatasetInclude<ExtArgs> | null
-  where?: Prisma.DatasetWhereInput
-  orderBy?: Prisma.DatasetOrderByWithRelationInput | Prisma.DatasetOrderByWithRelationInput[]
-  cursor?: Prisma.DatasetWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.DatasetScalarFieldEnum | Prisma.DatasetScalarFieldEnum[]
-}
-
-/**
  * ExternalRepository.assets
  */
 export type ExternalRepository$assetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2412,6 +2369,49 @@ export type ExternalRepository$assetVersionsArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.AssetVersionScalarFieldEnum | Prisma.AssetVersionScalarFieldEnum[]
+}
+
+/**
+ * ExternalRepository.datasets
+ */
+export type ExternalRepository$datasetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Dataset
+   */
+  select?: Prisma.DatasetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Dataset
+   */
+  omit?: Prisma.DatasetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatasetInclude<ExtArgs> | null
+  where?: Prisma.DatasetWhereInput
+  orderBy?: Prisma.DatasetOrderByWithRelationInput | Prisma.DatasetOrderByWithRelationInput[]
+  cursor?: Prisma.DatasetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DatasetScalarFieldEnum | Prisma.DatasetScalarFieldEnum[]
+}
+
+/**
+ * ExternalRepository.createdBy
+ */
+export type ExternalRepository$createdByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

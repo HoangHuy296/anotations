@@ -4,9 +4,9 @@ import test from "node:test";
 import { db } from "@/lib/db";
 import { enqueueExistingJob } from "@/lib/queue/enqueue-job";
 import { runPendingJobRecovery } from "../../../worker/src/queue/recovery-scanner.js";
-import { createJobQueueFixture, createQueueInspector, hasQueueIntegration } from "./helpers";
+import { createJobQueueFixture, createQueueInspector, queueIntegrationSkipReason } from "./helpers";
 
-test("a failed enqueue leaves one pending Job and an explicit recovery delivers that same Job once", { skip: !hasQueueIntegration }, async () => {
+test("a failed enqueue leaves one pending Job and an explicit recovery delivers that same Job once", { skip: queueIntegrationSkipReason }, async () => {
   const fixture = await createJobQueueFixture();
   const inspector = createQueueInspector();
   try {

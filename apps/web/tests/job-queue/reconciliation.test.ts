@@ -4,9 +4,9 @@ import test from "node:test";
 import { db } from "@/lib/db";
 import { enqueueExistingJob } from "@/lib/queue/enqueue-job";
 import { runPendingJobRecovery } from "../../../worker/src/queue/recovery-scanner.js";
-import { createJobQueueFixture, createQueueInspector, hasQueueIntegration } from "./helpers";
+import { createJobQueueFixture, createQueueInspector, queueIntegrationSkipReason } from "./helpers";
 
-test("recovery does not overwrite conflicting transport metadata or create a replacement Job", { skip: !hasQueueIntegration }, async () => {
+test("recovery does not overwrite conflicting transport metadata or create a replacement Job", { skip: queueIntegrationSkipReason }, async () => {
   const fixture = await createJobQueueFixture();
   const inspector = createQueueInspector();
   try {
@@ -26,7 +26,7 @@ test("recovery does not overwrite conflicting transport metadata or create a rep
   }
 });
 
-test("an existing deterministic BullMQ delivery is reconciled onto the same unstamped Job", { skip: !hasQueueIntegration }, async () => {
+test("an existing deterministic BullMQ delivery is reconciled onto the same unstamped Job", { skip: queueIntegrationSkipReason }, async () => {
   const fixture = await createJobQueueFixture();
   const inspector = createQueueInspector();
   try {

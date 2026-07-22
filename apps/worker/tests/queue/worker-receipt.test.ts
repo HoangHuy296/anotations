@@ -3,9 +3,7 @@ import test from "node:test";
 
 import { getWorkerConfig } from "../../src/config.js";
 import { createFoundationWorker } from "../../src/queue/bullmq-worker.js";
-import { createWorkerJobFixture, createWorkerQueueInspector } from "./helpers.js";
-
-const hasIntegrationDatabase = Boolean(process.env.DATABASE_URL && process.env.REDIS_HOST);
+import { createWorkerJobFixture, createWorkerQueueInspector, workerQueueIntegrationSkipReason } from "./helpers.js";
 
 async function waitForClaim(read: () => Promise<string | null>) {
   for (let attempt = 0; attempt < 40; attempt += 1) {
@@ -16,14 +14,16 @@ async function waitForClaim(read: () => Promise<string | null>) {
   throw new Error("Worker did not record claim.");
 }
 
-test("private worker consumes a strict Job reference, claims it, and does not invoke business work", { skip: !hasIntegrationDatabase }, async () => {
+test("private worker consumes a strict Job reference and keeps commit-signal import work pending", { skip: workerQueueIntegrationSkipReason }, async () => {
   const fixture = await createWorkerJobFixture();
   const inspector = createWorkerQueueInspector();
   const runtime = createFoundationWorker({ config: getWorkerConfig(), db: fixture.db });
   let jobId = "";
   try {
     await runtime.worker.waitUntilReady();
-    const job = await fixture.createJob({ enqueuedAt: new Date() });
+    // IMPORT_DATASET is the approved workflow that remains RUNNING after
+    // receipt while it waits for its authenticated commit signal.
+    const job = await fixture.createJob({ type: "IMPORT_DATASET", enqueuedAt: new Date() });
     jobId = job.id;
     await inspector.add(job.id);
     await waitForClaim(async () => (await fixture.db.job.findUnique({ where: { id: job.id }, select: { lockToken: true } }))?.lockToken ?? null);

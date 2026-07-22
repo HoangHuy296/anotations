@@ -8,7 +8,7 @@ import { DatasetMemberRole, JobStatus, JobType, UserRole } from "@internal/db";
 
 import { hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { hasQueueIntegration } from "./helpers";
+import { hasQueueIntegration, queueIntegrationSkipReason } from "./helpers";
 
 const port = 3_107;
 const baseUrl = `http://127.0.0.1:${port}`;
@@ -82,7 +82,7 @@ after(async () => {
   if (userIds.length) await db.user.deleteMany({ where: { id: { in: userIds } } });
 });
 
-test("Job status is PostgreSQL-backed, Dataset-authorized, and fully redacted", { skip: !hasQueueIntegration }, async () => {
+test("Job status is PostgreSQL-backed, Dataset-authorized, and fully redacted", { skip: queueIntegrationSkipReason }, async () => {
   const anonymous = await fetch(`${baseUrl}/api/jobs/${jobId}`);
   assert.equal(anonymous.status, 401);
   const owner = await fetch(`${baseUrl}/api/jobs/${jobId}`, { headers: { Cookie: ownerCookie } });
@@ -93,8 +93,14 @@ test("Job status is PostgreSQL-backed, Dataset-authorized, and fully redacted", 
   assert.equal(body.data.successCount, 2);
   assert.equal(body.data.failedCount, 1);
   assert.equal(body.data.summary, null);
-  for (const field of ["input", "state", "result", "error", "queueName", "queueJobId", "enqueuedAt", "raw", "events"]) assert.equal(field in body.data, false);
+  for (const field of [
+    "input", "state", "result", "resultStorageKey", "resultFilename", "error", "errorDetails",
+    "queueName", "queueJobId", "enqueuedAt", "dequeuedAt", "lockedBy", "lockToken", "lockedUntil",
+    "sourceConnectionId", "externalRepositoryId", "raw", "events",
+  ]) assert.equal(field in body.data, false);
   assert.equal(JSON.stringify(body).includes("must-not-leak"), false);
   assert.equal((await fetch(`${baseUrl}/api/jobs/${jobId}`, { headers: { Cookie: memberCookie } })).status, 200);
-  assert.equal((await fetch(`${baseUrl}/api/jobs/${jobId}`, { headers: { Cookie: outsiderCookie } })).status, 404);
+  const denied = await fetch(`${baseUrl}/api/jobs/${jobId}`, { headers: { Cookie: outsiderCookie } });
+  assert.equal(denied.status, 404);
+  assert.equal(JSON.stringify(await denied.json()).includes("must-not-leak"), false);
 });

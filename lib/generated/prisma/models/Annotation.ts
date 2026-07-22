@@ -480,19 +480,19 @@ export type AnnotationWhereInput = {
   speakerId?: Prisma.StringNullableFilter<"Annotation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
-  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
   assetVersion?: Prisma.XOR<Prisma.AssetVersionNullableScalarRelationFilter, Prisma.AssetVersionWhereInput> | null
-  label?: Prisma.XOR<Prisma.LabelNullableScalarRelationFilter, Prisma.LabelWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  reviewedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  track?: Prisma.XOR<Prisma.VideoObjectTrackNullableScalarRelationFilter, Prisma.VideoObjectTrackWhereInput> | null
-  audioSpeaker?: Prisma.XOR<Prisma.AudioSpeakerNullableScalarRelationFilter, Prisma.AudioSpeakerWhereInput> | null
+  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   fromAnnotation?: Prisma.XOR<Prisma.AnnotationNullableScalarRelationFilter, Prisma.AnnotationWhereInput> | null
-  toAnnotation?: Prisma.XOR<Prisma.AnnotationNullableScalarRelationFilter, Prisma.AnnotationWhereInput> | null
   outgoingTextRelations?: Prisma.AnnotationListRelationFilter
+  label?: Prisma.XOR<Prisma.LabelNullableScalarRelationFilter, Prisma.LabelWhereInput> | null
+  reviewedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  audioSpeaker?: Prisma.XOR<Prisma.AudioSpeakerNullableScalarRelationFilter, Prisma.AudioSpeakerWhereInput> | null
+  toAnnotation?: Prisma.XOR<Prisma.AnnotationNullableScalarRelationFilter, Prisma.AnnotationWhereInput> | null
   incomingTextRelations?: Prisma.AnnotationListRelationFilter
+  track?: Prisma.XOR<Prisma.VideoObjectTrackNullableScalarRelationFilter, Prisma.VideoObjectTrackWhereInput> | null
+  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type AnnotationOrderByWithRelationInput = {
@@ -530,19 +530,19 @@ export type AnnotationOrderByWithRelationInput = {
   speakerId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  dataset?: Prisma.DatasetOrderByWithRelationInput
   asset?: Prisma.AssetOrderByWithRelationInput
   assetVersion?: Prisma.AssetVersionOrderByWithRelationInput
-  label?: Prisma.LabelOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
-  updatedBy?: Prisma.UserOrderByWithRelationInput
-  reviewedBy?: Prisma.UserOrderByWithRelationInput
-  track?: Prisma.VideoObjectTrackOrderByWithRelationInput
-  audioSpeaker?: Prisma.AudioSpeakerOrderByWithRelationInput
+  dataset?: Prisma.DatasetOrderByWithRelationInput
   fromAnnotation?: Prisma.AnnotationOrderByWithRelationInput
-  toAnnotation?: Prisma.AnnotationOrderByWithRelationInput
   outgoingTextRelations?: Prisma.AnnotationOrderByRelationAggregateInput
+  label?: Prisma.LabelOrderByWithRelationInput
+  reviewedBy?: Prisma.UserOrderByWithRelationInput
+  audioSpeaker?: Prisma.AudioSpeakerOrderByWithRelationInput
+  toAnnotation?: Prisma.AnnotationOrderByWithRelationInput
   incomingTextRelations?: Prisma.AnnotationOrderByRelationAggregateInput
+  track?: Prisma.VideoObjectTrackOrderByWithRelationInput
+  updatedBy?: Prisma.UserOrderByWithRelationInput
 }
 
 export type AnnotationWhereUniqueInput = Prisma.AtLeast<{
@@ -583,19 +583,19 @@ export type AnnotationWhereUniqueInput = Prisma.AtLeast<{
   speakerId?: Prisma.StringNullableFilter<"Annotation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
-  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
   assetVersion?: Prisma.XOR<Prisma.AssetVersionNullableScalarRelationFilter, Prisma.AssetVersionWhereInput> | null
-  label?: Prisma.XOR<Prisma.LabelNullableScalarRelationFilter, Prisma.LabelWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  reviewedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  track?: Prisma.XOR<Prisma.VideoObjectTrackNullableScalarRelationFilter, Prisma.VideoObjectTrackWhereInput> | null
-  audioSpeaker?: Prisma.XOR<Prisma.AudioSpeakerNullableScalarRelationFilter, Prisma.AudioSpeakerWhereInput> | null
+  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   fromAnnotation?: Prisma.XOR<Prisma.AnnotationNullableScalarRelationFilter, Prisma.AnnotationWhereInput> | null
-  toAnnotation?: Prisma.XOR<Prisma.AnnotationNullableScalarRelationFilter, Prisma.AnnotationWhereInput> | null
   outgoingTextRelations?: Prisma.AnnotationListRelationFilter
+  label?: Prisma.XOR<Prisma.LabelNullableScalarRelationFilter, Prisma.LabelWhereInput> | null
+  reviewedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  audioSpeaker?: Prisma.XOR<Prisma.AudioSpeakerNullableScalarRelationFilter, Prisma.AudioSpeakerWhereInput> | null
+  toAnnotation?: Prisma.XOR<Prisma.AnnotationNullableScalarRelationFilter, Prisma.AnnotationWhereInput> | null
   incomingTextRelations?: Prisma.AnnotationListRelationFilter
+  track?: Prisma.XOR<Prisma.VideoObjectTrackNullableScalarRelationFilter, Prisma.VideoObjectTrackWhereInput> | null
+  updatedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
 export type AnnotationOrderByWithAggregationInput = {
@@ -704,19 +704,19 @@ export type AnnotationCreateInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateInput = {
@@ -782,19 +782,19 @@ export type AnnotationUpdateInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateInput = {
@@ -1093,17 +1093,17 @@ export type AnnotationCreateNestedManyWithoutCreatedByInput = {
   connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
 }
 
-export type AnnotationCreateNestedManyWithoutUpdatedByInput = {
-  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput> | Prisma.AnnotationCreateWithoutUpdatedByInput[] | Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput[]
-  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput | Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput[]
-  createMany?: Prisma.AnnotationCreateManyUpdatedByInputEnvelope
-  connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-}
-
 export type AnnotationCreateNestedManyWithoutReviewedByInput = {
   create?: Prisma.XOR<Prisma.AnnotationCreateWithoutReviewedByInput, Prisma.AnnotationUncheckedCreateWithoutReviewedByInput> | Prisma.AnnotationCreateWithoutReviewedByInput[] | Prisma.AnnotationUncheckedCreateWithoutReviewedByInput[]
   connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutReviewedByInput | Prisma.AnnotationCreateOrConnectWithoutReviewedByInput[]
   createMany?: Prisma.AnnotationCreateManyReviewedByInputEnvelope
+  connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+}
+
+export type AnnotationCreateNestedManyWithoutUpdatedByInput = {
+  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput> | Prisma.AnnotationCreateWithoutUpdatedByInput[] | Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput | Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput[]
+  createMany?: Prisma.AnnotationCreateManyUpdatedByInputEnvelope
   connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
 }
 
@@ -1114,17 +1114,17 @@ export type AnnotationUncheckedCreateNestedManyWithoutCreatedByInput = {
   connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
 }
 
-export type AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput = {
-  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput> | Prisma.AnnotationCreateWithoutUpdatedByInput[] | Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput[]
-  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput | Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput[]
-  createMany?: Prisma.AnnotationCreateManyUpdatedByInputEnvelope
-  connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-}
-
 export type AnnotationUncheckedCreateNestedManyWithoutReviewedByInput = {
   create?: Prisma.XOR<Prisma.AnnotationCreateWithoutReviewedByInput, Prisma.AnnotationUncheckedCreateWithoutReviewedByInput> | Prisma.AnnotationCreateWithoutReviewedByInput[] | Prisma.AnnotationUncheckedCreateWithoutReviewedByInput[]
   connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutReviewedByInput | Prisma.AnnotationCreateOrConnectWithoutReviewedByInput[]
   createMany?: Prisma.AnnotationCreateManyReviewedByInputEnvelope
+  connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+}
+
+export type AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput = {
+  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput> | Prisma.AnnotationCreateWithoutUpdatedByInput[] | Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput | Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput[]
+  createMany?: Prisma.AnnotationCreateManyUpdatedByInputEnvelope
   connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
 }
 
@@ -1142,20 +1142,6 @@ export type AnnotationUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
 }
 
-export type AnnotationUpdateManyWithoutUpdatedByNestedInput = {
-  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput> | Prisma.AnnotationCreateWithoutUpdatedByInput[] | Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput[]
-  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput | Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput[]
-  upsert?: Prisma.AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput[]
-  createMany?: Prisma.AnnotationCreateManyUpdatedByInputEnvelope
-  set?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-  disconnect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-  delete?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-  connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-  update?: Prisma.AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput[]
-  updateMany?: Prisma.AnnotationUpdateManyWithWhereWithoutUpdatedByInput | Prisma.AnnotationUpdateManyWithWhereWithoutUpdatedByInput[]
-  deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
-}
-
 export type AnnotationUpdateManyWithoutReviewedByNestedInput = {
   create?: Prisma.XOR<Prisma.AnnotationCreateWithoutReviewedByInput, Prisma.AnnotationUncheckedCreateWithoutReviewedByInput> | Prisma.AnnotationCreateWithoutReviewedByInput[] | Prisma.AnnotationUncheckedCreateWithoutReviewedByInput[]
   connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutReviewedByInput | Prisma.AnnotationCreateOrConnectWithoutReviewedByInput[]
@@ -1167,6 +1153,20 @@ export type AnnotationUpdateManyWithoutReviewedByNestedInput = {
   connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
   update?: Prisma.AnnotationUpdateWithWhereUniqueWithoutReviewedByInput | Prisma.AnnotationUpdateWithWhereUniqueWithoutReviewedByInput[]
   updateMany?: Prisma.AnnotationUpdateManyWithWhereWithoutReviewedByInput | Prisma.AnnotationUpdateManyWithWhereWithoutReviewedByInput[]
+  deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
+}
+
+export type AnnotationUpdateManyWithoutUpdatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput> | Prisma.AnnotationCreateWithoutUpdatedByInput[] | Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput | Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput[]
+  upsert?: Prisma.AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput[]
+  createMany?: Prisma.AnnotationCreateManyUpdatedByInputEnvelope
+  set?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+  disconnect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+  delete?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+  connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+  update?: Prisma.AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput[]
+  updateMany?: Prisma.AnnotationUpdateManyWithWhereWithoutUpdatedByInput | Prisma.AnnotationUpdateManyWithWhereWithoutUpdatedByInput[]
   deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
 }
 
@@ -1184,20 +1184,6 @@ export type AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
 }
 
-export type AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput = {
-  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput> | Prisma.AnnotationCreateWithoutUpdatedByInput[] | Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput[]
-  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput | Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput[]
-  upsert?: Prisma.AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput[]
-  createMany?: Prisma.AnnotationCreateManyUpdatedByInputEnvelope
-  set?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-  disconnect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-  delete?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-  connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
-  update?: Prisma.AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput[]
-  updateMany?: Prisma.AnnotationUpdateManyWithWhereWithoutUpdatedByInput | Prisma.AnnotationUpdateManyWithWhereWithoutUpdatedByInput[]
-  deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
-}
-
 export type AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput = {
   create?: Prisma.XOR<Prisma.AnnotationCreateWithoutReviewedByInput, Prisma.AnnotationUncheckedCreateWithoutReviewedByInput> | Prisma.AnnotationCreateWithoutReviewedByInput[] | Prisma.AnnotationUncheckedCreateWithoutReviewedByInput[]
   connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutReviewedByInput | Prisma.AnnotationCreateOrConnectWithoutReviewedByInput[]
@@ -1209,6 +1195,20 @@ export type AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput = {
   connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
   update?: Prisma.AnnotationUpdateWithWhereUniqueWithoutReviewedByInput | Prisma.AnnotationUpdateWithWhereUniqueWithoutReviewedByInput[]
   updateMany?: Prisma.AnnotationUpdateManyWithWhereWithoutReviewedByInput | Prisma.AnnotationUpdateManyWithWhereWithoutReviewedByInput[]
+  deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
+}
+
+export type AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput = {
+  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput> | Prisma.AnnotationCreateWithoutUpdatedByInput[] | Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput[]
+  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput | Prisma.AnnotationCreateOrConnectWithoutUpdatedByInput[]
+  upsert?: Prisma.AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput | Prisma.AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput[]
+  createMany?: Prisma.AnnotationCreateManyUpdatedByInputEnvelope
+  set?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+  disconnect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+  delete?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+  connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+  update?: Prisma.AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput | Prisma.AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput[]
+  updateMany?: Prisma.AnnotationUpdateManyWithWhereWithoutUpdatedByInput | Prisma.AnnotationUpdateManyWithWhereWithoutUpdatedByInput[]
   deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
 }
 
@@ -1386,17 +1386,17 @@ export type AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput = {
   connect?: Prisma.AnnotationWhereUniqueInput
 }
 
-export type AnnotationCreateNestedOneWithoutIncomingTextRelationsInput = {
-  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutIncomingTextRelationsInput, Prisma.AnnotationUncheckedCreateWithoutIncomingTextRelationsInput>
-  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutIncomingTextRelationsInput
-  connect?: Prisma.AnnotationWhereUniqueInput
-}
-
 export type AnnotationCreateNestedManyWithoutFromAnnotationInput = {
   create?: Prisma.XOR<Prisma.AnnotationCreateWithoutFromAnnotationInput, Prisma.AnnotationUncheckedCreateWithoutFromAnnotationInput> | Prisma.AnnotationCreateWithoutFromAnnotationInput[] | Prisma.AnnotationUncheckedCreateWithoutFromAnnotationInput[]
   connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutFromAnnotationInput | Prisma.AnnotationCreateOrConnectWithoutFromAnnotationInput[]
   createMany?: Prisma.AnnotationCreateManyFromAnnotationInputEnvelope
   connect?: Prisma.AnnotationWhereUniqueInput | Prisma.AnnotationWhereUniqueInput[]
+}
+
+export type AnnotationCreateNestedOneWithoutIncomingTextRelationsInput = {
+  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutIncomingTextRelationsInput, Prisma.AnnotationUncheckedCreateWithoutIncomingTextRelationsInput>
+  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutIncomingTextRelationsInput
+  connect?: Prisma.AnnotationWhereUniqueInput
 }
 
 export type AnnotationCreateNestedManyWithoutToAnnotationInput = {
@@ -1442,16 +1442,6 @@ export type AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AnnotationUpdateToOneWithWhereWithoutOutgoingTextRelationsInput, Prisma.AnnotationUpdateWithoutOutgoingTextRelationsInput>, Prisma.AnnotationUncheckedUpdateWithoutOutgoingTextRelationsInput>
 }
 
-export type AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput = {
-  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutIncomingTextRelationsInput, Prisma.AnnotationUncheckedCreateWithoutIncomingTextRelationsInput>
-  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutIncomingTextRelationsInput
-  upsert?: Prisma.AnnotationUpsertWithoutIncomingTextRelationsInput
-  disconnect?: Prisma.AnnotationWhereInput | boolean
-  delete?: Prisma.AnnotationWhereInput | boolean
-  connect?: Prisma.AnnotationWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AnnotationUpdateToOneWithWhereWithoutIncomingTextRelationsInput, Prisma.AnnotationUpdateWithoutIncomingTextRelationsInput>, Prisma.AnnotationUncheckedUpdateWithoutIncomingTextRelationsInput>
-}
-
 export type AnnotationUpdateManyWithoutFromAnnotationNestedInput = {
   create?: Prisma.XOR<Prisma.AnnotationCreateWithoutFromAnnotationInput, Prisma.AnnotationUncheckedCreateWithoutFromAnnotationInput> | Prisma.AnnotationCreateWithoutFromAnnotationInput[] | Prisma.AnnotationUncheckedCreateWithoutFromAnnotationInput[]
   connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutFromAnnotationInput | Prisma.AnnotationCreateOrConnectWithoutFromAnnotationInput[]
@@ -1464,6 +1454,16 @@ export type AnnotationUpdateManyWithoutFromAnnotationNestedInput = {
   update?: Prisma.AnnotationUpdateWithWhereUniqueWithoutFromAnnotationInput | Prisma.AnnotationUpdateWithWhereUniqueWithoutFromAnnotationInput[]
   updateMany?: Prisma.AnnotationUpdateManyWithWhereWithoutFromAnnotationInput | Prisma.AnnotationUpdateManyWithWhereWithoutFromAnnotationInput[]
   deleteMany?: Prisma.AnnotationScalarWhereInput | Prisma.AnnotationScalarWhereInput[]
+}
+
+export type AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput = {
+  create?: Prisma.XOR<Prisma.AnnotationCreateWithoutIncomingTextRelationsInput, Prisma.AnnotationUncheckedCreateWithoutIncomingTextRelationsInput>
+  connectOrCreate?: Prisma.AnnotationCreateOrConnectWithoutIncomingTextRelationsInput
+  upsert?: Prisma.AnnotationUpsertWithoutIncomingTextRelationsInput
+  disconnect?: Prisma.AnnotationWhereInput | boolean
+  delete?: Prisma.AnnotationWhereInput | boolean
+  connect?: Prisma.AnnotationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AnnotationUpdateToOneWithWhereWithoutIncomingTextRelationsInput, Prisma.AnnotationUpdateWithoutIncomingTextRelationsInput>, Prisma.AnnotationUncheckedUpdateWithoutIncomingTextRelationsInput>
 }
 
 export type AnnotationUpdateManyWithoutToAnnotationNestedInput = {
@@ -1616,18 +1616,18 @@ export type AnnotationCreateWithoutCreatedByInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutCreatedByInput = {
@@ -1678,92 +1678,6 @@ export type AnnotationCreateManyCreatedByInputEnvelope = {
   skipDuplicates?: boolean
 }
 
-export type AnnotationCreateWithoutUpdatedByInput = {
-  id?: string
-  modality: $Enums.Modality
-  type: $Enums.AnnotationType
-  source?: $Enums.AnnotationSource
-  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: $Enums.AnnotationStatus
-  revision?: number
-  frameIndex?: number | null
-  timestampMs?: number | null
-  isKeyframe?: boolean
-  isInterpolated?: boolean
-  startMs?: number | null
-  endMs?: number | null
-  startChar?: number | null
-  endChar?: number | null
-  startToken?: number | null
-  endToken?: number | null
-  tokenIndex?: number | null
-  sentenceIndex?: number | null
-  textValue?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
-  asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
-  assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
-  fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
-  outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
-  incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
-}
-
-export type AnnotationUncheckedCreateWithoutUpdatedByInput = {
-  id?: string
-  datasetId: string
-  assetId: string
-  assetVersionId?: string | null
-  labelId?: string | null
-  createdById: string
-  reviewedById?: string | null
-  modality: $Enums.Modality
-  type: $Enums.AnnotationType
-  source?: $Enums.AnnotationSource
-  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: $Enums.AnnotationStatus
-  revision?: number
-  frameIndex?: number | null
-  timestampMs?: number | null
-  trackId?: string | null
-  isKeyframe?: boolean
-  isInterpolated?: boolean
-  startMs?: number | null
-  endMs?: number | null
-  startChar?: number | null
-  endChar?: number | null
-  startToken?: number | null
-  endToken?: number | null
-  tokenIndex?: number | null
-  sentenceIndex?: number | null
-  textValue?: string | null
-  fromAnnotationId?: string | null
-  toAnnotationId?: string | null
-  speakerId?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  outgoingTextRelations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutFromAnnotationInput
-  incomingTextRelations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutToAnnotationInput
-}
-
-export type AnnotationCreateOrConnectWithoutUpdatedByInput = {
-  where: Prisma.AnnotationWhereUniqueInput
-  create: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput>
-}
-
-export type AnnotationCreateManyUpdatedByInputEnvelope = {
-  data: Prisma.AnnotationCreateManyUpdatedByInput | Prisma.AnnotationCreateManyUpdatedByInput[]
-  skipDuplicates?: boolean
-}
-
 export type AnnotationCreateWithoutReviewedByInput = {
   id?: string
   modality: $Enums.Modality
@@ -1788,18 +1702,18 @@ export type AnnotationCreateWithoutReviewedByInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutReviewedByInput = {
@@ -1847,6 +1761,92 @@ export type AnnotationCreateOrConnectWithoutReviewedByInput = {
 
 export type AnnotationCreateManyReviewedByInputEnvelope = {
   data: Prisma.AnnotationCreateManyReviewedByInput | Prisma.AnnotationCreateManyReviewedByInput[]
+  skipDuplicates?: boolean
+}
+
+export type AnnotationCreateWithoutUpdatedByInput = {
+  id?: string
+  modality: $Enums.Modality
+  type: $Enums.AnnotationType
+  source?: $Enums.AnnotationSource
+  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.AnnotationStatus
+  revision?: number
+  frameIndex?: number | null
+  timestampMs?: number | null
+  isKeyframe?: boolean
+  isInterpolated?: boolean
+  startMs?: number | null
+  endMs?: number | null
+  startChar?: number | null
+  endChar?: number | null
+  startToken?: number | null
+  endToken?: number | null
+  tokenIndex?: number | null
+  sentenceIndex?: number | null
+  textValue?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
+  assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
+  fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
+  outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
+  incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+}
+
+export type AnnotationUncheckedCreateWithoutUpdatedByInput = {
+  id?: string
+  datasetId: string
+  assetId: string
+  assetVersionId?: string | null
+  labelId?: string | null
+  createdById: string
+  reviewedById?: string | null
+  modality: $Enums.Modality
+  type: $Enums.AnnotationType
+  source?: $Enums.AnnotationSource
+  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.AnnotationStatus
+  revision?: number
+  frameIndex?: number | null
+  timestampMs?: number | null
+  trackId?: string | null
+  isKeyframe?: boolean
+  isInterpolated?: boolean
+  startMs?: number | null
+  endMs?: number | null
+  startChar?: number | null
+  endChar?: number | null
+  startToken?: number | null
+  endToken?: number | null
+  tokenIndex?: number | null
+  sentenceIndex?: number | null
+  textValue?: string | null
+  fromAnnotationId?: string | null
+  toAnnotationId?: string | null
+  speakerId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  outgoingTextRelations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutFromAnnotationInput
+  incomingTextRelations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutToAnnotationInput
+}
+
+export type AnnotationCreateOrConnectWithoutUpdatedByInput = {
+  where: Prisma.AnnotationWhereUniqueInput
+  create: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput>
+}
+
+export type AnnotationCreateManyUpdatedByInputEnvelope = {
+  data: Prisma.AnnotationCreateManyUpdatedByInput | Prisma.AnnotationCreateManyUpdatedByInput[]
   skipDuplicates?: boolean
 }
 
@@ -1906,22 +1906,6 @@ export type AnnotationScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Annotation"> | Date | string
 }
 
-export type AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput = {
-  where: Prisma.AnnotationWhereUniqueInput
-  update: Prisma.XOR<Prisma.AnnotationUpdateWithoutUpdatedByInput, Prisma.AnnotationUncheckedUpdateWithoutUpdatedByInput>
-  create: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput>
-}
-
-export type AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput = {
-  where: Prisma.AnnotationWhereUniqueInput
-  data: Prisma.XOR<Prisma.AnnotationUpdateWithoutUpdatedByInput, Prisma.AnnotationUncheckedUpdateWithoutUpdatedByInput>
-}
-
-export type AnnotationUpdateManyWithWhereWithoutUpdatedByInput = {
-  where: Prisma.AnnotationScalarWhereInput
-  data: Prisma.XOR<Prisma.AnnotationUpdateManyMutationInput, Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByInput>
-}
-
 export type AnnotationUpsertWithWhereUniqueWithoutReviewedByInput = {
   where: Prisma.AnnotationWhereUniqueInput
   update: Prisma.XOR<Prisma.AnnotationUpdateWithoutReviewedByInput, Prisma.AnnotationUncheckedUpdateWithoutReviewedByInput>
@@ -1936,6 +1920,22 @@ export type AnnotationUpdateWithWhereUniqueWithoutReviewedByInput = {
 export type AnnotationUpdateManyWithWhereWithoutReviewedByInput = {
   where: Prisma.AnnotationScalarWhereInput
   data: Prisma.XOR<Prisma.AnnotationUpdateManyMutationInput, Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByInput>
+}
+
+export type AnnotationUpsertWithWhereUniqueWithoutUpdatedByInput = {
+  where: Prisma.AnnotationWhereUniqueInput
+  update: Prisma.XOR<Prisma.AnnotationUpdateWithoutUpdatedByInput, Prisma.AnnotationUncheckedUpdateWithoutUpdatedByInput>
+  create: Prisma.XOR<Prisma.AnnotationCreateWithoutUpdatedByInput, Prisma.AnnotationUncheckedCreateWithoutUpdatedByInput>
+}
+
+export type AnnotationUpdateWithWhereUniqueWithoutUpdatedByInput = {
+  where: Prisma.AnnotationWhereUniqueInput
+  data: Prisma.XOR<Prisma.AnnotationUpdateWithoutUpdatedByInput, Prisma.AnnotationUncheckedUpdateWithoutUpdatedByInput>
+}
+
+export type AnnotationUpdateManyWithWhereWithoutUpdatedByInput = {
+  where: Prisma.AnnotationScalarWhereInput
+  data: Prisma.XOR<Prisma.AnnotationUpdateManyMutationInput, Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByInput>
 }
 
 export type AnnotationCreateWithoutDatasetInput = {
@@ -1964,16 +1964,16 @@ export type AnnotationCreateWithoutDatasetInput = {
   updatedAt?: Date | string
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutDatasetInput = {
@@ -2064,18 +2064,18 @@ export type AnnotationCreateWithoutAssetInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutAssetInput = {
@@ -2166,18 +2166,18 @@ export type AnnotationCreateWithoutAssetVersionInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutAssetVersionInput = {
@@ -2268,18 +2268,18 @@ export type AnnotationCreateWithoutLabelInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutLabelInput = {
@@ -2370,18 +2370,18 @@ export type AnnotationCreateWithoutOutgoingTextRelationsInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
   toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutOutgoingTextRelationsInput = {
@@ -2427,87 +2427,6 @@ export type AnnotationCreateOrConnectWithoutOutgoingTextRelationsInput = {
   create: Prisma.XOR<Prisma.AnnotationCreateWithoutOutgoingTextRelationsInput, Prisma.AnnotationUncheckedCreateWithoutOutgoingTextRelationsInput>
 }
 
-export type AnnotationCreateWithoutIncomingTextRelationsInput = {
-  id?: string
-  modality: $Enums.Modality
-  type: $Enums.AnnotationType
-  source?: $Enums.AnnotationSource
-  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: $Enums.AnnotationStatus
-  revision?: number
-  frameIndex?: number | null
-  timestampMs?: number | null
-  isKeyframe?: boolean
-  isInterpolated?: boolean
-  startMs?: number | null
-  endMs?: number | null
-  startChar?: number | null
-  endChar?: number | null
-  startToken?: number | null
-  endToken?: number | null
-  tokenIndex?: number | null
-  sentenceIndex?: number | null
-  textValue?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
-  asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
-  assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
-  fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
-  outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
-}
-
-export type AnnotationUncheckedCreateWithoutIncomingTextRelationsInput = {
-  id?: string
-  datasetId: string
-  assetId: string
-  assetVersionId?: string | null
-  labelId?: string | null
-  createdById: string
-  updatedById?: string | null
-  reviewedById?: string | null
-  modality: $Enums.Modality
-  type: $Enums.AnnotationType
-  source?: $Enums.AnnotationSource
-  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: $Enums.AnnotationStatus
-  revision?: number
-  frameIndex?: number | null
-  timestampMs?: number | null
-  trackId?: string | null
-  isKeyframe?: boolean
-  isInterpolated?: boolean
-  startMs?: number | null
-  endMs?: number | null
-  startChar?: number | null
-  endChar?: number | null
-  startToken?: number | null
-  endToken?: number | null
-  tokenIndex?: number | null
-  sentenceIndex?: number | null
-  textValue?: string | null
-  fromAnnotationId?: string | null
-  toAnnotationId?: string | null
-  speakerId?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  outgoingTextRelations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutFromAnnotationInput
-}
-
-export type AnnotationCreateOrConnectWithoutIncomingTextRelationsInput = {
-  where: Prisma.AnnotationWhereUniqueInput
-  create: Prisma.XOR<Prisma.AnnotationCreateWithoutIncomingTextRelationsInput, Prisma.AnnotationUncheckedCreateWithoutIncomingTextRelationsInput>
-}
-
 export type AnnotationCreateWithoutFromAnnotationInput = {
   id?: string
   modality: $Enums.Modality
@@ -2532,18 +2451,18 @@ export type AnnotationCreateWithoutFromAnnotationInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
+  outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
   audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
   toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
-  outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutFromAnnotationInput = {
@@ -2594,6 +2513,87 @@ export type AnnotationCreateManyFromAnnotationInputEnvelope = {
   skipDuplicates?: boolean
 }
 
+export type AnnotationCreateWithoutIncomingTextRelationsInput = {
+  id?: string
+  modality: $Enums.Modality
+  type: $Enums.AnnotationType
+  source?: $Enums.AnnotationSource
+  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.AnnotationStatus
+  revision?: number
+  frameIndex?: number | null
+  timestampMs?: number | null
+  isKeyframe?: boolean
+  isInterpolated?: boolean
+  startMs?: number | null
+  endMs?: number | null
+  startChar?: number | null
+  endChar?: number | null
+  startToken?: number | null
+  endToken?: number | null
+  tokenIndex?: number | null
+  sentenceIndex?: number | null
+  textValue?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
+  assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
+  fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
+  outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
+}
+
+export type AnnotationUncheckedCreateWithoutIncomingTextRelationsInput = {
+  id?: string
+  datasetId: string
+  assetId: string
+  assetVersionId?: string | null
+  labelId?: string | null
+  createdById: string
+  updatedById?: string | null
+  reviewedById?: string | null
+  modality: $Enums.Modality
+  type: $Enums.AnnotationType
+  source?: $Enums.AnnotationSource
+  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.AnnotationStatus
+  revision?: number
+  frameIndex?: number | null
+  timestampMs?: number | null
+  trackId?: string | null
+  isKeyframe?: boolean
+  isInterpolated?: boolean
+  startMs?: number | null
+  endMs?: number | null
+  startChar?: number | null
+  endChar?: number | null
+  startToken?: number | null
+  endToken?: number | null
+  tokenIndex?: number | null
+  sentenceIndex?: number | null
+  textValue?: string | null
+  fromAnnotationId?: string | null
+  toAnnotationId?: string | null
+  speakerId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  outgoingTextRelations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutFromAnnotationInput
+}
+
+export type AnnotationCreateOrConnectWithoutIncomingTextRelationsInput = {
+  where: Prisma.AnnotationWhereUniqueInput
+  create: Prisma.XOR<Prisma.AnnotationCreateWithoutIncomingTextRelationsInput, Prisma.AnnotationUncheckedCreateWithoutIncomingTextRelationsInput>
+}
+
 export type AnnotationCreateWithoutToAnnotationInput = {
   id?: string
   modality: $Enums.Modality
@@ -2618,18 +2618,18 @@ export type AnnotationCreateWithoutToAnnotationInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
-  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutToAnnotationInput = {
@@ -2715,18 +2715,18 @@ export type AnnotationUpdateWithoutOutgoingTextRelationsInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
   toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutOutgoingTextRelationsInput = {
@@ -2767,6 +2767,22 @@ export type AnnotationUncheckedUpdateWithoutOutgoingTextRelationsInput = {
   incomingTextRelations?: Prisma.AnnotationUncheckedUpdateManyWithoutToAnnotationNestedInput
 }
 
+export type AnnotationUpsertWithWhereUniqueWithoutFromAnnotationInput = {
+  where: Prisma.AnnotationWhereUniqueInput
+  update: Prisma.XOR<Prisma.AnnotationUpdateWithoutFromAnnotationInput, Prisma.AnnotationUncheckedUpdateWithoutFromAnnotationInput>
+  create: Prisma.XOR<Prisma.AnnotationCreateWithoutFromAnnotationInput, Prisma.AnnotationUncheckedCreateWithoutFromAnnotationInput>
+}
+
+export type AnnotationUpdateWithWhereUniqueWithoutFromAnnotationInput = {
+  where: Prisma.AnnotationWhereUniqueInput
+  data: Prisma.XOR<Prisma.AnnotationUpdateWithoutFromAnnotationInput, Prisma.AnnotationUncheckedUpdateWithoutFromAnnotationInput>
+}
+
+export type AnnotationUpdateManyWithWhereWithoutFromAnnotationInput = {
+  where: Prisma.AnnotationScalarWhereInput
+  data: Prisma.XOR<Prisma.AnnotationUpdateManyMutationInput, Prisma.AnnotationUncheckedUpdateManyWithoutFromAnnotationInput>
+}
+
 export type AnnotationUpsertWithoutIncomingTextRelationsInput = {
   update: Prisma.XOR<Prisma.AnnotationUpdateWithoutIncomingTextRelationsInput, Prisma.AnnotationUncheckedUpdateWithoutIncomingTextRelationsInput>
   create: Prisma.XOR<Prisma.AnnotationCreateWithoutIncomingTextRelationsInput, Prisma.AnnotationUncheckedCreateWithoutIncomingTextRelationsInput>
@@ -2802,18 +2818,18 @@ export type AnnotationUpdateWithoutIncomingTextRelationsInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutIncomingTextRelationsInput = {
@@ -2852,22 +2868,6 @@ export type AnnotationUncheckedUpdateWithoutIncomingTextRelationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   outgoingTextRelations?: Prisma.AnnotationUncheckedUpdateManyWithoutFromAnnotationNestedInput
-}
-
-export type AnnotationUpsertWithWhereUniqueWithoutFromAnnotationInput = {
-  where: Prisma.AnnotationWhereUniqueInput
-  update: Prisma.XOR<Prisma.AnnotationUpdateWithoutFromAnnotationInput, Prisma.AnnotationUncheckedUpdateWithoutFromAnnotationInput>
-  create: Prisma.XOR<Prisma.AnnotationCreateWithoutFromAnnotationInput, Prisma.AnnotationUncheckedCreateWithoutFromAnnotationInput>
-}
-
-export type AnnotationUpdateWithWhereUniqueWithoutFromAnnotationInput = {
-  where: Prisma.AnnotationWhereUniqueInput
-  data: Prisma.XOR<Prisma.AnnotationUpdateWithoutFromAnnotationInput, Prisma.AnnotationUncheckedUpdateWithoutFromAnnotationInput>
-}
-
-export type AnnotationUpdateManyWithWhereWithoutFromAnnotationInput = {
-  where: Prisma.AnnotationScalarWhereInput
-  data: Prisma.XOR<Prisma.AnnotationUpdateManyMutationInput, Prisma.AnnotationUncheckedUpdateManyWithoutFromAnnotationInput>
 }
 
 export type AnnotationUpsertWithWhereUniqueWithoutToAnnotationInput = {
@@ -2910,18 +2910,18 @@ export type AnnotationCreateWithoutTrackInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
+  fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
+  outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
   audioSpeaker?: Prisma.AudioSpeakerCreateNestedOneWithoutAnnotationsInput
-  fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
   toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
-  outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutTrackInput = {
@@ -3012,18 +3012,18 @@ export type AnnotationCreateWithoutAudioSpeakerInput = {
   textValue?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   asset: Prisma.AssetCreateNestedOneWithoutAnnotationsInput
   assetVersion?: Prisma.AssetVersionCreateNestedOneWithoutAnnotationsInput
-  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
   createdBy: Prisma.UserCreateNestedOneWithoutAnnotationsCreatedInput
-  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
-  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
-  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAnnotationsInput
   fromAnnotation?: Prisma.AnnotationCreateNestedOneWithoutOutgoingTextRelationsInput
-  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   outgoingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutFromAnnotationInput
+  label?: Prisma.LabelCreateNestedOneWithoutAnnotationsInput
+  reviewedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsReviewedInput
+  toAnnotation?: Prisma.AnnotationCreateNestedOneWithoutIncomingTextRelationsInput
   incomingTextRelations?: Prisma.AnnotationCreateNestedManyWithoutToAnnotationInput
+  track?: Prisma.VideoObjectTrackCreateNestedOneWithoutAnnotationsInput
+  updatedBy?: Prisma.UserCreateNestedOneWithoutAnnotationsUpdatedInput
 }
 
 export type AnnotationUncheckedCreateWithoutAudioSpeakerInput = {
@@ -3126,14 +3126,14 @@ export type AnnotationCreateManyCreatedByInput = {
   updatedAt?: Date | string
 }
 
-export type AnnotationCreateManyUpdatedByInput = {
+export type AnnotationCreateManyReviewedByInput = {
   id?: string
   datasetId: string
   assetId: string
   assetVersionId?: string | null
   labelId?: string | null
   createdById: string
-  reviewedById?: string | null
+  updatedById?: string | null
   modality: $Enums.Modality
   type: $Enums.AnnotationType
   source?: $Enums.AnnotationSource
@@ -3162,14 +3162,14 @@ export type AnnotationCreateManyUpdatedByInput = {
   updatedAt?: Date | string
 }
 
-export type AnnotationCreateManyReviewedByInput = {
+export type AnnotationCreateManyUpdatedByInput = {
   id?: string
   datasetId: string
   assetId: string
   assetVersionId?: string | null
   labelId?: string | null
   createdById: string
-  updatedById?: string | null
+  reviewedById?: string | null
   modality: $Enums.Modality
   type: $Enums.AnnotationType
   source?: $Enums.AnnotationSource
@@ -3222,18 +3222,18 @@ export type AnnotationUpdateWithoutCreatedByInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutCreatedByInput = {
@@ -3310,118 +3310,6 @@ export type AnnotationUncheckedUpdateManyWithoutCreatedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type AnnotationUpdateWithoutUpdatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
-  type?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
-  source?: Prisma.EnumAnnotationSourceFieldUpdateOperationsInput | $Enums.AnnotationSource
-  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  revision?: Prisma.IntFieldUpdateOperationsInput | number
-  frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isInterpolated?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  startMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tokenIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sentenceIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
-  asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
-  assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
-  fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
-  outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
-  incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
-}
-
-export type AnnotationUncheckedUpdateWithoutUpdatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  labelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
-  type?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
-  source?: Prisma.EnumAnnotationSourceFieldUpdateOperationsInput | $Enums.AnnotationSource
-  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  revision?: Prisma.IntFieldUpdateOperationsInput | number
-  frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isInterpolated?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  startMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tokenIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sentenceIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fromAnnotationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  toAnnotationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  speakerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  outgoingTextRelations?: Prisma.AnnotationUncheckedUpdateManyWithoutFromAnnotationNestedInput
-  incomingTextRelations?: Prisma.AnnotationUncheckedUpdateManyWithoutToAnnotationNestedInput
-}
-
-export type AnnotationUncheckedUpdateManyWithoutUpdatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  labelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
-  type?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
-  source?: Prisma.EnumAnnotationSourceFieldUpdateOperationsInput | $Enums.AnnotationSource
-  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
-  revision?: Prisma.IntFieldUpdateOperationsInput | number
-  frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isInterpolated?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  startMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  startToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  endToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  tokenIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sentenceIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  fromAnnotationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  toAnnotationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  speakerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
 export type AnnotationUpdateWithoutReviewedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
@@ -3446,18 +3334,18 @@ export type AnnotationUpdateWithoutReviewedByInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutReviewedByInput = {
@@ -3506,6 +3394,118 @@ export type AnnotationUncheckedUpdateManyWithoutReviewedByInput = {
   labelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
   updatedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
+  type?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  source?: Prisma.EnumAnnotationSourceFieldUpdateOperationsInput | $Enums.AnnotationSource
+  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isInterpolated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tokenIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sentenceIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fromAnnotationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  toAnnotationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  speakerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type AnnotationUpdateWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
+  type?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  source?: Prisma.EnumAnnotationSourceFieldUpdateOperationsInput | $Enums.AnnotationSource
+  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isInterpolated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tokenIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sentenceIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
+  assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
+  fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
+  outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
+  incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+}
+
+export type AnnotationUncheckedUpdateWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  labelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
+  type?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  source?: Prisma.EnumAnnotationSourceFieldUpdateOperationsInput | $Enums.AnnotationSource
+  geometry?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  frameIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  timestampMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  trackId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isKeyframe?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isInterpolated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endChar?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  startToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  endToken?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  tokenIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sentenceIndex?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fromAnnotationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  toAnnotationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  speakerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  outgoingTextRelations?: Prisma.AnnotationUncheckedUpdateManyWithoutFromAnnotationNestedInput
+  incomingTextRelations?: Prisma.AnnotationUncheckedUpdateManyWithoutToAnnotationNestedInput
+}
+
+export type AnnotationUncheckedUpdateManyWithoutUpdatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.StringFieldUpdateOperationsInput | string
+  assetVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  labelId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   type?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
   source?: Prisma.EnumAnnotationSourceFieldUpdateOperationsInput | $Enums.AnnotationSource
@@ -3596,16 +3596,16 @@ export type AnnotationUpdateWithoutDatasetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutDatasetInput = {
@@ -3742,18 +3742,18 @@ export type AnnotationUpdateWithoutAssetInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutAssetInput = {
@@ -3890,18 +3890,18 @@ export type AnnotationUpdateWithoutAssetVersionInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutAssetVersionInput = {
@@ -4038,18 +4038,18 @@ export type AnnotationUpdateWithoutLabelInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutLabelInput = {
@@ -4222,18 +4222,18 @@ export type AnnotationUpdateWithoutFromAnnotationInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
+  outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
   audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
   toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
-  outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutFromAnnotationInput = {
@@ -4334,18 +4334,18 @@ export type AnnotationUpdateWithoutToAnnotationInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
-  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutToAnnotationInput = {
@@ -4482,18 +4482,18 @@ export type AnnotationUpdateWithoutTrackInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
+  fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
+  outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
   audioSpeaker?: Prisma.AudioSpeakerUpdateOneWithoutAnnotationsNestedInput
-  fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
   toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
-  outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutTrackInput = {
@@ -4630,18 +4630,18 @@ export type AnnotationUpdateWithoutAudioSpeakerInput = {
   textValue?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutAnnotationsNestedInput
   assetVersion?: Prisma.AssetVersionUpdateOneWithoutAnnotationsNestedInput
-  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput
-  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
-  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
-  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAnnotationsNestedInput
   fromAnnotation?: Prisma.AnnotationUpdateOneWithoutOutgoingTextRelationsNestedInput
-  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   outgoingTextRelations?: Prisma.AnnotationUpdateManyWithoutFromAnnotationNestedInput
+  label?: Prisma.LabelUpdateOneWithoutAnnotationsNestedInput
+  reviewedBy?: Prisma.UserUpdateOneWithoutAnnotationsReviewedNestedInput
+  toAnnotation?: Prisma.AnnotationUpdateOneWithoutIncomingTextRelationsNestedInput
   incomingTextRelations?: Prisma.AnnotationUpdateManyWithoutToAnnotationNestedInput
+  track?: Prisma.VideoObjectTrackUpdateOneWithoutAnnotationsNestedInput
+  updatedBy?: Prisma.UserUpdateOneWithoutAnnotationsUpdatedNestedInput
 }
 
 export type AnnotationUncheckedUpdateWithoutAudioSpeakerInput = {
@@ -4793,19 +4793,19 @@ export type AnnotationSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   speakerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   assetVersion?: boolean | Prisma.Annotation$assetVersionArgs<ExtArgs>
-  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
-  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
-  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
-  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   fromAnnotation?: boolean | Prisma.Annotation$fromAnnotationArgs<ExtArgs>
-  toAnnotation?: boolean | Prisma.Annotation$toAnnotationArgs<ExtArgs>
   outgoingTextRelations?: boolean | Prisma.Annotation$outgoingTextRelationsArgs<ExtArgs>
+  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
+  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
+  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
+  toAnnotation?: boolean | Prisma.Annotation$toAnnotationArgs<ExtArgs>
   incomingTextRelations?: boolean | Prisma.Annotation$incomingTextRelationsArgs<ExtArgs>
+  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
   _count?: boolean | Prisma.AnnotationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["annotation"]>
 
@@ -4844,17 +4844,17 @@ export type AnnotationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   speakerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   assetVersion?: boolean | Prisma.Annotation$assetVersionArgs<ExtArgs>
-  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
-  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
-  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
-  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   fromAnnotation?: boolean | Prisma.Annotation$fromAnnotationArgs<ExtArgs>
+  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
+  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
+  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
   toAnnotation?: boolean | Prisma.Annotation$toAnnotationArgs<ExtArgs>
+  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
 }, ExtArgs["result"]["annotation"]>
 
 export type AnnotationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -4892,17 +4892,17 @@ export type AnnotationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   speakerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   assetVersion?: boolean | Prisma.Annotation$assetVersionArgs<ExtArgs>
-  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
-  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
-  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
-  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   fromAnnotation?: boolean | Prisma.Annotation$fromAnnotationArgs<ExtArgs>
+  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
+  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
+  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
   toAnnotation?: boolean | Prisma.Annotation$toAnnotationArgs<ExtArgs>
+  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
 }, ExtArgs["result"]["annotation"]>
 
 export type AnnotationSelectScalar = {
@@ -4944,64 +4944,64 @@ export type AnnotationSelectScalar = {
 
 export type AnnotationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "assetId" | "assetVersionId" | "labelId" | "createdById" | "updatedById" | "reviewedById" | "modality" | "type" | "source" | "geometry" | "properties" | "status" | "revision" | "frameIndex" | "timestampMs" | "trackId" | "isKeyframe" | "isInterpolated" | "startMs" | "endMs" | "startChar" | "endChar" | "startToken" | "endToken" | "tokenIndex" | "sentenceIndex" | "textValue" | "fromAnnotationId" | "toAnnotationId" | "speakerId" | "createdAt" | "updatedAt", ExtArgs["result"]["annotation"]>
 export type AnnotationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   assetVersion?: boolean | Prisma.Annotation$assetVersionArgs<ExtArgs>
-  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
-  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
-  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
-  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   fromAnnotation?: boolean | Prisma.Annotation$fromAnnotationArgs<ExtArgs>
-  toAnnotation?: boolean | Prisma.Annotation$toAnnotationArgs<ExtArgs>
   outgoingTextRelations?: boolean | Prisma.Annotation$outgoingTextRelationsArgs<ExtArgs>
+  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
+  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
+  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
+  toAnnotation?: boolean | Prisma.Annotation$toAnnotationArgs<ExtArgs>
   incomingTextRelations?: boolean | Prisma.Annotation$incomingTextRelationsArgs<ExtArgs>
+  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
   _count?: boolean | Prisma.AnnotationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AnnotationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   assetVersion?: boolean | Prisma.Annotation$assetVersionArgs<ExtArgs>
-  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
-  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
-  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
-  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   fromAnnotation?: boolean | Prisma.Annotation$fromAnnotationArgs<ExtArgs>
+  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
+  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
+  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
   toAnnotation?: boolean | Prisma.Annotation$toAnnotationArgs<ExtArgs>
+  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
 }
 export type AnnotationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   assetVersion?: boolean | Prisma.Annotation$assetVersionArgs<ExtArgs>
-  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
-  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
-  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
-  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   fromAnnotation?: boolean | Prisma.Annotation$fromAnnotationArgs<ExtArgs>
+  label?: boolean | Prisma.Annotation$labelArgs<ExtArgs>
+  reviewedBy?: boolean | Prisma.Annotation$reviewedByArgs<ExtArgs>
+  audioSpeaker?: boolean | Prisma.Annotation$audioSpeakerArgs<ExtArgs>
   toAnnotation?: boolean | Prisma.Annotation$toAnnotationArgs<ExtArgs>
+  track?: boolean | Prisma.Annotation$trackArgs<ExtArgs>
+  updatedBy?: boolean | Prisma.Annotation$updatedByArgs<ExtArgs>
 }
 
 export type $AnnotationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Annotation"
   objects: {
-    dataset: Prisma.$DatasetPayload<ExtArgs>
     asset: Prisma.$AssetPayload<ExtArgs>
     assetVersion: Prisma.$AssetVersionPayload<ExtArgs> | null
-    label: Prisma.$LabelPayload<ExtArgs> | null
     createdBy: Prisma.$UserPayload<ExtArgs>
-    updatedBy: Prisma.$UserPayload<ExtArgs> | null
-    reviewedBy: Prisma.$UserPayload<ExtArgs> | null
-    track: Prisma.$VideoObjectTrackPayload<ExtArgs> | null
-    audioSpeaker: Prisma.$AudioSpeakerPayload<ExtArgs> | null
+    dataset: Prisma.$DatasetPayload<ExtArgs>
     fromAnnotation: Prisma.$AnnotationPayload<ExtArgs> | null
-    toAnnotation: Prisma.$AnnotationPayload<ExtArgs> | null
     outgoingTextRelations: Prisma.$AnnotationPayload<ExtArgs>[]
+    label: Prisma.$LabelPayload<ExtArgs> | null
+    reviewedBy: Prisma.$UserPayload<ExtArgs> | null
+    audioSpeaker: Prisma.$AudioSpeakerPayload<ExtArgs> | null
+    toAnnotation: Prisma.$AnnotationPayload<ExtArgs> | null
     incomingTextRelations: Prisma.$AnnotationPayload<ExtArgs>[]
+    track: Prisma.$VideoObjectTrackPayload<ExtArgs> | null
+    updatedBy: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5017,13 +5017,13 @@ export type $AnnotationPayload<ExtArgs extends runtime.Types.Extensions.Internal
     source: $Enums.AnnotationSource
     /**
      * *
-     *    * Canonical geometry payload.
-     *    * Validate this with Zod/application schemas.
+     * * Canonical geometry payload.
+     * * Validate this with Zod/application schemas.
      */
     geometry: runtime.JsonValue
     /**
      * *
-     *    * Metadata, model provenance, confidence, notes, custom fields.
+     * * Metadata, model provenance, confidence, notes, custom fields.
      */
     properties: runtime.JsonValue
     status: $Enums.AnnotationStatus
@@ -5441,19 +5441,19 @@ readonly fields: AnnotationFieldRefs;
  */
 export interface Prisma__AnnotationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   asset<T extends Prisma.AssetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetDefaultArgs<ExtArgs>>): Prisma.Prisma__AssetClient<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   assetVersion<T extends Prisma.Annotation$assetVersionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$assetVersionArgs<ExtArgs>>): Prisma.Prisma__AssetVersionClient<runtime.Types.Result.GetResult<Prisma.$AssetVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  label<T extends Prisma.Annotation$labelArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$labelArgs<ExtArgs>>): Prisma.Prisma__LabelClient<runtime.Types.Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  updatedBy<T extends Prisma.Annotation$updatedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$updatedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  reviewedBy<T extends Prisma.Annotation$reviewedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$reviewedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  track<T extends Prisma.Annotation$trackArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$trackArgs<ExtArgs>>): Prisma.Prisma__VideoObjectTrackClient<runtime.Types.Result.GetResult<Prisma.$VideoObjectTrackPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  audioSpeaker<T extends Prisma.Annotation$audioSpeakerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$audioSpeakerArgs<ExtArgs>>): Prisma.Prisma__AudioSpeakerClient<runtime.Types.Result.GetResult<Prisma.$AudioSpeakerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   fromAnnotation<T extends Prisma.Annotation$fromAnnotationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$fromAnnotationArgs<ExtArgs>>): Prisma.Prisma__AnnotationClient<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  toAnnotation<T extends Prisma.Annotation$toAnnotationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$toAnnotationArgs<ExtArgs>>): Prisma.Prisma__AnnotationClient<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   outgoingTextRelations<T extends Prisma.Annotation$outgoingTextRelationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$outgoingTextRelationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  label<T extends Prisma.Annotation$labelArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$labelArgs<ExtArgs>>): Prisma.Prisma__LabelClient<runtime.Types.Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  reviewedBy<T extends Prisma.Annotation$reviewedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$reviewedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  audioSpeaker<T extends Prisma.Annotation$audioSpeakerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$audioSpeakerArgs<ExtArgs>>): Prisma.Prisma__AudioSpeakerClient<runtime.Types.Result.GetResult<Prisma.$AudioSpeakerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  toAnnotation<T extends Prisma.Annotation$toAnnotationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$toAnnotationArgs<ExtArgs>>): Prisma.Prisma__AnnotationClient<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   incomingTextRelations<T extends Prisma.Annotation$incomingTextRelationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$incomingTextRelationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  track<T extends Prisma.Annotation$trackArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$trackArgs<ExtArgs>>): Prisma.Prisma__VideoObjectTrackClient<runtime.Types.Result.GetResult<Prisma.$VideoObjectTrackPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  updatedBy<T extends Prisma.Annotation$updatedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Annotation$updatedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5932,123 +5932,9 @@ export type Annotation$assetVersionArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
- * Annotation.label
- */
-export type Annotation$labelArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Label
-   */
-  select?: Prisma.LabelSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Label
-   */
-  omit?: Prisma.LabelOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.LabelInclude<ExtArgs> | null
-  where?: Prisma.LabelWhereInput
-}
-
-/**
- * Annotation.updatedBy
- */
-export type Annotation$updatedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
-}
-
-/**
- * Annotation.reviewedBy
- */
-export type Annotation$reviewedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
-}
-
-/**
- * Annotation.track
- */
-export type Annotation$trackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the VideoObjectTrack
-   */
-  select?: Prisma.VideoObjectTrackSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the VideoObjectTrack
-   */
-  omit?: Prisma.VideoObjectTrackOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.VideoObjectTrackInclude<ExtArgs> | null
-  where?: Prisma.VideoObjectTrackWhereInput
-}
-
-/**
- * Annotation.audioSpeaker
- */
-export type Annotation$audioSpeakerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AudioSpeaker
-   */
-  select?: Prisma.AudioSpeakerSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AudioSpeaker
-   */
-  omit?: Prisma.AudioSpeakerOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AudioSpeakerInclude<ExtArgs> | null
-  where?: Prisma.AudioSpeakerWhereInput
-}
-
-/**
  * Annotation.fromAnnotation
  */
 export type Annotation$fromAnnotationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Annotation
-   */
-  select?: Prisma.AnnotationSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Annotation
-   */
-  omit?: Prisma.AnnotationOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnnotationInclude<ExtArgs> | null
-  where?: Prisma.AnnotationWhereInput
-}
-
-/**
- * Annotation.toAnnotation
- */
-export type Annotation$toAnnotationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Annotation
    */
@@ -6089,6 +5975,82 @@ export type Annotation$outgoingTextRelationsArgs<ExtArgs extends runtime.Types.E
 }
 
 /**
+ * Annotation.label
+ */
+export type Annotation$labelArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Label
+   */
+  select?: Prisma.LabelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Label
+   */
+  omit?: Prisma.LabelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LabelInclude<ExtArgs> | null
+  where?: Prisma.LabelWhereInput
+}
+
+/**
+ * Annotation.reviewedBy
+ */
+export type Annotation$reviewedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
+}
+
+/**
+ * Annotation.audioSpeaker
+ */
+export type Annotation$audioSpeakerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AudioSpeaker
+   */
+  select?: Prisma.AudioSpeakerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AudioSpeaker
+   */
+  omit?: Prisma.AudioSpeakerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AudioSpeakerInclude<ExtArgs> | null
+  where?: Prisma.AudioSpeakerWhereInput
+}
+
+/**
+ * Annotation.toAnnotation
+ */
+export type Annotation$toAnnotationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Annotation
+   */
+  select?: Prisma.AnnotationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Annotation
+   */
+  omit?: Prisma.AnnotationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AnnotationInclude<ExtArgs> | null
+  where?: Prisma.AnnotationWhereInput
+}
+
+/**
  * Annotation.incomingTextRelations
  */
 export type Annotation$incomingTextRelationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6110,6 +6072,44 @@ export type Annotation$incomingTextRelationsArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
+}
+
+/**
+ * Annotation.track
+ */
+export type Annotation$trackArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VideoObjectTrack
+   */
+  select?: Prisma.VideoObjectTrackSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VideoObjectTrack
+   */
+  omit?: Prisma.VideoObjectTrackOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VideoObjectTrackInclude<ExtArgs> | null
+  where?: Prisma.VideoObjectTrackWhereInput
+}
+
+/**
+ * Annotation.updatedBy
+ */
+export type Annotation$updatedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

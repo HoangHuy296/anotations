@@ -13,12 +13,13 @@ test("queue payload remains exactly one durable job id", () => {
 
 test("only an allowlisted existing Job type maps to a queue", () => {
   assert.ok(queueNameForJobType("EXPORT_DATASET"));
-  assert.equal(queueNameForJobType("IMPORT_DATASET"), null);
+  assert.ok(queueNameForJobType("IMPORT_DATASET"));
+  assert.equal(queueNameForJobType("AI_TASK_SYNC"), null);
 });
 
 test("foundation submission rejects unsupported Job types before a durable write", () => {
-  assert.equal(foundationJobInputSchema.safeParse({ datasetId: "ck012345678901234567890123", type: "IMPORT_DATASET", input: {} }).success, true);
-  assert.equal(queueNameForJobType("IMPORT_DATASET"), null);
+  assert.equal(foundationJobInputSchema.safeParse({ datasetId: "ck012345678901234567890123", type: "AI_TASK_SYNC", input: {} }).success, true);
+  assert.equal(queueNameForJobType("AI_TASK_SYNC"), null);
 });
 
 test("safe summary schema rejects unapproved keys", () => {

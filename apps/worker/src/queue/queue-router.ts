@@ -3,6 +3,8 @@ import { jobQueuePayloadSchema, queueNameForJobType } from "@fieldframe/queue";
 
 import { writeSafeJobEvent, type JobEventReason } from "../jobs/job-event-writer.js";
 import { claimJob } from "../jobs/job-claim-lock.js";
+import { processImportDataset } from "../jobs/import-dataset.js";
+import { processExportDataset } from "../jobs/export-dataset.js";
 
 export type QueueRouteResult =
   | { kind: "received"; jobId: string }
@@ -47,5 +49,7 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
   if (claim.kind === "refused") return { kind: "skipped", reason: "NOT_QUEUED" };
   await writeSafeJobEvent(input.db, { jobId: job.id, kind: "QUEUE_RECEIVED", queueName, queueJobId: job.id });
   await writeSafeJobEvent(input.db, { jobId: job.id, kind: "JOB_CLAIMED" });
+  if (job.type === "IMPORT_DATASET") await processImportDataset(input.db, job.id);
+  if (job.type === "EXPORT_DATASET") await processExportDataset(input.db, job.id, claim.lockToken);
   return { kind: "claimed", jobId: job.id };
 }

@@ -1,128 +1,277 @@
-import {
-  ClockCounterClockwise,
-  ImageSquare,
-  Info,
-  Tag,
-} from "@phosphor-icons/react/dist/ssr";
+"use client";
+
+import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { AssetStatus } from "@internal/db";
 
+import {
+  deleteBoundingBoxAction,
+  ensureDefaultImageLabelsAction,
+  updateBoundingBoxLabelAction,
+  updateImageDescriptionAction,
+} from "@/app/(app)/workspace/[datasetId]/actions";
+import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
 import { Badge } from "@/components/ui/badge";
-import { imageStatusPresentation } from "@/lib/image-status";
+import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status";
+import { useAnnotationStore } from "@/stores/annotation-store";
+import type { SafeImageWorkspaceAsset, SafeWorkspaceAsset, SafeWorkspaceLabel } from "@/types/image-workspace";
 
+type PanelTab = "description" | "labels" | "shapes" | "images";
 type PropertiesPanelProps = {
-  image: {
-    filename: string;
-    path: string;
-    width: number | null;
-    height: number | null;
-    sizeBytes: bigint | null;
-    giteaSha: string;
-    status: AssetStatus;
-    annotationCount: number;
-  } | null;
+  datasetId: string;
+  image: SafeImageWorkspaceAsset | null;
+  labels: SafeWorkspaceLabel[];
+  images: SafeWorkspaceAsset[];
+  page: number;
+  pageSize: number;
+  totalAssets: number;
+  completedAssets: number;
+  search: string;
+  statuses: AssetStatus[];
+  selectedAssetId: string | null;
 };
 
-export function PropertiesPanel({ image }: PropertiesPanelProps) {
-  if (!image) {
-    return (
-      <aside className="grid min-h-64 place-items-center border-l border-zinc-200 bg-white px-6 text-center">
-        <div>
-          <ImageSquare
-            aria-hidden="true"
-            className="mx-auto text-zinc-300"
-            size={26}
-            weight="duotone"
-          />
-          <p className="mt-3 text-xs font-semibold text-zinc-600">
-            No image details
-          </p>
-        </div>
-      </aside>
-    );
+type PropertiesPanelBodyProps = PropertiesPanelProps & { tab: PanelTab; setTab: (tab: PanelTab) => void };
+
+/** The tab state stays mounted while only asset-specific editor state is reset. */
+export function PropertiesPanel(props: PropertiesPanelProps) {
+  const [tab, setTab] = useState<PanelTab>("description");
+  return <PropertiesPanelBody key={props.image?.id ?? props.selectedAssetId ?? "none"} {...props} tab={tab} setTab={setTab} />;
+}
+
+function PropertiesPanelBody({ datasetId, image, labels, images, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: PropertiesPanelBodyProps) {
+  const router = useRouter();
+  const assetId = image?.id;
+  const [description, setDescription] = useState(image?.description ?? "");
+  const [serverDescription, setServerDescription] = useState(image?.description ?? "");
+  const [version, setVersion] = useState(image?.version ?? 1);
+  const [descriptionState, setDescriptionState] = useState<"idle" | "pending" | "saving" | "saved" | "failed" | "conflict">("idle");
+  const [conflictDraft, setConflictDraft] = useState<string | null>(null);
+  const [shapeError, setShapeError] = useState<string | null>(null);
+  const [labelError, setLabelError] = useState<string | null>(null);
+  const [newLabelName, setNewLabelName] = useState("");
+  const [taxonomy, setTaxonomy] = useState(labels);
+  const lastAttemptedDescriptionRef = useRef<string | null>(null);
+  const annotations = useAnnotationStore((store) => store.persistedAnnotations);
+  const selectedId = useAnnotationStore((store) => store.selectedId);
+  const setSelectedId = useAnnotationStore((store) => store.setSelectedId);
+  const upsertSafeAnnotation = useAnnotationStore((store) => store.upsertSafeAnnotation);
+  const removeSafeAnnotation = useAnnotationStore((store) => store.removeSafeAnnotation);
+  const scheduleAutosave = useAnnotationStore((store) => store.scheduleAutosave);
+  const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
+  const setConflictDraftInStore = useAnnotationStore((store) => store.setConflictDraft);
+
+  useEffect(() => {
+    if (!image || description === serverDescription || lastAttemptedDescriptionRef.current === description) return;
+    const resourceKey = `asset-description:${image.id}`;
+    setDescriptionState("pending");
+    scheduleAutosave(resourceKey, async () => {
+      lastAttemptedDescriptionRef.current = description;
+      setDescriptionState("saving");
+      const result = await updateImageDescriptionAction({
+        datasetId,
+        assetId: image.id,
+        version,
+        description: description.trim() || null,
+      });
+      if (result.ok) {
+        setVersion(result.asset.version);
+        setServerDescription(result.asset.description ?? "");
+        setDescriptionState("saved");
+        return "saved";
+      }
+      if (result.error === "CONFLICT") {
+        setConflictDraft(description);
+        setConflictDraftInStore(resourceKey, description);
+        setDescriptionState("conflict");
+        return "conflict";
+      }
+      setDescriptionState("failed");
+      return "failed";
+    });
+  }, [datasetId, description, image, scheduleAutosave, serverDescription, setConflictDraftInStore, version]);
+
+  if (!image || !assetId) {
+    return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white p-4"><h2 className="text-sm font-bold text-zinc-950">Assets</h2><p className="mt-1 text-xs leading-5 text-zinc-500">Select an image to edit it. Other modalities stay available for their workspace engine.</p><AssetNavigator datasetId={datasetId} assets={images} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardImageNavigation} /></aside>;
   }
 
   const presentation = imageStatusPresentation[image.status];
 
-  return (
-    <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white">
-      <div className="border-b border-zinc-200 p-4">
-        <div className="flex items-center gap-2">
-          <Tag aria-hidden="true" size={17} className="text-sky-600" />
-          <h2 className="text-sm font-bold text-zinc-950">Annotation</h2>
-          <Badge variant="neutral" className="ml-auto">
-            Phase 7
-          </Badge>
-        </div>
-        <p className="mt-4 text-xs leading-5 text-zinc-500">
-          Bounding-box properties and label assignment arrive next. Canvas
-          viewport changes are never persisted as annotations.
-        </p>
-      </div>
+  function scheduleLabelChange(annotationId: string, labelId: string | null) {
+    const annotation = annotations.find((item) => item.id === annotationId);
+    if (!annotation) return;
+    upsertSafeAnnotation({ ...annotation, labelId });
+    scheduleAutosave(`annotation:${annotationId}`, async () => {
+      const result = await updateBoundingBoxLabelAction({
+        datasetId,
+        assetId,
+        annotationId,
+        version: annotation.version,
+        labelId,
+      });
+      if (result.ok) {
+        upsertSafeAnnotation(result.annotation);
+        return "saved";
+      }
+      if (result.error === "CONFLICT") {
+        setConflictDraftInStore(`annotation:${annotationId}`, { labelId });
+        setShapeError("A newer annotation version exists. Your local label choice is still visible.");
+        return "conflict";
+      }
+      setShapeError("The annotation label could not be changed.");
+      return "failed";
+    });
+  }
 
-      <div className="border-b border-zinc-200 p-4">
-        <div className="flex items-center gap-2">
-          <Info aria-hidden="true" size={17} className="text-zinc-400" />
-          <h2 className="text-sm font-bold text-zinc-950">Image details</h2>
-          <Badge variant={presentation.variant} className="ml-auto">
-            {presentation.label}
-          </Badge>
-        </div>
-        <p className="mt-4 break-all text-xs font-semibold text-zinc-800">
-          {image.filename}
-        </p>
-        <p className="mt-1 break-all font-mono text-[10px] leading-4 text-zinc-400">
-          {image.path}
-        </p>
-        <dl className="mt-5 space-y-3 text-xs">
-          <Detail
-            label="Dimensions"
-            value={
-              image.width && image.height
-                ? `${image.width} × ${image.height}`
-                : "Detected on load"
-            }
-          />
-          <Detail label="File size" value={formatBytes(image.sizeBytes)} />
-          <Detail label="Annotations" value={String(image.annotationCount)} />
-          <Detail label="Gitea SHA" value={image.giteaSha.slice(0, 10)} />
-        </dl>
-      </div>
+  async function deleteShape(annotationId: string) {
+    const annotation = annotations.find((item) => item.id === annotationId);
+    if (!annotation) return;
+    const result = await deleteBoundingBoxAction({ datasetId, assetId, annotationId, version: annotation.version });
+    if (result.ok) {
+      removeSafeAnnotation(annotationId);
+      return;
+    }
+    setShapeError(result.error === "CONFLICT" ? "A newer annotation version exists. Reload before deleting." : "The annotation could not be deleted.");
+  }
 
-      <div className="p-4">
-        <div className="flex items-center gap-2">
-          <ClockCounterClockwise
-            aria-hidden="true"
-            size={17}
-            className="text-zinc-400"
-          />
-          <h2 className="text-sm font-bold text-zinc-950">Action history</h2>
+  async function createCustomLabel() {
+    const name = newLabelName.trim();
+    if (!name) return;
+    setLabelError(null);
+    const response = await fetch(`/api/datasets/${datasetId}/labels`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, color: "#0EA5E9", description: "", hotkey: "" }),
+    });
+    const payload = await response.json().catch(() => null) as { data?: SafeWorkspaceLabel; error?: { message?: string } } | null;
+    if (!response.ok || !payload?.data) {
+      setLabelError(payload?.error?.message ?? "The label could not be created.");
+      return;
+    }
+    setTaxonomy((current) => [...current, payload.data!].sort((left, right) => left.name.localeCompare(right.name)));
+    setNewLabelName("");
+  }
+
+  async function deleteLabel(labelId: string) {
+    setLabelError(null);
+    const response = await fetch(`/api/labels/${labelId}`, { method: "DELETE", credentials: "same-origin" });
+    if (response.status === 204) {
+      setTaxonomy((current) => current.filter((label) => label.id !== labelId));
+      return;
+    }
+    const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null;
+    setLabelError(payload?.error?.message ?? "The label could not be deleted.");
+  }
+
+  async function addDefaults() {
+    setLabelError(null);
+    const result = await ensureDefaultImageLabelsAction(datasetId);
+    if (!result.ok) {
+      setLabelError("You do not have permission to establish default labels.");
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function guardImageNavigation(event: MouseEvent<HTMLAnchorElement>, href: string) {
+    event.preventDefault();
+    if (!(await flushBeforeNavigation())) return;
+    router.push(href);
+  }
+
+  async function flushBeforeNavigation() {
+    await flushAllAutosaves();
+    const latestStates = Object.values(useAnnotationStore.getState().saveStates);
+    const needsResolution = latestStates.some((state) => state === "failed" || state === "conflict");
+    return !needsResolution || window.confirm("An image edit could not be saved or has a conflict. Discard the local draft and leave this image?");
+  }
+
+  async function applyAssetFilters(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    // React clears currentTarget once the synchronous handler exits. Capture the
+    // actual form before awaiting an autosave flush so status clicks/submits
+    // cannot hand FormData a non-form target.
+    const formElement = event.currentTarget;
+    if (!(await flushBeforeNavigation())) return;
+    const form = new FormData(formElement);
+    const params = new URLSearchParams({ page: "1" });
+    const nextSearch = String(form.get("q") ?? "").trim();
+    if (nextSearch) params.set("q", nextSearch);
+    const nextStatus = String(form.get("status") ?? "ALL");
+    if (imageStatusOptions.includes(nextStatus as AssetStatus)) params.set("status", nextStatus);
+    router.push(`/workspace/${datasetId}?${params.toString()}`);
+  }
+
+  // The previous Images-tab UX used one clear status choice plus an explicit
+  // “All statuses” reset. Preserve multi-status query compatibility for old
+  // links, while rendering that proven, less error-prone control.
+  const selectedStatus = statuses.length === 1 ? statuses[0] : "ALL";
+
+  return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white">
+    <div className="border-b border-zinc-200 p-4">
+      <div className="flex items-center justify-between gap-3"><h2 className="text-sm font-bold text-zinc-950">Image details</h2><Badge variant={presentation.variant}>{presentation.label}</Badge></div>
+      <p className="mt-3 break-all text-xs font-semibold text-zinc-800">{image.filename}</p>
+      <dl className="mt-4 space-y-2 text-xs"><Detail label="Dimensions" value={image.width && image.height ? `${image.width} × ${image.height}` : "Unknown"} /><Detail label="Annotations" value={String(annotations.length)} /><Detail label="Batch" value={String(image.batchIndex + 1)} /></dl>
+    </div>
+    <nav aria-label="Image management" className="grid grid-cols-4 border-b border-zinc-200">
+      {(["description", "labels", "shapes", "images"] as const).map((entry) => <button key={entry} type="button" onClick={() => setTab(entry)} className={`px-2 py-3 text-xs font-semibold capitalize ${tab === entry ? "border-b-2 border-sky-600 text-sky-700" : "text-zinc-500"}`}>{entry}</button>)}
+    </nav>
+    {tab === "description" && <section className="p-4">
+      <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Description</h2><span className="text-[11px] text-zinc-400">{descriptionState === "pending" ? "Saving after inactivity…" : descriptionState === "saving" ? "Saving…" : descriptionState === "saved" ? "Saved" : descriptionState === "failed" ? "Save failed" : ""}</span></div>
+      <textarea value={description} onChange={(event) => { lastAttemptedDescriptionRef.current = null; setDescription(event.target.value); }} maxLength={10_000} rows={7} className="mt-3 w-full resize-y rounded-xl border border-zinc-200 p-3 text-sm text-zinc-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" placeholder="Scene context, notes, or quality flags" />
+      {descriptionState === "conflict" && <div className="mt-3"><SaveConflictPanel message="Your description draft is still visible and was not sent again." onReload={() => window.location.reload()} onDiscard={() => { setDescription(serverDescription); setConflictDraft(null); setDescriptionState("idle"); }} /></div>}
+      {descriptionState === "failed" && <p role="alert" className="mt-3 text-xs text-rose-700">Description was not saved. Edit it again to retry.</p>}
+      {conflictDraft && <p className="sr-only">Local draft preserved.</p>}
+    </section>}
+    {tab === "labels" && <section className="p-4">
+      <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Labels</h2><button type="button" onClick={() => void addDefaults()} className="text-xs font-semibold text-sky-700">Add defaults</button></div>
+      <div className="mt-3 flex gap-2"><input aria-label="New label name" value={newLabelName} onChange={(event) => setNewLabelName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void createCustomLabel(); } }} className="min-w-0 flex-1 rounded-lg border border-zinc-200 px-2 py-2 text-xs" placeholder="Custom label" /><button type="button" onClick={() => void createCustomLabel()} className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white">Add</button></div>
+      <div className="mt-3 space-y-2">{taxonomy.map((label) => <div key={label.id} className="flex items-center gap-2 rounded-lg border border-zinc-200 px-2 py-2"><span aria-hidden="true" className="h-3 w-3 rounded-full" style={{ backgroundColor: label.color }} /><span className="min-w-0 flex-1 truncate text-xs font-medium text-zinc-800">{label.name}</span><button type="button" onClick={() => void deleteLabel(label.id)} className="text-[11px] font-semibold text-rose-700">Remove</button></div>)}</div>
+      {labelError && <p role="alert" className="mt-3 text-xs text-rose-700">{labelError}</p>}
+    </section>}
+    {tab === "shapes" && <section className="p-4">
+      <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Shapes</h2><span className="text-xs text-zinc-400">{annotations.length}</span></div>
+      <div className="mt-3 space-y-2">{annotations.length === 0 ? <p className="text-xs text-zinc-500">No bounding boxes yet.</p> : annotations.map((annotation) => <div key={annotation.id} className={`rounded-xl border p-2 ${annotation.id === selectedId ? "border-sky-300 bg-sky-50" : "border-zinc-200"}`}><button type="button" onClick={() => setSelectedId(annotation.id)} className="w-full text-left text-xs font-semibold text-zinc-800">Bounding box · {taxonomy.find((label) => label.id === annotation.labelId)?.name ?? "No label"}</button><div className="mt-2 flex gap-1"><select aria-label={`Label for ${annotation.id}`} value={annotation.labelId ?? ""} onChange={(event) => scheduleLabelChange(annotation.id, event.target.value || null)} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-[11px]"><option value="">No label</option>{taxonomy.map((label) => <option key={label.id} value={label.id}>{label.name}</option>)}</select><button type="button" onClick={() => void deleteShape(annotation.id)} className="rounded-lg px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button></div></div>)}</div>
+      {shapeError && <p role="alert" className="mt-3 text-xs text-rose-700">{shapeError}</p>}
+    </section>}
+    {tab === "images" && <section className="p-4">
+      <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Assets</h2><span className="text-xs text-zinc-400">Page {page}</span></div>
+      <p className="mt-1 text-xs text-zinc-500">This workspace page is limited to {pageSize} assets.</p>
+      <form method="get" onSubmit={(event) => { void applyAssetFilters(event); }} className="mt-3 space-y-2">
+        <label className="sr-only" htmlFor="workspace-asset-search">Search assets</label>
+        <input id="workspace-asset-search" name="q" type="search" defaultValue={search} placeholder="Search assets" className="w-full rounded-lg border border-zinc-200 px-2 py-2 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
+        <div className="flex gap-2">
+          <label className="sr-only" htmlFor="workspace-asset-status">Filter by status</label>
+          <select id="workspace-asset-status" name="status" defaultValue={selectedStatus} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-2 text-xs text-zinc-700">
+            <option value="ALL">All statuses</option>
+            {imageStatusOptions.map((option) => <option key={option} value={option}>{imageStatusPresentation[option].label}</option>)}
+          </select>
+          <button type="submit" className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white hover:bg-zinc-800">Apply</button>
         </div>
-        <div className="mt-4 rounded-xl border border-dashed border-zinc-200 p-4 text-center">
-          <p className="text-xs font-medium text-zinc-500">
-            No annotation actions yet
-          </p>
-          <p className="mt-1 text-[11px] leading-4 text-zinc-400">
-            Viewport pan and zoom are intentionally excluded.
-          </p>
-        </div>
-      </div>
-    </aside>
-  );
+      </form>
+      <div className="mt-3" aria-label="Dataset progress"><div className="flex justify-between text-[11px] text-zinc-500"><span>Dataset progress</span><span>{completedAssets} / {totalAssets}</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${totalAssets ? Math.round((completedAssets / totalAssets) * 100) : 0}%` }} /></div></div>
+      <AssetNavigator datasetId={datasetId} assets={images} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardImageNavigation} />
+    </section>}
+  </aside>;
+}
+
+function AssetNavigator({ datasetId, assets, page, pageSize, totalAssets, search, statuses, selectedAssetId, onNavigate }: { datasetId: string; assets: SafeWorkspaceAsset[]; page: number; pageSize: number; totalAssets: number; search: string; statuses: AssetStatus[]; selectedAssetId: string | null; onNavigate: (event: MouseEvent<HTMLAnchorElement>, href: string) => void | Promise<void> }) {
+  const href = (nextPage: number, assetId?: string) => {
+    const params = new URLSearchParams({ page: String(nextPage) });
+    if (search) params.set("q", search);
+    for (const status of statuses) params.append("status", status);
+    if (assetId) params.set("image", assetId);
+    return `/workspace/${datasetId}?${params.toString()}`;
+  };
+  return <div className="mt-3"><div className="space-y-1">{assets.map((asset) => { const assetHref = href(page, asset.id); return <Link key={asset.id} href={assetHref} onClick={(event) => { void onNavigate(event, assetHref); }} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-xs ${asset.id === selectedAssetId ? "bg-sky-50 font-semibold text-sky-800" : "text-zinc-700 hover:bg-zinc-50"}`}><span className="min-w-0 truncate">{asset.filename}</span><span className="shrink-0 font-mono text-[10px] text-zinc-400">{asset.modality}</span></Link>; })}</div><div className="mt-3 flex items-center justify-between gap-2 border-t border-zinc-100 pt-3"><span className="text-[11px] text-zinc-400">{totalAssets === 0 ? "0 assets" : `${Math.min((page - 1) * pageSize + 1, totalAssets)}–${Math.min(page * pageSize, totalAssets)} of ${totalAssets}`}</span><span className="flex gap-1"><PageButton href={href(page - 1)} disabled={page <= 1} label="Previous" onNavigate={onNavigate} /><PageButton href={href(page + 1)} disabled={page * pageSize >= totalAssets} label="Next" onNavigate={onNavigate} /></span></div></div>;
+}
+
+function PageButton({ href, disabled, label, onNavigate }: { href: string; disabled: boolean; label: string; onNavigate: (event: MouseEvent<HTMLAnchorElement>, href: string) => void | Promise<void> }) {
+  return disabled ? <span className="rounded-md border border-zinc-200 px-2 py-1 text-[10px] text-zinc-300">{label}</span> : <Link href={href} onClick={(event) => { void onNavigate(event, href); }} className="rounded-md border border-zinc-200 px-2 py-1 text-[10px] font-semibold text-zinc-600 hover:bg-zinc-50">{label}</Link>;
 }
 
 function Detail({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <dt className="text-zinc-400">{label}</dt>
-      <dd className="max-w-[150px] truncate font-mono text-zinc-700">{value}</dd>
-    </div>
-  );
-}
-
-function formatBytes(bytes: bigint | null) {
-  if (bytes === null) return "Unknown";
-  const value = Number(bytes);
-  if (value < 1024) return `${value} B`;
-  if (value < 1024 ** 2) return `${(value / 1024).toFixed(1)} KB`;
-  return `${(value / 1024 ** 2).toFixed(1)} MB`;
+  return <div className="flex justify-between gap-3"><dt className="text-zinc-400">{label}</dt><dd className="max-w-[150px] truncate font-mono text-zinc-700">{value}</dd></div>;
 }

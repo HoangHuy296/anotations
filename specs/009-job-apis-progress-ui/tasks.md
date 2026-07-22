@@ -12,10 +12,10 @@
 
 **Purpose**: Establish the Phase 009 contracts and test locations without starting import work.
 
-- [ ] T001 Record Phase 009 API/UI scope, explicit import exclusions, and safe browser field prohibitions in `specs/009-job-apis-progress-ui/contracts/job-api.md`
-- [ ] T002 Record durable polling, terminal-state, and action-control behavior in `specs/009-job-apis-progress-ui/contracts/progress-ui.md`
-- [ ] T003 Create Phase 009 fixture helpers for Dataset members, failed/running/queued Jobs, and queue inspection in `apps/web/tests/job-queue/helpers.ts`
-- [ ] T004 [P] Add the Phase 009 test command and test-file discovery coverage in `apps/web/package.json`
+- [X] T001 Record Phase 009 API/UI scope, explicit import exclusions, and safe browser field prohibitions in `specs/009-job-apis-progress-ui/contracts/job-api.md`
+- [X] T002 Record durable polling, terminal-state, and action-control behavior in `specs/009-job-apis-progress-ui/contracts/progress-ui.md`
+- [X] T003 Create Phase 009 fixture helpers for Dataset members, failed/running/queued Jobs, and queue inspection in `apps/web/tests/job-queue/helpers.ts`
+- [X] T004 [P] Add the Phase 009 test command and test-file discovery coverage in `apps/web/package.json`
 
 ---
 
@@ -25,14 +25,14 @@
 
 **⚠️ CRITICAL**: Complete this phase before implementing status/events, cancellation, retry, or UI actions.
 
-- [ ] T005 Add nullable unique `retryOfJobId` self-relation and reverse retry relation to `prisma/schema.prisma`
-- [ ] T006 Create and review the additive retry-lineage migration under `prisma/migrations/`
-- [ ] T007 Generate the Prisma client after T005–T006 using `prisma/schema.prisma`
-- [ ] T008 Add `job.retry` to the Dataset permission type and owner/manager/admin permission policy in `apps/web/src/lib/authorization.ts`
-- [ ] T009 [P] Add Dataset permission matrix coverage for `job.retry` and preserve non-member 404 behavior in `apps/web/tests/auth-ownership/permission-matrix.test.ts`
-- [ ] T010 Create a server-only allowlist mapper and cursor schema for SafeJobEvent without returning `JobEvent.data` in `apps/web/src/lib/jobs/safe-job-event.ts`
-- [ ] T011 Create shared Job action/status validation and Job-specific safe error-code helpers in `apps/web/src/lib/validation/job.ts` and `apps/web/src/lib/api-response.ts`
-- [ ] T012 Extend Job authorization helpers with action-scoped lookup and safe conflict results in `apps/web/src/lib/jobs/authorization.ts`
+- [X] T005 Add nullable unique `retryOfJobId` self-relation and reverse retry relation to `prisma/schema.prisma`
+- [X] T006 Create and review the additive retry-lineage migration under `prisma/migrations/`
+- [X] T007 Generate the Prisma client after T005–T006 using `prisma/schema.prisma`
+- [X] T008 Add `job.retry` to the Dataset permission type and owner/manager/admin permission policy in `apps/web/src/lib/authorization.ts`
+- [X] T009 [P] Add Dataset permission matrix coverage for `job.retry` and preserve non-member 404 behavior in `apps/web/tests/auth-ownership/permission-matrix.test.ts`
+- [X] T010 Create a server-only allowlist mapper and cursor schema for SafeJobEvent without returning `JobEvent.data` in `apps/web/src/lib/jobs/safe-job-event.ts`
+- [X] T011 Create shared Job action/status validation and Job-specific safe error-code helpers in `apps/web/src/lib/validation/job.ts` and `apps/web/src/lib/api-response.ts`
+- [X] T012 Extend Job authorization helpers with action-scoped lookup and safe conflict results in `apps/web/src/lib/jobs/authorization.ts`
 
 **Checkpoint**: Retry lineage is durable, authorization is explicit, and shared server helpers cannot expose raw Job or JobEvent data.
 
@@ -46,17 +46,17 @@
 
 ### Tests for User Story 1
 
-- [ ] T013 [P] [US1] Add status-route authorization, safe summary, and prohibited-field regression coverage in `apps/web/tests/job-queue/status-route.test.ts`
-- [ ] T014 [P] [US1] Add cursor, ordering, allowlisted-event, raw-`data` redaction, member 200, non-member 404, and forbidden 403 coverage in `apps/web/tests/job-queue/events-route.test.ts`
-- [ ] T015 [P] [US1] Add pure progress/stage/counter and non-terminal polling lifecycle tests in `apps/web/tests/job-queue/job-progress-view.test.ts`
+- [X] T013 [P] [US1] Add status-route authorization, safe summary, and prohibited-field regression coverage in `apps/web/tests/job-queue/status-route.test.ts`
+- [X] T014 [P] [US1] Add cursor, ordering, allowlisted-event, raw-`data` redaction, member 200, non-member 404, and forbidden 403 coverage in `apps/web/tests/job-queue/events-route.test.ts`
+- [X] T015 [P] [US1] Add pure progress/stage/counter and non-terminal polling lifecycle tests in `apps/web/tests/job-queue/job-progress-view.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Update the existing safe status read and Job-specific not-found response in `apps/web/src/app/api/jobs/[jobId]/route.ts`
-- [ ] T017 [US1] Implement bounded authorized SafeJobEvent history endpoint in `apps/web/src/app/api/jobs/[jobId]/events/route.ts`
-- [ ] T018 [P] [US1] Create client-safe Job status/event display types and polling state helpers in `apps/web/src/lib/jobs/job-progress-view.ts`
-- [ ] T019 [P] [US1] Implement progress card, stage indicator, progress bar, counters, and event list components in `apps/web/src/components/jobs/job-progress-card.tsx`, `apps/web/src/components/jobs/job-stage-indicator.tsx`, `apps/web/src/components/jobs/job-progress-bar.tsx`, and `apps/web/src/components/jobs/job-event-list.tsx`
-- [ ] T020 [US1] Implement the authorized Job detail page and non-terminal visible-page polling in `apps/web/src/app/(app)/jobs/[jobId]/page.tsx`
+- [X] T016 [US1] Update the existing safe status read and Job-specific not-found response in `apps/web/src/app/api/jobs/[jobId]/route.ts`
+- [X] T017 [US1] Implement bounded authorized SafeJobEvent history endpoint in `apps/web/src/app/api/jobs/[jobId]/events/route.ts`
+- [X] T018 [P] [US1] Create client-safe Job status/event display types and polling state helpers in `apps/web/src/lib/jobs/job-progress-view.ts`
+- [X] T019 [P] [US1] Implement progress card, stage indicator, progress bar, counters, and event list components in `apps/web/src/components/jobs/job-progress-card.tsx`, `apps/web/src/components/jobs/job-stage-indicator.tsx`, `apps/web/src/components/jobs/job-progress-bar.tsx`, and `apps/web/src/components/jobs/job-event-list.tsx`
+- [X] T020 [US1] Implement the authorized Job detail page and non-terminal visible-page polling in `apps/web/src/app/(app)/jobs/[jobId]/page.tsx`
 
 **Checkpoint**: An authorized member can independently monitor one Job without reading queue state or private event data.
 
@@ -70,16 +70,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T021 [P] [US2] Add HTTP cancellation matrix for owner/manager/reviewer/labeler/non-member, queued/retrying/running/terminal states, 404/403 behavior, and no-side-effect denials in `apps/web/tests/job-queue/cancel-route.test.ts`
-- [ ] T022 [P] [US2] Add cancellation race and allowlisted cancellation-event assertions using Prisma fixtures in `apps/web/tests/job-queue/cancel-route.test.ts`
-- [ ] T023 [P] [US2] Add worker regression coverage proving only a current unexpired lease acknowledges RUNNING cancellation in `apps/worker/tests/queue/lifecycle-mutations.test.ts`
+- [X] T021 [P] [US2] Add HTTP cancellation matrix for owner/manager/reviewer/labeler/non-member, queued/retrying/running/terminal states, 404/403 behavior, and no-side-effect denials in `apps/web/tests/job-queue/cancel-route.test.ts`
+- [X] T022 [P] [US2] Add cancellation race and allowlisted cancellation-event assertions using Prisma fixtures in `apps/web/tests/job-queue/cancel-route.test.ts`
+- [X] T023 [P] [US2] Add worker regression coverage proving only a current unexpired lease acknowledges RUNNING cancellation in `apps/worker/tests/queue/lifecycle-mutations.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Implement state-aware authorized cancellation mutation: direct terminal cancel for unclaimed QUEUED/unlocked RETRYING and CANCELING request for RUNNING in `apps/web/src/lib/jobs/authorization.ts`
-- [ ] T025 [US2] Append only allowlisted successful cancellation-request events in `apps/web/src/lib/jobs/safe-job-event.ts` and `apps/web/src/lib/jobs/authorization.ts`
-- [ ] T026 [US2] Implement the Dataset-authorized cancellation endpoint with safe 400/403/404/409 responses in `apps/web/src/app/api/jobs/[jobId]/cancel/route.ts`
-- [ ] T027 [US2] Add the cancellation action state, disabled/pending behavior, and durable refresh integration to `apps/web/src/components/jobs/job-action-buttons.tsx` and `apps/web/src/app/(app)/jobs/[jobId]/page.tsx`
+- [X] T024 [US2] Implement state-aware authorized cancellation mutation: direct terminal cancel for unclaimed QUEUED/unlocked RETRYING and CANCELING request for RUNNING in `apps/web/src/lib/jobs/authorization.ts`
+- [X] T025 [US2] Append only allowlisted successful cancellation-request events in `apps/web/src/lib/jobs/safe-job-event.ts` and `apps/web/src/lib/jobs/authorization.ts`
+- [X] T026 [US2] Implement the Dataset-authorized cancellation endpoint with safe 400/403/404/409 responses in `apps/web/src/app/api/jobs/[jobId]/cancel/route.ts`
+- [X] T027 [US2] Add the cancellation action state, disabled/pending behavior, and durable refresh integration to `apps/web/src/components/jobs/job-action-buttons.tsx` and `apps/web/src/app/(app)/jobs/[jobId]/page.tsx`
 
 **Checkpoint**: Browser cancellation is authorized and durable; it never carries a lock token or bypasses worker-side final cancellation.
 
@@ -93,16 +93,16 @@
 
 ### Tests for User Story 3
 
-- [ ] T028 [P] [US3] Add schema/migration integration coverage for one unique retry successor and preserved failed original in `apps/web/tests/job-queue/retry-route.test.ts`
-- [ ] T029 [P] [US3] Add retry HTTP authorization, terminal-state eligibility, unsupported-type conflict, queue-payload redaction, and denial-side-effect coverage in `apps/web/tests/job-queue/retry-route.test.ts`
-- [ ] T030 [P] [US3] Add concurrent retry assertions proving one successor and one queue delivery for one original Job in `apps/web/tests/job-queue/retry-route.test.ts`
+- [X] T028 [P] [US3] Add schema/migration integration coverage for one unique retry successor and preserved failed original in `apps/web/tests/job-queue/retry-route.test.ts`
+- [X] T029 [P] [US3] Add retry HTTP authorization, terminal-state eligibility, unsupported-type conflict, queue-payload redaction, and denial-side-effect coverage in `apps/web/tests/job-queue/retry-route.test.ts`
+- [X] T030 [P] [US3] Add concurrent retry assertions proving one successor and one queue delivery for one original Job in `apps/web/tests/job-queue/retry-route.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T031 [US3] Define type-specific allowlisted retry-context extraction that excludes raw input/state/errors/connections/storage fields in `apps/web/src/lib/jobs/retry-job.ts`
-- [ ] T032 [US3] Implement transaction-safe failed-Job successor creation/reuse using `retryOfJobId`, fresh lifecycle fields, and the existing enqueue service in `apps/web/src/lib/jobs/retry-job.ts`
-- [ ] T033 [US3] Implement Dataset-authorized retry endpoint with 200 existing-successor, 201 new-successor, and safe 403/404/409 responses in `apps/web/src/app/api/jobs/[jobId]/retry/route.ts`
-- [ ] T034 [US3] Add failed-only retry control and successor navigation/refresh behavior in `apps/web/src/components/jobs/job-action-buttons.tsx` and `apps/web/src/app/(app)/jobs/[jobId]/page.tsx`
+- [X] T031 [US3] Define type-specific allowlisted retry-context extraction that excludes raw input/state/errors/connections/storage fields in `apps/web/src/lib/jobs/retry-job.ts`
+- [X] T032 [US3] Implement transaction-safe failed-Job successor creation/reuse using `retryOfJobId`, fresh lifecycle fields, and the existing enqueue service in `apps/web/src/lib/jobs/retry-job.ts`
+- [X] T033 [US3] Implement Dataset-authorized retry endpoint with 200 existing-successor, 201 new-successor, and safe 403/404/409 responses in `apps/web/src/app/api/jobs/[jobId]/retry/route.ts`
+- [X] T034 [US3] Add failed-only retry control and successor navigation/refresh behavior in `apps/web/src/components/jobs/job-action-buttons.tsx` and `apps/web/src/app/(app)/jobs/[jobId]/page.tsx`
 
 **Checkpoint**: A failed delivery-supported Job has at most one direct successor and retains its immutable failure history.
 
@@ -116,13 +116,13 @@
 
 ### Tests for User Story 4
 
-- [ ] T035 [P] [US4] Add safe-summary allowlist/null and raw summary/error redaction coverage in `apps/web/tests/job-queue/status-route.test.ts`
-- [ ] T036 [P] [US4] Add error-panel display-model tests for absent, completed, failed, and canceled summaries in `apps/web/tests/job-queue/job-progress-view.test.ts`
+- [X] T035 [P] [US4] Add safe-summary allowlist/null and raw summary/error redaction coverage in `apps/web/tests/job-queue/status-route.test.ts`
+- [X] T036 [P] [US4] Add error-panel display-model tests for absent, completed, failed, and canceled summaries in `apps/web/tests/job-queue/job-progress-view.test.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T037 [US4] Implement strict safe-summary sanitization without serializing raw Prisma JSON in `apps/web/src/lib/jobs/safe-job-status.ts`
-- [ ] T038 [US4] Implement safe error panel rendering and integrate it with the Job progress card in `apps/web/src/components/jobs/job-error-panel.tsx` and `apps/web/src/components/jobs/job-progress-card.tsx`
+- [X] T037 [US4] Implement strict safe-summary sanitization without serializing raw Prisma JSON in `apps/web/src/lib/jobs/safe-job-status.ts`
+- [X] T038 [US4] Implement safe error panel rendering and integrate it with the Job progress card in `apps/web/src/components/jobs/job-error-panel.tsx` and `apps/web/src/components/jobs/job-progress-card.tsx`
 
 **Checkpoint**: Failed Job information is actionable for members and safe for the browser.
 
@@ -132,10 +132,10 @@
 
 **Purpose**: Confirm the public contract, security boundaries, migration, and runtime behavior together.
 
-- [ ] T039 Update Phase 009 contract and validation records with implemented response/error semantics in `specs/009-job-apis-progress-ui/contracts/job-api.md` and `specs/009-job-apis-progress-ui/quickstart.md`
-- [ ] T040 [P] Audit all Phase 009 routes/components for prohibited Job, JobEvent, queue, lock, provider, credential, storage, binary, and import fields in `apps/web/src/app/api/jobs/` and `apps/web/src/components/jobs/`
-- [ ] T041 Run Prisma validation/generation, the retry migration, web typecheck/build, web Job tests, and worker queue regressions; record results in `specs/009-job-apis-progress-ui/quickstart.md`
-- [ ] T042 Confirm no commit-import endpoint, PreparedImport model, import staging, IMPORT_DATASET queue support, or import worker processor was introduced in `apps/web/src/app/api/jobs/`, `prisma/schema.prisma`, `packages/queue/src/job-contract.ts`, and `apps/worker/src/`
+- [X] T039 Update Phase 009 contract and validation records with implemented response/error semantics in `specs/009-job-apis-progress-ui/contracts/job-api.md` and `specs/009-job-apis-progress-ui/quickstart.md`
+- [X] T040 [P] Audit all Phase 009 routes/components for prohibited Job, JobEvent, queue, lock, provider, credential, storage, binary, and import fields in `apps/web/src/app/api/jobs/` and `apps/web/src/components/jobs/`
+- [X] T041 Run Prisma validation/generation, the retry migration, web typecheck/build, web Job tests, and worker queue regressions; record results in `specs/009-job-apis-progress-ui/quickstart.md`
+- [X] T042 Confirm no commit-import endpoint, PreparedImport model, import staging, IMPORT_DATASET queue support, or import worker processor was introduced in `apps/web/src/app/api/jobs/`, `prisma/schema.prisma`, `packages/queue/src/job-contract.ts`, and `apps/worker/src/`
 
 ---
 

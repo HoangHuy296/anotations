@@ -3,9 +3,9 @@ import { DatasetMemberRole, UserRole } from "@internal/db";
 import type { RequestActor } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-export type DatasetPermission = "dataset.read" | "dataset.update" | "dataset.delete" | "member.manage" | "asset.upload" | "asset.delete" | "label.manage" | "annotation.create" | "annotation.updateOwn" | "annotation.updateAny" | "annotation.review" | "repository.sync" | "job.createExport" | "job.cancel";
+export type DatasetPermission = "dataset.read" | "dataset.update" | "dataset.delete" | "member.manage" | "asset.upload" | "asset.delete" | "label.manage" | "annotation.create" | "annotation.updateOwn" | "annotation.updateAny" | "annotation.review" | "repository.sync" | "job.createExport" | "job.cancel" | "job.retry";
 export const DATASET_ROLE_PERMISSIONS: Record<DatasetMemberRole, readonly (DatasetPermission | "*")[]> = {
-  OWNER: ["*"], MANAGER: ["dataset.read", "dataset.update", "member.manage", "asset.upload", "asset.delete", "label.manage", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "repository.sync", "job.createExport", "job.cancel"], REVIEWER: ["dataset.read", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "job.createExport"], LABELER: ["dataset.read", "annotation.create", "annotation.updateOwn"],
+  OWNER: ["*"], MANAGER: ["dataset.read", "dataset.update", "member.manage", "asset.upload", "asset.delete", "label.manage", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "repository.sync", "job.createExport", "job.cancel", "job.retry"], REVIEWER: ["dataset.read", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "job.createExport"], LABELER: ["dataset.read", "annotation.create", "annotation.updateOwn"],
 };
 export function canCreateDataset(actor: RequestActor) { return actor.role === UserRole.ADMIN || actor.role === UserRole.MANAGER; }
 export async function requireDatasetPermission(actor: RequestActor, datasetId: string, permission: DatasetPermission) {

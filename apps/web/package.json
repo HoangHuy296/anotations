@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "sh -c 'set -a; [ -f ../../.env ] && . ../../.env; set +a; exec ./node_modules/.bin/next dev'",
+    "build": "sh -c 'set -a; [ -f ../../.env ] && . ../../.env; set +a; exec ./node_modules/.bin/next build'",
+    "start": "sh -c 'set -a; [ -f ../../.env ] && . ../../.env; set +a; exec ./node_modules/.bin/next start'",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:auth-ownership": "node --env-file=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/auth-ownership/**/*.test.ts",
     "test:dataset-metadata": "node --env-file=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/dataset-metadata/**/*.test.ts",
     "test:direct-upload": "node --env-file=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/direct-upload/**/*.test.ts",
-    "test:job-queue": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/job-queue/**/*.test.ts"
+    "test:job-queue": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/job-queue/**/*.test.ts",
+    "test:local-folder-import": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/local-folder-import/**/*.test.ts",
+    "test:workspace": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/workspace/**/*.test.ts"
   },
   "dependencies": {
     "@fieldframe/domain": "workspace:*",

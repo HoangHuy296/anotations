@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { datasetIdSchema } from "@/lib/validation/dataset";
 
 export const labelSchema = z.object({
-  datasetId: z.string().cuid("Select a valid dataset."),
+  datasetId: datasetIdSchema,
   name: z
     .string()
     .trim()

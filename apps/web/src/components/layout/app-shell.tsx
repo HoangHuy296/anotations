@@ -11,6 +11,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AppMark } from "@/components/layout/app-mark";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -98,6 +99,7 @@ export function AppShell({
               >
                 OP
               </span>
+              <SignOutButton />
             </div>
           </header>
 

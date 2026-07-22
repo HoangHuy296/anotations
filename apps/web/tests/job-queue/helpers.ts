@@ -1,11 +1,30 @@
 import { randomBytes } from "node:crypto";
 
 import { DatasetMemberRole, JobStatus, JobType, UserRole } from "@internal/db";
-import { createQueueTransport } from "@fieldframe/queue";
+import { createQueueTransport, readSafeLocalQueueTestConfig, type SafeLocalQueueTestConfig } from "@fieldframe/queue";
 
 import { db } from "@/lib/db";
 
-export const hasQueueIntegration = Boolean(process.env.DATABASE_URL && process.env.REDIS_HOST);
+let queueTestConfig: SafeLocalQueueTestConfig | null = null;
+export let queueIntegrationSkipReason: string | undefined;
+
+try {
+  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not configured");
+  queueTestConfig = readSafeLocalQueueTestConfig();
+} catch (error) {
+  void error;
+  queueIntegrationSkipReason = "full queue integration skipped: safe local Redis configuration is incomplete or violates the controlled-test policy";
+  // Node's test-file reporter can hide individual skipped test reasons. Keep
+  // the opt-out explicit in CI and local output without attempting a fallback.
+  console.warn(queueIntegrationSkipReason);
+}
+
+export const hasQueueIntegration = queueTestConfig !== null;
+
+function requireQueueTestConfig() {
+  if (!queueTestConfig) throw new Error(queueIntegrationSkipReason);
+  return queueTestConfig;
+}
 
 function marker(prefix: string) {
   return `${prefix}-${Date.now()}-${randomBytes(5).toString("hex")}`;
@@ -35,6 +54,10 @@ export async function createJobQueueFixture() {
     outsider: { ...outsider, name: outsider.name ?? outsider.email },
     datasetId: dataset.id,
     otherDatasetId: otherDataset.id,
+    createJob: (input: { datasetId?: string; createdById?: string; type?: JobType; status?: JobStatus } = {}) => db.job.create({
+      data: { datasetId: input.datasetId ?? dataset.id, createdById: input.createdById ?? owner.id, type: input.type ?? JobType.EXPORT_DATASET, status: input.status ?? JobStatus.QUEUED, input: { fixture: true } },
+      select: { id: true },
+    }),
     createQueuedJob: (datasetId = dataset.id, createdById = owner.id) => db.job.create({
       data: { datasetId, createdById, type: JobType.EXPORT_DATASET, status: JobStatus.QUEUED, input: { fixture: true } },
       select: { id: true },
@@ -47,12 +70,13 @@ export async function createJobQueueFixture() {
 }
 
 export function createQueueInspector() {
-  const port = Number.parseInt(process.env.REDIS_PORT ?? "6379", 10);
+  const config = requireQueueTestConfig();
   const queue = createQueueTransport({
-    host: process.env.REDIS_HOST ?? "redis",
-    port,
-    password: process.env.REDIS_PASSWORD ?? "",
-    prefix: process.env.BULLMQ_PREFIX ?? "annotation-platform",
+    host: config.REDIS_HOST,
+    port: config.REDIS_PORT,
+    password: config.REDIS_PASSWORD,
+    db: config.REDIS_TEST_DB,
+    prefix: config.REDIS_TEST_PREFIX,
   });
   return {
     find: (jobId: string) => queue.getJob(jobId),

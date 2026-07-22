@@ -14,7 +14,7 @@ test("malformed, unknown, cancelled, non-queued, inactive, and unsupported deliv
       fixture.createJob({ cancelRequestedAt: new Date() }),
       fixture.createJob({ status: "RUNNING" }),
       fixture.createJob({ datasetId: archived.id }),
-      fixture.createJob({ type: "IMPORT_DATASET" }),
+      fixture.db.job.create({ data: { datasetId: fixture.datasetId, createdById: fixture.ownerId, type: "AI_TASK_SYNC", status: "QUEUED" }, select: { id: true } }),
     ]);
     const before = await fixture.db.job.count();
     assert.deepEqual(await routeQueueDelivery({ db: fixture.db, payload: { jobId: cancelled.id, input: {} } }), { kind: "skipped", reason: "MALFORMED_PAYLOAD" });
@@ -28,4 +28,13 @@ test("malformed, unknown, cancelled, non-queued, inactive, and unsupported deliv
   } finally {
     await fixture.cleanup();
   }
+});
+
+test("IMPORT_DATASET is an approved durable delivery", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createWorkerJobFixture();
+  try {
+    const job = await fixture.createJob({ type: "IMPORT_DATASET" });
+    assert.deepEqual(await routeQueueDelivery({ db: fixture.db, payload: { jobId: job.id }, workerId: "import-router-test" }), { kind: "claimed", jobId: job.id });
+    assert.equal((await fixture.db.job.findUniqueOrThrow({ where: { id: job.id }, select: { status: true } })).status, "RUNNING");
+  } finally { await fixture.cleanup(); }
 });

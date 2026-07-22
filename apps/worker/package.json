@@ -9,7 +9,8 @@
     "start": "node --import tsx src/index.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test:queue": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/queue/**/*.test.ts"
+    "test:queue": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/queue/**/*.test.ts",
+    "test:import": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/queue/import-*.test.ts"
   },
   "dependencies": {
     "@fieldframe/domain": "workspace:*",

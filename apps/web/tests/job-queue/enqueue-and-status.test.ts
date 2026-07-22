@@ -6,9 +6,9 @@ import { fieldframeQueueName } from "@fieldframe/queue";
 
 import { db } from "@/lib/db";
 import { createAndEnqueueFoundationJob } from "@/lib/queue/enqueue-job";
-import { createJobQueueFixture, createQueueInspector, hasQueueIntegration } from "./helpers";
+import { createJobQueueFixture, createQueueInspector, queueIntegrationSkipReason } from "./helpers";
 
-test("an authorized foundation Job is durable, delivered by its own id, and transport-stamped", { skip: !hasQueueIntegration }, async () => {
+test("an authorized foundation Job is durable, delivered by its own id, and transport-stamped", { skip: queueIntegrationSkipReason }, async () => {
   const fixture = await createJobQueueFixture();
   const inspector = createQueueInspector();
   try {

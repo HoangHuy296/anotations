@@ -397,6 +397,8 @@ export const ModelName = {
   ExternalRepository: 'ExternalRepository',
   SourceConnection: 'SourceConnection',
   Dataset: 'Dataset',
+  PreparedImport: 'PreparedImport',
+  PreparedImportItem: 'PreparedImportItem',
   DatasetMember: 'DatasetMember',
   Asset: 'Asset',
   AssetVersion: 'AssetVersion',
@@ -424,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "authSession" | "job" | "jobEvent" | "externalRepository" | "sourceConnection" | "dataset" | "datasetMember" | "asset" | "assetVersion" | "label" | "annotation" | "imageAsset" | "videoAsset" | "videoObjectTrack" | "textDocument" | "audioAsset" | "audioSpeaker" | "aiTask"
+    modelProps: "user" | "authSession" | "job" | "jobEvent" | "externalRepository" | "sourceConnection" | "dataset" | "preparedImport" | "preparedImportItem" | "datasetMember" | "asset" | "assetVersion" | "label" | "annotation" | "imageAsset" | "videoAsset" | "videoObjectTrack" | "textDocument" | "audioAsset" | "audioSpeaker" | "aiTask"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -943,6 +945,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.DatasetCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.DatasetCountAggregateOutputType> | number
+        }
+      }
+    }
+    PreparedImport: {
+      payload: Prisma.$PreparedImportPayload<ExtArgs>
+      fields: Prisma.PreparedImportFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PreparedImportFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PreparedImportFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>
+        }
+        findFirst: {
+          args: Prisma.PreparedImportFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PreparedImportFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>
+        }
+        findMany: {
+          args: Prisma.PreparedImportFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>[]
+        }
+        create: {
+          args: Prisma.PreparedImportCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>
+        }
+        createMany: {
+          args: Prisma.PreparedImportCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PreparedImportCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>[]
+        }
+        delete: {
+          args: Prisma.PreparedImportDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>
+        }
+        update: {
+          args: Prisma.PreparedImportUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>
+        }
+        deleteMany: {
+          args: Prisma.PreparedImportDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PreparedImportUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PreparedImportUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>[]
+        }
+        upsert: {
+          args: Prisma.PreparedImportUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportPayload>
+        }
+        aggregate: {
+          args: Prisma.PreparedImportAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePreparedImport>
+        }
+        groupBy: {
+          args: Prisma.PreparedImportGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PreparedImportGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PreparedImportCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PreparedImportCountAggregateOutputType> | number
+        }
+      }
+    }
+    PreparedImportItem: {
+      payload: Prisma.$PreparedImportItemPayload<ExtArgs>
+      fields: Prisma.PreparedImportItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PreparedImportItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PreparedImportItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>
+        }
+        findFirst: {
+          args: Prisma.PreparedImportItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PreparedImportItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>
+        }
+        findMany: {
+          args: Prisma.PreparedImportItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>[]
+        }
+        create: {
+          args: Prisma.PreparedImportItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>
+        }
+        createMany: {
+          args: Prisma.PreparedImportItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PreparedImportItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>[]
+        }
+        delete: {
+          args: Prisma.PreparedImportItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>
+        }
+        update: {
+          args: Prisma.PreparedImportItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.PreparedImportItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PreparedImportItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PreparedImportItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.PreparedImportItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PreparedImportItemPayload>
+        }
+        aggregate: {
+          args: Prisma.PreparedImportItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePreparedImportItem>
+        }
+        groupBy: {
+          args: Prisma.PreparedImportItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PreparedImportItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PreparedImportItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PreparedImportItemCountAggregateOutputType> | number
         }
       }
     }
@@ -1911,6 +2061,10 @@ export const JobScalarFieldEnum = {
   modality: 'modality',
   status: 'status',
   stage: 'stage',
+  queueName: 'queueName',
+  queueJobId: 'queueJobId',
+  enqueuedAt: 'enqueuedAt',
+  dequeuedAt: 'dequeuedAt',
   priority: 'priority',
   priorityValue: 'priorityValue',
   trigger: 'trigger',
@@ -1944,12 +2098,9 @@ export const JobScalarFieldEnum = {
   idempotencyKey: 'idempotencyKey',
   resultStorageKey: 'resultStorageKey',
   resultFilename: 'resultFilename',
-  queueName: 'queueName',
-  queueJobId: 'queueJobId',
-  enqueuedAt: 'enqueuedAt',
-  dequeuedAt: 'dequeuedAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  retryOfJobId: 'retryOfJobId'
 } as const
 
 export type JobScalarFieldEnum = (typeof JobScalarFieldEnum)[keyof typeof JobScalarFieldEnum]
@@ -2041,6 +2192,44 @@ export const DatasetScalarFieldEnum = {
 } as const
 
 export type DatasetScalarFieldEnum = (typeof DatasetScalarFieldEnum)[keyof typeof DatasetScalarFieldEnum]
+
+
+export const PreparedImportScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  jobId: 'jobId',
+  createdById: 'createdById',
+  status: 'status',
+  expectedItemCount: 'expectedItemCount',
+  deadlineAt: 'deadlineAt',
+  committedAt: 'committedAt',
+  idempotencyKey: 'idempotencyKey',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PreparedImportScalarFieldEnum = (typeof PreparedImportScalarFieldEnum)[keyof typeof PreparedImportScalarFieldEnum]
+
+
+export const PreparedImportItemScalarFieldEnum = {
+  id: 'id',
+  preparedImportId: 'preparedImportId',
+  logicalPath: 'logicalPath',
+  normalizedPath: 'normalizedPath',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  modality: 'modality',
+  position: 'position',
+  fingerprint: 'fingerprint',
+  storageKey: 'storageKey',
+  assetId: 'assetId',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PreparedImportItemScalarFieldEnum = (typeof PreparedImportItemScalarFieldEnum)[keyof typeof PreparedImportItemScalarFieldEnum]
 
 
 export const DatasetMemberScalarFieldEnum = {
@@ -2646,16 +2835,16 @@ export type ListEnumAssetSyncStatusFieldRefInput<$PrismaModel> = FieldRefInputTy
 
 
 /**
- * Reference to a field of type 'DatasetMemberRole'
+ * Reference to a field of type 'PreparedImportStatus'
  */
-export type EnumDatasetMemberRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DatasetMemberRole'>
+export type EnumPreparedImportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PreparedImportStatus'>
     
 
 
 /**
- * Reference to a field of type 'DatasetMemberRole[]'
+ * Reference to a field of type 'PreparedImportStatus[]'
  */
-export type ListEnumDatasetMemberRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DatasetMemberRole[]'>
+export type ListEnumPreparedImportStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PreparedImportStatus[]'>
     
 
 
@@ -2670,6 +2859,20 @@ export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'BigInt[]'
  */
 export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DatasetMemberRole'
+ */
+export type EnumDatasetMemberRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DatasetMemberRole'>
+    
+
+
+/**
+ * Reference to a field of type 'DatasetMemberRole[]'
+ */
+export type ListEnumDatasetMemberRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DatasetMemberRole[]'>
     
 
 
@@ -2913,6 +3116,8 @@ export type GlobalOmitConfig = {
   externalRepository?: Prisma.ExternalRepositoryOmit
   sourceConnection?: Prisma.SourceConnectionOmit
   dataset?: Prisma.DatasetOmit
+  preparedImport?: Prisma.PreparedImportOmit
+  preparedImportItem?: Prisma.PreparedImportItemOmit
   datasetMember?: Prisma.DatasetMemberOmit
   asset?: Prisma.AssetOmit
   assetVersion?: Prisma.AssetVersionOmit

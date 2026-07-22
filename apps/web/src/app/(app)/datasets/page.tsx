@@ -143,7 +143,9 @@ export default async function DatasetsPage() {
                       </span>
                       <div className="min-w-0">
                         <h2 className="truncate text-sm font-bold text-zinc-950">
-                          {dataset.name}
+                          <Link className="rounded-sm outline-none hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-400" href={`/workspace/${dataset.id}`} aria-label={`Open ${dataset.name} workspace`}>
+                            {dataset.name}
+                          </Link>
                         </h2>
                         <p className="mt-1 truncate font-mono text-[10px] text-zinc-400">
                           {dataset.externalRepository?.fullName ?? "Local dataset"}

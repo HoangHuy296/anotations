@@ -8,6 +8,7 @@ import {
   ensureBucket,
 } from "./providers/index.js";
 import { createFoundationWorker } from "./queue/bullmq-worker.js";
+import { failExpiredPreparedImports } from "./queue/import-timeout-scanner.js";
 
 export async function startWorkerReadiness() {
   let closeOnError: (() => Promise<void>) | undefined;
@@ -42,6 +43,9 @@ export async function startWorkerReadiness() {
       await Promise.allSettled([foundationWorker.close(), queue.close(), connection.quit(), db.$disconnect()]);
     };
     await foundationWorker.worker.waitUntilReady();
+    await failExpiredPreparedImports(db).catch(() => undefined);
+    const importTimeoutTimer = setInterval(() => { void failExpiredPreparedImports(db); }, 60_000);
+    importTimeoutTimer.unref();
     await Promise.allSettled([queue.close(), connection.quit()]);
 
     const shutdown = async () => {

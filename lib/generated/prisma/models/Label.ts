@@ -234,8 +234,8 @@ export type LabelWhereInput = {
   properties?: Prisma.JsonFilter<"Label">
   createdAt?: Prisma.DateTimeFilter<"Label"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Label"> | Date | string
-  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   annotations?: Prisma.AnnotationListRelationFilter
+  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   videoTracks?: Prisma.VideoObjectTrackListRelationFilter
 }
 
@@ -252,8 +252,8 @@ export type LabelOrderByWithRelationInput = {
   properties?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  dataset?: Prisma.DatasetOrderByWithRelationInput
   annotations?: Prisma.AnnotationOrderByRelationAggregateInput
+  dataset?: Prisma.DatasetOrderByWithRelationInput
   videoTracks?: Prisma.VideoObjectTrackOrderByRelationAggregateInput
 }
 
@@ -274,8 +274,8 @@ export type LabelWhereUniqueInput = Prisma.AtLeast<{
   properties?: Prisma.JsonFilter<"Label">
   createdAt?: Prisma.DateTimeFilter<"Label"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Label"> | Date | string
-  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   annotations?: Prisma.AnnotationListRelationFilter
+  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   videoTracks?: Prisma.VideoObjectTrackListRelationFilter
 }, "id" | "datasetId_normalizedName">
 
@@ -327,8 +327,8 @@ export type LabelCreateInput = {
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutLabelsInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutLabelInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutLabelsInput
   videoTracks?: Prisma.VideoObjectTrackCreateNestedManyWithoutLabelInput
 }
 
@@ -361,8 +361,8 @@ export type LabelUpdateInput = {
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutLabelsNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutLabelNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutLabelsNestedInput
   videoTracks?: Prisma.VideoObjectTrackUpdateManyWithoutLabelNestedInput
 }
 
@@ -736,8 +736,8 @@ export type LabelCreateWithoutVideoTracksInput = {
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutLabelsInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutLabelInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutLabelsInput
 }
 
 export type LabelUncheckedCreateWithoutVideoTracksInput = {
@@ -784,8 +784,8 @@ export type LabelUpdateWithoutVideoTracksInput = {
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutLabelsNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutLabelNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutLabelsNestedInput
 }
 
 export type LabelUncheckedUpdateWithoutVideoTracksInput = {
@@ -917,8 +917,8 @@ export type LabelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   properties?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   annotations?: boolean | Prisma.Label$annotationsArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   videoTracks?: boolean | Prisma.Label$videoTracksArgs<ExtArgs>
   _count?: boolean | Prisma.LabelCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["label"]>
@@ -972,8 +972,8 @@ export type LabelSelectScalar = {
 
 export type LabelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "modality" | "scope" | "name" | "normalizedName" | "color" | "description" | "hotkey" | "properties" | "createdAt" | "updatedAt", ExtArgs["result"]["label"]>
 export type LabelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   annotations?: boolean | Prisma.Label$annotationsArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   videoTracks?: boolean | Prisma.Label$videoTracksArgs<ExtArgs>
   _count?: boolean | Prisma.LabelCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -987,8 +987,8 @@ export type LabelIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type $LabelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Label"
   objects: {
-    dataset: Prisma.$DatasetPayload<ExtArgs>
     annotations: Prisma.$AnnotationPayload<ExtArgs>[]
+    dataset: Prisma.$DatasetPayload<ExtArgs>
     videoTracks: Prisma.$VideoObjectTrackPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1398,8 +1398,8 @@ readonly fields: LabelFieldRefs;
  */
 export interface Prisma__LabelClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   annotations<T extends Prisma.Label$annotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Label$annotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   videoTracks<T extends Prisma.Label$videoTracksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Label$videoTracksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoObjectTrackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.

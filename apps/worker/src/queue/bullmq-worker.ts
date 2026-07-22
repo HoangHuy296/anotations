@@ -16,6 +16,7 @@ export function createFoundationWorker(input: { config: ProviderConfig; db: Pris
     host: input.config.REDIS_HOST,
     port: input.config.REDIS_PORT,
     password: input.config.REDIS_PASSWORD,
+    db: input.config.REDIS_DB,
     maxRetriesPerRequest: null,
   });
   const worker = new Worker(
@@ -31,7 +32,13 @@ export function createFoundationWorker(input: { config: ProviderConfig; db: Pris
       await worker.close();
       // BullMQ may close an injected connection while stopping. Avoid a second
       // QUIT command on an already-ended socket during SIGTERM or tests.
-      if (connection.status !== "end") connection.disconnect();
+      if (connection.status !== "end") {
+        await connection.quit().catch(() => undefined);
+        // ioredis can resolve QUIT while retaining a ready status when the
+        // connection was supplied to BullMQ. Finish the local lifecycle
+        // deterministically; this is transport cleanup, never Job state.
+        connection.disconnect();
+      }
     },
   };
 }

@@ -14,7 +14,9 @@ export type WorkspaceLabel = {
 
 export type DraftAnnotation = {
   id: string;
-  labelId: string;
+  assetId: string;
+  version: number;
+  labelId: string | null;
   coordinates: BoundingBoxCoordinates;
 };
 

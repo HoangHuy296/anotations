@@ -1,196 +1,61 @@
-import {
-  CaretRight,
-  Funnel,
-  ImageSquare,
-  MagnifyingGlass,
-} from "@phosphor-icons/react/dist/ssr";
-import type { AssetStatus } from "@internal/db";
+"use client";
+
+import { BoundingBox, Cursor, FolderOpen, Hand } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { MouseEvent, ReactNode } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  imageStatusOptions,
-  imageStatusPresentation,
-} from "@/lib/image-status";
-
-type SidebarImage = {
-  id: string;
-  filename: string;
-  path: string;
-  width: number | null;
-  height: number | null;
-  status: AssetStatus;
-};
+import { useAnnotationStore } from "@/stores/annotation-store";
 
 type DatasetSidebarProps = {
   datasetId: string;
-  images: SidebarImage[];
-  totalImages: number;
-  completedImages: number;
-  selectedImageId: string | null;
+  selectedAssetId: string | null;
   search: string;
-  status: AssetStatus | "ALL";
+  statuses: string[];
+  page: number;
+  previous: { id: string; page: number } | null;
+  next: { id: string; page: number } | null;
 };
 
-export function DatasetSidebar({
-  datasetId,
-  images,
-  totalImages,
-  completedImages,
-  selectedImageId,
-  search,
-  status,
-}: DatasetSidebarProps) {
-  const progress =
-    totalImages === 0 ? 0 : Math.round((completedImages / totalImages) * 1000) / 10;
+/** Toolbox only. Asset discovery, filtering, and pagination live in the right sidebar. */
+export function DatasetSidebar({ datasetId, search, statuses, previous, next }: DatasetSidebarProps) {
+  const router = useRouter();
+  const tool = useAnnotationStore((store) => store.tool);
+  const setTool = useAnnotationStore((store) => store.setTool);
+  const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
+  const hrefFor = (target: { id: string; page: number }) => {
+    const params = new URLSearchParams({ image: target.id });
+    if (search) params.set("q", search);
+    for (const status of statuses) params.append("status", status);
+    if (target.page > 1) params.set("page", String(target.page));
+    return `/workspace/${datasetId}?${params.toString()}`;
+  };
+  const guardNavigation = async (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    event.preventDefault();
+    await flushAllAutosaves();
+    const states = Object.values(useAnnotationStore.getState().saveStates);
+    const needsResolution = states.some((state) => state === "failed" || state === "conflict");
+    if (needsResolution && !window.confirm("An image edit could not be saved or has a conflict. Discard the local draft and leave this asset?")) return;
+    router.push(href);
+  };
 
-  return (
-    <aside className="flex min-h-0 flex-col border-r border-zinc-200 bg-white">
-      <div className="border-b border-zinc-200 p-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">
-            Dataset
-          </p>
-          <p className="mt-1 text-sm font-semibold text-zinc-900">
-            {totalImages} source image{totalImages === 1 ? "" : "s"}
-          </p>
-        </div>
+  return <aside className="min-h-0 border-r border-zinc-200 bg-white p-3" aria-label="Image annotation tools">
+    <div className="flex items-center justify-between"><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Toolbox</p><span className="text-[10px] font-semibold text-sky-700">Image</span></div>
+    <div className="mt-3 grid grid-cols-3 gap-1.5">
+      <ToolButton active={tool === "select"} label="Select" onClick={() => setTool("select")}><Cursor size={17} weight="bold" /></ToolButton>
+      <ToolButton active={tool === "box"} label="Bounding box" onClick={() => setTool("box")}><BoundingBox size={17} /></ToolButton>
+      <ToolButton active={tool === "pan"} label="Pan" onClick={() => setTool("pan")}><Hand size={17} /></ToolButton>
+    </div>
+    <div className="mt-2 grid grid-cols-2 gap-1.5">{["Polygon", "Circle", "Point", "Polyline", "Mask"].map((label) => <button key={label} type="button" disabled title={`${label} is not available in the Image MVP`} className="rounded-lg border border-zinc-100 px-2 py-1.5 text-[10px] font-medium text-zinc-300">{label}</button>)}</div>
+    <Link href="/datasets/new/local-folder" className="mt-3 flex h-9 items-center justify-center gap-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"><FolderOpen size={15} />Open directory</Link>
+    <div className="mt-2 grid grid-cols-2 gap-1.5"><AssetNavigation href={previous ? hrefFor(previous) : null} label="Previous" onNavigate={guardNavigation} /><AssetNavigation href={next ? hrefFor(next) : null} label="Next" onNavigate={guardNavigation} /></div>
+  </aside>;
+}
 
-        <form className="mt-3 space-y-2" method="get">
-          <label className="flex h-10 items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-100">
-            <MagnifyingGlass
-              aria-hidden="true"
-              size={16}
-              className="text-zinc-400"
-            />
-            <span className="sr-only">Search images</span>
-            <input
-              className="min-w-0 flex-1 bg-transparent text-sm text-zinc-900 outline-none placeholder:text-zinc-400"
-              defaultValue={search}
-              name="q"
-              placeholder="Search files"
-              type="search"
-            />
-          </label>
-          <div className="flex gap-2">
-            <label className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-2.5">
-              <Funnel aria-hidden="true" size={15} className="text-zinc-400" />
-              <span className="sr-only">Filter by status</span>
-              <select
-                className="min-w-0 flex-1 bg-transparent text-xs text-zinc-700 outline-none"
-                defaultValue={status}
-                name="status"
-              >
-                <option value="ALL">All statuses</option>
-                {imageStatusOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {imageStatusPresentation[option].label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <button
-              className="h-9 rounded-xl bg-zinc-950 px-3 text-xs font-semibold text-white transition-colors hover:bg-zinc-800"
-              type="submit"
-            >
-              Apply
-            </button>
-          </div>
-        </form>
-      </div>
+function ToolButton({ active, label, onClick, children }: { active: boolean; label: string; onClick: () => void; children: ReactNode }) {
+  return <button type="button" aria-label={label} aria-pressed={active} onClick={onClick} className={`grid min-h-12 place-items-center rounded-lg border transition-colors ${active ? "border-sky-500 bg-sky-50 text-sky-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>{children}<span className="sr-only">{label}</span></button>;
+}
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-2">
-        {images.length === 0 ? (
-          <div className="px-4 py-10 text-center">
-            <ImageSquare
-              aria-hidden="true"
-              className="mx-auto text-zinc-300"
-              size={26}
-              weight="duotone"
-            />
-            <p className="mt-3 text-xs font-semibold text-zinc-600">
-              No matching images
-            </p>
-            <p className="mt-1 text-[11px] leading-4 text-zinc-400">
-              Adjust the filename or status filter.
-            </p>
-          </div>
-        ) : (
-          images.map((image, index) => {
-            const selected = image.id === selectedImageId;
-            const presentation = imageStatusPresentation[image.status];
-            const params = new URLSearchParams();
-            if (search) params.set("q", search);
-            if (status !== "ALL") params.set("status", status);
-            params.set("image", image.id);
-
-            return (
-              <Link
-                key={image.id}
-                href={`/workspace/${datasetId}?${params.toString()}`}
-                className={`mb-1 flex w-full items-start gap-3 rounded-xl border p-2.5 text-left transition-colors ${
-                  selected
-                    ? "border-sky-200 bg-sky-50"
-                    : "border-transparent hover:bg-zinc-50"
-                }`}
-              >
-                <span
-                  className={`grid size-11 shrink-0 place-items-center rounded-lg ${
-                    selected
-                      ? "bg-sky-100 text-sky-700"
-                      : "bg-zinc-100 text-zinc-400"
-                  }`}
-                >
-                  <ImageSquare aria-hidden="true" size={20} weight="duotone" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center justify-between gap-2">
-                    <span className="truncate text-xs font-semibold text-zinc-900">
-                      {image.filename}
-                    </span>
-                    <span className="font-mono text-[10px] text-zinc-400">
-                      {String(index + 1).padStart(4, "0")}
-                    </span>
-                  </span>
-                  <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    <Badge variant={presentation.variant}>
-                      {presentation.label}
-                    </Badge>
-                    <span className="font-mono text-[9px] text-zinc-400">
-                      {image.width && image.height
-                        ? `${image.width} × ${image.height}`
-                        : "dimensions pending"}
-                    </span>
-                  </span>
-                </span>
-                {selected && (
-                  <CaretRight
-                    aria-hidden="true"
-                    className="mt-3 shrink-0 text-sky-600"
-                    size={14}
-                    weight="bold"
-                  />
-                )}
-              </Link>
-            );
-          })
-        )}
-      </div>
-
-      <div className="border-t border-zinc-200 px-4 py-3">
-        <div className="flex items-center justify-between text-xs">
-          <span className="font-medium text-zinc-500">Dataset progress</span>
-          <span className="font-mono font-semibold text-zinc-900">
-            {progress}%
-          </span>
-        </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-zinc-100">
-          <div
-            className="h-full rounded-full bg-sky-600"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
-    </aside>
-  );
+function AssetNavigation({ href, label, onNavigate }: { href: string | null; label: string; onNavigate: (event: MouseEvent<HTMLAnchorElement>, href: string) => void | Promise<void> }) {
+  return href ? <Link href={href} onClick={(event) => { void onNavigate(event, href); }} className="rounded-lg border border-zinc-200 px-2 py-1.5 text-center text-[10px] font-semibold text-zinc-700 hover:bg-zinc-50">{label}</Link> : <span className="rounded-lg border border-zinc-100 px-2 py-1.5 text-center text-[10px] font-semibold text-zinc-300">{label}</span>;
 }

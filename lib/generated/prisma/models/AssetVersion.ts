@@ -528,10 +528,10 @@ export type AssetVersionWhereInput = {
   metadata?: Prisma.JsonFilter<"AssetVersion">
   createdAt?: Prisma.DateTimeFilter<"AssetVersion"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetVersion"> | Date | string
-  externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
+  annotations?: Prisma.AnnotationListRelationFilter
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
-  annotations?: Prisma.AnnotationListRelationFilter
+  externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
 }
 
 export type AssetVersionOrderByWithRelationInput = {
@@ -577,10 +577,10 @@ export type AssetVersionOrderByWithRelationInput = {
   metadata?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  externalRepository?: Prisma.ExternalRepositoryOrderByWithRelationInput
+  annotations?: Prisma.AnnotationOrderByRelationAggregateInput
   asset?: Prisma.AssetOrderByWithRelationInput
   dataset?: Prisma.DatasetOrderByWithRelationInput
-  annotations?: Prisma.AnnotationOrderByRelationAggregateInput
+  externalRepository?: Prisma.ExternalRepositoryOrderByWithRelationInput
 }
 
 export type AssetVersionWhereUniqueInput = Prisma.AtLeast<{
@@ -633,10 +633,10 @@ export type AssetVersionWhereUniqueInput = Prisma.AtLeast<{
   metadata?: Prisma.JsonFilter<"AssetVersion">
   createdAt?: Prisma.DateTimeFilter<"AssetVersion"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssetVersion"> | Date | string
-  externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
+  annotations?: Prisma.AnnotationListRelationFilter
   asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
-  annotations?: Prisma.AnnotationListRelationFilter
+  externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
 }, "id" | "assetId_versionNumber" | "storageProvider_storageBucket_storageKey" | "cacheProvider_cacheBucket_cacheKey" | "datasetId_sourceFingerprint">
 
 export type AssetVersionOrderByWithAggregationInput = {
@@ -777,10 +777,10 @@ export type AssetVersionCreateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetVersionsInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetVersionInput
   asset: Prisma.AssetCreateNestedOneWithoutVersionsInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetVersionsInput
-  annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetVersionInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetVersionsInput
 }
 
 export type AssetVersionUncheckedCreateInput = {
@@ -869,10 +869,10 @@ export type AssetVersionUpdateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetVersionsNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutAssetVersionNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutVersionsNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetVersionsNestedInput
-  annotations?: Prisma.AnnotationUpdateManyWithoutAssetVersionNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetVersionsNestedInput
 }
 
 export type AssetVersionUncheckedUpdateInput = {
@@ -1427,9 +1427,9 @@ export type AssetVersionCreateWithoutExternalRepositoryInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetVersionInput
   asset: Prisma.AssetCreateNestedOneWithoutVersionsInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetVersionsInput
-  annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetVersionInput
 }
 
 export type AssetVersionUncheckedCreateWithoutExternalRepositoryInput = {
@@ -1591,9 +1591,9 @@ export type AssetVersionCreateWithoutDatasetInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetVersionsInput
-  asset: Prisma.AssetCreateNestedOneWithoutVersionsInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetVersionInput
+  asset: Prisma.AssetCreateNestedOneWithoutVersionsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetVersionsInput
 }
 
 export type AssetVersionUncheckedCreateWithoutDatasetInput = {
@@ -1707,9 +1707,9 @@ export type AssetVersionCreateWithoutAssetInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetVersionsInput
-  dataset: Prisma.DatasetCreateNestedOneWithoutAssetVersionsInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetVersionInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAssetVersionsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetVersionsInput
 }
 
 export type AssetVersionUncheckedCreateWithoutAssetInput = {
@@ -1823,9 +1823,9 @@ export type AssetVersionCreateWithoutAnnotationsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetVersionsInput
   asset: Prisma.AssetCreateNestedOneWithoutVersionsInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetVersionsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetVersionsInput
 }
 
 export type AssetVersionUncheckedCreateWithoutAnnotationsInput = {
@@ -1929,9 +1929,9 @@ export type AssetVersionUpdateWithoutAnnotationsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetVersionsNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutVersionsNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetVersionsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetVersionsNestedInput
 }
 
 export type AssetVersionUncheckedUpdateWithoutAnnotationsInput = {
@@ -2063,9 +2063,9 @@ export type AssetVersionUpdateWithoutExternalRepositoryInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  annotations?: Prisma.AnnotationUpdateManyWithoutAssetVersionNestedInput
   asset?: Prisma.AssetUpdateOneRequiredWithoutVersionsNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetVersionsNestedInput
-  annotations?: Prisma.AnnotationUpdateManyWithoutAssetVersionNestedInput
 }
 
 export type AssetVersionUncheckedUpdateWithoutExternalRepositoryInput = {
@@ -2241,9 +2241,9 @@ export type AssetVersionUpdateWithoutDatasetInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetVersionsNestedInput
-  asset?: Prisma.AssetUpdateOneRequiredWithoutVersionsNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetVersionNestedInput
+  asset?: Prisma.AssetUpdateOneRequiredWithoutVersionsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetVersionsNestedInput
 }
 
 export type AssetVersionUncheckedUpdateWithoutDatasetInput = {
@@ -2419,9 +2419,9 @@ export type AssetVersionUpdateWithoutAssetInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetVersionsNestedInput
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetVersionsNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetVersionNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetVersionsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetVersionsNestedInput
 }
 
 export type AssetVersionUncheckedUpdateWithoutAssetInput = {
@@ -2587,10 +2587,10 @@ export type AssetVersionSelect<ExtArgs extends runtime.Types.Extensions.Internal
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
+  annotations?: boolean | Prisma.AssetVersion$annotationsArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  annotations?: boolean | Prisma.AssetVersion$annotationsArgs<ExtArgs>
+  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
   _count?: boolean | Prisma.AssetVersionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["assetVersion"]>
 
@@ -2637,9 +2637,9 @@ export type AssetVersionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
 }, ExtArgs["result"]["assetVersion"]>
 
 export type AssetVersionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2685,9 +2685,9 @@ export type AssetVersionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   metadata?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
 }, ExtArgs["result"]["assetVersion"]>
 
 export type AssetVersionSelectScalar = {
@@ -2737,30 +2737,30 @@ export type AssetVersionSelectScalar = {
 
 export type AssetVersionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assetId" | "datasetId" | "versionNumber" | "isCurrent" | "modality" | "sourceMode" | "externalRepositoryId" | "sourceProvider" | "sourceBranch" | "sourceRevision" | "sourcePath" | "sourceFileSha" | "sourceBlobSha" | "sourceLfsOid" | "sourceEtag" | "sourceUrl" | "sourceFingerprint" | "storageProvider" | "storageBucket" | "storageKey" | "checksum" | "cacheStatus" | "cacheProvider" | "cacheBucket" | "cacheKey" | "cacheChecksum" | "cachedAt" | "cacheExpiresAt" | "cacheError" | "filename" | "originalFilename" | "mimeType" | "sizeBytes" | "width" | "height" | "durationMs" | "textLength" | "syncStatus" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["assetVersion"]>
 export type AssetVersionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
+  annotations?: boolean | Prisma.AssetVersion$annotationsArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  annotations?: boolean | Prisma.AssetVersion$annotationsArgs<ExtArgs>
+  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
   _count?: boolean | Prisma.AssetVersionCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssetVersionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
 }
 export type AssetVersionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  externalRepository?: boolean | Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>
 }
 
 export type $AssetVersionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AssetVersion"
   objects: {
-    externalRepository: Prisma.$ExternalRepositoryPayload<ExtArgs> | null
+    annotations: Prisma.$AnnotationPayload<ExtArgs>[]
     asset: Prisma.$AssetPayload<ExtArgs>
     dataset: Prisma.$DatasetPayload<ExtArgs>
-    annotations: Prisma.$AnnotationPayload<ExtArgs>[]
+    externalRepository: Prisma.$ExternalRepositoryPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3199,10 +3199,10 @@ readonly fields: AssetVersionFieldRefs;
  */
 export interface Prisma__AssetVersionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  externalRepository<T extends Prisma.AssetVersion$externalRepositoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>>): Prisma.Prisma__ExternalRepositoryClient<runtime.Types.Result.GetResult<Prisma.$ExternalRepositoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  annotations<T extends Prisma.AssetVersion$annotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetVersion$annotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   asset<T extends Prisma.AssetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetDefaultArgs<ExtArgs>>): Prisma.Prisma__AssetClient<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  annotations<T extends Prisma.AssetVersion$annotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetVersion$annotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  externalRepository<T extends Prisma.AssetVersion$externalRepositoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssetVersion$externalRepositoryArgs<ExtArgs>>): Prisma.Prisma__ExternalRepositoryClient<runtime.Types.Result.GetResult<Prisma.$ExternalRepositoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3670,25 +3670,6 @@ export type AssetVersionDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
 }
 
 /**
- * AssetVersion.externalRepository
- */
-export type AssetVersion$externalRepositoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ExternalRepository
-   */
-  select?: Prisma.ExternalRepositorySelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the ExternalRepository
-   */
-  omit?: Prisma.ExternalRepositoryOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ExternalRepositoryInclude<ExtArgs> | null
-  where?: Prisma.ExternalRepositoryWhereInput
-}
-
-/**
  * AssetVersion.annotations
  */
 export type AssetVersion$annotationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3710,6 +3691,25 @@ export type AssetVersion$annotationsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
+}
+
+/**
+ * AssetVersion.externalRepository
+ */
+export type AssetVersion$externalRepositoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ExternalRepository
+   */
+  select?: Prisma.ExternalRepositorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ExternalRepository
+   */
+  omit?: Prisma.ExternalRepositoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ExternalRepositoryInclude<ExtArgs> | null
+  where?: Prisma.ExternalRepositoryWhereInput
 }
 
 /**

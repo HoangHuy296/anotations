@@ -294,10 +294,10 @@ export type AiTaskWhereInput = {
   resultStorageKey?: Prisma.StringNullableFilter<"AiTask"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
-  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   asset?: Prisma.XOR<Prisma.AssetNullableScalarRelationFilter, Prisma.AssetWhereInput> | null
-  job?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
+  job?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
 }
 
 export type AiTaskOrderByWithRelationInput = {
@@ -322,10 +322,10 @@ export type AiTaskOrderByWithRelationInput = {
   resultStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  dataset?: Prisma.DatasetOrderByWithRelationInput
   asset?: Prisma.AssetOrderByWithRelationInput
-  job?: Prisma.JobOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
+  dataset?: Prisma.DatasetOrderByWithRelationInput
+  job?: Prisma.JobOrderByWithRelationInput
 }
 
 export type AiTaskWhereUniqueInput = Prisma.AtLeast<{
@@ -353,10 +353,10 @@ export type AiTaskWhereUniqueInput = Prisma.AtLeast<{
   resultStorageKey?: Prisma.StringNullableFilter<"AiTask"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
-  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   asset?: Prisma.XOR<Prisma.AssetNullableScalarRelationFilter, Prisma.AssetWhereInput> | null
-  job?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
+  job?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
 }, "id" | "externalTaskId">
 
 export type AiTaskOrderByWithAggregationInput = {
@@ -431,10 +431,10 @@ export type AiTaskCreateInput = {
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
   asset?: Prisma.AssetCreateNestedOneWithoutAiTasksInput
-  job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
   createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
+  job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
 }
 
 export type AiTaskUncheckedCreateInput = {
@@ -479,10 +479,10 @@ export type AiTaskUpdateInput = {
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
   asset?: Prisma.AssetUpdateOneWithoutAiTasksNestedInput
-  job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
+  job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
 }
 
 export type AiTaskUncheckedUpdateInput = {
@@ -845,8 +845,8 @@ export type AiTaskCreateWithoutCreatedByInput = {
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
   asset?: Prisma.AssetCreateNestedOneWithoutAiTasksInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
   job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
 }
 
@@ -944,9 +944,9 @@ export type AiTaskCreateWithoutJobInput = {
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
   asset?: Prisma.AssetCreateNestedOneWithoutAiTasksInput
   createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
 }
 
 export type AiTaskUncheckedCreateWithoutJobInput = {
@@ -1017,8 +1017,8 @@ export type AiTaskCreateWithoutDatasetInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   asset?: Prisma.AssetCreateNestedOneWithoutAiTasksInput
-  job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
   createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
+  job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
 }
 
 export type AiTaskUncheckedCreateWithoutDatasetInput = {
@@ -1088,9 +1088,9 @@ export type AiTaskCreateWithoutAssetInput = {
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
   job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
-  createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
 }
 
 export type AiTaskUncheckedCreateWithoutAssetInput = {
@@ -1183,8 +1183,8 @@ export type AiTaskUpdateWithoutCreatedByInput = {
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
   asset?: Prisma.AssetUpdateOneWithoutAiTasksNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
   job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
 }
 
@@ -1275,9 +1275,9 @@ export type AiTaskUpdateWithoutJobInput = {
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
   asset?: Prisma.AssetUpdateOneWithoutAiTasksNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
 }
 
 export type AiTaskUncheckedUpdateWithoutJobInput = {
@@ -1368,8 +1368,8 @@ export type AiTaskUpdateWithoutDatasetInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   asset?: Prisma.AssetUpdateOneWithoutAiTasksNestedInput
-  job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
+  job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
 }
 
 export type AiTaskUncheckedUpdateWithoutDatasetInput = {
@@ -1459,9 +1459,9 @@ export type AiTaskUpdateWithoutAssetInput = {
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
   job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
 }
 
 export type AiTaskUncheckedUpdateWithoutAssetInput = {
@@ -1534,10 +1534,10 @@ export type AiTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   resultStorageKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
 }, ExtArgs["result"]["aiTask"]>
 
 export type AiTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1562,10 +1562,10 @@ export type AiTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   resultStorageKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
 }, ExtArgs["result"]["aiTask"]>
 
 export type AiTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1590,10 +1590,10 @@ export type AiTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   resultStorageKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
 }, ExtArgs["result"]["aiTask"]>
 
 export type AiTaskSelectScalar = {
@@ -1622,31 +1622,31 @@ export type AiTaskSelectScalar = {
 
 export type AiTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalTaskId" | "datasetId" | "assetId" | "jobId" | "createdById" | "provider" | "type" | "status" | "modality" | "modelName" | "modelVersion" | "input" | "output" | "summary" | "error" | "errorCode" | "errorDetails" | "resultStorageKey" | "createdAt" | "updatedAt", ExtArgs["result"]["aiTask"]>
 export type AiTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
 }
 export type AiTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
 }
 export type AiTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
 }
 
 export type $AiTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AiTask"
   objects: {
-    dataset: Prisma.$DatasetPayload<ExtArgs>
     asset: Prisma.$AssetPayload<ExtArgs> | null
-    job: Prisma.$JobPayload<ExtArgs> | null
     createdBy: Prisma.$UserPayload<ExtArgs>
+    dataset: Prisma.$DatasetPayload<ExtArgs>
+    job: Prisma.$JobPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2064,10 +2064,10 @@ readonly fields: AiTaskFieldRefs;
  */
 export interface Prisma__AiTaskClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   asset<T extends Prisma.AiTask$assetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AiTask$assetArgs<ExtArgs>>): Prisma.Prisma__AssetClient<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  job<T extends Prisma.AiTask$jobArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AiTask$jobArgs<ExtArgs>>): Prisma.Prisma__JobClient<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  job<T extends Prisma.AiTask$jobArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AiTask$jobArgs<ExtArgs>>): Prisma.Prisma__JobClient<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

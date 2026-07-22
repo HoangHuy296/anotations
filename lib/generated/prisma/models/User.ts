@@ -198,19 +198,20 @@ export type UserWhereInput = {
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  aiTasksCreated?: Prisma.AiTaskListRelationFilter
+  annotationsCreated?: Prisma.AnnotationListRelationFilter
+  annotationsReviewed?: Prisma.AnnotationListRelationFilter
+  annotationsUpdated?: Prisma.AnnotationListRelationFilter
+  uploadedAssets?: Prisma.AssetListRelationFilter
+  sessions?: Prisma.AuthSessionListRelationFilter
   ownedDatasets?: Prisma.DatasetListRelationFilter
   memberships?: Prisma.DatasetMemberListRelationFilter
-  sessions?: Prisma.AuthSessionListRelationFilter
-  uploadedAssets?: Prisma.AssetListRelationFilter
-  annotationsCreated?: Prisma.AnnotationListRelationFilter
-  annotationsUpdated?: Prisma.AnnotationListRelationFilter
-  annotationsReviewed?: Prisma.AnnotationListRelationFilter
-  tracksCreated?: Prisma.VideoObjectTrackListRelationFilter
   externalRepositories?: Prisma.ExternalRepositoryListRelationFilter
-  sourceConnections?: Prisma.SourceConnectionListRelationFilter
-  jobsCreated?: Prisma.JobListRelationFilter
   jobsCanceled?: Prisma.JobListRelationFilter
-  aiTasksCreated?: Prisma.AiTaskListRelationFilter
+  jobsCreated?: Prisma.JobListRelationFilter
+  preparedImports?: Prisma.PreparedImportListRelationFilter
+  sourceConnections?: Prisma.SourceConnectionListRelationFilter
+  tracksCreated?: Prisma.VideoObjectTrackListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -221,19 +222,20 @@ export type UserOrderByWithRelationInput = {
   role?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  aiTasksCreated?: Prisma.AiTaskOrderByRelationAggregateInput
+  annotationsCreated?: Prisma.AnnotationOrderByRelationAggregateInput
+  annotationsReviewed?: Prisma.AnnotationOrderByRelationAggregateInput
+  annotationsUpdated?: Prisma.AnnotationOrderByRelationAggregateInput
+  uploadedAssets?: Prisma.AssetOrderByRelationAggregateInput
+  sessions?: Prisma.AuthSessionOrderByRelationAggregateInput
   ownedDatasets?: Prisma.DatasetOrderByRelationAggregateInput
   memberships?: Prisma.DatasetMemberOrderByRelationAggregateInput
-  sessions?: Prisma.AuthSessionOrderByRelationAggregateInput
-  uploadedAssets?: Prisma.AssetOrderByRelationAggregateInput
-  annotationsCreated?: Prisma.AnnotationOrderByRelationAggregateInput
-  annotationsUpdated?: Prisma.AnnotationOrderByRelationAggregateInput
-  annotationsReviewed?: Prisma.AnnotationOrderByRelationAggregateInput
-  tracksCreated?: Prisma.VideoObjectTrackOrderByRelationAggregateInput
   externalRepositories?: Prisma.ExternalRepositoryOrderByRelationAggregateInput
-  sourceConnections?: Prisma.SourceConnectionOrderByRelationAggregateInput
-  jobsCreated?: Prisma.JobOrderByRelationAggregateInput
   jobsCanceled?: Prisma.JobOrderByRelationAggregateInput
-  aiTasksCreated?: Prisma.AiTaskOrderByRelationAggregateInput
+  jobsCreated?: Prisma.JobOrderByRelationAggregateInput
+  preparedImports?: Prisma.PreparedImportOrderByRelationAggregateInput
+  sourceConnections?: Prisma.SourceConnectionOrderByRelationAggregateInput
+  tracksCreated?: Prisma.VideoObjectTrackOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -247,19 +249,20 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   role?: Prisma.EnumUserRoleFilter<"User"> | $Enums.UserRole
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  aiTasksCreated?: Prisma.AiTaskListRelationFilter
+  annotationsCreated?: Prisma.AnnotationListRelationFilter
+  annotationsReviewed?: Prisma.AnnotationListRelationFilter
+  annotationsUpdated?: Prisma.AnnotationListRelationFilter
+  uploadedAssets?: Prisma.AssetListRelationFilter
+  sessions?: Prisma.AuthSessionListRelationFilter
   ownedDatasets?: Prisma.DatasetListRelationFilter
   memberships?: Prisma.DatasetMemberListRelationFilter
-  sessions?: Prisma.AuthSessionListRelationFilter
-  uploadedAssets?: Prisma.AssetListRelationFilter
-  annotationsCreated?: Prisma.AnnotationListRelationFilter
-  annotationsUpdated?: Prisma.AnnotationListRelationFilter
-  annotationsReviewed?: Prisma.AnnotationListRelationFilter
-  tracksCreated?: Prisma.VideoObjectTrackListRelationFilter
   externalRepositories?: Prisma.ExternalRepositoryListRelationFilter
-  sourceConnections?: Prisma.SourceConnectionListRelationFilter
-  jobsCreated?: Prisma.JobListRelationFilter
   jobsCanceled?: Prisma.JobListRelationFilter
-  aiTasksCreated?: Prisma.AiTaskListRelationFilter
+  jobsCreated?: Prisma.JobListRelationFilter
+  preparedImports?: Prisma.PreparedImportListRelationFilter
+  sourceConnections?: Prisma.SourceConnectionListRelationFilter
+  tracksCreated?: Prisma.VideoObjectTrackListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -293,22 +296,23 @@ export type UserCreateInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -316,22 +320,23 @@ export type UserUncheckedCreateInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUpdateInput = {
@@ -342,19 +347,20 @@ export type UserUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -365,19 +371,20 @@ export type UserUncheckedUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -385,7 +392,7 @@ export type UserCreateManyInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -480,24 +487,16 @@ export type UserUpdateOneRequiredWithoutSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSessionsInput, Prisma.UserUpdateWithoutSessionsInput>, Prisma.UserUncheckedUpdateWithoutSessionsInput>
 }
 
-export type UserCreateNestedOneWithoutJobsCreatedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutJobsCreatedInput, Prisma.UserUncheckedCreateWithoutJobsCreatedInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutJobsCreatedInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
 export type UserCreateNestedOneWithoutJobsCanceledInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutJobsCanceledInput, Prisma.UserUncheckedCreateWithoutJobsCanceledInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutJobsCanceledInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutJobsCreatedNestedInput = {
+export type UserCreateNestedOneWithoutJobsCreatedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutJobsCreatedInput, Prisma.UserUncheckedCreateWithoutJobsCreatedInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutJobsCreatedInput
-  upsert?: Prisma.UserUpsertWithoutJobsCreatedInput
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutJobsCreatedInput, Prisma.UserUpdateWithoutJobsCreatedInput>, Prisma.UserUncheckedUpdateWithoutJobsCreatedInput>
 }
 
 export type UserUpdateOneWithoutJobsCanceledNestedInput = {
@@ -508,6 +507,14 @@ export type UserUpdateOneWithoutJobsCanceledNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutJobsCanceledInput, Prisma.UserUpdateWithoutJobsCanceledInput>, Prisma.UserUncheckedUpdateWithoutJobsCanceledInput>
+}
+
+export type UserUpdateOneRequiredWithoutJobsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutJobsCreatedInput, Prisma.UserUncheckedCreateWithoutJobsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutJobsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutJobsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutJobsCreatedInput, Prisma.UserUpdateWithoutJobsCreatedInput>, Prisma.UserUncheckedUpdateWithoutJobsCreatedInput>
 }
 
 export type UserCreateNestedOneWithoutExternalRepositoriesInput = {
@@ -554,6 +561,20 @@ export type UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOwnedDatasetsInput, Prisma.UserUpdateWithoutOwnedDatasetsInput>, Prisma.UserUncheckedUpdateWithoutOwnedDatasetsInput>
 }
 
+export type UserCreateNestedOneWithoutPreparedImportsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPreparedImportsInput, Prisma.UserUncheckedCreateWithoutPreparedImportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPreparedImportsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPreparedImportsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPreparedImportsInput, Prisma.UserUncheckedCreateWithoutPreparedImportsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPreparedImportsInput
+  upsert?: Prisma.UserUpsertWithoutPreparedImportsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPreparedImportsInput, Prisma.UserUpdateWithoutPreparedImportsInput>, Prisma.UserUncheckedUpdateWithoutPreparedImportsInput>
+}
+
 export type UserCreateNestedOneWithoutMembershipsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutMembershipsInput, Prisma.UserUncheckedCreateWithoutMembershipsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutMembershipsInput
@@ -590,15 +611,15 @@ export type UserCreateNestedOneWithoutAnnotationsCreatedInput = {
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserCreateNestedOneWithoutAnnotationsUpdatedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsUpdatedInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnnotationsUpdatedInput
-  connect?: Prisma.UserWhereUniqueInput
-}
-
 export type UserCreateNestedOneWithoutAnnotationsReviewedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsReviewedInput, Prisma.UserUncheckedCreateWithoutAnnotationsReviewedInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnnotationsReviewedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutAnnotationsUpdatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsUpdatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnnotationsUpdatedInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
@@ -610,16 +631,6 @@ export type UserUpdateOneRequiredWithoutAnnotationsCreatedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAnnotationsCreatedInput, Prisma.UserUpdateWithoutAnnotationsCreatedInput>, Prisma.UserUncheckedUpdateWithoutAnnotationsCreatedInput>
 }
 
-export type UserUpdateOneWithoutAnnotationsUpdatedNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsUpdatedInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnnotationsUpdatedInput
-  upsert?: Prisma.UserUpsertWithoutAnnotationsUpdatedInput
-  disconnect?: Prisma.UserWhereInput | boolean
-  delete?: Prisma.UserWhereInput | boolean
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAnnotationsUpdatedInput, Prisma.UserUpdateWithoutAnnotationsUpdatedInput>, Prisma.UserUncheckedUpdateWithoutAnnotationsUpdatedInput>
-}
-
 export type UserUpdateOneWithoutAnnotationsReviewedNestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsReviewedInput, Prisma.UserUncheckedCreateWithoutAnnotationsReviewedInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnnotationsReviewedInput
@@ -628,6 +639,16 @@ export type UserUpdateOneWithoutAnnotationsReviewedNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAnnotationsReviewedInput, Prisma.UserUpdateWithoutAnnotationsReviewedInput>, Prisma.UserUncheckedUpdateWithoutAnnotationsReviewedInput>
+}
+
+export type UserUpdateOneWithoutAnnotationsUpdatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsUpdatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAnnotationsUpdatedInput
+  upsert?: Prisma.UserUpsertWithoutAnnotationsUpdatedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAnnotationsUpdatedInput, Prisma.UserUpdateWithoutAnnotationsUpdatedInput>, Prisma.UserUncheckedUpdateWithoutAnnotationsUpdatedInput>
 }
 
 export type UserCreateNestedOneWithoutTracksCreatedInput = {
@@ -665,21 +686,22 @@ export type UserCreateWithoutSessionsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -687,21 +709,22 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -728,18 +751,19 @@ export type UserUpdateWithoutSessionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -750,67 +774,19 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
-}
-
-export type UserCreateWithoutJobsCreatedInput = {
-  id?: string
-  email: string
-  passwordHash?: string | null
-  name?: string | null
-  role?: $Enums.UserRole
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
-  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
-  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
-}
-
-export type UserUncheckedCreateWithoutJobsCreatedInput = {
-  id?: string
-  email: string
-  passwordHash?: string | null
-  name?: string | null
-  role?: $Enums.UserRole
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
-  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
-  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
-}
-
-export type UserCreateOrConnectWithoutJobsCreatedInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutJobsCreatedInput, Prisma.UserUncheckedCreateWithoutJobsCreatedInput>
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutJobsCanceledInput = {
@@ -818,21 +794,22 @@ export type UserCreateWithoutJobsCanceledInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutJobsCanceledInput = {
@@ -840,21 +817,22 @@ export type UserUncheckedCreateWithoutJobsCanceledInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutJobsCanceledInput = {
@@ -862,59 +840,55 @@ export type UserCreateOrConnectWithoutJobsCanceledInput = {
   create: Prisma.XOR<Prisma.UserCreateWithoutJobsCanceledInput, Prisma.UserUncheckedCreateWithoutJobsCanceledInput>
 }
 
-export type UserUpsertWithoutJobsCreatedInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutJobsCreatedInput, Prisma.UserUncheckedUpdateWithoutJobsCreatedInput>
+export type UserCreateWithoutJobsCreatedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserUncheckedCreateWithoutJobsCreatedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserCreateOrConnectWithoutJobsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
   create: Prisma.XOR<Prisma.UserCreateWithoutJobsCreatedInput, Prisma.UserUncheckedCreateWithoutJobsCreatedInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutJobsCreatedInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutJobsCreatedInput, Prisma.UserUncheckedUpdateWithoutJobsCreatedInput>
-}
-
-export type UserUpdateWithoutJobsCreatedInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
-  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
-  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
-}
-
-export type UserUncheckedUpdateWithoutJobsCreatedInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
-  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
-  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUpsertWithoutJobsCanceledInput = {
@@ -936,18 +910,19 @@ export type UserUpdateWithoutJobsCanceledInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobsCanceledInput = {
@@ -958,18 +933,76 @@ export type UserUncheckedUpdateWithoutJobsCanceledInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUpsertWithoutJobsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutJobsCreatedInput, Prisma.UserUncheckedUpdateWithoutJobsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutJobsCreatedInput, Prisma.UserUncheckedCreateWithoutJobsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutJobsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutJobsCreatedInput, Prisma.UserUncheckedUpdateWithoutJobsCreatedInput>
+}
+
+export type UserUpdateWithoutJobsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutJobsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutExternalRepositoriesInput = {
@@ -977,21 +1010,22 @@ export type UserCreateWithoutExternalRepositoriesInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutExternalRepositoriesInput = {
@@ -999,21 +1033,22 @@ export type UserUncheckedCreateWithoutExternalRepositoriesInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutExternalRepositoriesInput = {
@@ -1040,18 +1075,19 @@ export type UserUpdateWithoutExternalRepositoriesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExternalRepositoriesInput = {
@@ -1062,18 +1098,19 @@ export type UserUncheckedUpdateWithoutExternalRepositoriesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutSourceConnectionsInput = {
@@ -1081,21 +1118,22 @@ export type UserCreateWithoutSourceConnectionsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutSourceConnectionsInput = {
@@ -1103,21 +1141,22 @@ export type UserUncheckedCreateWithoutSourceConnectionsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutSourceConnectionsInput = {
@@ -1144,18 +1183,19 @@ export type UserUpdateWithoutSourceConnectionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSourceConnectionsInput = {
@@ -1166,18 +1206,19 @@ export type UserUncheckedUpdateWithoutSourceConnectionsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutOwnedDatasetsInput = {
@@ -1185,21 +1226,22 @@ export type UserCreateWithoutOwnedDatasetsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
-  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
-  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
   aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutOwnedDatasetsInput = {
@@ -1207,21 +1249,22 @@ export type UserUncheckedCreateWithoutOwnedDatasetsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
-  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
-  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
   aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutOwnedDatasetsInput = {
@@ -1248,18 +1291,19 @@ export type UserUpdateWithoutOwnedDatasetsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
-  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
-  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
   aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedDatasetsInput = {
@@ -1270,18 +1314,127 @@ export type UserUncheckedUpdateWithoutOwnedDatasetsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
-  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
-  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
   aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserCreateWithoutPreparedImportsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserUncheckedCreateWithoutPreparedImportsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserCreateOrConnectWithoutPreparedImportsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPreparedImportsInput, Prisma.UserUncheckedCreateWithoutPreparedImportsInput>
+}
+
+export type UserUpsertWithoutPreparedImportsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPreparedImportsInput, Prisma.UserUncheckedUpdateWithoutPreparedImportsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPreparedImportsInput, Prisma.UserUncheckedCreateWithoutPreparedImportsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPreparedImportsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPreparedImportsInput, Prisma.UserUncheckedUpdateWithoutPreparedImportsInput>
+}
+
+export type UserUpdateWithoutPreparedImportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPreparedImportsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -1289,21 +1442,22 @@ export type UserCreateWithoutMembershipsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
-  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
-  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
   aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -1311,21 +1465,22 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
-  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
-  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
   aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -1352,18 +1507,19 @@ export type UserUpdateWithoutMembershipsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
-  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
-  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
   aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -1374,18 +1530,19 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
-  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
-  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
   aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutUploadedAssetsInput = {
@@ -1393,21 +1550,22 @@ export type UserCreateWithoutUploadedAssetsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutUploadedAssetsInput = {
@@ -1415,21 +1573,22 @@ export type UserUncheckedCreateWithoutUploadedAssetsInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutUploadedAssetsInput = {
@@ -1456,18 +1615,19 @@ export type UserUpdateWithoutUploadedAssetsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedAssetsInput = {
@@ -1478,18 +1638,19 @@ export type UserUncheckedUpdateWithoutUploadedAssetsInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutAnnotationsCreatedInput = {
@@ -1497,21 +1658,22 @@ export type UserCreateWithoutAnnotationsCreatedInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsCreatedInput = {
@@ -1519,21 +1681,22 @@ export type UserUncheckedCreateWithoutAnnotationsCreatedInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsCreatedInput = {
@@ -1541,75 +1704,27 @@ export type UserCreateOrConnectWithoutAnnotationsCreatedInput = {
   create: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsCreatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsCreatedInput>
 }
 
-export type UserCreateWithoutAnnotationsUpdatedInput = {
-  id?: string
-  email: string
-  passwordHash?: string | null
-  name?: string | null
-  role?: $Enums.UserRole
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
-  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
-  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
-  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
-}
-
-export type UserUncheckedCreateWithoutAnnotationsUpdatedInput = {
-  id?: string
-  email: string
-  passwordHash?: string | null
-  name?: string | null
-  role?: $Enums.UserRole
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
-  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
-  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
-  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
-}
-
-export type UserCreateOrConnectWithoutAnnotationsUpdatedInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsUpdatedInput>
-}
-
 export type UserCreateWithoutAnnotationsReviewedInput = {
   id?: string
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
-  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
   annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsReviewedInput = {
@@ -1617,26 +1732,78 @@ export type UserUncheckedCreateWithoutAnnotationsReviewedInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
-  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
   annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsReviewedInput = {
   where: Prisma.UserWhereUniqueInput
   create: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsReviewedInput, Prisma.UserUncheckedCreateWithoutAnnotationsReviewedInput>
+}
+
+export type UserCreateWithoutAnnotationsUpdatedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserUncheckedCreateWithoutAnnotationsUpdatedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+}
+
+export type UserCreateOrConnectWithoutAnnotationsUpdatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsUpdatedInput>
 }
 
 export type UserUpsertWithoutAnnotationsCreatedInput = {
@@ -1658,18 +1825,19 @@ export type UserUpdateWithoutAnnotationsCreatedInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsCreatedInput = {
@@ -1680,73 +1848,19 @@ export type UserUncheckedUpdateWithoutAnnotationsCreatedInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
-  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
-  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
-  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
-}
-
-export type UserUpsertWithoutAnnotationsUpdatedInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedUpdateWithoutAnnotationsUpdatedInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsUpdatedInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutAnnotationsUpdatedInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedUpdateWithoutAnnotationsUpdatedInput>
-}
-
-export type UserUpdateWithoutAnnotationsUpdatedInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
-  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
-  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
-  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
-}
-
-export type UserUncheckedUpdateWithoutAnnotationsUpdatedInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUpsertWithoutAnnotationsReviewedInput = {
@@ -1768,18 +1882,19 @@ export type UserUpdateWithoutAnnotationsReviewedInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
-  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
   annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsReviewedInput = {
@@ -1790,18 +1905,76 @@ export type UserUncheckedUpdateWithoutAnnotationsReviewedInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
-  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUpsertWithoutAnnotationsUpdatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedUpdateWithoutAnnotationsUpdatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedCreateWithoutAnnotationsUpdatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAnnotationsUpdatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAnnotationsUpdatedInput, Prisma.UserUncheckedUpdateWithoutAnnotationsUpdatedInput>
+}
+
+export type UserUpdateWithoutAnnotationsUpdatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAnnotationsUpdatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserCreateWithoutTracksCreatedInput = {
@@ -1809,21 +1982,22 @@ export type UserCreateWithoutTracksCreatedInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTracksCreatedInput = {
@@ -1831,21 +2005,22 @@ export type UserUncheckedCreateWithoutTracksCreatedInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTracksCreatedInput = {
@@ -1872,18 +2047,19 @@ export type UserUpdateWithoutTracksCreatedInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTracksCreatedInput = {
@@ -1894,18 +2070,19 @@ export type UserUncheckedUpdateWithoutTracksCreatedInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
-  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiTasksCreatedInput = {
@@ -1913,21 +2090,22 @@ export type UserCreateWithoutAiTasksCreatedInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserUncheckedCreateWithoutAiTasksCreatedInput = {
@@ -1935,21 +2113,22 @@ export type UserUncheckedCreateWithoutAiTasksCreatedInput = {
   email: string
   passwordHash?: string | null
   name?: string | null
-  role?: $Enums.UserRole
+  role: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
-  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
-  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
-  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
-  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
 }
 
 export type UserCreateOrConnectWithoutAiTasksCreatedInput = {
@@ -1976,18 +2155,19 @@ export type UserUpdateWithoutAiTasksCreatedInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiTasksCreatedInput = {
@@ -1998,18 +2178,19 @@ export type UserUncheckedUpdateWithoutAiTasksCreatedInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
-  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
-  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
-  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
-  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
-  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
-  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
-  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
-  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
 }
 
 
@@ -2018,35 +2199,37 @@ export type UserUncheckedUpdateWithoutAiTasksCreatedInput = {
  */
 
 export type UserCountOutputType = {
+  aiTasksCreated: number
+  annotationsCreated: number
+  annotationsReviewed: number
+  annotationsUpdated: number
+  uploadedAssets: number
+  sessions: number
   ownedDatasets: number
   memberships: number
-  sessions: number
-  uploadedAssets: number
-  annotationsCreated: number
-  annotationsUpdated: number
-  annotationsReviewed: number
-  tracksCreated: number
   externalRepositories: number
-  sourceConnections: number
-  jobsCreated: number
   jobsCanceled: number
-  aiTasksCreated: number
+  jobsCreated: number
+  preparedImports: number
+  sourceConnections: number
+  tracksCreated: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  aiTasksCreated?: boolean | UserCountOutputTypeCountAiTasksCreatedArgs
+  annotationsCreated?: boolean | UserCountOutputTypeCountAnnotationsCreatedArgs
+  annotationsReviewed?: boolean | UserCountOutputTypeCountAnnotationsReviewedArgs
+  annotationsUpdated?: boolean | UserCountOutputTypeCountAnnotationsUpdatedArgs
+  uploadedAssets?: boolean | UserCountOutputTypeCountUploadedAssetsArgs
+  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   ownedDatasets?: boolean | UserCountOutputTypeCountOwnedDatasetsArgs
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
-  sessions?: boolean | UserCountOutputTypeCountSessionsArgs
-  uploadedAssets?: boolean | UserCountOutputTypeCountUploadedAssetsArgs
-  annotationsCreated?: boolean | UserCountOutputTypeCountAnnotationsCreatedArgs
-  annotationsUpdated?: boolean | UserCountOutputTypeCountAnnotationsUpdatedArgs
-  annotationsReviewed?: boolean | UserCountOutputTypeCountAnnotationsReviewedArgs
-  tracksCreated?: boolean | UserCountOutputTypeCountTracksCreatedArgs
   externalRepositories?: boolean | UserCountOutputTypeCountExternalRepositoriesArgs
-  sourceConnections?: boolean | UserCountOutputTypeCountSourceConnectionsArgs
-  jobsCreated?: boolean | UserCountOutputTypeCountJobsCreatedArgs
   jobsCanceled?: boolean | UserCountOutputTypeCountJobsCanceledArgs
-  aiTasksCreated?: boolean | UserCountOutputTypeCountAiTasksCreatedArgs
+  jobsCreated?: boolean | UserCountOutputTypeCountJobsCreatedArgs
+  preparedImports?: boolean | UserCountOutputTypeCountPreparedImportsArgs
+  sourceConnections?: boolean | UserCountOutputTypeCountSourceConnectionsArgs
+  tracksCreated?: boolean | UserCountOutputTypeCountTracksCreatedArgs
 }
 
 /**
@@ -2057,6 +2240,48 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the UserCountOutputType
    */
   select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAiTasksCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiTaskWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAnnotationsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AnnotationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAnnotationsReviewedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AnnotationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAnnotationsUpdatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AnnotationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountUploadedAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuthSessionWhereInput
 }
 
 /**
@@ -2076,64 +2301,8 @@ export type UserCountOutputTypeCountMembershipsArgs<ExtArgs extends runtime.Type
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AuthSessionWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountUploadedAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AssetWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountAnnotationsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AnnotationWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountAnnotationsUpdatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AnnotationWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountAnnotationsReviewedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AnnotationWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountTracksCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.VideoObjectTrackWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountExternalRepositoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ExternalRepositoryWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountSourceConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.SourceConnectionWhereInput
-}
-
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountJobsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.JobWhereInput
 }
 
 /**
@@ -2146,8 +2315,29 @@ export type UserCountOutputTypeCountJobsCanceledArgs<ExtArgs extends runtime.Typ
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountAiTasksCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AiTaskWhereInput
+export type UserCountOutputTypeCountJobsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JobWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPreparedImportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PreparedImportWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSourceConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SourceConnectionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountTracksCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VideoObjectTrackWhereInput
 }
 
 
@@ -2159,19 +2349,20 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   role?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  aiTasksCreated?: boolean | Prisma.User$aiTasksCreatedArgs<ExtArgs>
+  annotationsCreated?: boolean | Prisma.User$annotationsCreatedArgs<ExtArgs>
+  annotationsReviewed?: boolean | Prisma.User$annotationsReviewedArgs<ExtArgs>
+  annotationsUpdated?: boolean | Prisma.User$annotationsUpdatedArgs<ExtArgs>
+  uploadedAssets?: boolean | Prisma.User$uploadedAssetsArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   ownedDatasets?: boolean | Prisma.User$ownedDatasetsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
-  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
-  uploadedAssets?: boolean | Prisma.User$uploadedAssetsArgs<ExtArgs>
-  annotationsCreated?: boolean | Prisma.User$annotationsCreatedArgs<ExtArgs>
-  annotationsUpdated?: boolean | Prisma.User$annotationsUpdatedArgs<ExtArgs>
-  annotationsReviewed?: boolean | Prisma.User$annotationsReviewedArgs<ExtArgs>
-  tracksCreated?: boolean | Prisma.User$tracksCreatedArgs<ExtArgs>
   externalRepositories?: boolean | Prisma.User$externalRepositoriesArgs<ExtArgs>
-  sourceConnections?: boolean | Prisma.User$sourceConnectionsArgs<ExtArgs>
-  jobsCreated?: boolean | Prisma.User$jobsCreatedArgs<ExtArgs>
   jobsCanceled?: boolean | Prisma.User$jobsCanceledArgs<ExtArgs>
-  aiTasksCreated?: boolean | Prisma.User$aiTasksCreatedArgs<ExtArgs>
+  jobsCreated?: boolean | Prisma.User$jobsCreatedArgs<ExtArgs>
+  preparedImports?: boolean | Prisma.User$preparedImportsArgs<ExtArgs>
+  sourceConnections?: boolean | Prisma.User$sourceConnectionsArgs<ExtArgs>
+  tracksCreated?: boolean | Prisma.User$tracksCreatedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2207,19 +2398,20 @@ export type UserSelectScalar = {
 
 export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "passwordHash" | "name" | "role" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  aiTasksCreated?: boolean | Prisma.User$aiTasksCreatedArgs<ExtArgs>
+  annotationsCreated?: boolean | Prisma.User$annotationsCreatedArgs<ExtArgs>
+  annotationsReviewed?: boolean | Prisma.User$annotationsReviewedArgs<ExtArgs>
+  annotationsUpdated?: boolean | Prisma.User$annotationsUpdatedArgs<ExtArgs>
+  uploadedAssets?: boolean | Prisma.User$uploadedAssetsArgs<ExtArgs>
+  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   ownedDatasets?: boolean | Prisma.User$ownedDatasetsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
-  sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
-  uploadedAssets?: boolean | Prisma.User$uploadedAssetsArgs<ExtArgs>
-  annotationsCreated?: boolean | Prisma.User$annotationsCreatedArgs<ExtArgs>
-  annotationsUpdated?: boolean | Prisma.User$annotationsUpdatedArgs<ExtArgs>
-  annotationsReviewed?: boolean | Prisma.User$annotationsReviewedArgs<ExtArgs>
-  tracksCreated?: boolean | Prisma.User$tracksCreatedArgs<ExtArgs>
   externalRepositories?: boolean | Prisma.User$externalRepositoriesArgs<ExtArgs>
-  sourceConnections?: boolean | Prisma.User$sourceConnectionsArgs<ExtArgs>
-  jobsCreated?: boolean | Prisma.User$jobsCreatedArgs<ExtArgs>
   jobsCanceled?: boolean | Prisma.User$jobsCanceledArgs<ExtArgs>
-  aiTasksCreated?: boolean | Prisma.User$aiTasksCreatedArgs<ExtArgs>
+  jobsCreated?: boolean | Prisma.User$jobsCreatedArgs<ExtArgs>
+  preparedImports?: boolean | Prisma.User$preparedImportsArgs<ExtArgs>
+  sourceConnections?: boolean | Prisma.User$sourceConnectionsArgs<ExtArgs>
+  tracksCreated?: boolean | Prisma.User$tracksCreatedArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2228,19 +2420,20 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
+    aiTasksCreated: Prisma.$AiTaskPayload<ExtArgs>[]
+    annotationsCreated: Prisma.$AnnotationPayload<ExtArgs>[]
+    annotationsReviewed: Prisma.$AnnotationPayload<ExtArgs>[]
+    annotationsUpdated: Prisma.$AnnotationPayload<ExtArgs>[]
+    uploadedAssets: Prisma.$AssetPayload<ExtArgs>[]
+    sessions: Prisma.$AuthSessionPayload<ExtArgs>[]
     ownedDatasets: Prisma.$DatasetPayload<ExtArgs>[]
     memberships: Prisma.$DatasetMemberPayload<ExtArgs>[]
-    sessions: Prisma.$AuthSessionPayload<ExtArgs>[]
-    uploadedAssets: Prisma.$AssetPayload<ExtArgs>[]
-    annotationsCreated: Prisma.$AnnotationPayload<ExtArgs>[]
-    annotationsUpdated: Prisma.$AnnotationPayload<ExtArgs>[]
-    annotationsReviewed: Prisma.$AnnotationPayload<ExtArgs>[]
-    tracksCreated: Prisma.$VideoObjectTrackPayload<ExtArgs>[]
     externalRepositories: Prisma.$ExternalRepositoryPayload<ExtArgs>[]
-    sourceConnections: Prisma.$SourceConnectionPayload<ExtArgs>[]
-    jobsCreated: Prisma.$JobPayload<ExtArgs>[]
     jobsCanceled: Prisma.$JobPayload<ExtArgs>[]
-    aiTasksCreated: Prisma.$AiTaskPayload<ExtArgs>[]
+    jobsCreated: Prisma.$JobPayload<ExtArgs>[]
+    preparedImports: Prisma.$PreparedImportPayload<ExtArgs>[]
+    sourceConnections: Prisma.$SourceConnectionPayload<ExtArgs>[]
+    tracksCreated: Prisma.$VideoObjectTrackPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2644,19 +2837,20 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  aiTasksCreated<T extends Prisma.User$aiTasksCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiTasksCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  annotationsCreated<T extends Prisma.User$annotationsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  annotationsReviewed<T extends Prisma.User$annotationsReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  annotationsUpdated<T extends Prisma.User$annotationsUpdatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationsUpdatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  uploadedAssets<T extends Prisma.User$uploadedAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$uploadedAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ownedDatasets<T extends Prisma.User$ownedDatasetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedDatasetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  uploadedAssets<T extends Prisma.User$uploadedAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$uploadedAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  annotationsCreated<T extends Prisma.User$annotationsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  annotationsUpdated<T extends Prisma.User$annotationsUpdatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationsUpdatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  annotationsReviewed<T extends Prisma.User$annotationsReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  tracksCreated<T extends Prisma.User$tracksCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tracksCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoObjectTrackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   externalRepositories<T extends Prisma.User$externalRepositoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$externalRepositoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExternalRepositoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  sourceConnections<T extends Prisma.User$sourceConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sourceConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourceConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  jobsCreated<T extends Prisma.User$jobsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobsCanceled<T extends Prisma.User$jobsCanceledArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobsCanceledArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  aiTasksCreated<T extends Prisma.User$aiTasksCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiTasksCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  jobsCreated<T extends Prisma.User$jobsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$jobsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  preparedImports<T extends Prisma.User$preparedImportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$preparedImportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PreparedImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sourceConnections<T extends Prisma.User$sourceConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sourceConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourceConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tracksCreated<T extends Prisma.User$tracksCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tracksCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoObjectTrackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3081,6 +3275,150 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
+ * User.aiTasksCreated
+ */
+export type User$aiTasksCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiTask
+   */
+  select?: Prisma.AiTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiTask
+   */
+  omit?: Prisma.AiTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiTaskInclude<ExtArgs> | null
+  where?: Prisma.AiTaskWhereInput
+  orderBy?: Prisma.AiTaskOrderByWithRelationInput | Prisma.AiTaskOrderByWithRelationInput[]
+  cursor?: Prisma.AiTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiTaskScalarFieldEnum | Prisma.AiTaskScalarFieldEnum[]
+}
+
+/**
+ * User.annotationsCreated
+ */
+export type User$annotationsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Annotation
+   */
+  select?: Prisma.AnnotationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Annotation
+   */
+  omit?: Prisma.AnnotationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AnnotationInclude<ExtArgs> | null
+  where?: Prisma.AnnotationWhereInput
+  orderBy?: Prisma.AnnotationOrderByWithRelationInput | Prisma.AnnotationOrderByWithRelationInput[]
+  cursor?: Prisma.AnnotationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
+}
+
+/**
+ * User.annotationsReviewed
+ */
+export type User$annotationsReviewedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Annotation
+   */
+  select?: Prisma.AnnotationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Annotation
+   */
+  omit?: Prisma.AnnotationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AnnotationInclude<ExtArgs> | null
+  where?: Prisma.AnnotationWhereInput
+  orderBy?: Prisma.AnnotationOrderByWithRelationInput | Prisma.AnnotationOrderByWithRelationInput[]
+  cursor?: Prisma.AnnotationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
+}
+
+/**
+ * User.annotationsUpdated
+ */
+export type User$annotationsUpdatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Annotation
+   */
+  select?: Prisma.AnnotationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Annotation
+   */
+  omit?: Prisma.AnnotationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AnnotationInclude<ExtArgs> | null
+  where?: Prisma.AnnotationWhereInput
+  orderBy?: Prisma.AnnotationOrderByWithRelationInput | Prisma.AnnotationOrderByWithRelationInput[]
+  cursor?: Prisma.AnnotationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
+}
+
+/**
+ * User.uploadedAssets
+ */
+export type User$uploadedAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Asset
+   */
+  select?: Prisma.AssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Asset
+   */
+  omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
+  where?: Prisma.AssetWhereInput
+  orderBy?: Prisma.AssetOrderByWithRelationInput | Prisma.AssetOrderByWithRelationInput[]
+  cursor?: Prisma.AssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetScalarFieldEnum | Prisma.AssetScalarFieldEnum[]
+}
+
+/**
+ * User.sessions
+ */
+export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuthSession
+   */
+  select?: Prisma.AuthSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuthSession
+   */
+  omit?: Prisma.AuthSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuthSessionInclude<ExtArgs> | null
+  where?: Prisma.AuthSessionWhereInput
+  orderBy?: Prisma.AuthSessionOrderByWithRelationInput | Prisma.AuthSessionOrderByWithRelationInput[]
+  cursor?: Prisma.AuthSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuthSessionScalarFieldEnum | Prisma.AuthSessionScalarFieldEnum[]
+}
+
+/**
  * User.ownedDatasets
  */
 export type User$ownedDatasetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3129,150 +3467,6 @@ export type User$membershipsArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
- * User.sessions
- */
-export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AuthSession
-   */
-  select?: Prisma.AuthSessionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AuthSession
-   */
-  omit?: Prisma.AuthSessionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AuthSessionInclude<ExtArgs> | null
-  where?: Prisma.AuthSessionWhereInput
-  orderBy?: Prisma.AuthSessionOrderByWithRelationInput | Prisma.AuthSessionOrderByWithRelationInput[]
-  cursor?: Prisma.AuthSessionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AuthSessionScalarFieldEnum | Prisma.AuthSessionScalarFieldEnum[]
-}
-
-/**
- * User.uploadedAssets
- */
-export type User$uploadedAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Asset
-   */
-  select?: Prisma.AssetSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Asset
-   */
-  omit?: Prisma.AssetOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AssetInclude<ExtArgs> | null
-  where?: Prisma.AssetWhereInput
-  orderBy?: Prisma.AssetOrderByWithRelationInput | Prisma.AssetOrderByWithRelationInput[]
-  cursor?: Prisma.AssetWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AssetScalarFieldEnum | Prisma.AssetScalarFieldEnum[]
-}
-
-/**
- * User.annotationsCreated
- */
-export type User$annotationsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Annotation
-   */
-  select?: Prisma.AnnotationSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Annotation
-   */
-  omit?: Prisma.AnnotationOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnnotationInclude<ExtArgs> | null
-  where?: Prisma.AnnotationWhereInput
-  orderBy?: Prisma.AnnotationOrderByWithRelationInput | Prisma.AnnotationOrderByWithRelationInput[]
-  cursor?: Prisma.AnnotationWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
-}
-
-/**
- * User.annotationsUpdated
- */
-export type User$annotationsUpdatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Annotation
-   */
-  select?: Prisma.AnnotationSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Annotation
-   */
-  omit?: Prisma.AnnotationOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnnotationInclude<ExtArgs> | null
-  where?: Prisma.AnnotationWhereInput
-  orderBy?: Prisma.AnnotationOrderByWithRelationInput | Prisma.AnnotationOrderByWithRelationInput[]
-  cursor?: Prisma.AnnotationWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
-}
-
-/**
- * User.annotationsReviewed
- */
-export type User$annotationsReviewedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Annotation
-   */
-  select?: Prisma.AnnotationSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Annotation
-   */
-  omit?: Prisma.AnnotationOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnnotationInclude<ExtArgs> | null
-  where?: Prisma.AnnotationWhereInput
-  orderBy?: Prisma.AnnotationOrderByWithRelationInput | Prisma.AnnotationOrderByWithRelationInput[]
-  cursor?: Prisma.AnnotationWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
-}
-
-/**
- * User.tracksCreated
- */
-export type User$tracksCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the VideoObjectTrack
-   */
-  select?: Prisma.VideoObjectTrackSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the VideoObjectTrack
-   */
-  omit?: Prisma.VideoObjectTrackOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.VideoObjectTrackInclude<ExtArgs> | null
-  where?: Prisma.VideoObjectTrackWhereInput
-  orderBy?: Prisma.VideoObjectTrackOrderByWithRelationInput | Prisma.VideoObjectTrackOrderByWithRelationInput[]
-  cursor?: Prisma.VideoObjectTrackWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.VideoObjectTrackScalarFieldEnum | Prisma.VideoObjectTrackScalarFieldEnum[]
-}
-
-/**
  * User.externalRepositories
  */
 export type User$externalRepositoriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3294,54 +3488,6 @@ export type User$externalRepositoriesArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.ExternalRepositoryScalarFieldEnum | Prisma.ExternalRepositoryScalarFieldEnum[]
-}
-
-/**
- * User.sourceConnections
- */
-export type User$sourceConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SourceConnection
-   */
-  select?: Prisma.SourceConnectionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the SourceConnection
-   */
-  omit?: Prisma.SourceConnectionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SourceConnectionInclude<ExtArgs> | null
-  where?: Prisma.SourceConnectionWhereInput
-  orderBy?: Prisma.SourceConnectionOrderByWithRelationInput | Prisma.SourceConnectionOrderByWithRelationInput[]
-  cursor?: Prisma.SourceConnectionWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.SourceConnectionScalarFieldEnum | Prisma.SourceConnectionScalarFieldEnum[]
-}
-
-/**
- * User.jobsCreated
- */
-export type User$jobsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Job
-   */
-  select?: Prisma.JobSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Job
-   */
-  omit?: Prisma.JobOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.JobInclude<ExtArgs> | null
-  where?: Prisma.JobWhereInput
-  orderBy?: Prisma.JobOrderByWithRelationInput | Prisma.JobOrderByWithRelationInput[]
-  cursor?: Prisma.JobWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.JobScalarFieldEnum | Prisma.JobScalarFieldEnum[]
 }
 
 /**
@@ -3369,27 +3515,99 @@ export type User$jobsCanceledArgs<ExtArgs extends runtime.Types.Extensions.Inter
 }
 
 /**
- * User.aiTasksCreated
+ * User.jobsCreated
  */
-export type User$aiTasksCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type User$jobsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the AiTask
+   * Select specific fields to fetch from the Job
    */
-  select?: Prisma.AiTaskSelect<ExtArgs> | null
+  select?: Prisma.JobSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the AiTask
+   * Omit specific fields from the Job
    */
-  omit?: Prisma.AiTaskOmit<ExtArgs> | null
+  omit?: Prisma.JobOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AiTaskInclude<ExtArgs> | null
-  where?: Prisma.AiTaskWhereInput
-  orderBy?: Prisma.AiTaskOrderByWithRelationInput | Prisma.AiTaskOrderByWithRelationInput[]
-  cursor?: Prisma.AiTaskWhereUniqueInput
+  include?: Prisma.JobInclude<ExtArgs> | null
+  where?: Prisma.JobWhereInput
+  orderBy?: Prisma.JobOrderByWithRelationInput | Prisma.JobOrderByWithRelationInput[]
+  cursor?: Prisma.JobWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.AiTaskScalarFieldEnum | Prisma.AiTaskScalarFieldEnum[]
+  distinct?: Prisma.JobScalarFieldEnum | Prisma.JobScalarFieldEnum[]
+}
+
+/**
+ * User.preparedImports
+ */
+export type User$preparedImportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PreparedImport
+   */
+  select?: Prisma.PreparedImportSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PreparedImport
+   */
+  omit?: Prisma.PreparedImportOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PreparedImportInclude<ExtArgs> | null
+  where?: Prisma.PreparedImportWhereInput
+  orderBy?: Prisma.PreparedImportOrderByWithRelationInput | Prisma.PreparedImportOrderByWithRelationInput[]
+  cursor?: Prisma.PreparedImportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PreparedImportScalarFieldEnum | Prisma.PreparedImportScalarFieldEnum[]
+}
+
+/**
+ * User.sourceConnections
+ */
+export type User$sourceConnectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SourceConnection
+   */
+  select?: Prisma.SourceConnectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SourceConnection
+   */
+  omit?: Prisma.SourceConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SourceConnectionInclude<ExtArgs> | null
+  where?: Prisma.SourceConnectionWhereInput
+  orderBy?: Prisma.SourceConnectionOrderByWithRelationInput | Prisma.SourceConnectionOrderByWithRelationInput[]
+  cursor?: Prisma.SourceConnectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SourceConnectionScalarFieldEnum | Prisma.SourceConnectionScalarFieldEnum[]
+}
+
+/**
+ * User.tracksCreated
+ */
+export type User$tracksCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VideoObjectTrack
+   */
+  select?: Prisma.VideoObjectTrackSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VideoObjectTrack
+   */
+  omit?: Prisma.VideoObjectTrackOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VideoObjectTrackInclude<ExtArgs> | null
+  where?: Prisma.VideoObjectTrackWhereInput
+  orderBy?: Prisma.VideoObjectTrackOrderByWithRelationInput | Prisma.VideoObjectTrackOrderByWithRelationInput[]
+  cursor?: Prisma.VideoObjectTrackWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VideoObjectTrackScalarFieldEnum | Prisma.VideoObjectTrackScalarFieldEnum[]
 }
 
 /**

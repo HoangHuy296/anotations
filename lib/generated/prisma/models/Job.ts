@@ -59,6 +59,10 @@ export type JobMinAggregateOutputType = {
   modality: $Enums.Modality | null
   status: $Enums.JobStatus | null
   stage: $Enums.JobStage | null
+  queueName: string | null
+  queueJobId: string | null
+  enqueuedAt: Date | null
+  dequeuedAt: Date | null
   priority: $Enums.JobPriority | null
   priorityValue: number | null
   trigger: $Enums.JobTrigger | null
@@ -88,12 +92,9 @@ export type JobMinAggregateOutputType = {
   idempotencyKey: string | null
   resultStorageKey: string | null
   resultFilename: string | null
-  queueName: string | null
-  queueJobId: string | null
-  enqueuedAt: Date | null
-  dequeuedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  retryOfJobId: string | null
 }
 
 export type JobMaxAggregateOutputType = {
@@ -105,6 +106,10 @@ export type JobMaxAggregateOutputType = {
   modality: $Enums.Modality | null
   status: $Enums.JobStatus | null
   stage: $Enums.JobStage | null
+  queueName: string | null
+  queueJobId: string | null
+  enqueuedAt: Date | null
+  dequeuedAt: Date | null
   priority: $Enums.JobPriority | null
   priorityValue: number | null
   trigger: $Enums.JobTrigger | null
@@ -134,12 +139,9 @@ export type JobMaxAggregateOutputType = {
   idempotencyKey: string | null
   resultStorageKey: string | null
   resultFilename: string | null
-  queueName: string | null
-  queueJobId: string | null
-  enqueuedAt: Date | null
-  dequeuedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  retryOfJobId: string | null
 }
 
 export type JobCountAggregateOutputType = {
@@ -151,6 +153,10 @@ export type JobCountAggregateOutputType = {
   modality: number
   status: number
   stage: number
+  queueName: number
+  queueJobId: number
+  enqueuedAt: number
+  dequeuedAt: number
   priority: number
   priorityValue: number
   trigger: number
@@ -184,12 +190,9 @@ export type JobCountAggregateOutputType = {
   idempotencyKey: number
   resultStorageKey: number
   resultFilename: number
-  queueName: number
-  queueJobId: number
-  enqueuedAt: number
-  dequeuedAt: number
   createdAt: number
   updatedAt: number
+  retryOfJobId: number
   _all: number
 }
 
@@ -227,6 +230,10 @@ export type JobMinAggregateInputType = {
   modality?: true
   status?: true
   stage?: true
+  queueName?: true
+  queueJobId?: true
+  enqueuedAt?: true
+  dequeuedAt?: true
   priority?: true
   priorityValue?: true
   trigger?: true
@@ -256,12 +263,9 @@ export type JobMinAggregateInputType = {
   idempotencyKey?: true
   resultStorageKey?: true
   resultFilename?: true
-  queueName?: true
-  queueJobId?: true
-  enqueuedAt?: true
-  dequeuedAt?: true
   createdAt?: true
   updatedAt?: true
+  retryOfJobId?: true
 }
 
 export type JobMaxAggregateInputType = {
@@ -273,6 +277,10 @@ export type JobMaxAggregateInputType = {
   modality?: true
   status?: true
   stage?: true
+  queueName?: true
+  queueJobId?: true
+  enqueuedAt?: true
+  dequeuedAt?: true
   priority?: true
   priorityValue?: true
   trigger?: true
@@ -302,12 +310,9 @@ export type JobMaxAggregateInputType = {
   idempotencyKey?: true
   resultStorageKey?: true
   resultFilename?: true
-  queueName?: true
-  queueJobId?: true
-  enqueuedAt?: true
-  dequeuedAt?: true
   createdAt?: true
   updatedAt?: true
+  retryOfJobId?: true
 }
 
 export type JobCountAggregateInputType = {
@@ -319,6 +324,10 @@ export type JobCountAggregateInputType = {
   modality?: true
   status?: true
   stage?: true
+  queueName?: true
+  queueJobId?: true
+  enqueuedAt?: true
+  dequeuedAt?: true
   priority?: true
   priorityValue?: true
   trigger?: true
@@ -352,12 +361,9 @@ export type JobCountAggregateInputType = {
   idempotencyKey?: true
   resultStorageKey?: true
   resultFilename?: true
-  queueName?: true
-  queueJobId?: true
-  enqueuedAt?: true
-  dequeuedAt?: true
   createdAt?: true
   updatedAt?: true
+  retryOfJobId?: true
   _all?: true
 }
 
@@ -456,6 +462,10 @@ export type JobGroupByOutputType = {
   modality: $Enums.Modality | null
   status: $Enums.JobStatus
   stage: $Enums.JobStage
+  queueName: string | null
+  queueJobId: string | null
+  enqueuedAt: Date | null
+  dequeuedAt: Date | null
   priority: $Enums.JobPriority
   priorityValue: number
   trigger: $Enums.JobTrigger
@@ -489,12 +499,9 @@ export type JobGroupByOutputType = {
   idempotencyKey: string | null
   resultStorageKey: string | null
   resultFilename: string | null
-  queueName: string | null
-  queueJobId: string | null
-  enqueuedAt: Date | null
-  dequeuedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  retryOfJobId: string | null
   _count: JobCountAggregateOutputType | null
   _avg: JobAvgAggregateOutputType | null
   _sum: JobSumAggregateOutputType | null
@@ -529,6 +536,10 @@ export type JobWhereInput = {
   modality?: Prisma.EnumModalityNullableFilter<"Job"> | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFilter<"Job"> | $Enums.JobStage
+  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
+  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   priority?: Prisma.EnumJobPriorityFilter<"Job"> | $Enums.JobPriority
   priorityValue?: Prisma.IntFilter<"Job"> | number
   trigger?: Prisma.EnumJobTriggerFilter<"Job"> | $Enums.JobTrigger
@@ -562,19 +573,19 @@ export type JobWhereInput = {
   idempotencyKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultFilename?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
-  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
-  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
-  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
-  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  canceledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  sourceConnection?: Prisma.XOR<Prisma.SourceConnectionNullableScalarRelationFilter, Prisma.SourceConnectionWhereInput> | null
-  externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
-  events?: Prisma.JobEventListRelationFilter
+  retryOfJobId?: Prisma.StringNullableFilter<"Job"> | string | null
   aiTasks?: Prisma.AiTaskListRelationFilter
+  canceledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
+  externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
+  retryOfJob?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
+  retrySuccessor?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
+  sourceConnection?: Prisma.XOR<Prisma.SourceConnectionNullableScalarRelationFilter, Prisma.SourceConnectionWhereInput> | null
+  events?: Prisma.JobEventListRelationFilter
+  preparedImport?: Prisma.XOR<Prisma.PreparedImportNullableScalarRelationFilter, Prisma.PreparedImportWhereInput> | null
 }
 
 export type JobOrderByWithRelationInput = {
@@ -586,6 +597,10 @@ export type JobOrderByWithRelationInput = {
   modality?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
+  queueName?: Prisma.SortOrderInput | Prisma.SortOrder
+  queueJobId?: Prisma.SortOrderInput | Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -619,23 +634,24 @@ export type JobOrderByWithRelationInput = {
   idempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   resultFilename?: Prisma.SortOrderInput | Prisma.SortOrder
-  queueName?: Prisma.SortOrderInput | Prisma.SortOrder
-  queueJobId?: Prisma.SortOrderInput | Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  dataset?: Prisma.DatasetOrderByWithRelationInput
-  createdBy?: Prisma.UserOrderByWithRelationInput
-  canceledBy?: Prisma.UserOrderByWithRelationInput
-  sourceConnection?: Prisma.SourceConnectionOrderByWithRelationInput
-  externalRepository?: Prisma.ExternalRepositoryOrderByWithRelationInput
-  events?: Prisma.JobEventOrderByRelationAggregateInput
+  retryOfJobId?: Prisma.SortOrderInput | Prisma.SortOrder
   aiTasks?: Prisma.AiTaskOrderByRelationAggregateInput
+  canceledBy?: Prisma.UserOrderByWithRelationInput
+  createdBy?: Prisma.UserOrderByWithRelationInput
+  dataset?: Prisma.DatasetOrderByWithRelationInput
+  externalRepository?: Prisma.ExternalRepositoryOrderByWithRelationInput
+  retryOfJob?: Prisma.JobOrderByWithRelationInput
+  retrySuccessor?: Prisma.JobOrderByWithRelationInput
+  sourceConnection?: Prisma.SourceConnectionOrderByWithRelationInput
+  events?: Prisma.JobEventOrderByRelationAggregateInput
+  preparedImport?: Prisma.PreparedImportOrderByWithRelationInput
 }
 
 export type JobWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  retryOfJobId?: string
   datasetId_idempotencyKey?: Prisma.JobDatasetIdIdempotencyKeyCompoundUniqueInput
   AND?: Prisma.JobWhereInput | Prisma.JobWhereInput[]
   OR?: Prisma.JobWhereInput[]
@@ -647,6 +663,10 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   modality?: Prisma.EnumModalityNullableFilter<"Job"> | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFilter<"Job"> | $Enums.JobStage
+  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
+  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   priority?: Prisma.EnumJobPriorityFilter<"Job"> | $Enums.JobPriority
   priorityValue?: Prisma.IntFilter<"Job"> | number
   trigger?: Prisma.EnumJobTriggerFilter<"Job"> | $Enums.JobTrigger
@@ -680,20 +700,19 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   idempotencyKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultFilename?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
-  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
-  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
-  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
-  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  canceledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
-  sourceConnection?: Prisma.XOR<Prisma.SourceConnectionNullableScalarRelationFilter, Prisma.SourceConnectionWhereInput> | null
-  externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
-  events?: Prisma.JobEventListRelationFilter
   aiTasks?: Prisma.AiTaskListRelationFilter
-}, "id" | "datasetId_idempotencyKey">
+  canceledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
+  externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
+  retryOfJob?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
+  retrySuccessor?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
+  sourceConnection?: Prisma.XOR<Prisma.SourceConnectionNullableScalarRelationFilter, Prisma.SourceConnectionWhereInput> | null
+  events?: Prisma.JobEventListRelationFilter
+  preparedImport?: Prisma.XOR<Prisma.PreparedImportNullableScalarRelationFilter, Prisma.PreparedImportWhereInput> | null
+}, "id" | "retryOfJobId" | "datasetId_idempotencyKey">
 
 export type JobOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -704,6 +723,10 @@ export type JobOrderByWithAggregationInput = {
   modality?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
+  queueName?: Prisma.SortOrderInput | Prisma.SortOrder
+  queueJobId?: Prisma.SortOrderInput | Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -737,12 +760,9 @@ export type JobOrderByWithAggregationInput = {
   idempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   resultFilename?: Prisma.SortOrderInput | Prisma.SortOrder
-  queueName?: Prisma.SortOrderInput | Prisma.SortOrder
-  queueJobId?: Prisma.SortOrderInput | Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  retryOfJobId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.JobCountOrderByAggregateInput
   _avg?: Prisma.JobAvgOrderByAggregateInput
   _max?: Prisma.JobMaxOrderByAggregateInput
@@ -762,6 +782,10 @@ export type JobScalarWhereWithAggregatesInput = {
   modality?: Prisma.EnumModalityNullableWithAggregatesFilter<"Job"> | $Enums.Modality | null
   status?: Prisma.EnumJobStatusWithAggregatesFilter<"Job"> | $Enums.JobStatus
   stage?: Prisma.EnumJobStageWithAggregatesFilter<"Job"> | $Enums.JobStage
+  queueName?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  queueJobId?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  enqueuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
+  dequeuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
   priority?: Prisma.EnumJobPriorityWithAggregatesFilter<"Job"> | $Enums.JobPriority
   priorityValue?: Prisma.IntWithAggregatesFilter<"Job"> | number
   trigger?: Prisma.EnumJobTriggerWithAggregatesFilter<"Job"> | $Enums.JobTrigger
@@ -795,12 +819,9 @@ export type JobScalarWhereWithAggregatesInput = {
   idempotencyKey?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
   resultStorageKey?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
   resultFilename?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
-  queueName?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
-  queueJobId?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
-  enqueuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
-  dequeuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
+  retryOfJobId?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
 }
 
 export type JobCreateInput = {
@@ -809,6 +830,10 @@ export type JobCreateInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -840,19 +865,18 @@ export type JobCreateInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
-  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
-  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
-  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateInput = {
@@ -864,6 +888,10 @@ export type JobUncheckedCreateInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -897,14 +925,13 @@ export type JobUncheckedCreateInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  retryOfJobId?: string | null
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobUpdateInput = {
@@ -913,6 +940,10 @@ export type JobUpdateInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -944,19 +975,18 @@ export type JobUpdateInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
-  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
-  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
-  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateInput = {
@@ -968,6 +998,10 @@ export type JobUncheckedUpdateInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -1001,14 +1035,13 @@ export type JobUncheckedUpdateInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobCreateManyInput = {
@@ -1020,6 +1053,10 @@ export type JobCreateManyInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1053,12 +1090,9 @@ export type JobCreateManyInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  retryOfJobId?: string | null
 }
 
 export type JobUpdateManyMutationInput = {
@@ -1067,6 +1101,10 @@ export type JobUpdateManyMutationInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -1098,10 +1136,6 @@ export type JobUpdateManyMutationInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1115,6 +1149,10 @@ export type JobUncheckedUpdateManyInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -1148,12 +1186,9 @@ export type JobUncheckedUpdateManyInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type JobListRelationFilter = {
@@ -1164,6 +1199,11 @@ export type JobListRelationFilter = {
 
 export type JobOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type JobNullableScalarRelationFilter = {
+  is?: Prisma.JobWhereInput | null
+  isNot?: Prisma.JobWhereInput | null
 }
 
 export type JobDatasetIdIdempotencyKeyCompoundUniqueInput = {
@@ -1180,6 +1220,10 @@ export type JobCountOrderByAggregateInput = {
   modality?: Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
+  queueName?: Prisma.SortOrder
+  queueJobId?: Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -1213,12 +1257,9 @@ export type JobCountOrderByAggregateInput = {
   idempotencyKey?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   resultFilename?: Prisma.SortOrder
-  queueName?: Prisma.SortOrder
-  queueJobId?: Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  retryOfJobId?: Prisma.SortOrder
 }
 
 export type JobAvgOrderByAggregateInput = {
@@ -1242,6 +1283,10 @@ export type JobMaxOrderByAggregateInput = {
   modality?: Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
+  queueName?: Prisma.SortOrder
+  queueJobId?: Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -1271,12 +1316,9 @@ export type JobMaxOrderByAggregateInput = {
   idempotencyKey?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   resultFilename?: Prisma.SortOrder
-  queueName?: Prisma.SortOrder
-  queueJobId?: Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  retryOfJobId?: Prisma.SortOrder
 }
 
 export type JobMinOrderByAggregateInput = {
@@ -1288,6 +1330,10 @@ export type JobMinOrderByAggregateInput = {
   modality?: Prisma.SortOrder
   status?: Prisma.SortOrder
   stage?: Prisma.SortOrder
+  queueName?: Prisma.SortOrder
+  queueJobId?: Prisma.SortOrder
+  enqueuedAt?: Prisma.SortOrder
+  dequeuedAt?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   priorityValue?: Prisma.SortOrder
   trigger?: Prisma.SortOrder
@@ -1317,12 +1363,9 @@ export type JobMinOrderByAggregateInput = {
   idempotencyKey?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   resultFilename?: Prisma.SortOrder
-  queueName?: Prisma.SortOrder
-  queueJobId?: Prisma.SortOrder
-  enqueuedAt?: Prisma.SortOrder
-  dequeuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  retryOfJobId?: Prisma.SortOrder
 }
 
 export type JobSumOrderByAggregateInput = {
@@ -1342,9 +1385,11 @@ export type JobScalarRelationFilter = {
   isNot?: Prisma.JobWhereInput
 }
 
-export type JobNullableScalarRelationFilter = {
-  is?: Prisma.JobWhereInput | null
-  isNot?: Prisma.JobWhereInput | null
+export type JobCreateNestedManyWithoutCanceledByInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutCanceledByInput, Prisma.JobUncheckedCreateWithoutCanceledByInput> | Prisma.JobCreateWithoutCanceledByInput[] | Prisma.JobUncheckedCreateWithoutCanceledByInput[]
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutCanceledByInput | Prisma.JobCreateOrConnectWithoutCanceledByInput[]
+  createMany?: Prisma.JobCreateManyCanceledByInputEnvelope
+  connect?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
 }
 
 export type JobCreateNestedManyWithoutCreatedByInput = {
@@ -1354,7 +1399,7 @@ export type JobCreateNestedManyWithoutCreatedByInput = {
   connect?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
 }
 
-export type JobCreateNestedManyWithoutCanceledByInput = {
+export type JobUncheckedCreateNestedManyWithoutCanceledByInput = {
   create?: Prisma.XOR<Prisma.JobCreateWithoutCanceledByInput, Prisma.JobUncheckedCreateWithoutCanceledByInput> | Prisma.JobCreateWithoutCanceledByInput[] | Prisma.JobUncheckedCreateWithoutCanceledByInput[]
   connectOrCreate?: Prisma.JobCreateOrConnectWithoutCanceledByInput | Prisma.JobCreateOrConnectWithoutCanceledByInput[]
   createMany?: Prisma.JobCreateManyCanceledByInputEnvelope
@@ -1368,11 +1413,18 @@ export type JobUncheckedCreateNestedManyWithoutCreatedByInput = {
   connect?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
 }
 
-export type JobUncheckedCreateNestedManyWithoutCanceledByInput = {
+export type JobUpdateManyWithoutCanceledByNestedInput = {
   create?: Prisma.XOR<Prisma.JobCreateWithoutCanceledByInput, Prisma.JobUncheckedCreateWithoutCanceledByInput> | Prisma.JobCreateWithoutCanceledByInput[] | Prisma.JobUncheckedCreateWithoutCanceledByInput[]
   connectOrCreate?: Prisma.JobCreateOrConnectWithoutCanceledByInput | Prisma.JobCreateOrConnectWithoutCanceledByInput[]
+  upsert?: Prisma.JobUpsertWithWhereUniqueWithoutCanceledByInput | Prisma.JobUpsertWithWhereUniqueWithoutCanceledByInput[]
   createMany?: Prisma.JobCreateManyCanceledByInputEnvelope
+  set?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
+  disconnect?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
+  delete?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
   connect?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
+  update?: Prisma.JobUpdateWithWhereUniqueWithoutCanceledByInput | Prisma.JobUpdateWithWhereUniqueWithoutCanceledByInput[]
+  updateMany?: Prisma.JobUpdateManyWithWhereWithoutCanceledByInput | Prisma.JobUpdateManyWithWhereWithoutCanceledByInput[]
+  deleteMany?: Prisma.JobScalarWhereInput | Prisma.JobScalarWhereInput[]
 }
 
 export type JobUpdateManyWithoutCreatedByNestedInput = {
@@ -1389,7 +1441,7 @@ export type JobUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.JobScalarWhereInput | Prisma.JobScalarWhereInput[]
 }
 
-export type JobUpdateManyWithoutCanceledByNestedInput = {
+export type JobUncheckedUpdateManyWithoutCanceledByNestedInput = {
   create?: Prisma.XOR<Prisma.JobCreateWithoutCanceledByInput, Prisma.JobUncheckedCreateWithoutCanceledByInput> | Prisma.JobCreateWithoutCanceledByInput[] | Prisma.JobUncheckedCreateWithoutCanceledByInput[]
   connectOrCreate?: Prisma.JobCreateOrConnectWithoutCanceledByInput | Prisma.JobCreateOrConnectWithoutCanceledByInput[]
   upsert?: Prisma.JobUpsertWithWhereUniqueWithoutCanceledByInput | Prisma.JobUpsertWithWhereUniqueWithoutCanceledByInput[]
@@ -1417,18 +1469,22 @@ export type JobUncheckedUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.JobScalarWhereInput | Prisma.JobScalarWhereInput[]
 }
 
-export type JobUncheckedUpdateManyWithoutCanceledByNestedInput = {
-  create?: Prisma.XOR<Prisma.JobCreateWithoutCanceledByInput, Prisma.JobUncheckedCreateWithoutCanceledByInput> | Prisma.JobCreateWithoutCanceledByInput[] | Prisma.JobUncheckedCreateWithoutCanceledByInput[]
-  connectOrCreate?: Prisma.JobCreateOrConnectWithoutCanceledByInput | Prisma.JobCreateOrConnectWithoutCanceledByInput[]
-  upsert?: Prisma.JobUpsertWithWhereUniqueWithoutCanceledByInput | Prisma.JobUpsertWithWhereUniqueWithoutCanceledByInput[]
-  createMany?: Prisma.JobCreateManyCanceledByInputEnvelope
-  set?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
-  disconnect?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
-  delete?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
-  connect?: Prisma.JobWhereUniqueInput | Prisma.JobWhereUniqueInput[]
-  update?: Prisma.JobUpdateWithWhereUniqueWithoutCanceledByInput | Prisma.JobUpdateWithWhereUniqueWithoutCanceledByInput[]
-  updateMany?: Prisma.JobUpdateManyWithWhereWithoutCanceledByInput | Prisma.JobUpdateManyWithWhereWithoutCanceledByInput[]
-  deleteMany?: Prisma.JobScalarWhereInput | Prisma.JobScalarWhereInput[]
+export type JobCreateNestedOneWithoutRetrySuccessorInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutRetrySuccessorInput, Prisma.JobUncheckedCreateWithoutRetrySuccessorInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutRetrySuccessorInput
+  connect?: Prisma.JobWhereUniqueInput
+}
+
+export type JobCreateNestedOneWithoutRetryOfJobInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutRetryOfJobInput, Prisma.JobUncheckedCreateWithoutRetryOfJobInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutRetryOfJobInput
+  connect?: Prisma.JobWhereUniqueInput
+}
+
+export type JobUncheckedCreateNestedOneWithoutRetryOfJobInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutRetryOfJobInput, Prisma.JobUncheckedCreateWithoutRetryOfJobInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutRetryOfJobInput
+  connect?: Prisma.JobWhereUniqueInput
 }
 
 export type EnumJobTypeFieldUpdateOperationsInput = {
@@ -1473,6 +1529,36 @@ export type NullableIntFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type JobUpdateOneWithoutRetrySuccessorNestedInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutRetrySuccessorInput, Prisma.JobUncheckedCreateWithoutRetrySuccessorInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutRetrySuccessorInput
+  upsert?: Prisma.JobUpsertWithoutRetrySuccessorInput
+  disconnect?: Prisma.JobWhereInput | boolean
+  delete?: Prisma.JobWhereInput | boolean
+  connect?: Prisma.JobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JobUpdateToOneWithWhereWithoutRetrySuccessorInput, Prisma.JobUpdateWithoutRetrySuccessorInput>, Prisma.JobUncheckedUpdateWithoutRetrySuccessorInput>
+}
+
+export type JobUpdateOneWithoutRetryOfJobNestedInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutRetryOfJobInput, Prisma.JobUncheckedCreateWithoutRetryOfJobInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutRetryOfJobInput
+  upsert?: Prisma.JobUpsertWithoutRetryOfJobInput
+  disconnect?: Prisma.JobWhereInput | boolean
+  delete?: Prisma.JobWhereInput | boolean
+  connect?: Prisma.JobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JobUpdateToOneWithWhereWithoutRetryOfJobInput, Prisma.JobUpdateWithoutRetryOfJobInput>, Prisma.JobUncheckedUpdateWithoutRetryOfJobInput>
+}
+
+export type JobUncheckedUpdateOneWithoutRetryOfJobNestedInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutRetryOfJobInput, Prisma.JobUncheckedCreateWithoutRetryOfJobInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutRetryOfJobInput
+  upsert?: Prisma.JobUpsertWithoutRetryOfJobInput
+  disconnect?: Prisma.JobWhereInput | boolean
+  delete?: Prisma.JobWhereInput | boolean
+  connect?: Prisma.JobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JobUpdateToOneWithWhereWithoutRetryOfJobInput, Prisma.JobUpdateWithoutRetryOfJobInput>, Prisma.JobUncheckedUpdateWithoutRetryOfJobInput>
 }
 
 export type JobCreateNestedOneWithoutEventsInput = {
@@ -1615,6 +1701,20 @@ export type JobUncheckedUpdateManyWithoutDatasetNestedInput = {
   deleteMany?: Prisma.JobScalarWhereInput | Prisma.JobScalarWhereInput[]
 }
 
+export type JobCreateNestedOneWithoutPreparedImportInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutPreparedImportInput, Prisma.JobUncheckedCreateWithoutPreparedImportInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutPreparedImportInput
+  connect?: Prisma.JobWhereUniqueInput
+}
+
+export type JobUpdateOneRequiredWithoutPreparedImportNestedInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutPreparedImportInput, Prisma.JobUncheckedCreateWithoutPreparedImportInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutPreparedImportInput
+  upsert?: Prisma.JobUpsertWithoutPreparedImportInput
+  connect?: Prisma.JobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JobUpdateToOneWithWhereWithoutPreparedImportInput, Prisma.JobUpdateWithoutPreparedImportInput>, Prisma.JobUncheckedUpdateWithoutPreparedImportInput>
+}
+
 export type JobCreateNestedOneWithoutAiTasksInput = {
   create?: Prisma.XOR<Prisma.JobCreateWithoutAiTasksInput, Prisma.JobUncheckedCreateWithoutAiTasksInput>
   connectOrCreate?: Prisma.JobCreateOrConnectWithoutAiTasksInput
@@ -1631,124 +1731,16 @@ export type JobUpdateOneWithoutAiTasksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.JobUpdateToOneWithWhereWithoutAiTasksInput, Prisma.JobUpdateWithoutAiTasksInput>, Prisma.JobUncheckedUpdateWithoutAiTasksInput>
 }
 
-export type JobCreateWithoutCreatedByInput = {
-  id?: string
-  type: $Enums.JobType
-  modality?: $Enums.Modality | null
-  status?: $Enums.JobStatus
-  stage?: $Enums.JobStage
-  priority?: $Enums.JobPriority
-  priorityValue?: number
-  trigger?: $Enums.JobTrigger
-  provider?: $Enums.RepoProvider | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  progress?: number
-  totalItems?: number | null
-  processedItems?: number
-  successItems?: number
-  failedItems?: number
-  skippedItems?: number
-  error?: string | null
-  errorCode?: string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  lockedBy?: string | null
-  lockToken?: string | null
-  lockedAt?: Date | string | null
-  lockedUntil?: Date | string | null
-  heartbeatAt?: Date | string | null
-  startedAt?: Date | string | null
-  finishedAt?: Date | string | null
-  runAfter?: Date | string | null
-  attempts?: number
-  maxAttempts?: number
-  cancelRequestedAt?: Date | string | null
-  canceledAt?: Date | string | null
-  idempotencyKey?: string | null
-  resultStorageKey?: string | null
-  resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
-  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
-  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
-  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
-}
-
-export type JobUncheckedCreateWithoutCreatedByInput = {
-  id?: string
-  datasetId: string
-  canceledById?: string | null
-  type: $Enums.JobType
-  modality?: $Enums.Modality | null
-  status?: $Enums.JobStatus
-  stage?: $Enums.JobStage
-  priority?: $Enums.JobPriority
-  priorityValue?: number
-  trigger?: $Enums.JobTrigger
-  provider?: $Enums.RepoProvider | null
-  sourceConnectionId?: string | null
-  externalRepositoryId?: string | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  progress?: number
-  totalItems?: number | null
-  processedItems?: number
-  successItems?: number
-  failedItems?: number
-  skippedItems?: number
-  error?: string | null
-  errorCode?: string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  lockedBy?: string | null
-  lockToken?: string | null
-  lockedAt?: Date | string | null
-  lockedUntil?: Date | string | null
-  heartbeatAt?: Date | string | null
-  startedAt?: Date | string | null
-  finishedAt?: Date | string | null
-  runAfter?: Date | string | null
-  attempts?: number
-  maxAttempts?: number
-  cancelRequestedAt?: Date | string | null
-  canceledAt?: Date | string | null
-  idempotencyKey?: string | null
-  resultStorageKey?: string | null
-  resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
-}
-
-export type JobCreateOrConnectWithoutCreatedByInput = {
-  where: Prisma.JobWhereUniqueInput
-  create: Prisma.XOR<Prisma.JobCreateWithoutCreatedByInput, Prisma.JobUncheckedCreateWithoutCreatedByInput>
-}
-
-export type JobCreateManyCreatedByInputEnvelope = {
-  data: Prisma.JobCreateManyCreatedByInput | Prisma.JobCreateManyCreatedByInput[]
-  skipDuplicates?: boolean
-}
-
 export type JobCreateWithoutCanceledByInput = {
   id?: string
   type: $Enums.JobType
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1780,18 +1772,17 @@ export type JobCreateWithoutCanceledByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
-  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
-  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutCanceledByInput = {
@@ -1802,6 +1793,10 @@ export type JobUncheckedCreateWithoutCanceledByInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1835,14 +1830,13 @@ export type JobUncheckedCreateWithoutCanceledByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  retryOfJobId?: string | null
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutCanceledByInput = {
@@ -1855,20 +1849,138 @@ export type JobCreateManyCanceledByInputEnvelope = {
   skipDuplicates?: boolean
 }
 
-export type JobUpsertWithWhereUniqueWithoutCreatedByInput = {
+export type JobCreateWithoutCreatedByInput = {
+  id?: string
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+}
+
+export type JobUncheckedCreateWithoutCreatedByInput = {
+  id?: string
+  datasetId: string
+  canceledById?: string | null
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  sourceConnectionId?: string | null
+  externalRepositoryId?: string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  retryOfJobId?: string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+}
+
+export type JobCreateOrConnectWithoutCreatedByInput = {
   where: Prisma.JobWhereUniqueInput
-  update: Prisma.XOR<Prisma.JobUpdateWithoutCreatedByInput, Prisma.JobUncheckedUpdateWithoutCreatedByInput>
   create: Prisma.XOR<Prisma.JobCreateWithoutCreatedByInput, Prisma.JobUncheckedCreateWithoutCreatedByInput>
 }
 
-export type JobUpdateWithWhereUniqueWithoutCreatedByInput = {
-  where: Prisma.JobWhereUniqueInput
-  data: Prisma.XOR<Prisma.JobUpdateWithoutCreatedByInput, Prisma.JobUncheckedUpdateWithoutCreatedByInput>
+export type JobCreateManyCreatedByInputEnvelope = {
+  data: Prisma.JobCreateManyCreatedByInput | Prisma.JobCreateManyCreatedByInput[]
+  skipDuplicates?: boolean
 }
 
-export type JobUpdateManyWithWhereWithoutCreatedByInput = {
+export type JobUpsertWithWhereUniqueWithoutCanceledByInput = {
+  where: Prisma.JobWhereUniqueInput
+  update: Prisma.XOR<Prisma.JobUpdateWithoutCanceledByInput, Prisma.JobUncheckedUpdateWithoutCanceledByInput>
+  create: Prisma.XOR<Prisma.JobCreateWithoutCanceledByInput, Prisma.JobUncheckedCreateWithoutCanceledByInput>
+}
+
+export type JobUpdateWithWhereUniqueWithoutCanceledByInput = {
+  where: Prisma.JobWhereUniqueInput
+  data: Prisma.XOR<Prisma.JobUpdateWithoutCanceledByInput, Prisma.JobUncheckedUpdateWithoutCanceledByInput>
+}
+
+export type JobUpdateManyWithWhereWithoutCanceledByInput = {
   where: Prisma.JobScalarWhereInput
-  data: Prisma.XOR<Prisma.JobUpdateManyMutationInput, Prisma.JobUncheckedUpdateManyWithoutCreatedByInput>
+  data: Prisma.XOR<Prisma.JobUpdateManyMutationInput, Prisma.JobUncheckedUpdateManyWithoutCanceledByInput>
 }
 
 export type JobScalarWhereInput = {
@@ -1883,6 +1995,10 @@ export type JobScalarWhereInput = {
   modality?: Prisma.EnumModalityNullableFilter<"Job"> | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFilter<"Job"> | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFilter<"Job"> | $Enums.JobStage
+  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
+  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
+  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
+  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   priority?: Prisma.EnumJobPriorityFilter<"Job"> | $Enums.JobPriority
   priorityValue?: Prisma.IntFilter<"Job"> | number
   trigger?: Prisma.EnumJobTriggerFilter<"Job"> | $Enums.JobTrigger
@@ -1916,36 +2032,37 @@ export type JobScalarWhereInput = {
   idempotencyKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"Job"> | string | null
   resultFilename?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueName?: Prisma.StringNullableFilter<"Job"> | string | null
-  queueJobId?: Prisma.StringNullableFilter<"Job"> | string | null
-  enqueuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
-  dequeuedAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
+  retryOfJobId?: Prisma.StringNullableFilter<"Job"> | string | null
 }
 
-export type JobUpsertWithWhereUniqueWithoutCanceledByInput = {
+export type JobUpsertWithWhereUniqueWithoutCreatedByInput = {
   where: Prisma.JobWhereUniqueInput
-  update: Prisma.XOR<Prisma.JobUpdateWithoutCanceledByInput, Prisma.JobUncheckedUpdateWithoutCanceledByInput>
-  create: Prisma.XOR<Prisma.JobCreateWithoutCanceledByInput, Prisma.JobUncheckedCreateWithoutCanceledByInput>
+  update: Prisma.XOR<Prisma.JobUpdateWithoutCreatedByInput, Prisma.JobUncheckedUpdateWithoutCreatedByInput>
+  create: Prisma.XOR<Prisma.JobCreateWithoutCreatedByInput, Prisma.JobUncheckedCreateWithoutCreatedByInput>
 }
 
-export type JobUpdateWithWhereUniqueWithoutCanceledByInput = {
+export type JobUpdateWithWhereUniqueWithoutCreatedByInput = {
   where: Prisma.JobWhereUniqueInput
-  data: Prisma.XOR<Prisma.JobUpdateWithoutCanceledByInput, Prisma.JobUncheckedUpdateWithoutCanceledByInput>
+  data: Prisma.XOR<Prisma.JobUpdateWithoutCreatedByInput, Prisma.JobUncheckedUpdateWithoutCreatedByInput>
 }
 
-export type JobUpdateManyWithWhereWithoutCanceledByInput = {
+export type JobUpdateManyWithWhereWithoutCreatedByInput = {
   where: Prisma.JobScalarWhereInput
-  data: Prisma.XOR<Prisma.JobUpdateManyMutationInput, Prisma.JobUncheckedUpdateManyWithoutCanceledByInput>
+  data: Prisma.XOR<Prisma.JobUpdateManyMutationInput, Prisma.JobUncheckedUpdateManyWithoutCreatedByInput>
 }
 
-export type JobCreateWithoutEventsInput = {
+export type JobCreateWithoutRetrySuccessorInput = {
   id?: string
   type: $Enums.JobType
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -1977,21 +2094,20 @@ export type JobCreateWithoutEventsInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
-  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
-  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
   aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
 }
 
-export type JobUncheckedCreateWithoutEventsInput = {
+export type JobUncheckedCreateWithoutRetrySuccessorInput = {
   id?: string
   datasetId: string
   createdById: string
@@ -2000,6 +2116,10 @@ export type JobUncheckedCreateWithoutEventsInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2033,37 +2153,153 @@ export type JobUncheckedCreateWithoutEventsInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  retryOfJobId?: string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+}
+
+export type JobCreateOrConnectWithoutRetrySuccessorInput = {
+  where: Prisma.JobWhereUniqueInput
+  create: Prisma.XOR<Prisma.JobCreateWithoutRetrySuccessorInput, Prisma.JobUncheckedCreateWithoutRetrySuccessorInput>
+}
+
+export type JobCreateWithoutRetryOfJobInput = {
+  id?: string
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
   queueName?: string | null
   queueJobId?: string | null
   enqueuedAt?: Date | string | null
   dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+}
+
+export type JobUncheckedCreateWithoutRetryOfJobInput = {
+  id?: string
+  datasetId: string
+  createdById: string
+  canceledById?: string | null
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  sourceConnectionId?: string | null
+  externalRepositoryId?: string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
 
-export type JobCreateOrConnectWithoutEventsInput = {
+export type JobCreateOrConnectWithoutRetryOfJobInput = {
   where: Prisma.JobWhereUniqueInput
-  create: Prisma.XOR<Prisma.JobCreateWithoutEventsInput, Prisma.JobUncheckedCreateWithoutEventsInput>
+  create: Prisma.XOR<Prisma.JobCreateWithoutRetryOfJobInput, Prisma.JobUncheckedCreateWithoutRetryOfJobInput>
 }
 
-export type JobUpsertWithoutEventsInput = {
-  update: Prisma.XOR<Prisma.JobUpdateWithoutEventsInput, Prisma.JobUncheckedUpdateWithoutEventsInput>
-  create: Prisma.XOR<Prisma.JobCreateWithoutEventsInput, Prisma.JobUncheckedCreateWithoutEventsInput>
+export type JobUpsertWithoutRetrySuccessorInput = {
+  update: Prisma.XOR<Prisma.JobUpdateWithoutRetrySuccessorInput, Prisma.JobUncheckedUpdateWithoutRetrySuccessorInput>
+  create: Prisma.XOR<Prisma.JobCreateWithoutRetrySuccessorInput, Prisma.JobUncheckedCreateWithoutRetrySuccessorInput>
   where?: Prisma.JobWhereInput
 }
 
-export type JobUpdateToOneWithWhereWithoutEventsInput = {
+export type JobUpdateToOneWithWhereWithoutRetrySuccessorInput = {
   where?: Prisma.JobWhereInput
-  data: Prisma.XOR<Prisma.JobUpdateWithoutEventsInput, Prisma.JobUncheckedUpdateWithoutEventsInput>
+  data: Prisma.XOR<Prisma.JobUpdateWithoutRetrySuccessorInput, Prisma.JobUncheckedUpdateWithoutRetrySuccessorInput>
 }
 
-export type JobUpdateWithoutEventsInput = {
+export type JobUpdateWithoutRetrySuccessorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2095,21 +2331,20 @@ export type JobUpdateWithoutEventsInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
-  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
-  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
   aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
 }
 
-export type JobUncheckedUpdateWithoutEventsInput = {
+export type JobUncheckedUpdateWithoutRetrySuccessorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2118,6 +2353,10 @@ export type JobUncheckedUpdateWithoutEventsInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2151,21 +2390,143 @@ export type JobUncheckedUpdateWithoutEventsInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+}
+
+export type JobUpsertWithoutRetryOfJobInput = {
+  update: Prisma.XOR<Prisma.JobUpdateWithoutRetryOfJobInput, Prisma.JobUncheckedUpdateWithoutRetryOfJobInput>
+  create: Prisma.XOR<Prisma.JobCreateWithoutRetryOfJobInput, Prisma.JobUncheckedCreateWithoutRetryOfJobInput>
+  where?: Prisma.JobWhereInput
+}
+
+export type JobUpdateToOneWithWhereWithoutRetryOfJobInput = {
+  where?: Prisma.JobWhereInput
+  data: Prisma.XOR<Prisma.JobUpdateWithoutRetryOfJobInput, Prisma.JobUncheckedUpdateWithoutRetryOfJobInput>
+}
+
+export type JobUpdateWithoutRetryOfJobInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
   queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+}
+
+export type JobUncheckedUpdateWithoutRetryOfJobInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  canceledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
 
-export type JobCreateWithoutExternalRepositoryInput = {
+export type JobCreateWithoutEventsInput = {
   id?: string
   type: $Enums.JobType
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2197,18 +2558,249 @@ export type JobCreateWithoutExternalRepositoryInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+}
+
+export type JobUncheckedCreateWithoutEventsInput = {
+  id?: string
+  datasetId: string
+  createdById: string
+  canceledById?: string | null
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
   queueName?: string | null
   queueJobId?: string | null
   enqueuedAt?: Date | string | null
   dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  sourceConnectionId?: string | null
+  externalRepositoryId?: string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  retryOfJobId?: string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+}
+
+export type JobCreateOrConnectWithoutEventsInput = {
+  where: Prisma.JobWhereUniqueInput
+  create: Prisma.XOR<Prisma.JobCreateWithoutEventsInput, Prisma.JobUncheckedCreateWithoutEventsInput>
+}
+
+export type JobUpsertWithoutEventsInput = {
+  update: Prisma.XOR<Prisma.JobUpdateWithoutEventsInput, Prisma.JobUncheckedUpdateWithoutEventsInput>
+  create: Prisma.XOR<Prisma.JobCreateWithoutEventsInput, Prisma.JobUncheckedCreateWithoutEventsInput>
+  where?: Prisma.JobWhereInput
+}
+
+export type JobUpdateToOneWithWhereWithoutEventsInput = {
+  where?: Prisma.JobWhereInput
+  data: Prisma.XOR<Prisma.JobUpdateWithoutEventsInput, Prisma.JobUncheckedUpdateWithoutEventsInput>
+}
+
+export type JobUpdateWithoutEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+}
+
+export type JobUncheckedUpdateWithoutEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  canceledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+}
+
+export type JobCreateWithoutExternalRepositoryInput = {
+  id?: string
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutExternalRepositoryInput = {
@@ -2220,6 +2812,10 @@ export type JobUncheckedCreateWithoutExternalRepositoryInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2252,14 +2848,13 @@ export type JobUncheckedCreateWithoutExternalRepositoryInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  retryOfJobId?: string | null
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutExternalRepositoryInput = {
@@ -2294,6 +2889,10 @@ export type JobCreateWithoutSourceConnectionInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2325,18 +2924,17 @@ export type JobCreateWithoutSourceConnectionInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
-  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
-  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutSourceConnectionInput = {
@@ -2348,6 +2946,10 @@ export type JobUncheckedCreateWithoutSourceConnectionInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2380,14 +2982,13 @@ export type JobUncheckedCreateWithoutSourceConnectionInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  retryOfJobId?: string | null
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutSourceConnectionInput = {
@@ -2422,6 +3023,10 @@ export type JobCreateWithoutDatasetInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2453,18 +3058,17 @@ export type JobCreateWithoutDatasetInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
-  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
-  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
-  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutDatasetInput = {
@@ -2475,6 +3079,10 @@ export type JobUncheckedCreateWithoutDatasetInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2508,14 +3116,13 @@ export type JobUncheckedCreateWithoutDatasetInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  retryOfJobId?: string | null
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutDatasetInput = {
@@ -2544,12 +3151,16 @@ export type JobUpdateManyWithWhereWithoutDatasetInput = {
   data: Prisma.XOR<Prisma.JobUpdateManyMutationInput, Prisma.JobUncheckedUpdateManyWithoutDatasetInput>
 }
 
-export type JobCreateWithoutAiTasksInput = {
+export type JobCreateWithoutPreparedImportInput = {
   id?: string
   type: $Enums.JobType
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2581,21 +3192,20 @@ export type JobCreateWithoutAiTasksInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
-  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
-  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
 }
 
-export type JobUncheckedCreateWithoutAiTasksInput = {
+export type JobUncheckedCreateWithoutPreparedImportInput = {
   id?: string
   datasetId: string
   createdById: string
@@ -2604,6 +3214,10 @@ export type JobUncheckedCreateWithoutAiTasksInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2637,13 +3251,244 @@ export type JobUncheckedCreateWithoutAiTasksInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  retryOfJobId?: string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+}
+
+export type JobCreateOrConnectWithoutPreparedImportInput = {
+  where: Prisma.JobWhereUniqueInput
+  create: Prisma.XOR<Prisma.JobCreateWithoutPreparedImportInput, Prisma.JobUncheckedCreateWithoutPreparedImportInput>
+}
+
+export type JobUpsertWithoutPreparedImportInput = {
+  update: Prisma.XOR<Prisma.JobUpdateWithoutPreparedImportInput, Prisma.JobUncheckedUpdateWithoutPreparedImportInput>
+  create: Prisma.XOR<Prisma.JobCreateWithoutPreparedImportInput, Prisma.JobUncheckedCreateWithoutPreparedImportInput>
+  where?: Prisma.JobWhereInput
+}
+
+export type JobUpdateToOneWithWhereWithoutPreparedImportInput = {
+  where?: Prisma.JobWhereInput
+  data: Prisma.XOR<Prisma.JobUpdateWithoutPreparedImportInput, Prisma.JobUncheckedUpdateWithoutPreparedImportInput>
+}
+
+export type JobUpdateWithoutPreparedImportInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+}
+
+export type JobUncheckedUpdateWithoutPreparedImportInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  canceledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+}
+
+export type JobCreateWithoutAiTasksInput = {
+  id?: string
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
   queueName?: string | null
   queueJobId?: string | null
   enqueuedAt?: Date | string | null
   dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+}
+
+export type JobUncheckedCreateWithoutAiTasksInput = {
+  id?: string
+  datasetId: string
+  createdById: string
+  canceledById?: string | null
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  sourceConnectionId?: string | null
+  externalRepositoryId?: string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  retryOfJobId?: string | null
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutAiTasksInput = {
@@ -2668,6 +3513,10 @@ export type JobUpdateWithoutAiTasksInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2699,18 +3548,17 @@ export type JobUpdateWithoutAiTasksInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
-  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutAiTasksInput = {
@@ -2722,6 +3570,10 @@ export type JobUncheckedUpdateWithoutAiTasksInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -2755,62 +3607,12 @@ export type JobUncheckedUpdateWithoutAiTasksInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
-}
-
-export type JobCreateManyCreatedByInput = {
-  id?: string
-  datasetId: string
-  canceledById?: string | null
-  type: $Enums.JobType
-  modality?: $Enums.Modality | null
-  status?: $Enums.JobStatus
-  stage?: $Enums.JobStage
-  priority?: $Enums.JobPriority
-  priorityValue?: number
-  trigger?: $Enums.JobTrigger
-  provider?: $Enums.RepoProvider | null
-  sourceConnectionId?: string | null
-  externalRepositoryId?: string | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  progress?: number
-  totalItems?: number | null
-  processedItems?: number
-  successItems?: number
-  failedItems?: number
-  skippedItems?: number
-  error?: string | null
-  errorCode?: string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  lockedBy?: string | null
-  lockToken?: string | null
-  lockedAt?: Date | string | null
-  lockedUntil?: Date | string | null
-  heartbeatAt?: Date | string | null
-  startedAt?: Date | string | null
-  finishedAt?: Date | string | null
-  runAfter?: Date | string | null
-  attempts?: number
-  maxAttempts?: number
-  cancelRequestedAt?: Date | string | null
-  canceledAt?: Date | string | null
-  idempotencyKey?: string | null
-  resultStorageKey?: string | null
-  resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobCreateManyCanceledByInput = {
@@ -2821,6 +3623,10 @@ export type JobCreateManyCanceledByInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -2854,163 +3660,59 @@ export type JobCreateManyCanceledByInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  retryOfJobId?: string | null
+}
+
+export type JobCreateManyCreatedByInput = {
+  id?: string
+  datasetId: string
+  canceledById?: string | null
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
   queueName?: string | null
   queueJobId?: string | null
   enqueuedAt?: Date | string | null
   dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  sourceConnectionId?: string | null
+  externalRepositoryId?: string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-}
-
-export type JobUpdateWithoutCreatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
-  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
-  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
-  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
-  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
-  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  progress?: Prisma.IntFieldUpdateOperationsInput | number
-  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  successItems?: Prisma.IntFieldUpdateOperationsInput | number
-  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  attempts?: Prisma.IntFieldUpdateOperationsInput | number
-  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
-  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
-  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
-  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
-}
-
-export type JobUncheckedUpdateWithoutCreatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  canceledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
-  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
-  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
-  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
-  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
-  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  progress?: Prisma.IntFieldUpdateOperationsInput | number
-  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  successItems?: Prisma.IntFieldUpdateOperationsInput | number
-  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  attempts?: Prisma.IntFieldUpdateOperationsInput | number
-  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
-}
-
-export type JobUncheckedUpdateManyWithoutCreatedByInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  canceledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
-  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
-  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
-  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
-  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
-  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
-  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  progress?: Prisma.IntFieldUpdateOperationsInput | number
-  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  successItems?: Prisma.IntFieldUpdateOperationsInput | number
-  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  attempts?: Prisma.IntFieldUpdateOperationsInput | number
-  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
-  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: string | null
 }
 
 export type JobUpdateWithoutCanceledByInput = {
@@ -3019,6 +3721,10 @@ export type JobUpdateWithoutCanceledByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3050,18 +3756,17 @@ export type JobUpdateWithoutCanceledByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
-  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
-  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutCanceledByInput = {
@@ -3072,6 +3777,10 @@ export type JobUncheckedUpdateWithoutCanceledByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3105,14 +3814,13 @@ export type JobUncheckedUpdateWithoutCanceledByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutCanceledByInput = {
@@ -3123,6 +3831,10 @@ export type JobUncheckedUpdateManyWithoutCanceledByInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3156,12 +3868,167 @@ export type JobUncheckedUpdateManyWithoutCanceledByInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type JobUpdateWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
   queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+}
+
+export type JobUncheckedUpdateWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  canceledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+}
+
+export type JobUncheckedUpdateManyWithoutCreatedByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  canceledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type JobCreateManyExternalRepositoryInput = {
@@ -3173,6 +4040,10 @@ export type JobCreateManyExternalRepositoryInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -3205,12 +4076,9 @@ export type JobCreateManyExternalRepositoryInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  retryOfJobId?: string | null
 }
 
 export type JobUpdateWithoutExternalRepositoryInput = {
@@ -3219,6 +4087,10 @@ export type JobUpdateWithoutExternalRepositoryInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3250,18 +4122,17 @@ export type JobUpdateWithoutExternalRepositoryInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutExternalRepositoryInput = {
@@ -3273,6 +4144,10 @@ export type JobUncheckedUpdateWithoutExternalRepositoryInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3305,14 +4180,13 @@ export type JobUncheckedUpdateWithoutExternalRepositoryInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutExternalRepositoryInput = {
@@ -3324,6 +4198,10 @@ export type JobUncheckedUpdateManyWithoutExternalRepositoryInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3356,12 +4234,9 @@ export type JobUncheckedUpdateManyWithoutExternalRepositoryInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type JobCreateManySourceConnectionInput = {
@@ -3373,6 +4248,10 @@ export type JobCreateManySourceConnectionInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -3405,12 +4284,9 @@ export type JobCreateManySourceConnectionInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  retryOfJobId?: string | null
 }
 
 export type JobUpdateWithoutSourceConnectionInput = {
@@ -3419,6 +4295,10 @@ export type JobUpdateWithoutSourceConnectionInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3450,18 +4330,17 @@ export type JobUpdateWithoutSourceConnectionInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
-  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
-  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutSourceConnectionInput = {
@@ -3473,6 +4352,10 @@ export type JobUncheckedUpdateWithoutSourceConnectionInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3505,14 +4388,13 @@ export type JobUncheckedUpdateWithoutSourceConnectionInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutSourceConnectionInput = {
@@ -3524,6 +4406,10 @@ export type JobUncheckedUpdateManyWithoutSourceConnectionInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3556,12 +4442,9 @@ export type JobUncheckedUpdateManyWithoutSourceConnectionInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type JobCreateManyDatasetInput = {
@@ -3572,6 +4455,10 @@ export type JobCreateManyDatasetInput = {
   modality?: $Enums.Modality | null
   status?: $Enums.JobStatus
   stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
   priority?: $Enums.JobPriority
   priorityValue?: number
   trigger?: $Enums.JobTrigger
@@ -3605,12 +4492,9 @@ export type JobCreateManyDatasetInput = {
   idempotencyKey?: string | null
   resultStorageKey?: string | null
   resultFilename?: string | null
-  queueName?: string | null
-  queueJobId?: string | null
-  enqueuedAt?: Date | string | null
-  dequeuedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  retryOfJobId?: string | null
 }
 
 export type JobUpdateWithoutDatasetInput = {
@@ -3619,6 +4503,10 @@ export type JobUpdateWithoutDatasetInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3650,18 +4538,17 @@ export type JobUpdateWithoutDatasetInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
-  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
-  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
-  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutDatasetInput = {
@@ -3672,6 +4559,10 @@ export type JobUncheckedUpdateWithoutDatasetInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3705,14 +4596,13 @@ export type JobUncheckedUpdateWithoutDatasetInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutDatasetInput = {
@@ -3723,6 +4613,10 @@ export type JobUncheckedUpdateManyWithoutDatasetInput = {
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
   status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
   stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
   priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
   trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
@@ -3756,12 +4650,9 @@ export type JobUncheckedUpdateManyWithoutDatasetInput = {
   idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -3770,13 +4661,13 @@ export type JobUncheckedUpdateManyWithoutDatasetInput = {
  */
 
 export type JobCountOutputType = {
-  events: number
   aiTasks: number
+  events: number
 }
 
 export type JobCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  events?: boolean | JobCountOutputTypeCountEventsArgs
   aiTasks?: boolean | JobCountOutputTypeCountAiTasksArgs
+  events?: boolean | JobCountOutputTypeCountEventsArgs
 }
 
 /**
@@ -3792,15 +4683,15 @@ export type JobCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensio
 /**
  * JobCountOutputType without action
  */
-export type JobCountOutputTypeCountEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.JobEventWhereInput
+export type JobCountOutputTypeCountAiTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AiTaskWhereInput
 }
 
 /**
  * JobCountOutputType without action
  */
-export type JobCountOutputTypeCountAiTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AiTaskWhereInput
+export type JobCountOutputTypeCountEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JobEventWhereInput
 }
 
 
@@ -3813,6 +4704,10 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   modality?: boolean
   status?: boolean
   stage?: boolean
+  queueName?: boolean
+  queueJobId?: boolean
+  enqueuedAt?: boolean
+  dequeuedAt?: boolean
   priority?: boolean
   priorityValue?: boolean
   trigger?: boolean
@@ -3846,19 +4741,19 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   idempotencyKey?: boolean
   resultStorageKey?: boolean
   resultFilename?: boolean
-  queueName?: boolean
-  queueJobId?: boolean
-  enqueuedAt?: boolean
-  dequeuedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  canceledBy?: boolean | Prisma.Job$canceledByArgs<ExtArgs>
-  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
-  externalRepository?: boolean | Prisma.Job$externalRepositoryArgs<ExtArgs>
-  events?: boolean | Prisma.Job$eventsArgs<ExtArgs>
+  retryOfJobId?: boolean
   aiTasks?: boolean | Prisma.Job$aiTasksArgs<ExtArgs>
+  canceledBy?: boolean | Prisma.Job$canceledByArgs<ExtArgs>
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  externalRepository?: boolean | Prisma.Job$externalRepositoryArgs<ExtArgs>
+  retryOfJob?: boolean | Prisma.Job$retryOfJobArgs<ExtArgs>
+  retrySuccessor?: boolean | Prisma.Job$retrySuccessorArgs<ExtArgs>
+  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
+  events?: boolean | Prisma.Job$eventsArgs<ExtArgs>
+  preparedImport?: boolean | Prisma.Job$preparedImportArgs<ExtArgs>
   _count?: boolean | Prisma.JobCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["job"]>
 
@@ -3871,6 +4766,10 @@ export type JobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   modality?: boolean
   status?: boolean
   stage?: boolean
+  queueName?: boolean
+  queueJobId?: boolean
+  enqueuedAt?: boolean
+  dequeuedAt?: boolean
   priority?: boolean
   priorityValue?: boolean
   trigger?: boolean
@@ -3904,17 +4803,15 @@ export type JobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   idempotencyKey?: boolean
   resultStorageKey?: boolean
   resultFilename?: boolean
-  queueName?: boolean
-  queueJobId?: boolean
-  enqueuedAt?: boolean
-  dequeuedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  retryOfJobId?: boolean
   canceledBy?: boolean | Prisma.Job$canceledByArgs<ExtArgs>
-  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   externalRepository?: boolean | Prisma.Job$externalRepositoryArgs<ExtArgs>
+  retryOfJob?: boolean | Prisma.Job$retryOfJobArgs<ExtArgs>
+  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
 }, ExtArgs["result"]["job"]>
 
 export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -3926,6 +4823,10 @@ export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   modality?: boolean
   status?: boolean
   stage?: boolean
+  queueName?: boolean
+  queueJobId?: boolean
+  enqueuedAt?: boolean
+  dequeuedAt?: boolean
   priority?: boolean
   priorityValue?: boolean
   trigger?: boolean
@@ -3959,17 +4860,15 @@ export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   idempotencyKey?: boolean
   resultStorageKey?: boolean
   resultFilename?: boolean
-  queueName?: boolean
-  queueJobId?: boolean
-  enqueuedAt?: boolean
-  dequeuedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  retryOfJobId?: boolean
   canceledBy?: boolean | Prisma.Job$canceledByArgs<ExtArgs>
-  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   externalRepository?: boolean | Prisma.Job$externalRepositoryArgs<ExtArgs>
+  retryOfJob?: boolean | Prisma.Job$retryOfJobArgs<ExtArgs>
+  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
 }, ExtArgs["result"]["job"]>
 
 export type JobSelectScalar = {
@@ -3981,6 +4880,10 @@ export type JobSelectScalar = {
   modality?: boolean
   status?: boolean
   stage?: boolean
+  queueName?: boolean
+  queueJobId?: boolean
+  enqueuedAt?: boolean
+  dequeuedAt?: boolean
   priority?: boolean
   priorityValue?: boolean
   trigger?: boolean
@@ -4014,50 +4917,55 @@ export type JobSelectScalar = {
   idempotencyKey?: boolean
   resultStorageKey?: boolean
   resultFilename?: boolean
-  queueName?: boolean
-  queueJobId?: boolean
-  enqueuedAt?: boolean
-  dequeuedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  retryOfJobId?: boolean
 }
 
-export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "createdById" | "canceledById" | "type" | "modality" | "status" | "stage" | "priority" | "priorityValue" | "trigger" | "provider" | "sourceConnectionId" | "externalRepositoryId" | "input" | "state" | "summary" | "progress" | "totalItems" | "processedItems" | "successItems" | "failedItems" | "skippedItems" | "error" | "errorCode" | "errorDetails" | "lockedBy" | "lockToken" | "lockedAt" | "lockedUntil" | "heartbeatAt" | "startedAt" | "finishedAt" | "runAfter" | "attempts" | "maxAttempts" | "cancelRequestedAt" | "canceledAt" | "idempotencyKey" | "resultStorageKey" | "resultFilename" | "queueName" | "queueJobId" | "enqueuedAt" | "dequeuedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
+export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "createdById" | "canceledById" | "type" | "modality" | "status" | "stage" | "queueName" | "queueJobId" | "enqueuedAt" | "dequeuedAt" | "priority" | "priorityValue" | "trigger" | "provider" | "sourceConnectionId" | "externalRepositoryId" | "input" | "state" | "summary" | "progress" | "totalItems" | "processedItems" | "successItems" | "failedItems" | "skippedItems" | "error" | "errorCode" | "errorDetails" | "lockedBy" | "lockToken" | "lockedAt" | "lockedUntil" | "heartbeatAt" | "startedAt" | "finishedAt" | "runAfter" | "attempts" | "maxAttempts" | "cancelRequestedAt" | "canceledAt" | "idempotencyKey" | "resultStorageKey" | "resultFilename" | "createdAt" | "updatedAt" | "retryOfJobId", ExtArgs["result"]["job"]>
 export type JobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  canceledBy?: boolean | Prisma.Job$canceledByArgs<ExtArgs>
-  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
-  externalRepository?: boolean | Prisma.Job$externalRepositoryArgs<ExtArgs>
-  events?: boolean | Prisma.Job$eventsArgs<ExtArgs>
   aiTasks?: boolean | Prisma.Job$aiTasksArgs<ExtArgs>
+  canceledBy?: boolean | Prisma.Job$canceledByArgs<ExtArgs>
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
+  externalRepository?: boolean | Prisma.Job$externalRepositoryArgs<ExtArgs>
+  retryOfJob?: boolean | Prisma.Job$retryOfJobArgs<ExtArgs>
+  retrySuccessor?: boolean | Prisma.Job$retrySuccessorArgs<ExtArgs>
+  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
+  events?: boolean | Prisma.Job$eventsArgs<ExtArgs>
+  preparedImport?: boolean | Prisma.Job$preparedImportArgs<ExtArgs>
   _count?: boolean | Prisma.JobCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type JobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   canceledBy?: boolean | Prisma.Job$canceledByArgs<ExtArgs>
-  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   externalRepository?: boolean | Prisma.Job$externalRepositoryArgs<ExtArgs>
+  retryOfJob?: boolean | Prisma.Job$retryOfJobArgs<ExtArgs>
+  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
 }
 export type JobIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   canceledBy?: boolean | Prisma.Job$canceledByArgs<ExtArgs>
-  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
+  createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   externalRepository?: boolean | Prisma.Job$externalRepositoryArgs<ExtArgs>
+  retryOfJob?: boolean | Prisma.Job$retryOfJobArgs<ExtArgs>
+  sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
 }
 
 export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Job"
   objects: {
-    dataset: Prisma.$DatasetPayload<ExtArgs>
-    createdBy: Prisma.$UserPayload<ExtArgs>
-    canceledBy: Prisma.$UserPayload<ExtArgs> | null
-    sourceConnection: Prisma.$SourceConnectionPayload<ExtArgs> | null
-    externalRepository: Prisma.$ExternalRepositoryPayload<ExtArgs> | null
-    events: Prisma.$JobEventPayload<ExtArgs>[]
     aiTasks: Prisma.$AiTaskPayload<ExtArgs>[]
+    canceledBy: Prisma.$UserPayload<ExtArgs> | null
+    createdBy: Prisma.$UserPayload<ExtArgs>
+    dataset: Prisma.$DatasetPayload<ExtArgs>
+    externalRepository: Prisma.$ExternalRepositoryPayload<ExtArgs> | null
+    retryOfJob: Prisma.$JobPayload<ExtArgs> | null
+    retrySuccessor: Prisma.$JobPayload<ExtArgs> | null
+    sourceConnection: Prisma.$SourceConnectionPayload<ExtArgs> | null
+    events: Prisma.$JobEventPayload<ExtArgs>[]
+    preparedImport: Prisma.$PreparedImportPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4068,6 +4976,10 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     modality: $Enums.Modality | null
     status: $Enums.JobStatus
     stage: $Enums.JobStage
+    queueName: string | null
+    queueJobId: string | null
+    enqueuedAt: Date | null
+    dequeuedAt: Date | null
     priority: $Enums.JobPriority
     priorityValue: number
     trigger: $Enums.JobTrigger
@@ -4076,19 +4988,19 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     externalRepositoryId: string | null
     /**
      * *
-     *    * Task-specific request payload.
-     *    * Do not store secrets here.
+     * * Task-specific request payload.
+     * * Do not store secrets here.
      */
     input: runtime.JsonValue
     /**
      * *
-     *    * Runtime checkpoint.
-     *    * Worker can update this while running.
+     * * Runtime checkpoint.
+     * * Worker can update this while running.
      */
     state: runtime.JsonValue
     /**
      * *
-     *    * Realtime/final summary for frontend.
+     * * Realtime/final summary for frontend.
      */
     summary: runtime.JsonValue
     progress: number
@@ -4102,7 +5014,7 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     errorDetails: runtime.JsonValue | null
     /**
      * *
-     *    * Worker locking.
+     * * Worker locking.
      */
     lockedBy: string | null
     lockToken: string | null
@@ -4116,28 +5028,25 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     maxAttempts: number
     /**
      * *
-     *    * Soft cancel.
+     * * Soft cancel.
      */
     cancelRequestedAt: Date | null
     canceledAt: Date | null
     /**
      * *
-     *    * Prevent duplicate jobs.
-     *    * For clone repo, generate from dataset/repo/ref/rootPath/modality/sourceMode.
+     * * Prevent duplicate jobs.
+     * * For clone repo, generate from dataset/repo/ref/rootPath/modality/sourceMode.
      */
     idempotencyKey: string | null
     /**
      * *
-     *    * Output result if job creates a file.
+     * * Output result if job creates a file.
      */
     resultStorageKey: string | null
     resultFilename: string | null
-    queueName: string | null
-    queueJobId: string | null
-    enqueuedAt: Date | null
-    dequeuedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    retryOfJobId: string | null
   }, ExtArgs["result"]["job"]>
   composites: {}
 }
@@ -4532,13 +5441,16 @@ readonly fields: JobFieldRefs;
  */
 export interface Prisma__JobClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  canceledBy<T extends Prisma.Job$canceledByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$canceledByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  sourceConnection<T extends Prisma.Job$sourceConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$sourceConnectionArgs<ExtArgs>>): Prisma.Prisma__SourceConnectionClient<runtime.Types.Result.GetResult<Prisma.$SourceConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  externalRepository<T extends Prisma.Job$externalRepositoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$externalRepositoryArgs<ExtArgs>>): Prisma.Prisma__ExternalRepositoryClient<runtime.Types.Result.GetResult<Prisma.$ExternalRepositoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  events<T extends Prisma.Job$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiTasks<T extends Prisma.Job$aiTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$aiTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  canceledBy<T extends Prisma.Job$canceledByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$canceledByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  externalRepository<T extends Prisma.Job$externalRepositoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$externalRepositoryArgs<ExtArgs>>): Prisma.Prisma__ExternalRepositoryClient<runtime.Types.Result.GetResult<Prisma.$ExternalRepositoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  retryOfJob<T extends Prisma.Job$retryOfJobArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$retryOfJobArgs<ExtArgs>>): Prisma.Prisma__JobClient<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  retrySuccessor<T extends Prisma.Job$retrySuccessorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$retrySuccessorArgs<ExtArgs>>): Prisma.Prisma__JobClient<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  sourceConnection<T extends Prisma.Job$sourceConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$sourceConnectionArgs<ExtArgs>>): Prisma.Prisma__SourceConnectionClient<runtime.Types.Result.GetResult<Prisma.$SourceConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  events<T extends Prisma.Job$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  preparedImport<T extends Prisma.Job$preparedImportArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$preparedImportArgs<ExtArgs>>): Prisma.Prisma__PreparedImportClient<runtime.Types.Result.GetResult<Prisma.$PreparedImportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4576,6 +5488,10 @@ export interface JobFieldRefs {
   readonly modality: Prisma.FieldRef<"Job", 'Modality'>
   readonly status: Prisma.FieldRef<"Job", 'JobStatus'>
   readonly stage: Prisma.FieldRef<"Job", 'JobStage'>
+  readonly queueName: Prisma.FieldRef<"Job", 'String'>
+  readonly queueJobId: Prisma.FieldRef<"Job", 'String'>
+  readonly enqueuedAt: Prisma.FieldRef<"Job", 'DateTime'>
+  readonly dequeuedAt: Prisma.FieldRef<"Job", 'DateTime'>
   readonly priority: Prisma.FieldRef<"Job", 'JobPriority'>
   readonly priorityValue: Prisma.FieldRef<"Job", 'Int'>
   readonly trigger: Prisma.FieldRef<"Job", 'JobTrigger'>
@@ -4609,12 +5525,9 @@ export interface JobFieldRefs {
   readonly idempotencyKey: Prisma.FieldRef<"Job", 'String'>
   readonly resultStorageKey: Prisma.FieldRef<"Job", 'String'>
   readonly resultFilename: Prisma.FieldRef<"Job", 'String'>
-  readonly queueName: Prisma.FieldRef<"Job", 'String'>
-  readonly queueJobId: Prisma.FieldRef<"Job", 'String'>
-  readonly enqueuedAt: Prisma.FieldRef<"Job", 'DateTime'>
-  readonly dequeuedAt: Prisma.FieldRef<"Job", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Job", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Job", 'DateTime'>
+  readonly retryOfJobId: Prisma.FieldRef<"Job", 'String'>
 }
     
 
@@ -5011,6 +5924,30 @@ export type JobDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.InternalA
 }
 
 /**
+ * Job.aiTasks
+ */
+export type Job$aiTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AiTask
+   */
+  select?: Prisma.AiTaskSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AiTask
+   */
+  omit?: Prisma.AiTaskOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AiTaskInclude<ExtArgs> | null
+  where?: Prisma.AiTaskWhereInput
+  orderBy?: Prisma.AiTaskOrderByWithRelationInput | Prisma.AiTaskOrderByWithRelationInput[]
+  cursor?: Prisma.AiTaskWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AiTaskScalarFieldEnum | Prisma.AiTaskScalarFieldEnum[]
+}
+
+/**
  * Job.canceledBy
  */
 export type Job$canceledByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5030,25 +5967,6 @@ export type Job$canceledByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * Job.sourceConnection
- */
-export type Job$sourceConnectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SourceConnection
-   */
-  select?: Prisma.SourceConnectionSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the SourceConnection
-   */
-  omit?: Prisma.SourceConnectionOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SourceConnectionInclude<ExtArgs> | null
-  where?: Prisma.SourceConnectionWhereInput
-}
-
-/**
  * Job.externalRepository
  */
 export type Job$externalRepositoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -5065,6 +5983,63 @@ export type Job$externalRepositoryArgs<ExtArgs extends runtime.Types.Extensions.
    */
   include?: Prisma.ExternalRepositoryInclude<ExtArgs> | null
   where?: Prisma.ExternalRepositoryWhereInput
+}
+
+/**
+ * Job.retryOfJob
+ */
+export type Job$retryOfJobArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Job
+   */
+  select?: Prisma.JobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Job
+   */
+  omit?: Prisma.JobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JobInclude<ExtArgs> | null
+  where?: Prisma.JobWhereInput
+}
+
+/**
+ * Job.retrySuccessor
+ */
+export type Job$retrySuccessorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Job
+   */
+  select?: Prisma.JobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Job
+   */
+  omit?: Prisma.JobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JobInclude<ExtArgs> | null
+  where?: Prisma.JobWhereInput
+}
+
+/**
+ * Job.sourceConnection
+ */
+export type Job$sourceConnectionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SourceConnection
+   */
+  select?: Prisma.SourceConnectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SourceConnection
+   */
+  omit?: Prisma.SourceConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SourceConnectionInclude<ExtArgs> | null
+  where?: Prisma.SourceConnectionWhereInput
 }
 
 /**
@@ -5092,27 +6067,22 @@ export type Job$eventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
 }
 
 /**
- * Job.aiTasks
+ * Job.preparedImport
  */
-export type Job$aiTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Job$preparedImportArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the AiTask
+   * Select specific fields to fetch from the PreparedImport
    */
-  select?: Prisma.AiTaskSelect<ExtArgs> | null
+  select?: Prisma.PreparedImportSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the AiTask
+   * Omit specific fields from the PreparedImport
    */
-  omit?: Prisma.AiTaskOmit<ExtArgs> | null
+  omit?: Prisma.PreparedImportOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AiTaskInclude<ExtArgs> | null
-  where?: Prisma.AiTaskWhereInput
-  orderBy?: Prisma.AiTaskOrderByWithRelationInput | Prisma.AiTaskOrderByWithRelationInput[]
-  cursor?: Prisma.AiTaskWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AiTaskScalarFieldEnum | Prisma.AiTaskScalarFieldEnum[]
+  include?: Prisma.PreparedImportInclude<ExtArgs> | null
+  where?: Prisma.PreparedImportWhereInput
 }
 
 /**

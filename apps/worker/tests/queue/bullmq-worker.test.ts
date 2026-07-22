@@ -3,11 +3,9 @@ import test from "node:test";
 
 import { getWorkerConfig } from "../../src/config.js";
 import { createFoundationWorker } from "../../src/queue/bullmq-worker.js";
-import { createWorkerJobFixture } from "./helpers.js";
+import { createWorkerJobFixture, workerQueueIntegrationSkipReason } from "./helpers.js";
 
-const hasIntegrationDatabase = Boolean(process.env.DATABASE_URL && process.env.REDIS_HOST);
-
-test("private worker has graceful close semantics and no HTTP listener", { skip: !hasIntegrationDatabase }, async () => {
+test("private worker has graceful close semantics and no HTTP listener", { skip: workerQueueIntegrationSkipReason }, async () => {
   const fixture = await createWorkerJobFixture();
   const runtime = createFoundationWorker({ config: getWorkerConfig(), db: fixture.db });
   try {

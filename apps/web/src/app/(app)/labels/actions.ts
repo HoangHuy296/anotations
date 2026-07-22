@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
+import { deleteUnreferencedLabel } from "@/lib/workspace/label-management";
 import {
   labelIdSchema,
   labelSchema,
@@ -231,9 +232,6 @@ export async function deleteLabelAction(
       select: {
         name: true,
         datasetId: true,
-        _count: {
-          select: { annotations: true },
-        },
       },
     });
 
@@ -243,19 +241,17 @@ export async function deleteLabelAction(
         message: "This label no longer exists.",
       };
     }
-    const access = await requireDatasetPermission(actor, label.datasetId, "label.manage");
-    if (!access || access.forbidden) return unauthorizedResult();
-
-    if (label._count.annotations > 0) {
+    const deleted = await deleteUnreferencedLabel(actor, parsedId.data);
+    if (!deleted.ok && deleted.status === 403) return unauthorizedResult();
+    if (!deleted.ok && deleted.status === 404) {
+      return { success: false, message: "This label no longer exists." };
+    }
+    if (!deleted.ok) {
       return {
         success: false,
-        message: `${label.name} is assigned to ${label._count.annotations} annotation${label._count.annotations === 1 ? "" : "s"} and cannot be deleted.`,
+        message: `${label.name} is assigned to an annotation and cannot be deleted.`,
       };
     }
-
-    await db.label.delete({
-      where: { id: parsedId.data },
-    });
 
     revalidatePath("/labels");
     return {

@@ -1,8 +1,16 @@
 import { JobType } from "@internal/db";
 import { z } from "zod";
+import { datasetIdSchema } from "@/lib/validation/dataset";
+
+export const jobIdSchema = z.union([z.string().cuid(), z.string().uuid()]);
+
+export const jobEventQuerySchema = z.object({
+  cursor: z.string().cuid().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+}).strict();
 
 export const foundationJobInputSchema = z.object({
-  datasetId: z.string().cuid(),
+  datasetId: datasetIdSchema,
   type: z.nativeEnum(JobType),
   input: z.record(z.string(), z.json()).default({}),
 }).strict();

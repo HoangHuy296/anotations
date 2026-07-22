@@ -6,7 +6,7 @@ import { readDirectUploadConfig, readProviderConfig } from "@fieldframe/domain";
 
 import { db } from "@/lib/db";
 
-function createMinioClient(endpointValue: string, accessKey: string, secretKey: string) {
+function createMinioClient(endpointValue: string, accessKey: string, secretKey: string, region?: string) {
   const endpoint = new URL(endpointValue);
   return new MinioClient({
     endPoint: endpoint.hostname,
@@ -14,6 +14,7 @@ function createMinioClient(endpointValue: string, accessKey: string, secretKey: 
     useSSL: endpoint.protocol === "https:",
     accessKey,
     secretKey,
+    region,
   });
 }
 
@@ -42,6 +43,8 @@ export function getDirectUploadProviders() {
     config,
     db,
     minio: createMinioClient(config.MINIO_ENDPOINT, config.MINIO_ACCESS_KEY, config.MINIO_SECRET_KEY),
-    publicMinio: createMinioClient(config.MINIO_PUBLIC_ENDPOINT, config.MINIO_ACCESS_KEY, config.MINIO_SECRET_KEY),
+    // Supplying MinIO's default region lets the server sign a browser-facing
+    // URL without trying to contact that public endpoint from its container.
+    publicMinio: createMinioClient(config.MINIO_PUBLIC_ENDPOINT, config.MINIO_ACCESS_KEY, config.MINIO_SECRET_KEY, "us-east-1"),
   };
 }

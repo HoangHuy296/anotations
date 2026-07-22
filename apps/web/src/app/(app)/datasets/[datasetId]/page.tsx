@@ -3,6 +3,8 @@ import { redirect, notFound } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
@@ -23,7 +25,7 @@ export default async function DatasetDetailPage({ params }: { params: Promise<{ 
     <AppShell currentPath="/datasets">
       <main className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <Badge variant="info">{dataset.type}</Badge>
-        <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-zinc-950">{dataset.name}</h1>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3"><h1 className="text-3xl font-bold tracking-[-0.04em] text-zinc-950">{dataset.name}</h1><Button asChild><Link href={`/workspace/${datasetId}`}>Open workspace</Link></Button></div>
         {dataset.description ? <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-500">{dataset.description}</p> : null}
         <dl className="mt-8 grid max-w-xl gap-4 rounded-2xl border border-zinc-200 p-5 text-sm sm:grid-cols-2">
           <div><dt className="text-zinc-500">Primary modality</dt><dd className="mt-1 font-medium text-zinc-950">{dataset.primaryModality ?? "Not set"}</dd></div>

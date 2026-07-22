@@ -218,10 +218,10 @@ export type VideoObjectTrackWhereInput = {
   status?: Prisma.EnumAnnotationStatusFilter<"VideoObjectTrack"> | $Enums.AnnotationStatus
   createdAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
-  videoAsset?: Prisma.XOR<Prisma.VideoAssetScalarRelationFilter, Prisma.VideoAssetWhereInput>
-  label?: Prisma.XOR<Prisma.LabelNullableScalarRelationFilter, Prisma.LabelWhereInput> | null
-  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   annotations?: Prisma.AnnotationListRelationFilter
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  label?: Prisma.XOR<Prisma.LabelNullableScalarRelationFilter, Prisma.LabelWhereInput> | null
+  videoAsset?: Prisma.XOR<Prisma.VideoAssetScalarRelationFilter, Prisma.VideoAssetWhereInput>
 }
 
 export type VideoObjectTrackOrderByWithRelationInput = {
@@ -235,10 +235,10 @@ export type VideoObjectTrackOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  videoAsset?: Prisma.VideoAssetOrderByWithRelationInput
-  label?: Prisma.LabelOrderByWithRelationInput
-  createdBy?: Prisma.UserOrderByWithRelationInput
   annotations?: Prisma.AnnotationOrderByRelationAggregateInput
+  createdBy?: Prisma.UserOrderByWithRelationInput
+  label?: Prisma.LabelOrderByWithRelationInput
+  videoAsset?: Prisma.VideoAssetOrderByWithRelationInput
 }
 
 export type VideoObjectTrackWhereUniqueInput = Prisma.AtLeast<{
@@ -255,10 +255,10 @@ export type VideoObjectTrackWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumAnnotationStatusFilter<"VideoObjectTrack"> | $Enums.AnnotationStatus
   createdAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
-  videoAsset?: Prisma.XOR<Prisma.VideoAssetScalarRelationFilter, Prisma.VideoAssetWhereInput>
-  label?: Prisma.XOR<Prisma.LabelNullableScalarRelationFilter, Prisma.LabelWhereInput> | null
-  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   annotations?: Prisma.AnnotationListRelationFilter
+  createdBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  label?: Prisma.XOR<Prisma.LabelNullableScalarRelationFilter, Prisma.LabelWhereInput> | null
+  videoAsset?: Prisma.XOR<Prisma.VideoAssetScalarRelationFilter, Prisma.VideoAssetWhereInput>
 }, "id">
 
 export type VideoObjectTrackOrderByWithAggregationInput = {
@@ -301,10 +301,10 @@ export type VideoObjectTrackCreateInput = {
   status?: $Enums.AnnotationStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  videoAsset: Prisma.VideoAssetCreateNestedOneWithoutTracksInput
-  label?: Prisma.LabelCreateNestedOneWithoutVideoTracksInput
-  createdBy?: Prisma.UserCreateNestedOneWithoutTracksCreatedInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutTrackInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutTracksCreatedInput
+  label?: Prisma.LabelCreateNestedOneWithoutVideoTracksInput
+  videoAsset: Prisma.VideoAssetCreateNestedOneWithoutTracksInput
 }
 
 export type VideoObjectTrackUncheckedCreateInput = {
@@ -329,10 +329,10 @@ export type VideoObjectTrackUpdateInput = {
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  videoAsset?: Prisma.VideoAssetUpdateOneRequiredWithoutTracksNestedInput
-  label?: Prisma.LabelUpdateOneWithoutVideoTracksNestedInput
-  createdBy?: Prisma.UserUpdateOneWithoutTracksCreatedNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutTrackNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutTracksCreatedNestedInput
+  label?: Prisma.LabelUpdateOneWithoutVideoTracksNestedInput
+  videoAsset?: Prisma.VideoAssetUpdateOneRequiredWithoutTracksNestedInput
 }
 
 export type VideoObjectTrackUncheckedUpdateInput = {
@@ -587,9 +587,9 @@ export type VideoObjectTrackCreateWithoutCreatedByInput = {
   status?: $Enums.AnnotationStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  videoAsset: Prisma.VideoAssetCreateNestedOneWithoutTracksInput
-  label?: Prisma.LabelCreateNestedOneWithoutVideoTracksInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutTrackInput
+  label?: Prisma.LabelCreateNestedOneWithoutVideoTracksInput
+  videoAsset: Prisma.VideoAssetCreateNestedOneWithoutTracksInput
 }
 
 export type VideoObjectTrackUncheckedCreateWithoutCreatedByInput = {
@@ -655,9 +655,9 @@ export type VideoObjectTrackCreateWithoutLabelInput = {
   status?: $Enums.AnnotationStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  videoAsset: Prisma.VideoAssetCreateNestedOneWithoutTracksInput
-  createdBy?: Prisma.UserCreateNestedOneWithoutTracksCreatedInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutTrackInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutTracksCreatedInput
+  videoAsset: Prisma.VideoAssetCreateNestedOneWithoutTracksInput
 }
 
 export type VideoObjectTrackUncheckedCreateWithoutLabelInput = {
@@ -707,9 +707,9 @@ export type VideoObjectTrackCreateWithoutAnnotationsInput = {
   status?: $Enums.AnnotationStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  videoAsset: Prisma.VideoAssetCreateNestedOneWithoutTracksInput
-  label?: Prisma.LabelCreateNestedOneWithoutVideoTracksInput
   createdBy?: Prisma.UserCreateNestedOneWithoutTracksCreatedInput
+  label?: Prisma.LabelCreateNestedOneWithoutVideoTracksInput
+  videoAsset: Prisma.VideoAssetCreateNestedOneWithoutTracksInput
 }
 
 export type VideoObjectTrackUncheckedCreateWithoutAnnotationsInput = {
@@ -749,9 +749,9 @@ export type VideoObjectTrackUpdateWithoutAnnotationsInput = {
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  videoAsset?: Prisma.VideoAssetUpdateOneRequiredWithoutTracksNestedInput
-  label?: Prisma.LabelUpdateOneWithoutVideoTracksNestedInput
   createdBy?: Prisma.UserUpdateOneWithoutTracksCreatedNestedInput
+  label?: Prisma.LabelUpdateOneWithoutVideoTracksNestedInput
+  videoAsset?: Prisma.VideoAssetUpdateOneRequiredWithoutTracksNestedInput
 }
 
 export type VideoObjectTrackUncheckedUpdateWithoutAnnotationsInput = {
@@ -775,9 +775,9 @@ export type VideoObjectTrackCreateWithoutVideoAssetInput = {
   status?: $Enums.AnnotationStatus
   createdAt?: Date | string
   updatedAt?: Date | string
-  label?: Prisma.LabelCreateNestedOneWithoutVideoTracksInput
-  createdBy?: Prisma.UserCreateNestedOneWithoutTracksCreatedInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutTrackInput
+  createdBy?: Prisma.UserCreateNestedOneWithoutTracksCreatedInput
+  label?: Prisma.LabelCreateNestedOneWithoutVideoTracksInput
 }
 
 export type VideoObjectTrackUncheckedCreateWithoutVideoAssetInput = {
@@ -839,9 +839,9 @@ export type VideoObjectTrackUpdateWithoutCreatedByInput = {
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  videoAsset?: Prisma.VideoAssetUpdateOneRequiredWithoutTracksNestedInput
-  label?: Prisma.LabelUpdateOneWithoutVideoTracksNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutTrackNestedInput
+  label?: Prisma.LabelUpdateOneWithoutVideoTracksNestedInput
+  videoAsset?: Prisma.VideoAssetUpdateOneRequiredWithoutTracksNestedInput
 }
 
 export type VideoObjectTrackUncheckedUpdateWithoutCreatedByInput = {
@@ -889,9 +889,9 @@ export type VideoObjectTrackUpdateWithoutLabelInput = {
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  videoAsset?: Prisma.VideoAssetUpdateOneRequiredWithoutTracksNestedInput
-  createdBy?: Prisma.UserUpdateOneWithoutTracksCreatedNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutTrackNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutTracksCreatedNestedInput
+  videoAsset?: Prisma.VideoAssetUpdateOneRequiredWithoutTracksNestedInput
 }
 
 export type VideoObjectTrackUncheckedUpdateWithoutLabelInput = {
@@ -939,9 +939,9 @@ export type VideoObjectTrackUpdateWithoutVideoAssetInput = {
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  label?: Prisma.LabelUpdateOneWithoutVideoTracksNestedInput
-  createdBy?: Prisma.UserUpdateOneWithoutTracksCreatedNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutTrackNestedInput
+  createdBy?: Prisma.UserUpdateOneWithoutTracksCreatedNestedInput
+  label?: Prisma.LabelUpdateOneWithoutVideoTracksNestedInput
 }
 
 export type VideoObjectTrackUncheckedUpdateWithoutVideoAssetInput = {
@@ -1011,10 +1011,10 @@ export type VideoObjectTrackSelect<ExtArgs extends runtime.Types.Extensions.Inte
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
-  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
-  createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
   annotations?: boolean | Prisma.VideoObjectTrack$annotationsArgs<ExtArgs>
+  createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
+  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
+  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.VideoObjectTrackCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["videoObjectTrack"]>
 
@@ -1029,9 +1029,9 @@ export type VideoObjectTrackSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
-  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
+  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
+  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["videoObjectTrack"]>
 
 export type VideoObjectTrackSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1045,9 +1045,9 @@ export type VideoObjectTrackSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
-  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
+  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
+  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["videoObjectTrack"]>
 
 export type VideoObjectTrackSelectScalar = {
@@ -1065,30 +1065,30 @@ export type VideoObjectTrackSelectScalar = {
 
 export type VideoObjectTrackOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "videoAssetId" | "labelId" | "createdById" | "name" | "color" | "properties" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["videoObjectTrack"]>
 export type VideoObjectTrackInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
-  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
-  createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
   annotations?: boolean | Prisma.VideoObjectTrack$annotationsArgs<ExtArgs>
+  createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
+  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
+  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.VideoObjectTrackCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VideoObjectTrackIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
-  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
+  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
+  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
 }
 export type VideoObjectTrackIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
-  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
   createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
+  label?: boolean | Prisma.VideoObjectTrack$labelArgs<ExtArgs>
+  videoAsset?: boolean | Prisma.VideoAssetDefaultArgs<ExtArgs>
 }
 
 export type $VideoObjectTrackPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "VideoObjectTrack"
   objects: {
-    videoAsset: Prisma.$VideoAssetPayload<ExtArgs>
-    label: Prisma.$LabelPayload<ExtArgs> | null
-    createdBy: Prisma.$UserPayload<ExtArgs> | null
     annotations: Prisma.$AnnotationPayload<ExtArgs>[]
+    createdBy: Prisma.$UserPayload<ExtArgs> | null
+    label: Prisma.$LabelPayload<ExtArgs> | null
+    videoAsset: Prisma.$VideoAssetPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1495,10 +1495,10 @@ readonly fields: VideoObjectTrackFieldRefs;
  */
 export interface Prisma__VideoObjectTrackClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  videoAsset<T extends Prisma.VideoAssetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VideoAssetDefaultArgs<ExtArgs>>): Prisma.Prisma__VideoAssetClient<runtime.Types.Result.GetResult<Prisma.$VideoAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  label<T extends Prisma.VideoObjectTrack$labelArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VideoObjectTrack$labelArgs<ExtArgs>>): Prisma.Prisma__LabelClient<runtime.Types.Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  createdBy<T extends Prisma.VideoObjectTrack$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VideoObjectTrack$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   annotations<T extends Prisma.VideoObjectTrack$annotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VideoObjectTrack$annotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdBy<T extends Prisma.VideoObjectTrack$createdByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VideoObjectTrack$createdByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  label<T extends Prisma.VideoObjectTrack$labelArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VideoObjectTrack$labelArgs<ExtArgs>>): Prisma.Prisma__LabelClient<runtime.Types.Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  videoAsset<T extends Prisma.VideoAssetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VideoAssetDefaultArgs<ExtArgs>>): Prisma.Prisma__VideoAssetClient<runtime.Types.Result.GetResult<Prisma.$VideoAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1934,22 +1934,27 @@ export type VideoObjectTrackDeleteManyArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 /**
- * VideoObjectTrack.label
+ * VideoObjectTrack.annotations
  */
-export type VideoObjectTrack$labelArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type VideoObjectTrack$annotationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Label
+   * Select specific fields to fetch from the Annotation
    */
-  select?: Prisma.LabelSelect<ExtArgs> | null
+  select?: Prisma.AnnotationSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Label
+   * Omit specific fields from the Annotation
    */
-  omit?: Prisma.LabelOmit<ExtArgs> | null
+  omit?: Prisma.AnnotationOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.LabelInclude<ExtArgs> | null
-  where?: Prisma.LabelWhereInput
+  include?: Prisma.AnnotationInclude<ExtArgs> | null
+  where?: Prisma.AnnotationWhereInput
+  orderBy?: Prisma.AnnotationOrderByWithRelationInput | Prisma.AnnotationOrderByWithRelationInput[]
+  cursor?: Prisma.AnnotationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
 }
 
 /**
@@ -1972,27 +1977,22 @@ export type VideoObjectTrack$createdByArgs<ExtArgs extends runtime.Types.Extensi
 }
 
 /**
- * VideoObjectTrack.annotations
+ * VideoObjectTrack.label
  */
-export type VideoObjectTrack$annotationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type VideoObjectTrack$labelArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Annotation
+   * Select specific fields to fetch from the Label
    */
-  select?: Prisma.AnnotationSelect<ExtArgs> | null
+  select?: Prisma.LabelSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Annotation
+   * Omit specific fields from the Label
    */
-  omit?: Prisma.AnnotationOmit<ExtArgs> | null
+  omit?: Prisma.LabelOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AnnotationInclude<ExtArgs> | null
-  where?: Prisma.AnnotationWhereInput
-  orderBy?: Prisma.AnnotationOrderByWithRelationInput | Prisma.AnnotationOrderByWithRelationInput[]
-  cursor?: Prisma.AnnotationWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AnnotationScalarFieldEnum | Prisma.AnnotationScalarFieldEnum[]
+  include?: Prisma.LabelInclude<ExtArgs> | null
+  where?: Prisma.LabelWhereInput
 }
 
 /**

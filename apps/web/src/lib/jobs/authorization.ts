@@ -3,6 +3,7 @@ import "server-only";
 import { JobStatus, JobType } from "@internal/db";
 import { jobQueuePayloadSchema } from "@fieldframe/queue";
 import { z } from "zod";
+import { datasetIdSchema } from "@/lib/validation/dataset";
 import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
@@ -28,7 +29,9 @@ const jobAuthorizationSelect = {
  * not enqueue or process work: PostgreSQL creation and the queue transport are
  * separate later-phase responsibilities.
  */
-export async function requireJobPermission(actor: RequestActor, datasetId: string, permission: "job.createExport" | "job.cancel" | "dataset.read") {
+export type JobPermission = "job.createExport" | "job.cancel" | "job.retry" | "dataset.read";
+
+export async function requireJobPermission(actor: RequestActor, datasetId: string, permission: JobPermission) {
   return requireDatasetPermission(actor, datasetId, permission);
 }
 
@@ -50,7 +53,7 @@ export async function authorizeFoundationJobSubmission(actor: RequestActor, inpu
   return { ok: true as const, input: parsed.data, queueName };
 }
 
-const exportInputSchema = z.object({ datasetId: z.string().cuid(), input: z.record(z.string(), z.json()).default({}) });
+const exportInputSchema = z.object({ datasetId: datasetIdSchema, input: z.record(z.string(), z.json()).default({}) });
 
 /** Creates PostgreSQL Job authority only; enqueue remains an explicit later-phase step. */
 export async function createAuthorizedExportJob(actor: RequestActor, input: unknown) {
@@ -81,12 +84,77 @@ export async function readAuthorizedJob(actor: RequestActor, jobId: string) {
   return { ok: true as const, status: 200 as const, job };
 }
 
-export async function cancelAuthorizedJob(actor: RequestActor, jobId: string) {
-  const job = await db.job.findFirst({ where: { id: jobId }, select: { id: true, datasetId: true } });
+/**
+ * Resolves the durable Job and applies a Dataset-scoped action permission.
+ * This intentionally conceals a Job from non-members, even when its id is
+ * known. Callers must not perform a second unscoped lookup after this guard.
+ */
+export async function readAuthorizedJobForAction(actor: RequestActor, jobId: string, permission: JobPermission) {
+  const job = await db.job.findFirst({ where: { id: jobId }, select: jobAuthorizationSelect });
   if (!job) return { ok: false as const, status: 404 as const };
-  const access = await requireJobPermission(actor, job.datasetId, "job.cancel");
+  const access = await requireJobPermission(actor, job.datasetId, permission);
   if (!access) return { ok: false as const, status: 404 as const };
   if (access.forbidden) return { ok: false as const, status: 403 as const };
-  await db.job.updateMany({ where: { id: job.id, status: { in: [JobStatus.QUEUED, JobStatus.RUNNING, JobStatus.RETRYING] } }, data: { status: JobStatus.CANCELING, cancelRequestedAt: new Date(), canceledById: actor.id } });
-  return { ok: true as const, status: 200 as const };
+  return { ok: true as const, status: 200 as const, job };
+}
+
+export async function cancelAuthorizedJob(actor: RequestActor, jobId: string) {
+  const authorized = await readAuthorizedJobForAction(actor, jobId, "job.cancel");
+  if (!authorized.ok) return authorized;
+
+  const now = new Date();
+  const terminalCancel = {
+    status: JobStatus.CANCELED,
+    cancelRequestedAt: now,
+    canceledById: actor.id,
+    canceledAt: now,
+    finishedAt: now,
+    lockedBy: null,
+    lockToken: null,
+    lockedAt: null,
+    lockedUntil: null,
+    heartbeatAt: null,
+  } as const;
+
+  // The status predicate is repeated in the mutation: a status observed by
+  // the authorization lookup is never treated as permission to overwrite a
+  // concurrent worker transition.
+  const outcome = await db.$transaction(async (tx) => {
+    let updated;
+    let mode: "CANCELED" | "CANCELING";
+    if (authorized.job.status === JobStatus.QUEUED) {
+      mode = "CANCELED";
+      updated = await tx.job.updateMany({ where: { id: jobId, status: JobStatus.QUEUED }, data: terminalCancel });
+    } else if (authorized.job.status === JobStatus.RETRYING) {
+      mode = "CANCELED";
+      updated = await tx.job.updateMany({
+        where: { id: jobId, status: JobStatus.RETRYING, OR: [{ lockedUntil: null }, { lockedUntil: { lt: now } }] },
+        data: terminalCancel,
+      });
+    } else if (authorized.job.status === JobStatus.RUNNING) {
+      mode = "CANCELING";
+      updated = await tx.job.updateMany({
+        where: { id: jobId, status: JobStatus.RUNNING },
+        data: { status: JobStatus.CANCELING, cancelRequestedAt: now, canceledById: actor.id },
+      });
+    } else {
+      return null;
+    }
+    if (updated.count !== 1) return null;
+
+    await tx.jobEvent.create({
+      data: {
+        jobId,
+        level: "INFO",
+        message: mode === "CANCELED" ? "JOB_CANCELED" : "CANCEL_REQUESTED",
+        // Fixed, allowlisted event metadata only. Never copy Job input/state
+        // or worker/queue fields into an application event.
+        data: { action: mode === "CANCELED" ? "canceled" : "cancel_requested" },
+      },
+    });
+    return mode;
+  });
+
+  if (!outcome) return { ok: false as const, status: 409 as const };
+  return { ok: true as const, status: 200 as const, cancellationStatus: outcome };
 }

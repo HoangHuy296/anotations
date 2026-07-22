@@ -17,6 +17,8 @@ export type UploadCapability = {
   sizeBytes: number;
   nonce: string;
   expiresAt: number;
+  preparedImportId?: string;
+  preparedImportItemId?: string;
 };
 
 function encryptionKey(secret: string) { return createHash("sha256").update(secret).digest(); }
@@ -26,6 +28,20 @@ function encrypt(value: unknown, secret: string) {
   const cipher = createCipheriv("aes-256-gcm", encryptionKey(secret), iv);
   const ciphertext = Buffer.concat([cipher.update(JSON.stringify(value), "utf8"), cipher.final()]);
   return `${iv.toString("base64url")}.${ciphertext.toString("base64url")}.${cipher.getAuthTag().toString("base64url")}`;
+}
+
+export function createPreparedImportUploadCapability(
+  config: Pick<DirectUploadConfig, "UPLOAD_CAPABILITY_SECRET">,
+  input: Omit<UploadCapability, "purpose" | "objectKey" | "nonce" | "expiresAt" | "preparedImportId" | "preparedImportItemId"> & { objectKey: string; preparedImportId: string; preparedImportItemId: string; nowSeconds?: number },
+) {
+  const nonce = randomBytes(18).toString("base64url");
+  const nowSeconds = input.nowSeconds ?? Math.floor(Date.now() / 1000);
+  const payload: UploadCapability = {
+    actorId: input.actorId, datasetId: input.datasetId, filename: safeFilename(input.filename), candidateContentType: input.candidateContentType,
+    sizeBytes: input.sizeBytes, objectKey: input.objectKey, preparedImportId: input.preparedImportId, preparedImportItemId: input.preparedImportItemId,
+    purpose: "upload", nonce, expiresAt: nowSeconds + UPLOAD_CAPABILITY_TTL_SECONDS,
+  };
+  return { payload, token: encrypt(payload, config.UPLOAD_CAPABILITY_SECRET) };
 }
 
 function decrypt(token: string, secret: string): unknown | null {

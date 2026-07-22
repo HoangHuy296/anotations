@@ -4,9 +4,9 @@ import { z } from "zod";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { datasetIdSchema } from "@/lib/validation/dataset";
 
-const datasetIdSchema = z.string().cuid();
-const memberInputSchema = z.object({ datasetId: z.string().cuid(), userId: z.string().cuid(), role: z.enum(["MANAGER", "REVIEWER", "LABELER"]) });
+const memberInputSchema = z.object({ datasetId: datasetIdSchema, userId: z.string().cuid(), role: z.enum(["MANAGER", "REVIEWER", "LABELER"]) });
 
 export async function archiveDatasetAction(datasetId: unknown) {
   const parsed = datasetIdSchema.safeParse(datasetId); if (!parsed.success) return { ok: false, status: 400 };
@@ -31,7 +31,7 @@ export async function upsertDatasetMemberAction(input: unknown) {
 }
 
 export async function removeDatasetMemberAction(input: unknown) {
-  const parsed = z.object({ datasetId: z.string().cuid(), userId: z.string().cuid() }).safeParse(input); if (!parsed.success) return { ok: false, status: 400 };
+  const parsed = z.object({ datasetId: datasetIdSchema, userId: z.string().cuid() }).safeParse(input); if (!parsed.success) return { ok: false, status: 400 };
   const actor = await getRequestActor(); if (!actor) return { ok: false, status: 401 };
   const access = await requireDatasetPermission(actor, parsed.data.datasetId, "member.manage");
   if (!access) return { ok: false, status: 404 }; if (access.forbidden || access.dataset.ownerId === parsed.data.userId) return { ok: false, status: 403 };

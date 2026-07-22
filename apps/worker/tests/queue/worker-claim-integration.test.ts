@@ -9,7 +9,9 @@ const hasIntegrationDatabase = Boolean(process.env.DATABASE_URL);
 test("duplicate strict queue deliveries receive one durable claim and no token leaks into JobEvents", { skip: !hasIntegrationDatabase }, async () => {
   const fixture = await createWorkerJobFixture();
   try {
-    const job = await fixture.createJob();
+    // IMPORT_DATASET intentionally remains RUNNING while it waits for the
+    // browser commit signal. EXPORT_DATASET now has a real terminal processor.
+    const job = await fixture.createJob({ type: "IMPORT_DATASET" });
     const [first, second] = await Promise.all([
       routeQueueDelivery({ db: fixture.db, payload: { jobId: job.id }, workerId: "worker-a" }),
       routeQueueDelivery({ db: fixture.db, payload: { jobId: job.id }, workerId: "worker-b" }),
