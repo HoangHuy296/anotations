@@ -1,6 +1,6 @@
 import "server-only";
 
-import { PrismaClient } from "@internal/db";
+import { Prisma, PrismaClient } from "@internal/db";
 
 import { getDatabaseUrl } from "../../../../database-url";
 
@@ -9,6 +9,12 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const databaseUrl = getDatabaseUrl();
+const prismaLog: Prisma.LogLevel[] =
+  process.env.NODE_ENV === "test"
+    ? []
+    : process.env.NODE_ENV === "development"
+      ? ["warn", "error"]
+      : ["error"];
 
 export const db =
   globalForPrisma.prisma ??
@@ -20,10 +26,9 @@ export const db =
           },
         }
       : {}),
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["warn", "error"]
-        : ["error"],
+    // Tests assert safe application responses; expected serialization retries
+    // must not emit raw Prisma diagnostics into integration-test output.
+    log: prismaLog,
   });
 
 if (process.env.NODE_ENV !== "production") {

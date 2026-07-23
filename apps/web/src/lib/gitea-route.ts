@@ -3,8 +3,10 @@ import "server-only";
 import type { ZodError } from "zod";
 
 import { apiError } from "@/lib/api-response";
-import { requireOwnedSourceConnection, resolveDatasetSourceConnection } from "@/lib/authorization";
+import { resolveDatasetSourceConnection } from "@/lib/authorization";
 import { getRequestActor, type RequestActor } from "@/lib/auth";
+import { resolveOwnedSourceToken } from "@/lib/source-connection-service";
+import { validateSourceBaseUrl } from "@/lib/source-access-policy";
 import { decryptSourceToken } from "@/lib/source-connection-crypto";
 import { createGiteaClient, GiteaClientError } from "@/lib/gitea";
 
@@ -27,19 +29,8 @@ export async function requireApiActor(): Promise<
 }
 
 export async function requireOwnedGiteaClient(actor: RequestActor, sourceConnectionId: string) {
-  const connection = await requireOwnedSourceConnection(actor, sourceConnectionId);
-  if (!connection || !connection.tokenEncrypted) return null;
-
-  try {
-    const token = decryptSourceToken(connection.tokenEncrypted);
-    return {
-      connection: { id: connection.id, baseUrl: connection.baseUrl },
-      client: createGiteaClient({ baseUrl: connection.baseUrl, token }),
-    };
-  } catch {
-    // Never disclose whether the stored ciphertext/key is malformed to callers.
-    return null;
-  }
+  const connection = await resolveOwnedSourceToken(actor, sourceConnectionId);
+  return connection ? { connection: { id: connection.id, baseUrl: connection.baseUrl }, client: createGiteaClient({ baseUrl: connection.baseUrl, token: connection.token }) } : null;
 }
 
 /**
@@ -52,8 +43,10 @@ export async function requireDatasetGiteaClient(datasetId: string) {
   if (!connection?.tokenEncrypted) return null;
 
   try {
+    const address = await validateSourceBaseUrl(connection.baseUrl);
+    if (!address.ok) return null;
     return createGiteaClient({
-      baseUrl: connection.baseUrl,
+      baseUrl: address.value.toString(),
       token: decryptSourceToken(connection.tokenEncrypted),
     });
   } catch {
@@ -73,6 +66,12 @@ export function giteaErrorResponse(error: unknown) {
           503,
           "GITEA_CONFIGURATION_ERROR",
           "Gitea integration is not configured.",
+        );
+      case "unauthorized":
+        return apiError(
+          error.status === 401 ? 422 : 422,
+          error.status === 401 ? "SOURCE_TOKEN_EXPIRED" : "SOURCE_TOKEN_INVALID",
+          error.status === 401 ? "The source token has expired." : "The source token is invalid.",
         );
       case "not_found":
         return apiError(
@@ -101,7 +100,6 @@ export function giteaErrorResponse(error: unknown) {
     }
   }
 
-  console.error("Unexpected Gitea route failure.", error);
   return apiError(500, "INTERNAL_ERROR", "The request could not be completed.");
 }
 

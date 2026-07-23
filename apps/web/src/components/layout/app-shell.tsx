@@ -1,25 +1,23 @@
 import {
   ArrowSquareOut,
-  Database,
   Export,
   GithubLogo,
   House,
   Tag,
-  TrayArrowDown,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AppMark } from "@/components/layout/app-mark";
-import { SignOutButton } from "@/components/auth/sign-out-button";
+import { DatasetNavigationGroup } from "@/components/layout/dataset-navigation-group";
+import { AvatarMenu } from "@/components/auth/avatar-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getRequestActor } from "@/lib/auth";
 
 const navigation = [
   { href: "/dashboard", label: "Overview", icon: House },
-  { href: "/datasets", label: "Datasets", icon: Database },
-  { href: "/imports", label: "Imports", icon: TrayArrowDown },
   { href: "/labels", label: "Labels", icon: Tag },
   { href: "/exports", label: "Exports", icon: Export },
 ];
@@ -29,10 +27,11 @@ type AppShellProps = {
   currentPath?: string;
 };
 
-export function AppShell({
+export async function AppShell({
   children,
   currentPath = "/dashboard",
 }: AppShellProps) {
+  const actor = await getRequestActor();
   return (
     <div className="min-h-[100dvh] bg-zinc-50 text-zinc-950">
       <div className="mx-auto grid min-h-[100dvh] max-w-[1600px] grid-cols-1 bg-white lg:grid-cols-[236px_minmax(0,1fr)]">
@@ -40,7 +39,7 @@ export function AppShell({
           <AppMark className="px-2" />
 
           <nav className="mt-10 space-y-1" aria-label="Primary navigation">
-            {navigation.map((item) => {
+            {navigation.slice(0, 1).map((item) => {
               const Icon = item.icon;
               const active = currentPath === item.href;
 
@@ -53,6 +52,24 @@ export function AppShell({
                     active
                       ? "bg-zinc-950 text-white"
                       : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950",
+                  )}
+                >
+                  <Icon aria-hidden="true" size={18} weight={active ? "fill" : "regular"} />
+                  {item.label}
+                </Link>
+              );
+            })}
+            <DatasetNavigationGroup activePath={currentPath} />
+            {navigation.slice(1).map((item) => {
+              const Icon = item.icon;
+              const active = currentPath === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors",
+                    active ? "bg-zinc-950 text-white" : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950",
                   )}
                 >
                   <Icon aria-hidden="true" size={18} weight={active ? "fill" : "regular"} />
@@ -93,13 +110,7 @@ export function AppShell({
                   <ArrowSquareOut aria-hidden="true" size={15} />
                 </Link>
               </Button>
-              <span
-                className="grid size-9 place-items-center rounded-xl bg-sky-100 text-xs font-bold text-sky-800"
-                aria-label="Signed in operator"
-              >
-                OP
-              </span>
-              <SignOutButton />
+              {actor ? <AvatarMenu actor={actor} /> : null}
             </div>
           </header>
 

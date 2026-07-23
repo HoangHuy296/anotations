@@ -104,12 +104,12 @@ Dataset is the central organizational entity for imported and processed work. As
 
 `Asset.modality` is the sole source of truth for selecting the workspace engine. All assets open through one workspace route; the route selects an appropriate engine from the asset's recorded modality instead of branching application routing by media type. An absent or unsupported modality must result in a safe unsupported state, not a guessed engine.
 
-`Annotation.geometry` is the canonical shape for every annotation. Labels, display properties, and derived UI state must not replace or reinterpret it as the authoritative shape. `Annotation.version` is the required optimistic concurrency value for every annotation update or autosave:
+`Annotation.geometry` is the canonical shape for every annotation. Labels, display properties, and derived UI state must not replace or reinterpret it as the authoritative shape. `Annotation.revision` is the required optimistic concurrency value for every annotation update or autosave:
 
-1. A client submits the expected current version with its authorized geometry update.
-2. The durable update succeeds only when that version equals the persisted version.
-3. A successful update increments the persisted version.
-4. A stale update is rejected; the client must reload canonical geometry and version rather than overwriting newer work.
+1. A client submits the expected current revision with its authorized geometry update.
+2. The durable update succeeds only when that revision equals the persisted revision.
+3. A successful update increments the persisted revision.
+4. A stale update is rejected; the client must reload canonical geometry and revision rather than overwriting newer work.
 
 Viewport pan, zoom, in-progress pointer state, and other transient canvas interaction remain outside canonical annotation data. Persist at semantic action boundaries only.
 

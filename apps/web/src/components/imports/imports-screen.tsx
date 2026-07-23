@@ -1,12 +1,12 @@
 import { TrayArrowDown } from "@phosphor-icons/react/dist/ssr";
 import { redirect } from "next/navigation";
 
-import { AppShell } from "@/components/layout/app-shell";
 import { ImportForm } from "@/components/imports/import-form";
+import { AppShell } from "@/components/layout/app-shell";
 import { getRequestActor } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-export default async function ImportsPage() {
+export async function ImportsScreen({ currentPath }: { currentPath: string }) {
   const actor = await getRequestActor();
   if (!actor) redirect("/unauthorized");
   const connections = await db.sourceConnection.findMany({
@@ -14,27 +14,17 @@ export default async function ImportsPage() {
     select: { id: true, name: true },
   });
   return (
-    <AppShell currentPath="/imports">
+    <AppShell currentPath={currentPath}>
       <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <header className="border-b border-zinc-200 pb-7">
           <div className="flex items-center gap-2 text-sky-700">
             <TrayArrowDown aria-hidden="true" size={18} weight="duotone" />
-            <span className="text-xs font-bold uppercase tracking-[0.14em]">
-              Gitea import
-            </span>
+            <span className="text-xs font-bold uppercase tracking-[0.14em]">Gitea import</span>
           </div>
-          <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-zinc-950">
-            Import a repository folder
-          </h1>
-          <p className="mt-2 max-w-[65ch] text-sm leading-6 text-zinc-500">
-            Preview the selected tree first. Fieldframe writes repository,
-            dataset, and image records only after the preview passes safety
-            limits.
-          </p>
+          <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-zinc-950">Import a repository folder</h1>
+          <p className="mt-2 max-w-[65ch] text-sm leading-6 text-zinc-500">Preview the selected tree first. Fieldframe writes repository, dataset, and image records only after the preview passes safety limits.</p>
         </header>
-        <div className="mt-7">
-          <ImportForm connections={connections} />
-        </div>
+        <div className="mt-7"><ImportForm connections={connections} /></div>
       </div>
     </AppShell>
   );

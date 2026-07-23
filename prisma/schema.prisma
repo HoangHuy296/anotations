@@ -251,7 +251,7 @@ model Dataset {
   members              DatasetMember[]
   jobs                 Job[]               @relation("DatasetJobs")
   labels               Label[]
-  preparedImports      PreparedImport?
+  preparedImports      PreparedImport[]
 
   @@index([ownerId])
   @@index([ownerId, primaryModality])
@@ -269,7 +269,7 @@ model Dataset {
 ///  * ever persisted.
 model PreparedImport {
   id                String               @id @default(cuid())
-  datasetId         String               @unique
+  datasetId         String
   jobId             String               @unique
   createdById       String
   status            PreparedImportStatus @default(PREPARING)
@@ -285,6 +285,7 @@ model PreparedImport {
   items             PreparedImportItem[]
 
   @@unique([createdById, idempotencyKey])
+  @@index([datasetId, createdAt])
   @@index([status, deadlineAt])
   @@index([createdById, createdAt])
 }

@@ -5,7 +5,7 @@ import {
   Images,
   WarningCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import { AssetStatus } from "@internal/db";
+import { AssetStatus, DatasetSourceMode, UserRole } from "@internal/db";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
@@ -21,6 +21,7 @@ type DatasetSummary = {
   name: string;
   sourceRootPath: string | null;
   sourceBranch: string | null;
+  sourceMode: DatasetSourceMode;
   externalRepository: { fullName: string } | null;
   _count: { assets: number };
 };
@@ -31,7 +32,11 @@ type DatasetStatusCount = {
   _count: { _all: number };
 };
 
-export default async function DatasetsPage() {
+const PAGE_SIZE = 25;
+type SearchParams = { after?: string | string[]; before?: string | string[] };
+const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
+
+export default async function DatasetsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   await connection();
 
   const actor = await getRequestActor();
@@ -41,36 +46,46 @@ export default async function DatasetsPage() {
     return <DatasetSetupState />;
   }
 
+  const query = await searchParams;
+  const after = first(query.after) || undefined;
+  const before = first(query.before) || undefined;
+  const paginationMode = before ? "before" : "after";
+  const cursor = before || after;
   let data;
   try {
-    const [datasets, statusCounts] = await Promise.all([
-      db.dataset.findMany({
-        where: { deletedAt: null, archivedAt: null, OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] },
-        orderBy: { updatedAt: "desc" },
-        include: {
-          externalRepository: {
-            select: { fullName: true },
-          },
-          _count: {
-            select: { assets: true },
-          },
-        },
-      }),
-      db.asset.groupBy({
-        by: ["datasetId", "status"],
-        where: { modality: "IMAGE", dataset: { OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] } },
-        _count: { _all: true },
-      }),
-    ]);
+    const datasetWhere = {
+      deletedAt: null,
+      archivedAt: null,
+      ...(actor.role === UserRole.ADMIN ? {} : { OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] }),
+    };
+    const datasets = await db.dataset.findMany({
+      where: datasetWhere,
+      orderBy: paginationMode === "before" ? [{ updatedAt: "asc" }, { id: "asc" }] : [{ updatedAt: "desc" }, { id: "desc" }],
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      take: PAGE_SIZE + 1,
+      include: {
+        externalRepository: { select: { fullName: true } },
+        _count: { select: { assets: true } },
+      },
+    });
+    const hasOverflow = datasets.length > PAGE_SIZE;
+    const pageDatasets = (paginationMode === "before" ? datasets.slice(0, PAGE_SIZE).reverse() : datasets.slice(0, PAGE_SIZE)) as DatasetSummary[];
+    const statusCounts = await db.asset.groupBy({
+      by: ["datasetId", "status"],
+      where: { modality: "IMAGE", datasetId: { in: pageDatasets.map((dataset) => dataset.id) } },
+      _count: { _all: true },
+    });
     data = {
-      datasets: datasets as DatasetSummary[],
+      datasets: pageDatasets,
       statusCounts: statusCounts as DatasetStatusCount[],
+      hasNext: paginationMode === "before" ? true : hasOverflow,
+      hasPrevious: paginationMode === "before" ? hasOverflow : Boolean(after),
     };
   } catch (error: unknown) {
     console.error("Datasets could not be loaded.", error);
     return <DatasetSetupState unavailable />;
   }
-  const { datasets, statusCounts } = data;
+  const { datasets, statusCounts, hasNext, hasPrevious } = data;
 
   return (
     <AppShell currentPath="/datasets">
@@ -88,9 +103,14 @@ export default async function DatasetsPage() {
               SHA provenance.
             </p>
           </div>
-          <Button asChild>
-            <Link href="/imports">Import dataset</Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="secondary">
+              <Link href="/datasets/new/local-folder">Upload</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/datasets/imports">Import dataset</Link>
+            </Button>
+          </div>
         </header>
 
         {datasets.length === 0 ? (
@@ -174,9 +194,9 @@ export default async function DatasetsPage() {
                   </div>
 
                   <div className="flex items-center gap-3 md:justify-end">
-                    <Badge variant="info">
+                    <Badge variant={dataset.sourceMode === DatasetSourceMode.UPLOAD ? "neutral" : "info"}>
                       <GitBranch aria-hidden="true" size={12} />
-                      {dataset.sourceBranch ?? "local"}
+                      {dataset.sourceMode === DatasetSourceMode.UPLOAD ? "local upload" : dataset.sourceBranch ?? "repository"}
                     </Badge>
                     <Button
                       asChild
@@ -193,6 +213,21 @@ export default async function DatasetsPage() {
             })}
           </div>
         )}
+        {datasets.length > 0 ? (
+          <nav aria-label="Dataset pages" className="mt-6 flex items-center justify-between gap-4">
+            {hasPrevious && datasets[0] ? (
+              <Button asChild variant="secondary" size="sm">
+                <Link href={`/datasets?before=${encodeURIComponent(datasets[0].id)}`}>Previous page</Link>
+              </Button>
+            ) : <span />}
+            <p className="text-xs text-zinc-500">Showing up to {PAGE_SIZE} accessible datasets</p>
+            {hasNext && datasets.at(-1) ? (
+              <Button asChild variant="secondary" size="sm">
+                <Link href={`/datasets?after=${encodeURIComponent(datasets.at(-1)!.id)}`}>Next page</Link>
+              </Button>
+            ) : <span />}
+          </nav>
+        ) : null}
       </div>
     </AppShell>
   );

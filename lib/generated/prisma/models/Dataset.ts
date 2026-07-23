@@ -320,7 +320,7 @@ export type DatasetWhereInput = {
   members?: Prisma.DatasetMemberListRelationFilter
   jobs?: Prisma.JobListRelationFilter
   labels?: Prisma.LabelListRelationFilter
-  preparedImports?: Prisma.XOR<Prisma.PreparedImportNullableScalarRelationFilter, Prisma.PreparedImportWhereInput> | null
+  preparedImports?: Prisma.PreparedImportListRelationFilter
 }
 
 export type DatasetOrderByWithRelationInput = {
@@ -357,7 +357,7 @@ export type DatasetOrderByWithRelationInput = {
   members?: Prisma.DatasetMemberOrderByRelationAggregateInput
   jobs?: Prisma.JobOrderByRelationAggregateInput
   labels?: Prisma.LabelOrderByRelationAggregateInput
-  preparedImports?: Prisma.PreparedImportOrderByWithRelationInput
+  preparedImports?: Prisma.PreparedImportOrderByRelationAggregateInput
 }
 
 export type DatasetWhereUniqueInput = Prisma.AtLeast<{
@@ -397,7 +397,7 @@ export type DatasetWhereUniqueInput = Prisma.AtLeast<{
   members?: Prisma.DatasetMemberListRelationFilter
   jobs?: Prisma.JobListRelationFilter
   labels?: Prisma.LabelListRelationFilter
-  preparedImports?: Prisma.XOR<Prisma.PreparedImportNullableScalarRelationFilter, Prisma.PreparedImportWhereInput> | null
+  preparedImports?: Prisma.PreparedImportListRelationFilter
 }, "id">
 
 export type DatasetOrderByWithAggregationInput = {
@@ -489,7 +489,7 @@ export type DatasetCreateInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateInput = {
@@ -523,7 +523,7 @@ export type DatasetUncheckedCreateInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUpdateInput = {
@@ -557,7 +557,7 @@ export type DatasetUpdateInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateInput = {
@@ -591,7 +591,7 @@ export type DatasetUncheckedUpdateInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateManyInput = {
@@ -1034,7 +1034,7 @@ export type DatasetCreateWithoutOwnerInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutOwnerInput = {
@@ -1067,7 +1067,7 @@ export type DatasetUncheckedCreateWithoutOwnerInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutOwnerInput = {
@@ -1155,7 +1155,7 @@ export type DatasetCreateWithoutJobsInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutJobsInput = {
@@ -1188,7 +1188,7 @@ export type DatasetUncheckedCreateWithoutJobsInput = {
   assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutJobsInput = {
@@ -1237,7 +1237,7 @@ export type DatasetUpdateWithoutJobsInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutJobsInput = {
@@ -1270,7 +1270,7 @@ export type DatasetUncheckedUpdateWithoutJobsInput = {
   assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutExternalRepositoryInput = {
@@ -1303,7 +1303,7 @@ export type DatasetCreateWithoutExternalRepositoryInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutExternalRepositoryInput = {
@@ -1336,7 +1336,7 @@ export type DatasetUncheckedCreateWithoutExternalRepositoryInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutExternalRepositoryInput = {
@@ -1395,7 +1395,7 @@ export type DatasetCreateWithoutSourceConnectionInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutSourceConnectionInput = {
@@ -1428,7 +1428,7 @@ export type DatasetUncheckedCreateWithoutSourceConnectionInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutSourceConnectionInput = {
@@ -1635,7 +1635,7 @@ export type DatasetCreateWithoutMembersInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutMembersInput = {
@@ -1668,7 +1668,7 @@ export type DatasetUncheckedCreateWithoutMembersInput = {
   assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutMembersInput = {
@@ -1717,7 +1717,7 @@ export type DatasetUpdateWithoutMembersInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutMembersInput = {
@@ -1750,7 +1750,7 @@ export type DatasetUncheckedUpdateWithoutMembersInput = {
   assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAssetsInput = {
@@ -1783,7 +1783,7 @@ export type DatasetCreateWithoutAssetsInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAssetsInput = {
@@ -1816,7 +1816,7 @@ export type DatasetUncheckedCreateWithoutAssetsInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAssetsInput = {
@@ -1865,7 +1865,7 @@ export type DatasetUpdateWithoutAssetsInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAssetsInput = {
@@ -1898,7 +1898,7 @@ export type DatasetUncheckedUpdateWithoutAssetsInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAssetVersionsInput = {
@@ -1931,7 +1931,7 @@ export type DatasetCreateWithoutAssetVersionsInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAssetVersionsInput = {
@@ -1964,7 +1964,7 @@ export type DatasetUncheckedCreateWithoutAssetVersionsInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAssetVersionsInput = {
@@ -2013,7 +2013,7 @@ export type DatasetUpdateWithoutAssetVersionsInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAssetVersionsInput = {
@@ -2046,7 +2046,7 @@ export type DatasetUncheckedUpdateWithoutAssetVersionsInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutLabelsInput = {
@@ -2079,7 +2079,7 @@ export type DatasetCreateWithoutLabelsInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutLabelsInput = {
@@ -2112,7 +2112,7 @@ export type DatasetUncheckedCreateWithoutLabelsInput = {
   assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutLabelsInput = {
@@ -2161,7 +2161,7 @@ export type DatasetUpdateWithoutLabelsInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutLabelsInput = {
@@ -2194,7 +2194,7 @@ export type DatasetUncheckedUpdateWithoutLabelsInput = {
   assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAnnotationsInput = {
@@ -2227,7 +2227,7 @@ export type DatasetCreateWithoutAnnotationsInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAnnotationsInput = {
@@ -2260,7 +2260,7 @@ export type DatasetUncheckedCreateWithoutAnnotationsInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAnnotationsInput = {
@@ -2309,7 +2309,7 @@ export type DatasetUpdateWithoutAnnotationsInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAnnotationsInput = {
@@ -2342,7 +2342,7 @@ export type DatasetUncheckedUpdateWithoutAnnotationsInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAiTasksInput = {
@@ -2375,7 +2375,7 @@ export type DatasetCreateWithoutAiTasksInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAiTasksInput = {
@@ -2408,7 +2408,7 @@ export type DatasetUncheckedCreateWithoutAiTasksInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
-  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAiTasksInput = {
@@ -2457,7 +2457,7 @@ export type DatasetUpdateWithoutAiTasksInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAiTasksInput = {
@@ -2490,7 +2490,7 @@ export type DatasetUncheckedUpdateWithoutAiTasksInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateManyOwnerInput = {
@@ -2548,7 +2548,7 @@ export type DatasetUpdateWithoutOwnerInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutOwnerInput = {
@@ -2581,7 +2581,7 @@ export type DatasetUncheckedUpdateWithoutOwnerInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutOwnerInput = {
@@ -2664,7 +2664,7 @@ export type DatasetUpdateWithoutExternalRepositoryInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutExternalRepositoryInput = {
@@ -2697,7 +2697,7 @@ export type DatasetUncheckedUpdateWithoutExternalRepositoryInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutExternalRepositoryInput = {
@@ -2780,7 +2780,7 @@ export type DatasetUpdateWithoutSourceConnectionInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutSourceConnectionInput = {
@@ -2813,7 +2813,7 @@ export type DatasetUncheckedUpdateWithoutSourceConnectionInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
-  preparedImports?: Prisma.PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutSourceConnectionInput = {
@@ -2854,6 +2854,7 @@ export type DatasetCountOutputType = {
   members: number
   jobs: number
   labels: number
+  preparedImports: number
 }
 
 export type DatasetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2864,6 +2865,7 @@ export type DatasetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   members?: boolean | DatasetCountOutputTypeCountMembersArgs
   jobs?: boolean | DatasetCountOutputTypeCountJobsArgs
   labels?: boolean | DatasetCountOutputTypeCountLabelsArgs
+  preparedImports?: boolean | DatasetCountOutputTypeCountPreparedImportsArgs
 }
 
 /**
@@ -2923,6 +2925,13 @@ export type DatasetCountOutputTypeCountJobsArgs<ExtArgs extends runtime.Types.Ex
  */
 export type DatasetCountOutputTypeCountLabelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LabelWhereInput
+}
+
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountPreparedImportsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PreparedImportWhereInput
 }
 
 
@@ -3087,7 +3096,7 @@ export type $DatasetPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     members: Prisma.$DatasetMemberPayload<ExtArgs>[]
     jobs: Prisma.$JobPayload<ExtArgs>[]
     labels: Prisma.$LabelPayload<ExtArgs>[]
-    preparedImports: Prisma.$PreparedImportPayload<ExtArgs> | null
+    preparedImports: Prisma.$PreparedImportPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3517,7 +3526,7 @@ export interface Prisma__DatasetClient<T, Null = never, ExtArgs extends runtime.
   members<T extends Prisma.Dataset$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   jobs<T extends Prisma.Dataset$jobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$jobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   labels<T extends Prisma.Dataset$labelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$labelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  preparedImports<T extends Prisma.Dataset$preparedImportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$preparedImportsArgs<ExtArgs>>): Prisma.Prisma__PreparedImportClient<runtime.Types.Result.GetResult<Prisma.$PreparedImportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  preparedImports<T extends Prisma.Dataset$preparedImportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$preparedImportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PreparedImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4188,6 +4197,11 @@ export type Dataset$preparedImportsArgs<ExtArgs extends runtime.Types.Extensions
    */
   include?: Prisma.PreparedImportInclude<ExtArgs> | null
   where?: Prisma.PreparedImportWhereInput
+  orderBy?: Prisma.PreparedImportOrderByWithRelationInput | Prisma.PreparedImportOrderByWithRelationInput[]
+  cursor?: Prisma.PreparedImportWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PreparedImportScalarFieldEnum | Prisma.PreparedImportScalarFieldEnum[]
 }
 
 /**

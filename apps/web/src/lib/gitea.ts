@@ -63,6 +63,7 @@ export class GiteaClientError extends Error {
   constructor(
     public readonly kind:
       | "configuration"
+      | "unauthorized"
       | "unavailable"
       | "not_found"
       | "rate_limited"
@@ -193,6 +194,13 @@ async function requestJson(connection: GiteaConnection, path: string, query?: UR
   }
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new GiteaClientError(
+        "unauthorized",
+        "Gitea rejected the source connection token.",
+        response.status,
+      );
+    }
     if (response.status === 404) {
       throw new GiteaClientError(
         "not_found",
@@ -247,6 +255,13 @@ async function requestFile(connection: GiteaConnection, path: string, query?: UR
   }
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      throw new GiteaClientError(
+        "unauthorized",
+        "Gitea rejected the source connection token.",
+        response.status,
+      );
+    }
     if (response.status === 404) {
       throw new GiteaClientError(
         "not_found",

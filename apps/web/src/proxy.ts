@@ -16,4 +16,4 @@ export async function proxy(request: NextRequest) {
   url.searchParams.set("returnTo", target);
   return NextResponse.redirect(url);
 }
-export const config = { matcher: ["/dashboard/:path*", "/datasets/:path*", "/imports/:path*", "/labels/:path*", "/exports/:path*", "/workspace/:path*", "/api/:path*"] };
+export const config = { matcher: ["/dashboard/:path*", "/datasets/:path*", "/labels/:path*", "/exports/:path*", "/workspace/:path*", "/account/:path*", "/api/:path*"] };

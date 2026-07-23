@@ -293,12 +293,12 @@ export type PreparedImportOrderByWithRelationInput = {
 
 export type PreparedImportWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  datasetId?: string
   jobId?: string
   createdById_idempotencyKey?: Prisma.PreparedImportCreatedByIdIdempotencyKeyCompoundUniqueInput
   AND?: Prisma.PreparedImportWhereInput | Prisma.PreparedImportWhereInput[]
   OR?: Prisma.PreparedImportWhereInput[]
   NOT?: Prisma.PreparedImportWhereInput | Prisma.PreparedImportWhereInput[]
+  datasetId?: Prisma.StringFilter<"PreparedImport"> | string
   createdById?: Prisma.StringFilter<"PreparedImport"> | string
   status?: Prisma.EnumPreparedImportStatusFilter<"PreparedImport"> | $Enums.PreparedImportStatus
   expectedItemCount?: Prisma.IntFilter<"PreparedImport"> | number
@@ -311,7 +311,7 @@ export type PreparedImportWhereUniqueInput = Prisma.AtLeast<{
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   job?: Prisma.XOR<Prisma.JobScalarRelationFilter, Prisma.JobWhereInput>
   items?: Prisma.PreparedImportItemListRelationFilter
-}, "id" | "datasetId" | "jobId" | "createdById_idempotencyKey">
+}, "id" | "jobId" | "createdById_idempotencyKey">
 
 export type PreparedImportOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -597,36 +597,46 @@ export type PreparedImportUncheckedUpdateOneWithoutJobNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PreparedImportUpdateToOneWithWhereWithoutJobInput, Prisma.PreparedImportUpdateWithoutJobInput>, Prisma.PreparedImportUncheckedUpdateWithoutJobInput>
 }
 
-export type PreparedImportCreateNestedOneWithoutDatasetInput = {
-  create?: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput>
-  connectOrCreate?: Prisma.PreparedImportCreateOrConnectWithoutDatasetInput
-  connect?: Prisma.PreparedImportWhereUniqueInput
+export type PreparedImportCreateNestedManyWithoutDatasetInput = {
+  create?: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput> | Prisma.PreparedImportCreateWithoutDatasetInput[] | Prisma.PreparedImportUncheckedCreateWithoutDatasetInput[]
+  connectOrCreate?: Prisma.PreparedImportCreateOrConnectWithoutDatasetInput | Prisma.PreparedImportCreateOrConnectWithoutDatasetInput[]
+  createMany?: Prisma.PreparedImportCreateManyDatasetInputEnvelope
+  connect?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
 }
 
-export type PreparedImportUncheckedCreateNestedOneWithoutDatasetInput = {
-  create?: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput>
-  connectOrCreate?: Prisma.PreparedImportCreateOrConnectWithoutDatasetInput
-  connect?: Prisma.PreparedImportWhereUniqueInput
+export type PreparedImportUncheckedCreateNestedManyWithoutDatasetInput = {
+  create?: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput> | Prisma.PreparedImportCreateWithoutDatasetInput[] | Prisma.PreparedImportUncheckedCreateWithoutDatasetInput[]
+  connectOrCreate?: Prisma.PreparedImportCreateOrConnectWithoutDatasetInput | Prisma.PreparedImportCreateOrConnectWithoutDatasetInput[]
+  createMany?: Prisma.PreparedImportCreateManyDatasetInputEnvelope
+  connect?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
 }
 
-export type PreparedImportUpdateOneWithoutDatasetNestedInput = {
-  create?: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput>
-  connectOrCreate?: Prisma.PreparedImportCreateOrConnectWithoutDatasetInput
-  upsert?: Prisma.PreparedImportUpsertWithoutDatasetInput
-  disconnect?: Prisma.PreparedImportWhereInput | boolean
-  delete?: Prisma.PreparedImportWhereInput | boolean
-  connect?: Prisma.PreparedImportWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.PreparedImportUpdateToOneWithWhereWithoutDatasetInput, Prisma.PreparedImportUpdateWithoutDatasetInput>, Prisma.PreparedImportUncheckedUpdateWithoutDatasetInput>
+export type PreparedImportUpdateManyWithoutDatasetNestedInput = {
+  create?: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput> | Prisma.PreparedImportCreateWithoutDatasetInput[] | Prisma.PreparedImportUncheckedCreateWithoutDatasetInput[]
+  connectOrCreate?: Prisma.PreparedImportCreateOrConnectWithoutDatasetInput | Prisma.PreparedImportCreateOrConnectWithoutDatasetInput[]
+  upsert?: Prisma.PreparedImportUpsertWithWhereUniqueWithoutDatasetInput | Prisma.PreparedImportUpsertWithWhereUniqueWithoutDatasetInput[]
+  createMany?: Prisma.PreparedImportCreateManyDatasetInputEnvelope
+  set?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
+  disconnect?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
+  delete?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
+  connect?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
+  update?: Prisma.PreparedImportUpdateWithWhereUniqueWithoutDatasetInput | Prisma.PreparedImportUpdateWithWhereUniqueWithoutDatasetInput[]
+  updateMany?: Prisma.PreparedImportUpdateManyWithWhereWithoutDatasetInput | Prisma.PreparedImportUpdateManyWithWhereWithoutDatasetInput[]
+  deleteMany?: Prisma.PreparedImportScalarWhereInput | Prisma.PreparedImportScalarWhereInput[]
 }
 
-export type PreparedImportUncheckedUpdateOneWithoutDatasetNestedInput = {
-  create?: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput>
-  connectOrCreate?: Prisma.PreparedImportCreateOrConnectWithoutDatasetInput
-  upsert?: Prisma.PreparedImportUpsertWithoutDatasetInput
-  disconnect?: Prisma.PreparedImportWhereInput | boolean
-  delete?: Prisma.PreparedImportWhereInput | boolean
-  connect?: Prisma.PreparedImportWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.PreparedImportUpdateToOneWithWhereWithoutDatasetInput, Prisma.PreparedImportUpdateWithoutDatasetInput>, Prisma.PreparedImportUncheckedUpdateWithoutDatasetInput>
+export type PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput = {
+  create?: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput> | Prisma.PreparedImportCreateWithoutDatasetInput[] | Prisma.PreparedImportUncheckedCreateWithoutDatasetInput[]
+  connectOrCreate?: Prisma.PreparedImportCreateOrConnectWithoutDatasetInput | Prisma.PreparedImportCreateOrConnectWithoutDatasetInput[]
+  upsert?: Prisma.PreparedImportUpsertWithWhereUniqueWithoutDatasetInput | Prisma.PreparedImportUpsertWithWhereUniqueWithoutDatasetInput[]
+  createMany?: Prisma.PreparedImportCreateManyDatasetInputEnvelope
+  set?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
+  disconnect?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
+  delete?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
+  connect?: Prisma.PreparedImportWhereUniqueInput | Prisma.PreparedImportWhereUniqueInput[]
+  update?: Prisma.PreparedImportUpdateWithWhereUniqueWithoutDatasetInput | Prisma.PreparedImportUpdateWithWhereUniqueWithoutDatasetInput[]
+  updateMany?: Prisma.PreparedImportUpdateManyWithWhereWithoutDatasetInput | Prisma.PreparedImportUpdateManyWithWhereWithoutDatasetInput[]
+  deleteMany?: Prisma.PreparedImportScalarWhereInput | Prisma.PreparedImportScalarWhereInput[]
 }
 
 export type EnumPreparedImportStatusFieldUpdateOperationsInput = {
@@ -823,43 +833,25 @@ export type PreparedImportCreateOrConnectWithoutDatasetInput = {
   create: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput>
 }
 
-export type PreparedImportUpsertWithoutDatasetInput = {
-  update: Prisma.XOR<Prisma.PreparedImportUpdateWithoutDatasetInput, Prisma.PreparedImportUncheckedUpdateWithoutDatasetInput>
-  create: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput>
-  where?: Prisma.PreparedImportWhereInput
+export type PreparedImportCreateManyDatasetInputEnvelope = {
+  data: Prisma.PreparedImportCreateManyDatasetInput | Prisma.PreparedImportCreateManyDatasetInput[]
+  skipDuplicates?: boolean
 }
 
-export type PreparedImportUpdateToOneWithWhereWithoutDatasetInput = {
-  where?: Prisma.PreparedImportWhereInput
+export type PreparedImportUpsertWithWhereUniqueWithoutDatasetInput = {
+  where: Prisma.PreparedImportWhereUniqueInput
+  update: Prisma.XOR<Prisma.PreparedImportUpdateWithoutDatasetInput, Prisma.PreparedImportUncheckedUpdateWithoutDatasetInput>
+  create: Prisma.XOR<Prisma.PreparedImportCreateWithoutDatasetInput, Prisma.PreparedImportUncheckedCreateWithoutDatasetInput>
+}
+
+export type PreparedImportUpdateWithWhereUniqueWithoutDatasetInput = {
+  where: Prisma.PreparedImportWhereUniqueInput
   data: Prisma.XOR<Prisma.PreparedImportUpdateWithoutDatasetInput, Prisma.PreparedImportUncheckedUpdateWithoutDatasetInput>
 }
 
-export type PreparedImportUpdateWithoutDatasetInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumPreparedImportStatusFieldUpdateOperationsInput | $Enums.PreparedImportStatus
-  expectedItemCount?: Prisma.IntFieldUpdateOperationsInput | number
-  deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutPreparedImportsNestedInput
-  job?: Prisma.JobUpdateOneRequiredWithoutPreparedImportNestedInput
-  items?: Prisma.PreparedImportItemUpdateManyWithoutPreparedImportNestedInput
-}
-
-export type PreparedImportUncheckedUpdateWithoutDatasetInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  jobId?: Prisma.StringFieldUpdateOperationsInput | string
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  status?: Prisma.EnumPreparedImportStatusFieldUpdateOperationsInput | $Enums.PreparedImportStatus
-  expectedItemCount?: Prisma.IntFieldUpdateOperationsInput | number
-  deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  items?: Prisma.PreparedImportItemUncheckedUpdateManyWithoutPreparedImportNestedInput
+export type PreparedImportUpdateManyWithWhereWithoutDatasetInput = {
+  where: Prisma.PreparedImportScalarWhereInput
+  data: Prisma.XOR<Prisma.PreparedImportUpdateManyMutationInput, Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetInput>
 }
 
 export type PreparedImportCreateWithoutItemsInput = {
@@ -979,6 +971,60 @@ export type PreparedImportUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
   jobId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPreparedImportStatusFieldUpdateOperationsInput | $Enums.PreparedImportStatus
+  expectedItemCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PreparedImportCreateManyDatasetInput = {
+  id?: string
+  jobId: string
+  createdById: string
+  status?: $Enums.PreparedImportStatus
+  expectedItemCount: number
+  deadlineAt: Date | string
+  committedAt?: Date | string | null
+  idempotencyKey: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PreparedImportUpdateWithoutDatasetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPreparedImportStatusFieldUpdateOperationsInput | $Enums.PreparedImportStatus
+  expectedItemCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutPreparedImportsNestedInput
+  job?: Prisma.JobUpdateOneRequiredWithoutPreparedImportNestedInput
+  items?: Prisma.PreparedImportItemUpdateManyWithoutPreparedImportNestedInput
+}
+
+export type PreparedImportUncheckedUpdateWithoutDatasetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPreparedImportStatusFieldUpdateOperationsInput | $Enums.PreparedImportStatus
+  expectedItemCount?: Prisma.IntFieldUpdateOperationsInput | number
+  deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.PreparedImportItemUncheckedUpdateManyWithoutPreparedImportNestedInput
+}
+
+export type PreparedImportUncheckedUpdateManyWithoutDatasetInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPreparedImportStatusFieldUpdateOperationsInput | $Enums.PreparedImportStatus
   expectedItemCount?: Prisma.IntFieldUpdateOperationsInput | number
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string

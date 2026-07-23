@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { jobQueuePayloadSchema, queueNameForJobType } from "@fieldframe/queue";
 
-import { startLocalFolderImportSchema } from "@/lib/validation/local-folder-import";
+import { appendLocalFolderImportSchema, startLocalFolderImportSchema } from "@/lib/validation/local-folder-import";
 import { safeManifestItem } from "./helpers";
 
 test("local-folder manifest rejects absolute paths and duplicate logical paths", () => {
@@ -25,4 +25,10 @@ test("safe import request schema admits all supported modalities without a binar
     assert.equal(parsed.success, true);
     if (parsed.success) assert.equal("binary" in parsed.data.items[0]!, false);
   }
+});
+
+test("workspace append schema accepts only a bounded manifest and never a browser Dataset id", () => {
+  const item = safeManifestItem("append/photo.png", "image/png");
+  assert.equal(appendLocalFolderImportSchema.safeParse({ idempotencyKey: "c".repeat(16), items: [item] }).success, true);
+  assert.equal(appendLocalFolderImportSchema.safeParse({ datasetId: "browser-controlled", idempotencyKey: "c".repeat(16), items: [item] }).success, false);
 });

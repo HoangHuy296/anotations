@@ -16,6 +16,10 @@
     "./provider-readiness": {
       "types": "./dist/provider-readiness.d.ts",
       "default": "./dist/provider-readiness.js"
+    },
+    "./source-access-policy": {
+      "types": "./dist/source-access-policy.d.ts",
+      "default": "./dist/source-access-policy.js"
     }
   },
   "scripts": {

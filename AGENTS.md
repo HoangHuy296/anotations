@@ -49,12 +49,14 @@ Use Prisma for database access. Do not use raw SQL unless explicitly approved.
   BullMQ/Redis.
 - Do not store binary data in PostgreSQL. Store binary objects in MinIO and
   persist only safe object metadata/references in PostgreSQL.
-- Make retries idempotent. A retry uses the same durable Job and must not
-  create a duplicate asset or artifact.
+- Make retries idempotent. An authorized retry creates or reuses one successor
+  Job linked to its predecessor and carries only allowlisted retry context. A
+  duplicate delivery of either Job must not create a duplicate asset or
+  artifact.
 - `Dataset` is the central entity for imported and processed assets.
 - `Asset.modality` selects the workspace engine. Do not create workspace routes
   by modality.
-- `Annotation.geometry` is the canonical shape. `Annotation.version` is
+- `Annotation.geometry` is the canonical shape. `Annotation.revision` is
   required on every autosave/update and must reject stale overwrites.
 
 ## Security rules

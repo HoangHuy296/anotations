@@ -38,9 +38,9 @@ for cloning or other long-running processing.
 ```text
 Worker failure or retryable error
   → worker records sanitized failure/attempt data in PostgreSQL
-  → authorized retry returns the same Job to `queued`
-  → BullMQ receives the same { jobId }
-  → worker reloads Job and idempotency context from PostgreSQL
+  → authorized retry creates or reuses one successor Job with allowlisted context
+  → BullMQ receives the successor { jobId }
+  → worker reloads that successor Job and its idempotency context from PostgreSQL
   → worker reconciles any existing MinIO result before creating output
 ```
 

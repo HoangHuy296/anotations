@@ -2,5 +2,9 @@ import { LocalFolderImportForm } from "@/components/imports/local-folder-import-
 import { AppShell } from "@/components/layout/app-shell";
 
 export default function LocalFolderImportPage() {
-  return <AppShell currentPath="/datasets"><LocalFolderImportForm /></AppShell>;
+  return (
+    <AppShell currentPath="/datasets/new/local-folder">
+      <LocalFolderImportForm />
+    </AppShell>
+  );
 }

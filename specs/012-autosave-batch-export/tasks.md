@@ -85,7 +85,7 @@
 - [X] T025 [US2] Extend the safe list query parser for repeated/multi-status filter values and bounded search/page inputs in `apps/web/src/lib/validation/image-workspace.ts`.
 - [X] T026 [US2] Update the Dataset-scoped workspace read model to apply the validated filtered order consistently, cap pages at 100, reconcile selection, and return safe progress aggregates in `apps/web/src/lib/workspace/image-workspace.ts`.
 - [X] T027 [US2] Update workspace query parsing and authorized server data loading to retain `q`, statuses, page, and selected asset safely in `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx`.
-- [X] T028 [US2] Render multi-status filters, search, empty state, 100-item pagination, Dataset progress, and stable selected-asset context in `apps/web/src/components/workspace/properties-panel.tsx`.
+- [X] T028 [US2] Render a single-status selector with an `All statuses` reset, search, empty state, 100-item pagination, Dataset progress, and stable selected-asset context in `apps/web/src/components/workspace/properties-panel.tsx`. The backend and URL contract continue to accept repeated status values.
 - [X] T029 [US2] Make previous/next generate URLs from the same filtered order and preserve query/filter/page state in `apps/web/src/components/workspace/dataset-sidebar.tsx`.
 - [X] T030 [US2] Run and record the focused workspace list/navigation/authorization suite in `apps/web/tests/workspace/image-workspace-http.test.ts`, `apps/web/tests/workspace/image-navigation.test.ts`, and `apps/web/tests/workspace/workspace-authorization.test.ts`.
 

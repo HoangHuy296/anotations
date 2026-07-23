@@ -13,7 +13,9 @@
     "test:direct-upload": "node --env-file=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/direct-upload/**/*.test.ts",
     "test:job-queue": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/job-queue/**/*.test.ts",
     "test:local-folder-import": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/local-folder-import/**/*.test.ts",
-    "test:workspace": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/workspace/**/*.test.ts"
+    "test:workspace": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/workspace/**/*.test.ts",
+    "test:source-connections": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/source-connections/**/*.test.ts",
+    "test:source-connections:vitest": "vitest run tests/source-connections/source-access-policy.vitest.spec.ts --environment node"
   },
   "dependencies": {
     "@fieldframe/domain": "workspace:*",
@@ -44,6 +46,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, FloppyDisk, Plus } from "@phosphor-icons/react";
+import { Check, FloppyDisk, Palette, Plus } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -39,6 +39,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
     handleSubmit,
     reset,
     setError,
+    setValue,
     control,
     formState: { errors, isDirty },
   } = useForm<LabelInput>({
@@ -52,6 +53,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
     },
   });
   const color = useWatch({ control, name: "color" });
+  const [paletteOpen, setPaletteOpen] = useState(false);
 
   const submit = handleSubmit((values) => {
     setResult(null);
@@ -106,7 +108,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
   return (
     <form onSubmit={submit} className="space-y-4" noValidate>
       <input type="hidden" {...register("datasetId")} />
-      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_116px]">
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_116px_152px]">
         <Field label="Name" error={errors.name?.message}>
           <input
             {...register("name")}
@@ -117,49 +119,91 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
           />
         </Field>
 
-        <Field label="Color" error={errors.color?.message}>
+        <Field label="Color" error={undefined}>
           <div className="relative mt-2">
-            <span
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 rounded-md border border-black/10"
-              style={{
-                backgroundColor: /^#[0-9A-Fa-f]{6}$/.test(color)
-                  ? color
-                  : "#E4E4E7",
-              }}
-            />
-            <input
-              {...register("color")}
-              className={`${inputClassName} mt-0 pl-10 font-mono uppercase`}
+            <button
+              aria-controls={`label-color-palette-${label?.id ?? "new"}`}
+              aria-expanded={paletteOpen}
+              aria-haspopup="dialog"
+              className="mt-0 grid h-10 w-full place-items-center rounded-xl border border-zinc-200 bg-white outline-none transition hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-400 disabled:opacity-50"
               disabled={!canManage || isPending}
-              placeholder="#0EA5E9"
-              autoComplete="off"
-            />
+              onClick={() => setPaletteOpen((open) => !open)}
+              type="button"
+              title="Choose label color"
+            >
+              <span
+                className="size-5 rounded-md border border-black/10"
+                style={{ backgroundColor: /^#[0-9A-Fa-f]{6}$/.test(color) ? color : "#E4E4E7" }}
+              />
+              <span className="sr-only">Choose label color</span>
+            </button>
+            {paletteOpen ? (
+              <div
+                aria-label="Label color palette"
+                className="absolute z-20 mt-2 grid w-48 grid-cols-6 gap-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-xl"
+                id={`label-color-palette-${label?.id ?? "new"}`}
+                role="dialog"
+              >
+                {LABEL_COLORS.map((value) => (
+                  <button
+                    aria-label={`Use ${value}`}
+                    aria-pressed={color?.toUpperCase() === value}
+                    className="grid size-6 place-items-center rounded-md border border-black/10 outline-none transition hover:scale-110 focus-visible:ring-2 focus-visible:ring-sky-400"
+                    key={value}
+                    onClick={() => {
+                      setValue("color", value, { shouldDirty: true, shouldValidate: true });
+                      setPaletteOpen(false);
+                    }}
+                    style={{ backgroundColor: value }}
+                    type="button"
+                  >
+                    {color?.toUpperCase() === value ? <Check aria-hidden="true" className="text-white drop-shadow" size={13} weight="bold" /> : null}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
         </Field>
-      </div>
 
-      <Field label="Description" error={errors.description?.message}>
-        <textarea
-          {...register("description")}
-          className="mt-2 min-h-20 w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm leading-6 text-zinc-900 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500"
-          disabled={!canManage || isPending}
-          placeholder="Describe when annotators should apply this label."
-        />
-      </Field>
-
-      <div className="grid items-end gap-4 sm:grid-cols-[116px_minmax(0,1fr)]">
-        <Field label="Hotkey" error={errors.hotkey?.message}>
+        <Field label="Color code" error={errors.color?.message}>
           <input
-            {...register("hotkey")}
+            {...register("color")}
             className={`${inputClassName} font-mono uppercase`}
             disabled={!canManage || isPending}
-            maxLength={1}
-            placeholder="1"
+            placeholder="#0EA5E9"
             autoComplete="off"
           />
         </Field>
+      </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <details className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2" open={Boolean(label?.description || label?.hotkey)}>
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold text-zinc-600">
+          <Palette aria-hidden="true" size={14} />
+          Advanced label metadata
+        </summary>
+        <div className="mt-3 grid gap-4 sm:grid-cols-[minmax(0,1fr)_116px]">
+          <Field label="Description" error={errors.description?.message}>
+            <textarea
+              {...register("description")}
+              className="mt-2 min-h-20 w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm leading-6 text-zinc-900 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500"
+              disabled={!canManage || isPending}
+              placeholder="Describe when annotators should apply this label."
+            />
+          </Field>
+          <Field label="Hotkey" error={errors.hotkey?.message}>
+            <input
+              {...register("hotkey")}
+              className={`${inputClassName} font-mono uppercase`}
+              disabled={!canManage || isPending}
+              maxLength={1}
+              placeholder="1"
+              autoComplete="off"
+            />
+          </Field>
+        </div>
+      </details>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
           <p
             className={`text-xs leading-5 ${
               result?.success ? "text-emerald-700" : "text-rose-700"
@@ -188,11 +232,17 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
                 ? "Create label"
                 : "Save changes"}
           </Button>
-        </div>
       </div>
     </form>
   );
 }
+
+const LABEL_COLORS = [
+  "#0EA5E9", "#2563EB", "#4F46E5", "#7C3AED", "#9333EA", "#C026D3",
+  "#DB2777", "#E11D48", "#EA580C", "#F97316", "#CA8A04", "#EAB308",
+  "#65A30D", "#16A34A", "#059669", "#0F766E", "#0891B2", "#475569",
+  "#334155", "#78350F", "#BE123C", "#A21CAF", "#1D4ED8", "#047857",
+] as const;
 
 function Field({
   label,

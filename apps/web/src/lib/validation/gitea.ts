@@ -1,4 +1,5 @@
 import { Modality } from "@internal/db";
+import { normalizeSourceRootPath } from "@/lib/source-access-policy";
 import { z } from "zod";
 
 const repositorySegment = z
@@ -33,6 +34,9 @@ export const importPreviewSchema = z.object({
   branch: z.string().trim().min(1).max(255),
   rootPath: z.string().trim().max(1024).default(""),
   name: z.string().trim().min(2).max(80),
+  // This is the operator's expectation, not a source of truth. The provider
+  // response remains authoritative and is checked again before persistence.
+  expectedVisibility: z.enum(["PUBLIC", "PRIVATE"]).optional(),
   // UI/default only. Asset modality is determined per candidate and never
   // inferred from Dataset.primaryModality.
   primaryModality: z.union([z.literal(Modality.IMAGE), z.null()]).optional().default(null),
@@ -44,18 +48,6 @@ export const sourceConnectionQuerySchema = z.object({
 });
 
 export function normalizeRepositoryPath(path: string) {
-  if (path.includes("\0") || path.startsWith("/") || path.startsWith("\\")) {
-    return null;
-  }
-
-  const segments = path
-    .replaceAll("\\", "/")
-    .split("/")
-    .filter(Boolean);
-
-  if (segments.some((segment) => segment === "." || segment === "..")) {
-    return null;
-  }
-
-  return segments.join("/");
+  const result = normalizeSourceRootPath(path);
+  return result.ok ? result.value : null;
 }

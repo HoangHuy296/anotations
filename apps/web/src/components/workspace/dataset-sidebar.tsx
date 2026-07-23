@@ -4,11 +4,14 @@ import { BoundingBox, Cursor, FolderOpen, Hand } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
+import { useState } from "react";
 
 import { useAnnotationStore } from "@/stores/annotation-store";
+import { WorkspaceAppendFolderDialog } from "@/components/imports/local-folder-import-form";
 
 type DatasetSidebarProps = {
   datasetId: string;
+  datasetName?: string;
   selectedAssetId: string | null;
   search: string;
   statuses: string[];
@@ -18,11 +21,12 @@ type DatasetSidebarProps = {
 };
 
 /** Toolbox only. Asset discovery, filtering, and pagination live in the right sidebar. */
-export function DatasetSidebar({ datasetId, search, statuses, previous, next }: DatasetSidebarProps) {
+export function DatasetSidebar({ datasetId, datasetName, search, statuses, previous, next }: DatasetSidebarProps) {
   const router = useRouter();
   const tool = useAnnotationStore((store) => store.tool);
   const setTool = useAnnotationStore((store) => store.setTool);
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
+  const [appendOpen, setAppendOpen] = useState(false);
   const hrefFor = (target: { id: string; page: number }) => {
     const params = new URLSearchParams({ image: target.id });
     if (search) params.set("q", search);
@@ -47,8 +51,9 @@ export function DatasetSidebar({ datasetId, search, statuses, previous, next }: 
       <ToolButton active={tool === "pan"} label="Pan" onClick={() => setTool("pan")}><Hand size={17} /></ToolButton>
     </div>
     <div className="mt-2 grid grid-cols-2 gap-1.5">{["Polygon", "Circle", "Point", "Polyline", "Mask"].map((label) => <button key={label} type="button" disabled title={`${label} is not available in the Image MVP`} className="rounded-lg border border-zinc-100 px-2 py-1.5 text-[10px] font-medium text-zinc-300">{label}</button>)}</div>
-    <Link href="/datasets/new/local-folder" className="mt-3 flex h-9 items-center justify-center gap-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"><FolderOpen size={15} />Open directory</Link>
+    <button type="button" onClick={() => setAppendOpen(true)} className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"><FolderOpen size={15} />Open directory</button>
     <div className="mt-2 grid grid-cols-2 gap-1.5"><AssetNavigation href={previous ? hrefFor(previous) : null} label="Previous" onNavigate={guardNavigation} /><AssetNavigation href={next ? hrefFor(next) : null} label="Next" onNavigate={guardNavigation} /></div>
+    {appendOpen && <WorkspaceAppendFolderDialog datasetId={datasetId} datasetName={datasetName} onClose={() => setAppendOpen(false)} />}
   </aside>;
 }
 

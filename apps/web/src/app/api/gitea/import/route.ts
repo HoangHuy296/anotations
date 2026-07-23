@@ -16,6 +16,7 @@ import {
   importPreviewSchema,
   normalizeRepositoryPath,
 } from "@/lib/validation/gitea";
+import { validateSourceImportLimits } from "@/lib/source-access-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -67,10 +68,16 @@ export async function POST(request: Request) {
       ),
     ]);
     const images = findImageCandidates(tree, rootPath);
+    const declaredBytes = images.reduce((total, image) => total + (image.size ?? 0), 0);
+    const limits = validateSourceImportLimits({ itemCount: images.length, declaredBytes });
+    const actualVisibility = repository.private ? "PRIVATE" : "PUBLIC";
+    const visibilityMatches =
+      !parsed.data.expectedVisibility ||
+      parsed.data.expectedVisibility === actualVisibility;
     const readyForPersistence =
       !tree.truncated &&
       images.length > 0 &&
-      images.length <= MAX_IMPORT_IMAGES;
+      images.length <= MAX_IMPORT_IMAGES && limits.ok && visibilityMatches;
 
     if (parsed.data.mode === "persist") {
       if (!isDatabaseConfigured()) {
@@ -99,6 +106,15 @@ export async function POST(request: Request) {
           422,
           "INVALID_REQUEST",
           `Imports are limited to ${MAX_IMPORT_IMAGES} images.`,
+        );
+      }
+      if (!limits.ok) return apiError(422, limits.code, "The selected source exceeds configured import limits.");
+      if (!visibilityMatches) {
+        return apiError(
+          422,
+          "INVALID_REQUEST",
+          "The selected repository visibility does not match the provider response.",
+          { expectedVisibility: ["Choose the repository visibility reported by Gitea before importing."] },
         );
       }
 
@@ -144,12 +160,14 @@ export async function POST(request: Request) {
         primaryModality: parsed.data.primaryModality,
       },
       repository,
+      visibility: {
+        expected: parsed.data.expectedVisibility ?? null,
+        actual: actualVisibility,
+        matches: visibilityMatches,
+      },
       summary: {
         imageCount: images.length,
-        totalBytes: images.reduce(
-          (total, image) => total + (image.size ?? 0),
-          0,
-        ),
+        totalBytes: declaredBytes,
         treeTruncated: tree.truncated,
         importLimit: MAX_IMPORT_IMAGES,
       },

@@ -200,14 +200,18 @@ function PropertiesPanelBody({ datasetId, image, labels, images, page, pageSize,
     const nextSearch = String(form.get("q") ?? "").trim();
     if (nextSearch) params.set("q", nextSearch);
     const nextStatus = String(form.get("status") ?? "ALL");
-    if (imageStatusOptions.includes(nextStatus as AssetStatus)) params.set("status", nextStatus);
+    if (nextStatus === "MULTIPLE") {
+      for (const status of statuses) params.append("status", status);
+    } else if (imageStatusOptions.includes(nextStatus as AssetStatus)) {
+      params.set("status", nextStatus);
+    }
     router.push(`/workspace/${datasetId}?${params.toString()}`);
   }
 
   // The previous Images-tab UX used one clear status choice plus an explicit
   // “All statuses” reset. Preserve multi-status query compatibility for old
   // links, while rendering that proven, less error-prone control.
-  const selectedStatus = statuses.length === 1 ? statuses[0] : "ALL";
+  const selectedStatus = statuses.length === 1 ? statuses[0] : statuses.length > 1 ? "MULTIPLE" : "ALL";
 
   return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white">
     <div className="border-b border-zinc-200 p-4">
@@ -246,6 +250,7 @@ function PropertiesPanelBody({ datasetId, image, labels, images, page, pageSize,
           <label className="sr-only" htmlFor="workspace-asset-status">Filter by status</label>
           <select id="workspace-asset-status" name="status" defaultValue={selectedStatus} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-2 text-xs text-zinc-700">
             <option value="ALL">All statuses</option>
+            {statuses.length > 1 && <option value="MULTIPLE">Keep multiple status filters</option>}
             {imageStatusOptions.map((option) => <option key={option} value={option}>{imageStatusPresentation[option].label}</option>)}
           </select>
           <button type="submit" className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white hover:bg-zinc-800">Apply</button>

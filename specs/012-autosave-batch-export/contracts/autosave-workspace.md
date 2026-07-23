@@ -50,7 +50,17 @@ type WorkspaceListQuery = {
 };
 ```
 
-An absent `statuses` value means all statuses; an empty or invalid filter is rejected or normalized according to the server validation contract, never broadened silently. Response contains only safe Asset display fields, the active query context, total matching count, page/pageSize, and safe Dataset progress. Results are ordered consistently by `batchIndex`, `orderIndex`, and id; page size is 100. The selected Asset is reconciled against this same result set.
+The server and URL contract accept zero or more allowed `statuses` values. The
+right-sidebar UI deliberately exposes one status selector plus `All statuses`;
+it does not compose a new multi-status filter. Existing repeated-status URLs
+remain supported and are preserved unless the user explicitly applies a new
+single-status or all-status selection. An absent `statuses` value means all
+statuses; an empty or invalid filter is rejected or normalized according to the
+server validation contract, never broadened silently. Response contains only
+safe Asset display fields, the active query context, total matching count,
+page/pageSize, and safe Dataset progress. Results are ordered consistently by
+`batchIndex`, `orderIndex`, and id; page size is 100. The selected Asset is
+reconciled against this same result set.
 
 ## Required verification
 

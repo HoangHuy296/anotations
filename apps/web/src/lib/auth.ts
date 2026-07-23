@@ -86,4 +86,41 @@ export async function revokeSession() {
   await db.authSession.updateMany({ where: { refreshTokenHash: digest(token), revokedAt: null }, data: { revokedAt: new Date() } });
 }
 
+/**
+ * Replaces the current opaque credential while invalidating every other active
+ * session for the same user. The caller must verify the current password first.
+ */
+export async function changePasswordAndRotateSession(userId: string, passwordHash: string) {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+
+  const replacement = randomBytes(32).toString("base64url");
+  const replacementHash = digest(replacement);
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  const now = new Date();
+
+  const changed = await db.$transaction(async (tx) => {
+    const currentSession = await tx.authSession.updateMany({
+      where: {
+        userId,
+        refreshTokenHash: digest(token),
+        revokedAt: null,
+        deletedAt: null,
+        expiresAt: { gt: now },
+      },
+      data: { refreshTokenHash: replacementHash, expiresAt },
+    });
+    if (currentSession.count !== 1) return false;
+
+    await tx.user.update({ where: { id: userId }, data: { passwordHash } });
+    await tx.authSession.updateMany({
+      where: { userId, refreshTokenHash: { not: replacementHash }, revokedAt: null, deletedAt: null },
+      data: { revokedAt: now },
+    });
+    return true;
+  });
+
+  return changed ? { token: replacement, expiresAt } : null;
+}
+
 export { normalizeEmail };

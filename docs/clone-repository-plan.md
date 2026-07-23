@@ -34,10 +34,12 @@ but it must not clone a repository or hold a long-running clone process.
 
 ## Retry behavior
 
-The worker reloads the same durable Job on retry. Before writing a clone-derived
-asset or artifact, it checks the Job's durable result and deterministic object
-identity. Existing valid outputs are reused or reconciled. A retry cannot
-create a duplicate object merely because the first attempt was interrupted.
+The worker reloads the durable Job delivered for the current attempt. An
+authorized retry creates or reuses one successor Job linked to the failed
+predecessor. Before writing a clone-derived asset or artifact, the worker checks
+that Job's durable result and deterministic object identity. Existing valid
+outputs are reused or reconciled. A retry cannot create a duplicate object
+merely because the first attempt was interrupted.
 
 ## Phase boundary
 

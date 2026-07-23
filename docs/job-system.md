@@ -38,17 +38,18 @@ created | queued | running → cancelled
   PostgreSQL.
 - `completed`, `cancelled`, and a non-retryable `failed` state are terminal.
   Repeated delivery must not repeat their work or create duplicate binaries.
-- A retry retains the same Job identity and its idempotency context. It may
-  return a retryable `failed` Job to `queued` only through an authorized state
-  transition.
+- An authorized retry creates or reuses one successor Job linked to the failed
+  predecessor. The successor receives only allowlisted retry context and has
+  its own durable lifecycle; the failed Job remains immutable history.
 
 ## Idempotency and output safety
 
 Before creating a binary output, the worker reads the Job result and checks a
 deterministic object identity derived from the durable Job context. If a
 completed result or valid existing object is present, the worker reuses or
-reconciles it. A retry must never create a second asset or artifact solely
-because a queue delivery happened again.
+reconciles it. Duplicate delivery of a Job and retry of its successor lineage
+must never create a second asset or artifact solely because delivery happened
+again.
 
 ## Explicit exclusions
 

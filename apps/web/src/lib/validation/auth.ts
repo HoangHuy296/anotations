@@ -10,3 +10,16 @@ export const registrationSchema = credentialsSchema.extend({
   name: z.string().trim().min(1).max(100).optional(),
   role: z.enum(["MANAGER", "LABELER", "REVIEWER"]),
 }).strict();
+
+/** Safe, self-service account edits. Email and role are intentionally excluded. */
+export const profileSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+}).strict();
+
+export const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1).max(256),
+  newPassword: z.string().min(12).max(256),
+}).strict().refine((value) => value.currentPassword !== value.newPassword, {
+  path: ["newPassword"],
+  message: "Choose a password that is different from your current password.",
+});

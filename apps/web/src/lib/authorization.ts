@@ -23,8 +23,8 @@ export async function assertAnnotationPermission(actor: RequestActor, datasetId:
 
 export async function requireOwnedSourceConnection(actor: RequestActor, id: string) {
   return db.sourceConnection.findFirst({
-    where: { id, ...(actor.role === UserRole.ADMIN ? {} : { userId: actor.id }), provider: "GITEA", status: "ACTIVE", revokedAt: null },
-    select: { id: true, provider: true, baseUrl: true, tokenEncrypted: true, status: true },
+    where: { id, ...(actor.role === UserRole.ADMIN ? {} : { userId: actor.id }), provider: "GITEA", status: "ACTIVE", revokedAt: null, OR: [{ tokenExpiresAt: null }, { tokenExpiresAt: { gt: new Date() } }] },
+    select: { id: true, userId: true, provider: true, baseUrl: true, tokenEncrypted: true, status: true, tokenExpiresAt: true },
   });
 }
 

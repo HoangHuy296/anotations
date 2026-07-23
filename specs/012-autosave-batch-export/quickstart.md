@@ -99,7 +99,7 @@ WORKSPACE_INTEGRATION_TESTS=1 MINIO_VIEW_INTEGRATION_TESTS=1 \
 pnpm --filter @fieldframe/web test:workspace
 ```
 
-Result: 34 tests; 33 passed, 0 failed, 1 skipped. The skipped test is an unrelated explicitly guarded auth-flow case; the real PostgreSQL revision, MinIO view capability, 250-Asset search/pagination, filtered navigation, authorization, autosave, flush, and conflict tests passed.
+Result: 34 tests; 33 passed, 0 failed, 1 skipped. The skipped test is an unrelated explicitly guarded auth-flow case; the real PostgreSQL revision, MinIO view capability, 250-Asset search/pagination, filtered navigation, authorization, autosave, flush, and conflict tests passed. The skip remains documented and is not a Phase 012 completion blocker; opening a separate authentication-hardening task requires explicit approval.
 
 Controlled web queue/export suite:
 

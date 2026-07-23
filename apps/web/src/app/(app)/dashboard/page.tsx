@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
+import { DatasetActionMenu } from "@/components/dashboard/dataset-action-menu";
 import { Button } from "@/components/ui/button";
 import { getRequestActor } from "@/lib/auth";
 
@@ -86,17 +87,12 @@ export default async function DashboardPage() {
 
           <div className="flex flex-col gap-3 sm:flex-row xl:justify-end">
             <Button asChild variant="secondary" size="lg">
-              <Link href="/imports">
-                <Database aria-hidden="true" size={18} />
-                Import dataset
-              </Link>
-            </Button>
-            <Button asChild size="lg">
               <Link href="/datasets">
                 Browse datasets
                 <ArrowRight aria-hidden="true" size={18} weight="bold" />
               </Link>
             </Button>
+            <DatasetActionMenu />
           </div>
         </section>
 
