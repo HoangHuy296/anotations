@@ -1,6 +1,6 @@
 import "server-only";
 
-import { JobStatus, Prisma, type JobType } from "@internal/db";
+import { DatasetSourceMode, JobStatus, Prisma, RepoProvider, type JobType } from "@internal/db";
 import { getQueueDeliveryId, jobQueuePayloadSchema } from "@fieldframe/queue";
 
 import type { RequestActor } from "@/lib/auth";
@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { createWebQueue } from "@/lib/queue/bullmq-client";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { validateSourceImportLimits } from "@/lib/source-access-policy";
+import { encryptSourceToken } from "@/lib/source-connection-crypto";
 
 type QueueEvent = "QUEUE_ENQUEUED" | "QUEUE_DELIVERY_PENDING";
 type QueueEventReason = "QUEUE_UNAVAILABLE";
@@ -35,6 +36,22 @@ export type SafeSourceJobInput = {
   repository: { provider: "GITEA"; owner: string; repo: string; branch: string; normalizedRootPath: string; visibility: "PUBLIC" | "PRIVATE" };
   manifest?: { itemCount: number; declaredBytes: number; durationMs?: number };
   retryOfJobId?: string;
+};
+
+export type NewDatasetSourceImportInput = {
+  datasetName: string;
+  sourceConnection: { id: string; baseUrl: string } | null;
+  createSourceConnection: { name: string; baseUrl: string; token: string } | null;
+  repository: {
+    provider: "GITEA";
+    baseUrl: string;
+    owner: string;
+    repo: string;
+    ref: string;
+    normalizedRootPath: string;
+    visibility: "PUBLIC" | "PRIVATE";
+  };
+  manifest: { itemCount: number; declaredBytes: number; durationMs?: number };
 };
 
 const SOURCE_JOB_TRANSACTION_ATTEMPTS = 3;
@@ -87,6 +104,111 @@ export async function createAndEnqueueSourceImportJob(actor: RequestActor, input
   if (!queueName) return { ok: false as const, status: 400 as const };
   // $transaction resolves only after commit; transport is strictly post-commit.
   return enqueueExistingJob(created.id, queueName, created);
+}
+
+/**
+ * Approved new-Dataset source-import boundary. It is intentionally separate
+ * from the existing-Dataset helper above: the latter must keep its Dataset
+ * permission semantics for source-job ownership/race tests.
+ *
+ * A one-time PAT reaches this function only in server memory. The transaction
+ * encrypts it before persistence, and the durable Job payload contains no
+ * credential material.
+ */
+export async function createAndEnqueueNewDatasetSourceImportJob(
+  actor: RequestActor,
+  input: NewDatasetSourceImportInput,
+) {
+  const limits = validateSourceImportLimits(input.manifest);
+  if (!limits.ok) return { ok: false as const, status: 422 as const };
+  if (input.repository.visibility === "PRIVATE" && !input.sourceConnection && !input.createSourceConnection) {
+    return { ok: false as const, status: 409 as const };
+  }
+
+  const created = await db.$transaction(async (tx) => {
+    let sourceConnectionId: string | null = null;
+    let sourceBaseUrl = input.repository.baseUrl;
+
+    if (input.sourceConnection) {
+      const connection = await tx.sourceConnection.findFirst({
+        where: {
+          id: input.sourceConnection.id,
+          userId: actor.id,
+          provider: RepoProvider.GITEA,
+          status: "ACTIVE",
+          revokedAt: null,
+          OR: [{ tokenExpiresAt: null }, { tokenExpiresAt: { gt: new Date() } }],
+        },
+        select: { id: true, baseUrl: true },
+      });
+      if (!connection) return null;
+      sourceConnectionId = connection.id;
+      sourceBaseUrl = connection.baseUrl;
+    } else if (input.createSourceConnection) {
+      const connection = await tx.sourceConnection.create({
+        data: {
+          userId: actor.id,
+          provider: RepoProvider.GITEA,
+          name: input.createSourceConnection.name,
+          baseUrl: input.createSourceConnection.baseUrl,
+          tokenEncrypted: encryptSourceToken(input.createSourceConnection.token),
+          status: "ACTIVE",
+        },
+        select: { id: true },
+      });
+      sourceConnectionId = connection.id;
+    }
+
+    const dataset = await tx.dataset.create({
+      data: {
+        ownerId: actor.id,
+        name: input.datasetName,
+        sourceMode: DatasetSourceMode.MIRROR_TO_MINIO,
+        sourceConnectionId,
+        sourceBranch: input.repository.ref,
+        sourceRootPath: input.repository.normalizedRootPath || null,
+      },
+      select: { id: true },
+    });
+
+    const job = await tx.job.create({
+      data: {
+        datasetId: dataset.id,
+        createdById: actor.id,
+        type: "IMPORT_DATASET",
+        status: JobStatus.QUEUED,
+        sourceConnectionId,
+        totalItems: input.manifest.itemCount,
+        input: {
+          source: {
+            repository: {
+              provider: input.repository.provider,
+              // Credentialed imports resolve the server address again from
+              // PostgreSQL. Public imports retain the safe public endpoint
+              // because there is no SourceConnection to resolve.
+              ...(sourceConnectionId ? {} : { baseUrl: sourceBaseUrl }),
+              owner: input.repository.owner,
+              repo: input.repository.repo,
+              ref: input.repository.ref,
+              rootPath: input.repository.normalizedRootPath,
+              visibility: input.repository.visibility,
+            },
+            manifest: input.manifest,
+            sourceConnectionId,
+          },
+        },
+      },
+      select: { id: true, datasetId: true, status: true, queueName: true, queueJobId: true, enqueuedAt: true },
+    });
+    return { job, sourceConnectionId };
+  }, { isolationLevel: "Serializable" });
+
+  if (!created) return { ok: false as const, status: 404 as const };
+  const queueName = resolveQueueName("IMPORT_DATASET");
+  if (!queueName) return { ok: false as const, status: 400 as const };
+  const delivery = await enqueueExistingJob(created.job.id, queueName, created.job);
+  if (!delivery.ok) return delivery;
+  return { ...delivery, datasetId: created.job.datasetId, sourceConnectionId: created.sourceConnectionId };
 }
 
 type QueueClient = {

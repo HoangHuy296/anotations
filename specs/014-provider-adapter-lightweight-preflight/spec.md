@@ -8,13 +8,26 @@
 ## Purpose and Scope
 
 This phase lets an authorized user confirm that a selected repository can be
-used before creating any Dataset or durable Job. It is a lightweight
-accessibility check, not an import, clone, synchronization, or artifact
-production flow.
+used before creating any Dataset or durable Job. The preflight itself is a
+lightweight accessibility check, not an import, clone, synchronization, or
+artifact production flow. The separately approved Start Import boundary may
+use a successful preflight as input to create a new Dataset and durable source
+Job; it is not part of preflight and must revalidate server-side.
 
 The phase introduces a common provider-adapter contract and two adapter
 implementations: GitHub and Gitea. It exposes one authenticated preflight
 operation for a repository, optional ref, and optional root path.
+
+## Approved Scope Amendment — Hybrid Gitea Credentials
+
+The import UI selects one `CredentialMode`: `PUBLIC`,
+`EXISTING_SOURCE_CONNECTION`, or `ONE_TIME_PAT`. A one-time Gitea PAT is used
+only transiently by the authenticated preflight and Start Import boundaries;
+it is never logged, returned, queued, or persisted by preflight. A checked
+save flag is intent only until Start Import. For private one-time-PAT imports,
+Start Import must create an encrypted SourceConnection after successful
+preflight and before durable Job creation; otherwise reject because Job input
+and queue payloads may never contain credentials.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -138,8 +151,9 @@ the same category of safe result or stable failure code.
   inspecting a source connection or contacting a provider; it MUST derive
   connection ownership and eligibility server-side.
 - **FR-003**: The system MUST validate every preflight request strictly and
-  reject unknown fields, browser policy overrides, browser-supplied provider
-  tokens, provider URLs with embedded credentials, and storage/queue fields.
+  reject unknown fields, browser policy overrides, provider URLs with embedded
+  credentials, and storage/queue fields. A transient one-time Gitea PAT is the
+  sole approved credential exception and is never durable during preflight.
 - **FR-004**: The system MUST use a provider-neutral adapter contract with the
   following required capabilities:
 
@@ -160,7 +174,8 @@ the same category of safe result or stable failure code.
   public repository may be checked anonymously only where the selected
   provider allows it. Credentialed access must use an existing eligible
   server-resolved SourceConnection; this phase MUST NOT accept or persist a
-  new browser-supplied token.
+  new browser-supplied token, except for the approved transient one-time Gitea
+  PAT; it must not be persisted until the separate Start Import boundary.
 - **FR-006**: The system MUST validate the repository URL and every redirect
   hop with the existing SSRF/DNS policy before provider access. Unsafe input
   MUST return `UNSAFE_REPOSITORY_URL`.
@@ -191,11 +206,13 @@ the same category of safe result or stable failure code.
   approved provider boundary, with common types/errors/registry and separate
   GitHub and Gitea client/mapper modules. Request validation and the
   browser-facing preflight route remain separate from provider clients.
-- **FR-015**: This phase MUST add only the dedicated preflight operation. It
-  MUST NOT invoke a legacy repository-import persistence path, alter existing
-  SourceConnection lifecycle behavior, or imply that GitHub credentials can
-  be stored before an explicitly approved GitHub SourceConnection lifecycle
-  exists.
+- **FR-015**: The preflight route MUST NOT invoke a legacy repository-import
+  persistence path or make durable writes. The separately authorized Start
+  Import route MAY create Dataset + Job and, only for a one-time Gitea PAT
+  with explicit save intent, encrypt/persist an owned SourceConnection in the
+  same transaction. It MUST re-run preflight before that transaction, enqueue
+  only `{ jobId }` after commit, and never introduce a GitHub credential
+  lifecycle.
 
 ### Required Delivery Structure
 

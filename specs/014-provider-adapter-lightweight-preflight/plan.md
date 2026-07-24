@@ -20,7 +20,7 @@ repository, downloads source bytes, or persists a manifest.
 existing opaque-cookie authentication, `@fieldframe/domain` source-access
 policy, Node fetch/streams. No new dependency is planned.
 
-**Storage**: PostgreSQL SourceConnection is read-only for this phase; its
+**Storage**: PostgreSQL SourceConnection is read-only during preflight; its
 credential is decrypted only in server memory after authorization. PostgreSQL,
 Redis/BullMQ, and MinIO have no preflight writes.
 
@@ -39,7 +39,8 @@ seconds in controlled tests; it reads only minimum repository/ref/path metadata
 and never lists an unbounded tree.
 
 **Constraints**: Opaque-session authorization first; strict Zod body; no
-browser token/policy override; fresh SSRF/DNS validation before provider
+browser token/policy override except a transient approved one-time Gitea PAT;
+fresh SSRF/DNS validation before provider
 access and for every redirect hop; token/URL/provider diagnostic redaction;
 zero durable side effects; queue payload prohibition.
 
@@ -138,3 +139,10 @@ clone/import capability appears in the design.
 ## Complexity Tracking
 
 No constitution exception or additional complexity justification is required.
+
+## Approved Amendment — Hybrid Credential UX
+
+`/datasets/imports` offers PUBLIC, existing SourceConnection, and one-time
+Gitea PAT modes. Preflight is write-free in every mode. Only Start Import may
+encrypt/persist a selected one-time PAT, re-resolve the resulting connection,
+and then create/enqueue a durable Job with `{ jobId }` only.

@@ -18,9 +18,9 @@ Gitea import/source-job route.
 
 **Purpose**: Establish test locations and make the phase boundary executable.
 
-- [ ] T001 Record the no-schema/no-migration/no-dependency/no-durable-write scope guard and required validation commands in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
-- [ ] T002 [P] Create the provider-preflight test directory and server-only test registration convention in `apps/web/tests/repository-preflight/helpers.ts`.
-- [ ] T003 [P] Add the targeted provider-preflight test command without changing unrelated test commands in `apps/web/package.json`.
+- [X] T001 Record the no-schema/no-migration/no-dependency/no-durable-write scope guard and required validation commands in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T002 [P] Create the provider-preflight test directory and server-only test registration convention in `apps/web/tests/repository-preflight/helpers.ts`.
+- [X] T003 [P] Add the targeted provider-preflight test command without changing unrelated test commands in `apps/web/package.json`.
 
 ---
 
@@ -31,14 +31,14 @@ Gitea import/source-job route.
 **⚠️ CRITICAL**: Complete this phase before implementing any route or provider
 adapter. It is the boundary that prevents legacy import code from being used.
 
-- [ ] T004 Define transient preflight, resolved-ref, bounded-listing, credential-context, and safe-result types; keep `downloadFile` declared but Phase-014-unreachable in `apps/web/src/lib/providers/provider.types.ts`.
-- [ ] T005 [P] Define internal provider errors and the one-way mapping to safe preflight/error envelopes in `apps/web/src/lib/providers/provider-errors.ts` and `apps/web/src/lib/api-response.ts`.
-- [ ] T006 [P] Implement strict Zod validation that accepts only provider/repository/ref/rootPath/sourceConnectionId and rejects tokens, owner/policy/queue/storage/manifest fields in `apps/web/src/lib/validation/repository-preflight.ts`.
-- [ ] T007 Build the server-only provider registry that supports only GitHub and Gitea and rejects all other providers in `apps/web/src/lib/providers/provider-registry.ts`.
-- [ ] T008 Implement the server-only owned-connection token resolver wrapper that reuses Phase 013 ownership/ACTIVE/revoked/expiry controls and never returns a token to callers outside provider code in `apps/web/src/lib/providers/token-check.ts`.
-- [ ] T009 Implement shared preflight coordination order—actor result, normalized request, concealed connection resolution, policy validation, adapter call, safe projection—in `apps/web/src/lib/providers/preflight-repository.ts`.
-- [ ] T010 [P] Add contract/unit tests for strict schema, registry selection, safe error mapping, and the prohibition on calling `downloadFile` in `apps/web/tests/repository-preflight/provider-contract.test.ts`.
-- [ ] T011 [P] Add reusable controlled-provider, opaque-cookie HTTP, PostgreSQL/isolated-Redis/MinIO snapshot, and sentinel-redaction helpers in `apps/web/tests/repository-preflight/helpers.ts`.
+- [X] T004 Define transient preflight, resolved-ref, bounded-listing, credential-context, and safe-result types; keep `downloadFile` declared but Phase-014-unreachable in `apps/web/src/lib/providers/provider.types.ts`.
+- [X] T005 [P] Define internal provider errors and the one-way mapping to safe preflight/error envelopes in `apps/web/src/lib/providers/provider-errors.ts` and `apps/web/src/lib/api-response.ts`.
+- [X] T006 [P] Implement strict Zod validation that accepts only provider/repository/ref/rootPath/sourceConnectionId and rejects tokens, owner/policy/queue/storage/manifest fields in `apps/web/src/lib/validation/repository-preflight.ts`.
+- [X] T007 Build the server-only provider registry that supports only GitHub and Gitea and rejects all other providers in `apps/web/src/lib/providers/provider-registry.ts`.
+- [X] T008 Implement the server-only owned-connection token resolver wrapper that reuses Phase 013 ownership/ACTIVE/revoked/expiry controls and never returns a token to callers outside provider code in `apps/web/src/lib/providers/token-check.ts`.
+- [X] T009 Implement shared preflight coordination order—actor result, normalized request, concealed connection resolution, policy validation, adapter call, safe projection—in `apps/web/src/lib/providers/preflight-repository.ts`.
+- [X] T010 [P] Add contract/unit tests for strict schema, registry selection, safe error mapping, and the prohibition on calling `downloadFile` in `apps/web/tests/repository-preflight/provider-contract.test.ts`.
+- [X] T011 [P] Add reusable controlled-provider, opaque-cookie HTTP, PostgreSQL/isolated-Redis/MinIO snapshot, and sentinel-redaction helpers in `apps/web/tests/repository-preflight/helpers.ts`.
 
 **Checkpoint**: One server-only typed boundary exists; it has no persistence,
 queue, storage, clone, download, or legacy import path.
@@ -57,19 +57,19 @@ return the safe DTO while all durable/queue/storage snapshots remain unchanged.
 
 ### Tests for User Story 1
 
-- [ ] T012 [P] [US1] Write controlled provider-client contract tests for repository existence, supplied/default ref, and bounded root-path metadata checks in `apps/web/tests/repository-preflight/provider-adapters.test.ts`.
-- [ ] T013 [P] [US1] Write authenticated HTTP success tests for public GitHub, public Gitea, and owned active Gitea connection preflight in `apps/web/tests/repository-preflight/preflight-route.test.ts`.
-- [ ] T014 [P] [US1] Write snapshot assertions proving every successful preflight leaves Dataset, Job, JobEvent, SourceConnection, ExternalRepository, Asset, isolated Redis/BullMQ, and MinIO prefix unchanged in `apps/web/tests/repository-preflight/preflight-no-side-effects.test.ts`.
+- [X] T012 [P] [US1] Write controlled provider-client contract tests for repository existence, supplied/default ref, and bounded root-path metadata checks in `apps/web/tests/repository-preflight/provider-adapters.test.ts`.
+- [X] T013 [P] [US1] Write authenticated HTTP success tests for public GitHub, public Gitea, and owned active Gitea connection preflight in `apps/web/tests/repository-preflight/preflight-route.test.ts`.
+- [X] T014 [P] [US1] Write snapshot assertions proving every successful preflight leaves Dataset, Job, JobEvent, SourceConnection, ExternalRepository, Asset, isolated Redis/BullMQ, and MinIO prefix unchanged in `apps/web/tests/repository-preflight/preflight-no-side-effects.test.ts`.
 
 ### Implementation for User Story 1
 
-- [ ] T015 [P] [US1] Implement bounded, redirect-aware GitHub metadata/ref/root client operations with anonymous-public access only in `apps/web/src/lib/providers/github/github.client.ts`.
-- [ ] T016 [P] [US1] Implement GitHub response-to-safe-result/error mapping and the GitHub adapter in `apps/web/src/lib/providers/github/github.mapper.ts` and `apps/web/src/lib/providers/github/github.provider.ts`.
-- [ ] T017 [P] [US1] Implement bounded, redirect-aware Gitea metadata/ref/root client operations without using recursive tree/file-download legacy helpers in `apps/web/src/lib/providers/gitea/gitea.client.ts`.
-- [ ] T018 [P] [US1] Implement Gitea response-to-safe-result/error mapping and the Gitea adapter in `apps/web/src/lib/providers/gitea/gitea.mapper.ts` and `apps/web/src/lib/providers/gitea/gitea.provider.ts`.
-- [ ] T019 [US1] Integrate the two adapters into the coordinator, ensuring omitted refs resolve a provider default, supplied refs remain exact, and root checks remain bounded in `apps/web/src/lib/providers/preflight-repository.ts`.
-- [ ] T020 [US1] Add the authenticated no-store preflight Route Handler with safe success DTO projection in `apps/web/src/app/api/source-repositories/preflight/route.ts`.
-- [ ] T021 [US1] Run the targeted success suites and record redacted controlled-HTTP evidence, duration, and zero-side-effect snapshots in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T015 [P] [US1] Implement bounded, redirect-aware GitHub metadata/ref/root client operations with anonymous-public access only in `apps/web/src/lib/providers/github/github.client.ts`.
+- [X] T016 [P] [US1] Implement GitHub response-to-safe-result/error mapping and the GitHub adapter in `apps/web/src/lib/providers/github/github.mapper.ts` and `apps/web/src/lib/providers/github/github.provider.ts`.
+- [X] T017 [P] [US1] Implement bounded, redirect-aware Gitea metadata/ref/root client operations without using recursive tree/file-download legacy helpers in `apps/web/src/lib/providers/gitea/gitea.client.ts`.
+- [X] T018 [P] [US1] Implement Gitea response-to-safe-result/error mapping and the Gitea adapter in `apps/web/src/lib/providers/gitea/gitea.mapper.ts` and `apps/web/src/lib/providers/gitea/gitea.provider.ts`.
+- [X] T019 [US1] Integrate the two adapters into the coordinator, ensuring omitted refs resolve a provider default, supplied refs remain exact, and root checks remain bounded in `apps/web/src/lib/providers/preflight-repository.ts`.
+- [X] T020 [US1] Add the authenticated no-store preflight Route Handler with safe success DTO projection in `apps/web/src/app/api/source-repositories/preflight/route.ts`.
+- [X] T021 [US1] Run the targeted success suites and record redacted controlled-HTTP evidence, duration, and zero-side-effect snapshots in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 
 **Checkpoint**: US1 is independently demoable without a Dataset, Job, queue
 delivery, storage object, clone, download, or persisted manifest.
@@ -97,10 +97,10 @@ provider access plus unchanged durable/Redis/MinIO snapshots.
 
 ### Implementation for User Story 2
 
-- [ ] T028 [US2] Apply shared source-access policy before every provider request and each redirect hop; map unsafe input to `UNSAFE_REPOSITORY_URL` without echoing unsafe locations in `apps/web/src/lib/providers/github/github.client.ts` and `apps/web/src/lib/providers/gitea/gitea.client.ts`.
-- [ ] T029 [US2] Implement normalized mappings for not-found, access-denied, expired/invalid token, missing ref/root, and safe operational unavailability in `apps/web/src/lib/providers/provider-errors.ts` and `apps/web/src/lib/providers/preflight-repository.ts`.
-- [ ] T030 [US2] Enforce concealed foreign/unknown connection semantics and private-GitHub denial before any adapter invocation in `apps/web/src/lib/providers/token-check.ts` and `apps/web/src/lib/providers/preflight-repository.ts`.
-- [ ] T031 [US2] Project only stable non-secret HTTP errors, no stack traces, and no request/private URL echo in `apps/web/src/app/api/source-repositories/preflight/route.ts`.
+- [X] T028 [US2] Apply shared source-access policy before every provider request and each redirect hop; map unsafe input to `UNSAFE_REPOSITORY_URL` without echoing unsafe locations in `apps/web/src/lib/providers/github/github.client.ts` and `apps/web/src/lib/providers/gitea/gitea.client.ts`.
+- [X] T029 [US2] Implement normalized mappings for not-found, access-denied, expired/invalid token, missing ref/root, and safe operational unavailability in `apps/web/src/lib/providers/provider-errors.ts` and `apps/web/src/lib/providers/preflight-repository.ts`.
+- [X] T030 [US2] Enforce concealed foreign/unknown connection semantics and private-GitHub denial before any adapter invocation in `apps/web/src/lib/providers/token-check.ts` and `apps/web/src/lib/providers/preflight-repository.ts`.
+- [X] T031 [US2] Project only stable non-secret HTTP errors, no stack traces, and no request/private URL echo in `apps/web/src/app/api/source-repositories/preflight/route.ts`.
 - [ ] T032 [US2] Run the failure/security/no-side-effect suites against controlled Compose services and append only redacted results to `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 
 **Checkpoint**: All invalid requests fail before durable work; pre-policy and
@@ -126,8 +126,8 @@ lifecycle change.
 
 ### Implementation for User Story 3
 
-- [ ] T036 [US3] Finalize registry/provider type compatibility so adapter implementations cannot return raw provider DTOs, full listings, or credentials in `apps/web/src/lib/providers/provider.types.ts`, `apps/web/src/lib/providers/provider-registry.ts`, and `apps/web/src/lib/providers/preflight-repository.ts`.
-- [ ] T037 [US3] Ensure all route result paths use the contract’s safe DTO and `Cache-Control: no-store` behavior in `apps/web/src/app/api/source-repositories/preflight/route.ts`.
+- [X] T036 [US3] Finalize registry/provider type compatibility so adapter implementations cannot return raw provider DTOs, full listings, or credentials in `apps/web/src/lib/providers/provider.types.ts`, `apps/web/src/lib/providers/provider-registry.ts`, and `apps/web/src/lib/providers/preflight-repository.ts`.
+- [X] T037 [US3] Ensure all route result paths use the contract’s safe DTO and `Cache-Control: no-store` behavior in `apps/web/src/app/api/source-repositories/preflight/route.ts`.
 - [ ] T038 [US3] Run the cross-provider parity/redaction suite under the controlled provider fixture and record redacted evidence in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 
 **Checkpoint**: Both adapters are interchangeable through the common contract;
@@ -140,11 +140,11 @@ no credential lifecycle or import behavior was added.
 **Purpose**: Verify the implementation stays within Architecture Lock and has
 repeatable evidence before Phase 014 can close.
 
-- [ ] T039 [P] Update safe endpoint/provider contract commentary and test command documentation in `specs/014-provider-adapter-lightweight-preflight/contracts/repository-preflight-api.md` and `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
-- [ ] T040 Run Prisma validation, web typecheck, lint, and targeted provider-preflight suites; record pass/fail counts without secrets in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T039 [P] Update safe endpoint/provider contract commentary and test command documentation in `specs/014-provider-adapter-lightweight-preflight/contracts/repository-preflight-api.md` and `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T040 Run Prisma validation, web typecheck, lint, and targeted provider-preflight suites; record pass/fail counts without secrets in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 - [ ] T041 Run a redacted controlled Compose authenticated HTTP matrix with isolated passworded Redis and MinIO snapshot prefix; include provider fixtures, normal login, duration, and no-side-effect evidence in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
-- [ ] T042 Run the web production build and record the result in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
-- [ ] T043 Perform a final scope audit against `AGENTS.md`, `docs/architecture.md`, and `specs/014-provider-adapter-lightweight-preflight/spec.md`; verify no schema/migration/dependency/raw-SQL/legacy-import/Job/queue/MinIO changes in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T042 Run the web production build and record the result in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T043 Perform a final scope audit against `AGENTS.md`, `docs/architecture.md`, and `specs/014-provider-adapter-lightweight-preflight/spec.md`; verify no schema/migration/dependency/raw-SQL/legacy-import/Job/queue/MinIO changes in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 
 ---
 
@@ -175,6 +175,19 @@ cross-provider parity after both adapters are working.
   all prior tests and built web image.
 
 ## Implementation Strategy
+
+## Approved amendment tasks — Hybrid Gitea credential UX
+
+**Scope guard**: `POST /api/source-import-preflight` remains read-only in all
+credential modes. T046 is the explicit approved exception for Start Import:
+it replaces—not supplements—the legacy persistence route and may create a
+Dataset, an encrypted owned Gitea SourceConnection, and a recoverable QUEUED
+Job. It must enqueue exactly `{ jobId }` only after the transaction commits.
+
+- [X] T044 [P] Add strict credential-mode, transient one-time PAT, and save-intent validation plus preflight contract coverage in `apps/web/src/lib/validation/source-connection.ts`, `apps/web/src/lib/source-import/preflight.ts`, and `specs/014-provider-adapter-lightweight-preflight/contracts/repository-preflight-api.md`.
+- [X] T045 [P] Add accessible Public/existing SourceConnection/one-time PAT controls and conditional Server URL, PAT, and save fields in `apps/web/src/components/imports/import-form.tsx`; no PAT may enter React state, preview state, localStorage, or a browser DTO.
+- [X] T046 Replace legacy `/api/gitea/import` usage with the authorized Start Import transaction: re-preflight, create Dataset + optional encrypted saved Gitea SourceConnection + QUEUED Job atomically, then enqueue `{ jobId }` only after commit in `apps/web/src/app/api/source-import-jobs/route.ts` and `apps/web/src/lib/queue/enqueue-job.ts`; legacy route returns `410 GITEA_IMPORT_DEPRECATED`.
+- [X] T047 Add normal-cookie HTTP, no-side-effect, and redaction tests for all credential modes and save-on-start behavior in `apps/web/tests/repository-preflight/` and `apps/web/tests/source-connections/`.
 
 ### MVP first
 

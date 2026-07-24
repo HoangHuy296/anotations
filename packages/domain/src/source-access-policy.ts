@@ -98,7 +98,11 @@ async function defaultLookup(hostname: string) {
  * never by a browser request. A value of `!ERROR` models a resolver failure.
  */
 function configuredTestLookup(environment: NodeJS.ProcessEnv = process.env): DnsLookup | null {
-  if (environment.NODE_ENV === "production" || environment.SOURCE_CONNECTION_TEST_MODE !== "1") return null;
+  if (
+    environment.NODE_ENV === "production"
+    || environment.REPOSITORY_PREFLIGHT_INTEGRATION_TESTS !== "1"
+    || environment.SOURCE_CONNECTION_TEST_MODE !== "1"
+  ) return null;
   const raw = environment.SOURCE_TEST_DNS_OVERRIDES;
   if (!raw || raw.length > 8_192) return null;
   try {

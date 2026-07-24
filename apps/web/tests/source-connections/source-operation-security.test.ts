@@ -23,6 +23,13 @@ after(async () => {
   await db.user.deleteMany({ where: { id: { in: cleanupUserIds } } });
 });
 
+test("legacy Gitea import route is explicitly deprecated", { skip: sourceConnectionHttpEnabled ? false : sourceConnectionHttpSkipReason }, async () => {
+  const response = await request("/api/gitea/import", { method: "POST" });
+  assert.equal(response.status, 410);
+  const body = await response.json() as { error: { code: string } };
+  assert.equal(body.error.code, "GITEA_IMPORT_DEPRECATED");
+});
+
 test("authenticated root-path rejection and browser policy override have no side effects before provider access", { skip: sourceConnectionHttpEnabled ? false : sourceConnectionHttpSkipReason }, async () => {
   const actor = await signupAndLogin();
   const user = await db.user.findUniqueOrThrow({ where: { email: actor.email }, select: { id: true } });
@@ -42,17 +49,21 @@ test("authenticated root-path rejection and browser policy override have no side
 
   const beforeRoot = await businessSnapshot();
   const transportBeforeRoot = await transportAndStorageSnapshot();
-  const rootResponse = await request("/api/gitea/import", {
+  const rootResponse = await request("/api/source-import-preflight", {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: actor.cookie },
     body: JSON.stringify({
+      provider: "GITEA",
+      credentialMode: "EXISTING_SOURCE_CONNECTION",
       sourceConnectionId: connection.id,
-      owner: "owner",
-      repo: "repo",
-      branch: "main",
-      rootPath: "../outside",
-      name: "Unsafe root",
-      mode: "preview",
+      datasetName: "Unsafe root",
+      repository: {
+        owner: "owner",
+        repo: "repo",
+        ref: "main",
+        rootPath: "../outside",
+        expectedVisibility: "PRIVATE",
+      },
     }),
   });
   assert.equal(rootResponse.status, 400);

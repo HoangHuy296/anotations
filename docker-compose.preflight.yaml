@@ -1,0 +1,17 @@
+# Controlled local-only runtime for Phase 014 HTTP evidence. This override is
+# deliberately opt-in: production Compose continues to run `next start` and
+# rejects plaintext/private fixture destinations.
+services:
+  web:
+    command:
+      - sh
+      - -c
+      - cd /workspace && exec pnpm --filter @fieldframe/web exec next dev
+    environment:
+      NODE_ENV: development
+      REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "1"
+      SOURCE_CONNECTION_TEST_MODE: "1"
+      SOURCE_TRUSTED_TEST_HOSTS: github-fixture,gitea,localhost,127.0.0.1
+      GITHUB_API_BASE_URL: http://github-fixture:8080
+      REDIS_DB: "15"
+      BULLMQ_PREFIX: fieldframe-phase014-test
