@@ -40,8 +40,11 @@ export async function resolvePreflightGiteaCredential(
   });
 
   if (!connection) throw new PreflightError("SOURCE_CONNECTION_NOT_FOUND");
+  // Do not distinguish expiry, revocation, malformed ciphertext, or a bad
+  // upstream credential at this boundary: all are credential-invalid to the
+  // caller and share one stable response shape.
   if (connection.revokedAt || connection.status === SourceConnectionStatus.REVOKED || connection.status === SourceConnectionStatus.EXPIRED || (connection.tokenExpiresAt && connection.tokenExpiresAt <= new Date())) {
-    throw new PreflightError("SOURCE_TOKEN_EXPIRED");
+    throw new PreflightError("SOURCE_TOKEN_INVALID");
   }
   if (connection.status !== SourceConnectionStatus.ACTIVE || !connection.tokenEncrypted) {
     throw new PreflightError("SOURCE_TOKEN_INVALID");

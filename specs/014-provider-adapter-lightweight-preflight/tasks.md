@@ -88,12 +88,12 @@ provider access plus unchanged durable/Redis/MinIO snapshots.
 
 ### Tests for User Story 2
 
-- [ ] T022 [P] [US2] Add HTTP validation and failure-code tests for unsupported provider, forbidden body fields, malformed input, repository missing, access denial, missing ref, and missing root path in `apps/web/tests/repository-preflight/preflight-route.test.ts`.
-- [ ] T023 [P] [US2] Add deterministic URL/DNS policy tests for userinfo/query/fragment, numeric/default-denied IPs, loopback/private addresses, resolver failure, and mixed public/private DNS answers in `apps/web/tests/repository-preflight/preflight-security.test.ts`.
-- [ ] T024 [P] [US2] Add controlled redirect-hop tests for allowed-to-blocked destination, outside-policy destination, redirect loop, and no outbound call after policy denial in `apps/web/tests/repository-preflight/preflight-security.test.ts`.
-- [ ] T025 [P] [US2] Add foreign/unknown/malformed SourceConnection concealment and provider-call-count tests using normal login cookies in `apps/web/tests/repository-preflight/preflight-security.test.ts`.
-- [ ] T026 [P] [US2] Add invalid/expired Gitea credential and private-GitHub-without-approved-connection tests, including stable code and response-redaction assertions in `apps/web/tests/repository-preflight/preflight-security.test.ts`.
-- [ ] T027 [P] [US2] Expand before/after snapshot assertions for every denial: exact durable IDs/canonical fields, JobEvent count, isolated Redis delivery keys, MinIO prefix, and no raw provider/Prisma error in `apps/web/tests/repository-preflight/preflight-no-side-effects.test.ts`.
+- [X] T022 [P] [US2] Add HTTP validation and failure-code tests for unsupported provider, forbidden body fields, malformed input, repository missing, access denial, missing ref, and missing root path in `apps/web/tests/repository-preflight/preflight-route.test.ts`.
+- [X] T023 [P] [US2] Add deterministic URL/DNS policy tests for userinfo/query/fragment, numeric/default-denied IPs, loopback/private addresses, resolver failure, and mixed public/private DNS answers in `apps/web/tests/repository-preflight/preflight-security.test.ts`.
+- [X] T024 [P] [US2] Add controlled redirect-hop tests for allowed-to-blocked destination, outside-policy destination, redirect loop, and no outbound call after policy denial in `apps/web/tests/repository-preflight/preflight-security.test.ts`.
+- [X] T025 [P] [US2] Add foreign/unknown/malformed SourceConnection concealment and provider-call-count tests using normal login cookies in `apps/web/tests/repository-preflight/preflight-security.test.ts`.
+- [X] T026 [P] [US2] Add invalid/expired Gitea credential and private-GitHub-without-approved-connection tests, including stable code and response-redaction assertions in `apps/web/tests/repository-preflight/preflight-security.test.ts`.
+- [X] T027 [P] [US2] Expand before/after snapshot assertions for every denial: exact durable IDs/canonical fields, JobEvent count, isolated Redis delivery keys, MinIO prefix, and no raw provider/Prisma error in `apps/web/tests/repository-preflight/preflight-no-side-effects.test.ts`.
 
 ### Implementation for User Story 2
 
@@ -101,7 +101,7 @@ provider access plus unchanged durable/Redis/MinIO snapshots.
 - [X] T029 [US2] Implement normalized mappings for not-found, access-denied, expired/invalid token, missing ref/root, and safe operational unavailability in `apps/web/src/lib/providers/provider-errors.ts` and `apps/web/src/lib/providers/preflight-repository.ts`.
 - [X] T030 [US2] Enforce concealed foreign/unknown connection semantics and private-GitHub denial before any adapter invocation in `apps/web/src/lib/providers/token-check.ts` and `apps/web/src/lib/providers/preflight-repository.ts`.
 - [X] T031 [US2] Project only stable non-secret HTTP errors, no stack traces, and no request/private URL echo in `apps/web/src/app/api/source-repositories/preflight/route.ts`.
-- [ ] T032 [US2] Run the failure/security/no-side-effect suites against controlled Compose services and append only redacted results to `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T032 [US2] Run the failure/security/no-side-effect suites against controlled Compose services and append only redacted results to `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 
 **Checkpoint**: All invalid requests fail before durable work; pre-policy and
 foreign connection denials make no provider request.
@@ -120,15 +120,15 @@ lifecycle change.
 
 ### Tests for User Story 3
 
-- [ ] T033 [P] [US3] Add cross-provider contract tests that compare safe DTO shape, exact-ref behavior, bounded root behavior, and normalized failures in `apps/web/tests/repository-preflight/provider-adapters.test.ts`.
-- [ ] T034 [P] [US3] Add authenticated HTTP parity tests for anonymous public GitHub/Gitea, owned credentialed Gitea, and denied private GitHub in `apps/web/tests/repository-preflight/preflight-route.test.ts`.
-- [ ] T035 [P] [US3] Add response/log sentinel-redaction audit coverage for success, semantic failures, and provider-unavailable results in `apps/web/tests/repository-preflight/preflight-redaction.test.ts`.
+- [X] T033 [P] [US3] Add cross-provider contract tests that compare safe DTO shape, exact-ref behavior, bounded root behavior, and normalized failures in `apps/web/tests/repository-preflight/provider-adapters.test.ts`.
+- [X] T034 [P] [US3] Add authenticated HTTP parity tests for anonymous public GitHub/Gitea, owned credentialed Gitea, and denied private GitHub in `apps/web/tests/repository-preflight/preflight-route.test.ts`.
+- [X] T035 [P] [US3] Add response/log sentinel-redaction audit coverage for success, semantic failures, and provider-unavailable results in `apps/web/tests/repository-preflight/preflight-redaction.test.ts`.
 
 ### Implementation for User Story 3
 
 - [X] T036 [US3] Finalize registry/provider type compatibility so adapter implementations cannot return raw provider DTOs, full listings, or credentials in `apps/web/src/lib/providers/provider.types.ts`, `apps/web/src/lib/providers/provider-registry.ts`, and `apps/web/src/lib/providers/preflight-repository.ts`.
 - [X] T037 [US3] Ensure all route result paths use the contract’s safe DTO and `Cache-Control: no-store` behavior in `apps/web/src/app/api/source-repositories/preflight/route.ts`.
-- [ ] T038 [US3] Run the cross-provider parity/redaction suite under the controlled provider fixture and record redacted evidence in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T038 [US3] Run the cross-provider parity/redaction suite under the controlled provider fixture and record redacted evidence in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 
 **Checkpoint**: Both adapters are interchangeable through the common contract;
 no credential lifecycle or import behavior was added.
@@ -142,7 +142,7 @@ repeatable evidence before Phase 014 can close.
 
 - [X] T039 [P] Update safe endpoint/provider contract commentary and test command documentation in `specs/014-provider-adapter-lightweight-preflight/contracts/repository-preflight-api.md` and `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 - [X] T040 Run Prisma validation, web typecheck, lint, and targeted provider-preflight suites; record pass/fail counts without secrets in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
-- [ ] T041 Run a redacted controlled Compose authenticated HTTP matrix with isolated passworded Redis and MinIO snapshot prefix; include provider fixtures, normal login, duration, and no-side-effect evidence in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
+- [X] T041 Run a redacted controlled Compose authenticated HTTP matrix with isolated passworded Redis and MinIO snapshot prefix; include provider fixtures, normal login, duration, and no-side-effect evidence in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 - [X] T042 Run the web production build and record the result in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 - [X] T043 Perform a final scope audit against `AGENTS.md`, `docs/architecture.md`, and `specs/014-provider-adapter-lightweight-preflight/spec.md`; verify no schema/migration/dependency/raw-SQL/legacy-import/Job/queue/MinIO changes in `specs/014-provider-adapter-lightweight-preflight/quickstart.md`.
 

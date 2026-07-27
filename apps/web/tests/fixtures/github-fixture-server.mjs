@@ -61,10 +61,27 @@ function accessFailure(request, repository) {
   return null;
 }
 
+let requestCount = 0;
+let requestCountByPath = new Map();
+
 const server = http.createServer((request, response) => {
   try {
-    if (request.method !== "GET") return send(response, 405, { message: "Method Not Allowed" });
     const url = new URL(request.url || "/", `http://${request.headers.host}`);
+    // Test-control endpoints are available only inside the Compose fixture;
+    // they are never proxied by Fieldframe and return counters, never tokens.
+    if (request.method === "POST" && url.pathname === "/__test/reset") {
+      requestCount = 0;
+      requestCountByPath = new Map();
+      response.writeHead(204);
+      response.end();
+      return;
+    }
+    if (request.method === "GET" && url.pathname === "/__test/counter") {
+      return send(response, 200, { requests: requestCount, paths: Object.fromEntries(requestCountByPath) });
+    }
+    if (request.method !== "GET") return send(response, 405, { message: "Method Not Allowed" });
+    requestCount += 1;
+    requestCountByPath.set(url.pathname, (requestCountByPath.get(url.pathname) || 0) + 1);
     if (url.pathname === "/healthz") return send(response, 200, { ok: true });
     if (url.pathname === "/user") {
       const failure = tokenFailure(request);
@@ -76,6 +93,22 @@ const server = http.createServer((request, response) => {
     if (!match) return send(response, 404, { message: "Not Found" });
     const owner = decodeURIComponent(match[1]);
     const name = decodeURIComponent(match[2]);
+    if (owner === "fixture" && name === "redirect-blocked") {
+      // This is a distinct Compose network alias for this fixture. It is
+      // intentionally *not* trusted by the web test policy. If a regression
+      // follows the redirect, `/__test/blocked-target` would increment here.
+      response.writeHead(302, { location: "http://github-blocked-target:8080/__test/blocked-target" });
+      response.end();
+      return;
+    }
+    if (owner === "fixture" && name === "redirect-loop") {
+      response.writeHead(302, { location: "/repos/fixture/redirect-loop" });
+      response.end();
+      return;
+    }
+    if (owner === "fixture" && name === "unavailable") {
+      return send(response, 503, { message: "fixture provider unavailable" });
+    }
     const repository = repos.get(`${owner}/${name}`);
     if (!repository) return send(response, 404, { message: "Not Found" });
     const denied = accessFailure(request, repository);

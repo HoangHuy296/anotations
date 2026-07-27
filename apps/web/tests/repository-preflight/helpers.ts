@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { randomBytes } from "node:crypto";
+import { promisify } from "node:util";
 
 import { createQueueTransport } from "@fieldframe/queue";
 
@@ -34,6 +36,60 @@ export const preflightHttpSkipReason = "repository-preflight HTTP integration sk
 
 const httpBaseUrl = process.env.REPOSITORY_PREFLIGHT_HTTP_BASE_URL ?? "";
 const testPassword = randomBytes(24).toString("base64url");
+const execFileAsync = promisify(execFile);
+
+function githubFixtureBaseUrl() {
+  const raw = process.env.GITHUB_API_BASE_URL ?? "";
+  const url = new URL(raw);
+  if (!isUsableHttpEndpoint(raw, ["127.0.0.1", "localhost", "github-fixture"])) {
+    throw new Error("controlled GitHub fixture endpoint is not configured");
+  }
+  return url.origin;
+}
+
+/** Fixture-only controls. They are never routed through Fieldframe. */
+export async function resetGithubFixtureCounter() {
+  const response = await fetch(`${githubFixtureBaseUrl()}/__test/reset`, { method: "POST" });
+  assert.equal(response.status, 204, "GitHub fixture counter reset failed");
+}
+
+export async function githubFixtureRequestCount() {
+  return (await githubFixtureCounters()).requests;
+}
+
+export async function githubFixturePathCount(path: string) {
+  assert.ok(path.startsWith("/"));
+  return (await githubFixtureCounters()).paths[path] ?? 0;
+}
+
+async function githubFixtureCounters() {
+  const response = await fetch(`${githubFixtureBaseUrl()}/__test/counter`, { cache: "no-store" });
+  assert.equal(response.status, 200, "GitHub fixture counter read failed");
+  const body = await response.json() as { requests?: unknown; paths?: unknown };
+  assert.equal(typeof body.requests, "number");
+  assert.ok(body.paths && typeof body.paths === "object" && !Array.isArray(body.paths));
+  const paths = Object.fromEntries(Object.entries(body.paths as Record<string, unknown>).map(([path, count]) => {
+    assert.equal(typeof count, "number");
+    return [path, count as number];
+  }));
+  return { requests: body.requests as number, paths };
+}
+
+/**
+ * Gitea has no test counter API. In the explicit Compose-only assertion mode,
+ * use its access log as the equivalent provider-call evidence. The helper
+ * returns only a count and never surfaces log text (which could contain a
+ * repository path); health checks are excluded by matching only `/api/v1/`.
+ */
+export async function giteaProviderAccessLogCountSince(since: Date) {
+  if (process.env.GITEA_ACCESS_LOG_ASSERTIONS !== "1") return null;
+  const { stdout } = await execFileAsync(
+    "docker",
+    ["compose", "logs", "--no-color", "--since", since.toISOString(), "gitea"],
+    { cwd: new URL("../../../../", import.meta.url).pathname, maxBuffer: 512 * 1024 },
+  );
+  return stdout.split("\n").filter((line) => line.includes("/api/v1/")).length;
+}
 
 function sessionCookie(response: Response) {
   const match = /^fieldframe_session=([^;]+)/i.exec(response.headers.get("set-cookie") ?? "");
@@ -136,7 +192,25 @@ export async function preflightTransportSnapshot() {
     failFast: true,
   });
   try {
-    return { objects: objects.sort(), queue: await queue.getJobCounts("wait", "active", "delayed", "completed", "failed") };
+    // `apps/web` must not import ioredis/BullMQ directly. The controlled
+    // Compose Redis container already owns its password in environment; this
+    // test-only CLI query snapshots only our isolated namespace's key names.
+    const prefix = process.env.BULLMQ_PREFIX ?? "fieldframe-phase014-test";
+    assert.match(prefix, /^[A-Za-z0-9:_-]{8,120}$/);
+    const redisDb = String(Number(process.env.REDIS_DB ?? "15"));
+    const { stdout } = await execFileAsync(
+      "docker",
+      [
+        "compose", "exec", "-T", "redis", "sh", "-lc",
+        `redis-cli --no-auth-warning -a "$REDIS_PASSWORD" -n ${redisDb} --scan --pattern "${prefix}:*"`,
+      ],
+      { cwd: new URL("../../../../", import.meta.url).pathname, maxBuffer: 512 * 1024 },
+    );
+    return {
+      objects: objects.sort(),
+      queue: await queue.getJobCounts("wait", "active", "delayed", "completed", "failed"),
+      redisKeys: stdout.split("\n").map((key) => key.trim()).filter(Boolean).sort(),
+    };
   } finally {
     await queue.close();
   }
@@ -152,4 +226,6 @@ export function assertNoPreflightSecret(value: unknown, sentinels: readonly stri
     "tokenEncrypted", "refreshTokenEncrypted", "Authorization", "DATABASE_URL", "REDIS_PASSWORD",
     "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "SOURCE_CONNECTION_ENCRYPTION_KEY", "stack", ...sentinels,
   ]) assert.equal(serialized.includes(forbidden), false, `preflight response leaked ${forbidden}`);
+  assert.equal(/"(?:token|pat|password|ciphertext|authorization|cookie)"\s*:/i.test(serialized), false, "preflight response exposed a sensitive field");
+  assert.equal(/https?:\/\/[^"\s]*@/i.test(serialized), false, "preflight response exposed credentialed URL syntax");
 }

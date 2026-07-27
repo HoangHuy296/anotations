@@ -38,8 +38,14 @@ export function toPreflightError(
   if (!(error instanceof ProviderTransportError)) return new PreflightError("PROVIDER_UNAVAILABLE");
   if (error.kind === "UNSAFE") return new PreflightError("UNSAFE_REPOSITORY_URL");
   if (error.kind === "UNAVAILABLE" || error.kind === "INVALID_RESPONSE") return new PreflightError("PROVIDER_UNAVAILABLE");
-  if (error.kind === "UNAUTHORIZED") return new PreflightError(hasCredential ? "SOURCE_TOKEN_EXPIRED" : "REPOSITORY_ACCESS_DENIED");
+  // Provider 401 does not safely prove expiry rather than revocation or a bad
+  // token. Credential failures intentionally share SOURCE_TOKEN_INVALID.
+  if (error.kind === "UNAUTHORIZED") return new PreflightError(hasCredential ? "SOURCE_TOKEN_INVALID" : "REPOSITORY_ACCESS_DENIED");
   if (error.kind === "FORBIDDEN") return new PreflightError(hasCredential ? "SOURCE_TOKEN_INVALID" : "REPOSITORY_ACCESS_DENIED");
+  // Credential/ciphertext failures deliberately collapse to
+  // SOURCE_TOKEN_INVALID. Selector failures intentionally remain distinct:
+  // a syntactically valid ref or root can be independently corrected without
+  // changing a credential, and neither code reveals provider internals.
   if (stage === "ref") return new PreflightError("REF_NOT_FOUND");
   if (stage === "root") return new PreflightError("ROOT_PATH_NOT_FOUND");
   return new PreflightError("REPOSITORY_NOT_FOUND");

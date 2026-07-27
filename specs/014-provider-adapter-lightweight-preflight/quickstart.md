@@ -223,6 +223,149 @@ is contract-only and its Phase-014 implementation rejects invocation.
   full UI credential-mode matrix and all response redaction cases. Therefore
   T045 and T047 remain open and this record is not phase-completion evidence.
 
+## Partial US2 security-matrix evidence — 2026-07-27
+
+This is deliberately **not** the Phase-014 closure record and does not run
+T041. It records only the completed T022–T027/T032 security tranche.
+
+- Services: controlled `docker-compose.preflight.yaml` web runtime, PostgreSQL,
+  passworded Redis DB `15`, MinIO, local Gitea, and the private
+  `github-fixture`. Web was recreated with server-only
+  `SOURCE_TEST_DNS_OVERRIDES`, then restored with normal
+  `docker-compose.yaml` after the matrix.
+- Authentication: every Fieldframe request used normal `/api/auth/signup` then
+  `/api/auth/login` opaque-cookie sessions. No JWT, `DEV_AUTH_EMAIL`, seeded
+  session, or browser auth bypass was used.
+- Redacted command shape: `REPOSITORY_PREFLIGHT_INTEGRATION_TESTS=1`,
+  `SOURCE_CONNECTION_TEST_MODE=1`, isolated Redis DB/prefix
+  `15`/`fieldframe-phase014-test`, `PHASE014_DNS_MATRIX=1`,
+  `PHASE014_TIMING_MATRIX=1`, then
+  `pnpm --filter @fieldframe/web test:repository-preflight`.
+- Result: **30 passed, 0 failed, 0 skipped** in 35.26 seconds. The suite
+  covered forbidden request bodies, public-with-connection and
+  existing-connection-with-PAT denials, foreign/malformed/unknown connection
+  concealment, a real controlled private-Gitea-without-connection concealment
+  result, private GitHub denial, expired/revoked/corrupt/provider-401
+  credential convergence, numeric/userinfo/query/fragment URL policy,
+  loopback/private/mixed/failing DNS, blocked redirects, and bounded redirect
+  loops.
+- No-side-effect snapshots compared canonical Dataset, Job, JobEvent,
+  SourceConnection, ExternalRepository, and Asset projections; isolated
+  Redis namespace key names plus BullMQ counts; and MinIO
+  `phase014-test/` object names. All tested preflight denials and successes
+  left these snapshots unchanged.
+- Provider-call evidence is intentionally asymmetric: the GitHub fixture uses
+  fixture-only `POST /__test/reset` and `GET /__test/counter`; pre-policy
+  GitHub denials observed zero calls. Real Gitea has no counter route, so
+  tests take a Compose access-log timestamp and assert zero matching
+  `/api/v1/` repository calls, excluding health/static/admin/setup traffic.
+  No production test route was added.
+- Response redaction passed for success, semantic failure, provider
+  unavailable, concealed connection, and credential-invalid responses. The
+  log audit is **N/A**: no safe test-accessible structured application logger
+  exists; HTTP redaction is the evidence. PATs, ciphertext, session cookies,
+  provider URLs, database/Redis/MinIO configuration, and stack traces were not
+  printed in this record.
+- Timing convergence: aggregate-only test samples used 30 requests each for
+  expired, revoked, corrupt-ciphertext, and provider-401 states. **Max median
+  delta observed: 4.33ms; threshold: 100ms; PASS.** No individual timings or
+  credential material were recorded.
+- The credential-invalid response policy is intentional: expired, revoked,
+  corrupt ciphertext, and provider-side 401 all return the same `422
+  SOURCE_TOKEN_INVALID` safe body. `REF_NOT_FOUND` and
+  `ROOT_PATH_NOT_FOUND` remain intentionally distinct safe selector errors.
+
+## T033–T035 prerequisite verification — 2026-07-27
+
+This verification was completed before beginning T033–T035 and must be
+reconfirmed before T041. It is not a T041 consolidated record.
+
+- **PASS — redirect target evidence is path-scoped.** The fixture resets both
+  its total and per-path counters before each redirect case. The allowed
+  initial path `/repos/fixture/redirect-blocked` must be exactly `1`, while the
+  untrusted Compose alias target `/__test/blocked-target` must be exactly `0`.
+  This distinguishes the allowed initial redirect response from a prohibited
+  redirect-target fetch; it is not an aggregate-only counter assertion.
+- **PASS — Gitea access-log assertions are serial.** The Node test command
+  uses `--test-concurrency=1`; the two tests that open a Gitea access-log
+  window additionally declare `concurrency: false`. The access-log mechanism
+  remains intentionally distinct from the GitHub fixture counter mechanism.
+- **PASS — fixed aggregate timing record.** Thirty authenticated HTTP requests
+  were measured for each converged state. Expired: median `26.25ms`, p95
+  `35.36ms`; revoked: median `25.32ms`, p95 `35.52ms`; corrupted ciphertext:
+  median `25.03ms`, p95 `31.64ms`; provider-side 401: median `29.36ms`, p95
+  `36.29ms`. Max median delta observed: **4.12ms**; threshold: **100ms**;
+  **PASS**. Only aggregates were recorded; individual timings were not logged.
+- **PASS — `REVOKED` is pre-existing.** `git show HEAD:prisma/schema.prisma`
+  contains `SourceConnectionStatus.REVOKED`, and
+  `git diff -- prisma/schema.prisma` is empty for the Phase-014 working tree.
+  No schema change or migration was introduced for this state.
+- Verification command result: **30 passed, 0 failed, 0 skipped** in 40.89
+  seconds under the controlled Compose override. Normal Compose web runtime
+  was restored after the run.
+
+## Provider parity and HTTP redaction evidence — 2026-07-27
+
+This records T033–T035/T038 only. It is not the final Phase-014 closure and
+does not mark T041 complete.
+
+- Controlled Compose result: **32 passed, 0 failed, 0 skipped** in 43.05
+  seconds. Authentication used only normal signup/login opaque cookies with
+  PostgreSQL, isolated passworded Redis DB `15` / prefix
+  `fieldframe-phase014-test`, MinIO `phase014-test/`, local Gitea, and the
+  fixture-only GitHub service.
+- Contract parity compares public GitHub, public Gitea, and owned credentialed
+  Gitea result envelopes without requiring provider-specific preview content
+  to match. It verifies safe provider/repository/visibility/ref/root fields,
+  no credential or raw provider DTO, and normalized repository/ref/root/
+  access/unavailable failures. Gitea provider 401 is intentionally normalized
+  to `422 SOURCE_TOKEN_INVALID`; Phase 014 has no GitHub credential lifecycle.
+- HTTP parity covers public GitHub, public Gitea, owned active Gitea,
+  concealed private GitHub, and repository/ref/root failures. Every case uses
+  before/after PostgreSQL canonical projections, isolated Redis key/queue
+  snapshots, and MinIO prefix snapshots; no preflight creates a Dataset, Job,
+  JobEvent, queue delivery, or object.
+- HTTP redaction covers success, semantic failure, provider unavailable,
+  foreign/unknown/malformed connections, expired/corrupt/provider-401
+  credentials, and the actual deprecated `POST /api/gitea/import` route. That
+  route exists, returns `410 GITEA_IMPORT_DEPRECATED`, and is the former
+  persistence boundary—not an invented compatibility endpoint. Responses were
+  checked for PAT/token/ciphertext field exposure, authorization/session data,
+  raw provider errors, stacks, configuration, private credentials-in-URL, and
+  presigned query syntax. Structured-log audit remains N/A because no safe
+  test-accessible logger exists; HTTP response redaction is the enforced
+  evidence.
+
+## Final Phase-014 controlled validation and closure — 2026-07-27
+
+- T041 controlled Compose matrix: **32 passed, 0 failed, 0 skipped** in 44.23
+  seconds. Services were PostgreSQL, passworded Redis DB `15` with isolated
+  `fieldframe-phase014-test` prefix, MinIO `phase014-test/`, web, local Gitea,
+  and the fixture-only GitHub provider. A worker was not needed: this phase's
+  preflight boundary is read-only and creates no durable Job to deliver.
+- Every request authenticated with normal signup/login opaque cookies. The
+  matrix re-confirmed no Dataset, Job, JobEvent, Redis/BullMQ delivery, or
+  MinIO object mutation; response redaction, provider parity, per-path
+  redirect-target non-contact, serial Gitea access-log evidence, and the
+  converged credential-invalid response contract all passed.
+- T041 timing rerun: max median delta **5.45ms**, fixed threshold **100ms**,
+  **PASS**. Only aggregate timing output was retained.
+- Final commands passed: `pnpm exec prisma validate`,
+  `pnpm --filter @fieldframe/web typecheck`,
+  `pnpm --filter @fieldframe/web lint`,
+  `pnpm --filter @fieldframe/web build`, and `git diff --check`.
+- Scope confirmation: no schema/migration/dependency/JWT/auth-bypass change;
+  no provider clone/download/persisted manifest during preflight; no provider
+  credential, encrypted token, private URL, storage/database/Redis setting,
+  cookie, or stack trace entered an HTTP response, Job input, queue payload,
+  Dataset metadata, or this record. The only fixture endpoints are private to
+  the GitHub test service. Normal Compose web runtime was restored after the
+  matrix.
+
+Phase 014 is validated and closed. The next phase may build on the provider
+preflight contract, but must preserve read-only preflight and the existing
+source-backed durable Job boundary.
+
 ## Real Gitea saved-one-time-PAT evidence — 2026-07-24
 
 - Verified the local provider using only safe metadata: repository
