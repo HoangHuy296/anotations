@@ -9,12 +9,12 @@
 - Use a normal `/api/auth/login` opaque-cookie session. Do not use
   `DEV_AUTH_EMAIL`, JWT, browser token storage, or a provider credential in
   browser state.
-- Before implementation validation, obtain explicit approval for the narrow
-  durable idempotency schema migration described in
-  [data-model.md](./data-model.md). Do not apply a migration merely by running
-  this guide.
+- The approved local development migrations add the creation-idempotency
+  boundary and preserve the user-approved `sourceBranch` → `sourceRef` rename.
+  Do not apply either migration to another environment without its own change
+  approval.
 
-## Planned validation commands
+## Validation commands
 
 Run commands only after the implementation tasks exist and configuration is
 available. Never print `.env` values, provider credentials, storage
@@ -31,8 +31,22 @@ pnpm --filter @fieldframe/web build
 git diff --check
 ```
 
-The exact repository-import test script must be added by the later task phase;
-do not substitute an unrelated mocked suite.
+For controlled Compose HTTP evidence, use a separate passworded Redis DB and
+prefix. The worker is deliberately stopped while acceptance tests inspect
+`QUEUED` Jobs and exact deliveries, then restored afterward:
+
+```bash
+REPOSITORY_PREFLIGHT_INTEGRATION_TESTS=1 \
+SOURCE_CONNECTION_TEST_MODE=1 \
+QUEUE_INTEGRATION_TESTS=1 \
+REPOSITORY_IMPORT_TEST_CONSUMERS_STOPPED=1 \
+REPOSITORY_PREFLIGHT_HTTP_BASE_URL=http://127.0.0.1:3000 \
+GITHUB_API_BASE_URL=http://127.0.0.1:18080 \
+REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
+BULLMQ_PREFIX=fieldframe-phase015-test \
+REDIS_TEST_PREFIX=fieldframe-phase015-test \
+pnpm --filter @fieldframe/web test:repository-import-request
+```
 
 ## Controlled runtime scenario
 
@@ -60,6 +74,66 @@ The normal production/local queue namespace remains untouched.
 8. Simulate enqueue unavailability after a valid durable commit. Confirm the
    one Job remains `QUEUED` and eligible for existing recovery; do not delete
    or recreate the Dataset/Job.
+
+## Runtime evidence — 2026-07-28
+
+- **Authentication**: normal `/api/auth/signup` and `/api/auth/login`
+  opaque-cookie sessions; no JWT, `DEV_AUTH_EMAIL`, or auth bypass.
+- **Compose services**: PostgreSQL, passworded Redis, MinIO, web, controlled
+  GitHub fixture, and local Gitea fixture. Worker consumption was stopped only
+  while asserting the isolated acceptance namespace and was restored after the
+  run.
+- **Isolation**: Redis DB `15`, `fieldframe-phase015-test` prefix, and the
+  `phase015-test/` MinIO snapshot prefix. The normal
+  `annotation-platform` namespace was not used by the controlled suite.
+- **Repository-import matrix command**: the command above completed in
+  `22.348s`: 17 tests total, 16 passed, 0 failed, 1 intentionally skipped.
+  The skipped case is the dedicated transport-outage test, because that test
+  must run with web pointed at an unused Redis port.
+- **Transport-outage command**: the dedicated real-outage recovery test passed
+  `1/1` in `3.881s`. It verified `202` after commit, one `QUEUED` Job with no
+  queue stamp, and recovery delivery of exactly `{ jobId }` for that same Job.
+- **No-side-effect/redaction**: invalid input, unsafe provider selections,
+  foreign/malformed connection IDs, and owned expired/revoked/`ERROR`/missing
+  credential states left Dataset, Job, JobEvent, isolated Redis, and MinIO
+  snapshots unchanged. Response tests excluded credential, ciphertext, raw
+  Job, queue, storage, configuration, and stack-trace fields. No secret value
+  was printed.
+- **Prisma**: `pnpm exec prisma validate`, `pnpm exec prisma generate`, and
+  `pnpm exec prisma migrate status` passed; the local schema is up to date.
+- **Dependency regression suites**:
+  - repository-preflight: 32 total, 29 passed, 0 failed, 3 documented
+    fixture/access-log skips;
+  - auth/ownership: 15 passed, 0 failed, 0 skipped;
+  - worker queue: 23 total, 19 passed, 0 failed, 4 documented runtime skips.
+- **Static/build validation**: root `pnpm typecheck` and `pnpm lint` passed;
+  `git diff --check` passed. The host `pnpm build` wrote a fresh Next build
+  artifact; the controlled `COMPOSE_BAKE=false docker compose build web` also
+  completed the domain, queue, and production web build. Worker build passed
+  with `pnpm --filter @fieldframe/worker build`.
+
+## Scope review — single public write boundary confirmed
+
+Phase 015 did not implement repository cloning, complete manifest persistence,
+binary transfer, MinIO writes, Asset creation, or worker import processing.
+PostgreSQL remains Job authority and every observed BullMQ delivery is exactly
+`{ jobId }`.
+
+On 2026-07-28, `/datasets/imports` was migrated to read-only `POST
+/api/source-import-preflight` followed by the sole durable route `POST
+/api/datasets/from-repository`. The UI supplies the Phase-015 idempotency key
+only at Start Import. For `ONE_TIME_PAT`, preflight is in-memory only and
+Start Import requires `saveAsSourceConnection=true`; the shared transaction
+creates the encrypted owned SourceConnection, Dataset, and Job once.
+
+`POST /api/source-import-jobs` is retired and returns `410
+SOURCE_IMPORT_JOBS_DEPRECATED`. The controlled Compose run used normal
+opaque-cookie signup/login, PostgreSQL, MinIO, Gitea, GitHub fixture, and
+passworded Redis DB `15` with prefix `fieldframe-phase015-test`. It recorded
+**21 total, 20 passed, 0 failed, 1 documented queue-outage skip** in 25.1
+seconds. It proved no durable effects during preflight/denial, one idempotent
+encrypted connection for the saved one-time PAT path, and queue payloads
+exactly `{ jobId }`. No secret values were printed.
 
 ## Expected evidence record
 

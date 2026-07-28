@@ -60,7 +60,7 @@
 - [X] T021 [US1] Implement item object verification, Asset/child-row reconciliation, and durable progress update in `apps/web/src/lib/imports/complete-local-folder-item.ts`
 - [X] T022 [US1] Implement idempotent item-complete endpoint in `apps/web/src/app/api/imports/[preparedImportId]/items/[itemId]/complete/route.ts`
 - [X] T023 [US1] Implement browser folder picker, safe preflight scanner, batch transfer state, and no-path client model in `apps/web/src/components/imports/local-folder-import-form.tsx`
-- [X] T024 [US1] Implement new Dataset local-folder page in `apps/web/src/app/(app)/datasets/new/local-folder/page.tsx`
+- [X] T024 [US1] Implement new Dataset local-folder page in `apps/web/src/app/(app)/datasets/local-folder/page.tsx`
 
 **Checkpoint**: A complete set of files can be prepared and uploaded into a new Dataset without final completion being claimed.
 

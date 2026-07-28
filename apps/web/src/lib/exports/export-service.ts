@@ -15,7 +15,7 @@ import type { SafeExportJob } from "@/lib/exports/types";
 const exportJobSelect = {
   id: true, datasetId: true, type: true, status: true, stage: true, progress: true,
   totalItems: true, processedItems: true, successItems: true, failedItems: true,
-  skippedItems: true, summary: true, createdAt: true, updatedAt: true,
+  skippedItems: true, summary: true, errorCode: true, createdAt: true, startedAt: true, finishedAt: true, updatedAt: true,
 } as const;
 
 type ExportJobProjection = PrismaTypes.JobGetPayload<{ select: typeof exportJobSelect }>;

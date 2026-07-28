@@ -229,9 +229,11 @@ model Dataset {
   externalRepositoryId String?
   sourceConnectionId   String?
   sourceRootPath       String?
-  sourceBranch         String?
+  sourceRef            String?
   lockedRevision       String?
   currentRevision      String?
+  creationIdempotencyKey String?
+  creationRequestHash String?
   includePatterns      Json                @default("[]")
   excludePatterns      Json                @default("[]")
   lastSyncedAt         DateTime?
@@ -261,6 +263,7 @@ model Dataset {
   @@index([externalRepositoryId])
   @@index([sourceConnectionId])
   @@index([currentRevision])
+  @@unique([ownerId, creationIdempotencyKey])
 }
 
 /// *
@@ -351,7 +354,7 @@ model Asset {
   checksum             String?
   externalRepositoryId String?
   sourceProvider       RepoProvider?
-  sourceBranch         String?
+  sourceRef            String?
   sourceRevision       String?
   sourcePath           String?
   sourceFileSha        String?
@@ -426,7 +429,7 @@ model AssetVersion {
   sourceMode           DatasetSourceMode
   externalRepositoryId String?
   sourceProvider       RepoProvider?
-  sourceBranch         String?
+  sourceRef            String?
   sourceRevision       String?
   sourcePath           String?
   sourceFileSha        String?

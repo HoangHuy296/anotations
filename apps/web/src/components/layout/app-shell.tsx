@@ -32,6 +32,14 @@ export async function AppShell({
   currentPath = "/dashboard",
 }: AppShellProps) {
   const actor = await getRequestActor();
+  const pathSegments = currentPath
+    .split("?")[0]
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => ({
+      raw: segment,
+      label: segment.length > 18 ? "Details" : segment.replaceAll("-", " "),
+    }));
   return (
     <div className="min-h-[100dvh] bg-zinc-50 text-zinc-950">
       <div className="mx-auto grid min-h-[100dvh] max-w-[1600px] grid-cols-1 bg-white lg:grid-cols-[236px_minmax(0,1fr)]">
@@ -98,10 +106,16 @@ export async function AppShell({
         <div className="min-w-0">
           <header className="flex h-16 items-center justify-between border-b border-zinc-200 px-4 sm:px-6 lg:px-8">
             <AppMark compact className="lg:hidden" />
-            <div className="hidden items-center gap-2 text-sm text-zinc-500 lg:flex">
-              <span className="font-medium text-zinc-900">Workspace</span>
-              <span className="text-zinc-300">/</span>
-              <span>Production</span>
+            <div className="hidden min-w-0 items-center gap-2 text-sm text-zinc-500 lg:flex" aria-label="Current page">
+              <Link className="font-medium text-zinc-900 hover:text-sky-700" href="/dashboard">Workspace</Link>
+              {pathSegments.map((segment, index) => (
+                <span className="flex min-w-0 items-center gap-2" key={`${segment.raw}-${index}`}>
+                  <span className="text-zinc-300">/</span>
+                  <span className={cn("truncate capitalize", index === pathSegments.length - 1 && "font-medium text-zinc-900")}>
+                    {segment.label}
+                  </span>
+                </span>
+              ))}
             </div>
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost" size="sm">

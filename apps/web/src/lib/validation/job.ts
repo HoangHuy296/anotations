@@ -20,6 +20,9 @@ const safeSummarySchema = z.object({
   outcome: z.enum(["completed", "failed", "canceled"]).optional(),
   completedAt: z.string().datetime().optional(),
   resultCount: z.number().int().nonnegative().optional(),
+  imported: z.number().int().nonnegative().optional(),
+  skipped: z.number().int().nonnegative().optional(),
+  failed: z.number().int().nonnegative().optional(),
 }).strict();
 
 export const safeJobSummarySchema = safeSummarySchema.nullable();

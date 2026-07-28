@@ -10,8 +10,12 @@ export type JobDisplayStatus = {
   successCount: number | null;
   failedCount: number | null;
   skippedCount: number | null;
-  summary: { message?: string; outcome?: "completed" | "failed" | "canceled"; completedAt?: string; resultCount?: number } | null;
+  summary: { message?: string; outcome?: "completed" | "failed" | "canceled"; completedAt?: string; resultCount?: number; imported?: number; skipped?: number; failed?: number } | null;
+  errorCode: string | null;
+  errorMessage: string | null;
   createdAt: string;
+  startedAt: string | null;
+  finishedAt: string | null;
   updatedAt: string;
 };
 

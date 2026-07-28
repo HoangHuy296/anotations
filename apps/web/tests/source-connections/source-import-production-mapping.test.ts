@@ -51,9 +51,9 @@ test("normal production web maps only configured public Gitea root to its intern
       datasetName: "production one-time preview",
       credentialMode: "ONE_TIME_PAT",
       serverUrl: process.env.SOURCE_CONNECTION_GITEA_BASE_URL,
-      token: pat,
+      personalAccessToken: pat,
       saveAsSourceConnection: true,
-      sourceConnectionName: "production preview only",
+      connectionName: "production preview only",
       repository: { owner: "annotation-admin", repo: "ImageDataset", ref: "main", expectedVisibility: "PUBLIC" },
     }),
   });
@@ -64,7 +64,7 @@ test("normal production web maps only configured public Gitea root to its intern
   assertNoSourceSecret(oneTimeBody, [pat]);
   assert.deepEqual(await Promise.all([db.dataset.count(), db.sourceConnection.count(), db.job.count()]), before);
 
-  const blockedStart = await request("/api/source-import-jobs", {
+  const blockedStart = await request("/api/datasets/from-repository", {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: actor.cookie },
     body: JSON.stringify({
@@ -72,6 +72,7 @@ test("normal production web maps only configured public Gitea root to its intern
       datasetName: "visibility mismatch must not persist",
       credentialMode: "PUBLIC",
       serverUrl: process.env.SOURCE_CONNECTION_GITEA_BASE_URL,
+      idempotencyKey: "phase015-production-mapping-visibility-mismatch",
       repository: { owner: "annotation-admin", repo: "ImageDataset", ref: "main", expectedVisibility: "PRIVATE" },
     }),
   });

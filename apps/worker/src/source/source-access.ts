@@ -2,6 +2,7 @@ import { createDecipheriv } from "node:crypto";
 
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { normalizeSourceRootPath, validateSourceBaseUrl, validateSourceImportLimits } from "@fieldframe/domain";
+import { parseRepositoryImportInput, type RepositoryAccess } from "../jobs/repository-import-source.js";
 
 export type SourceAccessResolution =
   | { kind: "not-applicable" }
@@ -22,13 +23,64 @@ function decryptToken(value: string) {
   } catch { return null; }
 }
 
+function canonicalBaseUrl(value: string) {
+  const url = new URL(value);
+  if (!url.hostname || !["http:", "https:"].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
+    return null;
+  }
+  return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
+}
+
+/**
+ * A browser reaches the local Compose Gitea service through its published
+ * loopback URL, whereas a private worker must use the Compose network alias.
+ * The substitution is an exact, server-controlled topology mapping: it never
+ * accepts an internal hostname from a Job or browser request.
+ */
+export function resolveWorkerReachableGiteaBaseUrl(raw: string, environment: NodeJS.ProcessEnv = process.env) {
+  const publicUrl = environment.GITEA_PUBLIC_URL;
+  const internalUrl = environment.GITEA_INTERNAL_URL;
+  if (environment.FIELDFRAME_RUNTIME !== "compose" || !publicUrl || !internalUrl) return raw;
+  try {
+    const canonicalRaw = canonicalBaseUrl(raw);
+    const canonicalPublic = canonicalBaseUrl(publicUrl);
+    const canonicalInternal = canonicalBaseUrl(internalUrl);
+    return canonicalRaw && canonicalPublic && canonicalInternal && canonicalRaw === canonicalPublic
+      ? canonicalInternal
+      : raw;
+  } catch {
+    return raw;
+  }
+}
+
 /** Re-resolves authoritative state; it never consumes queue payload configuration. */
 export async function resolveSourceAccessForJob(db: PrismaClient, jobId: string): Promise<SourceAccessResolution> {
   const job = await db.job.findUnique({
     where: { id: jobId },
     select: { sourceConnectionId: true, input: true, createdById: true, createdBy: { select: { role: true } } },
   });
-  if (!job?.sourceConnectionId) return { kind: "not-applicable" };
+  if (!job) return { kind: "not-applicable" };
+  // Preserve the stable policy code for a syntactically visible unsafe root
+  // while the strict parser still rejects every other malformed input shape.
+  const rawSource = job.input && typeof job.input === "object" && !Array.isArray(job.input)
+    ? (job.input as { source?: unknown }).source : null;
+  const rawRepository = rawSource && typeof rawSource === "object" && !Array.isArray(rawSource)
+    ? (rawSource as { repository?: unknown }).repository : null;
+  const rawRootCandidate = rawRepository && typeof rawRepository === "object" && !Array.isArray(rawRepository)
+    ? (rawRepository as { rootPath?: unknown }).rootPath : undefined;
+  if (typeof rawRootCandidate === "string" && !normalizeSourceRootPath(rawRootCandidate).ok) {
+    return { kind: "refused", errorCode: "SOURCE_ROOT_PATH_UNSAFE" };
+  }
+  const parsedInput = parseRepositoryImportInput(job.input);
+  if (!parsedInput) return { kind: "refused", errorCode: "SOURCE_TOKEN_INVALID" };
+  if (!job.sourceConnectionId) {
+    if (parsedInput.repository.visibility !== "PUBLIC") return { kind: "refused", errorCode: "SOURCE_CONNECTION_NOT_FOUND" };
+    const baseUrl = parsedInput.repository.provider === "GITEA" ? process.env.GITEA_INTERNAL_URL : process.env.GITHUB_API_BASE_URL;
+    if (!baseUrl) return { kind: "refused", errorCode: "SOURCE_URL_UNSAFE" };
+    const address = await validateSourceBaseUrl(baseUrl);
+    if (!address.ok) return { kind: "refused", errorCode: "SOURCE_URL_UNSAFE" };
+    return { kind: "ready", sourceConnectionId: "", baseUrl: address.value.toString(), token: "", rootPath: parsedInput.repository.rootPath ?? "" };
+  }
   const connection = await db.sourceConnection.findUnique({
     where: { id: job.sourceConnectionId },
     select: { id: true, userId: true, baseUrl: true, tokenEncrypted: true, tokenExpiresAt: true, status: true, revokedAt: true },
@@ -39,23 +91,23 @@ export async function resolveSourceAccessForJob(db: PrismaClient, jobId: string)
     return { kind: "refused", errorCode: "SOURCE_TOKEN_EXPIRED" };
   }
   if (job.createdById !== connection.userId && job.createdBy.role !== "ADMIN") return { kind: "refused", errorCode: "SOURCE_CONNECTION_NOT_FOUND" };
+  // Validate the durable public/provider address first. When it is the exact
+  // configured Compose Gitea public root, use the server-controlled internal
+  // alias for the worker network hop; do not validate or accept a browser
+  // supplied internal hostname.
   const address = await validateSourceBaseUrl(connection.baseUrl);
   if (!address.ok) return { kind: "refused", errorCode: "SOURCE_URL_UNSAFE" };
-  const source = job.input && typeof job.input === "object" && !Array.isArray(job.input)
-    ? (job.input as Record<string, unknown>).source
-    : undefined;
-  const sourceRecord = source && typeof source === "object" && !Array.isArray(source)
-    ? source as Record<string, unknown>
-    : null;
-  const repository = sourceRecord?.repository && typeof sourceRecord.repository === "object" && !Array.isArray(sourceRecord.repository)
-    ? sourceRecord.repository as Record<string, unknown>
-    : null;
-  const rawRoot = typeof repository?.normalizedRootPath === "string" ? repository.normalizedRootPath : "";
+  const rawRoot = parsedInput.repository.rootPath ?? "";
   const rootPath = normalizeSourceRootPath(rawRoot);
   if (!rootPath.ok) return { kind: "refused", errorCode: "SOURCE_ROOT_PATH_UNSAFE" };
-  const manifest = sourceRecord?.manifest && typeof sourceRecord.manifest === "object" && !Array.isArray(sourceRecord.manifest) ? sourceRecord.manifest as Record<string, unknown> : null;
-  const limitResult = validateSourceImportLimits({ itemCount: typeof manifest?.itemCount === "number" ? manifest.itemCount : 0, declaredBytes: typeof manifest?.declaredBytes === "number" ? manifest.declaredBytes : 0, ...(typeof manifest?.durationMs === "number" ? { durationMs: manifest.durationMs } : {}) });
+  const limitResult = validateSourceImportLimits(parsedInput.manifest);
   if (!limitResult.ok) return { kind: "refused", errorCode: "SOURCE_IMPORT_LIMIT_EXCEEDED" };
   const token = decryptToken(connection.tokenEncrypted);
-  return token ? { kind: "ready", sourceConnectionId: connection.id, baseUrl: address.value.toString(), token, rootPath: rootPath.value } : { kind: "refused", errorCode: "SOURCE_TOKEN_INVALID" };
+  const baseUrl = resolveWorkerReachableGiteaBaseUrl(address.value.toString());
+  return token ? { kind: "ready", sourceConnectionId: connection.id, baseUrl, token, rootPath: rootPath.value } : { kind: "refused", errorCode: "SOURCE_TOKEN_INVALID" };
+}
+
+/** Converts a successful durable-source revalidation into the provider bridge shape. */
+export function sourceAccessToRepositoryAccess(value: SourceAccessResolution): RepositoryAccess | null {
+  return value.kind === "ready" ? { baseUrl: value.baseUrl, token: value.token || null } : null;
 }

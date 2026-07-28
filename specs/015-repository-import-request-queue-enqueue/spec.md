@@ -29,6 +29,10 @@ delivery contains only that Job identifier, and the progress page opens.
 2. **Given** a private repository and an active SourceConnection owned by the
    signed-in user, **When** the user submits a valid selection, **Then** the
    import request references that connection without revealing its credential.
+3. **Given** a user supplies a one-time Gitea PAT and explicitly chooses to
+   save it, **When** preflight succeeds and they start import, **Then** the
+   PAT is encrypted into one owned SourceConnection in the same durable
+   transaction as the Dataset and Job; no plaintext credential is persisted.
 3. **Given** a user submits the same accepted request again using the same
    idempotency key, **When** the first request has already been accepted,
    **Then** the existing accepted request is returned without creating another
@@ -88,8 +92,9 @@ the displayed request belongs to the Dataset; a non-member cannot read it.
 ### Edge Cases
 
 - A public repository must not require or persist a SourceConnection.
-- A private repository must not accept a browser-supplied token or a foreign,
-  disabled, expired, or revoked SourceConnection.
+- A private repository may use an active owned SourceConnection or a one-time
+  PAT only when `saveAsSourceConnection=true`; an unsaved one-time PAT is
+  rejected with `ONE_TIME_PAT_REQUIRES_SAVE_FOR_ASYNC_IMPORT`.
 - A delivery failure after durable acceptance must leave the queued Job
   recoverable rather than deleting or duplicating it.
 - A browser retry or double click must not create duplicate Dataset, Job, or
@@ -103,13 +108,17 @@ the displayed request belongs to the Dataset; a non-member cannot read it.
 
 ### Functional Requirements
 
-- **FR-001**: The product MUST provide a Create from Repository wizard at
-  `/datasets/new` and a Dataset-scoped import progress page at
-  `/datasets/[datasetId]/imports/[jobId]`.
+- **FR-001**: The product MUST provide the Create from Repository workflow at
+  `/datasets/imports` and a Dataset-scoped import progress page at
+  `/datasets/[datasetId]/imports/[jobId]`. `/datasets/new` is retained only as
+  a redirect to the canonical entry; it is not a second creation flow.
 - **FR-002**: The wizard MUST require a repository provider, repository
   identity, requested ref, optional root path, Dataset name, expected
-  visibility, and an idempotency key; it MUST not send an owner, storage key,
-  provider credential, queue payload, or policy override.
+  visibility, and an idempotency key. It supports only `PUBLIC`,
+  `EXISTING_SOURCE_CONNECTION`, and `ONE_TIME_PAT` credential modes. A PAT is
+  transient request data only and is accepted solely for Gitea one-time
+  preflight/start with `saveAsSourceConnection=true`; it must never reach a
+  hash, Dataset metadata, Job input, queue payload, response, or log.
 - **FR-003**: The authenticated request endpoint `POST
   /api/datasets/from-repository` MUST authorize Dataset creation and repository
   access from the server-side actor, never from browser-supplied ownership.
@@ -124,10 +133,13 @@ the displayed request belongs to the Dataset; a non-member cannot read it.
   import Job as one controlled acceptance boundary; the Job MUST retain only
   allowlisted repository identity, resolved revision, root selection, bounded
   preview/manifest metadata, and a SourceConnection identifier when required.
-- **FR-007**: A public import MUST have no SourceConnection reference. A
-  private import MUST use an active, owned SourceConnection; browser tokens,
-  decrypted credentials, and encrypted credential material MUST not be placed
-  in Dataset metadata, Job input, events, responses, or queue transport.
+- **FR-007**: A public import MUST have no SourceConnection reference. An
+  existing-connection import MUST use an active, owned SourceConnection. A
+  one-time-PAT async import MUST create exactly one encrypted owned
+  SourceConnection in the accepted transaction and requires an explicit name
+  and save flag. Browser tokens, decrypted credentials, and encrypted
+  credential material MUST not be placed in Dataset metadata, Job input,
+  events, responses, or queue transport.
 - **FR-008**: After durable acceptance, the system MUST request one background
   delivery whose payload is exactly `{ jobId }`. If delivery cannot be made,
   the queued Job MUST remain recoverable through the existing recovery
@@ -146,7 +158,11 @@ the displayed request belongs to the Dataset; a non-member cannot read it.
   stack trace may be returned.
 - **FR-013**: This phase MUST reuse the approved repository preflight and
   source-backed import acceptance boundary; it MUST NOT introduce a parallel
-  legacy import path or a workflow-specific Job table.
+  legacy import path or a workflow-specific Job table. `POST
+  /api/source-import-preflight` is read-only and `POST
+  /api/datasets/from-repository` is the only public durable creation boundary;
+  `POST /api/source-import-jobs` is deprecated with `410
+  SOURCE_IMPORT_JOBS_DEPRECATED`.
 
 ### Key Entities *(include if feature involves data)*
 

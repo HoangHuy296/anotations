@@ -1,4 +1,5 @@
-import type { JobStage, JobStatus, JobType, Modality } from "@internal/db";
+import type { JobStatus, JobType, Modality } from "@internal/db";
+import type { SafeJobStage } from "@/lib/jobs/safe-job-stage";
 
 /**
  * Browser-safe export status. This deliberately excludes raw Job JSON,
@@ -9,7 +10,7 @@ export type SafeExportJob = {
   datasetId: string;
   type: Extract<JobType, "EXPORT_DATASET">;
   status: JobStatus;
-  stage: JobStage | null;
+  stage: SafeJobStage | null;
   progress: number | null;
   totalItems: number | null;
   processedItems: number | null;

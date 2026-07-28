@@ -56,8 +56,8 @@ export function DatasetNavigationGroup({ activePath }: DatasetNavigationGroupPro
             Imports
           </Link>
           <Link
-            className={childLinkClass(activePath === "/datasets/new/local-folder")}
-            href="/datasets/new/local-folder"
+            className={childLinkClass(activePath === "/datasets/local-folder")}
+            href="/datasets/local-folder"
           >
             <UploadSimple aria-hidden="true" size={15} />
             Upload

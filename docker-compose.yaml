@@ -78,7 +78,9 @@ services:
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
       FIELDFRAME_RUNTIME: compose
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: ${REPOSITORY_PREFLIGHT_INTEGRATION_TESTS:-0}
-      GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-http://github-fixture:8080}
+      # Public GitHub is the normal deployment endpoint. The controlled
+      # preflight override is the only place that substitutes github-fixture.
+      GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
       GITHUB_WEB_BASE_URL: ${GITHUB_WEB_BASE_URL:-https://github.com}
       SOURCE_CONNECTION_TEST_MODE: ${SOURCE_CONNECTION_TEST_MODE:-}
       # Test-only deterministic resolver input. It is ignored unless both
@@ -122,7 +124,11 @@ services:
       SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-wSA2xXBH4KiKxAjt9b38M8bqk6QbYzbs0p9AZkUp+4I=}
       GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}  
+      GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
       FIELDFRAME_RUNTIME: compose
+      # Required only by the controlled fixture override; production remains
+      # disabled by default and cannot enable it through browser input.
+      REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: ${REPOSITORY_PREFLIGHT_INTEGRATION_TESTS:-0}
       SOURCE_CONNECTION_TEST_MODE: ${SOURCE_CONNECTION_TEST_MODE:-}
       SOURCE_TRUSTED_TEST_HOSTS: ${SOURCE_TRUSTED_TEST_HOSTS:-}
       SOURCE_ALLOWED_IP_CIDRS: ${SOURCE_ALLOWED_IP_CIDRS:-}

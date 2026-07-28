@@ -22,7 +22,7 @@ export async function ImportsScreen({ currentPath }: { currentPath: string }) {
             <span className="text-xs font-bold uppercase tracking-[0.14em]">Gitea import</span>
           </div>
           <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-zinc-950">Import a repository folder</h1>
-          <p className="mt-2 max-w-[65ch] text-sm leading-6 text-zinc-500">Preview the selected tree first. Fieldframe writes repository, dataset, and image records only after the preview passes safety limits.</p>
+          <p className="mt-2 max-w-[65ch] text-sm leading-6 text-zinc-500">Preview repository access and a bounded asset sample first. Only Start Import may create the dataset and durable background job.</p>
         </header>
         <div className="mt-7"><ImportForm connections={connections} /></div>
       </div>

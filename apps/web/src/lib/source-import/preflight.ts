@@ -3,6 +3,7 @@ import "server-only";
 import type { RequestActor } from "@/lib/auth";
 import { PreflightError } from "@/lib/providers/provider-errors";
 import { getRepositoryProvider } from "@/lib/providers/provider-registry";
+import { getGiteaBranches } from "@/lib/providers/gitea/gitea.client";
 import { resolvePreflightGiteaCredential } from "@/lib/providers/token-check";
 import type { PreflightResult, ServerCredentialContext } from "@/lib/providers/provider.types";
 import { normalizeSourceRootPath, validateSourceBaseUrl } from "@/lib/source-access-policy";
@@ -47,6 +48,7 @@ export type SourceImportPreflight = {
   result: PreflightResult;
   baseUrl: string;
   sourceConnectionId: string | null;
+  availableRefs: string[];
 };
 
 /**
@@ -80,7 +82,7 @@ export async function preflightSourceImport(
       baseUrl = canonicalBaseUrl(address.value);
     }
     if (input.credentialMode === "ONE_TIME_PAT") {
-      credential = { connectionId: null, baseUrl, token: input.token! };
+      credential = { connectionId: null, baseUrl, token: input.personalAccessToken! };
     }
   }
 
@@ -92,5 +94,15 @@ export async function preflightSourceImport(
     rootPath: root.value || null,
     credential,
   });
-  return { result, baseUrl, sourceConnectionId };
+  let availableRefs: string[];
+  try {
+    availableRefs = await getGiteaBranches(baseUrl, { owner: input.repository.owner, name: input.repository.repo }, credential);
+  } catch (error) {
+    // A repository can be valid even when its provider refuses branch listing.
+    // Preserve the verified selected ref as a safe, usable picker option.
+    if (error instanceof PreflightError) throw error;
+    availableRefs = [result.ref.resolved];
+  }
+  if (!availableRefs.includes(result.ref.resolved)) availableRefs.unshift(result.ref.resolved);
+  return { result, baseUrl, sourceConnectionId, availableRefs };
 }

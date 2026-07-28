@@ -2,10 +2,11 @@
 
 ## Routes
 
-- `/datasets/new` — Create from Repository wizard.
+- `/datasets/imports` — Create from Repository wizard. `/datasets/new`
+  redirects here and is not a second durable creation path.
 - `/datasets/[datasetId]/imports/[jobId]` — authorized import progress page.
 
-`/datasets/new/local-folder` remains the separate approved local-folder flow.
+`/datasets/local-folder` remains the separate approved local-folder flow.
 
 ## Wizard behavior
 

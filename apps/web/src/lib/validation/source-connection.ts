@@ -73,9 +73,9 @@ const sourceImportBaseSchema = z.object({
   credentialMode: z.enum(["PUBLIC", "EXISTING_SOURCE_CONNECTION", "ONE_TIME_PAT"]),
   sourceConnectionId: z.string().trim().min(1).max(128).optional(),
   serverUrl: z.string().trim().url().max(2048).optional(),
-  token: z.string().min(1).max(4096).optional(),
+  personalAccessToken: z.string().min(1).max(4096).optional(),
   saveAsSourceConnection: z.boolean().optional(),
-  sourceConnectionName: z.string().trim().min(1).max(80).optional(),
+  connectionName: z.string().trim().min(1).max(80).optional(),
 }).strict();
 
 /**
@@ -85,17 +85,17 @@ const sourceImportBaseSchema = z.object({
 export const sourceImportPreflightSchema = sourceImportBaseSchema.superRefine((value, context) => {
   if (value.credentialMode === "PUBLIC") {
     if (!value.serverUrl) context.addIssue({ code: "custom", path: ["serverUrl"], message: "A Gitea server URL is required for public import." });
-    if (value.sourceConnectionId || value.token || value.saveAsSourceConnection || value.sourceConnectionName) context.addIssue({ code: "custom", path: ["credentialMode"], message: "Public import cannot include credentials." });
+    if (value.sourceConnectionId || value.personalAccessToken || value.saveAsSourceConnection || value.connectionName) context.addIssue({ code: "custom", path: ["credentialMode"], message: "Public import cannot include credentials." });
   }
   if (value.credentialMode === "EXISTING_SOURCE_CONNECTION") {
     if (!value.sourceConnectionId) context.addIssue({ code: "custom", path: ["sourceConnectionId"], message: "Select an active source connection." });
-    if (value.serverUrl || value.token || value.saveAsSourceConnection || value.sourceConnectionName) context.addIssue({ code: "custom", path: ["credentialMode"], message: "An existing connection supplies its own credentials." });
+    if (value.serverUrl || value.personalAccessToken || value.saveAsSourceConnection || value.connectionName) context.addIssue({ code: "custom", path: ["credentialMode"], message: "An existing connection supplies its own credentials." });
   }
   if (value.credentialMode === "ONE_TIME_PAT") {
     if (!value.serverUrl) context.addIssue({ code: "custom", path: ["serverUrl"], message: "A Gitea server URL is required." });
-    if (!value.token) context.addIssue({ code: "custom", path: ["token"], message: "A personal access token is required." });
+    if (!value.personalAccessToken) context.addIssue({ code: "custom", path: ["personalAccessToken"], message: "A personal access token is required." });
     if (value.sourceConnectionId) context.addIssue({ code: "custom", path: ["sourceConnectionId"], message: "Choose one credential mode." });
-    if (value.saveAsSourceConnection && !value.sourceConnectionName) context.addIssue({ code: "custom", path: ["sourceConnectionName"], message: "Name the source connection before saving it." });
+    if (value.saveAsSourceConnection && !value.connectionName) context.addIssue({ code: "custom", path: ["connectionName"], message: "Name the source connection before saving it." });
   }
 });
 

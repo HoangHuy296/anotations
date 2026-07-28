@@ -56,7 +56,7 @@ export function DatasetActionMenu() {
           </Link>
           <Link
             className="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-800 outline-none transition hover:bg-sky-50 hover:text-sky-800 focus-visible:ring-2 focus-visible:ring-sky-400"
-            href="/datasets/new/local-folder"
+            href="/datasets/local-folder"
             onClick={() => setOpen(false)}
             role="menuitem"
           >

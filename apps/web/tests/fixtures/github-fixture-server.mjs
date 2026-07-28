@@ -89,6 +89,18 @@ const server = http.createServer((request, response) => {
       return bearer(request) ? send(response, 200, { login: "fixture-user", id: 9001 }) : send(response, 401, { message: "Requires authentication" });
     }
 
+    const raw = /^\/raw\/([^/]+)\/([^/]+)\/([^/]+)\/(.+)$/.exec(url.pathname);
+    if (raw) {
+      const repository = repos.get(`${decodeURIComponent(raw[1])}/${decodeURIComponent(raw[2])}`);
+      const file = repository?.files.find((candidate) => candidate.sha === decodeURIComponent(raw[3]) && candidate.path === decodeURIComponent(raw[4]));
+      if (!repository || !file) return send(response, 404, { message: "Not Found" });
+      const denied = accessFailure(request, repository);
+      if (denied) return send(response, denied.status, denied.body);
+      response.writeHead(200, { "content-type": "application/octet-stream", "content-length": String(file.size) });
+      response.end(Buffer.alloc(file.size, 0));
+      return;
+    }
+
     const match = /^\/repos\/([^/]+)\/([^/]+)(?:\/(.*))?$/.exec(url.pathname);
     if (!match) return send(response, 404, { message: "Not Found" });
     const owner = decodeURIComponent(match[1]);

@@ -16,6 +16,8 @@
     "test:workspace": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/workspace/**/*.test.ts",
     "test:source-connections": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/source-connections/**/*.test.ts",
     "test:repository-preflight": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/repository-preflight/**/*.test.ts",
+    "test:repository-import-request": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/repository-import-request/**/*.test.ts",
+    "test:repository-import-worker": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/repository-import-worker/**/*.test.ts",
     "test:source-connections:vitest": "vitest run tests/source-connections/source-access-policy.vitest.spec.ts --environment node"
   },
   "dependencies": {

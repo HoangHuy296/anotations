@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test:queue": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/queue/**/*.test.ts",
     "test:import": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/queue/import-*.test.ts",
-    "test:source-access": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/source/**/*.test.ts"
+    "test:source-access": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/source/**/*.test.ts",
+    "test:repository-import": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/repository-import/**/*.test.ts"
   },
   "dependencies": {
     "@fieldframe/domain": "workspace:*",

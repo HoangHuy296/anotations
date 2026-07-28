@@ -8,12 +8,17 @@ import { readAuthorizedJobForAction } from "@/lib/jobs/authorization";
 import { enqueueExistingJob } from "@/lib/queue/enqueue-job";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { exportJobInputSchema } from "@/lib/validation/export";
+import {
+  buildSafeRepositoryImportJobInput,
+  isSafeRepositoryImportJobInput,
+} from "@/lib/repository-import/types";
 
 type RetryContext = {
   datasetId: string;
   type: JobType;
   modality: "IMAGE" | "VIDEO" | "TEXT" | "AUDIO" | null;
   input: unknown;
+  sourceConnectionId: string | null;
 };
 
 /**
@@ -21,7 +26,11 @@ type RetryContext = {
  * queue types must receive an explicit reviewed mapping here; raw input/state,
  * errors, provider connections and storage references never cross retries.
  */
-function extractRetryContext(job: RetryContext): { input: { format: "JSON"; manifestSchemaVersion: "1" }; modality: RetryContext["modality"] } | null {
+function extractRetryContext(job: RetryContext): {
+  input: { format: "JSON"; manifestSchemaVersion: "1" } | ReturnType<typeof buildSafeRepositoryImportJobInput>;
+  modality: RetryContext["modality"];
+  sourceConnectionId: string | null;
+} | null {
   switch (job.type) {
     case "EXPORT_DATASET": {
       const parsed = exportJobInputSchema.safeParse(job.input);
@@ -31,6 +40,29 @@ function extractRetryContext(job: RetryContext): { input: { format: "JSON"; mani
       return {
         input: parsed.success ? parsed.data : { format: "JSON", manifestSchemaVersion: "1" },
         modality: job.modality,
+        sourceConnectionId: null,
+      };
+    }
+    case "IMPORT_DATASET": {
+      if (!isSafeRepositoryImportJobInput(job.input)) return null;
+      const source = job.input.source;
+      // The durable reference and its allowlisted input mirror each other.
+      // Reject historical/tampered rows instead of copying arbitrary JSON into
+      // a successor Job.
+      if (source.sourceConnectionId !== job.sourceConnectionId) return null;
+      return {
+        input: buildSafeRepositoryImportJobInput({
+          provider: source.repository.provider,
+          owner: source.repository.owner,
+          repo: source.repository.repo,
+          ref: source.repository.ref,
+          normalizedRootPath: source.repository.rootPath,
+          visibility: source.repository.visibility,
+          sourceConnectionId: source.sourceConnectionId,
+          manifest: source.manifest,
+        }),
+        modality: job.modality,
+        sourceConnectionId: source.sourceConnectionId,
       };
     }
     default:
@@ -48,7 +80,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string): Pr
 
   const queueName = await db.job.findUnique({
     where: { id: authorized.job.id },
-    select: { id: true, datasetId: true, type: true, status: true, modality: true, input: true },
+    select: { id: true, datasetId: true, type: true, status: true, modality: true, input: true, sourceConnectionId: true },
   });
   if (!queueName || queueName.status !== JobStatus.FAILED || !resolveQueueName(queueName.type)) {
     return { ok: false, status: 409 };
@@ -68,7 +100,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string): Pr
       const original = await tx.job.findUnique({
         where: { id: jobId },
         select: {
-          id: true, datasetId: true, type: true, status: true, modality: true, input: true,
+          id: true, datasetId: true, type: true, status: true, modality: true, input: true, sourceConnectionId: true,
           retrySuccessor: { select: { id: true, datasetId: true, type: true, status: true } },
         },
       });
@@ -78,6 +110,19 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string): Pr
       if (original.retrySuccessor) return original.retrySuccessor;
       const retryContext = extractRetryContext(original);
       if (!retryContext || !resolveQueueName(original.type)) throw new RetryConflict();
+      if (retryContext.sourceConnectionId) {
+        const connection = await tx.sourceConnection.findFirst({
+          where: {
+            id: retryContext.sourceConnectionId,
+            userId: actor.id,
+            status: "ACTIVE",
+            revokedAt: null,
+            OR: [{ tokenExpiresAt: null }, { tokenExpiresAt: { gt: new Date() } }],
+          },
+          select: { id: true },
+        });
+        if (!connection) throw new RetryConflict();
+      }
       created = true;
       return tx.job.create({
         data: {
@@ -88,6 +133,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string): Pr
           modality: retryContext.modality,
           status: JobStatus.QUEUED,
           trigger: JobTrigger.RETRY,
+          sourceConnectionId: retryContext.sourceConnectionId,
           // Only the canonical allowlisted export configuration crosses the
           // retry boundary. Never duplicate the original raw input JSON.
           input: retryContext.input,

@@ -11,6 +11,10 @@ import { createWebQueue } from "@/lib/queue/bullmq-client";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { validateSourceImportLimits } from "@/lib/source-access-policy";
 import { encryptSourceToken } from "@/lib/source-connection-crypto";
+import {
+  buildSafeRepositoryImportJobInput,
+  reconcileDatasetCreationIdempotency,
+} from "@/lib/repository-import/types";
 
 type QueueEvent = "QUEUE_ENQUEUED" | "QUEUE_DELIVERY_PENDING";
 type QueueEventReason = "QUEUE_UNAVAILABLE";
@@ -40,10 +44,12 @@ export type SafeSourceJobInput = {
 
 export type NewDatasetSourceImportInput = {
   datasetName: string;
+  /** Present only for the durable Phase-015 repository-create contract. */
+  creationIdempotency?: { key: string; requestHash: string };
   sourceConnection: { id: string; baseUrl: string } | null;
   createSourceConnection: { name: string; baseUrl: string; token: string } | null;
   repository: {
-    provider: "GITEA";
+    provider: "GITEA" | "GITHUB";
     baseUrl: string;
     owner: string;
     repo: string;
@@ -53,6 +59,22 @@ export type NewDatasetSourceImportInput = {
   };
   manifest: { itemCount: number; declaredBytes: number; durationMs?: number };
 };
+
+type NewDatasetImportJob = {
+  id: string;
+  datasetId: string;
+  status: JobStatus;
+  queueName: string | null;
+  queueJobId: string | null;
+  enqueuedAt: Date | null;
+  sourceConnectionId: string | null;
+};
+
+type NewDatasetCreation =
+  | { kind: "created"; job: NewDatasetImportJob; sourceConnectionId: string | null }
+  | { kind: "reused"; job: NewDatasetImportJob; sourceConnectionId: string | null }
+  | { kind: "conflict" }
+  | null;
 
 const SOURCE_JOB_TRANSACTION_ATTEMPTS = 3;
 
@@ -125,9 +147,46 @@ export async function createAndEnqueueNewDatasetSourceImportJob(
     return { ok: false as const, status: 409 as const };
   }
 
-  const created = await db.$transaction(async (tx) => {
+  const resolveIdempotentResult = async (client: typeof db): Promise<NewDatasetCreation> => {
+    if (!input.creationIdempotency) return null;
+    const existing = await client.dataset.findUnique({
+      where: {
+        ownerId_creationIdempotencyKey: {
+          ownerId: actor.id,
+          creationIdempotencyKey: input.creationIdempotency.key,
+        },
+      },
+      select: {
+        id: true,
+        sourceConnectionId: true,
+        creationRequestHash: true,
+        jobs: {
+          where: { type: "IMPORT_DATASET", createdById: actor.id, idempotencyKey: input.creationIdempotency.key },
+          orderBy: { createdAt: "asc" },
+          take: 1,
+          select: { id: true, datasetId: true, status: true, queueName: true, queueJobId: true, enqueuedAt: true, sourceConnectionId: true },
+        },
+      },
+    });
+    const reconciliation = reconcileDatasetCreationIdempotency(
+      existing
+        ? { creationRequestHash: existing.creationRequestHash, job: existing.jobs[0] ?? null }
+        : null,
+      input.creationIdempotency.requestHash,
+    );
+    if (reconciliation.kind === "absent") return null;
+    if (reconciliation.kind === "conflict") return { kind: "conflict" };
+    return {
+      kind: "reused",
+      job: reconciliation.job,
+      sourceConnectionId: existing!.sourceConnectionId,
+    };
+  };
+
+  const create = async (): Promise<NewDatasetCreation> => db.$transaction(async (tx) => {
+    const existing = await resolveIdempotentResult(tx as typeof db);
+    if (existing) return existing;
     let sourceConnectionId: string | null = null;
-    let sourceBaseUrl = input.repository.baseUrl;
 
     if (input.sourceConnection) {
       const connection = await tx.sourceConnection.findFirst({
@@ -139,11 +198,10 @@ export async function createAndEnqueueNewDatasetSourceImportJob(
           revokedAt: null,
           OR: [{ tokenExpiresAt: null }, { tokenExpiresAt: { gt: new Date() } }],
         },
-        select: { id: true, baseUrl: true },
+        select: { id: true },
       });
       if (!connection) return null;
       sourceConnectionId = connection.id;
-      sourceBaseUrl = connection.baseUrl;
     } else if (input.createSourceConnection) {
       const connection = await tx.sourceConnection.create({
         data: {
@@ -165,8 +223,14 @@ export async function createAndEnqueueNewDatasetSourceImportJob(
         name: input.datasetName,
         sourceMode: DatasetSourceMode.MIRROR_TO_MINIO,
         sourceConnectionId,
-        sourceBranch: input.repository.ref,
+        sourceRef: input.repository.ref,
         sourceRootPath: input.repository.normalizedRootPath || null,
+        ...(input.creationIdempotency
+          ? {
+              creationIdempotencyKey: input.creationIdempotency.key,
+              creationRequestHash: input.creationIdempotency.requestHash,
+            }
+          : {}),
       },
       select: { id: true },
     });
@@ -178,37 +242,67 @@ export async function createAndEnqueueNewDatasetSourceImportJob(
         type: "IMPORT_DATASET",
         status: JobStatus.QUEUED,
         sourceConnectionId,
+        provider: input.repository.provider,
+        idempotencyKey: input.creationIdempotency?.key,
         totalItems: input.manifest.itemCount,
-        input: {
-          source: {
-            repository: {
-              provider: input.repository.provider,
-              // Credentialed imports resolve the server address again from
-              // PostgreSQL. Public imports retain the safe public endpoint
-              // because there is no SourceConnection to resolve.
-              ...(sourceConnectionId ? {} : { baseUrl: sourceBaseUrl }),
-              owner: input.repository.owner,
-              repo: input.repository.repo,
-              ref: input.repository.ref,
-              rootPath: input.repository.normalizedRootPath,
-              visibility: input.repository.visibility,
-            },
-            manifest: input.manifest,
-            sourceConnectionId,
-          },
-        },
+        // The worker re-resolves any server/provider address from its
+        // configured provider adapter or SourceConnection. Durable input is
+        // limited to repository identity, bounded manifest metadata, and the
+        // optional credential reference; it never contains a URL or token.
+        input: buildSafeRepositoryImportJobInput({
+          provider: input.repository.provider,
+          owner: input.repository.owner,
+          repo: input.repository.repo,
+          ref: input.repository.ref,
+          normalizedRootPath: input.repository.normalizedRootPath || null,
+          visibility: input.repository.visibility,
+          sourceConnectionId,
+          manifest: input.manifest,
+        }),
       },
-      select: { id: true, datasetId: true, status: true, queueName: true, queueJobId: true, enqueuedAt: true },
+      select: { id: true, datasetId: true, status: true, queueName: true, queueJobId: true, enqueuedAt: true, sourceConnectionId: true },
     });
-    return { job, sourceConnectionId };
+    return { kind: "created", job, sourceConnectionId };
   }, { isolationLevel: "Serializable" });
 
+  let created: NewDatasetCreation = null;
+  for (let attempt = 0; attempt < SOURCE_JOB_TRANSACTION_ATTEMPTS; attempt += 1) {
+    try {
+      created = await create();
+      break;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002" && input.creationIdempotency) {
+        created = await resolveIdempotentResult(db);
+        break;
+      }
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2034" || attempt === SOURCE_JOB_TRANSACTION_ATTEMPTS - 1) throw error;
+    }
+  }
+
   if (!created) return { ok: false as const, status: 404 as const };
+  if (created.kind === "conflict") return { ok: false as const, status: 409 as const, reason: "IDEMPOTENCY_KEY_CONFLICT" as const };
+  if (created.kind === "reused") {
+    return {
+      ok: true as const,
+      status: 200 as const,
+      job: created.job,
+      datasetId: created.job.datasetId,
+      sourceConnectionId: created.sourceConnectionId,
+      // A concurrent replay can observe the committed Dataset/Job before the
+      // first request has stamped queue transport fields. It is still the
+      // same accepted durable request, so preserve the idempotency contract
+      // (200) rather than projecting it as a second 202 acceptance. The
+      // original request/recovery scanner remains solely responsible for
+      // delivery; this replay never calls enqueue again.
+      deliveryPending: false,
+      reused: true as const,
+    };
+  }
   const queueName = resolveQueueName("IMPORT_DATASET");
   if (!queueName) return { ok: false as const, status: 400 as const };
   const delivery = await enqueueExistingJob(created.job.id, queueName, created.job);
   if (!delivery.ok) return delivery;
-  return { ...delivery, datasetId: created.job.datasetId, sourceConnectionId: created.sourceConnectionId };
+  return { ...delivery, datasetId: created.job.datasetId, sourceConnectionId: created.sourceConnectionId, reused: false as const };
 }
 
 type QueueClient = {
@@ -216,6 +310,19 @@ type QueueClient = {
   close: () => Promise<void>;
 };
 type EnqueueOptions = { createQueue?: () => QueueClient };
+
+/**
+ * The queue transport contract is deliberately constructed in one place: it
+ * contains the durable Job identifier and nothing else. PostgreSQL remains
+ * the source for all Job input and state.
+ */
+export function buildDurableJobQueueDelivery(jobId: string) {
+  return {
+    name: "durable-job" as const,
+    payload: jobQueuePayloadSchema.parse({ jobId }),
+    queueJobId: getQueueDeliveryId(jobId),
+  };
+}
 
 export async function enqueueExistingJob(
   jobId: string,
@@ -227,15 +334,20 @@ export async function enqueueExistingJob(
   if (!job || job.status !== JobStatus.QUEUED || ("cancelRequestedAt" in job && job.cancelRequestedAt)) return { ok: false as const, status: 409 as const };
   const queueName = expectedQueueName ?? resolveQueueName(("type" in job ? job.type : "") as JobType);
   if (!queueName) return { ok: false as const, status: 400 as const };
-  const deliveryId = getQueueDeliveryId(job.id);
+  const delivery = buildDurableJobQueueDelivery(job.id);
+  const deliveryId = delivery.queueJobId;
   if (job.enqueuedAt) {
     return job.queueName === queueName && job.queueJobId === deliveryId
       ? { ok: true as const, status: 200 as const, job, deliveryPending: false }
       : { ok: false as const, status: 409 as const };
   }
-  const client = options.createQueue?.() ?? createWebQueue();
+  // Construction may fail before `queue.add()` when the local Redis transport
+  // is unavailable. The Job is already durable, so preserve it as QUEUED for
+  // recovery rather than allowing a route-level 500.
+  let client: QueueClient | null = null;
   try {
-    await client.queue.add("durable-job", jobQueuePayloadSchema.parse({ jobId: job.id }), { jobId: deliveryId });
+    client = options.createQueue?.() ?? createWebQueue();
+    await client.queue.add(delivery.name, delivery.payload, { jobId: delivery.queueJobId });
     const stamp = await db.job.updateMany({
       // A private worker may claim or even finish this Job immediately after
       // queue.add(). Transport stamping records that delivery fact and must not
@@ -254,5 +366,5 @@ export async function enqueueExistingJob(
   } catch {
     await writeQueueEvent(job.id, "QUEUE_DELIVERY_PENDING", { queueName, reason: "QUEUE_UNAVAILABLE" });
     return { ok: true as const, status: 202 as const, job, deliveryPending: true };
-  } finally { await client.close(); }
+  } finally { await client?.close().catch(() => undefined); }
 }

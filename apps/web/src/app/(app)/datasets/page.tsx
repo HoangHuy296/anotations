@@ -11,6 +11,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { DatasetRowActions } from "@/components/datasets/dataset-row-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { db, isDatabaseConfigured } from "@/lib/db";
@@ -20,9 +21,12 @@ type DatasetSummary = {
   id: string;
   name: string;
   sourceRootPath: string | null;
-  sourceBranch: string | null;
+  sourceRef: string | null;
   sourceMode: DatasetSourceMode;
+  ownerId: string;
+  metadata: unknown;
   externalRepository: { fullName: string } | null;
+  members: Array<{ role: "MANAGER" | "LABELER" | "REVIEWER" | "OWNER" }>;
   _count: { assets: number };
 };
 
@@ -32,7 +36,8 @@ type DatasetStatusCount = {
   _count: { _all: number };
 };
 
-const PAGE_SIZE = 25;
+/** The dataset library deliberately stays compact: one page is seven datasets. */
+const PAGE_SIZE = 7;
 type SearchParams = { after?: string | string[]; before?: string | string[] };
 const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
 
@@ -65,11 +70,12 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
       take: PAGE_SIZE + 1,
       include: {
         externalRepository: { select: { fullName: true } },
+        members: { where: { userId: actor.id }, select: { role: true } },
         _count: { select: { assets: true } },
       },
     });
     const hasOverflow = datasets.length > PAGE_SIZE;
-    const pageDatasets = (paginationMode === "before" ? datasets.slice(0, PAGE_SIZE).reverse() : datasets.slice(0, PAGE_SIZE)) as DatasetSummary[];
+    const pageDatasets = (paginationMode === "before" ? datasets.slice(0, PAGE_SIZE).reverse() : datasets.slice(0, PAGE_SIZE)) as unknown as DatasetSummary[];
     const statusCounts = await db.asset.groupBy({
       by: ["datasetId", "status"],
       where: { modality: "IMAGE", datasetId: { in: pageDatasets.map((dataset) => dataset.id) } },
@@ -99,13 +105,13 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
               Datasets
             </h1>
             <p className="mt-2 text-sm leading-6 text-zinc-500">
-              Imported folders retain their repository, branch, path, and file
-              SHA provenance.
+              Browse repository and local datasets, their source provenance, and
+              current annotation progress.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="secondary">
-              <Link href="/datasets/new/local-folder">Upload</Link>
+              <Link href="/datasets/local-folder">Upload</Link>
             </Button>
             <Button asChild>
               <Link href="/datasets/imports">Import dataset</Link>
@@ -144,8 +150,10 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                 .reduce((sum, count) => sum + count._count._all, 0);
               const progress =
                 total === 0
-                  ? 0
-                  : Math.round((completed / total) * 1000) / 10;
+                ? 0
+                : Math.round((completed / total) * 1000) / 10;
+              const workflowStatus = readWorkflowStatus(dataset.metadata);
+              const canManage = actor.role === UserRole.ADMIN || dataset.ownerId === actor.id || dataset.members.some((member) => member.role === "MANAGER");
 
               return (
                 <article
@@ -196,8 +204,12 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                   <div className="flex items-center gap-3 md:justify-end">
                     <Badge variant={dataset.sourceMode === DatasetSourceMode.UPLOAD ? "neutral" : "info"}>
                       <GitBranch aria-hidden="true" size={12} />
-                      {dataset.sourceMode === DatasetSourceMode.UPLOAD ? "local upload" : dataset.sourceBranch ?? "repository"}
+                      {dataset.sourceMode === DatasetSourceMode.UPLOAD ? "local upload" : dataset.sourceRef ?? "repository"}
                     </Badge>
+                    <Badge variant={workflowStatus === "REVIEWED" || workflowStatus === "COMPLETED" ? "success" : total === 0 ? "neutral" : "warning"}>
+                      {workflowStatus.replaceAll("_", " ").toLowerCase()}
+                    </Badge>
+                    {canManage ? <DatasetRowActions datasetId={dataset.id} datasetName={dataset.name} workflowStatus={workflowStatus} /> : null}
                     <Button
                       asChild
                       variant="icon"
@@ -220,7 +232,7 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                 <Link href={`/datasets?before=${encodeURIComponent(datasets[0].id)}`}>Previous page</Link>
               </Button>
             ) : <span />}
-            <p className="text-xs text-zinc-500">Showing up to {PAGE_SIZE} accessible datasets</p>
+            <p className="text-xs text-zinc-500">Showing {datasets.length} of up to {PAGE_SIZE} accessible datasets</p>
             {hasNext && datasets.at(-1) ? (
               <Button asChild variant="secondary" size="sm">
                 <Link href={`/datasets?after=${encodeURIComponent(datasets.at(-1)!.id)}`}>Next page</Link>
@@ -231,6 +243,14 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
       </div>
     </AppShell>
   );
+}
+
+function readWorkflowStatus(metadata: unknown): "IN_PROGRESS" | "COMPLETED" | "REVIEWED" {
+  if (metadata && typeof metadata === "object" && !Array.isArray(metadata)) {
+    const value = (metadata as Record<string, unknown>).workflowStatus;
+    if (value === "COMPLETED" || value === "REVIEWED" || value === "IN_PROGRESS") return value;
+  }
+  return "IN_PROGRESS";
 }
 
 function DatasetSetupState({ unavailable = false }: { unavailable?: boolean }) {

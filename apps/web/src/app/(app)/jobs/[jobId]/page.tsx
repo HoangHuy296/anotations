@@ -15,7 +15,7 @@ export default async function JobPage({ params }: { params: Promise<{ jobId: str
   const access = await readAuthorizedJob(actor, jobId);
   if (!access.ok) notFound();
   const [job, eventRows] = await Promise.all([
-    db.job.findUnique({ where: { id: access.job.id }, select: { id: true, datasetId: true, type: true, status: true, stage: true, progress: true, totalItems: true, processedItems: true, successItems: true, failedItems: true, skippedItems: true, summary: true, createdAt: true, updatedAt: true } }),
+    db.job.findUnique({ where: { id: access.job.id }, select: { id: true, datasetId: true, type: true, status: true, stage: true, progress: true, totalItems: true, processedItems: true, successItems: true, failedItems: true, skippedItems: true, summary: true, errorCode: true, createdAt: true, startedAt: true, finishedAt: true, updatedAt: true } }),
     db.jobEvent.findMany({ where: { jobId: access.job.id }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], take: 50, select: { id: true, createdAt: true, level: true, stage: true, message: true, data: true } }),
   ]);
   if (!job) notFound();

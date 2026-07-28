@@ -18,7 +18,7 @@ export async function GET(_: Request, context: { params: Promise<{ jobId: string
   );
   const job = await db.job.findUnique({ where: { id: access.job.id }, select: {
     id: true, datasetId: true, type: true, status: true, stage: true, progress: true, totalItems: true,
-    processedItems: true, successItems: true, failedItems: true, skippedItems: true, summary: true, createdAt: true, updatedAt: true,
+    processedItems: true, successItems: true, failedItems: true, skippedItems: true, summary: true, errorCode: true, createdAt: true, startedAt: true, finishedAt: true, updatedAt: true,
   } });
   if (!job) return apiError(404, "JOB_NOT_FOUND", "The job was not found.");
   return apiSuccess(toSafeJobStatus(job));

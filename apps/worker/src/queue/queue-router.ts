@@ -5,6 +5,7 @@ import { writeSafeJobEvent, type JobEventReason } from "../jobs/job-event-writer
 import { claimJob } from "../jobs/job-claim-lock.js";
 import { processImportDataset } from "../jobs/import-dataset.js";
 import { failJob } from "../jobs/job-claim-lock.js";
+import { cancelJob } from "../jobs/job-claim-lock.js";
 import { resolveSourceAccessForJob } from "../source/source-access.js";
 import { processExportDataset } from "../jobs/export-dataset.js";
 
@@ -29,6 +30,7 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
       type: true,
       status: true,
       cancelRequestedAt: true,
+      sourceConnectionId: true,
       dataset: { select: { archivedAt: true, deletedAt: true } },
     },
   });
@@ -51,13 +53,22 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
   if (claim.kind === "refused") return { kind: "skipped", reason: "NOT_QUEUED" };
   await writeSafeJobEvent(input.db, { jobId: job.id, kind: "QUEUE_RECEIVED", queueName, queueJobId: job.id });
   await writeSafeJobEvent(input.db, { jobId: job.id, kind: "JOB_CLAIMED" });
-  const sourceAccess = await resolveSourceAccessForJob(input.db, job.id);
-  if (sourceAccess.kind === "refused") {
-    await input.db.job.updateMany({ where: { id: job.id, lockToken: claim.lockToken, status: "RUNNING" }, data: { errorCode: sourceAccess.errorCode } });
-    await failJob(input.db, { jobId: job.id, lockToken: claim.lockToken });
+  const cancellation = await input.db.job.findFirst({ where: { id: job.id, lockToken: claim.lockToken }, select: { cancelRequestedAt: true, status: true } });
+  if (cancellation?.cancelRequestedAt || cancellation?.status === "CANCELING") {
+    await cancelJob(input.db, { jobId: job.id, lockToken: claim.lockToken });
     return { kind: "claimed", jobId: job.id };
   }
-  if (job.type === "IMPORT_DATASET") await processImportDataset(input.db, job.id);
+  // A durable connection is always revalidated before a worker may proceed.
+  // Local-folder jobs have no SourceConnection and retain their existing path.
+  if (job.type === "IMPORT_DATASET" && job.sourceConnectionId) {
+    const sourceAccess = await resolveSourceAccessForJob(input.db, job.id);
+    if (sourceAccess.kind === "refused") {
+      await input.db.job.updateMany({ where: { id: job.id, lockToken: claim.lockToken, status: "RUNNING" }, data: { errorCode: sourceAccess.errorCode } });
+      await failJob(input.db, { jobId: job.id, lockToken: claim.lockToken });
+      return { kind: "claimed", jobId: job.id };
+    }
+  }
+  if (job.type === "IMPORT_DATASET") await processImportDataset(input.db, job.id, claim.lockToken);
   if (job.type === "EXPORT_DATASET") await processExportDataset(input.db, job.id, claim.lockToken);
   return { kind: "claimed", jobId: job.id };
 }

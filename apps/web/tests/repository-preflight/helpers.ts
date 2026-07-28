@@ -29,7 +29,7 @@ export const preflightHttpEnabled = process.env.REPOSITORY_PREFLIGHT_INTEGRATION
   // The host test runner calls web through loopback; Compose web reaches this
   // controlled service through its private network name. No public provider is
   // accepted as an integration-test fixture.
-  && isUsableHttpEndpoint(process.env.GITHUB_API_BASE_URL, ["127.0.0.1", "localhost", "github-fixture"])
+  && isUsableHttpEndpoint(process.env.GITHUB_FIXTURE_CONTROL_BASE_URL ?? process.env.GITHUB_API_BASE_URL, ["127.0.0.1", "localhost"])
   && isolatedQueue;
 
 export const preflightHttpSkipReason = "repository-preflight HTTP integration skipped: require a usable loopback GitHub fixture endpoint plus isolated REDIS_DB/REDIS_TEST_DB and non-default REDIS_TEST_PREFIX/BULLMQ_PREFIX";
@@ -39,9 +39,12 @@ const testPassword = randomBytes(24).toString("base64url");
 const execFileAsync = promisify(execFile);
 
 function githubFixtureBaseUrl() {
-  const raw = process.env.GITHUB_API_BASE_URL ?? "";
+  // Compose web must use its private `github-fixture` DNS name. Host-side
+  // tests use the loopback-published fixture control URL strictly for the
+  // fixture-only counter endpoints; this never enters a Fieldframe request.
+  const raw = process.env.GITHUB_FIXTURE_CONTROL_BASE_URL ?? process.env.GITHUB_API_BASE_URL ?? "";
   const url = new URL(raw);
-  if (!isUsableHttpEndpoint(raw, ["127.0.0.1", "localhost", "github-fixture"])) {
+  if (!isUsableHttpEndpoint(raw, ["127.0.0.1", "localhost"])) {
     throw new Error("controlled GitHub fixture endpoint is not configured");
   }
   return url.origin;
@@ -142,7 +145,7 @@ export async function createOwnedPreflightGiteaConnection(cookie: string, token:
   return body.data.connection.id;
 }
 
-export async function sourceImportRequest(path: "/api/source-import-preflight" | "/api/source-import-jobs" | "/api/gitea/import", cookie: string | null, body: unknown) {
+export async function sourceImportRequest(path: "/api/source-import-preflight" | "/api/datasets/from-repository" | "/api/gitea/import", cookie: string | null, body: unknown) {
   return fetch(`${httpBaseUrl}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(cookie ? { Cookie: cookie } : {}) },

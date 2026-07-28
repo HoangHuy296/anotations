@@ -56,6 +56,24 @@ export async function getGiteaRevision(baseUrl: string, repository: RepositoryId
   return typeof sha === "string" && sha.length <= 128 ? sha : null;
 }
 
+/**
+ * A bounded branch projection for the browser's read-only Import Preview.
+ * It is provider metadata only: no file manifest or credential is returned.
+ */
+export async function getGiteaBranches(baseUrl: string, repository: RepositoryIdentity, credential: ServerCredentialContext | null): Promise<string[]> {
+  const body = await requestProviderJson({
+    baseUrl: apiBaseUrl(baseUrl),
+    path: `repos/${encodePath(repository.owner, repository.name)}/branches?limit=100&page=1`,
+    headers: authHeaders(credential),
+  });
+  if (!Array.isArray(body)) throw new ProviderTransportError("INVALID_RESPONSE");
+  return body.flatMap((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+    const name = (entry as Record<string, unknown>).name;
+    return typeof name === "string" && name.trim().length > 0 && name.length <= 255 ? [name] : [];
+  }).slice(0, 100);
+}
+
 export async function giteaRootExists(baseUrl: string, repository: RepositoryIdentity, ref: string, rootPath: string, credential: ServerCredentialContext | null): Promise<boolean> {
   const relative = rootPath ? `/${rootPath.split("/").map(encodeURIComponent).join("/")}` : "";
   await requestProviderJson({

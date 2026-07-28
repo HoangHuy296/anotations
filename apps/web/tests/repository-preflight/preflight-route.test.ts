@@ -98,14 +98,15 @@ test("source Start Import rejects an unsaved one-time PAT before durable work", 
   try {
     const before = { business: await preflightBusinessSnapshot(), transport: await preflightTransportSnapshot() };
     const sentinel = "one-time-pat-must-not-persist";
-    const response = await sourceImportRequest("/api/source-import-jobs", actor.cookie, {
+    const response = await sourceImportRequest("/api/datasets/from-repository", actor.cookie, {
       provider: "GITEA",
       datasetName: "must-not-exist",
       credentialMode: "ONE_TIME_PAT",
       serverUrl: "http://github-fixture:8080",
-      token: sentinel,
+      personalAccessToken: sentinel,
       saveAsSourceConnection: false,
-      repository: { owner: "fixture", repo: "private-images", ref: "main", expectedVisibility: "PRIVATE" },
+      repository: { owner: "fixture", name: "private-images", ref: "main", expectedVisibility: "PRIVATE" },
+      idempotencyKey: "phase015-preflight-unsaved-one-time-pat",
     });
     const body = await response.json();
     assert.equal(response.status, 422);

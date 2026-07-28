@@ -4,7 +4,7 @@
 
 ## Summary
 
-Provide one authenticated repository-import acceptance flow: `/datasets/new`
+Provide one authenticated repository-import acceptance flow: `/datasets/imports`
 performs a read-only Phase-014 preflight and then calls `POST
 /api/datasets/from-repository`. The server repeats preflight, accepts a valid
 request as one durable Dataset + `IMPORT_DATASET` Job boundary, commits it, and
@@ -17,6 +17,17 @@ acceptance service; the new API route is a public contract adapter, not a
 second Dataset/Job creation implementation. Repository clone, manifest
 persistence, object transfer, Asset creation, and worker business processing
 are deliberately excluded.
+
+### Public boundary decision
+
+`POST /api/source-import-preflight` remains read-only. `/datasets/imports`
+uses it only for preview, then calls `POST /api/datasets/from-repository` as
+the single public durable Dataset/Job creation route. This route supports
+`PUBLIC`, `EXISTING_SOURCE_CONNECTION`, and `ONE_TIME_PAT`; a one-time PAT is
+valid for async import only with `saveAsSourceConnection=true` and becomes an
+encrypted owned SourceConnection inside the already-approved transaction.
+`POST /api/source-import-jobs` is retired with `410
+SOURCE_IMPORT_JOBS_DEPRECATED`; it cannot remain a compatibility writer.
 
 ## Technical Context
 
@@ -77,13 +88,13 @@ input, Dataset name, or `ExternalRepository` would not be an authoritative
 concurrent idempotency guarantee and must not be used as a workaround.
 
 Before implementation can mark FR-009 complete, the project owner must approve
-one narrow schema-alignment migration, preferably an optional
-`Dataset.repositoryImportIdempotencyKey` with a unique actor-scoped constraint
-(`@@unique([ownerId, repositoryImportIdempotencyKey])`). The route must set it
-only for this creation flow and re-read the existing accepted Dataset/Job on a
-unique conflict. This is not a workflow-specific Job table and does not change
-the common Job authority. If migration approval is withheld, Phase 015 must
-exclude FR-009 and remain open rather than claiming duplicate-submit safety.
+one narrow schema-alignment migration: optional
+`Dataset.creationIdempotencyKey` and `Dataset.creationRequestHash` with the
+actor-scoped constraint `@@unique([ownerId, creationIdempotencyKey])`. The
+route must set them only for this creation flow, compare request hashes on a
+unique conflict, and re-read the existing accepted Dataset/Job only when they
+match. This is not a workflow-specific Job table and does not change the common
+Job authority.
 
 **Pre-design gate result**: CONDITIONAL — all architecture gates pass except
 the explicitly documented missing durable idempotency constraint. Planning is
@@ -115,13 +126,13 @@ specs/015-repository-import-request-queue-enqueue/
 ```text
 apps/web/src/
 ├── app/
-│   ├── (app)/datasets/new/page.tsx
+│   ├── (app)/datasets/imports/page.tsx
 │   ├── (app)/datasets/[datasetId]/imports/[jobId]/page.tsx
 │   └── api/
 │       ├── datasets/from-repository/route.ts
 │       └── jobs/[jobId]/route.ts                 # existing safe projection
 ├── components/datasets/
-│   ├── repository-import-wizard.tsx
+│   ├── imports/import-form.tsx
 │   └── repository-import-progress.tsx
 ├── lib/
 │   ├── source-import/preflight.ts                # existing read-only boundary
@@ -162,7 +173,7 @@ preflight, authorization, and durable acceptance stay server-only.
    one `QUEUED` `IMPORT_DATASET` Job. Persist only allowlisted repository
    identity/resolved revision/root/bounded preview summary and optional
    SourceConnection ID. Commit before calling `enqueueExistingJob`.
-5. Implement `/datasets/new` wizard state: request preflight, show only safe
+5. Implement `/datasets/imports` wizard state: request preflight, show only safe
    result, submit the idempotency key, and navigate only after an accepted safe
    Dataset/Job response. Implement Dataset-scoped progress rendering from the
    existing safe PostgreSQL status endpoint; preserve concealment on direct
@@ -188,4 +199,4 @@ idempotency; no implementation may bypass it.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 | --- | --- | --- |
-| Narrow Dataset idempotency migration (approval required) | FR-009 requires a concurrent, durable actor-scoped deduplication key before a Dataset exists. | Checking Job input/JSON, Dataset name, or ExternalRepository in application code is not unique, race-safe, or scoped correctly. |
+| Narrow Dataset idempotency migration (approved and applied) | FR-009 requires a concurrent, durable actor-scoped deduplication key before a Dataset exists. | Checking Job input/JSON, Dataset name, or ExternalRepository in application code is not unique, race-safe, or scoped correctly. |

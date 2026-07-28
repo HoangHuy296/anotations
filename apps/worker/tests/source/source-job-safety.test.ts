@@ -45,7 +45,7 @@ test("worker projects source failures safely without copying durable secrets int
         sourceConnectionId: connection.id,
         type: "IMPORT_DATASET",
         status: "QUEUED",
-        input: { source: { repository: { provider: "GITEA", owner: "safe-owner", repo: "safe-repository", branch: "main", normalizedRootPath: "images", visibility: "PRIVATE" }, manifest: { itemCount: 1, declaredBytes: 1 } } },
+        input: { source: { repository: { provider: "GITEA", owner: "safe-owner", repo: "safe-repository", ref: "main", rootPath: "images", visibility: "PRIVATE" }, manifest: { itemCount: 1, declaredBytes: 1 }, sourceConnectionId: connection.id } },
       },
       select: { id: true },
     });

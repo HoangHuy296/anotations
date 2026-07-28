@@ -5,6 +5,7 @@ const optionalText = z.string().trim().max(2_000).optional();
 // Keep browser-importable validation independent from Prisma's server runtime.
 const datasetTypes = ["IMAGE_LABELING", "VIDEO_LABELING", "TEXT_LABELING", "AUDIO_LABELING", "MULTI_MODAL"] as const;
 const modalities = ["IMAGE", "VIDEO", "TEXT", "AUDIO"] as const;
+export const datasetWorkflowStatuses = ["IN_PROGRESS", "COMPLETED", "REVIEWED"] as const;
 
 /** Legacy records use CUIDs; local-folder imports use UUIDs generated before persistence. */
 export const datasetIdSchema = z.union([z.string().cuid(), z.string().uuid()]);
@@ -21,4 +22,5 @@ export const updateDatasetSchema = z.object({
   type: z.enum(datasetTypes).optional(),
   primaryModality: z.enum(modalities).nullable().optional(),
   metadata: metadataSchema.optional(),
+  workflowStatus: z.enum(datasetWorkflowStatuses).optional(),
 }).refine((value) => Object.keys(value).length > 0, "Provide at least one dataset field.");

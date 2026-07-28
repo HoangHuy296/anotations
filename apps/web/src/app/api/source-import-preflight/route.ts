@@ -32,6 +32,7 @@ export async function POST(request: Request) {
         visibility: actual,
       },
       assetPreview: preflight.result.assetPreview,
+      availableRefs: preflight.availableRefs,
       visibility: { expected: parsed.data.repository.expectedVisibility, actual, matches: actual === parsed.data.repository.expectedVisibility },
     });
   } catch (error) {

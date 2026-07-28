@@ -65,15 +65,31 @@ test("saved one-time Gitea PAT preflight stays read-only; Start Import creates e
     // Browser-facing URL. The server maps its configured public Gitea root to
     // the Compose-internal endpoint; callers never select that private host.
     serverUrl: process.env.SOURCE_CONNECTION_GITEA_BASE_URL!,
-    token,
+    personalAccessToken: token,
     saveAsSourceConnection: true,
-    sourceConnectionName: "IMG987 Gitea",
+    connectionName: "IMG987 Gitea",
+    idempotencyKey: `phase015-one-time-${randomBytes(12).toString("hex")}`,
     repository: {
       owner: "annotation-admin",
       repo: "ImageDataset",
       ref: "main",
       expectedVisibility: "PUBLIC",
     },
+  };
+  const preflightRequestBody = {
+    provider: requestBody.provider,
+    datasetName: requestBody.datasetName,
+    credentialMode: requestBody.credentialMode,
+    serverUrl: requestBody.serverUrl,
+    personalAccessToken: requestBody.personalAccessToken,
+    saveAsSourceConnection: requestBody.saveAsSourceConnection,
+    connectionName: requestBody.connectionName,
+    repository: requestBody.repository,
+  };
+  const { repo, ...repositoryForAcceptance } = requestBody.repository;
+  const durableRequestBody = {
+    ...requestBody,
+    repository: { ...repositoryForAcceptance, name: repo },
   };
 
   const before = await sourceSnapshot();
@@ -96,7 +112,9 @@ test("saved one-time Gitea PAT preflight stays read-only; Start Import creates e
   const preview = await request("/api/source-import-preflight", {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: actor.cookie },
-    body: JSON.stringify(requestBody),
+    // Preflight is a distinct strict read-only contract; idempotency belongs
+    // only to the later Dataset/Job write boundary.
+    body: JSON.stringify(preflightRequestBody),
   });
   const previewBody = await preview.json();
   assert.equal(preview.status, 200);
@@ -105,10 +123,10 @@ test("saved one-time Gitea PAT preflight stays read-only; Start Import creates e
   assertNoSourceSecret(previewBody, [token]);
   assert.deepEqual(await sourceSnapshot(), before, "preflight must not create durable or storage state");
 
-  const start = await request("/api/source-import-jobs", {
+  const start = await request("/api/datasets/from-repository", {
     method: "POST",
     headers: { "Content-Type": "application/json", Cookie: actor.cookie },
-    body: JSON.stringify(requestBody),
+    body: JSON.stringify(durableRequestBody),
   });
   const startBody = await start.json();
   assert.equal(start.status, 201);
@@ -147,6 +165,21 @@ test("saved one-time Gitea PAT preflight stays read-only; Start Import creates e
   assert.ok(connection.tokenEncrypted);
   assert.notEqual(connection.tokenEncrypted, token);
 
+  const replay = await request("/api/datasets/from-repository", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: actor.cookie },
+    body: JSON.stringify(durableRequestBody),
+  });
+  const replayBody = await replay.json();
+  assert.equal(replay.status, 200, "same one-time request must reuse the durable acceptance");
+  assert.equal(replayBody.data.dataset.id, datasetId);
+  assert.equal(replayBody.data.job.id, jobId);
+  assert.equal(
+    await db.sourceConnection.count({ where: { userId: user.id, name: requestBody.connectionName } }),
+    1,
+    "idempotent reuse must not create another encrypted SourceConnection",
+  );
+
   const beforeExistingPreview = await sourceSnapshot();
   const existingPreview = await request("/api/source-import-preflight", {
     method: "POST",
@@ -177,7 +210,7 @@ test("saved one-time Gitea PAT preflight stays read-only; Start Import creates e
   assert.deepEqual(afterStart.objects, before.objects, "source Start Import must not write a MinIO object before worker processing");
 
   for (const credentialMode of ["PUBLIC", "EXISTING_SOURCE_CONNECTION"] as const) {
-    const response = await request("/api/source-import-jobs", {
+    const response = await request("/api/datasets/from-repository", {
       method: "POST",
       headers: { "Content-Type": "application/json", Cookie: actor.cookie },
       body: JSON.stringify(credentialMode === "PUBLIC" ? {
@@ -185,13 +218,15 @@ test("saved one-time Gitea PAT preflight stays read-only; Start Import creates e
         datasetName: `IMG987-public-${randomBytes(4).toString("hex")}`,
         credentialMode,
         serverUrl: process.env.SOURCE_CONNECTION_GITEA_BASE_URL!,
-        repository: { owner: "annotation-admin", repo: "ImageDataset", ref: "main", expectedVisibility: "PUBLIC" },
+        idempotencyKey: `phase015-public-${randomBytes(12).toString("hex")}`,
+        repository: { owner: "annotation-admin", name: "ImageDataset", ref: "main", expectedVisibility: "PUBLIC" },
       } : {
         provider: "GITEA",
         datasetName: `IMG987-existing-${randomBytes(4).toString("hex")}`,
         credentialMode,
         sourceConnectionId: connection.id,
-        repository: { owner: "annotation-admin", repo: "ImageDataset", ref: "main", expectedVisibility: "PUBLIC" },
+        idempotencyKey: `phase015-existing-${randomBytes(12).toString("hex")}`,
+        repository: { owner: "annotation-admin", name: "ImageDataset", ref: "main", expectedVisibility: "PUBLIC" },
       }),
     });
     const body = await response.json();

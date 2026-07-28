@@ -1,10 +1,6 @@
-import { LocalFolderImportForm } from "@/components/imports/local-folder-import-form";
-import { AppShell } from "@/components/layout/app-shell";
+import { redirect } from "next/navigation";
 
+/** Legacy URL only. All user-facing navigation targets /datasets/local-folder. */
 export default function LocalFolderImportPage() {
-  return (
-    <AppShell currentPath="/datasets/new/local-folder">
-      <LocalFolderImportForm />
-    </AppShell>
-  );
+  redirect("/datasets/local-folder");
 }

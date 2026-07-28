@@ -2,6 +2,7 @@ import "server-only";
 
 import type { JobEventLevel, JobStage } from "@internal/db";
 import { z } from "zod";
+import { toSafeJobStage, type SafeJobStage } from "@/lib/jobs/safe-job-stage";
 
 /**
  * Browser-safe operational event vocabulary. Persisted JobEvent.message is
@@ -16,6 +17,7 @@ export const safeJobEventMessages = [
   "JOB_CLAIMED",
   "JOB_HEARTBEAT",
   "JOB_PROGRESS",
+  "IMPORT_BATCH_COMPLETED",
   "JOB_COMPLETED",
   "JOB_FAILED",
   "JOB_CANCELED",
@@ -47,7 +49,7 @@ export type SafeJobEvent = {
   id: string;
   createdAt: string;
   level: JobEventLevel;
-  stage: JobStage | null;
+  stage: SafeJobStage | null;
   message: SafeJobEventMessage;
   reason: SafeJobEventReason | null;
 };
@@ -78,7 +80,7 @@ export function toSafeJobEvent(event: PersistedJobEvent): SafeJobEvent | null {
     id: event.id,
     createdAt: event.createdAt.toISOString(),
     level: event.level,
-    stage: event.stage,
+    stage: toSafeJobStage(event.stage),
     message: message.data,
     reason: reason.success ? reason.data : null,
   };

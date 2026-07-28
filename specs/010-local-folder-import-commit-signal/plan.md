@@ -56,7 +56,7 @@ specs/010-local-folder-import-commit-signal/
     └── import-ui.md
 
 apps/web/src/
-├── app/(app)/datasets/new/local-folder/
+├── app/(app)/datasets/local-folder/
 ├── app/api/imports/
 ├── app/api/jobs/[jobId]/commit-import/
 ├── components/imports/

@@ -54,7 +54,7 @@ export type AssetVersionMinAggregateOutputType = {
   sourceMode: $Enums.DatasetSourceMode | null
   externalRepositoryId: string | null
   sourceProvider: $Enums.RepoProvider | null
-  sourceBranch: string | null
+  sourceRef: string | null
   sourceRevision: string | null
   sourcePath: string | null
   sourceFileSha: string | null
@@ -98,7 +98,7 @@ export type AssetVersionMaxAggregateOutputType = {
   sourceMode: $Enums.DatasetSourceMode | null
   externalRepositoryId: string | null
   sourceProvider: $Enums.RepoProvider | null
-  sourceBranch: string | null
+  sourceRef: string | null
   sourceRevision: string | null
   sourcePath: string | null
   sourceFileSha: string | null
@@ -142,7 +142,7 @@ export type AssetVersionCountAggregateOutputType = {
   sourceMode: number
   externalRepositoryId: number
   sourceProvider: number
-  sourceBranch: number
+  sourceRef: number
   sourceRevision: number
   sourcePath: number
   sourceFileSha: number
@@ -207,7 +207,7 @@ export type AssetVersionMinAggregateInputType = {
   sourceMode?: true
   externalRepositoryId?: true
   sourceProvider?: true
-  sourceBranch?: true
+  sourceRef?: true
   sourceRevision?: true
   sourcePath?: true
   sourceFileSha?: true
@@ -251,7 +251,7 @@ export type AssetVersionMaxAggregateInputType = {
   sourceMode?: true
   externalRepositoryId?: true
   sourceProvider?: true
-  sourceBranch?: true
+  sourceRef?: true
   sourceRevision?: true
   sourcePath?: true
   sourceFileSha?: true
@@ -295,7 +295,7 @@ export type AssetVersionCountAggregateInputType = {
   sourceMode?: true
   externalRepositoryId?: true
   sourceProvider?: true
-  sourceBranch?: true
+  sourceRef?: true
   sourceRevision?: true
   sourcePath?: true
   sourceFileSha?: true
@@ -427,7 +427,7 @@ export type AssetVersionGroupByOutputType = {
   sourceMode: $Enums.DatasetSourceMode
   externalRepositoryId: string | null
   sourceProvider: $Enums.RepoProvider | null
-  sourceBranch: string | null
+  sourceRef: string | null
   sourceRevision: string | null
   sourcePath: string | null
   sourceFileSha: string | null
@@ -495,7 +495,7 @@ export type AssetVersionWhereInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFilter<"AssetVersion"> | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceProvider?: Prisma.EnumRepoProviderNullableFilter<"AssetVersion"> | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceRevision?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourcePath?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceFileSha?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
@@ -544,7 +544,7 @@ export type AssetVersionOrderByWithRelationInput = {
   sourceMode?: Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceProvider?: Prisma.SortOrderInput | Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRef?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceRevision?: Prisma.SortOrderInput | Prisma.SortOrder
   sourcePath?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -600,7 +600,7 @@ export type AssetVersionWhereUniqueInput = Prisma.AtLeast<{
   sourceMode?: Prisma.EnumDatasetSourceModeFilter<"AssetVersion"> | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceProvider?: Prisma.EnumRepoProviderNullableFilter<"AssetVersion"> | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceRevision?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourcePath?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceFileSha?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
@@ -649,7 +649,7 @@ export type AssetVersionOrderByWithAggregationInput = {
   sourceMode?: Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceProvider?: Prisma.SortOrderInput | Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRef?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceRevision?: Prisma.SortOrderInput | Prisma.SortOrder
   sourcePath?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -702,7 +702,7 @@ export type AssetVersionScalarWhereWithAggregatesInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeWithAggregatesFilter<"AssetVersion"> | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.StringNullableWithAggregatesFilter<"AssetVersion"> | string | null
   sourceProvider?: Prisma.EnumRepoProviderNullableWithAggregatesFilter<"AssetVersion"> | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.StringNullableWithAggregatesFilter<"AssetVersion"> | string | null
+  sourceRef?: Prisma.StringNullableWithAggregatesFilter<"AssetVersion"> | string | null
   sourceRevision?: Prisma.StringNullableWithAggregatesFilter<"AssetVersion"> | string | null
   sourcePath?: Prisma.StringNullableWithAggregatesFilter<"AssetVersion"> | string | null
   sourceFileSha?: Prisma.StringNullableWithAggregatesFilter<"AssetVersion"> | string | null
@@ -744,7 +744,7 @@ export type AssetVersionCreateInput = {
   modality: $Enums.Modality
   sourceMode: $Enums.DatasetSourceMode
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -793,7 +793,7 @@ export type AssetVersionUncheckedCreateInput = {
   sourceMode: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -836,7 +836,7 @@ export type AssetVersionUpdateInput = {
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -885,7 +885,7 @@ export type AssetVersionUncheckedUpdateInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -931,7 +931,7 @@ export type AssetVersionCreateManyInput = {
   sourceMode: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -973,7 +973,7 @@ export type AssetVersionUpdateManyMutationInput = {
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1018,7 +1018,7 @@ export type AssetVersionUncheckedUpdateManyInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1095,7 +1095,7 @@ export type AssetVersionCountOrderByAggregateInput = {
   sourceMode?: Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrder
   sourceProvider?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
   sourcePath?: Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrder
@@ -1149,7 +1149,7 @@ export type AssetVersionMaxOrderByAggregateInput = {
   sourceMode?: Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrder
   sourceProvider?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
   sourcePath?: Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrder
@@ -1193,7 +1193,7 @@ export type AssetVersionMinOrderByAggregateInput = {
   sourceMode?: Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrder
   sourceProvider?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
   sourcePath?: Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrder
@@ -1394,7 +1394,7 @@ export type AssetVersionCreateWithoutExternalRepositoryInput = {
   modality: $Enums.Modality
   sourceMode: $Enums.DatasetSourceMode
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1441,7 +1441,7 @@ export type AssetVersionUncheckedCreateWithoutExternalRepositoryInput = {
   modality: $Enums.Modality
   sourceMode: $Enums.DatasetSourceMode
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1516,7 +1516,7 @@ export type AssetVersionScalarWhereInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFilter<"AssetVersion"> | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceProvider?: Prisma.EnumRepoProviderNullableFilter<"AssetVersion"> | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceRevision?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourcePath?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
   sourceFileSha?: Prisma.StringNullableFilter<"AssetVersion"> | string | null
@@ -1558,7 +1558,7 @@ export type AssetVersionCreateWithoutDatasetInput = {
   modality: $Enums.Modality
   sourceMode: $Enums.DatasetSourceMode
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1605,7 +1605,7 @@ export type AssetVersionUncheckedCreateWithoutDatasetInput = {
   sourceMode: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1674,7 +1674,7 @@ export type AssetVersionCreateWithoutAssetInput = {
   modality: $Enums.Modality
   sourceMode: $Enums.DatasetSourceMode
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1721,7 +1721,7 @@ export type AssetVersionUncheckedCreateWithoutAssetInput = {
   sourceMode: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1790,7 +1790,7 @@ export type AssetVersionCreateWithoutAnnotationsInput = {
   modality: $Enums.Modality
   sourceMode: $Enums.DatasetSourceMode
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1838,7 +1838,7 @@ export type AssetVersionUncheckedCreateWithoutAnnotationsInput = {
   sourceMode: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1896,7 +1896,7 @@ export type AssetVersionUpdateWithoutAnnotationsInput = {
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1944,7 +1944,7 @@ export type AssetVersionUncheckedUpdateWithoutAnnotationsInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1988,7 +1988,7 @@ export type AssetVersionCreateManyExternalRepositoryInput = {
   modality: $Enums.Modality
   sourceMode: $Enums.DatasetSourceMode
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2030,7 +2030,7 @@ export type AssetVersionUpdateWithoutExternalRepositoryInput = {
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2077,7 +2077,7 @@ export type AssetVersionUncheckedUpdateWithoutExternalRepositoryInput = {
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2122,7 +2122,7 @@ export type AssetVersionUncheckedUpdateManyWithoutExternalRepositoryInput = {
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2166,7 +2166,7 @@ export type AssetVersionCreateManyDatasetInput = {
   sourceMode: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2208,7 +2208,7 @@ export type AssetVersionUpdateWithoutDatasetInput = {
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2255,7 +2255,7 @@ export type AssetVersionUncheckedUpdateWithoutDatasetInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2300,7 +2300,7 @@ export type AssetVersionUncheckedUpdateManyWithoutDatasetInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2344,7 +2344,7 @@ export type AssetVersionCreateManyAssetInput = {
   sourceMode: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2386,7 +2386,7 @@ export type AssetVersionUpdateWithoutAssetInput = {
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2433,7 +2433,7 @@ export type AssetVersionUncheckedUpdateWithoutAssetInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2478,7 +2478,7 @@ export type AssetVersionUncheckedUpdateManyWithoutAssetInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2554,7 +2554,7 @@ export type AssetVersionSelect<ExtArgs extends runtime.Types.Extensions.Internal
   sourceMode?: boolean
   externalRepositoryId?: boolean
   sourceProvider?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   sourceRevision?: boolean
   sourcePath?: boolean
   sourceFileSha?: boolean
@@ -2604,7 +2604,7 @@ export type AssetVersionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   sourceMode?: boolean
   externalRepositoryId?: boolean
   sourceProvider?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   sourceRevision?: boolean
   sourcePath?: boolean
   sourceFileSha?: boolean
@@ -2652,7 +2652,7 @@ export type AssetVersionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   sourceMode?: boolean
   externalRepositoryId?: boolean
   sourceProvider?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   sourceRevision?: boolean
   sourcePath?: boolean
   sourceFileSha?: boolean
@@ -2700,7 +2700,7 @@ export type AssetVersionSelectScalar = {
   sourceMode?: boolean
   externalRepositoryId?: boolean
   sourceProvider?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   sourceRevision?: boolean
   sourcePath?: boolean
   sourceFileSha?: boolean
@@ -2735,7 +2735,7 @@ export type AssetVersionSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AssetVersionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assetId" | "datasetId" | "versionNumber" | "isCurrent" | "modality" | "sourceMode" | "externalRepositoryId" | "sourceProvider" | "sourceBranch" | "sourceRevision" | "sourcePath" | "sourceFileSha" | "sourceBlobSha" | "sourceLfsOid" | "sourceEtag" | "sourceUrl" | "sourceFingerprint" | "storageProvider" | "storageBucket" | "storageKey" | "checksum" | "cacheStatus" | "cacheProvider" | "cacheBucket" | "cacheKey" | "cacheChecksum" | "cachedAt" | "cacheExpiresAt" | "cacheError" | "filename" | "originalFilename" | "mimeType" | "sizeBytes" | "width" | "height" | "durationMs" | "textLength" | "syncStatus" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["assetVersion"]>
+export type AssetVersionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assetId" | "datasetId" | "versionNumber" | "isCurrent" | "modality" | "sourceMode" | "externalRepositoryId" | "sourceProvider" | "sourceRef" | "sourceRevision" | "sourcePath" | "sourceFileSha" | "sourceBlobSha" | "sourceLfsOid" | "sourceEtag" | "sourceUrl" | "sourceFingerprint" | "storageProvider" | "storageBucket" | "storageKey" | "checksum" | "cacheStatus" | "cacheProvider" | "cacheBucket" | "cacheKey" | "cacheChecksum" | "cachedAt" | "cacheExpiresAt" | "cacheError" | "filename" | "originalFilename" | "mimeType" | "sizeBytes" | "width" | "height" | "durationMs" | "textLength" | "syncStatus" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["assetVersion"]>
 export type AssetVersionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   annotations?: boolean | Prisma.AssetVersion$annotationsArgs<ExtArgs>
   asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>
@@ -2772,7 +2772,7 @@ export type $AssetVersionPayload<ExtArgs extends runtime.Types.Extensions.Intern
     sourceMode: $Enums.DatasetSourceMode
     externalRepositoryId: string | null
     sourceProvider: $Enums.RepoProvider | null
-    sourceBranch: string | null
+    sourceRef: string | null
     sourceRevision: string | null
     sourcePath: string | null
     sourceFileSha: string | null
@@ -3241,7 +3241,7 @@ export interface AssetVersionFieldRefs {
   readonly sourceMode: Prisma.FieldRef<"AssetVersion", 'DatasetSourceMode'>
   readonly externalRepositoryId: Prisma.FieldRef<"AssetVersion", 'String'>
   readonly sourceProvider: Prisma.FieldRef<"AssetVersion", 'RepoProvider'>
-  readonly sourceBranch: Prisma.FieldRef<"AssetVersion", 'String'>
+  readonly sourceRef: Prisma.FieldRef<"AssetVersion", 'String'>
   readonly sourceRevision: Prisma.FieldRef<"AssetVersion", 'String'>
   readonly sourcePath: Prisma.FieldRef<"AssetVersion", 'String'>
   readonly sourceFileSha: Prisma.FieldRef<"AssetVersion", 'String'>

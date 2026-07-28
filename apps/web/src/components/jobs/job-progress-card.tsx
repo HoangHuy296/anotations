@@ -12,6 +12,7 @@ export function JobProgressCard({ job }: { job: JobDisplayStatus }) {
     </div>
     <div className="space-y-5 p-5 sm:p-6"><dl className="grid grid-cols-2 gap-3 sm:grid-cols-4"><Metric label="Processed" value={job.processedItems} /><Metric label="Succeeded" value={job.successCount} tone="success" /><Metric label="Failed" value={job.failedCount} tone="danger" /><Metric label="Skipped" value={job.skippedCount} /></dl>
       <div className="flex items-center gap-2 text-xs text-zinc-500"><Clock size={15} /><span>Updated {new Date(job.updatedAt).toLocaleString()}</span><span className="text-zinc-300">•</span><ListChecks size={15} /><span>{job.totalItems ?? "—"} total items</span></div>
+      {job.summary?.outcome === "completed" && (job.summary.imported !== undefined || job.summary.skipped !== undefined || job.summary.failed !== undefined) ? <p className="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">Import outcome: {job.summary.imported ?? 0} imported, {job.summary.skipped ?? 0} skipped, {job.summary.failed ?? 0} failed.</p> : null}
       <JobErrorPanel job={job} />
     </div>
   </section>;

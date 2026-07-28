@@ -19,6 +19,12 @@ authorization, input redaction, and delivery recovery behavior.
 - Keep the browser calling `/api/source-import-jobs` — rejected; it does not
   expose the Phase-015 public API contract or idempotency semantics.
 
+**Implementation baseline audited (2026-07-28)**: Phase 015 reuses
+`createAndEnqueueNewDatasetSourceImportJob` for the one serializable
+Dataset/Job transaction and `enqueueExistingJob` for post-commit delivery. The
+new `acceptRepositoryImportRequest` coordinator is a server-only adapter to
+that boundary; it is not a second transaction or queue path.
+
 ## Decision: Preflight remains read-only and is repeated before acceptance
 
 The browser may first call the existing safe preflight API to display a

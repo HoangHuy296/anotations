@@ -10,9 +10,24 @@ import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { routeQueueDelivery } from "./queue-router.js";
 
 
-export function createFoundationWorker(input: { config: ProviderConfig; db: PrismaClient }) {
+export type RedisConnectionOwnership = "RUNTIME" | "CALLER";
+
+async function waitForRedisEnd(connection: Redis, timeoutMs = 2_000) {
+  if (connection.status === "end") return;
+  await new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      connection.off("end", onEnd);
+      reject(new Error("Runtime-owned Redis connection did not close."));
+    }, timeoutMs);
+    const onEnd = () => { clearTimeout(timeout); resolve(); };
+    connection.once("end", onEnd);
+  });
+}
+
+export function createFoundationWorker(input: { config: ProviderConfig; db: PrismaClient; connection?: Redis }) {
   const workerId = `worker-${randomBytes(12).toString("hex")}`;
-  const connection = new Redis({
+  const ownsConnection = input.connection === undefined;
+  const connection = input.connection ?? new Redis({
     host: input.config.REDIS_HOST,
     port: input.config.REDIS_PORT,
     password: input.config.REDIS_PASSWORD,
@@ -25,20 +40,31 @@ export function createFoundationWorker(input: { config: ProviderConfig; db: Pris
     { connection, prefix: input.config.BULLMQ_PREFIX },
   );
 
+  let closing: Promise<void> | null = null;
+
   return {
     worker,
     connection,
-    close: async () => {
+    connectionOwnership: ownsConnection ? "RUNTIME" as const : "CALLER" as const,
+    close: () => {
+      if (closing) return closing;
+      closing = (async () => {
+        // Stop consumption first; BullMQ closes its internal resources before
+        // the base connection is touched.
       await worker.close();
-      // BullMQ may close an injected connection while stopping. Avoid a second
-      // QUIT command on an already-ended socket during SIGTERM or tests.
-      if (connection.status !== "end") {
-        await connection.quit().catch(() => undefined);
-        // ioredis can resolve QUIT while retaining a ready status when the
-        // connection was supplied to BullMQ. Finish the local lifecycle
-        // deterministically; this is transport cleanup, never Job state.
-        connection.disconnect();
-      }
+        if (!ownsConnection || connection.status === "end") return;
+        const ended = waitForRedisEnd(connection);
+        try {
+          await connection.quit();
+        } catch {
+          connection.disconnect();
+        }
+        // A failed QUIT may leave a live socket; force only runtime-owned
+        // transport down and still wait for the terminal ioredis event.
+        if (String(connection.status) !== "end") connection.disconnect();
+        await ended;
+      })();
+      return closing;
     },
   };
 }

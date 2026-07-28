@@ -9,6 +9,7 @@ const leaseDurationMs = 5 * 60 * 1000;
 const jobReferenceSchema = z.object({ jobId: z.string().min(1), lockToken: z.string().min(1) });
 const claimInputSchema = z.object({ jobId: z.string().min(1), workerId: z.string().min(1) });
 const progressInputSchema = jobReferenceSchema.extend({
+  stage: z.enum(["SCANNING_FILES", "UPLOADING_OBJECTS", "WRITING_ASSETS"]).optional(),
   progress: z.number().int().nonnegative().optional(),
   totalItems: z.number().int().nonnegative().nullable().optional(),
   processedItems: z.number().int().nonnegative().optional(),
@@ -30,6 +31,9 @@ const completionInputSchema = jobReferenceSchema.extend({
     outcome: z.literal("completed").optional(),
     completedAt: z.string().datetime().optional(),
     resultCount: z.number().int().nonnegative().optional(),
+    imported: z.number().int().nonnegative().optional(),
+    skipped: z.number().int().nonnegative().optional(),
+    failed: z.number().int().nonnegative().optional(),
   }).strict().optional(),
   progress: z.number().int().min(0).max(100).optional(),
   totalItems: z.number().int().nonnegative().nullable().optional(),
@@ -69,7 +73,7 @@ export async function updateJobProgress(db: PrismaClient, input: unknown): Promi
   const { jobId, lockToken, ...progress } = parsed.data;
   const updated = await db.job.updateMany({
     where: { ...currentLeaseWhere(jobId, lockToken, now), status: "RUNNING" },
-    data: { ...(progress.progress !== undefined ? { progress: progress.progress } : {}), ...(progress.totalItems !== undefined ? { totalItems: progress.totalItems } : {}), ...(progress.processedItems !== undefined ? { processedItems: progress.processedItems } : {}), ...(progress.successItems !== undefined ? { successItems: progress.successItems } : {}), ...(progress.failedItems !== undefined ? { failedItems: progress.failedItems } : {}), ...(progress.skippedItems !== undefined ? { skippedItems: progress.skippedItems } : {}) },
+    data: { ...(progress.stage !== undefined ? { stage: progress.stage } : {}), ...(progress.progress !== undefined ? { progress: progress.progress } : {}), ...(progress.totalItems !== undefined ? { totalItems: progress.totalItems } : {}), ...(progress.processedItems !== undefined ? { processedItems: progress.processedItems } : {}), ...(progress.successItems !== undefined ? { successItems: progress.successItems } : {}), ...(progress.failedItems !== undefined ? { failedItems: progress.failedItems } : {}), ...(progress.skippedItems !== undefined ? { skippedItems: progress.skippedItems } : {}) },
   });
   if (updated.count !== 1) return { kind: "refused" };
   await writeSafeJobEvent(db, { jobId, kind: "JOB_PROGRESS" });

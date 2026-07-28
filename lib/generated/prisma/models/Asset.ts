@@ -68,7 +68,7 @@ export type AssetMinAggregateOutputType = {
   checksum: string | null
   externalRepositoryId: string | null
   sourceProvider: $Enums.RepoProvider | null
-  sourceBranch: string | null
+  sourceRef: string | null
   sourceRevision: string | null
   sourcePath: string | null
   sourceFileSha: string | null
@@ -119,7 +119,7 @@ export type AssetMaxAggregateOutputType = {
   checksum: string | null
   externalRepositoryId: string | null
   sourceProvider: $Enums.RepoProvider | null
-  sourceBranch: string | null
+  sourceRef: string | null
   sourceRevision: string | null
   sourcePath: string | null
   sourceFileSha: string | null
@@ -170,7 +170,7 @@ export type AssetCountAggregateOutputType = {
   checksum: number
   externalRepositoryId: number
   sourceProvider: number
-  sourceBranch: number
+  sourceRef: number
   sourceRevision: number
   sourcePath: number
   sourceFileSha: number
@@ -247,7 +247,7 @@ export type AssetMinAggregateInputType = {
   checksum?: true
   externalRepositoryId?: true
   sourceProvider?: true
-  sourceBranch?: true
+  sourceRef?: true
   sourceRevision?: true
   sourcePath?: true
   sourceFileSha?: true
@@ -298,7 +298,7 @@ export type AssetMaxAggregateInputType = {
   checksum?: true
   externalRepositoryId?: true
   sourceProvider?: true
-  sourceBranch?: true
+  sourceRef?: true
   sourceRevision?: true
   sourcePath?: true
   sourceFileSha?: true
@@ -349,7 +349,7 @@ export type AssetCountAggregateInputType = {
   checksum?: true
   externalRepositoryId?: true
   sourceProvider?: true
-  sourceBranch?: true
+  sourceRef?: true
   sourceRevision?: true
   sourcePath?: true
   sourceFileSha?: true
@@ -489,7 +489,7 @@ export type AssetGroupByOutputType = {
   checksum: string | null
   externalRepositoryId: string | null
   sourceProvider: $Enums.RepoProvider | null
-  sourceBranch: string | null
+  sourceRef: string | null
   sourceRevision: string | null
   sourcePath: string | null
   sourceFileSha: string | null
@@ -565,7 +565,7 @@ export type AssetWhereInput = {
   checksum?: Prisma.StringNullableFilter<"Asset"> | string | null
   externalRepositoryId?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceProvider?: Prisma.EnumRepoProviderNullableFilter<"Asset"> | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.StringNullableFilter<"Asset"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceRevision?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourcePath?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceFileSha?: Prisma.StringNullableFilter<"Asset"> | string | null
@@ -629,7 +629,7 @@ export type AssetOrderByWithRelationInput = {
   checksum?: Prisma.SortOrderInput | Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceProvider?: Prisma.SortOrderInput | Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRef?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceRevision?: Prisma.SortOrderInput | Prisma.SortOrder
   sourcePath?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -699,7 +699,7 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   checksum?: Prisma.StringNullableFilter<"Asset"> | string | null
   externalRepositoryId?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceProvider?: Prisma.EnumRepoProviderNullableFilter<"Asset"> | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.StringNullableFilter<"Asset"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceRevision?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourcePath?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceFileSha?: Prisma.StringNullableFilter<"Asset"> | string | null
@@ -763,7 +763,7 @@ export type AssetOrderByWithAggregationInput = {
   checksum?: Prisma.SortOrderInput | Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceProvider?: Prisma.SortOrderInput | Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRef?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceRevision?: Prisma.SortOrderInput | Prisma.SortOrder
   sourcePath?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -824,7 +824,7 @@ export type AssetScalarWhereWithAggregatesInput = {
   checksum?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   externalRepositoryId?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   sourceProvider?: Prisma.EnumRepoProviderNullableWithAggregatesFilter<"Asset"> | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
+  sourceRef?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   sourceRevision?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   sourcePath?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
   sourceFileSha?: Prisma.StringNullableWithAggregatesFilter<"Asset"> | string | null
@@ -874,7 +874,7 @@ export type AssetCreateInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -938,7 +938,7 @@ export type AssetUncheckedCreateInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -996,7 +996,7 @@ export type AssetUpdateInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1060,7 +1060,7 @@ export type AssetUncheckedUpdateInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1121,7 +1121,7 @@ export type AssetCreateManyInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1171,7 +1171,7 @@ export type AssetUpdateManyMutationInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1224,7 +1224,7 @@ export type AssetUncheckedUpdateManyInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1309,7 +1309,7 @@ export type AssetCountOrderByAggregateInput = {
   checksum?: Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrder
   sourceProvider?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
   sourcePath?: Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrder
@@ -1373,7 +1373,7 @@ export type AssetMaxOrderByAggregateInput = {
   checksum?: Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrder
   sourceProvider?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
   sourcePath?: Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrder
@@ -1424,7 +1424,7 @@ export type AssetMinOrderByAggregateInput = {
   checksum?: Prisma.SortOrder
   externalRepositoryId?: Prisma.SortOrder
   sourceProvider?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   sourceRevision?: Prisma.SortOrder
   sourcePath?: Prisma.SortOrder
   sourceFileSha?: Prisma.SortOrder
@@ -1750,7 +1750,7 @@ export type AssetCreateWithoutUploadedByInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1812,7 +1812,7 @@ export type AssetUncheckedCreateWithoutUploadedByInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -1902,7 +1902,7 @@ export type AssetScalarWhereInput = {
   checksum?: Prisma.StringNullableFilter<"Asset"> | string | null
   externalRepositoryId?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceProvider?: Prisma.EnumRepoProviderNullableFilter<"Asset"> | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.StringNullableFilter<"Asset"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceRevision?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourcePath?: Prisma.StringNullableFilter<"Asset"> | string | null
   sourceFileSha?: Prisma.StringNullableFilter<"Asset"> | string | null
@@ -1952,7 +1952,7 @@ export type AssetCreateWithoutExternalRepositoryInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2014,7 +2014,7 @@ export type AssetUncheckedCreateWithoutExternalRepositoryInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2098,7 +2098,7 @@ export type AssetCreateWithoutDatasetInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2160,7 +2160,7 @@ export type AssetUncheckedCreateWithoutDatasetInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2244,7 +2244,7 @@ export type AssetCreateWithoutPreparedImportItemInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2307,7 +2307,7 @@ export type AssetUncheckedCreateWithoutPreparedImportItemInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2380,7 +2380,7 @@ export type AssetUpdateWithoutPreparedImportItemInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2443,7 +2443,7 @@ export type AssetUncheckedUpdateWithoutPreparedImportItemInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2500,7 +2500,7 @@ export type AssetCreateWithoutVersionsInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2563,7 +2563,7 @@ export type AssetUncheckedCreateWithoutVersionsInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2636,7 +2636,7 @@ export type AssetUpdateWithoutVersionsInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2699,7 +2699,7 @@ export type AssetUncheckedUpdateWithoutVersionsInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2756,7 +2756,7 @@ export type AssetCreateWithoutAnnotationsInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2819,7 +2819,7 @@ export type AssetUncheckedCreateWithoutAnnotationsInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -2892,7 +2892,7 @@ export type AssetUpdateWithoutAnnotationsInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2955,7 +2955,7 @@ export type AssetUncheckedUpdateWithoutAnnotationsInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3012,7 +3012,7 @@ export type AssetCreateWithoutImageAssetInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -3075,7 +3075,7 @@ export type AssetUncheckedCreateWithoutImageAssetInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -3148,7 +3148,7 @@ export type AssetUpdateWithoutImageAssetInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3211,7 +3211,7 @@ export type AssetUncheckedUpdateWithoutImageAssetInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3268,7 +3268,7 @@ export type AssetCreateWithoutVideoAssetInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -3331,7 +3331,7 @@ export type AssetUncheckedCreateWithoutVideoAssetInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -3404,7 +3404,7 @@ export type AssetUpdateWithoutVideoAssetInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3467,7 +3467,7 @@ export type AssetUncheckedUpdateWithoutVideoAssetInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3524,7 +3524,7 @@ export type AssetCreateWithoutTextDocumentInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -3587,7 +3587,7 @@ export type AssetUncheckedCreateWithoutTextDocumentInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -3660,7 +3660,7 @@ export type AssetUpdateWithoutTextDocumentInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3723,7 +3723,7 @@ export type AssetUncheckedUpdateWithoutTextDocumentInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3780,7 +3780,7 @@ export type AssetCreateWithoutAudioAssetInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -3843,7 +3843,7 @@ export type AssetUncheckedCreateWithoutAudioAssetInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -3916,7 +3916,7 @@ export type AssetUpdateWithoutAudioAssetInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3979,7 +3979,7 @@ export type AssetUncheckedUpdateWithoutAudioAssetInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4036,7 +4036,7 @@ export type AssetCreateWithoutAiTasksInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -4099,7 +4099,7 @@ export type AssetUncheckedCreateWithoutAiTasksInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -4172,7 +4172,7 @@ export type AssetUpdateWithoutAiTasksInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4235,7 +4235,7 @@ export type AssetUncheckedUpdateWithoutAiTasksInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4294,7 +4294,7 @@ export type AssetCreateManyUploadedByInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -4344,7 +4344,7 @@ export type AssetUpdateWithoutUploadedByInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4406,7 +4406,7 @@ export type AssetUncheckedUpdateWithoutUploadedByInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4466,7 +4466,7 @@ export type AssetUncheckedUpdateManyWithoutUploadedByInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4518,7 +4518,7 @@ export type AssetCreateManyExternalRepositoryInput = {
   storageKey?: string | null
   checksum?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -4568,7 +4568,7 @@ export type AssetUpdateWithoutExternalRepositoryInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4630,7 +4630,7 @@ export type AssetUncheckedUpdateWithoutExternalRepositoryInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4690,7 +4690,7 @@ export type AssetUncheckedUpdateManyWithoutExternalRepositoryInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4742,7 +4742,7 @@ export type AssetCreateManyDatasetInput = {
   checksum?: string | null
   externalRepositoryId?: string | null
   sourceProvider?: $Enums.RepoProvider | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   sourceRevision?: string | null
   sourcePath?: string | null
   sourceFileSha?: string | null
@@ -4792,7 +4792,7 @@ export type AssetUpdateWithoutDatasetInput = {
   storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4854,7 +4854,7 @@ export type AssetUncheckedUpdateWithoutDatasetInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4914,7 +4914,7 @@ export type AssetUncheckedUpdateManyWithoutDatasetInput = {
   checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5016,7 +5016,7 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   checksum?: boolean
   externalRepositoryId?: boolean
   sourceProvider?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   sourceRevision?: boolean
   sourcePath?: boolean
   sourceFileSha?: boolean
@@ -5081,7 +5081,7 @@ export type AssetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   checksum?: boolean
   externalRepositoryId?: boolean
   sourceProvider?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   sourceRevision?: boolean
   sourcePath?: boolean
   sourceFileSha?: boolean
@@ -5137,7 +5137,7 @@ export type AssetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   checksum?: boolean
   externalRepositoryId?: boolean
   sourceProvider?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   sourceRevision?: boolean
   sourcePath?: boolean
   sourceFileSha?: boolean
@@ -5193,7 +5193,7 @@ export type AssetSelectScalar = {
   checksum?: boolean
   externalRepositoryId?: boolean
   sourceProvider?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   sourceRevision?: boolean
   sourcePath?: boolean
   sourceFileSha?: boolean
@@ -5226,7 +5226,7 @@ export type AssetSelectScalar = {
   deletedAt?: boolean
 }
 
-export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "uploadedById" | "modality" | "filename" | "originalFilename" | "mimeType" | "sizeBytes" | "width" | "height" | "durationMs" | "textLength" | "sourceMode" | "storageProvider" | "storageBucket" | "storageKey" | "checksum" | "externalRepositoryId" | "sourceProvider" | "sourceBranch" | "sourceRevision" | "sourcePath" | "sourceFileSha" | "sourceBlobSha" | "sourceLfsOid" | "sourceEtag" | "sourceUrl" | "sourceFingerprint" | "cacheStatus" | "cacheProvider" | "cacheBucket" | "cacheKey" | "cacheChecksum" | "cachedAt" | "cacheExpiresAt" | "cacheError" | "currentVersionId" | "syncStatus" | "lastSyncedAt" | "syncSummary" | "status" | "batchIndex" | "orderIndex" | "description" | "metadata" | "revision" | "createdAt" | "updatedAt" | "archivedAt" | "deletedAt", ExtArgs["result"]["asset"]>
+export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "uploadedById" | "modality" | "filename" | "originalFilename" | "mimeType" | "sizeBytes" | "width" | "height" | "durationMs" | "textLength" | "sourceMode" | "storageProvider" | "storageBucket" | "storageKey" | "checksum" | "externalRepositoryId" | "sourceProvider" | "sourceRef" | "sourceRevision" | "sourcePath" | "sourceFileSha" | "sourceBlobSha" | "sourceLfsOid" | "sourceEtag" | "sourceUrl" | "sourceFingerprint" | "cacheStatus" | "cacheProvider" | "cacheBucket" | "cacheKey" | "cacheChecksum" | "cachedAt" | "cacheExpiresAt" | "cacheError" | "currentVersionId" | "syncStatus" | "lastSyncedAt" | "syncSummary" | "status" | "batchIndex" | "orderIndex" | "description" | "metadata" | "revision" | "createdAt" | "updatedAt" | "archivedAt" | "deletedAt", ExtArgs["result"]["asset"]>
 export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   aiTasks?: boolean | Prisma.Asset$aiTasksArgs<ExtArgs>
   annotations?: boolean | Prisma.Asset$annotationsArgs<ExtArgs>
@@ -5287,7 +5287,7 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     checksum: string | null
     externalRepositoryId: string | null
     sourceProvider: $Enums.RepoProvider | null
-    sourceBranch: string | null
+    sourceRef: string | null
     sourceRevision: string | null
     sourcePath: string | null
     sourceFileSha: string | null
@@ -5771,7 +5771,7 @@ export interface AssetFieldRefs {
   readonly checksum: Prisma.FieldRef<"Asset", 'String'>
   readonly externalRepositoryId: Prisma.FieldRef<"Asset", 'String'>
   readonly sourceProvider: Prisma.FieldRef<"Asset", 'RepoProvider'>
-  readonly sourceBranch: Prisma.FieldRef<"Asset", 'String'>
+  readonly sourceRef: Prisma.FieldRef<"Asset", 'String'>
   readonly sourceRevision: Prisma.FieldRef<"Asset", 'String'>
   readonly sourcePath: Prisma.FieldRef<"Asset", 'String'>
   readonly sourceFileSha: Prisma.FieldRef<"Asset", 'String'>

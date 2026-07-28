@@ -31,7 +31,16 @@ export async function PATCH(request: Request, context: Context) {
   const result = await resolve(actor, context, "dataset.update"); if ("response" in result) return result.response;
   const parsed = updateDatasetSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return apiError(400, "INVALID_REQUEST", "Dataset input is invalid.", parsed.error.flatten().fieldErrors);
-  const dataset = await db.dataset.update({ where: { id: result.datasetId }, data: { ...parsed.data, ...(parsed.data.description !== undefined ? { description: parsed.data.description || null } : {}) }, select: datasetMetadataSelect });
+  const { workflowStatus, ...update } = parsed.data;
+  let metadata = update.metadata;
+  if (workflowStatus) {
+    const current = await db.dataset.findUnique({ where: { id: result.datasetId }, select: { metadata: true } });
+    const currentMetadata = current?.metadata && typeof current.metadata === "object" && !Array.isArray(current.metadata)
+      ? current.metadata as Record<string, unknown>
+      : {};
+    metadata = { ...currentMetadata, workflowStatus };
+  }
+  const dataset = await db.dataset.update({ where: { id: result.datasetId }, data: { ...update, ...(metadata !== undefined ? { metadata } : {}), ...(update.description !== undefined ? { description: update.description || null } : {}) }, select: datasetMetadataSelect });
   return apiSuccess(dataset);
 }
 

@@ -19,6 +19,25 @@ async function createFailedJob(datasetId: string, createdById: string, type: Job
   });
 }
 
+async function createFailedRepositoryImportJob(datasetId: string, createdById: string) {
+  return db.job.create({
+    data: {
+      datasetId,
+      createdById,
+      type: JobType.IMPORT_DATASET,
+      status: JobStatus.FAILED,
+      input: {
+        source: {
+          repository: { provider: "GITHUB", owner: "fixture", repo: "public-images", ref: "main", rootPath: null, visibility: "PUBLIC" },
+          manifest: { itemCount: 1, declaredBytes: 12 },
+          sourceConnectionId: null,
+        },
+      },
+    },
+    select: { id: true },
+  });
+}
+
 test("retry creates one successor without copying raw original input or changing failed history", { skip: queueIntegrationSkipReason }, async () => {
   const fixture = await createJobQueueFixture();
   try {
@@ -69,11 +88,32 @@ test("retry conceals non-members, forbids labelers, and rejects unsupported or n
     const original = await createFailedJob(fixture.datasetId, fixture.owner.id);
     assert.deepEqual(await retryAuthorizedJob(fixture.labeler, original.id), { ok: false, status: 403 });
     assert.deepEqual(await retryAuthorizedJob(fixture.outsider, original.id), { ok: false, status: 404 });
-    const unsupported = await createFailedJob(fixture.datasetId, fixture.owner.id, JobType.IMPORT_DATASET);
+    const unsupported = await createFailedJob(fixture.datasetId, fixture.owner.id, JobType.AI_TASK_SYNC);
     assert.deepEqual(await retryAuthorizedJob(fixture.owner, unsupported.id), { ok: false, status: 409 });
     const queued = await fixture.createQueuedJob();
     assert.deepEqual(await retryAuthorizedJob(fixture.owner, queued.id), { ok: false, status: 409 });
     assert.equal(await db.job.count({ where: { retryOfJobId: { in: [original.id, unsupported.id, queued.id] } } }), 0);
+  } finally { await fixture.cleanup(); }
+});
+
+test("retry creates one safe IMPORT_DATASET successor without copying raw state", { skip: queueIntegrationSkipReason }, async () => {
+  const fixture = await createJobQueueFixture();
+  try {
+    const original = await createFailedRepositoryImportJob(fixture.datasetId, fixture.owner.id);
+    const result = await retryAuthorizedJob(fixture.owner, original.id);
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    const successor = await db.job.findUniqueOrThrow({ where: { id: result.job.id }, select: { retryOfJobId: true, type: true, input: true, sourceConnectionId: true } });
+    assert.equal(successor.retryOfJobId, original.id);
+    assert.equal(successor.type, JobType.IMPORT_DATASET);
+    assert.equal(successor.sourceConnectionId, null);
+    assert.deepEqual(successor.input, {
+      source: {
+        repository: { provider: "GITHUB", owner: "fixture", repo: "public-images", ref: "main", rootPath: null, visibility: "PUBLIC" },
+        manifest: { itemCount: 1, declaredBytes: 12 },
+        sourceConnectionId: null,
+      },
+    });
   } finally { await fixture.cleanup(); }
 });
 

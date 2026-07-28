@@ -46,3 +46,15 @@ merely because the first attempt was interrupted.
 This is a plan, not a clone implementation. Docker Compose, worker entrypoints,
 provider clients, MinIO clients, retention jobs, and credentials are Phase 1 or
 later work and must not be mocked in Phase 0.
+
+## Repository request boundary
+
+For a new repository-backed Dataset, browser preview is strictly read-only at
+`POST /api/source-import-preflight`. The sole durable browser write boundary
+is `POST /api/datasets/from-repository`, which repeats preflight, commits the
+Dataset and common `Job`, and only then enqueues `{ jobId }`. The retired
+`POST /api/source-import-jobs` endpoint returns a safe deprecation result; it
+must not provide a second Dataset/Job creation path. A one-time provider PAT
+is transient request memory and may become an encrypted owned
+SourceConnection only inside that approved transaction; it is never Job input
+or queue data.

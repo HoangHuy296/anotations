@@ -4,10 +4,21 @@ import test from "node:test";
 
 import { getWorkerConfig } from "../../src/config.js";
 import { createWorkerDatabase } from "../../src/providers/db.js";
-import { resolveSourceAccessForJob } from "../../src/source/source-access.js";
+import { resolveSourceAccessForJob, resolveWorkerReachableGiteaBaseUrl } from "../../src/source/source-access.js";
 
 const enabled = Boolean(process.env.DATABASE_URL && process.env.SOURCE_CONNECTION_ENCRYPTION_KEY);
 const skip = "source worker integration skipped: controlled PostgreSQL or source encryption configuration is unavailable";
+
+test("worker maps only the exact configured public Compose Gitea root to its server-controlled internal endpoint", () => {
+  const environment = {
+    FIELDFRAME_RUNTIME: "compose",
+    GITEA_PUBLIC_URL: "http://localhost:3100/",
+    GITEA_INTERNAL_URL: "http://gitea:3000",
+  };
+  assert.equal(resolveWorkerReachableGiteaBaseUrl("http://localhost:3100", environment), "http://gitea:3000");
+  assert.equal(resolveWorkerReachableGiteaBaseUrl("http://untrusted.invalid:3100", environment), "http://untrusted.invalid:3100");
+  assert.equal(resolveWorkerReachableGiteaBaseUrl("http://localhost:3100", { ...environment, FIELDFRAME_RUNTIME: "host" }), "http://localhost:3100");
+});
 
 function encryptForWorker(token: string) {
   const encoded = process.env.SOURCE_CONNECTION_ENCRYPTION_KEY;
@@ -43,7 +54,7 @@ async function fixture() {
       type: "IMPORT_DATASET",
       status: "QUEUED",
       sourceConnectionId: overrides.sourceConnectionId ?? connection.id,
-      input: { source: { repository: { provider: "GITEA", owner: "owner", repo: "repo", branch: "main", normalizedRootPath: overrides.root ?? "images" } } },
+      input: { source: { repository: { provider: "GITEA", owner: "owner", repo: "repo", ref: "main", rootPath: overrides.root ?? "images", visibility: "PRIVATE" }, manifest: { itemCount: 1, declaredBytes: 1 }, sourceConnectionId: overrides.sourceConnectionId ?? connection.id } },
     },
     select: { id: true },
   });
@@ -107,7 +118,7 @@ test("worker marks an expired token and safely rejects invalid root and foreign 
 test("worker safely projects an over-limit durable source manifest", { skip: enabled ? false : skip }, async () => {
   const value = await fixture();
   try {
-    const job = await value.db.job.create({ data: { datasetId: value.dataset.id, createdById: value.owner.id, type: "IMPORT_DATASET", status: "QUEUED", sourceConnectionId: value.connection.id, input: { source: { repository: { normalizedRootPath: "images" }, manifest: { itemCount: 2_001, declaredBytes: 1 } } } }, select: { id: true } });
+    const job = await value.db.job.create({ data: { datasetId: value.dataset.id, createdById: value.owner.id, type: "IMPORT_DATASET", status: "QUEUED", sourceConnectionId: value.connection.id, input: { source: { repository: { provider: "GITEA", owner: "owner", repo: "repo", ref: "main", rootPath: "images", visibility: "PRIVATE" }, manifest: { itemCount: 2_001, declaredBytes: 1 }, sourceConnectionId: value.connection.id } } }, select: { id: true } });
     assert.deepEqual(await resolveSourceAccessForJob(value.db, job.id), { kind: "refused", errorCode: "SOURCE_IMPORT_LIMIT_EXCEEDED" });
   } finally { await value.cleanup(); }
 });

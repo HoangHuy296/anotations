@@ -55,11 +55,12 @@ migration should add:
 
 | Candidate field | Entity | Constraint | Purpose |
 | --- | --- | --- | --- |
-| `repositoryImportIdempotencyKey String?` | `Dataset` | `@@unique([ownerId, repositoryImportIdempotencyKey])` | One actor-scoped durable acceptance outcome per request key, while preserving multiple `NULL` values for all other Dataset flows. |
+| `creationIdempotencyKey String?` and `creationRequestHash String?` | `Dataset` | `@@unique([ownerId, creationIdempotencyKey])` | One actor-scoped durable acceptance outcome per request key; the hash detects reuse of that key for a different request while preserving multiple `NULL` values for all other Dataset flows. |
 
-The exact field name may change during the approved migration review, but its
-scope must remain actor-scoped repository-import acceptance. Do **not** add a
-workflow-specific Job table or repurpose `PreparedImport`.
+The approved field names are `creationIdempotencyKey` and
+`creationRequestHash`. Their scope remains actor-scoped repository-import
+acceptance. Do **not** add a workflow-specific Job table or repurpose
+`PreparedImport`.
 
 ## Transaction and state transitions
 

@@ -35,9 +35,11 @@ export type DatasetMinAggregateOutputType = {
   externalRepositoryId: string | null
   sourceConnectionId: string | null
   sourceRootPath: string | null
-  sourceBranch: string | null
+  sourceRef: string | null
   lockedRevision: string | null
   currentRevision: string | null
+  creationIdempotencyKey: string | null
+  creationRequestHash: string | null
   lastSyncedAt: Date | null
   syncStatus: $Enums.AssetSyncStatus | null
   createdAt: Date | null
@@ -57,9 +59,11 @@ export type DatasetMaxAggregateOutputType = {
   externalRepositoryId: string | null
   sourceConnectionId: string | null
   sourceRootPath: string | null
-  sourceBranch: string | null
+  sourceRef: string | null
   lockedRevision: string | null
   currentRevision: string | null
+  creationIdempotencyKey: string | null
+  creationRequestHash: string | null
   lastSyncedAt: Date | null
   syncStatus: $Enums.AssetSyncStatus | null
   createdAt: Date | null
@@ -80,9 +84,11 @@ export type DatasetCountAggregateOutputType = {
   externalRepositoryId: number
   sourceConnectionId: number
   sourceRootPath: number
-  sourceBranch: number
+  sourceRef: number
   lockedRevision: number
   currentRevision: number
+  creationIdempotencyKey: number
+  creationRequestHash: number
   includePatterns: number
   excludePatterns: number
   lastSyncedAt: number
@@ -107,9 +113,11 @@ export type DatasetMinAggregateInputType = {
   externalRepositoryId?: true
   sourceConnectionId?: true
   sourceRootPath?: true
-  sourceBranch?: true
+  sourceRef?: true
   lockedRevision?: true
   currentRevision?: true
+  creationIdempotencyKey?: true
+  creationRequestHash?: true
   lastSyncedAt?: true
   syncStatus?: true
   createdAt?: true
@@ -129,9 +137,11 @@ export type DatasetMaxAggregateInputType = {
   externalRepositoryId?: true
   sourceConnectionId?: true
   sourceRootPath?: true
-  sourceBranch?: true
+  sourceRef?: true
   lockedRevision?: true
   currentRevision?: true
+  creationIdempotencyKey?: true
+  creationRequestHash?: true
   lastSyncedAt?: true
   syncStatus?: true
   createdAt?: true
@@ -152,9 +162,11 @@ export type DatasetCountAggregateInputType = {
   externalRepositoryId?: true
   sourceConnectionId?: true
   sourceRootPath?: true
-  sourceBranch?: true
+  sourceRef?: true
   lockedRevision?: true
   currentRevision?: true
+  creationIdempotencyKey?: true
+  creationRequestHash?: true
   includePatterns?: true
   excludePatterns?: true
   lastSyncedAt?: true
@@ -251,9 +263,11 @@ export type DatasetGroupByOutputType = {
   externalRepositoryId: string | null
   sourceConnectionId: string | null
   sourceRootPath: string | null
-  sourceBranch: string | null
+  sourceRef: string | null
   lockedRevision: string | null
   currentRevision: string | null
+  creationIdempotencyKey: string | null
+  creationRequestHash: string | null
   includePatterns: runtime.JsonValue
   excludePatterns: runtime.JsonValue
   lastSyncedAt: Date | null
@@ -298,9 +312,11 @@ export type DatasetWhereInput = {
   externalRepositoryId?: Prisma.StringNullableFilter<"Dataset"> | string | null
   sourceConnectionId?: Prisma.StringNullableFilter<"Dataset"> | string | null
   sourceRootPath?: Prisma.StringNullableFilter<"Dataset"> | string | null
-  sourceBranch?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"Dataset"> | string | null
   lockedRevision?: Prisma.StringNullableFilter<"Dataset"> | string | null
   currentRevision?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  creationIdempotencyKey?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  creationRequestHash?: Prisma.StringNullableFilter<"Dataset"> | string | null
   includePatterns?: Prisma.JsonFilter<"Dataset">
   excludePatterns?: Prisma.JsonFilter<"Dataset">
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"Dataset"> | Date | string | null
@@ -335,9 +351,11 @@ export type DatasetOrderByWithRelationInput = {
   externalRepositoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceConnectionId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceRootPath?: Prisma.SortOrderInput | Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRef?: Prisma.SortOrderInput | Prisma.SortOrder
   lockedRevision?: Prisma.SortOrderInput | Prisma.SortOrder
   currentRevision?: Prisma.SortOrderInput | Prisma.SortOrder
+  creationIdempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrderInput | Prisma.SortOrder
   includePatterns?: Prisma.SortOrder
   excludePatterns?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -362,6 +380,7 @@ export type DatasetOrderByWithRelationInput = {
 
 export type DatasetWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  ownerId_creationIdempotencyKey?: Prisma.DatasetOwnerIdCreationIdempotencyKeyCompoundUniqueInput
   AND?: Prisma.DatasetWhereInput | Prisma.DatasetWhereInput[]
   OR?: Prisma.DatasetWhereInput[]
   NOT?: Prisma.DatasetWhereInput | Prisma.DatasetWhereInput[]
@@ -375,9 +394,11 @@ export type DatasetWhereUniqueInput = Prisma.AtLeast<{
   externalRepositoryId?: Prisma.StringNullableFilter<"Dataset"> | string | null
   sourceConnectionId?: Prisma.StringNullableFilter<"Dataset"> | string | null
   sourceRootPath?: Prisma.StringNullableFilter<"Dataset"> | string | null
-  sourceBranch?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"Dataset"> | string | null
   lockedRevision?: Prisma.StringNullableFilter<"Dataset"> | string | null
   currentRevision?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  creationIdempotencyKey?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  creationRequestHash?: Prisma.StringNullableFilter<"Dataset"> | string | null
   includePatterns?: Prisma.JsonFilter<"Dataset">
   excludePatterns?: Prisma.JsonFilter<"Dataset">
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"Dataset"> | Date | string | null
@@ -398,7 +419,7 @@ export type DatasetWhereUniqueInput = Prisma.AtLeast<{
   jobs?: Prisma.JobListRelationFilter
   labels?: Prisma.LabelListRelationFilter
   preparedImports?: Prisma.PreparedImportListRelationFilter
-}, "id">
+}, "id" | "ownerId_creationIdempotencyKey">
 
 export type DatasetOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -412,9 +433,11 @@ export type DatasetOrderByWithAggregationInput = {
   externalRepositoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceConnectionId?: Prisma.SortOrderInput | Prisma.SortOrder
   sourceRootPath?: Prisma.SortOrderInput | Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceRef?: Prisma.SortOrderInput | Prisma.SortOrder
   lockedRevision?: Prisma.SortOrderInput | Prisma.SortOrder
   currentRevision?: Prisma.SortOrderInput | Prisma.SortOrder
+  creationIdempotencyKey?: Prisma.SortOrderInput | Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrderInput | Prisma.SortOrder
   includePatterns?: Prisma.SortOrder
   excludePatterns?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -444,9 +467,11 @@ export type DatasetScalarWhereWithAggregatesInput = {
   externalRepositoryId?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
   sourceConnectionId?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
   sourceRootPath?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
-  sourceBranch?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
+  sourceRef?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
   lockedRevision?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
   currentRevision?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
+  creationIdempotencyKey?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
+  creationRequestHash?: Prisma.StringNullableWithAggregatesFilter<"Dataset"> | string | null
   includePatterns?: Prisma.JsonWithAggregatesFilter<"Dataset">
   excludePatterns?: Prisma.JsonWithAggregatesFilter<"Dataset">
   lastSyncedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Dataset"> | Date | string | null
@@ -467,9 +492,11 @@ export type DatasetCreateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -504,9 +531,11 @@ export type DatasetUncheckedCreateInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -535,9 +564,11 @@ export type DatasetUpdateInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -572,9 +603,11 @@ export type DatasetUncheckedUpdateInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -606,9 +639,11 @@ export type DatasetCreateManyInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -629,9 +664,11 @@ export type DatasetUpdateManyMutationInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -655,9 +692,11 @@ export type DatasetUncheckedUpdateManyInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -684,6 +723,11 @@ export type DatasetScalarRelationFilter = {
   isNot?: Prisma.DatasetWhereInput
 }
 
+export type DatasetOwnerIdCreationIdempotencyKeyCompoundUniqueInput = {
+  ownerId: string
+  creationIdempotencyKey: string
+}
+
 export type DatasetCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
@@ -696,9 +740,11 @@ export type DatasetCountOrderByAggregateInput = {
   externalRepositoryId?: Prisma.SortOrder
   sourceConnectionId?: Prisma.SortOrder
   sourceRootPath?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   lockedRevision?: Prisma.SortOrder
   currentRevision?: Prisma.SortOrder
+  creationIdempotencyKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   includePatterns?: Prisma.SortOrder
   excludePatterns?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
@@ -721,9 +767,11 @@ export type DatasetMaxOrderByAggregateInput = {
   externalRepositoryId?: Prisma.SortOrder
   sourceConnectionId?: Prisma.SortOrder
   sourceRootPath?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   lockedRevision?: Prisma.SortOrder
   currentRevision?: Prisma.SortOrder
+  creationIdempotencyKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
   syncStatus?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -743,9 +791,11 @@ export type DatasetMinOrderByAggregateInput = {
   externalRepositoryId?: Prisma.SortOrder
   sourceConnectionId?: Prisma.SortOrder
   sourceRootPath?: Prisma.SortOrder
-  sourceBranch?: Prisma.SortOrder
+  sourceRef?: Prisma.SortOrder
   lockedRevision?: Prisma.SortOrder
   currentRevision?: Prisma.SortOrder
+  creationIdempotencyKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   lastSyncedAt?: Prisma.SortOrder
   syncStatus?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -1013,9 +1063,11 @@ export type DatasetCreateWithoutOwnerInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1048,9 +1100,11 @@ export type DatasetUncheckedCreateWithoutOwnerInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1111,9 +1165,11 @@ export type DatasetScalarWhereInput = {
   externalRepositoryId?: Prisma.StringNullableFilter<"Dataset"> | string | null
   sourceConnectionId?: Prisma.StringNullableFilter<"Dataset"> | string | null
   sourceRootPath?: Prisma.StringNullableFilter<"Dataset"> | string | null
-  sourceBranch?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  sourceRef?: Prisma.StringNullableFilter<"Dataset"> | string | null
   lockedRevision?: Prisma.StringNullableFilter<"Dataset"> | string | null
   currentRevision?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  creationIdempotencyKey?: Prisma.StringNullableFilter<"Dataset"> | string | null
+  creationRequestHash?: Prisma.StringNullableFilter<"Dataset"> | string | null
   includePatterns?: Prisma.JsonFilter<"Dataset">
   excludePatterns?: Prisma.JsonFilter<"Dataset">
   lastSyncedAt?: Prisma.DateTimeNullableFilter<"Dataset"> | Date | string | null
@@ -1134,9 +1190,11 @@ export type DatasetCreateWithoutJobsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1170,9 +1228,11 @@ export type DatasetUncheckedCreateWithoutJobsInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1216,9 +1276,11 @@ export type DatasetUpdateWithoutJobsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1252,9 +1314,11 @@ export type DatasetUncheckedUpdateWithoutJobsInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1282,9 +1346,11 @@ export type DatasetCreateWithoutExternalRepositoryInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1317,9 +1383,11 @@ export type DatasetUncheckedCreateWithoutExternalRepositoryInput = {
   sourceMode?: $Enums.DatasetSourceMode
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1374,9 +1442,11 @@ export type DatasetCreateWithoutSourceConnectionInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1409,9 +1479,11 @@ export type DatasetUncheckedCreateWithoutSourceConnectionInput = {
   sourceMode?: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1466,9 +1538,11 @@ export type DatasetCreateWithoutPreparedImportsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1502,9 +1576,11 @@ export type DatasetUncheckedCreateWithoutPreparedImportsInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1548,9 +1624,11 @@ export type DatasetUpdateWithoutPreparedImportsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1584,9 +1662,11 @@ export type DatasetUncheckedUpdateWithoutPreparedImportsInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1614,9 +1694,11 @@ export type DatasetCreateWithoutMembersInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1650,9 +1732,11 @@ export type DatasetUncheckedCreateWithoutMembersInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1696,9 +1780,11 @@ export type DatasetUpdateWithoutMembersInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1732,9 +1818,11 @@ export type DatasetUncheckedUpdateWithoutMembersInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1762,9 +1850,11 @@ export type DatasetCreateWithoutAssetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1798,9 +1888,11 @@ export type DatasetUncheckedCreateWithoutAssetsInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1844,9 +1936,11 @@ export type DatasetUpdateWithoutAssetsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1880,9 +1974,11 @@ export type DatasetUncheckedUpdateWithoutAssetsInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1910,9 +2006,11 @@ export type DatasetCreateWithoutAssetVersionsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1946,9 +2044,11 @@ export type DatasetUncheckedCreateWithoutAssetVersionsInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -1992,9 +2092,11 @@ export type DatasetUpdateWithoutAssetVersionsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2028,9 +2130,11 @@ export type DatasetUncheckedUpdateWithoutAssetVersionsInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2058,9 +2162,11 @@ export type DatasetCreateWithoutLabelsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2094,9 +2200,11 @@ export type DatasetUncheckedCreateWithoutLabelsInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2140,9 +2248,11 @@ export type DatasetUpdateWithoutLabelsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2176,9 +2286,11 @@ export type DatasetUncheckedUpdateWithoutLabelsInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2206,9 +2318,11 @@ export type DatasetCreateWithoutAnnotationsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2242,9 +2356,11 @@ export type DatasetUncheckedCreateWithoutAnnotationsInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2288,9 +2404,11 @@ export type DatasetUpdateWithoutAnnotationsInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2324,9 +2442,11 @@ export type DatasetUncheckedUpdateWithoutAnnotationsInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2354,9 +2474,11 @@ export type DatasetCreateWithoutAiTasksInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: $Enums.DatasetSourceMode
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2390,9 +2512,11 @@ export type DatasetUncheckedCreateWithoutAiTasksInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2436,9 +2560,11 @@ export type DatasetUpdateWithoutAiTasksInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2472,9 +2598,11 @@ export type DatasetUncheckedUpdateWithoutAiTasksInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2504,9 +2632,11 @@ export type DatasetCreateManyOwnerInput = {
   externalRepositoryId?: string | null
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2527,9 +2657,11 @@ export type DatasetUpdateWithoutOwnerInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2562,9 +2694,11 @@ export type DatasetUncheckedUpdateWithoutOwnerInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2595,9 +2729,11 @@ export type DatasetUncheckedUpdateManyWithoutOwnerInput = {
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2620,9 +2756,11 @@ export type DatasetCreateManyExternalRepositoryInput = {
   sourceMode?: $Enums.DatasetSourceMode
   sourceConnectionId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2643,9 +2781,11 @@ export type DatasetUpdateWithoutExternalRepositoryInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2678,9 +2818,11 @@ export type DatasetUncheckedUpdateWithoutExternalRepositoryInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2711,9 +2853,11 @@ export type DatasetUncheckedUpdateManyWithoutExternalRepositoryInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2736,9 +2880,11 @@ export type DatasetCreateManySourceConnectionInput = {
   sourceMode?: $Enums.DatasetSourceMode
   externalRepositoryId?: string | null
   sourceRootPath?: string | null
-  sourceBranch?: string | null
+  sourceRef?: string | null
   lockedRevision?: string | null
   currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Date | string | null
@@ -2759,9 +2905,11 @@ export type DatasetUpdateWithoutSourceConnectionInput = {
   metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2794,9 +2942,11 @@ export type DatasetUncheckedUpdateWithoutSourceConnectionInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2827,9 +2977,11 @@ export type DatasetUncheckedUpdateManyWithoutSourceConnectionInput = {
   sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
   externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBranch?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2947,9 +3099,11 @@ export type DatasetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   externalRepositoryId?: boolean
   sourceConnectionId?: boolean
   sourceRootPath?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   lockedRevision?: boolean
   currentRevision?: boolean
+  creationIdempotencyKey?: boolean
+  creationRequestHash?: boolean
   includePatterns?: boolean
   excludePatterns?: boolean
   lastSyncedAt?: boolean
@@ -2985,9 +3139,11 @@ export type DatasetSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   externalRepositoryId?: boolean
   sourceConnectionId?: boolean
   sourceRootPath?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   lockedRevision?: boolean
   currentRevision?: boolean
+  creationIdempotencyKey?: boolean
+  creationRequestHash?: boolean
   includePatterns?: boolean
   excludePatterns?: boolean
   lastSyncedAt?: boolean
@@ -3014,9 +3170,11 @@ export type DatasetSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   externalRepositoryId?: boolean
   sourceConnectionId?: boolean
   sourceRootPath?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   lockedRevision?: boolean
   currentRevision?: boolean
+  creationIdempotencyKey?: boolean
+  creationRequestHash?: boolean
   includePatterns?: boolean
   excludePatterns?: boolean
   lastSyncedAt?: boolean
@@ -3043,9 +3201,11 @@ export type DatasetSelectScalar = {
   externalRepositoryId?: boolean
   sourceConnectionId?: boolean
   sourceRootPath?: boolean
-  sourceBranch?: boolean
+  sourceRef?: boolean
   lockedRevision?: boolean
   currentRevision?: boolean
+  creationIdempotencyKey?: boolean
+  creationRequestHash?: boolean
   includePatterns?: boolean
   excludePatterns?: boolean
   lastSyncedAt?: boolean
@@ -3057,7 +3217,7 @@ export type DatasetSelectScalar = {
   deletedAt?: boolean
 }
 
-export type DatasetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "name" | "description" | "type" | "primaryModality" | "metadata" | "sourceMode" | "externalRepositoryId" | "sourceConnectionId" | "sourceRootPath" | "sourceBranch" | "lockedRevision" | "currentRevision" | "includePatterns" | "excludePatterns" | "lastSyncedAt" | "syncStatus" | "syncSummary" | "createdAt" | "updatedAt" | "archivedAt" | "deletedAt", ExtArgs["result"]["dataset"]>
+export type DatasetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "name" | "description" | "type" | "primaryModality" | "metadata" | "sourceMode" | "externalRepositoryId" | "sourceConnectionId" | "sourceRootPath" | "sourceRef" | "lockedRevision" | "currentRevision" | "creationIdempotencyKey" | "creationRequestHash" | "includePatterns" | "excludePatterns" | "lastSyncedAt" | "syncStatus" | "syncSummary" | "createdAt" | "updatedAt" | "archivedAt" | "deletedAt", ExtArgs["result"]["dataset"]>
 export type DatasetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   aiTasks?: boolean | Prisma.Dataset$aiTasksArgs<ExtArgs>
   annotations?: boolean | Prisma.Dataset$annotationsArgs<ExtArgs>
@@ -3110,9 +3270,11 @@ export type $DatasetPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     externalRepositoryId: string | null
     sourceConnectionId: string | null
     sourceRootPath: string | null
-    sourceBranch: string | null
+    sourceRef: string | null
     lockedRevision: string | null
     currentRevision: string | null
+    creationIdempotencyKey: string | null
+    creationRequestHash: string | null
     includePatterns: runtime.JsonValue
     excludePatterns: runtime.JsonValue
     lastSyncedAt: Date | null
@@ -3567,9 +3729,11 @@ export interface DatasetFieldRefs {
   readonly externalRepositoryId: Prisma.FieldRef<"Dataset", 'String'>
   readonly sourceConnectionId: Prisma.FieldRef<"Dataset", 'String'>
   readonly sourceRootPath: Prisma.FieldRef<"Dataset", 'String'>
-  readonly sourceBranch: Prisma.FieldRef<"Dataset", 'String'>
+  readonly sourceRef: Prisma.FieldRef<"Dataset", 'String'>
   readonly lockedRevision: Prisma.FieldRef<"Dataset", 'String'>
   readonly currentRevision: Prisma.FieldRef<"Dataset", 'String'>
+  readonly creationIdempotencyKey: Prisma.FieldRef<"Dataset", 'String'>
+  readonly creationRequestHash: Prisma.FieldRef<"Dataset", 'String'>
   readonly includePatterns: Prisma.FieldRef<"Dataset", 'Json'>
   readonly excludePatterns: Prisma.FieldRef<"Dataset", 'Json'>
   readonly lastSyncedAt: Prisma.FieldRef<"Dataset", 'DateTime'>

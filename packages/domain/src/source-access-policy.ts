@@ -43,7 +43,12 @@ function csv(value: string | undefined) {
 
 /** Deployment policy only; browser input never reaches this constructor. */
 export function readSourceAccessPolicy(environment: NodeJS.ProcessEnv = process.env): SourceAccessPolicy {
-  const testMode = environment.NODE_ENV !== "production" && environment.SOURCE_CONNECTION_TEST_MODE === "1";
+  // Controlled Compose integration uses a production Next.js build.  Test
+  // fixture exceptions therefore cannot depend on NODE_ENV alone; they need
+  // both explicit server-only test flags.  Browser input never reaches this
+  // policy constructor, so it cannot activate trusted fixture hosts.
+  const testMode = environment.REPOSITORY_PREFLIGHT_INTEGRATION_TESTS === "1"
+    && environment.SOURCE_CONNECTION_TEST_MODE === "1";
   return {
     allowedIpCidrs: csv(environment.SOURCE_ALLOWED_IP_CIDRS),
     trustedTestHosts: testMode ? csv(environment.SOURCE_TRUSTED_TEST_HOSTS).map((host) => host.toLowerCase()) : [],
@@ -99,8 +104,7 @@ async function defaultLookup(hostname: string) {
  */
 function configuredTestLookup(environment: NodeJS.ProcessEnv = process.env): DnsLookup | null {
   if (
-    environment.NODE_ENV === "production"
-    || environment.REPOSITORY_PREFLIGHT_INTEGRATION_TESTS !== "1"
+    environment.REPOSITORY_PREFLIGHT_INTEGRATION_TESTS !== "1"
     || environment.SOURCE_CONNECTION_TEST_MODE !== "1"
   ) return null;
   const raw = environment.SOURCE_TEST_DNS_OVERRIDES;
