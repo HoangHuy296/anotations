@@ -197,6 +197,14 @@ export const AnnotationType = {
 export type AnnotationType = (typeof AnnotationType)[keyof typeof AnnotationType]
 
 
+export const VideoInterpolationMode = {
+  NONE: 'NONE',
+  LINEAR: 'LINEAR'
+} as const
+
+export type VideoInterpolationMode = (typeof VideoInterpolationMode)[keyof typeof VideoInterpolationMode]
+
+
 export const LabelScope = {
   OBJECT: 'OBJECT',
   SEGMENTATION: 'SEGMENTATION',

@@ -8,6 +8,8 @@ import { failJob } from "../jobs/job-claim-lock.js";
 import { cancelJob } from "../jobs/job-claim-lock.js";
 import { resolveSourceAccessForJob } from "../source/source-access.js";
 import { processExportDataset } from "../jobs/export-dataset.js";
+import { processVideoMetadata } from "../jobs/video-metadata.js";
+import { processAudioWaveform } from "../jobs/audio-waveform.js";
 
 export type QueueRouteResult =
   | { kind: "received"; jobId: string }
@@ -70,5 +72,7 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
   }
   if (job.type === "IMPORT_DATASET") await processImportDataset(input.db, job.id, claim.lockToken);
   if (job.type === "EXPORT_DATASET") await processExportDataset(input.db, job.id, claim.lockToken);
+  if (job.type === "EXTRACT_VIDEO_METADATA") await processVideoMetadata(input.db, job.id, claim.lockToken);
+  if (job.type === "GENERATE_AUDIO_WAVEFORM") await processAudioWaveform(input.db, job.id, claim.lockToken);
   return { kind: "claimed", jobId: job.id };
 }

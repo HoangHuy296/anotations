@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
+import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 
 type Visibility = "PUBLIC" | "PRIVATE";
 type CredentialMode = "PUBLIC" | "EXISTING_SOURCE_CONNECTION" | "ONE_TIME_PAT";
@@ -50,7 +51,7 @@ function requestFromForm(form: FormData, credentialMode: CredentialMode) {
   return request;
 }
 
-export function ImportForm({ connections }: { connections: Array<{ id: string; name: string | null }> }) {
+export function ImportForm({ connections, giteaServerUrl }: { connections: Array<{ id: string; name: string | null }>; giteaServerUrl?: string }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const importIdempotencyKeyRef = useRef<string | null>(null);
@@ -134,7 +135,7 @@ export function ImportForm({ connections }: { connections: Array<{ id: string; n
       repository: { ...repository, name: repo },
       // Retain this key for a failed-network retry of the same preview. The
       // server computes its request hash and remains the idempotency authority.
-      idempotencyKey: importIdempotencyKeyRef.current ??= crypto.randomUUID(),
+      idempotencyKey: importIdempotencyKeyRef.current ??= randomUUIDAuto(),
     };
     if (mode === "ONE_TIME_PAT" && requestPayload.saveAsSourceConnection !== true) {
       setMessage("Save the one-time PAT as a source connection before starting an asynchronous import.");
@@ -170,7 +171,7 @@ export function ImportForm({ connections }: { connections: Array<{ id: string; n
         </div></fieldset>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {mode === "EXISTING_SOURCE_CONNECTION" && <Field label="Source connection"><select className={inputClassName} disabled={isPending} name="sourceConnectionId" required><option value="">Select your active Gitea connection</option>{connections.map((connection) => <option key={connection.id} value={connection.id}>{connection.name ?? "Gitea connection"}</option>)}</select></Field>}
-          {(mode === "PUBLIC" || mode === "ONE_TIME_PAT") && <Field label="Gitea server URL"><input className={inputClassName} disabled={isPending} name="serverUrl" placeholder="http://localhost:3100" required type="url" /><span className="mt-1 block text-[11px] leading-4 text-zinc-500">Use the Gitea server root, not a clone URL such as <code>/owner/repository.git</code>.</span></Field>}
+          {(mode === "PUBLIC" || mode === "ONE_TIME_PAT") && <Field label="Gitea server URL"><input className={inputClassName} disabled={isPending} name="serverUrl" placeholder={giteaServerUrl ?? "http://localhost:3100"} required type="url" /><span className="mt-1 block text-[11px] leading-4 text-zinc-500">Use the Gitea server root, not a clone URL such as <code>/owner/repository.git</code>{giteaServerUrl ? <> — for this deployment, that&rsquo;s exactly <code>{giteaServerUrl}</code>, nothing else</> : null}.</span></Field>}
           {mode === "ONE_TIME_PAT" && <Field label="Personal access token"><input autoComplete="off" className={inputClassName} disabled={isPending} name="personalAccessToken" required type="password" /></Field>}
           <fieldset><legend className="text-xs font-semibold text-zinc-700">Expected repository visibility</legend><div className="mt-2 grid h-10 grid-cols-2 rounded-xl border border-zinc-200 bg-white p-1">{(["PUBLIC", "PRIVATE"] as const).map((visibility) => <label key={visibility} className="grid cursor-pointer place-items-center rounded-lg has-[:checked]:bg-zinc-950 has-[:checked]:text-white"><input className="sr-only" defaultChecked={visibility === "PUBLIC"} disabled={isPending} name="expectedVisibility" type="radio" value={visibility} /><span className="text-xs font-semibold">{visibility === "PUBLIC" ? "Public" : "Private"}</span></label>)}</div></fieldset>
           <Field label="Owner"><input className={inputClassName} disabled={isPending} name="owner" placeholder="annotation-admin" required /></Field><Field label="Repository"><input className={inputClassName} disabled={isPending} name="repo" placeholder="ImageDataset" required /></Field>

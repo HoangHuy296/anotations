@@ -1,0 +1,73 @@
+--progress is a global compose flag, better use `docker compose --progress xx build ...
+time="2026-07-30T15:34:45+07:00" level=warning msg="COMPOSE_BAKE=false is deprecated, support for internal compose builder will be removed in next release"
+#0 building with "default" instance using docker driver
+
+#1 [web internal] load build definition from Dockerfile
+#1 transferring dockerfile: 806B 0.0s done
+#1 DONE 0.0s
+
+#2 [web internal] load metadata for docker.io/library/node:22-bookworm-slim
+#2 DONE 0.0s
+
+#3 [web internal] load .dockerignore
+#3 transferring context: 183B done
+#3 DONE 0.0s
+
+#4 [web  1/13] FROM docker.io/library/node:22-bookworm-slim@sha256:53ada149d435c38b14476cb57e4a7da73c15595aba79bd6971b547ceb6d018bf
+#4 resolve docker.io/library/node:22-bookworm-slim@sha256:53ada149d435c38b14476cb57e4a7da73c15595aba79bd6971b547ceb6d018bf 0.0s done
+#4 DONE 0.0s
+
+#5 [web internal] load build context
+#5 transferring context: 21.80MB 0.6s done
+#5 DONE 0.6s
+
+#6 [web  3/13] RUN apt-get update   && apt-get install --no-install-recommends -y openssl   && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [web  9/13] COPY packages/queue/package.json packages/queue/package.json
+#7 CACHED
+
+#8 [web 10/13] RUN pnpm install --frozen-lockfile
+#8 CACHED
+
+#9 [web  7/13] COPY apps/worker/package.json apps/worker/package.json
+#9 CACHED
+
+#10 [web  6/13] COPY apps/web/package.json apps/web/package.json
+#10 CACHED
+
+#11 [web 12/13] RUN cp lib/generated/prisma/*.so.node lib/generated/
+#11 CACHED
+
+#12 [web  2/13] WORKDIR /workspace
+#12 CACHED
+
+#13 [web  4/13] RUN corepack enable
+#13 CACHED
+
+#14 [web 11/13] COPY . .
+#14 CACHED
+
+#15 [web  8/13] COPY packages/domain/package.json packages/domain/package.json
+#15 CACHED
+
+#16 [web  5/13] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+#16 CACHED
+
+#17 [web 13/13] RUN pnpm --filter @fieldframe/domain build   && pnpm --filter @fieldframe/queue build   && pnpm --filter @fieldframe/web build
+#17 CACHED
+
+#18 [web] exporting to image
+#18 exporting layers done
+#18 exporting manifest sha256:d006d137c2241782d5b24f03ff3aaee3997dc2ad638cf17da265a8588f544221 done
+#18 exporting config sha256:ee9dce6f085e0f97a6042326b9a0bbf4c0175e5e280af514ca0b6c7cdaa41d37 done
+#18 exporting attestation manifest sha256:81fefb26b0ff44ef748e6c02844579758d04cd0d90df04ffefca1ee3d7c63a31 0.0s done
+#18 exporting manifest list sha256:9456b139ed65afc8a1ebdaf72e57110d67cdbef1dbf967b57b0f929dca3166e9 0.0s done
+#18 naming to docker.io/library/anotations-web:latest
+#18 naming to docker.io/library/anotations-web:latest done
+#18 unpacking to docker.io/library/anotations-web:latest 0.0s done
+#18 DONE 0.2s
+
+#19 [web] resolving provenance for metadata file
+#19 DONE 0.0s
+ web  Built

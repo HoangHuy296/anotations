@@ -844,6 +844,23 @@ export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
 }
 
+export type EnumVideoInterpolationModeFilter<$PrismaModel = never> = {
+  equals?: $Enums.VideoInterpolationMode | Prisma.EnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  in?: $Enums.VideoInterpolationMode[] | Prisma.ListEnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.VideoInterpolationMode[] | Prisma.ListEnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumVideoInterpolationModeFilter<$PrismaModel> | $Enums.VideoInterpolationMode
+}
+
+export type EnumVideoInterpolationModeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.VideoInterpolationMode | Prisma.EnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  in?: $Enums.VideoInterpolationMode[] | Prisma.ListEnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.VideoInterpolationMode[] | Prisma.ListEnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumVideoInterpolationModeWithAggregatesFilter<$PrismaModel> | $Enums.VideoInterpolationMode
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumVideoInterpolationModeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumVideoInterpolationModeFilter<$PrismaModel>
+}
+
 export type EnumAiTaskTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.AiTaskType | Prisma.EnumAiTaskTypeFieldRefInput<$PrismaModel>
   in?: $Enums.AiTaskType[] | Prisma.ListEnumAiTaskTypeFieldRefInput<$PrismaModel>
@@ -1654,6 +1671,23 @@ export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _min?: Prisma.NestedFloatNullableFilter<$PrismaModel>
   _max?: Prisma.NestedFloatNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumVideoInterpolationModeFilter<$PrismaModel = never> = {
+  equals?: $Enums.VideoInterpolationMode | Prisma.EnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  in?: $Enums.VideoInterpolationMode[] | Prisma.ListEnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.VideoInterpolationMode[] | Prisma.ListEnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumVideoInterpolationModeFilter<$PrismaModel> | $Enums.VideoInterpolationMode
+}
+
+export type NestedEnumVideoInterpolationModeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.VideoInterpolationMode | Prisma.EnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  in?: $Enums.VideoInterpolationMode[] | Prisma.ListEnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.VideoInterpolationMode[] | Prisma.ListEnumVideoInterpolationModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumVideoInterpolationModeWithAggregatesFilter<$PrismaModel> | $Enums.VideoInterpolationMode
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumVideoInterpolationModeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumVideoInterpolationModeFilter<$PrismaModel>
 }
 
 export type NestedEnumAiTaskTypeFilter<$PrismaModel = never> = {

@@ -1,0 +1,90 @@
+$ sh -c 'set -a; [ -f ../../.env ] && . ../../.env; set +a; exec ./node_modules/.bin/next build'
+▲ Next.js 16.2.9 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 17.0s
+  Running TypeScript ...
+  Finished TypeScript in 22.2s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/24) ...
+  Generating static pages using 7 workers (6/24) 
+  Generating static pages using 7 workers (12/24) 
+  Generating static pages using 7 workers (18/24) 
+✓ Generating static pages using 7 workers (24/24) in 523ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /account
+├ ƒ /account/password
+├ ƒ /api/assets/[assetId]/annotations
+├ ƒ /api/assets/[assetId]/media-processing
+├ ƒ /api/assets/[assetId]/media-processing/status
+├ ƒ /api/assets/[assetId]/temporal-labels
+├ ƒ /api/assets/[assetId]/video-annotations
+├ ƒ /api/assets/[assetId]/video-object-tracks
+├ ƒ /api/assets/[assetId]/view-url
+├ ƒ /api/assets/complete-upload
+├ ƒ /api/assets/presigned-upload
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/auth/password
+├ ƒ /api/auth/profile
+├ ƒ /api/auth/refresh
+├ ƒ /api/auth/signup
+├ ƒ /api/datasets
+├ ƒ /api/datasets/[datasetId]
+├ ƒ /api/datasets/[datasetId]/assets
+├ ƒ /api/datasets/[datasetId]/imports/local-folder
+├ ƒ /api/datasets/[datasetId]/labels
+├ ƒ /api/datasets/from-repository
+├ ƒ /api/export
+├ ƒ /api/export/[jobId]
+├ ƒ /api/gitea/import
+├ ƒ /api/gitea/repos
+├ ƒ /api/gitea/repos/[owner]/[repo]/tree
+├ ƒ /api/health
+├ ƒ /api/images/[imageId]/content
+├ ƒ /api/images/[imageId]/dimensions
+├ ƒ /api/imports/[preparedImportId]/items/[itemId]/complete
+├ ƒ /api/imports/[preparedImportId]/upload-capabilities
+├ ƒ /api/imports/local-folder
+├ ƒ /api/jobs/[jobId]
+├ ƒ /api/jobs/[jobId]/cancel
+├ ƒ /api/jobs/[jobId]/commit-import
+├ ƒ /api/jobs/[jobId]/events
+├ ƒ /api/jobs/[jobId]/retry
+├ ƒ /api/labels/[labelId]
+├ ƒ /api/source-connections
+├ ƒ /api/source-connections/[id]
+├ ƒ /api/source-import-jobs
+├ ƒ /api/source-import-preflight
+├ ƒ /api/source-repositories/preflight
+├ ƒ /api/temporal-labels/[annotationId]
+├ ƒ /api/video-keyframes/[annotationId]
+├ ƒ /api/video-object-tracks/[trackId]
+├ ƒ /api/video-object-tracks/[trackId]/keyframes
+├ ƒ /dashboard
+├ ƒ /datasets
+├ ƒ /datasets/[datasetId]
+├ ƒ /datasets/[datasetId]/imports/[jobId]
+├ ƒ /datasets/imports
+├ ƒ /datasets/local-folder
+├ ○ /datasets/new
+├ ○ /datasets/new/local-folder
+├ ƒ /exports
+├ ƒ /jobs/[jobId]
+├ ƒ /labels
+├ ƒ /login
+├ ƒ /register
+├ ƒ /unauthorized
+└ ƒ /workspace/[datasetId]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

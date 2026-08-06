@@ -8,6 +8,7 @@ import { PreflightError } from "@/lib/providers/provider-errors";
 import type { ServerCredentialContext } from "@/lib/providers/provider.types";
 import { decryptSourceToken } from "@/lib/source-connection-crypto";
 import { validateSourceBaseUrl } from "@/lib/source-access-policy";
+import { configuredInternalBaseUrl, resolveServerReachableGiteaUrl } from "@/lib/providers/gitea-compose-url";
 
 function canonicalBaseUrl(url: URL) {
   const pathname = url.pathname.replace(/\/+$/, "");
@@ -50,12 +51,26 @@ export async function resolvePreflightGiteaCredential(
     throw new PreflightError("SOURCE_TOKEN_INVALID");
   }
 
-  const address = await validateSourceBaseUrl(connection.baseUrl);
-  if (!address.ok) throw new PreflightError("UNSAFE_REPOSITORY_URL");
+  // A stored connection always persists the public Gitea root (see
+  // source-import/preflight.ts's `durableBaseUrl`), never the internal
+  // Compose alias, so the same public->internal substitution used for a
+  // browser-submitted URL applies here before falling back to the general
+  // SSRF policy for a real, non-Compose address.
+  const reachable = resolveServerReachableGiteaUrl(connection.baseUrl);
+  let baseUrl: string;
+  if (reachable.usesConfiguredInternalUrl) {
+    const configured = configuredInternalBaseUrl(reachable.baseUrl);
+    if (!configured) throw new PreflightError("UNSAFE_REPOSITORY_URL");
+    baseUrl = configured;
+  } else {
+    const address = await validateSourceBaseUrl(reachable.baseUrl);
+    if (!address.ok) throw new PreflightError("UNSAFE_REPOSITORY_URL");
+    baseUrl = canonicalBaseUrl(address.value);
+  }
   try {
     return {
       connectionId: connection.id,
-      baseUrl: canonicalBaseUrl(address.value),
+      baseUrl,
       token: decryptSourceToken(connection.tokenEncrypted),
     };
   } catch {

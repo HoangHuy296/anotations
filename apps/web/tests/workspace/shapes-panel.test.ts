@@ -10,7 +10,7 @@ const annotation = {
   type: "BOUNDING_BOX" as const,
   geometry: { x: 0.1, y: 0.2, width: 0.3, height: 0.4 },
   status: "DRAFT" as const,
-  version: 1,
+  revision: 1,
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 
@@ -20,10 +20,10 @@ test("Shapes and canvas use one selected persisted annotation projection", () =>
   store.setSelectedId(annotation.id);
   assert.equal(useAnnotationStore.getState().selectedId, annotation.id);
 
-  store.upsertSafeAnnotation({ ...annotation, labelId: "label-vehicle", version: 2 });
+  store.upsertSafeAnnotation({ ...annotation, labelId: "label-vehicle", revision: 2 });
   const relabeled = useAnnotationStore.getState().persistedAnnotations.find((item) => item.id === annotation.id);
   assert.equal(relabeled?.labelId, "label-vehicle");
-  assert.equal(relabeled?.version, 2);
+  assert.equal(relabeled?.revision, 2);
 
   store.removeSafeAnnotation(annotation.id);
   assert.equal(useAnnotationStore.getState().persistedAnnotations.length, 0);

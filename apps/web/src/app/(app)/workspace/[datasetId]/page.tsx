@@ -11,11 +11,12 @@ import { getRequestActor } from "@/lib/auth";
 import { isDatabaseConfigured } from "@/lib/db";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 import { workspaceListQuerySchema } from "@/lib/validation/image-workspace";
-import { readImageWorkspaceAsset, readImageWorkspacePage } from "@/lib/workspace/image-workspace";
+import { readImageWorkspacePage } from "@/lib/workspace/image-workspace";
+import { readWorkspaceSelection } from "@/lib/workspace/workspace-read";
 
 export const metadata: Metadata = { title: "Annotation Workspace" };
 
-type SearchParams = { q?: string | string[]; status?: string | string[]; image?: string | string[]; page?: string | string[] };
+type SearchParams = { q?: string | string[]; status?: string | string[]; image?: string | string[]; video?: string | string[]; audio?: string | string[]; text?: string | string[]; page?: string | string[] };
 const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
 const values = (value: string | string[] | undefined) => Array.isArray(value) ? value : value ? [value] : [];
 
@@ -27,24 +28,26 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   const actor = await getRequestActor();
   if (!actor) notFound();
   const query = await searchParams;
+  const selectedAssetId = first(query.image) ?? first(query.video) ?? first(query.audio) ?? first(query.text);
   const parsedQuery = workspaceListQuerySchema.safeParse({
     page: first(query.page),
     q: first(query.q),
     statuses: values(query.status),
-    image: first(query.image),
+    image: selectedAssetId,
   });
   const listQuery = parsedQuery.success ? parsedQuery.data : { page: 1, q: "", statuses: [], image: undefined };
   const workspace = await readImageWorkspacePage(actor, datasetId, { page: listQuery.page, search: listQuery.q, statuses: listQuery.statuses, selectedAssetId: listQuery.image });
   if (!workspace) notFound();
-  const selectedAssetId = workspace.page.selectedAssetId;
-  const selectedAsset = workspace.page.items.find((item) => item.id === selectedAssetId) ?? null;
-  const selected = selectedAsset?.modality === "IMAGE" ? await readImageWorkspaceAsset(actor, datasetId, selectedAsset.id) : null;
+  const selectedAssetIdFromPage = workspace.page.selectedAssetId;
+  const selectedAsset = workspace.page.items.find((item) => item.id === selectedAssetIdFromPage) ?? null;
+  const selected = selectedAsset ? await readWorkspaceSelection(actor, datasetId, selectedAsset.id) : null;
+  const imageSelection = selected?.engine === "IMAGE" ? selected : null;
   return <div className="flex min-h-[100dvh] flex-col bg-zinc-100">
     <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
-      <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} />
-      <WorkspaceEngine datasetId={datasetId} asset={selectedAsset} image={selected?.asset ?? null} annotations={selected?.annotations ?? []} labels={selected?.labels ?? []} />
-      <PropertiesPanel datasetId={datasetId} image={selected?.asset ?? null} labels={selected?.labels ?? []} images={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetId} />
+      <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetIdFromPage} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} />
+      <WorkspaceEngine selection={selected} />
+      <PropertiesPanel datasetId={datasetId} image={imageSelection?.asset ?? null} labels={imageSelection?.labels ?? []} images={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetIdFromPage} />
     </div>
   </div>;
 }

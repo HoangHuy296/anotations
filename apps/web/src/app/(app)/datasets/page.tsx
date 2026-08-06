@@ -5,7 +5,7 @@ import {
   Images,
   WarningCircle,
 } from "@phosphor-icons/react/dist/ssr";
-import { AssetStatus, DatasetSourceMode, UserRole } from "@internal/db";
+import { AssetStatus, DatasetSourceMode, Modality, UserRole } from "@internal/db";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
@@ -33,6 +33,11 @@ type DatasetSummary = {
 type DatasetStatusCount = {
   datasetId: string;
   status: AssetStatus;
+  _count: { _all: number };
+};
+type DatasetModalityCount = {
+  datasetId: string;
+  modality: Modality;
   _count: { _all: number };
 };
 
@@ -78,12 +83,18 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
     const pageDatasets = (paginationMode === "before" ? datasets.slice(0, PAGE_SIZE).reverse() : datasets.slice(0, PAGE_SIZE)) as unknown as DatasetSummary[];
     const statusCounts = await db.asset.groupBy({
       by: ["datasetId", "status"],
-      where: { modality: "IMAGE", datasetId: { in: pageDatasets.map((dataset) => dataset.id) } },
+      where: { datasetId: { in: pageDatasets.map((dataset) => dataset.id) } },
+      _count: { _all: true },
+    });
+    const modalityCounts = await db.asset.groupBy({
+      by: ["datasetId", "modality"],
+      where: { datasetId: { in: pageDatasets.map((dataset) => dataset.id) } },
       _count: { _all: true },
     });
     data = {
       datasets: pageDatasets,
       statusCounts: statusCounts as DatasetStatusCount[],
+      modalityCounts: modalityCounts as DatasetModalityCount[],
       hasNext: paginationMode === "before" ? true : hasOverflow,
       hasPrevious: paginationMode === "before" ? hasOverflow : Boolean(after),
     };
@@ -91,7 +102,7 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
     console.error("Datasets could not be loaded.", error);
     return <DatasetSetupState unavailable />;
   }
-  const { datasets, statusCounts, hasNext, hasPrevious } = data;
+  const { datasets, statusCounts, modalityCounts, hasNext, hasPrevious } = data;
 
   return (
     <AppShell currentPath="/datasets">
@@ -138,7 +149,7 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
             </div>
           </div>
         ) : (
-          <div className="mt-7 divide-y divide-zinc-200 overflow-hidden rounded-2xl border border-zinc-200 bg-white">
+          <div className="mt-7 divide-y divide-zinc-200 overflow-visible rounded-2xl border border-zinc-200 bg-white">
             {datasets.map((dataset) => {
               const total = dataset._count.assets;
               const completed = statusCounts
@@ -187,7 +198,7 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                     <div className="flex justify-between text-xs">
                       <span className="flex items-center gap-1.5 text-zinc-500">
                         <Images aria-hidden="true" size={14} />
-                        {total} images
+                        {total} assets
                       </span>
                       <span className="font-mono font-semibold text-zinc-800">
                         {progress}%
@@ -198,6 +209,12 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                         className="h-full rounded-full bg-sky-600"
                         style={{ width: `${progress}%` }}
                       />
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Asset modality counts">
+                      {([Modality.IMAGE, Modality.VIDEO, Modality.AUDIO, Modality.TEXT] as const).map((modality) => {
+                        const count = modalityCounts.find((entry) => entry.datasetId === dataset.id && entry.modality === modality)?._count._all ?? 0;
+                        return <span key={modality} className="rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[10px] font-semibold text-zinc-600">{modality.toLowerCase()} {count}</span>;
+                      })}
                     </div>
                   </div>
 

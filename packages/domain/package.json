@@ -20,6 +20,10 @@
     "./source-access-policy": {
       "types": "./dist/source-access-policy.d.ts",
       "default": "./dist/source-access-policy.js"
+    },
+    "./media-processing": {
+      "types": "./dist/media-processing.d.ts",
+      "default": "./dist/media-processing.js"
     }
   },
   "scripts": {

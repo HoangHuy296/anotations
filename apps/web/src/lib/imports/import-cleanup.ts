@@ -4,8 +4,13 @@ import type { Client as MinioClient } from "minio";
 
 import { db } from "@/lib/db";
 
-function importPrefix(preparedImportId: string) {
-  return `prepared-imports/${preparedImportId}/`;
+// Storage keys are grouped by Dataset, not by individual import batch (see
+// prepare-local-folder-import.ts), so orphan cleanup scans the whole
+// Dataset's prefix. Each object is still checked against the database
+// individually below, so a real, published Asset from a different import
+// batch is never at risk of being deleted.
+function importPrefix(datasetId: string) {
+  return `prepared-imports/${datasetId}/`;
 }
 
 async function listObjects(minio: MinioClient, bucket: string, prefix: string) {
@@ -19,11 +24,11 @@ async function listObjects(minio: MinioClient, bucket: string, prefix: string) {
 }
 
 /**
- * Removes only unreferenced objects that belong to this preparation's private
- * prefix. One failed delete is isolated so a bulk cleanup can continue.
+ * Removes only unreferenced objects that belong to this Dataset's prepared-
+ * import prefix. One failed delete is isolated so a bulk cleanup can continue.
  */
-export async function cleanupPreparedImportOrphans(input: { minio: MinioClient; bucket: string; preparedImportId: string }) {
-  const prefix = importPrefix(input.preparedImportId);
+export async function cleanupPreparedImportOrphans(input: { minio: MinioClient; bucket: string; datasetId: string }) {
+  const prefix = importPrefix(input.datasetId);
   const keys = await listObjects(input.minio, input.bucket, prefix);
   let removed = 0;
   let failed = 0;

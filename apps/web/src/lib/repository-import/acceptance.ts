@@ -13,7 +13,7 @@ import {
 } from "@/lib/repository-import/types";
 import type { RepositoryImportRequest } from "@/lib/validation/repository-import-request";
 
-type RepositoryPreflight = { result: PreflightResult; baseUrl: string };
+type RepositoryPreflight = { result: PreflightResult; baseUrl: string; durableBaseUrl: string };
 
 function safePreviewAggregates(result: PreflightResult) {
   // The full manifest is never persisted. A non-truncated preview supplies
@@ -68,7 +68,7 @@ async function preflightForRepositoryImport(
         expectedVisibility: request.repository.expectedVisibility,
       },
     });
-    return { result: source.result, baseUrl: source.baseUrl };
+    return { result: source.result, baseUrl: source.baseUrl, durableBaseUrl: source.durableBaseUrl };
   }
 
   const result = await preflightRepository(actor, {
@@ -77,7 +77,7 @@ async function preflightForRepositoryImport(
     ref: request.repository.ref,
     rootPath: request.repository.rootPath,
   });
-  return { result, baseUrl: "" };
+  return { result, baseUrl: "", durableBaseUrl: "" };
 }
 
 /**
@@ -120,7 +120,10 @@ export async function acceptRepositoryImportRequest(
     createSourceConnection: request.credentialMode === "ONE_TIME_PAT"
       ? {
         name: request.connectionName!,
-        baseUrl: preflight.baseUrl,
+        // The durable public root, not `preflight.baseUrl` (which may be the
+        // internal Compose alias used only to make the preflight call) -- see
+        // source-import/preflight.ts's `durableBaseUrl`.
+        baseUrl: preflight.durableBaseUrl,
         token: request.personalAccessToken!,
       }
       : null,

@@ -1,0 +1,262 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fieldframe_review
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bcd7ab7a8ea5e089bb35d6bdbc34c155afc3b8133dd6fd01}
+      POSTGRES_DB: fieldframe_review
+    volumes:
+      - review_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${POSTGRES_REVIEW_PORT:-5434}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required in .env.review}
+    command:
+      ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$${REDIS_PASSWORD}\""]
+    ports:
+      - "127.0.0.1:${REDIS_REVIEW_PORT:-6380}:6379"
+    volumes:
+      - review_redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data --address ":9000" --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-review_minio_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-9q5D3WV0mnZcrci9Ur1f8Bi7py1E3yRuP1BPjjmM2zEK4l//u6oprTCHjpyIh3x3}
+    volumes:
+      - review_minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    ports:
+      - "${MINIO_API_REVIEW_PORT:-9100}:9000"
+      - "${MINIO_CONSOLE_REVIEW_PORT:-9101}:9001"
+
+  # Builds the web image once; `migrate`, `seed`, and `web` itself all reuse
+  # this same tagged image instead of each declaring their own `build:`.
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: fieldframe-review-web:latest
+    environment:
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-reviewer@example.com}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-Review Operator}
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://10.0.0.245:9100}
+      MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:-http://localhost:3001}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-review_minio_admin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-9q5D3WV0mnZcrci9Ur1f8Bi7py1E3yRuP1BPjjmM2zEK4l//u6oprTCHjpyIh3x3}
+      MINIO_BUCKET: ${MINIO_BUCKET:-fieldframe-review-assets}
+      UPLOAD_CAPABILITY_SECRET: ${UPLOAD_CAPABILITY_SECRET:-9q5D3WV0mnZcrci9Ur1f8Bi7py1E3yRuP1BPjjmM2zEK4l//u6oprTCHjpyIh3x3}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-pJgN/3zthrV5YsyUtjZr7buZjEYckwVv}
+      REDIS_DB: ${REDIS_DB:-0}
+      BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe-review}
+      EXPORT_QUEUE_NAME: ${EXPORT_QUEUE_NAME:-export-dataset}
+      SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-u6VLCxDEgcV0NNsGFvXFTkAeHT4A9rX+zIKEEPnSD9Q=}
+      GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.245:3101}
+      GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
+      FIELDFRAME_RUNTIME: compose
+      REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "0"
+      GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
+      GITHUB_WEB_BASE_URL: ${GITHUB_WEB_BASE_URL:-https://github.com}
+      # Numeric-IP repository hosts (e.g. a colleague typing this machine's
+      # LAN IP as the Gitea server URL) are rejected unless explicitly
+      # allowlisted here. Empty by default.
+      SOURCE_ALLOWED_IP_CIDRS: ${SOURCE_ALLOWED_IP_CIDRS:-}
+      # The session cookie's Secure flag is baked into the production build
+      # from NODE_ENV and can't be changed at runtime; this override lets the
+      # review stack be reached over plain HTTP from another machine (not
+      # just literally "localhost") without the browser silently dropping the
+      # session cookie. Never set this to false for a real deployment.
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      # Bound to a specific address (default: all interfaces) so this can
+      # share port 3000 with docker-compose.yaml's web, which is now
+      # loopback-only. Set WEB_REVIEW_BIND_ADDRESS to this host's LAN IP in
+      # .env.review to avoid also shadowing 127.0.0.1:3000.
+      - "${WEB_REVIEW_BIND_ADDRESS:-10.0.0.245}:${WEB_REVIEW_PORT:-3001}:3000"
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-review_minio_admin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-9q5D3WV0mnZcrci9Ur1f8Bi7py1E3yRuP1BPjjmM2zEK4l//u6oprTCHjpyIh3x3}
+      MINIO_BUCKET: ${MINIO_BUCKET:-fieldframe-review-assets}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-pJgN/3zthrV5YsyUtjZr7buZjEYckwVv}
+      REDIS_DB: ${REDIS_DB:-0}
+      BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe-review}
+      EXPORT_QUEUE_NAME: ${EXPORT_QUEUE_NAME:-export-dataset}
+      SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-u6VLCxDEgcV0NNsGFvXFTkAeHT4A9rX+zIKEEPnSD9Q=}
+      GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.245:3101}
+      GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
+      GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
+      FIELDFRAME_RUNTIME: compose
+      REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "0"
+      SOURCE_ALLOWED_IP_CIDRS: ${SOURCE_ALLOWED_IP_CIDRS:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # One-off: applies committed migrations non-interactively, then exits.
+  migrate:
+    image: fieldframe-review-web:latest
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+    command: ["pnpm", "exec", "prisma", "migrate", "deploy"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  # One-off: seeds a demo admin/dataset/labels as a convenience. See
+  # prisma/review.seed.ts. Runs right after `migrate`, but `web`/`worker`
+  # don't wait on it — colleagues can register their own real account via
+  # /register immediately without needing this seeded account at all.
+  seed:
+    image: fieldframe-review-web:latest
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-reviewer@example.com}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-Review Operator}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-review-demo-8e2a7f186fd3}
+      SEED_DATASET_NAME: ${SEED_DATASET_NAME:-Review Demo Dataset}
+    command: ["pnpm", "exec", "tsx", "prisma/review.seed.ts"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
+  # Gitea PostgreSQL
+  gitea-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gitea
+      POSTGRES_PASSWORD: ${GITEA_DB_PASSWORD:-LKTJQtJZGtSsaQz4DZMPj/bplwDegHCL}
+      POSTGRES_DB: gitea
+    volumes:
+      - review_gitea_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  gitea:
+    image: docker.gitea.com/gitea:1.27.0
+    restart: unless-stopped
+    environment:
+      USER_UID: ${GITEA_USER_UID:-1000}
+      USER_GID: ${GITEA_USER_GID:-1000}
+      GITEA__DEFAULT__APP_NAME: FieldFrame Git Service (Review)
+      GITEA__DEFAULT__RUN_MODE: prod
+      GITEA__database__DB_TYPE: postgres
+      GITEA__database__HOST: gitea-postgres:5432
+      GITEA__database__NAME: gitea
+      GITEA__database__USER: gitea
+      GITEA__database__PASSWD: ${GITEA_DB_PASSWORD:-LKTJQtJZGtSsaQz4DZMPj/bplwDegHCL}
+      GITEA__database__SSL_MODE: disable
+      GITEA__server__PROTOCOL: http
+      GITEA__server__DOMAIN: 10.0.0.245
+      GITEA__server__HTTP_ADDR: 0.0.0.0
+      GITEA__server__HTTP_PORT: 3000
+      GITEA__server__ROOT_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.245:3101}
+      GITEA__server__SSH_DOMAIN: localhost
+      GITEA__server__SSH_PORT: ${GITEA_SSH_REVIEW_PORT:-2223}
+      GITEA__server__DISABLE_SSH: "false"
+      GITEA__server__LFS_START_SERVER: "true"
+      GITEA__security__INSTALL_LOCK: "true"
+      GITEA__service__DISABLE_REGISTRATION: ${GITEA_DISABLE_REGISTRATION:-false}
+      GITEA__service__REQUIRE_SIGNIN_VIEW: ${GITEA_REQUIRE_SIGNIN_VIEW:-false}
+    volumes:
+      - review_gitea_data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${GITEA_HTTP_REVIEW_PORT:-3101}:3000"
+      - "${GITEA_SSH_REVIEW_PORT:-2223}:22"
+    depends_on:
+      gitea-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/healthz >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  github-fixture:
+    image: node:22-alpine
+    working_dir: /repo
+    command: ["node", "apps/web/tests/fixtures/github-fixture-server.mjs"]
+    environment:
+      GITHUB_FIXTURE_PORT: 8080
+    volumes:
+      - .:/repo:ro
+    ports:
+      - "127.0.0.1:${GITHUB_FIXTURE_REVIEW_PORT:-18081}:8080"
+    networks:
+      default:
+        aliases:
+          - github-blocked-target
+
+networks:
+  default:
+    name: fieldframe-review-net
+
+volumes:
+  review_postgres_data:
+    name: review_postgres_data
+  review_redis_data:
+    name: review_redis_data
+  review_minio_data:
+    name: review_minio_data
+  review_gitea_data:
+    name: review_gitea_data
+  review_gitea_postgres_data:
+    name: review_gitea_postgres_data

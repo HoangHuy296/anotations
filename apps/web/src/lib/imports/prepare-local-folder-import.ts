@@ -53,7 +53,11 @@ async function createPreparation(actor: RequestActor, input: StartInput | Append
       items: { create: input.items.map((item, index) => {
         const normalizedPath = item.logicalPath.normalize("NFKC").replace(/\\/g, "/").toLowerCase();
         const itemId = randomUUID();
-        return { id: itemId, position: index, logicalPath: item.logicalPath, normalizedPath, filename: filenameFromPath(item.logicalPath), mimeType: item.contentType, sizeBytes: BigInt(item.sizeBytes), modality: modalityForContentType(item.contentType), fingerprint: item.fingerprint, storageKey: `prepared-imports/${preparedImportId}/${itemId}` };
+        // Grouped by Dataset (not this one import batch) so repeated "Open
+        // Directory" uploads into the same Dataset land under one shared
+        // MinIO prefix. itemId is always a fresh UUID, so this never
+        // collides across import batches or Datasets.
+        return { id: itemId, position: index, logicalPath: item.logicalPath, normalizedPath, filename: filenameFromPath(item.logicalPath), mimeType: item.contentType, sizeBytes: BigInt(item.sizeBytes), modality: modalityForContentType(item.contentType), fingerprint: item.fingerprint, storageKey: `prepared-imports/${datasetId}/${itemId}` };
       }) },
     }, select: { id: true, datasetId: true, jobId: true, expectedItemCount: true, deadlineAt: true, items: { select: { id: true }, orderBy: { position: "asc" } } } });
     return { preparation, replayed: false };

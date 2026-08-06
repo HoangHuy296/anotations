@@ -46,8 +46,14 @@ export function CredentialsForm({ mode, returnTo }: CredentialsFormProps) {
         return;
       }
       setPassword("");
-      router.replace(destination);
-      router.refresh();
+      if (mode === "register") {
+        // Registration only creates the account; it does not sign the user
+        // in. Send them to the login page to authenticate explicitly.
+        router.replace(`/login?returnTo=${encodeURIComponent(destination)}`);
+      } else {
+        router.replace(destination);
+        router.refresh();
+      }
     } catch {
       setError("The sign-in service is unavailable. Try again shortly.");
     } finally {

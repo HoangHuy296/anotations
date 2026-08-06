@@ -35,8 +35,22 @@ export async function verifyPassword(password: string, stored: string | null) {
   return actual.length === expectedBuffer.length && timingSafeEqual(actual, expectedBuffer);
 }
 
+/**
+ * Defaults to the previous NODE_ENV-based behavior (secure in production).
+ * COOKIE_SECURE lets a non-TLS deployment (e.g. a local review/demo stack
+ * reached over plain HTTP from another machine) opt out explicitly, since
+ * browsers silently drop Secure cookies set over HTTP for any origin other
+ * than localhost.
+ */
+function resolveCookieSecure() {
+  const override = process.env.COOKIE_SECURE;
+  if (override === "false") return false;
+  if (override === "true") return true;
+  return process.env.NODE_ENV === "production";
+}
+
 export function cookieOptions(expiresAt: Date) {
-  return { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/", expires: expiresAt };
+  return { httpOnly: true, sameSite: "lax" as const, secure: resolveCookieSecure(), path: "/", expires: expiresAt };
 }
 
 async function sessionContext() {

@@ -75,7 +75,21 @@ export async function resolveSourceAccessForJob(db: PrismaClient, jobId: string)
   if (!parsedInput) return { kind: "refused", errorCode: "SOURCE_TOKEN_INVALID" };
   if (!job.sourceConnectionId) {
     if (parsedInput.repository.visibility !== "PUBLIC") return { kind: "refused", errorCode: "SOURCE_CONNECTION_NOT_FOUND" };
-    const baseUrl = parsedInput.repository.provider === "GITEA" ? process.env.GITEA_INTERNAL_URL : process.env.GITHUB_API_BASE_URL;
+    if (parsedInput.repository.provider === "GITEA") {
+      // Same pattern as the credentialed branch below: validate the durable
+      // public address first (this is what goes through the numeric-IP/DNS
+      // SSRF checks), then apply the exact, server-controlled internal-alias
+      // substitution. Validating GITEA_INTERNAL_URL directly is wrong here —
+      // it's a Compose-network hostname that resolves to a private address,
+      // which the private-IP policy correctly rejects for arbitrary hosts.
+      const publicUrl = process.env.GITEA_PUBLIC_URL;
+      if (!publicUrl) return { kind: "refused", errorCode: "SOURCE_URL_UNSAFE" };
+      const address = await validateSourceBaseUrl(publicUrl);
+      if (!address.ok) return { kind: "refused", errorCode: "SOURCE_URL_UNSAFE" };
+      const baseUrl = resolveWorkerReachableGiteaBaseUrl(address.value.toString());
+      return { kind: "ready", sourceConnectionId: "", baseUrl, token: "", rootPath: parsedInput.repository.rootPath ?? "" };
+    }
+    const baseUrl = process.env.GITHUB_API_BASE_URL;
     if (!baseUrl) return { kind: "refused", errorCode: "SOURCE_URL_UNSAFE" };
     const address = await validateSourceBaseUrl(baseUrl);
     if (!address.ok) return { kind: "refused", errorCode: "SOURCE_URL_UNSAFE" };

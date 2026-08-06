@@ -13,7 +13,7 @@ export const updateAnnotationInputSchema = z.object({
   datasetId: cuid,
   annotationId: cuid,
   geometry: canonicalGeometrySchema,
-  version: z.number().int().positive(),
+  revision: z.number().int().positive(),
   status: editableStatus.optional(),
 });
 
@@ -31,6 +31,6 @@ export const createAnnotationInputSchema = z.object({
 export const reviewAnnotationInputSchema = z.object({
   datasetId: cuid,
   annotationId: cuid,
-  version: z.number().int().positive(),
+  revision: z.number().int().positive(),
   status: reviewStatus,
 });

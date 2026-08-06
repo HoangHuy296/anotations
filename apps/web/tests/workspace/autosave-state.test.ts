@@ -77,7 +77,7 @@ test("autosave keeps conflict drafts and does not retry a stale write automatica
   assert.equal(useAnnotationStore.getState().conflictDrafts["annotation:test-conflict"], undefined);
 });
 
-test("successful mutation replaces the browser-safe annotation version", () => {
+test("successful mutation replaces the browser-safe annotation revision", () => {
   const store = useAnnotationStore.getState();
   store.initializePersistedImage("asset-autosave", [{
     id: "annotation-autosave",
@@ -86,7 +86,7 @@ test("successful mutation replaces the browser-safe annotation version", () => {
     type: "BOUNDING_BOX",
     geometry: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 },
     status: "DRAFT",
-    version: 1,
+    revision: 1,
     updatedAt: "2026-01-01T00:00:00.000Z",
   }]);
   store.upsertSafeAnnotation({
@@ -96,8 +96,8 @@ test("successful mutation replaces the browser-safe annotation version", () => {
     type: "BOUNDING_BOX",
     geometry: { x: 0.2, y: 0.1, width: 0.2, height: 0.2 },
     status: "DRAFT",
-    version: 2,
+    revision: 2,
     updatedAt: "2026-01-01T00:00:01.000Z",
   });
-  assert.equal(useAnnotationStore.getState().persistedAnnotations[0]?.version, 2);
+  assert.equal(useAnnotationStore.getState().persistedAnnotations[0]?.revision, 2);
 });

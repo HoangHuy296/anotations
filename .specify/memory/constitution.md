@@ -1,101 +1,50 @@
-<!--
-Sync Impact Report
-- Version change: template/unversioned -> 1.0.0
-- Modified principles: placeholder principles replaced by five Fieldframe principles.
-- Added sections: Architecture Authority, Non-Negotiable Data and Security Rules,
-  Development Workflow and Quality Gates.
-- Removed sections: none.
-- Templates reviewed: .specify/templates/plan-template.md ✅ no change required;
-  .specify/templates/spec-template.md ✅ no change required;
-  .specify/templates/tasks-template.md ✅ no change required.
-- Command templates: no .specify/templates/commands directory is present.
-- Runtime guidance synchronized: AGENTS.md, docs/architecture.md,
-  docs/job-system.md, docs/bullmq-postgres-job-flow.md, and
-  docs/clone-repository-plan.md.
-- Deferred items: none.
--->
-
-# Fieldframe Constitution
+# [PROJECT_NAME] Constitution
+<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
 
 ## Core Principles
 
-### I. Architecture Authority and Boundaries
+### [PRINCIPLE_1_NAME]
+<!-- Example: I. Library-First -->
+[PRINCIPLE_1_DESCRIPTION]
+<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
 
-`AGENTS.md` and the accepted Phase 0 architecture documents are authoritative.
-The public application MUST remain the Next.js App Router application; the
-worker MUST remain private and MUST NOT serve browser requests. Changes that
-alter an architecture decision require an explicit approved documentation
-amendment before dependent implementation proceeds.
+### [PRINCIPLE_2_NAME]
+<!-- Example: II. CLI Interface -->
+[PRINCIPLE_2_DESCRIPTION]
+<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
 
-### II. Durable State and Retry Lineage
+### [PRINCIPLE_3_NAME]
+<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
+[PRINCIPLE_3_DESCRIPTION]
+<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
 
-PostgreSQL with Prisma MUST be the canonical source of truth for metadata,
-Annotation state, and Job lifecycle. Redis/BullMQ MUST transport only
-`{ jobId }`; it MUST NOT contain canonical state, complete Job input,
-credentials, or binary data. An authorized retry MUST create or reuse one
-successor Job linked to its predecessor and carrying only allowlisted context.
-Duplicate delivery or retry MUST NOT create duplicate assets or artifacts.
+### [PRINCIPLE_4_NAME]
+<!-- Example: IV. Integration Testing -->
+[PRINCIPLE_4_DESCRIPTION]
+<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
 
-### III. Canonical Annotation and Workspace State
+### [PRINCIPLE_5_NAME]
+<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
+[PRINCIPLE_5_DESCRIPTION]
+<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
 
-`Annotation.geometry` MUST be the canonical saved shape and
-`Annotation.revision` MUST guard every annotation autosave or update. A stale
-write MUST be rejected without overwriting the durable value. `Asset.modality`
-MUST select the workspace engine under the shared workspace route; viewport and
-other transient interaction state MUST remain client-only.
+## [SECTION_2_NAME]
+<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
 
-### IV. Private Storage, Security, and Authorization
+[SECTION_2_CONTENT]
+<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
 
-Binary bytes MUST live in MinIO or another approved private object store, never
-in PostgreSQL. Browser-visible APIs MUST authenticate and authorize every
-request, conceal out-of-scope resources, and never expose credentials, tokens,
-private object locations, raw Job data, queue internals, or server-only
-configuration. A short-lived, object-scoped upload or download capability is
-the only permitted browser storage exception.
+## [SECTION_3_NAME]
+<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
 
-### V. Validation, Testing, and Phase Discipline
-
-Server inputs MUST use Zod validation. Durable mutations and background work
-MUST have proportionate unit, authorization, and controlled integration tests.
-No phase MAY be marked complete without the required runtime evidence. No
-schema migration, dependency, raw-SQL exception, mock substitution, or future
-phase scope may be introduced without explicit approval. Every phase completion
-report MUST state files, commands, environment-variable names, migration impact,
-limitations, and the next approved phase.
-
-## Architecture Authority
-
-The Phase 0 lock consists of `docs/architecture.md`, `docs/job-system.md`,
-`docs/bullmq-postgres-job-flow.md`, `docs/clone-repository-plan.md`, and
-`docs/phases.md`, read with `AGENTS.md`. Historical ADRs and older feature
-specifications provide context but cannot override this constitution or the
-accepted architecture documents.
-
-## Non-Negotiable Data and Security Rules
-
-- Do not create workflow-specific Job tables such as `ImportJob` or `ExportJob`.
-- Do not store binary data in PostgreSQL or use Redis as a Job-state store.
-- Do not expose provider, storage, Redis, database, session, or encryption
-  credentials in browser state, URLs, logs, public errors, or queue payloads.
-- Keep authorization and ownership decisions server-side; never trust a
-  browser-supplied owner or storage location.
-- Use Prisma for database access. Raw SQL requires explicit documented approval
-  limited to its stated operation.
-
-## Development Workflow and Quality Gates
-
-Each feature MUST have a specification, implementation plan, and ordered task
-list before implementation. Plans MUST include a Constitution Check. Completion
-requires task status backed by the required tests and a non-secret validation
-record. Documentation and implementation MUST be amended together when an
-approved architecture decision changes terminology or behavior.
+[SECTION_3_CONTENT]
+<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
 
 ## Governance
+<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-This constitution supersedes generic Spec Kit template guidance where they
-conflict. Amendments require explicit user approval, a rationale, a semantic
-version increment, and synchronization of affected architecture documents,
-plans, tasks, and runtime guidance. Reviews MUST verify the five principles
-before a phase is approved or a new phase begins.
+[GOVERNANCE_RULES]
+<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
 
-**Version**: 1.0.0 | **Ratified**: 2026-07-22 | **Last Amended**: 2026-07-22
+**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
+<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->

@@ -20,4 +20,4 @@ export type DraftAnnotation = {
   coordinates: BoundingBoxCoordinates;
 };
 
-export type AnnotationTool = "select" | "box" | "pan";
+export type AnnotationTool = "select" | "box" | "polygon" | "circle" | "point" | "polyline" | "pan";

@@ -2,6 +2,7 @@
 
 import { getRequestActor } from "@/lib/auth";
 import { assertAnnotationPermission } from "@/lib/authorization";
+import { mutateImageAnnotations } from "@/lib/annotations/annotation-service";
 import { db } from "@/lib/db";
 import {
   createBoundingBoxInputSchema,
@@ -12,10 +13,6 @@ import {
 } from "@/lib/validation/image-workspace";
 import { reviewAnnotationInputSchema } from "@/lib/validation/annotation";
 import {
-  createBoundingBox,
-  deleteBoundingBox,
-  updateBoundingBoxGeometry,
-  updateBoundingBoxLabel,
   updateImageDescription,
 } from "@/lib/workspace/image-mutations";
 import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
@@ -28,13 +25,20 @@ function fromStatus(status: 400 | 403 | 404 | 409): ActionFailure {
   return { ok: false, status, error: status === 403 ? "FORBIDDEN" : status === 404 ? "NOT_FOUND" : status === 409 ? "CONFLICT" : "INVALID_REQUEST" };
 }
 
+function fromMutationReason(reason: "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "WRITE_UNSUPPORTED" | "CREATE_REPLAY_CONFLICT"): ActionFailure {
+  return reason === "NOT_FOUND" ? fromStatus(404) : reason === "FORBIDDEN" ? fromStatus(403) : reason === "CONFLICT" || reason === "CREATE_REPLAY_CONFLICT" ? fromStatus(409) : fromStatus(400);
+}
+
 export async function createBoundingBoxAction(input: unknown) {
   const parsed = createBoundingBoxInputSchema.safeParse(input);
   if (!parsed.success) return invalid();
   const actor = await getRequestActor();
   if (!actor) return unauthenticated();
-  const result = await createBoundingBox(actor, parsed.data);
-  return result.ok ? { ok: true as const, status: 201 as const, annotation: result.value } : fromStatus(result.status);
+  const id = crypto.randomUUID();
+  const result = await mutateImageAnnotations(actor, parsed.data.assetId, { creates: [{ id, type: "BOUNDING_BOX", labelId: parsed.data.labelId, geometry: parsed.data.geometry }], updates: [], deletes: [] });
+  if (!result.ok) return fromMutationReason(result.reason);
+  const annotation = result.value.find((item) => item.id === id);
+  return annotation ? { ok: true as const, status: 201 as const, annotation } : invalid();
 }
 
 export async function updateBoundingBoxGeometryAction(input: unknown) {
@@ -42,8 +46,10 @@ export async function updateBoundingBoxGeometryAction(input: unknown) {
   if (!parsed.success) return invalid();
   const actor = await getRequestActor();
   if (!actor) return unauthenticated();
-  const result = await updateBoundingBoxGeometry(actor, parsed.data);
-  return result.ok ? { ok: true as const, status: 200 as const, annotation: result.value } : fromStatus(result.status);
+  const result = await mutateImageAnnotations(actor, parsed.data.assetId, { creates: [], updates: [{ id: parsed.data.annotationId, revision: parsed.data.revision, geometry: parsed.data.geometry }], deletes: [] });
+  if (!result.ok) return fromMutationReason(result.reason);
+  const annotation = result.value.find((item) => item.id === parsed.data.annotationId);
+  return annotation ? { ok: true as const, status: 200 as const, annotation } : invalid();
 }
 
 export async function updateBoundingBoxLabelAction(input: unknown) {
@@ -51,8 +57,10 @@ export async function updateBoundingBoxLabelAction(input: unknown) {
   if (!parsed.success) return invalid();
   const actor = await getRequestActor();
   if (!actor) return unauthenticated();
-  const result = await updateBoundingBoxLabel(actor, parsed.data);
-  return result.ok ? { ok: true as const, status: 200 as const, annotation: result.value } : fromStatus(result.status);
+  const result = await mutateImageAnnotations(actor, parsed.data.assetId, { creates: [], updates: [{ id: parsed.data.annotationId, revision: parsed.data.revision, labelId: parsed.data.labelId }], deletes: [] });
+  if (!result.ok) return fromMutationReason(result.reason);
+  const annotation = result.value.find((item) => item.id === parsed.data.annotationId);
+  return annotation ? { ok: true as const, status: 200 as const, annotation } : invalid();
 }
 
 export async function deleteBoundingBoxAction(input: unknown) {
@@ -60,8 +68,8 @@ export async function deleteBoundingBoxAction(input: unknown) {
   if (!parsed.success) return invalid();
   const actor = await getRequestActor();
   if (!actor) return unauthenticated();
-  const result = await deleteBoundingBox(actor, parsed.data);
-  return result.ok ? { ok: true as const, status: 204 as const } : fromStatus(result.status);
+  const result = await mutateImageAnnotations(actor, parsed.data.assetId, { creates: [], updates: [], deletes: [{ id: parsed.data.annotationId, revision: parsed.data.revision }] });
+  return result.ok ? { ok: true as const, status: 204 as const } : fromMutationReason(result.reason);
 }
 
 export async function updateImageDescriptionAction(input: unknown) {
@@ -95,7 +103,7 @@ export async function reviewAnnotationAction(input: unknown) {
   if (!access) return fromStatus(404);
   if (access.forbidden) return fromStatus(403);
   const result = await db.annotation.updateMany({
-    where: { id: parsed.data.annotationId, datasetId: parsed.data.datasetId, revision: parsed.data.version },
+    where: { id: parsed.data.annotationId, datasetId: parsed.data.datasetId, revision: parsed.data.revision },
     data: { status: parsed.data.status, reviewedById: actor.id, revision: { increment: 1 } },
   });
   return result.count === 1 ? { ok: true as const, status: 200 as const } : fromStatus(409);

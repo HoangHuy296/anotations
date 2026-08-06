@@ -1,12 +1,17 @@
 "use client";
 
+import type { ReactNode } from "react";
 import {
   ArrowsOut,
   BoundingBox,
+  Circle,
   Cursor,
   Hand,
+  LineSegment,
   MagnifyingGlassMinus,
   MagnifyingGlassPlus,
+  Pentagon,
+  MapPin,
 } from "@phosphor-icons/react";
 import type { AnnotationTool } from "@/types/annotation";
 import type { SafeWorkspaceLabel } from "@/types/image-workspace";
@@ -23,6 +28,8 @@ type ToolbarProps = {
   labels: SafeWorkspaceLabel[];
   activeLabelId: string | null;
   onActiveLabelChange: (labelId: string | null) => void;
+  onFinishPath?: () => void;
+  canFinishPath?: boolean;
 };
 
 export function Toolbar({
@@ -37,6 +44,8 @@ export function Toolbar({
   labels,
   activeLabelId,
   onActiveLabelChange,
+  onFinishPath,
+  canFinishPath = false,
 }: ToolbarProps) {
   return (
     <div className="flex min-h-12 flex-wrap items-center justify-between gap-3 border-t border-zinc-800 bg-zinc-900 px-3 py-1.5">
@@ -61,6 +70,11 @@ export function Toolbar({
         >
           <BoundingBox aria-hidden="true" size={18} />
         </button>
+        <ToolButton tool="polygon" currentTool={tool} onToolChange={onToolChange} label="Draw polygon"><Pentagon aria-hidden="true" size={18} /></ToolButton>
+        <ToolButton tool="circle" currentTool={tool} onToolChange={onToolChange} label="Draw circle"><Circle aria-hidden="true" size={18} /></ToolButton>
+        <ToolButton tool="point" currentTool={tool} onToolChange={onToolChange} label="Place point"><MapPin aria-hidden="true" size={18} /></ToolButton>
+        <ToolButton tool="polyline" currentTool={tool} onToolChange={onToolChange} label="Draw polyline"><LineSegment aria-hidden="true" size={18} /></ToolButton>
+        {(tool === "polygon" || tool === "polyline") && <button type="button" onClick={onFinishPath} disabled={!canFinishPath} className="h-9 rounded-lg px-2 text-xs font-semibold text-sky-200 hover:bg-sky-950/50 disabled:opacity-35">Finish shape</button>}
         <button
           type="button"
           aria-label="Pan by dragging the canvas"
@@ -112,4 +126,8 @@ export function Toolbar({
       </div>
     </div>
   );
+}
+
+function ToolButton({ tool, currentTool, onToolChange, label, children }: { tool: AnnotationTool; currentTool: AnnotationTool; onToolChange: (tool: AnnotationTool) => void; label: string; children: ReactNode }) {
+  return <button type="button" aria-label={label} className={`grid size-9 place-items-center rounded-lg ${currentTool === tool ? "bg-sky-500 text-white" : "text-zinc-400 hover:bg-zinc-800 hover:text-white"}`} onClick={() => onToolChange(tool)}>{children}</button>;
 }

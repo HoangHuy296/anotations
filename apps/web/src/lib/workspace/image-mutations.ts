@@ -13,7 +13,7 @@ function projectAnnotation(annotation: { id: string; assetId: string; labelId: s
   const geometry = annotation.geometry as Partial<NormalizedBoundingBox>;
   if (annotation.type !== AnnotationType.BOUNDING_BOX || !geometry || typeof geometry.x !== "number" || typeof geometry.y !== "number" || typeof geometry.width !== "number" || typeof geometry.height !== "number") return null;
   if (!["DRAFT", "IN_PROGRESS", "COMPLETED"].includes(annotation.status)) return null;
-  return { id: annotation.id, assetId: annotation.assetId, labelId: annotation.labelId, type: "BOUNDING_BOX", geometry: geometry as NormalizedBoundingBox, status: annotation.status as SafeImageAnnotation["status"], version: annotation.revision, updatedAt: annotation.updatedAt.toISOString() };
+  return { id: annotation.id, assetId: annotation.assetId, labelId: annotation.labelId, type: "BOUNDING_BOX", geometry: geometry as NormalizedBoundingBox, status: annotation.status as SafeImageAnnotation["status"], revision: annotation.revision, updatedAt: annotation.updatedAt.toISOString() };
 }
 
 async function resolveEditableAnnotation(actor: RequestActor, datasetId: string, assetId: string, annotationId: string) {
@@ -40,34 +40,34 @@ export async function createBoundingBox(actor: RequestActor, input: { datasetId:
   return value ? { ok: true, value } : { ok: false, status: 400 };
 }
 
-export async function updateBoundingBoxGeometry(actor: RequestActor, input: { datasetId: string; assetId: string; annotationId: string; version: number; geometry: NormalizedBoundingBox }): Promise<MutationResult<SafeImageAnnotation>> {
+export async function updateBoundingBoxGeometry(actor: RequestActor, input: { datasetId: string; assetId: string; annotationId: string; revision: number; geometry: NormalizedBoundingBox }): Promise<MutationResult<SafeImageAnnotation>> {
   const resolved = await resolveEditableAnnotation(actor, input.datasetId, input.assetId, input.annotationId);
   if ("status" in resolved) return { ok: false, status: resolved.status ?? 404 };
-  const result = await db.annotation.updateMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.version }, data: { geometry: input.geometry, updatedById: actor.id, revision: { increment: 1 } } });
+  const result = await db.annotation.updateMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision }, data: { geometry: input.geometry, updatedById: actor.id, revision: { increment: 1 } } });
   if (result.count !== 1) return { ok: false, status: 409 };
   const annotation = await db.annotation.findUnique({ where: { id: input.annotationId }, select: { id: true, assetId: true, labelId: true, type: true, geometry: true, status: true, revision: true, updatedAt: true } });
   const value = annotation && projectAnnotation(annotation);
   return value ? { ok: true, value } : { ok: false, status: 404 };
 }
 
-export async function updateBoundingBoxLabel(actor: RequestActor, input: { datasetId: string; assetId: string; annotationId: string; version: number; labelId: string | null }): Promise<MutationResult<SafeImageAnnotation>> {
+export async function updateBoundingBoxLabel(actor: RequestActor, input: { datasetId: string; assetId: string; annotationId: string; revision: number; labelId: string | null }): Promise<MutationResult<SafeImageAnnotation>> {
   const resolved = await resolveEditableAnnotation(actor, input.datasetId, input.assetId, input.annotationId);
   if ("status" in resolved) return { ok: false, status: resolved.status ?? 404 };
   if (input.labelId) {
     const label = await db.label.findFirst({ where: { id: input.labelId, datasetId: input.datasetId, OR: [{ modality: null }, { modality: Modality.IMAGE }] }, select: { id: true } });
     if (!label) return { ok: false, status: 404 };
   }
-  const result = await db.annotation.updateMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.version }, data: { labelId: input.labelId, updatedById: actor.id, revision: { increment: 1 } } });
+  const result = await db.annotation.updateMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision }, data: { labelId: input.labelId, updatedById: actor.id, revision: { increment: 1 } } });
   if (result.count !== 1) return { ok: false, status: 409 };
   const annotation = await db.annotation.findUnique({ where: { id: input.annotationId }, select: { id: true, assetId: true, labelId: true, type: true, geometry: true, status: true, revision: true, updatedAt: true } });
   const value = annotation && projectAnnotation(annotation);
   return value ? { ok: true, value } : { ok: false, status: 404 };
 }
 
-export async function deleteBoundingBox(actor: RequestActor, input: { datasetId: string; assetId: string; annotationId: string; version: number }): Promise<MutationResult<null>> {
+export async function deleteBoundingBox(actor: RequestActor, input: { datasetId: string; assetId: string; annotationId: string; revision: number }): Promise<MutationResult<null>> {
   const resolved = await resolveEditableAnnotation(actor, input.datasetId, input.assetId, input.annotationId);
   if ("status" in resolved) return { ok: false, status: resolved.status ?? 404 };
-  const result = await db.annotation.deleteMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.version } });
+  const result = await db.annotation.deleteMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision } });
   return result.count === 1 ? { ok: true, value: null } : { ok: false, status: 409 };
 }
 

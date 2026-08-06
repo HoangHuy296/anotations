@@ -9,7 +9,7 @@ import { addWorkspaceMember, cleanupWorkspaceFixture, createImageAsset, createIm
 
 const enabled = process.env.WORKSPACE_INTEGRATION_TESTS === "1" && Boolean(process.env.DATABASE_URL);
 
-test("geometry-only, relabel, and versioned delete mutations preserve their non-target metadata", { skip: !enabled }, async () => {
+test("geometry-only, relabel, and revision-guarded delete mutations preserve their non-target metadata", { skip: !enabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const labeler = await createWorkspaceUser(UserRole.LABELER);
   const dataset = await createWorkspaceDataset(owner.id);
@@ -22,7 +22,7 @@ test("geometry-only, relabel, and versioned delete mutations preserve their non-
     assert.equal(created.ok, true);
     if (!created.ok) return;
     await db.annotation.update({ where: { id: created.value.id }, data: { source: AnnotationSource.MANUAL, status: AnnotationStatus.IN_PROGRESS, properties: { note: "preserve" } } });
-    const geometry = await updateBoundingBoxGeometry(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, version: created.value.version, geometry: { x: 0.2, y: 0.2, width: 0.3, height: 0.4 } });
+    const geometry = await updateBoundingBoxGeometry(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, revision: created.value.revision, geometry: { x: 0.2, y: 0.2, width: 0.3, height: 0.4 } });
     assert.equal(geometry.ok, true);
     if (!geometry.ok) return;
     const afterGeometry = await db.annotation.findUniqueOrThrow({ where: { id: created.value.id } });
@@ -31,13 +31,13 @@ test("geometry-only, relabel, and versioned delete mutations preserve their non-
     assert.equal(afterGeometry.type, AnnotationType.BOUNDING_BOX);
     assert.equal(afterGeometry.status, AnnotationStatus.IN_PROGRESS);
     assert.deepEqual(afterGeometry.properties, { note: "preserve" });
-    const relabeled = await updateBoundingBoxLabel(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, version: geometry.value.version, labelId: secondLabel.id });
+    const relabeled = await updateBoundingBoxLabel(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, revision: geometry.value.revision, labelId: secondLabel.id });
     assert.equal(relabeled.ok, true);
     if (!relabeled.ok) return;
     const afterRelabel = await db.annotation.findUniqueOrThrow({ where: { id: created.value.id } });
     assert.equal(afterRelabel.labelId, secondLabel.id);
     assert.deepEqual(afterRelabel.geometry, { x: 0.2, y: 0.2, width: 0.3, height: 0.4 });
-    const deleted = await deleteBoundingBox(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, version: relabeled.value.version });
+    const deleted = await deleteBoundingBox(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, revision: relabeled.value.revision });
     assert.equal(deleted.ok, true);
     assert.equal(await db.annotation.findUnique({ where: { id: created.value.id } }), null);
   } finally { await cleanupWorkspaceFixture([owner.id, labeler.id], [dataset.id]); }

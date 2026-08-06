@@ -8,6 +8,7 @@ import { createGiteaClient, GiteaClientError } from "@/lib/gitea";
 import { decryptSourceToken, encryptSourceToken } from "@/lib/source-connection-crypto";
 import { toSafeSourceConnection, type SafeSourceConnection } from "@/lib/source-connection-dto";
 import { validateSourceBaseUrl } from "@/lib/source-access-policy";
+import { configuredInternalBaseUrl, resolveServerReachableGiteaUrl } from "@/lib/providers/gitea-compose-url";
 import { TERMINAL_JOB_STATUSES } from "@/lib/job-status";
 import type { sourceConnectionCreateSchema } from "@/lib/validation/source-connection";
 import type { z } from "zod";
@@ -70,23 +71,40 @@ async function validateGiteaToken(baseUrl: string, token: string): Promise<{ ok:
 }
 
 export async function createSourceConnection(actor: RequestActor, input: CreateInput): Promise<SourceResult> {
-  const address = await validateSourceBaseUrl(input.baseUrl);
-  if (!address.ok) {
-    return {
-      ok: false,
-      code: address.code === "SOURCE_DESTINATION_NOT_ALLOWED"
-        ? "SOURCE_DESTINATION_NOT_ALLOWED"
-        : "SOURCE_URL_UNSAFE",
-    };
+  // A submitted address equal to the configured public Gitea root resolves to
+  // the internal Compose alias only for the live token check below; the
+  // durable connection row always stores the public root the browser
+  // submitted, matching every other stored SourceConnection and the worker's
+  // later SSRF re-validation (which never sees or accepts the internal alias).
+  const reachable = resolveServerReachableGiteaUrl(input.baseUrl);
+  let callBaseUrl: string;
+  let baseUrl: string;
+  if (reachable.usesConfiguredInternalUrl) {
+    const configuredInternal = configuredInternalBaseUrl(reachable.baseUrl);
+    const configuredPublic = configuredInternalBaseUrl(input.baseUrl);
+    if (!configuredInternal || !configuredPublic) return { ok: false, code: "SOURCE_URL_UNSAFE" };
+    callBaseUrl = configuredInternal;
+    baseUrl = configuredPublic;
+  } else {
+    const address = await validateSourceBaseUrl(reachable.baseUrl);
+    if (!address.ok) {
+      return {
+        ok: false,
+        code: address.code === "SOURCE_DESTINATION_NOT_ALLOWED"
+          ? "SOURCE_DESTINATION_NOT_ALLOWED"
+          : "SOURCE_URL_UNSAFE",
+      };
+    }
+    callBaseUrl = canonicalBaseUrl(address.value);
+    baseUrl = callBaseUrl;
   }
-  const baseUrl = canonicalBaseUrl(address.value);
   const duplicate = await db.sourceConnection.findFirst({
     where: { userId: actor.id, provider: RepoProvider.GITEA, baseUrl, status: SourceConnectionStatus.ACTIVE, revokedAt: null },
     select: { id: true },
   });
   if (duplicate) return { ok: false, code: "SOURCE_CONNECTION_EXISTS" };
 
-  const validation = await validateGiteaToken(baseUrl, input.token);
+  const validation = await validateGiteaToken(callBaseUrl, input.token);
   if (!validation.ok) return validation;
 
   try {
@@ -154,7 +172,18 @@ export async function resolveOwnedSourceToken(actor: RequestActor, id: string) {
     select: { id: true, baseUrl: true, tokenEncrypted: true },
   });
   if (!connection?.tokenEncrypted) return null;
-  const address = await validateSourceBaseUrl(connection.baseUrl);
-  if (!address.ok) return null;
-  try { return { id: connection.id, baseUrl: canonicalBaseUrl(address.value), token: decryptSourceToken(connection.tokenEncrypted) }; } catch { return null; }
+  // The stored row always holds the public Gitea root; resolve it back to a
+  // reachable address the same way every other stored-connection path does.
+  const reachable = resolveServerReachableGiteaUrl(connection.baseUrl);
+  let baseUrl: string;
+  if (reachable.usesConfiguredInternalUrl) {
+    const configured = configuredInternalBaseUrl(reachable.baseUrl);
+    if (!configured) return null;
+    baseUrl = configured;
+  } else {
+    const address = await validateSourceBaseUrl(reachable.baseUrl);
+    if (!address.ok) return null;
+    baseUrl = canonicalBaseUrl(address.value);
+  }
+  try { return { id: connection.id, baseUrl, token: decryptSourceToken(connection.tokenEncrypted) }; } catch { return null; }
 }

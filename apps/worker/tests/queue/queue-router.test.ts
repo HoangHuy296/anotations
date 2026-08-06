@@ -38,3 +38,21 @@ test("IMPORT_DATASET is an approved durable delivery", { skip: !hasIntegrationDa
     assert.equal((await fixture.db.job.findUniqueOrThrow({ where: { id: job.id }, select: { status: true } })).status, "RUNNING");
   } finally { await fixture.cleanup(); }
 });
+
+test("EXTRACT_VIDEO_METADATA is routed to its private processor without changing the payload contract", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createWorkerJobFixture();
+  try {
+    const job = await fixture.createJob({ type: "EXTRACT_VIDEO_METADATA", input: {} });
+    assert.deepEqual(await routeQueueDelivery({ db: fixture.db, payload: { jobId: job.id }, workerId: "video-router-test" }), { kind: "claimed", jobId: job.id });
+    assert.equal((await fixture.db.job.findUniqueOrThrow({ where: { id: job.id }, select: { status: true, errorCode: true } })).status, "FAILED");
+  } finally { await fixture.cleanup(); }
+});
+
+test("GENERATE_AUDIO_WAVEFORM is routed to its private processor without changing the payload contract", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createWorkerJobFixture();
+  try {
+    const job = await fixture.createJob({ type: "GENERATE_AUDIO_WAVEFORM", input: {} });
+    assert.deepEqual(await routeQueueDelivery({ db: fixture.db, payload: { jobId: job.id }, workerId: "audio-router-test" }), { kind: "claimed", jobId: job.id });
+    assert.equal((await fixture.db.job.findUniqueOrThrow({ where: { id: job.id }, select: { status: true, errorCode: true } })).status, "FAILED");
+  } finally { await fixture.cleanup(); }
+});

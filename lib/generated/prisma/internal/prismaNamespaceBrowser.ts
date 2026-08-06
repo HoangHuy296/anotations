@@ -506,6 +506,9 @@ export const VideoObjectTrackScalarFieldEnum = {
   color: 'color',
   properties: 'properties',
   status: 'status',
+  revision: 'revision',
+  annotationType: 'annotationType',
+  interpolationMode: 'interpolationMode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

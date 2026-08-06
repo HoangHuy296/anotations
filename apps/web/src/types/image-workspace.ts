@@ -1,4 +1,5 @@
 import type { AssetStatus, Modality } from "@internal/db";
+import type { AnnotationType } from "@internal/db";
 
 export type NormalizedBoundingBox = {
   x: number;
@@ -7,15 +8,36 @@ export type NormalizedBoundingBox = {
   height: number;
 };
 
+export type NormalizedPoint = [number, number];
+export type ImageAnnotationGeometry =
+  | { x: number; y: number; width: number; height: number }
+  | { points: NormalizedPoint[] }
+  | { cx: number; cy: number; r: number }
+  | { px: number; py: number };
+
 export type SafeImageAnnotation = {
   id: string;
   assetId: string;
   labelId: string | null;
-  type: "BOUNDING_BOX";
-  geometry: NormalizedBoundingBox;
-  status: "DRAFT" | "IN_PROGRESS" | "COMPLETED";
-  version: number;
+  revision: number;
+  label?: { id: string; name: string; color: string } | null;
+  modality?: "IMAGE";
+  type: Extract<AnnotationType, "BOUNDING_BOX" | "POLYGON" | "CIRCLE" | "POINT" | "POLYLINE">;
+  geometry: ImageAnnotationGeometry | NormalizedBoundingBox;
+  status: string;
+  properties?: unknown;
+  createdAt?: string;
   updatedAt: string;
+};
+
+/** IMAGE records outside the Phase 017 editing contract remain visible but immutable. */
+export type SafeReadOnlyImageAnnotation = {
+  id: string;
+  type: AnnotationType;
+  label: { id: string; name: string; color: string } | null;
+  status: string;
+  geometry: unknown;
+  revision: number;
 };
 
 export type SafeWorkspaceLabel = {
@@ -50,8 +72,8 @@ export type ImageWorkspacePage = {
   page: number;
   pageSize: number;
   selectedAssetId: string | null;
-  previous: { id: string; page: number } | null;
-  next: { id: string; page: number } | null;
+  previous: { id: string; modality: Modality; page: number } | null;
+  next: { id: string; modality: Modality; page: number } | null;
 };
 
 export type SaveState = "idle" | "pending" | "saving" | "saved" | "failed" | "conflict";

@@ -24,7 +24,7 @@ export async function ImportsScreen({ currentPath }: { currentPath: string }) {
           <h1 className="mt-3 text-3xl font-bold tracking-[-0.04em] text-zinc-950">Import a repository folder</h1>
           <p className="mt-2 max-w-[65ch] text-sm leading-6 text-zinc-500">Preview repository access and a bounded asset sample first. Only Start Import may create the dataset and durable background job.</p>
         </header>
-        <div className="mt-7"><ImportForm connections={connections} /></div>
+        <div className="mt-7"><ImportForm connections={connections} giteaServerUrl={process.env.GITEA_PUBLIC_URL} /></div>
       </div>
     </AppShell>
   );

@@ -9,7 +9,16 @@ const leaseDurationMs = 5 * 60 * 1000;
 const jobReferenceSchema = z.object({ jobId: z.string().min(1), lockToken: z.string().min(1) });
 const claimInputSchema = z.object({ jobId: z.string().min(1), workerId: z.string().min(1) });
 const progressInputSchema = jobReferenceSchema.extend({
-  stage: z.enum(["SCANNING_FILES", "UPLOADING_OBJECTS", "WRITING_ASSETS"]).optional(),
+  stage: z.enum([
+    "VALIDATING_INPUT",
+    "PREPARING_WORKSPACE",
+    "EXTRACTING_METADATA",
+    "GENERATING_WAVEFORM",
+    "UPLOADING_OBJECTS",
+    "WRITING_ASSETS",
+    "WRITING_METADATA",
+    "CLEANING_UP",
+  ]).optional(),
   progress: z.number().int().nonnegative().optional(),
   totalItems: z.number().int().nonnegative().nullable().optional(),
   processedItems: z.number().int().nonnegative().optional(),

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
+import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
 
 type LabelSummary = {
   id: string;
@@ -214,7 +215,8 @@ async function loadLabelPageData() {
         select: { id: true, name: true },
       });
     const dataset = datasets[0] ?? null;
-    const labels: LabelSummary[] = dataset
+    const access = dataset ? await requireDatasetPermission(actor, dataset.id, "label.manage") : null;
+    let labels: LabelSummary[] = dataset
       ? await db.label.findMany({
         where: { datasetId: dataset.id },
         orderBy: [{ name: "asc" }],
@@ -226,7 +228,17 @@ async function loadLabelPageData() {
       }) as LabelSummary[]
       : [];
 
-    const access = dataset ? await requireDatasetPermission(actor, dataset.id, "label.manage") : null;
+    // Keep the taxonomy page useful for a new IMAGE dataset: defaults are
+    // established through the same guarded service used by the workspace.
+    // This is idempotent and only runs for an actor allowed to manage labels.
+    if (dataset && labels.length === 0 && access && !access.forbidden) {
+      await ensureDefaultImageLabels(actor, dataset.id);
+      labels = await db.label.findMany({
+        where: { datasetId: dataset.id },
+        orderBy: [{ name: "asc" }],
+        include: { _count: { select: { annotations: true } } },
+      }) as LabelSummary[];
+    }
     return { labels, actor, dataset, canManage: Boolean(access && !access.forbidden) };
   } catch (error: unknown) {
     console.error("Label page data could not be loaded.", error);

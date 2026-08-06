@@ -5,6 +5,7 @@ import { PreflightError } from "@/lib/providers/provider-errors";
 import { getRepositoryProvider } from "@/lib/providers/provider-registry";
 import { getGiteaBranches } from "@/lib/providers/gitea/gitea.client";
 import { resolvePreflightGiteaCredential } from "@/lib/providers/token-check";
+import { configuredInternalBaseUrl, resolveServerReachableGiteaUrl } from "@/lib/providers/gitea-compose-url";
 import type { PreflightResult, ServerCredentialContext } from "@/lib/providers/provider.types";
 import { normalizeSourceRootPath, validateSourceBaseUrl } from "@/lib/source-access-policy";
 import type { SourceImportRequest } from "@/lib/validation/source-connection";
@@ -13,40 +14,14 @@ function canonicalBaseUrl(url: URL) {
   return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
 }
 
-/**
- * Compose exposes Gitea to the browser at a public loopback URL while the web
- * container must reach it by its private service address. This substitution is
- * server-controlled and exact: browser input can only select the configured
- * public Gitea root; it cannot choose an arbitrary internal destination.
- */
-function resolveServerReachableGiteaUrl(raw: string): { baseUrl: string; usesConfiguredInternalUrl: boolean } {
-  const configuredPublic = process.env.GITEA_PUBLIC_URL;
-  const configuredInternal = process.env.GITEA_INTERNAL_URL;
-  // A host-run `next dev` can already reach Gitea at localhost. Only a
-  // Compose process needs the private Docker service hostname.
-  if (process.env.FIELDFRAME_RUNTIME !== "compose" || !configuredPublic || !configuredInternal) return { baseUrl: raw, usesConfiguredInternalUrl: false };
-  try {
-    return canonicalBaseUrl(new URL(raw)) === canonicalBaseUrl(new URL(configuredPublic))
-      ? { baseUrl: configuredInternal, usesConfiguredInternalUrl: true }
-      : { baseUrl: raw, usesConfiguredInternalUrl: false };
-  } catch {
-    return { baseUrl: raw, usesConfiguredInternalUrl: false };
-  }
-}
-
-function configuredInternalBaseUrl(raw: string) {
-  try {
-    const url = new URL(raw);
-    if (!url.hostname || !["http:", "https:"].includes(url.protocol) || url.username || url.password || url.search || url.hash) return null;
-    return canonicalBaseUrl(url);
-  } catch {
-    return null;
-  }
-}
-
 export type SourceImportPreflight = {
   result: PreflightResult;
+  /** The address actually reachable from this server process right now (may
+   * be the internal Compose alias); use this only to make provider calls. */
   baseUrl: string;
+  /** The durable, worker-revalidatable address -- always the public root,
+   * never the internal Compose alias. Persist this on a new SourceConnection. */
+  durableBaseUrl: string;
   sourceConnectionId: string | null;
   availableRefs: string[];
 };
@@ -64,11 +39,15 @@ export async function preflightSourceImport(
 
   let credential: ServerCredentialContext | null = null;
   let baseUrl: string;
+  let durableBaseUrl: string;
   let sourceConnectionId: string | null = null;
 
   if (input.credentialMode === "EXISTING_SOURCE_CONNECTION") {
     credential = await resolvePreflightGiteaCredential(actor, input.sourceConnectionId!);
     baseUrl = credential.baseUrl;
+    // Not used to persist a new connection in this branch -- the existing row
+    // is reused as-is -- but kept equal to baseUrl for a consistent return shape.
+    durableBaseUrl = baseUrl;
     sourceConnectionId = credential.connectionId;
   } else {
     const reachable = resolveServerReachableGiteaUrl(input.serverUrl!);
@@ -76,10 +55,19 @@ export async function preflightSourceImport(
       const configured = configuredInternalBaseUrl(reachable.baseUrl);
       if (!configured) throw new PreflightError("UNSAFE_REPOSITORY_URL");
       baseUrl = configured;
+      // `reachable.usesConfiguredInternalUrl` already proved `input.serverUrl`
+      // canonically equals GITEA_PUBLIC_URL. That public root -- never the
+      // internal Compose alias just resolved above -- is the durable address
+      // a new SourceConnection must persist, since only the public root
+      // survives the worker's later SSRF re-validation.
+      const publicRoot = configuredInternalBaseUrl(process.env.GITEA_PUBLIC_URL!);
+      if (!publicRoot) throw new PreflightError("UNSAFE_REPOSITORY_URL");
+      durableBaseUrl = publicRoot;
     } else {
       const address = await validateSourceBaseUrl(reachable.baseUrl);
       if (!address.ok) throw new PreflightError("UNSAFE_REPOSITORY_URL");
       baseUrl = canonicalBaseUrl(address.value);
+      durableBaseUrl = baseUrl;
     }
     if (input.credentialMode === "ONE_TIME_PAT") {
       credential = { connectionId: null, baseUrl, token: input.personalAccessToken! };
@@ -104,5 +92,5 @@ export async function preflightSourceImport(
     availableRefs = [result.ref.resolved];
   }
   if (!availableRefs.includes(result.ref.resolved)) availableRefs.unshift(result.ref.resolved);
-  return { result, baseUrl, sourceConnectionId, availableRefs };
+  return { result, baseUrl, durableBaseUrl, sourceConnectionId, availableRefs };
 }

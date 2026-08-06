@@ -6,18 +6,17 @@ import { useRouter } from "next/navigation";
 import type { AssetStatus } from "@internal/db";
 
 import {
-  deleteBoundingBoxAction,
   ensureDefaultImageLabelsAction,
-  updateBoundingBoxLabelAction,
   updateImageDescriptionAction,
 } from "@/app/(app)/workspace/[datasetId]/actions";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
 import { Badge } from "@/components/ui/badge";
 import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status";
+import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { useAnnotationStore } from "@/stores/annotation-store";
-import type { SafeImageWorkspaceAsset, SafeWorkspaceAsset, SafeWorkspaceLabel } from "@/types/image-workspace";
+import type { SafeImageAnnotation, SafeImageWorkspaceAsset, SafeWorkspaceAsset, SafeWorkspaceLabel } from "@/types/image-workspace";
 
-type PanelTab = "description" | "labels" | "shapes" | "images";
+type PanelTab = "description" | "labels" | "shapes" | "assets";
 type PropertiesPanelProps = {
   datasetId: string;
   image: SafeImageWorkspaceAsset | null;
@@ -96,6 +95,7 @@ function PropertiesPanelBody({ datasetId, image, labels, images, page, pageSize,
     return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white p-4"><h2 className="text-sm font-bold text-zinc-950">Assets</h2><p className="mt-1 text-xs leading-5 text-zinc-500">Select an image to edit it. Other modalities stay available for their workspace engine.</p><AssetNavigator datasetId={datasetId} assets={images} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardImageNavigation} /></aside>;
   }
 
+  const currentAssetId = image.id;
   const presentation = imageStatusPresentation[image.status];
 
   function scheduleLabelChange(annotationId: string, labelId: string | null) {
@@ -103,18 +103,17 @@ function PropertiesPanelBody({ datasetId, image, labels, images, page, pageSize,
     if (!annotation) return;
     upsertSafeAnnotation({ ...annotation, labelId });
     scheduleAutosave(`annotation:${annotationId}`, async () => {
-      const result = await updateBoundingBoxLabelAction({
-        datasetId,
-        assetId,
-        annotationId,
-        version: annotation.version,
-        labelId,
+      const result = await putAssetAnnotations(currentAssetId, {
+        updates: [{ id: annotationId, revision: annotation.revision, labelId }],
       });
       if (result.ok) {
-        upsertSafeAnnotation(result.annotation);
+        const updated = result.annotations.find((item) => item.id === annotationId);
+        if (updated?.modality === "IMAGE" && ["BOUNDING_BOX", "POLYGON", "CIRCLE", "POINT", "POLYLINE"].includes(updated.type)) {
+          upsertSafeAnnotation({ ...updated, modality: "IMAGE", type: updated.type as SafeImageAnnotation["type"], geometry: updated.geometry as SafeImageAnnotation["geometry"] });
+        }
         return "saved";
       }
-      if (result.error === "CONFLICT") {
+      if (result.conflict) {
         setConflictDraftInStore(`annotation:${annotationId}`, { labelId });
         setShapeError("A newer annotation version exists. Your local label choice is still visible.");
         return "conflict";
@@ -127,12 +126,14 @@ function PropertiesPanelBody({ datasetId, image, labels, images, page, pageSize,
   async function deleteShape(annotationId: string) {
     const annotation = annotations.find((item) => item.id === annotationId);
     if (!annotation) return;
-    const result = await deleteBoundingBoxAction({ datasetId, assetId, annotationId, version: annotation.version });
+    const result = await putAssetAnnotations(currentAssetId, {
+      deletes: [{ id: annotationId, revision: annotation.revision }],
+    });
     if (result.ok) {
       removeSafeAnnotation(annotationId);
       return;
     }
-    setShapeError(result.error === "CONFLICT" ? "A newer annotation version exists. Reload before deleting." : "The annotation could not be deleted.");
+    setShapeError(result.conflict ? "A newer annotation version exists. Reload before deleting." : "The annotation could not be deleted.");
   }
 
   async function createCustomLabel() {
@@ -220,7 +221,7 @@ function PropertiesPanelBody({ datasetId, image, labels, images, page, pageSize,
       <dl className="mt-4 space-y-2 text-xs"><Detail label="Dimensions" value={image.width && image.height ? `${image.width} × ${image.height}` : "Unknown"} /><Detail label="Annotations" value={String(annotations.length)} /><Detail label="Batch" value={String(image.batchIndex + 1)} /></dl>
     </div>
     <nav aria-label="Image management" className="grid grid-cols-4 border-b border-zinc-200">
-      {(["description", "labels", "shapes", "images"] as const).map((entry) => <button key={entry} type="button" onClick={() => setTab(entry)} className={`px-2 py-3 text-xs font-semibold capitalize ${tab === entry ? "border-b-2 border-sky-600 text-sky-700" : "text-zinc-500"}`}>{entry}</button>)}
+      {(["description", "labels", "shapes", "assets"] as const).map((entry) => <button key={entry} type="button" onClick={() => setTab(entry)} className={`px-2 py-3 text-xs font-semibold capitalize ${tab === entry ? "border-b-2 border-sky-600 text-sky-700" : "text-zinc-500"}`}>{entry}</button>)}
     </nav>
     {tab === "description" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Description</h2><span className="text-[11px] text-zinc-400">{descriptionState === "pending" ? "Saving after inactivity…" : descriptionState === "saving" ? "Saving…" : descriptionState === "saved" ? "Saved" : descriptionState === "failed" ? "Save failed" : ""}</span></div>
@@ -237,10 +238,10 @@ function PropertiesPanelBody({ datasetId, image, labels, images, page, pageSize,
     </section>}
     {tab === "shapes" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Shapes</h2><span className="text-xs text-zinc-400">{annotations.length}</span></div>
-      <div className="mt-3 space-y-2">{annotations.length === 0 ? <p className="text-xs text-zinc-500">No bounding boxes yet.</p> : annotations.map((annotation) => <div key={annotation.id} className={`rounded-xl border p-2 ${annotation.id === selectedId ? "border-sky-300 bg-sky-50" : "border-zinc-200"}`}><button type="button" onClick={() => setSelectedId(annotation.id)} className="w-full text-left text-xs font-semibold text-zinc-800">Bounding box · {taxonomy.find((label) => label.id === annotation.labelId)?.name ?? "No label"}</button><div className="mt-2 flex gap-1"><select aria-label={`Label for ${annotation.id}`} value={annotation.labelId ?? ""} onChange={(event) => scheduleLabelChange(annotation.id, event.target.value || null)} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-[11px]"><option value="">No label</option>{taxonomy.map((label) => <option key={label.id} value={label.id}>{label.name}</option>)}</select><button type="button" onClick={() => void deleteShape(annotation.id)} className="rounded-lg px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button></div></div>)}</div>
+      <div className="mt-3 space-y-2">{annotations.length === 0 ? <p className="text-xs text-zinc-500">No annotations yet.</p> : annotations.map((annotation) => <div key={annotation.id} className={`rounded-xl border p-2 ${annotation.id === selectedId ? "border-sky-300 bg-sky-50" : "border-zinc-200"}`}><button type="button" onClick={() => setSelectedId(annotation.id)} className="w-full text-left text-xs font-semibold text-zinc-800">{annotation.type.replaceAll("_", " ")} · {taxonomy.find((label) => label.id === annotation.labelId)?.name ?? "No label"}</button><div className="mt-2 flex gap-1"><select aria-label={`Label for ${annotation.id}`} value={annotation.labelId ?? ""} onChange={(event) => scheduleLabelChange(annotation.id, event.target.value || null)} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-[11px]"><option value="">No label</option>{taxonomy.map((label) => <option key={label.id} value={label.id}>{label.name}</option>)}</select><button type="button" onClick={() => void deleteShape(annotation.id)} className="rounded-lg px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button></div></div>)}</div>
       {shapeError && <p role="alert" className="mt-3 text-xs text-rose-700">{shapeError}</p>}
     </section>}
-    {tab === "images" && <section className="p-4">
+    {tab === "assets" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Assets</h2><span className="text-xs text-zinc-400">Page {page}</span></div>
       <p className="mt-1 text-xs text-zinc-500">This workspace page is limited to {pageSize} assets.</p>
       <form method="get" onSubmit={(event) => { void applyAssetFilters(event); }} className="mt-3 space-y-2">

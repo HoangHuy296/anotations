@@ -4,27 +4,18 @@ import { AssetStatus, Modality } from "@internal/db";
 
 import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
+import { readAssetAnnotations } from "@/lib/annotations/annotation-service";
 import { db } from "@/lib/db";
 import type {
   ImageWorkspacePage,
-  NormalizedBoundingBox,
   SafeImageAnnotation,
   SafeImageWorkspaceAsset,
+  SafeReadOnlyImageAnnotation,
   SafeWorkspaceAsset,
   SafeWorkspaceLabel,
 } from "@/types/image-workspace";
 
 const PAGE_SIZE = 100;
-
-function safeGeometry(value: unknown): NormalizedBoundingBox | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const box = value as Record<string, unknown>;
-  const numbers = [box.x, box.y, box.width, box.height];
-  if (!numbers.every((item) => typeof item === "number" && Number.isFinite(item))) return null;
-  const [x, y, width, height] = numbers as number[];
-  if (x < 0 || y < 0 || width <= 0 || height <= 0 || x + width > 1 || y + height > 1) return null;
-  return { x, y, width, height };
-}
 
 function toSafeAsset(asset: {
   id: string; modality: Modality; filename: string; width: number | null; height: number | null; description: string | null;
@@ -88,8 +79,8 @@ export async function readImageWorkspacePage(
   const previousItem = selectedIndex > 0 ? safeItems[selectedIndex - 1] : null;
   const nextItem = selectedIndex >= 0 && selectedIndex < safeItems.length - 1 ? safeItems[selectedIndex + 1] : null;
   const [previousAcrossPage, nextAcrossPage] = await Promise.all([
-    absoluteIndex > 0 && !previousItem ? db.asset.findMany({ where, orderBy: [{ batchIndex: "asc" }, { orderIndex: "asc" }, { id: "asc" }], skip: absoluteIndex - 1, take: 1, select: { id: true } }) : Promise.resolve([]),
-    absoluteIndex >= 0 && absoluteIndex + 1 < total && !nextItem ? db.asset.findMany({ where, orderBy: [{ batchIndex: "asc" }, { orderIndex: "asc" }, { id: "asc" }], skip: absoluteIndex + 1, take: 1, select: { id: true } }) : Promise.resolve([]),
+    absoluteIndex > 0 && !previousItem ? db.asset.findMany({ where, orderBy: [{ batchIndex: "asc" }, { orderIndex: "asc" }, { id: "asc" }], skip: absoluteIndex - 1, take: 1, select: { id: true, modality: true } }) : Promise.resolve([]),
+    absoluteIndex >= 0 && absoluteIndex + 1 < total && !nextItem ? db.asset.findMany({ where, orderBy: [{ batchIndex: "asc" }, { orderIndex: "asc" }, { id: "asc" }], skip: absoluteIndex + 1, take: 1, select: { id: true, modality: true } }) : Promise.resolve([]),
   ]);
   const previousId = previousItem?.id ?? previousAcrossPage[0]?.id ?? null;
   const nextId = nextItem?.id ?? nextAcrossPage[0]?.id ?? null;
@@ -97,8 +88,8 @@ export async function readImageWorkspacePage(
     dataset,
     page: {
       items: safeItems, total, completed, page, pageSize: PAGE_SIZE, selectedAssetId,
-      previous: previousId ? { id: previousId, page: Math.floor((absoluteIndex - 1) / PAGE_SIZE) + 1 } : null,
-      next: nextId ? { id: nextId, page: Math.floor((absoluteIndex + 1) / PAGE_SIZE) + 1 } : null,
+      previous: previousId ? { id: previousId, modality: previousItem?.modality ?? previousAcrossPage[0]!.modality, page: Math.floor((absoluteIndex - 1) / PAGE_SIZE) + 1 } : null,
+      next: nextId ? { id: nextId, modality: nextItem?.modality ?? nextAcrossPage[0]!.modality, page: Math.floor((absoluteIndex + 1) / PAGE_SIZE) + 1 } : null,
     },
   };
 }
@@ -112,20 +103,19 @@ export async function readImageWorkspaceAsset(actor: RequestActor, datasetId: st
       select: {
         id: true, filename: true, width: true, height: true, description: true, revision: true, status: true, batchIndex: true, orderIndex: true,
         _count: { select: { annotations: true } },
-        annotations: { where: { modality: Modality.IMAGE, type: "BOUNDING_BOX" }, orderBy: { createdAt: "asc" }, select: { id: true, assetId: true, labelId: true, type: true, geometry: true, status: true, revision: true, updatedAt: true } },
       },
     }),
     db.label.findMany({ where: { datasetId, OR: [{ modality: null }, { modality: Modality.IMAGE }] }, orderBy: { normalizedName: "asc" }, select: { id: true, name: true, color: true, modality: true } }),
   ]);
   if (!asset) return null;
-  const annotations: SafeImageAnnotation[] = asset.annotations.flatMap((annotation) => {
-    const geometry = safeGeometry(annotation.geometry);
-    if (!geometry || annotation.type !== "BOUNDING_BOX" || !["DRAFT", "IN_PROGRESS", "COMPLETED"].includes(annotation.status)) return [];
-    return [{ id: annotation.id, assetId: annotation.assetId, labelId: annotation.labelId, type: "BOUNDING_BOX" as const, geometry, status: annotation.status as SafeImageAnnotation["status"], version: annotation.revision, updatedAt: annotation.updatedAt.toISOString() }];
-  });
+  const listed = await readAssetAnnotations(actor, asset.id);
+  const editableTypes = ["BOUNDING_BOX", "POLYGON", "CIRCLE", "POINT", "POLYLINE"] as const;
+  const allImageAnnotations = listed.ok ? listed.value.filter((annotation) => annotation.modality === Modality.IMAGE) : [];
+  const annotations: SafeImageAnnotation[] = allImageAnnotations.filter((annotation): annotation is typeof annotation & { type: SafeImageAnnotation["type"] } => editableTypes.includes(annotation.type as typeof editableTypes[number])).map((annotation) => ({ ...annotation, modality: "IMAGE" as const, geometry: annotation.geometry as SafeImageAnnotation["geometry"] }));
+  const unsupportedAnnotations: SafeReadOnlyImageAnnotation[] = allImageAnnotations.filter((annotation) => !editableTypes.includes(annotation.type as typeof editableTypes[number])).map((annotation) => ({ id: annotation.id, type: annotation.type, label: annotation.label, status: annotation.status, geometry: annotation.geometry, revision: annotation.revision }));
   const safeLabels: SafeWorkspaceLabel[] = labels.map((label) => ({ id: label.id, name: label.name, color: label.color, modality: label.modality === Modality.IMAGE ? "IMAGE" : null }));
   const safeAsset: SafeImageWorkspaceAsset = { ...toSafeAsset({ ...asset, modality: Modality.IMAGE }), modality: Modality.IMAGE };
-  return { asset: safeAsset, annotations, labels: safeLabels };
+  return { asset: safeAsset, annotations, unsupportedAnnotations, labels: safeLabels };
 }
 
 export { PAGE_SIZE };

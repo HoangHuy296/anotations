@@ -1,0 +1,12 @@
+import type { AnnotationStatus, AnnotationType } from "@internal/db";
+import type { SafeVideoKeyframe, SafeVideoTemporalLabel, SafeVideoTrack } from "@/types/video-annotation";
+
+type Label = { id: string; name: string; color: string } | null;
+type TrackRecord = { id: string; videoAssetId: string; labelId: string | null; name: string | null; label: Label; annotationType: AnnotationType; interpolationMode: "LINEAR" | "NONE"; status: AnnotationStatus; revision: number; properties: unknown; createdAt: Date; updatedAt: Date };
+type KeyframeRecord = { id: string; trackId: string; assetId: string; labelId: string | null; type: "BOUNDING_BOX"; geometry: SafeVideoKeyframe["geometry"]; timestampMs: number; revision: number; createdAt: Date; updatedAt: Date };
+type TemporalRecord = { id: string; assetId: string; labelId: string | null; type: SafeVideoTemporalLabel["type"]; startMs: number; endMs: number; revision: number; properties: unknown; createdAt: Date; updatedAt: Date };
+
+function safeProperties(value: unknown) { return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {}; }
+export function toSafeVideoTrack(value: TrackRecord): SafeVideoTrack { return { id: value.id, videoAssetId: value.videoAssetId, labelId: value.labelId, name: value.name, label: value.label, annotationType: value.annotationType, interpolationMode: value.interpolationMode, status: value.status, revision: value.revision, properties: safeProperties(value.properties), createdAt: value.createdAt.toISOString(), updatedAt: value.updatedAt.toISOString() }; }
+export function toSafeVideoKeyframe(value: KeyframeRecord): SafeVideoKeyframe { return { id: value.id, trackId: value.trackId, assetId: value.assetId, labelId: value.labelId, type: value.type, geometry: value.geometry, timestampMs: value.timestampMs, revision: value.revision, createdAt: value.createdAt.toISOString(), updatedAt: value.updatedAt.toISOString() }; }
+export function toSafeVideoTemporalLabel(value: TemporalRecord): SafeVideoTemporalLabel { return { id: value.id, assetId: value.assetId, labelId: value.labelId, type: value.type, startMs: value.startMs, endMs: value.endMs, revision: value.revision, properties: safeProperties(value.properties), createdAt: value.createdAt.toISOString(), updatedAt: value.updatedAt.toISOString() }; }

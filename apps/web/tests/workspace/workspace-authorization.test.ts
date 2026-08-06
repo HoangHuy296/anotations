@@ -24,9 +24,9 @@ test("workspace read conceals another Dataset and revision guards reject stale w
     const created = await createBoundingBox(labeler, { datasetId: dataset.id, assetId: asset.id, labelId: label.id, geometry: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 } });
     assert.equal(created.ok, true);
     if (!created.ok) return;
-    const update = await updateBoundingBoxGeometry(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, version: created.value.version, geometry: { x: 0.2, y: 0.1, width: 0.2, height: 0.2 } });
+    const update = await updateBoundingBoxGeometry(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, revision: created.value.revision, geometry: { x: 0.2, y: 0.1, width: 0.2, height: 0.2 } });
     assert.equal(update.ok, true);
-    const stale = await updateBoundingBoxGeometry(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, version: created.value.version, geometry: { x: 0.3, y: 0.1, width: 0.2, height: 0.2 } });
+    const stale = await updateBoundingBoxGeometry(labeler, { datasetId: dataset.id, assetId: asset.id, annotationId: created.value.id, revision: created.value.revision, geometry: { x: 0.3, y: 0.1, width: 0.2, height: 0.2 } });
     assert.deepEqual(stale, { ok: false, status: 409 });
     assert.equal(await readImageWorkspaceAsset(outsider, dataset.id, asset.id), null);
     assert.equal(await readImageWorkspaceAsset(owner, otherDataset.id, asset.id), null);

@@ -20,8 +20,18 @@ export type VideoObjectTrackModel = runtime.Types.Result.DefaultSelection<Prisma
 
 export type AggregateVideoObjectTrack = {
   _count: VideoObjectTrackCountAggregateOutputType | null
+  _avg: VideoObjectTrackAvgAggregateOutputType | null
+  _sum: VideoObjectTrackSumAggregateOutputType | null
   _min: VideoObjectTrackMinAggregateOutputType | null
   _max: VideoObjectTrackMaxAggregateOutputType | null
+}
+
+export type VideoObjectTrackAvgAggregateOutputType = {
+  revision: number | null
+}
+
+export type VideoObjectTrackSumAggregateOutputType = {
+  revision: number | null
 }
 
 export type VideoObjectTrackMinAggregateOutputType = {
@@ -32,6 +42,9 @@ export type VideoObjectTrackMinAggregateOutputType = {
   name: string | null
   color: string | null
   status: $Enums.AnnotationStatus | null
+  revision: number | null
+  annotationType: $Enums.AnnotationType | null
+  interpolationMode: $Enums.VideoInterpolationMode | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +57,9 @@ export type VideoObjectTrackMaxAggregateOutputType = {
   name: string | null
   color: string | null
   status: $Enums.AnnotationStatus | null
+  revision: number | null
+  annotationType: $Enums.AnnotationType | null
+  interpolationMode: $Enums.VideoInterpolationMode | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -57,11 +73,22 @@ export type VideoObjectTrackCountAggregateOutputType = {
   color: number
   properties: number
   status: number
+  revision: number
+  annotationType: number
+  interpolationMode: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type VideoObjectTrackAvgAggregateInputType = {
+  revision?: true
+}
+
+export type VideoObjectTrackSumAggregateInputType = {
+  revision?: true
+}
 
 export type VideoObjectTrackMinAggregateInputType = {
   id?: true
@@ -71,6 +98,9 @@ export type VideoObjectTrackMinAggregateInputType = {
   name?: true
   color?: true
   status?: true
+  revision?: true
+  annotationType?: true
+  interpolationMode?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -83,6 +113,9 @@ export type VideoObjectTrackMaxAggregateInputType = {
   name?: true
   color?: true
   status?: true
+  revision?: true
+  annotationType?: true
+  interpolationMode?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -96,6 +129,9 @@ export type VideoObjectTrackCountAggregateInputType = {
   color?: true
   properties?: true
   status?: true
+  revision?: true
+  annotationType?: true
+  interpolationMode?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -139,6 +175,18 @@ export type VideoObjectTrackAggregateArgs<ExtArgs extends runtime.Types.Extensio
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: VideoObjectTrackAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: VideoObjectTrackSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: VideoObjectTrackMinAggregateInputType
@@ -169,6 +217,8 @@ export type VideoObjectTrackGroupByArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   _count?: VideoObjectTrackCountAggregateInputType | true
+  _avg?: VideoObjectTrackAvgAggregateInputType
+  _sum?: VideoObjectTrackSumAggregateInputType
   _min?: VideoObjectTrackMinAggregateInputType
   _max?: VideoObjectTrackMaxAggregateInputType
 }
@@ -182,9 +232,14 @@ export type VideoObjectTrackGroupByOutputType = {
   color: string | null
   properties: runtime.JsonValue
   status: $Enums.AnnotationStatus
+  revision: number
+  annotationType: $Enums.AnnotationType
+  interpolationMode: $Enums.VideoInterpolationMode
   createdAt: Date
   updatedAt: Date
   _count: VideoObjectTrackCountAggregateOutputType | null
+  _avg: VideoObjectTrackAvgAggregateOutputType | null
+  _sum: VideoObjectTrackSumAggregateOutputType | null
   _min: VideoObjectTrackMinAggregateOutputType | null
   _max: VideoObjectTrackMaxAggregateOutputType | null
 }
@@ -216,6 +271,9 @@ export type VideoObjectTrackWhereInput = {
   color?: Prisma.StringNullableFilter<"VideoObjectTrack"> | string | null
   properties?: Prisma.JsonFilter<"VideoObjectTrack">
   status?: Prisma.EnumAnnotationStatusFilter<"VideoObjectTrack"> | $Enums.AnnotationStatus
+  revision?: Prisma.IntFilter<"VideoObjectTrack"> | number
+  annotationType?: Prisma.EnumAnnotationTypeFilter<"VideoObjectTrack"> | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFilter<"VideoObjectTrack"> | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
   annotations?: Prisma.AnnotationListRelationFilter
@@ -233,6 +291,9 @@ export type VideoObjectTrackOrderByWithRelationInput = {
   color?: Prisma.SortOrderInput | Prisma.SortOrder
   properties?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  annotationType?: Prisma.SortOrder
+  interpolationMode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   annotations?: Prisma.AnnotationOrderByRelationAggregateInput
@@ -253,6 +314,9 @@ export type VideoObjectTrackWhereUniqueInput = Prisma.AtLeast<{
   color?: Prisma.StringNullableFilter<"VideoObjectTrack"> | string | null
   properties?: Prisma.JsonFilter<"VideoObjectTrack">
   status?: Prisma.EnumAnnotationStatusFilter<"VideoObjectTrack"> | $Enums.AnnotationStatus
+  revision?: Prisma.IntFilter<"VideoObjectTrack"> | number
+  annotationType?: Prisma.EnumAnnotationTypeFilter<"VideoObjectTrack"> | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFilter<"VideoObjectTrack"> | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
   annotations?: Prisma.AnnotationListRelationFilter
@@ -270,11 +334,16 @@ export type VideoObjectTrackOrderByWithAggregationInput = {
   color?: Prisma.SortOrderInput | Prisma.SortOrder
   properties?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  annotationType?: Prisma.SortOrder
+  interpolationMode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.VideoObjectTrackCountOrderByAggregateInput
+  _avg?: Prisma.VideoObjectTrackAvgOrderByAggregateInput
   _max?: Prisma.VideoObjectTrackMaxOrderByAggregateInput
   _min?: Prisma.VideoObjectTrackMinOrderByAggregateInput
+  _sum?: Prisma.VideoObjectTrackSumOrderByAggregateInput
 }
 
 export type VideoObjectTrackScalarWhereWithAggregatesInput = {
@@ -289,6 +358,9 @@ export type VideoObjectTrackScalarWhereWithAggregatesInput = {
   color?: Prisma.StringNullableWithAggregatesFilter<"VideoObjectTrack"> | string | null
   properties?: Prisma.JsonWithAggregatesFilter<"VideoObjectTrack">
   status?: Prisma.EnumAnnotationStatusWithAggregatesFilter<"VideoObjectTrack"> | $Enums.AnnotationStatus
+  revision?: Prisma.IntWithAggregatesFilter<"VideoObjectTrack"> | number
+  annotationType?: Prisma.EnumAnnotationTypeWithAggregatesFilter<"VideoObjectTrack"> | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeWithAggregatesFilter<"VideoObjectTrack"> | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"VideoObjectTrack"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"VideoObjectTrack"> | Date | string
 }
@@ -299,6 +371,9 @@ export type VideoObjectTrackCreateInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationCreateNestedManyWithoutTrackInput
@@ -316,6 +391,9 @@ export type VideoObjectTrackUncheckedCreateInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutTrackInput
@@ -327,6 +405,9 @@ export type VideoObjectTrackUpdateInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUpdateManyWithoutTrackNestedInput
@@ -344,6 +425,9 @@ export type VideoObjectTrackUncheckedUpdateInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutTrackNestedInput
@@ -358,6 +442,9 @@ export type VideoObjectTrackCreateManyInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -368,6 +455,9 @@ export type VideoObjectTrackUpdateManyMutationInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -381,6 +471,9 @@ export type VideoObjectTrackUncheckedUpdateManyInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -409,8 +502,15 @@ export type VideoObjectTrackCountOrderByAggregateInput = {
   color?: Prisma.SortOrder
   properties?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  annotationType?: Prisma.SortOrder
+  interpolationMode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type VideoObjectTrackAvgOrderByAggregateInput = {
+  revision?: Prisma.SortOrder
 }
 
 export type VideoObjectTrackMaxOrderByAggregateInput = {
@@ -421,6 +521,9 @@ export type VideoObjectTrackMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   color?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  annotationType?: Prisma.SortOrder
+  interpolationMode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -433,8 +536,15 @@ export type VideoObjectTrackMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   color?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  revision?: Prisma.SortOrder
+  annotationType?: Prisma.SortOrder
+  interpolationMode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type VideoObjectTrackSumOrderByAggregateInput = {
+  revision?: Prisma.SortOrder
 }
 
 export type VideoObjectTrackCreateNestedManyWithoutCreatedByInput = {
@@ -579,12 +689,19 @@ export type VideoObjectTrackUncheckedUpdateManyWithoutVideoAssetNestedInput = {
   deleteMany?: Prisma.VideoObjectTrackScalarWhereInput | Prisma.VideoObjectTrackScalarWhereInput[]
 }
 
+export type EnumVideoInterpolationModeFieldUpdateOperationsInput = {
+  set?: $Enums.VideoInterpolationMode
+}
+
 export type VideoObjectTrackCreateWithoutCreatedByInput = {
   id?: string
   name?: string | null
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationCreateNestedManyWithoutTrackInput
@@ -600,6 +717,9 @@ export type VideoObjectTrackUncheckedCreateWithoutCreatedByInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutTrackInput
@@ -643,6 +763,9 @@ export type VideoObjectTrackScalarWhereInput = {
   color?: Prisma.StringNullableFilter<"VideoObjectTrack"> | string | null
   properties?: Prisma.JsonFilter<"VideoObjectTrack">
   status?: Prisma.EnumAnnotationStatusFilter<"VideoObjectTrack"> | $Enums.AnnotationStatus
+  revision?: Prisma.IntFilter<"VideoObjectTrack"> | number
+  annotationType?: Prisma.EnumAnnotationTypeFilter<"VideoObjectTrack"> | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFilter<"VideoObjectTrack"> | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VideoObjectTrack"> | Date | string
 }
@@ -653,6 +776,9 @@ export type VideoObjectTrackCreateWithoutLabelInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationCreateNestedManyWithoutTrackInput
@@ -668,6 +794,9 @@ export type VideoObjectTrackUncheckedCreateWithoutLabelInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutTrackInput
@@ -705,6 +834,9 @@ export type VideoObjectTrackCreateWithoutAnnotationsInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy?: Prisma.UserCreateNestedOneWithoutTracksCreatedInput
@@ -721,6 +853,9 @@ export type VideoObjectTrackUncheckedCreateWithoutAnnotationsInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -747,6 +882,9 @@ export type VideoObjectTrackUpdateWithoutAnnotationsInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneWithoutTracksCreatedNestedInput
@@ -763,6 +901,9 @@ export type VideoObjectTrackUncheckedUpdateWithoutAnnotationsInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -773,6 +914,9 @@ export type VideoObjectTrackCreateWithoutVideoAssetInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationCreateNestedManyWithoutTrackInput
@@ -788,6 +932,9 @@ export type VideoObjectTrackUncheckedCreateWithoutVideoAssetInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutTrackInput
@@ -827,6 +974,9 @@ export type VideoObjectTrackCreateManyCreatedByInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -837,6 +987,9 @@ export type VideoObjectTrackUpdateWithoutCreatedByInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUpdateManyWithoutTrackNestedInput
@@ -852,6 +1005,9 @@ export type VideoObjectTrackUncheckedUpdateWithoutCreatedByInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutTrackNestedInput
@@ -865,6 +1021,9 @@ export type VideoObjectTrackUncheckedUpdateManyWithoutCreatedByInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -877,6 +1036,9 @@ export type VideoObjectTrackCreateManyLabelInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -887,6 +1049,9 @@ export type VideoObjectTrackUpdateWithoutLabelInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUpdateManyWithoutTrackNestedInput
@@ -902,6 +1067,9 @@ export type VideoObjectTrackUncheckedUpdateWithoutLabelInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutTrackNestedInput
@@ -915,6 +1083,9 @@ export type VideoObjectTrackUncheckedUpdateManyWithoutLabelInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -927,6 +1098,9 @@ export type VideoObjectTrackCreateManyVideoAssetInput = {
   color?: string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: $Enums.AnnotationStatus
+  revision?: number
+  annotationType?: $Enums.AnnotationType
+  interpolationMode?: $Enums.VideoInterpolationMode
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -937,6 +1111,9 @@ export type VideoObjectTrackUpdateWithoutVideoAssetInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUpdateManyWithoutTrackNestedInput
@@ -952,6 +1129,9 @@ export type VideoObjectTrackUncheckedUpdateWithoutVideoAssetInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutTrackNestedInput
@@ -965,6 +1145,9 @@ export type VideoObjectTrackUncheckedUpdateManyWithoutVideoAssetInput = {
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.EnumAnnotationStatusFieldUpdateOperationsInput | $Enums.AnnotationStatus
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  annotationType?: Prisma.EnumAnnotationTypeFieldUpdateOperationsInput | $Enums.AnnotationType
+  interpolationMode?: Prisma.EnumVideoInterpolationModeFieldUpdateOperationsInput | $Enums.VideoInterpolationMode
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1009,6 +1192,9 @@ export type VideoObjectTrackSelect<ExtArgs extends runtime.Types.Extensions.Inte
   color?: boolean
   properties?: boolean
   status?: boolean
+  revision?: boolean
+  annotationType?: boolean
+  interpolationMode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   annotations?: boolean | Prisma.VideoObjectTrack$annotationsArgs<ExtArgs>
@@ -1027,6 +1213,9 @@ export type VideoObjectTrackSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   color?: boolean
   properties?: boolean
   status?: boolean
+  revision?: boolean
+  annotationType?: boolean
+  interpolationMode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
@@ -1043,6 +1232,9 @@ export type VideoObjectTrackSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   color?: boolean
   properties?: boolean
   status?: boolean
+  revision?: boolean
+  annotationType?: boolean
+  interpolationMode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
@@ -1059,11 +1251,14 @@ export type VideoObjectTrackSelectScalar = {
   color?: boolean
   properties?: boolean
   status?: boolean
+  revision?: boolean
+  annotationType?: boolean
+  interpolationMode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type VideoObjectTrackOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "videoAssetId" | "labelId" | "createdById" | "name" | "color" | "properties" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["videoObjectTrack"]>
+export type VideoObjectTrackOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "videoAssetId" | "labelId" | "createdById" | "name" | "color" | "properties" | "status" | "revision" | "annotationType" | "interpolationMode" | "createdAt" | "updatedAt", ExtArgs["result"]["videoObjectTrack"]>
 export type VideoObjectTrackInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   annotations?: boolean | Prisma.VideoObjectTrack$annotationsArgs<ExtArgs>
   createdBy?: boolean | Prisma.VideoObjectTrack$createdByArgs<ExtArgs>
@@ -1099,6 +1294,9 @@ export type $VideoObjectTrackPayload<ExtArgs extends runtime.Types.Extensions.In
     color: string | null
     properties: runtime.JsonValue
     status: $Enums.AnnotationStatus
+    revision: number
+    annotationType: $Enums.AnnotationType
+    interpolationMode: $Enums.VideoInterpolationMode
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["videoObjectTrack"]>
@@ -1536,6 +1734,9 @@ export interface VideoObjectTrackFieldRefs {
   readonly color: Prisma.FieldRef<"VideoObjectTrack", 'String'>
   readonly properties: Prisma.FieldRef<"VideoObjectTrack", 'Json'>
   readonly status: Prisma.FieldRef<"VideoObjectTrack", 'AnnotationStatus'>
+  readonly revision: Prisma.FieldRef<"VideoObjectTrack", 'Int'>
+  readonly annotationType: Prisma.FieldRef<"VideoObjectTrack", 'AnnotationType'>
+  readonly interpolationMode: Prisma.FieldRef<"VideoObjectTrack", 'VideoInterpolationMode'>
   readonly createdAt: Prisma.FieldRef<"VideoObjectTrack", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"VideoObjectTrack", 'DateTime'>
 }

@@ -7,5 +7,7 @@ const nextConfig: NextConfig = {
   },
   transpilePackages: ["@fieldframe/domain", "@fieldframe/queue"],
 };
-
+module.exports = {
+  allowedDevOrigins: ['10.0.0.245'],
+}
 export default nextConfig;

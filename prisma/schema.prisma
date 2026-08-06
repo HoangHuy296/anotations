@@ -611,6 +611,9 @@ model VideoObjectTrack {
   color        String?
   properties   Json             @default("{}")
   status       AnnotationStatus @default(DRAFT)
+  revision     Int              @default(1)
+  annotationType AnnotationType @default(BOUNDING_BOX)
+  interpolationMode VideoInterpolationMode @default(LINEAR)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   annotations  Annotation[]
@@ -844,6 +847,11 @@ enum AnnotationType {
   SPEAKER_IDENTIFICATION
   NATURAL_LANGUAGE_UTTERANCE
   ACOUSTIC_EVENT
+}
+
+enum VideoInterpolationMode {
+  NONE
+  LINEAR
 }
 
 enum LabelScope {

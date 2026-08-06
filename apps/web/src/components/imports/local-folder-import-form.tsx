@@ -4,7 +4,10 @@ import { CheckCircle, CloudArrowUp, File, FolderOpen, SpinnerGap, WarningCircle 
 import Link from "next/link";
 import { useRef, useState } from "react";
 
+//only review need sha256HexAuto, so we can keep it in the browser bundle for review stack only. The production build uses a server-side hash for the same purpose.
 import { Button } from "@/components/ui/button";
+import { randomUUIDAuto } from "@/lib/browser-random-uuid";
+import { sha256HexAuto } from "@/lib/browser-sha256";
 
 type Prepared = { id: string; datasetId: string; jobId: string; items: { id: string }[] };
 type Capability = { itemId: string; fileId: string; uploadUrl: string; formFields: Record<string, string> };
@@ -13,8 +16,7 @@ type ImportStep = "idle" | "scanning" | "preparing" | "uploading" | "ready" | "f
 
 async function fingerprint(file: File) {
   const buffer = await file.arrayBuffer();
-  const digest = await crypto.subtle.digest("SHA-256", buffer);
-  return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return sha256HexAuto(buffer);
 }
 
 function formatBytes(value: number) {
@@ -69,7 +71,7 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
     try {
       const started = await fetch(appendMode ? `/api/datasets/${datasetId}/imports/local-folder` : "/api/imports/local-folder", {
         method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin",
-        body: JSON.stringify({ ...(appendMode ? {} : { name: name.trim() }), idempotencyKey: crypto.randomUUID() + crypto.randomUUID(), items: files.map(({ file, logicalPath, fingerprint }) => ({ logicalPath, contentType: file.type || "text/plain", sizeBytes: file.size, fingerprint })) }),
+        body: JSON.stringify({ ...(appendMode ? {} : { name: name.trim() }), idempotencyKey: randomUUIDAuto() + randomUUIDAuto(), items: files.map(({ file, logicalPath, fingerprint }) => ({ logicalPath, contentType: file.type || "text/plain", sizeBytes: file.size, fingerprint })) }),
       });
       const startBody = await started.json().catch(() => null);
       if (!started.ok) throw new Error(safeMessage(startBody, "Could not prepare this import."));

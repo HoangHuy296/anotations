@@ -45,7 +45,7 @@ export const updateBoundingBoxGeometryInputSchema = z.object({
   datasetId: datasetIdSchema,
   assetId: cuid,
   annotationId: cuid,
-  version: revision,
+  revision,
   geometry: normalizedBoundingBoxSchema,
 }).strict();
 
@@ -53,7 +53,7 @@ export const updateBoundingBoxLabelInputSchema = z.object({
   datasetId: datasetIdSchema,
   assetId: cuid,
   annotationId: cuid,
-  version: revision,
+  revision,
   labelId: cuid.nullable(),
 }).strict();
 
@@ -61,7 +61,7 @@ export const deleteBoundingBoxInputSchema = z.object({
   datasetId: datasetIdSchema,
   assetId: cuid,
   annotationId: cuid,
-  version: revision,
+  revision,
 }).strict();
 
 export const updateAssetDescriptionInputSchema = z.object({

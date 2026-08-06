@@ -14,8 +14,17 @@ export function getQueueDeliveryId(jobId: string) {
 
 export const fieldframeQueueName = "fieldframe-jobs";
 
-/** Only foundation-safe existing Job types may be delivered before workflow processors exist. */
-export const supportedQueueJobTypes = ["EXPORT_DATASET", "IMPORT_DATASET"] as const;
+/**
+ * Only Job types with a registered private processor may be delivered. Media
+ * jobs are single-asset jobs; their transport still carries only the durable
+ * PostgreSQL Job id.
+ */
+export const supportedQueueJobTypes = [
+  "EXPORT_DATASET",
+  "IMPORT_DATASET",
+  "EXTRACT_VIDEO_METADATA",
+  "GENERATE_AUDIO_WAVEFORM",
+] as const;
 export type SupportedQueueJobType = (typeof supportedQueueJobTypes)[number];
 
 export function queueNameForJobType(type: string): string | null {
