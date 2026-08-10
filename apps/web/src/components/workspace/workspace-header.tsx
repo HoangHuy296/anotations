@@ -9,24 +9,36 @@ import {
   WarningCircle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
+import type { Modality } from "@internal/db";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAnnotationStore } from "@/stores/annotation-store";
+import { useAnnotationStore } from "@/stores/image-annotation-store";
+import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 
 type WorkspaceHeaderProps = {
   datasetName: string;
   branch: string;
   repositoryFullName: string;
   rootPath: string;
+  /** The active selection's engine, or `null` when no asset is selected (defaults to the IMAGE status fields). */
+  engine: Modality | null;
 };
 
+/**
+ * The shared status surface. Save/dirty/conflict display and the
+ * "Connected" indicator are identical across engines; the modality badge
+ * (and future per-engine fields — spec FR-037) come from
+ * `workspaceEngineRegistry` (FR-041–FR-044).
+ */
 export function WorkspaceHeader({
   datasetName,
   branch,
   repositoryFullName,
   rootPath,
+  engine,
 }: WorkspaceHeaderProps) {
+  const { StatusFields } = workspaceEngineRegistry[engine ?? "IMAGE"]; 
   const saveStates = useAnnotationStore((store) => store.saveStates);
   const currentSaveStates = Object.values(saveStates);
   const conflict = currentSaveStates.includes("conflict") || currentSaveStates.includes("failed");
@@ -47,7 +59,7 @@ export function WorkspaceHeader({
               {datasetName}
             </h1>
             <Badge variant="info">{branch}</Badge>
-            <Badge variant="neutral">Image</Badge>
+            <StatusFields />
           </div>
           <p className="mt-1 truncate font-mono text-[10px] text-zinc-400">
             {repositoryFullName}

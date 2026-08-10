@@ -46,7 +46,13 @@ export const videoKeyframeUpdateSchema = z.object({
   timestampMs: timestamp.optional(),
   geometry: videoBoundingBoxSchema.optional(),
   properties: properties.optional(),
-}).strict().refine((value) => value.timestampMs !== undefined || value.geometry !== undefined || value.properties !== undefined, { message: "Keyframe update is empty." });
+  // Per-shape label override. A keyframe Annotation always has its own
+  // `labelId` column (it does not need to match its Track's `labelId`) --
+  // this just lets the Shapes tab in `video-properties-tabs.tsx` assign a
+  // label to *one* drawn box without renaming/relabeling every other
+  // keyframe that happens to share the same Track.
+  labelId: id.nullable().optional(),
+}).strict().refine((value) => value.timestampMs !== undefined || value.geometry !== undefined || value.properties !== undefined || value.labelId !== undefined, { message: "Keyframe update is empty." });
 
 export const videoKeyframeDeleteSchema = z.object({
   expectedTrackRevision: z.number().int().positive(),

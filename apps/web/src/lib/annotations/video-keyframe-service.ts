@@ -4,14 +4,14 @@ import { AnnotationSource, AnnotationStatus, AnnotationType, Modality, Prisma } 
 import type { RequestActor } from "@/lib/auth";
 import { assertAnnotationPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
-import { resolveVideoTrackAccess } from "@/lib/annotations/video-authorization";
+import { requireSameDatasetLabel, resolveVideoTrackAccess } from "@/lib/annotations/video-authorization";
 import { toSafeVideoKeyframe, toSafeVideoTrack } from "@/lib/annotations/video-projection";
 import { videoKeyframeCreateSchema, videoKeyframeUpdateSchema } from "@/lib/validation/video-annotation";
 
 export type VideoKeyframeFailure = "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "DUPLICATE_TIMESTAMP";
 export type VideoKeyframeResult<T> = { ok: true; value: T } | { ok: false; reason: VideoKeyframeFailure };
 
-const keyframeSelect = { id: true, assetId: true, trackId: true, labelId: true, type: true, geometry: true, timestampMs: true, revision: true, createdAt: true, updatedAt: true } satisfies Prisma.AnnotationSelect;
+const keyframeSelect = { id: true, assetId: true, trackId: true, labelId: true, type: true, geometry: true, properties: true, timestampMs: true, revision: true, createdAt: true, updatedAt: true } satisfies Prisma.AnnotationSelect;
 const trackSelect: Prisma.VideoObjectTrackSelect = { id: true, videoAssetId: true, labelId: true, name: true, properties: true, status: true, revision: true, annotationType: true, interpolationMode: true, createdAt: true, updatedAt: true, label: { select: { id: true, name: true, color: true } } };
 
 async function track(actor: RequestActor, trackId: string) {
@@ -59,11 +59,12 @@ export async function updateVideoKeyframe(actor: RequestActor, annotationId: str
   if (!permission || permission.forbidden) return { ok: false, reason: permission ? "FORBIDDEN" : "NOT_FOUND" };
   const nextTimestamp = parsed.data.timestampMs ?? annotation.timestampMs;
   if (nextTimestamp === null || (resolved.full.videoAsset.asset.durationMs !== null && nextTimestamp > resolved.full.videoAsset.asset.durationMs)) return { ok: false, reason: "INVALID_REQUEST" };
+  if (parsed.data.labelId !== undefined && !(await requireSameDatasetLabel(parsed.data.labelId, resolved.datasetId))) return { ok: false, reason: "INVALID_REQUEST" };
   try {
     const value = await db.$transaction(async (tx) => {
       const claimed = await tx.videoObjectTrack.updateMany({ where: { id: trackId, revision: parsed.data.expectedTrackRevision }, data: { revision: { increment: 1 } } });
       if (claimed.count !== 1) throw new Error("CONFLICT");
-      const updated = await tx.annotation.update({ where: { id: annotationId }, data: { timestampMs: nextTimestamp, ...(parsed.data.geometry ? { geometry: parsed.data.geometry } : {}), ...(parsed.data.properties ? { properties: parsed.data.properties as Prisma.InputJsonValue } : {}), updatedById: actor.id }, select: keyframeSelect });
+      const updated = await tx.annotation.update({ where: { id: annotationId }, data: { timestampMs: nextTimestamp, ...(parsed.data.geometry ? { geometry: parsed.data.geometry } : {}), ...(parsed.data.properties ? { properties: parsed.data.properties as Prisma.InputJsonValue } : {}), ...(parsed.data.labelId !== undefined ? { labelId: parsed.data.labelId } : {}), updatedById: actor.id }, select: keyframeSelect });
       const updatedTrack = await tx.videoObjectTrack.findUniqueOrThrow({ where: { id: trackId }, select: trackSelect });
       return { keyframe: updated, updatedTrack };
     });

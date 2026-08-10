@@ -47,7 +47,7 @@ describe("video annotation store state transitions", () => {
   });
 
   const track: SafeVideoTrack = { id: "track-a", videoAssetId: "video-asset-a", labelId: null, label: null, name: "Track A", annotationType: "BOUNDING_BOX", status: "DRAFT", properties: {}, revision: 1, interpolationMode: "LINEAR", createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" };
-  const keyframe: SafeVideoKeyframe = { id: "keyframe-a", trackId: "track-a", assetId: "asset-a", labelId: null, type: "BOUNDING_BOX", geometry: { kind: "BOUNDING_BOX", x: 0.1, y: 0.1, width: 0.2, height: 0.2 }, revision: 1, timestampMs: 1000, createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" };
+  const keyframe: SafeVideoKeyframe = { id: "keyframe-a", trackId: "track-a", assetId: "asset-a", labelId: null, type: "BOUNDING_BOX", geometry: { kind: "BOUNDING_BOX", x: 0.1, y: 0.1, width: 0.2, height: 0.2 }, properties: {}, revision: 1, timestampMs: 1000, createdAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" };
 
   it("moves from idle to saving to saved, and clears any prior draft on save", () => {
     useVideoAnnotationStore.getState().preserveConflict(keyframe);

@@ -391,3 +391,23 @@ T042 remains open: these cases do not yet constitute its complete operation-by-a
 - Current source runtime matrix command for `tests/auth-ownership/video-track-keyframe.test.ts` — **5 passed, 0 failed, 0 skipped** (3.38 s). The focused service/real-PostgreSQL command for Track contract, keyframe contract, and race suites — **12 passed, 0 failed, 0 skipped** (3.31 s), including same-revision conflict mapping, duplicate timestamp rollback, and atomic delete/update outcomes.
 
 T026 remains open. The ledger still identifies missing independent HTTP evidence for the full Track update/delete and keyframe DELETE actor matrices, plus explicit service-level mismatched Asset/Dataset relationship tests. A requested final lint execution was not attempted after the environment's external execution approval was denied due to its usage limit; no lint result is claimed for this checkpoint.
+
+## Planned validation — shared workspace shell (not yet executed)
+
+This section records what plan.md Phase 4 (FR-032–FR-040, US7) requires
+evidence for once implemented. Nothing below has been run; no pass/fail claim
+is made until it is executed against the controlled Compose environment.
+
+1. Workspace UI test asserting `DatasetSidebar`, `PropertiesPanel`, and the
+   shared status surface keep the same mounted component instance across an
+   IMAGE → VIDEO asset navigation, with only their internal content and
+   `WorkspaceEngine`'s child changing.
+2. Workspace UI test asserting `VideoEngine`'s rendered output no longer
+   contains a track toolbar, Video Details, temporal-label list, or inline
+   save-state footer.
+3. Full existing IMAGE workspace UI/autosave/conflict suite re-run unchanged
+   (regression baseline).
+4. Full existing VIDEO track/keyframe/temporal-label HTTP and race suites
+   re-run unchanged, to prove FR-005–FR-030 were not touched by the
+   relocation.
+5. Web typecheck/lint/build and `git diff --check`.

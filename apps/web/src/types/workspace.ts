@@ -11,6 +11,6 @@ export type SafeReadOnlyWorkspaceAsset = {
 
 export type WorkspaceSelection =
   | { engine: "IMAGE"; asset: SafeImageWorkspaceAsset; annotations: SafeImageAnnotation[]; unsupportedAnnotations: SafeReadOnlyImageAnnotation[]; labels: SafeWorkspaceLabel[] }
-  | { engine: "VIDEO"; asset: { id: string; modality: "VIDEO"; filename: string; description: string | null }; readiness: SafeMediaReadiness; annotations: SafeVideoAnnotations }
+  | { engine: "VIDEO"; asset: { id: string; modality: "VIDEO"; filename: string; description: string | null; version: number }; readiness: SafeMediaReadiness; annotations: SafeVideoAnnotations }
   | { engine: "AUDIO"; asset: { id: string; modality: "AUDIO"; filename: string; description: string | null }; readiness: SafeMediaReadiness }
   | { engine: "TEXT"; asset: SafeReadOnlyWorkspaceAsset };

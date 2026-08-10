@@ -1,11 +1,8 @@
 import type { AssetStatus, Modality } from "@internal/db";
 import type { AnnotationType } from "@internal/db";
 
-// IMAGE's tool vocabulary (`ImageAnnotationTool`) lives in
-// `types/annotation.ts`, alongside every other engine's tools -- this file
-// keeps only the DTOs/geometry those tools act on.
-
-export type NormalizedBoundingBox = {
+export type VideoBoundingBox = {
+  kind: "BOUNDING_BOX";
   x: number;
   y: number;
   width: number;
@@ -13,29 +10,45 @@ export type NormalizedBoundingBox = {
 };
 
 export type NormalizedPoint = [number, number];
-export type ImageAnnotationGeometry =
+export type VideoAnnotationGeometry =
   | { x: number; y: number; width: number; height: number }
   | { points: NormalizedPoint[] }
   | { cx: number; cy: number; r: number }
   | { px: number; py: number };
 
-export type SafeImageAnnotation = {
+export type SafeVideoAnnotation = {
   id: string;
   assetId: string;
   labelId: string | null;
   revision: number;
   label?: { id: string; name: string; color: string } | null;
-  modality?: "IMAGE";
+  modality?: "Video";
   type: Extract<AnnotationType, "BOUNDING_BOX" | "POLYGON" | "CIRCLE" | "POINT" | "POLYLINE">;
-  geometry: ImageAnnotationGeometry | NormalizedBoundingBox;
+  geometry: VideoAnnotationGeometry | VideoBoundingBox;
+  timestampMs: number;
   status: string;
   properties?: unknown;
   createdAt?: string;
   updatedAt: string;
 };
 
-/** IMAGE records outside the Phase 017 editing contract remain visible but immutable. */
-export type SafeReadOnlyImageAnnotation = {
+
+export type SafeVideoKeyframe = {
+  id: string;
+  trackId: string;
+  assetId: string;
+  labelId: string | null;
+  type: "BOUNDING_BOX";
+  geometry: VideoBoundingBox;
+  timestampMs: number;
+  revision: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+
+/** Video records outside the Phase 017 editing contract remain visible but immutable. */
+export type SafeReadOnlyVideoAnnotation = {
   id: string;
   type: AnnotationType;
   label: { id: string; name: string; color: string } | null;
@@ -48,7 +61,7 @@ export type SafeWorkspaceLabel = {
   id: string;
   name: string;
   color: string;
-  modality: "IMAGE" | null;
+  modality: "Video" | null;
 };
 
 export type SafeWorkspaceAsset = {
@@ -65,11 +78,11 @@ export type SafeWorkspaceAsset = {
   annotationCount: number;
 };
 
-export type SafeImageWorkspaceAsset = SafeWorkspaceAsset & {
-  modality: "IMAGE";
+export type SafeVideoWorkspaceAsset = SafeWorkspaceAsset & {
+  modality: "Video";
 };
 
-export type ImageWorkspacePage = {
+export type VideoWorkspacePage = {
   items: SafeWorkspaceAsset[];
   total: number;
   completed: number;

@@ -15,8 +15,10 @@ resource-specific optimistic locking. The browser receives only safe metadata
 and a short-lived view capability; video bytes continue to flow directly from
 private MinIO to the browser.
 
-The shared route remains `/workspace/[datasetId]/[assetId]`. `Asset.modality`
-selects the engine; a VIDEO Asset must never enter the Image engine.
+The shared route is `/workspace/[datasetId]`, with the selected Asset carried
+as a query parameter (`?image=`, `?video=`, `?audio=`, or `?text=`), not as a
+`/workspace/[datasetId]/[assetId]` path segment. `Asset.modality` selects the
+engine; a VIDEO Asset must never enter the Image engine.
 
 ## Repository and schema findings
 
@@ -161,6 +163,100 @@ navigation flushes pending work and reload restores it.
 **Independent Test**: Edit a track/keyframe and a temporal label, navigate,
 reload, and assert dirty/saving/saved/error/conflict states and persistence.
 
+### User Story 7 — Shared workspace engine/content registry (Priority: P1)
+
+Before any VIDEO-specific UI is relocated, the shared workspace shell gains
+one canonical registry — keyed by `WorkspaceSelection.engine` — that
+`WorkspaceEngine`, `DatasetSidebar`, `PropertiesPanel`, and the shared status
+surface all read from, instead of each independently deciding what content
+belongs to which modality. A future fifth modality is added by writing one
+registry entry, not by touching four component files.
+
+**Why this priority**: The product goal is a long-term, scalable multi-modal
+platform, not a four-modality one-off. A registry is what makes FR-040 ("a
+future modality requires only a new Engine and one new case") actually true
+structurally, rather than true only by convention that the next engineer has
+to remember. Building the registry first also gives User Story 8's relocation
+work a single place to add VIDEO's toolbox/tabs/status content, instead of
+inventing per-component branching that would need to be revisited anyway.
+
+**Independent Test**: Add one synthetic registry entry for a placeholder
+modality with a stub Engine component, toolbox, tabs, and status fields.
+Confirm `WorkspaceEngine`, `DatasetSidebar`, `PropertiesPanel`, and the shared
+status surface each render it correctly with zero changes to their own source
+files — only the registry module changed. Remove the synthetic entry and
+confirm IMAGE/VIDEO/AUDIO/TEXT behavior is byte-for-byte unchanged.
+
+**Acceptance Scenarios**:
+
+1. Given the registry module, when it is queried by `engine`, then it returns
+   one entry containing the Engine component and that engine's toolbox, tabs,
+   and status-field specifications — no other module holds a second copy of
+   this mapping.
+2. Given `WorkspaceEngine`, `DatasetSidebar`, `PropertiesPanel`, and the
+   shared status surface, when any of them needs modality-specific content,
+   then it reads the registry entry for the active `engine`; none of them
+   contains its own independent `switch`/`if` chain over `engine` or
+   `asset.modality` beyond looking the entry up.
+3. Given the registry currently contains IMAGE, VIDEO, AUDIO, and TEXT
+   entries, when IMAGE's entry is read, then its toolbox/tabs/status fields
+   match today's IMAGE-only behavior exactly (no regression).
+4. Given a synthetic fifth entry is added to the registry only, when the
+   workspace renders that modality, then all four shared surfaces pick it up
+   correctly with no other file touched; removing the entry fully removes the
+   modality from all four surfaces.
+5. Given the registry is populated for VIDEO before User Story 8 relocates
+   VIDEO's actual toolbar/details/temporal-label content into it, then VIDEO's
+   registry entry may start with placeholder/minimal toolbox and tabs content
+   that User Story 8 fills in — this story does not require VIDEO's UI to
+   have moved yet, only that the lookup mechanism exists and IMAGE proves it
+   end to end.
+
+### User Story 8 — Consistent workspace shell across modalities (Priority: P1)
+
+Building on User Story 7's registry, a user switching between IMAGE, VIDEO,
+AUDIO, and TEXT Assets in the same Dataset experiences one identical page
+shell; only the center engine surface changes. Every track/keyframe/temporal-label control a VIDEO Asset needs lives
+in the shared sidebar, properties panel, and status surfaces rather than
+inside the video canvas itself.
+
+**Why this priority**: This is a prerequisite architecture correction, not new
+functionality. Today `VideoEngine` embeds its own track toolbar, Video
+Details, temporal-label list, and save-state footer inline in the canvas
+area, duplicating layout responsibility that `DatasetSidebar`, `PropertiesPanel`,
+and the shared status surface already own for IMAGE. Left uncorrected, every
+future modality repeats the duplication instead of reusing one shell.
+
+**Independent Test**: Open an IMAGE Asset, then a VIDEO Asset, in the same
+Dataset session. Assert `DatasetSidebar`, `PropertiesPanel`, and the shared
+status surface remain the same mounted component instances — not
+modality-specific variants — while only `WorkspaceEngine`'s rendered child
+changes. Assert `VideoEngine`'s rendered output contains no toolbar, details,
+temporal-label, or save-state elements that duplicate content already owned
+by `DatasetSidebar`/`PropertiesPanel`/the status surface.
+
+**Acceptance Scenarios**:
+
+1. Given a Dataset with IMAGE and VIDEO Assets, when the user navigates
+   between them, then `DatasetSidebar`, `PropertiesPanel`, and the shared
+   status surface keep the same outer component identity; only their internal
+   content and `WorkspaceEngine`'s selected child differ.
+2. Given a VIDEO Asset is open, when the user creates a track, adds a
+   keyframe, edits track properties, or edits a temporal label, then the
+   controls used are rendered by `DatasetSidebar`'s toolbox and
+   `PropertiesPanel`'s tabs, not by `VideoEngine` itself.
+3. Given a VIDEO Asset is open, when a shape or track row is selected in
+   `PropertiesPanel`, then the player seeks to that shape's timestamp, the
+   shape highlights, and its track becomes selected, using the same
+   `WorkspaceSelection`/store data `VideoEngine` already reads today.
+4. Given an IMAGE workflow that passed before this refactor, when the same
+   workflow is exercised after it, then behavior, autosave timing, and
+   conflict handling are identical.
+5. Given no modality-switching change is intended in data or API contracts,
+   when track/keyframe/temporal-label mutations are exercised, then the
+   FR-005–FR-030 request/response shapes and revision semantics are
+   unchanged.
+
 ## Functional Requirements
 
 ### Read model and workspace
@@ -281,6 +377,74 @@ reload, and assert dirty/saving/saved/error/conflict states and persistence.
   retain the local draft, offer reload/copy resolution, and never silently
   overwrite or force-retry stale writes.
 
+### Shared workspace architecture
+
+- **FR-032**: The shared workspace route MUST render one identical layout
+  shell — `DatasetSidebar`, `WorkspaceEngine`, `PropertiesPanel`, and a shared
+  status surface — for every `Asset.modality`; only the engine `WorkspaceEngine`
+  selects may differ.
+- **FR-033**: `WorkspaceEngine` MUST remain the only component that switches
+  on `Asset.modality`/`WorkspaceSelection.engine` to decide layout placement.
+  No sidebar, panel, status surface, or modality Engine may itself branch on
+  modality to decide what layout region it belongs in.
+- **FR-034**: `DatasetSidebar`, `PropertiesPanel`, and the shared status
+  surface MUST each remain exactly one component; no per-modality variant
+  (for example a Video-specific sidebar or properties panel) is permitted.
+  Each renders modality-specific content internally, keyed off the same
+  `WorkspaceSelection` union `WorkspaceEngine` already uses.
+- **FR-035**: `DatasetSidebar`'s toolbox MUST present the tool set for the
+  active engine (IMAGE: select/pan/bounding-box/polygon/circle/point/polyline;
+  VIDEO: the IMAGE set plus temporal-segment and playback controls; AUDIO:
+  waveform/segment tools; TEXT: entity/span/relation tools) while dataset
+  navigation, asset navigation, and open-directory controls remain constant
+  across modalities.
+- **FR-036**: `PropertiesPanel` MUST present modality-appropriate tabs (IMAGE:
+  Details/Labels/Shapes/Assets; VIDEO: Video Details/Tracks/Labels/Shapes/
+  Properties/Assets; AUDIO: Audio Details/Labels/Segments/Properties; TEXT:
+  Text Details/Labels/Annotations) from the same shell component. Selecting a
+  VIDEO shape or track row MUST seek the player, highlight the shape, select
+  the track, and load its properties without leaving the panel.
+- **FR-037**: The shared status surface MUST always render save/dirty/saving/
+  conflict state for the active resource, plus modality-specific fields
+  (IMAGE: zoom, connection; VIDEO: current frame, timestamp, playback speed,
+  latency; AUDIO: current time, playback speed; TEXT: selection state).
+- **FR-038**: Each modality Engine (Image/Video/Audio/Text) MUST render only
+  its canvas/player/waveform/document rendering and direct-manipulation
+  surface; it MUST NOT render sidebar, properties/details, temporal-label, or
+  save-state chrome. VideoEngine controls that currently render inline (track
+  toolbar, Video Details, temporal-label list, inline save-state footer) MUST
+  relocate to `DatasetSidebar`/`PropertiesPanel`/the shared status surface
+  respectively, without changing the underlying track/keyframe/temporal-label
+  data flow, revision contracts, or autosave behavior defined elsewhere in
+  this spec.
+- **FR-039**: This relocation MUST be behavior-preserving for IMAGE (the
+  reference implementation) and MUST NOT alter any VIDEO API route, DTO, or
+  revision domain defined in FR-005–FR-030; only the rendering location of
+  existing controls changes.
+- **FR-040**: Adding a future modality (a fifth engine) MUST require only a
+  new Engine component and one new registry entry (FR-041); it MUST NOT
+  require any structural change to `WorkspaceEngine`, `DatasetSidebar`,
+  `PropertiesPanel`, or the shared status surface.
+- **FR-041**: A single shared workspace registry, keyed by
+  `WorkspaceSelection.engine`, MUST hold each engine's Engine component,
+  toolbox specification, `PropertiesPanel` tabs specification, and status-field
+  specification. This registry MUST be the only place this mapping exists;
+  `WorkspaceEngine`, `DatasetSidebar`, `PropertiesPanel`, and the shared status
+  surface MUST each read their modality-specific content from it rather than
+  maintaining an independent `switch`/`if` chain over `engine` or
+  `asset.modality`.
+- **FR-042**: `WorkspaceEngine` MUST render the registry entry's Engine
+  component for the active `engine`; this remains the only place selection
+  ultimately renders a modality's canvas/player/waveform/document surface.
+- **FR-043**: The registry MUST NOT carry storage identity, credentials,
+  provider data, or any value excluded elsewhere in this spec from browser
+  responses; it is a client-side composition mapping only (component
+  references and display specifications), not a data contract.
+- **FR-044**: Adding, removing, or editing a registry entry MUST NOT require
+  editing `workspace-engine.tsx`, `dataset-sidebar.tsx`, `properties-panel.tsx`,
+  or the shared status surface's source beyond the registry lookup already
+  wired into each.
+
 ### Limits
 
 - **FR-031**: Deployment-controlled finite limits MUST bound tracks per read,
@@ -339,6 +503,14 @@ and cross-Dataset Labels follow concealed-resource policy.
 - Foreign/unknown/malformed IDs, non-VIDEO Assets, cross-Dataset Labels,
   unauthorized roles, and a video with missing or unreliable fps.
 - Long videos exceeding bounded read limits; use a time-window or pagination.
+- Rapid modality switching (IMAGE → VIDEO → AUDIO → TEXT) MUST NOT remount
+  `DatasetSidebar`, `PropertiesPanel`, or the shared status surface as a
+  different component type; only their internal content re-renders for the
+  new `WorkspaceSelection`.
+- A VIDEO Asset with an in-flight track/keyframe autosave, when the user
+  navigates to a different Asset, MUST still flush or guard navigation the
+  same way the existing sidebar navigation guard does today, now triggered
+  from the shared sidebar regardless of which engine owns the dirty state.
 
 ## Security and redaction requirements
 
@@ -382,6 +554,17 @@ permission matrix.
 - **SC-008**: Existing IMAGE revision behavior, Audio workspace, repository
   import, local-folder import, and exact `{ jobId }` queue payload regressions
   remain green.
+- **SC-009**: `DatasetSidebar`, `PropertiesPanel`, and the shared status
+  surface are each exactly one component in the codebase after this change;
+  no modality-specific sidebar/panel/status-bar variant exists.
+- **SC-010**: `VideoEngine`'s rendered output contains only playback/canvas/
+  timeline surfaces; track toolbar, Video Details, and temporal-label controls
+  render from `DatasetSidebar`/`PropertiesPanel` instead.
+- **SC-011**: A synthetic fifth registry entry can be added, rendered
+  correctly across all four shared surfaces, and removed again by editing
+  only the registry module — no other shared-component file changes.
+- **SC-012**: IMAGE's registry entry reproduces IMAGE's current toolbox, tabs,
+  and status fields with no observable behavior difference.
 
 ## Known limitations
 
@@ -393,6 +576,23 @@ permission matrix.
   extraction, repository synchronization, or delete propagation is included.
 - Final numeric limits and any required migration/backfill remain subject to
   the implementation audit and separate approval.
+- AUDIO and TEXT engines remain intentionally read-only placeholders after
+  this refactor. Their `DatasetSidebar` toolbox entries and `PropertiesPanel`
+  tabs are structural placeholders consistent with that read-only state, not
+  newly editable functionality; editable AUDIO/TEXT annotation stays out of
+  scope for this phase.
+- This refactor is a client-side component/layout reorganization only. It
+  introduces no new data model entities, API routes, or revision domains, and
+  does not change the `/workspace/[datasetId]` query-parameter-based route
+  described in Feature overview; adopting a path-segment route remains a
+  separate, unauthorized follow-up.
+- The shared workspace registry (FR-041–FR-044) is a plain in-repo TypeScript
+  module mapping a fixed, closed `engine` union to static component
+  references and display specifications. It is not a runtime/dynamic plugin
+  system, does not support third-party or externally loaded engines, and does
+  not introduce a database-backed or admin-configurable registry; adding a
+  modality still requires a code change (one registry entry) and a normal
+  deploy, not a runtime toggle.
 
 ## Explicit non-goals
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { useAnnotationStore } from "@/stores/annotation-store";
+import { useAnnotationStore } from "@/stores/image-annotation-store";
 
 const first = { id: "annotation-a", assetId: "asset-a", version: 1, labelId: "label-a", coordinates: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 } };
 const second = { id: "annotation-b", assetId: "asset-a", version: 3, labelId: null, coordinates: { x: 0.4, y: 0.2, width: 0.2, height: 0.2 } };

@@ -124,3 +124,64 @@ may default to `BOUNDING_BOX`, `LINEAR`, and revision 1. No existing rows need
 rewriting. The migration was approved after this audit and applied separately
 as `20260729000000_add_video_track_revision_contract`; no row backfill or
 annotation rewrite was required.
+
+## Decision 10 — Shared workspace shell is a client-side relocation, not a data change
+
+**Decision**: `DatasetSidebar`, `PropertiesPanel`, and the shared status
+surface (`workspace-header.tsx`) become the single owners of VIDEO's track
+toolbar, Video Details, temporal-label list, and save-state display,
+generalized to branch on `WorkspaceSelection.engine`. `VideoEngine` keeps only
+playback/canvas/timeline rendering and direct manipulation. No Prisma model,
+API route, DTO, or revision domain changes.
+
+**Rationale**: A 2026-08-07 code audit found `WorkspaceEngine` already
+switches on `selection.engine` exclusively (correct), but `DatasetSidebar` is
+hard-coded to the IMAGE toolbox and `PropertiesPanel` is typed to
+`image: SafeImageWorkspaceAsset | null` only — neither reads
+`WorkspaceSelection` for VIDEO/AUDIO/TEXT. `VideoEngine` compensates by
+rendering `VideoToolbar`, `VideoDetailsPanel`, `VideoTemporalLabels`, and an
+inline save-state footer itself. That is exactly the "engines own layout"
+anti-pattern the shared-workspace principle forbids, and it does not scale to
+AUDIO/TEXT editing without repeating the same duplication. Because the
+underlying track/keyframe/temporal-label services, routes, and revision
+contracts (Decisions 1–9 above) are already correct and fully implemented
+(`tasks.md` all `[X]`), the fix is scoped to component boundaries only.
+
+**Alternatives considered**: A `VideoPropertiesPanel`/`VideoSidebar` pair was
+rejected — it satisfies nothing the current code doesn't already do wrong,
+and permanently forks IMAGE and VIDEO layout code that FR-034 requires to stay
+single. A brand-new bottom-mounted status-bar component (instead of
+generalizing `workspace-header.tsx`) was rejected because it would create a
+second, competing save-state source instead of extending the one that already
+reads `useAnnotationStore`.
+
+## Decision 11 — Build a shared engine/content registry before relocating VIDEO's UI
+
+**Decision**: Before moving VIDEO's toolbar/details/temporal-label UI (spec
+User Story 8), first build one registry module keyed by
+`WorkspaceSelection.engine` (spec User Story 7, FR-041–FR-044) that holds each
+engine's component and its `DatasetSidebar` toolbox, `PropertiesPanel` tabs,
+and status-field specifications. `WorkspaceEngine`, `DatasetSidebar`,
+`PropertiesPanel`, and the shared status surface each read from this one
+registry instead of independently branching on `engine`.
+
+**Rationale**: The stated product goal is a scalable, long-term multi-modal
+platform, not a fixed four-engine special case. Without a registry, Decision
+10's plan (each shared component grows its own `engine === "VIDEO"` branch)
+technically satisfies FR-032–FR-040 for four known modalities, but a fifth
+modality would still require editing `dataset-sidebar.tsx`,
+`properties-panel.tsx`, and `workspace-header.tsx` in lockstep — the same
+"every future modality repeats the duplication" failure mode this whole
+refactor exists to close, just moved one level up. A registry makes FR-040
+("a future modality requires only a new Engine and one new registry entry")
+true structurally, verifiable by adding and removing a synthetic entry
+(spec SC-011), not true only by the next engineer following convention.
+
+**Alternatives considered**: Proceeding directly to Decision 10's per-component
+branching (the original single-story plan) was rejected for the reason above —
+it is not wrong for the four current modalities, but it does not scale, and
+the user's stated goal is explicitly long-term scalability. A dynamic,
+config-driven, or database-backed registry was rejected as over-scoped: the
+`engine` union is closed and small, deploys already require a code change to
+add a Prisma `Modality` value, and a runtime plugin system would need its own
+security review (arbitrary component loading) with no requirement driving it.

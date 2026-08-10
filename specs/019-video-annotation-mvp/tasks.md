@@ -114,6 +114,66 @@
 - [ ] T060 Run Prisma validate/generate, web typecheck/lint/build, worker typecheck/build, focused Phase 019 tests, existing workspace/import/queue regressions, and `git diff --check`; record exact results in `specs/019-video-annotation-mvp/quickstart.md`
 - [ ] T061 Complete architecture/scope audit and record normal Compose restoration, migration status, redaction, authorization, and known limitations in `specs/019-video-annotation-mvp/quickstart.md`
 
+## Phase 10: User Story 7 — Shared workspace engine/content registry (Priority: P1)
+
+**Goal**: Build one registry, keyed by `WorkspaceSelection.engine`, holding
+each engine's component and its `DatasetSidebar` toolbox, `PropertiesPanel`
+tabs, and status-field specifications. `WorkspaceEngine`, `DatasetSidebar`,
+`PropertiesPanel`, and the shared status surface (`workspace-header.tsx`)
+each read from it instead of independently branching on `engine`. This is
+the mechanism a long-term multi-modal platform needs: a future fifth
+modality becomes one registry entry, not four file edits. Maps to `plan.md`
+Phase 4 / spec FR-041–FR-044.
+
+**Independent Test**: Add one synthetic registry entry (stub Engine
+component, toolbox, tabs, status fields). Confirm `WorkspaceEngine`,
+`DatasetSidebar`, `PropertiesPanel`, and the shared status surface each
+render it correctly with zero changes to their own source beyond the
+registry lookup already wired in. Remove the entry and confirm IMAGE/VIDEO/
+AUDIO/TEXT behavior is unchanged; IMAGE's own registry-sourced content must
+match its pre-registry behavior exactly.
+
+- [ ] T062 [P] [US7] Add a registry unit test proving a synthetic fifth entry renders correctly across all four consuming lookups and that removing it removes the modality cleanly, in `apps/web/tests/workspace/workspace-engine-registry.vitest.spec.ts`
+- [ ] T063 [P] [US7] Add a structural boundary test asserting `workspace-engine.tsx`, `dataset-sidebar.tsx`, `properties-panel.tsx`, and `workspace-header.tsx` each contain at most one `workspaceEngineRegistry[...]` lookup and no independent `switch`/`if` keyed on `engine`/`asset.modality` beyond it, in `apps/web/tests/workspace/workspace-shell-boundary.test.ts` (source-text assertions via `node:test` + `node:fs`, matching this repo's no-jsdom convention — no rendering harness is added)
+- [ ] T064 [US7] Define `WorkspaceEngineRegistryEntry` (`Component`, `toolbox`, `tabs`, `statusFields`) and the `Record<WorkspaceSelection["engine"], WorkspaceEngineRegistryEntry>` type in `apps/web/src/lib/workspace/workspace-engine-registry.ts`, per `contracts/workspace-shell-contract.md`
+- [ ] T065 [US7] Add the IMAGE registry entry reproducing current IMAGE toolbox (select/pan/bounding-box/polygon/circle/point/polyline)/tabs (Details/Labels/Shapes/Assets)/status fields (zoom, connection) exactly, in `apps/web/src/lib/workspace/workspace-engine-registry.ts`
+- [ ] T066 [US7] Add VIDEO/AUDIO/TEXT registry entries with their Engine component references and placeholder toolbox/tabs/status-field content (real VIDEO content is added in Phase 11; AUDIO/TEXT stay read-only placeholders), in `apps/web/src/lib/workspace/workspace-engine-registry.ts`
+- [ ] T067 [US7] Refactor `workspace-engine.tsx` to render `workspaceEngineRegistry[selection.engine].Component` instead of its inline `switch`, preserving the existing "no asset selected" fallback
+- [ ] T068 [US7] Refactor `dataset-sidebar.tsx` to render `workspaceEngineRegistry[engine].toolbox` instead of its hard-coded IMAGE-only tool buttons, with IMAGE's rendered output unchanged; dataset/asset navigation and open-directory controls stay outside the registry lookup
+- [ ] T069 [US7] Refactor `properties-panel.tsx` to accept `WorkspaceSelection` (or an equivalent discriminated prop) and render `workspaceEngineRegistry[engine].tabs` instead of its IMAGE-only `image` prop and hard-coded tabs, with IMAGE's rendered output unchanged
+- [ ] T070 [US7] Refactor `workspace-header.tsx` into the shared status surface: keep the existing save/dirty/conflict display, and render `workspaceEngineRegistry[engine].statusFields` instead of the hard-coded "Image" badge, with IMAGE's rendered output unchanged
+- [ ] T071 [US7] Update `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx` prop wiring only if `DatasetSidebar`/`PropertiesPanel` prop names changed in T068–T070; the page must keep composing the same four regions in the same order
+- [ ] T072 [US7] Re-run the full existing IMAGE workspace test suite unchanged and confirm it stays green as the regression baseline; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
+- [ ] T073 [US7] Run web typecheck/lint/build and `git diff --check`; record exact results in `specs/019-video-annotation-mvp/quickstart.md`
+
+## Phase 11: User Story 8 — Relocate VIDEO controls into the shared shell (Priority: P1)
+
+**Goal**: Depends on Phase 10's registry. Replace VIDEO's placeholder
+registry entry (T066) with its real toolbox/tabs/status content, so
+`VideoEngine` is trimmed to rendering/interaction only and `DatasetSidebar`/
+`PropertiesPanel`/the shared status surface show VIDEO's track toolbar,
+Video Details, temporal-label list, and save state through the registry-
+driven rendering Phase 10 already built. No VIDEO API route, DTO, or revision
+domain (FR-005–FR-030) changes. Maps to `plan.md` Phase 5 / spec FR-032–FR-040.
+
+**Independent Test**: Open an IMAGE Asset, then a VIDEO Asset, in the same
+Dataset session. `DatasetSidebar`/`PropertiesPanel`/the shared status surface
+keep the same component identity while only their registry-sourced content
+and `WorkspaceEngine`'s child change; `VideoEngine` no longer renders track
+toolbar, Video Details, temporal-label, or save-state chrome.
+
+- [ ] T074 [P] [US8] Extend `workspace-shell-content.vitest.spec.ts` (or add `apps/web/tests/workspace/workspace-shell-video-content.vitest.spec.ts`) asserting VIDEO's registry entry now matches spec FR-035–FR-037 content (toolbox includes track create/select/save/delete + Add Keyframe Here + temporal-segment + playback; tabs include Video Details/Tracks/Labels/Shapes/Properties/Assets; status fields include current frame/timestamp/playback speed/latency), replacing Phase 10's placeholder assertions
+- [ ] T075 [P] [US8] Extend `workspace-shell-boundary.test.ts` asserting `video-engine.tsx` no longer imports `VideoToolbar`, `VideoDetailsPanel`, or `VideoTemporalLabels`
+- [ ] T076 [US8] Replace VIDEO's placeholder toolbox in `workspace-engine-registry.ts` with real content, and move `VideoToolbar` (track create/select/save/delete, Add Keyframe Here) rendering into `dataset-sidebar.tsx`'s registry-driven toolbox output, preserving the existing autosave-coordinator wiring currently in `video-engine.tsx`
+- [ ] T077 [US8] Replace VIDEO's placeholder tabs in `workspace-engine-registry.ts` with Video Details/Tracks/Labels/Shapes/Properties/Assets, rendering `VideoDetailsPanel` and `VideoTemporalLabels` from `properties-panel.tsx`'s registry-driven tab shell instead of `video-engine.tsx`
+- [ ] T078 [US8] Wire PropertiesPanel's VIDEO Shapes/Tracks row selection to seek the player, highlight the shape, select the track, and load properties via `useVideoAnnotationStore`, replacing the equivalent logic currently inline in `video-engine.tsx`
+- [ ] T079 [US8] Replace VIDEO's placeholder status fields in `workspace-engine-registry.ts` with current frame, timestamp, playback speed, and latency, sourced from state currently read inside `video-engine.tsx`
+- [ ] T080 [US8] Trim `video-engine.tsx` to playback, canvas overlay, timeline, and drag/resize interaction only; delete the now-relocated inline `VideoToolbar`, `VideoDetailsPanel`, `VideoTemporalLabels`, and save-state footer JSX (depends on T076–T079 having taken over that rendering)
+- [ ] T081 [US8] Update `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx` prop wiring only if required by T076–T080; the page must keep composing the same four regions in the same order
+- [ ] T082 [US8] Re-run the full existing IMAGE workspace test suite unchanged and confirm it stays green as the regression baseline; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
+- [ ] T083 [US8] Re-run the existing VIDEO track/keyframe/temporal-label HTTP and race tests unchanged and confirm they stay green, proving FR-005–FR-030 were not altered by the relocation; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
+- [ ] T084 [US8] Run Prisma validate/generate (no schema change expected), web typecheck/lint/build, and `git diff --check`; record exact results in `specs/019-video-annotation-mvp/quickstart.md`
+
 ## Dependencies and execution order
 
 - Setup T001–T005 precedes foundational T006–T015.
@@ -122,10 +182,18 @@
 - US4 can run after foundational services and in parallel with US2/US3.
 - US5 depends on mutation services from US2 and US4; US6 depends on US5.
 - T057–T061 require all selected stories and regressions.
+- US7 (T062–T073) depends only on US1–US3's rendered UI existing (it does —
+  `video-engine.tsx` already renders `VideoToolbar`/`VideoDetailsPanel`/
+  `VideoTemporalLabels`/an inline save-state footer today). It does NOT
+  depend on US4's open items (T042, T045), US5 (T046–T051), US6 (T052–T056),
+  or Polish (T057–T061) — those remain independently open and are unaffected
+  by building a registry around already-built UI.
+- US8 (T074–T084) depends on US7's registry (T064–T070) existing; it does not
+  depend on US4–US6/Polish either, for the same reason.
 
 ## Parallel opportunities
 
-- T003–T005; T008 and T010–T014; T016–T018; T024–T027; T034–T036; T040–T042; T046–T048; and T052–T053/T057–T059 are parallelizable within their dependency boundaries.
+- T003–T005; T008 and T010–T014; T016–T018; T024–T027; T034–T036; T040–T042; T046–T048; T052–T053/T057–T059; T062–T063; and T074–T075 are parallelizable within their dependency boundaries.
 
 ## MVP and implementation strategy
 
@@ -134,5 +202,13 @@
 3. Stop for a demonstrable read-only MVP if desired.
 4. Add US2, US3, US4, US5, and US6 incrementally, validating each checkpoint.
 5. Finish cross-cutting redaction, regressions, builds, and scope audit.
+6. US7 (shared workspace registry) can be scheduled any time after US1–US3 —
+   it does not require US4–US6/Polish to close first. It should land before
+   US8, since US8 relocates VIDEO's UI into the registry US7 builds, and
+   before any fifth modality engine is proposed, since FR-040/FR-044 depend
+   on the registry already existing.
+7. US8 (relocate VIDEO controls) follows US7 directly; it is the same
+   relocation the earlier single-story plan described, now expressed as
+   registry-entry edits instead of ad hoc per-component branching.
 
 All tasks use the required checkbox/ID format, include concrete paths, and story tasks carry the appropriate [USn] label.

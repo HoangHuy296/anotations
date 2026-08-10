@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 
 import type { SafeImageAnnotation, SafeImageWorkspaceAsset, SafeReadOnlyImageAnnotation, SafeWorkspaceLabel } from "@/types/image-workspace";
-import { useAnnotationStore } from "@/stores/annotation-store";
+import { useAnnotationStore } from "@/stores/image-annotation-store";
 
 const CanvasStage = dynamic(() => import("@/components/workspace/canvas-stage"), { ssr: false, loading: () => <section className="canvas-grid grid min-h-[520px] min-w-0 place-items-center bg-zinc-900 lg:min-h-0"><div className="h-2 w-40 animate-pulse rounded-full bg-zinc-700" /></section> });
 

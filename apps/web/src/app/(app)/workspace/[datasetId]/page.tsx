@@ -41,13 +41,12 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   const selectedAssetIdFromPage = workspace.page.selectedAssetId;
   const selectedAsset = workspace.page.items.find((item) => item.id === selectedAssetIdFromPage) ?? null;
   const selected = selectedAsset ? await readWorkspaceSelection(actor, datasetId, selectedAsset.id) : null;
-  const imageSelection = selected?.engine === "IMAGE" ? selected : null;
   return <div className="flex min-h-[100dvh] flex-col bg-zinc-100">
-    <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" />
+    <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" engine={selected?.engine ?? null} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
-      <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetIdFromPage} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} />
+      <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetIdFromPage} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={selected?.engine ?? null} />
       <WorkspaceEngine selection={selected} />
-      <PropertiesPanel datasetId={datasetId} image={imageSelection?.asset ?? null} labels={imageSelection?.labels ?? []} images={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetIdFromPage} />
+      <PropertiesPanel datasetId={datasetId} selection={selected} images={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetIdFromPage} />
     </div>
   </div>;
 }

@@ -15,7 +15,7 @@ export function createVideoKeyframe(trackId: string, input: { expectedTrackRevis
   return request<{ keyframe: SafeVideoKeyframe; track: SafeVideoTrack }>(`/api/video-object-tracks/${encodeURIComponent(trackId)}/keyframes`, { method: "POST", body: JSON.stringify(input) });
 }
 
-export function createVideoTrack(assetId: string, input: { labelId?: string | null; name?: string; interpolationMode?: "LINEAR" | "NONE" }) {
+export function createVideoTrack(assetId: string, input: { labelId?: string | null; name?: string; interpolationMode?: "LINEAR" | "NONE"; properties?: Record<string, unknown> }) {
   return request<{ track: SafeVideoTrack }>(`/api/assets/${encodeURIComponent(assetId)}/video-object-tracks`, { method: "POST", body: JSON.stringify(input) });
 }
 
@@ -31,7 +31,7 @@ export function addKeyframeHere(trackId: string, draft: DerivedVideoInterpolatio
   return createVideoKeyframe(trackId, { expectedTrackRevision, timestampMs: draft.timestampMs, geometry: { kind: "BOUNDING_BOX", x: draft.x, y: draft.y, width: draft.width, height: draft.height } });
 }
 
-export function updateVideoKeyframe(annotationId: string, input: { expectedTrackRevision: number; timestampMs?: number; geometry?: VideoBoundingBox; properties?: Record<string, unknown> }) {
+export function updateVideoKeyframe(annotationId: string, input: { expectedTrackRevision: number; timestampMs?: number; geometry?: VideoBoundingBox; properties?: Record<string, unknown>; labelId?: string | null }) {
   return request<{ keyframe: SafeVideoKeyframe; track: SafeVideoTrack }>(`/api/video-keyframes/${encodeURIComponent(annotationId)}`, { method: "PATCH", body: JSON.stringify(input) });
 }
 

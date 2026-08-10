@@ -56,6 +56,20 @@ Not a persisted entity. For adjacent compatible keyframes `(t0, box0)` and
 independently. Derived values are returned/rendered as a safe display object
 only.
 
+## Shared workspace shell and registry (no new entity)
+
+The Phase 4/5 shell refactor (spec FR-032–FR-044) introduces no Prisma model,
+API DTO, or revision domain. `WorkspaceSelection` (`src/types/workspace.ts`)
+— the existing discriminated union keyed by `engine` — remains the only shape
+consumed both by `WorkspaceEngine` and by the new client-side
+`workspace-engine-registry.ts` module (a plain TypeScript map, not a
+database-backed entity) that `DatasetSidebar`, `PropertiesPanel`, and the
+shared status surface read to decide their internal content. It is unchanged
+by this refactor beyond whatever narrow, non-sensitive fields the Phase 5
+audit finds missing for a panel to render what `VideoEngine` already reads
+today (e.g. `readiness`, `annotations`). No storage identity, credential, or
+provider field is added to `WorkspaceSelection` or the registry.
+
 ## State and invariants
 
 - Track/keyframe mutations use one expected track revision and increment once.

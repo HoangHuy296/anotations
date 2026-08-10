@@ -10,7 +10,7 @@ import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 import { normalizeBoundingBox, viewportPointToImage } from "@/lib/workspace/geometry";
 import { replacePathVertex, resizeNormalizedCircle, translateImageGeometry } from "@/lib/workspace/annotation-geometry";
-import { useAnnotationStore } from "@/stores/annotation-store";
+import { useAnnotationStore } from "@/stores/image-annotation-store";
 import type { AnnotationTool } from "@/types/annotation";
 import type { ImageAnnotationGeometry, NormalizedBoundingBox, NormalizedPoint, SafeImageAnnotation, SafeImageWorkspaceAsset, SafeReadOnlyImageAnnotation, SafeWorkspaceLabel } from "@/types/image-workspace";
 

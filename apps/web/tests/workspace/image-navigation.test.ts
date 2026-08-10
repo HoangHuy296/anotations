@@ -5,7 +5,7 @@ import { AssetStatus, Modality, UserRole } from "@internal/db";
 
 import { db } from "@/lib/db";
 import { readImageWorkspacePage } from "@/lib/workspace/image-workspace";
-import { useAnnotationStore } from "@/stores/annotation-store";
+import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { cleanupWorkspaceFixture, createWorkspaceDataset, createWorkspaceUser, workspaceUnique } from "./helpers";
 
 const enabled = process.env.WORKSPACE_INTEGRATION_TESTS === "1" && Boolean(process.env.DATABASE_URL);

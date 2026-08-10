@@ -27,7 +27,7 @@ export async function readWorkspaceSelection(
   if (!access || access.forbidden) return null;
   const asset = await db.asset.findFirst({
     where: { id: assetId, datasetId, deletedAt: null, archivedAt: null },
-    select: { id: true, modality: true, filename: true, description: true },
+    select: { id: true, modality: true, filename: true, description: true, revision: true },
   });
   if (!asset) return null;
   if (asset.modality === Modality.IMAGE) {
@@ -42,7 +42,7 @@ export async function readWorkspaceSelection(
       if (!annotations) return null;
       return {
         engine: "VIDEO",
-        asset: { id: asset.id, modality: "VIDEO", filename: asset.filename, description: asset.description },
+        asset: { id: asset.id, modality: "VIDEO", filename: asset.filename, description: asset.description, version: asset.revision },
         readiness,
         annotations,
       };

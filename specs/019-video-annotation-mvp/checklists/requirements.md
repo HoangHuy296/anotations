@@ -33,6 +33,17 @@
 - [ ] CHK016 Regression coverage preserves Image Phase 017, Audio, imports, local-folder, and queue behavior.
 - [ ] CHK017 Success criteria are measurable and completion requires reload persistence plus revision-conflict evidence.
 
+## Shared workspace architecture
+
+- [ ] CHK018 `WorkspaceEngine` is confirmed as the only component switching on `Asset.modality`/`WorkspaceSelection.engine` (via the registry lookup, not an inline `switch`).
+- [ ] CHK019 `DatasetSidebar`, `PropertiesPanel`, and the shared status surface are each exactly one component, with no per-modality variant introduced.
+- [ ] CHK020 `VideoEngine`'s inline track toolbar, Video Details, temporal-label list, and save-state footer are relocated to `DatasetSidebar`/`PropertiesPanel`/the shared status surface without changing track/keyframe/temporal-label data flow or revision contracts (FR-005–FR-030).
+- [ ] CHK021 The relocation is confirmed behavior-preserving for IMAGE, with existing Image tests remaining green.
+- [ ] CHK022 The route discrepancy between Feature overview's `/workspace/[datasetId]` query-parameter route and any prior path-segment claim is resolved in the spec text.
+- [ ] CHK023 A single shared workspace registry (FR-041–FR-044) exists, keyed by `engine`, holding each modality's Engine component, toolbox, tabs, and status-field specifications, with no duplicate mapping elsewhere.
+- [ ] CHK024 A synthetic fifth registry entry can be added and removed with changes confined to the registry module (SC-011).
+- [ ] CHK025 The registry is confirmed to be a static, closed-union TypeScript mapping — not a runtime/dynamic/third-party plugin system (Known limitations).
+
 ## Notes
 
 This checklist is intentionally unchecked because it gates implementation
