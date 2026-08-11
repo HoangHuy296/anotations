@@ -9,7 +9,7 @@ import { AssetNavigator } from "@/components/workspace/asset-navigator";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
 import { Badge } from "@/components/ui/badge";
 import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status";
-import { deleteVideoKeyframe, deleteVideoTrack, updateVideoKeyframe } from "@/lib/workspace/video-annotation-client";
+import { createVideoTrack, deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
@@ -70,15 +70,35 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
   const [shapeError, setShapeError] = useState<string | null>(null);
   const [newLabelName, setNewLabelName] = useState("");
   const [taxonomy, setTaxonomy] = useState<WorkspaceLabel[]>([]);
+  const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
+  const [newTrackObjectId, setNewTrackObjectId] = useState("");
+  const [newTrackName, setNewTrackName] = useState("");
+  const [newTrackLabelId, setNewTrackLabelId] = useState("");
   const lastAttemptedDescriptionRef = useRef<string | null>(null);
   const scheduleAutosave = useAnnotationStore((store) => store.scheduleAutosave);
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const setConflictDraftInStore = useAnnotationStore((store) => store.setConflictDraft);
   const tracks = useVideoAnnotationStore((store) => store.tracks);
   const keyframes = useVideoAnnotationStore((store) => store.keyframes);
+  const storeTrackList = useVideoAnnotationStore((store) => store.trackList);
+  const storeKeyframeList = useVideoAnnotationStore((store) => store.keyframeList);
   const markSaved = useVideoAnnotationStore((store) => store.markSaved);
+  const removeTrackFromStore = useVideoAnnotationStore((store) => store.removeTrack);
+  const removeKeyframeFromStore = useVideoAnnotationStore((store) => store.removeKeyframe);
   const selectedKeyframeId = useVideoAnnotationStore((store) => store.selectedKeyframeId);
   const setSelectedKeyframeId = useVideoAnnotationStore((store) => store.setSelectedKeyframeId);
+  const requestedTab = useVideoAnnotationStore((store) => store.requestedTab);
+
+  // Applies `video-engine.tsx`'s toolbar "Create track" tab request (see
+  // `requestedTab`'s doc comment in the store): switching here, then
+  // clearing the flag, is what makes a track created via the toolbar
+  // appear in the Tracks tab immediately, with no reload and no re-fire on
+  // unrelated re-renders.
+  useEffect(() => {
+    if (!requestedTab) return;
+    setTab(requestedTab);
+    useVideoAnnotationStore.getState().clearRequestedTab();
+  }, [requestedTab, setTab]);
 
   useEffect(() => {
     let active = true;
@@ -145,20 +165,37 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
   }
 
   /**
-   * Writes to the keyframe's own `labelId` column (via `updateVideoKeyframe`),
-   * not the parent Track's -- a Track is shared by every keyframe on it, so
-   * relabeling the Track here would silently relabel every other box on the
-   * same track too.
+   * A Track *is* a shape/object identity in this UI (spec: "Each shape card
+   * corresponds to a VideoObjectTrack"). Creating one here does not draw a
+   * keyframe -- a track with zero keyframes is a shape waiting for its
+   * first position, added either by drawing on the frame (which now always
+   * creates its own new track, see `video-engine.tsx`'s `confirmPendingBox`)
+   * or via `VideoToolbar`'s "Add keyframe here" once this track is selected
+   * there.
    */
-  async function assignKeyframeLabel(keyframeId: string, labelId: string | null) {
-    const keyframe = keyframes[keyframeId];
-    const track = keyframe ? tracks[keyframe.trackId] : undefined;
-    if (!keyframe || !track) return;
+  async function createTrackRow() {
     setShapeError(null);
     try {
-      const result = await updateVideoKeyframe(keyframeId, { expectedTrackRevision: track.revision, labelId });
-      markSaved(result.track, result.keyframe);
-    } catch { setShapeError("This shape's label could not be changed."); }
+      const objectId = newTrackObjectId.trim();
+      const result = await createVideoTrack(asset.id, { name: newTrackName.trim() || undefined, labelId: newTrackLabelId || null, interpolationMode: "LINEAR", properties: objectId ? { objectId } : undefined });
+      markSaved(result.track);
+      setExpandedTrackId(result.track.id);
+      setNewTrackObjectId("");
+      setNewTrackName("");
+      setNewTrackLabelId("");
+    } catch { setShapeError("The track could not be created."); }
+  }
+
+  /** Every track field (objectId lives in `properties`, plus name/labelId/interpolationMode) goes through this one revision-guarded update. */
+  async function updateTrackFields(trackId: string, changes: { name?: string | null; labelId?: string | null; interpolationMode?: "LINEAR" | "NONE"; objectId?: string }) {
+    const track = tracks[trackId];
+    if (!track) return;
+    setShapeError(null);
+    try {
+      const properties = changes.objectId === undefined ? undefined : { ...track.properties, objectId: changes.objectId };
+      const result = await updateVideoTrack(trackId, { expectedTrackRevision: track.revision, ...(changes.name !== undefined ? { name: changes.name || undefined } : {}), ...(changes.labelId !== undefined ? { labelId: changes.labelId } : {}), ...(changes.interpolationMode ? { interpolationMode: changes.interpolationMode } : {}), ...(properties ? { properties } : {}) });
+      markSaved(result.track);
+    } catch { setShapeError("This shape could not be updated."); }
   }
 
   async function removeKeyframeRow(keyframeId: string) {
@@ -169,7 +206,7 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
     try {
       const result = await deleteVideoKeyframe(keyframeId, track.revision);
       markSaved(result.track);
-      useVideoAnnotationStore.setState((state) => { const next = { ...state.keyframes }; delete next[keyframeId]; return { keyframes: next }; });
+      removeKeyframeFromStore(keyframeId);
     } catch { setShapeError("The keyframe could not be deleted."); }
   }
 
@@ -179,12 +216,7 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
     setShapeError(null);
     try {
       await deleteVideoTrack(trackId, track.revision);
-      useVideoAnnotationStore.setState((state) => {
-        const nextTracks = { ...state.tracks };
-        delete nextTracks[trackId];
-        const nextKeyframes = Object.fromEntries(Object.entries(state.keyframes).filter(([, keyframe]) => keyframe.trackId !== trackId));
-        return { tracks: nextTracks, keyframes: nextKeyframes };
-      });
+      removeTrackFromStore(trackId);
     } catch { setShapeError("The track could not be deleted."); }
   }
 
@@ -216,8 +248,8 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
 
   const selectedStatus = statuses.length === 1 ? statuses[0] : statuses.length > 1 ? "MULTIPLE" : "ALL";
   const activeTab = (["description", "labels", "shapes", "tracks", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";
-  const trackList = Object.values(tracks);
-  const keyframeList = Object.values(keyframes).sort((left, right) => left.timestampMs - right.timestampMs);
+  const trackList = storeTrackList;
+  const keyframeList = [...storeKeyframeList].sort((left, right) => left.timestampMs - right.timestampMs);
 
   return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white">
     <div className="border-b border-zinc-200 p-4">
@@ -243,34 +275,76 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
     </section>}
     {activeTab === "shapes" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Shapes</h2><span className="text-xs text-zinc-400">{keyframeList.length}</span></div>
-      <p className="mt-1 text-[11px] leading-4 text-zinc-400">Every bounding box drawn on the frame is a keyframe, labelled by the Object ID/Name assigned when it was saved. Click a shape to highlight it on the paused frame.</p>
+      <p className="mt-1 text-[11px] leading-4 text-zinc-400">Every bounding box is one keyframe on a track (shape). Click one to highlight it on the paused frame. Manage a shape&apos;s Object ID, name, and label from the Tracks tab.</p>
       <div className="mt-3 space-y-2">{keyframeList.length === 0 ? <p className="text-xs text-zinc-500">No bounding boxes yet.</p> : keyframeList.map((keyframe) => {
-        const objectId = typeof keyframe.properties.objectId === "string" && keyframe.properties.objectId ? keyframe.properties.objectId : null;
-        const name = typeof keyframe.properties.name === "string" && keyframe.properties.name ? keyframe.properties.name : null;
-        const label = taxonomy.find((item) => item.id === keyframe.labelId) ?? null;
+        const track = tracks[keyframe.trackId];
+        const objectId = typeof track?.properties.objectId === "string" && track.properties.objectId ? track.properties.objectId : null;
         const isSelected = keyframe.id === selectedKeyframeId;
-  return <button key={keyframe.id} type="button" onClick={() => setSelectedKeyframeId(keyframe.id)} className={`w-full rounded-xl border p-2 text-left ${isSelected ? "border-sky-400 bg-sky-50" : "border-zinc-200 hover:bg-zinc-50"}`}>
+        return <div key={keyframe.id} role="button" tabIndex={0} onClick={() => setSelectedKeyframeId(keyframe.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedKeyframeId(keyframe.id); } }} className={`w-full cursor-pointer rounded-xl border p-2 text-left ${isSelected ? "border-sky-400 bg-sky-50" : "border-zinc-200 hover:bg-zinc-50"}`}>
           <div className="flex items-center justify-between gap-2"><span className="truncate font-mono text-[11px] text-zinc-500">Object ID: {objectId ?? "(none)"}</span><span className="shrink-0 text-[11px] text-zinc-400">{(keyframe.timestampMs / 1000).toFixed(2)}s</span></div>
-          <p className="mt-1 text-xs font-semibold text-zinc-800">{name ?? "(unnamed shape)"}</p>
-          <div className="mt-2 flex gap-1" onClick={(event) => event.stopPropagation()}>
-            <select aria-label={`Label for ${objectId ?? keyframe.id}`} value={keyframe.labelId ?? ""} onChange={(event) => void assignKeyframeLabel(keyframe.id, event.target.value || null)} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-[11px]">
-              <option value="">No label</option>
-              {taxonomy.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-            </select>
-            <button type="button" onClick={() => void removeKeyframeRow(keyframe.id)} className="rounded-lg px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <p className="truncate text-xs font-semibold text-zinc-800">{track?.name ?? "(unnamed shape)"}</p>
+            <button type="button" onClick={(event) => { event.stopPropagation(); void removeKeyframeRow(keyframe.id); }} className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button>
           </div>
-          {label ? <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-500"><span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: label.color }} />{label.name}</span> : null}
-        </button>;
+          {track?.label ? <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-500"><span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: track.label.color }} />{track.label.name}</span> : null}
+        </div>;
       })}</div>
       {shapeError && <p role="alert" className="mt-3 text-xs text-rose-700">{shapeError}</p>}
     </section>}
     {activeTab === "tracks" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Tracks</h2><span className="text-xs text-zinc-400">{trackList.length}</span></div>
-      <div className="mt-3 space-y-2">{trackList.length === 0 ? <p className="text-xs text-zinc-500">No tracks yet. Draw a box on the frame to create one.</p> : trackList.map((track) => {
-        const trackKeyframeCount = keyframeList.filter((keyframe) => keyframe.trackId === track.id).length;
-  return <div key={track.id} className="flex items-center justify-between gap-2 rounded-xl border border-zinc-200 p-2">
-          <div className="min-w-0"><p className="truncate text-xs font-semibold text-zinc-800">{track.name ?? track.id.slice(0, 8)}</p><p className="text-[11px] text-zinc-400">{trackKeyframeCount} keyframes · {track.interpolationMode.toLowerCase()}</p></div>
-          <button type="button" onClick={() => void removeTrackRow(track.id)} className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button>
+      <p className="mt-1 text-[11px] leading-4 text-zinc-400">Each track is one shape/object tracked across frames. Click a track to view and manage its keyframes.</p>
+      <div className="mt-3 space-y-2 rounded-xl border border-zinc-200 p-2" aria-label="Create track">
+        <div className="grid grid-cols-2 gap-2">
+          <input aria-label="New track object ID" value={newTrackObjectId} onChange={(event) => setNewTrackObjectId(event.target.value)} placeholder="Object ID" className="rounded-lg border border-zinc-200 px-2 py-1.5 text-xs" />
+          <input aria-label="New track name" value={newTrackName} onChange={(event) => setNewTrackName(event.target.value)} placeholder="Name" className="rounded-lg border border-zinc-200 px-2 py-1.5 text-xs" />
+        </div>
+        <div className="flex gap-2">
+          <select aria-label="New track label" value={newTrackLabelId} onChange={(event) => setNewTrackLabelId(event.target.value)} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs">
+            <option value="">No label</option>
+            {taxonomy.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+          </select>
+          <button type="button" onClick={() => void createTrackRow()} className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white">Add track</button>
+        </div>
+      </div>
+      <div className="mt-3 space-y-2">{trackList.length === 0 ? <p className="text-xs text-zinc-500">No tracks yet.</p> : trackList.map((track) => {
+        const trackKeyframes = keyframeList.filter((keyframe) => keyframe.trackId === track.id);
+        const objectId = typeof track.properties.objectId === "string" && track.properties.objectId ? track.properties.objectId : null;
+        const isExpanded = expandedTrackId === track.id;
+        return <div key={track.id} className={`rounded-xl border ${isExpanded ? "border-sky-300" : "border-zinc-200"}`}>
+          <div role="button" tabIndex={0} onClick={() => setExpandedTrackId(isExpanded ? null : track.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setExpandedTrackId(isExpanded ? null : track.id); } }} className="cursor-pointer p-2">
+            <div className="flex items-center justify-between gap-2"><span className="truncate font-mono text-[11px] text-zinc-500">Object ID: {objectId ?? "(none)"}</span><span className="shrink-0 text-[11px] text-zinc-400">{trackKeyframes.length} keyframes</span></div>
+            <p className="mt-1 truncate text-xs font-semibold text-zinc-800">{track.name ?? "(unnamed shape)"}</p>
+            {track.label ? <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-500"><span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: track.label.color }} />{track.label.name}</span> : null}
+          </div>
+          {isExpanded && <div className="space-y-2 border-t border-zinc-100 p-2">
+            <div className="grid grid-cols-2 gap-2">
+              <label className="text-[11px] text-zinc-500">Object ID<input defaultValue={objectId ?? ""} onBlur={(event) => void updateTrackFields(track.id, { objectId: event.target.value.trim() })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
+              <label className="text-[11px] text-zinc-500">Name<input defaultValue={track.name ?? ""} onBlur={(event) => void updateTrackFields(track.id, { name: event.target.value.trim() || null })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="text-[11px] text-zinc-500">Label
+                <select value={track.labelId ?? ""} onChange={(event) => void updateTrackFields(track.id, { labelId: event.target.value || null })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
+                  <option value="">No label</option>
+                  {taxonomy.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                </select>
+              </label>
+              <label className="text-[11px] text-zinc-500">Interpolation
+                <select value={track.interpolationMode} onChange={(event) => void updateTrackFields(track.id, { interpolationMode: event.target.value as "LINEAR" | "NONE" })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
+                  <option value="LINEAR">Linear</option>
+                  <option value="NONE">None</option>
+                </select>
+              </label>
+            </div>
+            <div>
+              <h4 className="text-[11px] font-semibold text-zinc-600">Keyframes</h4>
+              <div className="mt-1 space-y-1">{trackKeyframes.length === 0 ? <p className="text-[11px] text-zinc-400">No keyframes yet -- draw on the frame or use &quot;Add keyframe here&quot;.</p> : trackKeyframes.sort((left, right) => left.timestampMs - right.timestampMs).map((keyframe) => <div key={keyframe.id} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-[11px] ${keyframe.id === selectedKeyframeId ? "bg-sky-50 text-sky-800" : "text-zinc-600 hover:bg-zinc-50"}`}>
+                <button type="button" onClick={() => setSelectedKeyframeId(keyframe.id)} className="flex-1 text-left">{(keyframe.timestampMs / 1000).toFixed(2)}s</button>
+                <button type="button" onClick={() => void removeKeyframeRow(keyframe.id)} className="font-semibold text-rose-700">Delete</button>
+              </div>)}</div>
+            </div>
+            <button type="button" onClick={() => void removeTrackRow(track.id)} className="w-full rounded-lg px-2 py-1.5 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete track</button>
+          </div>}
         </div>;
       })}</div>
       {shapeError && <p role="alert" className="mt-3 text-xs text-rose-700">{shapeError}</p>}

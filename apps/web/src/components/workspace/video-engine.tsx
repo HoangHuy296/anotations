@@ -5,13 +5,12 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 
 import type { SafeMediaReadiness } from "@/types/media-processing";
 import type { SafeVideoAnnotations } from "@/types/video-annotation";
-import { VideoDetailsPanel } from "@/components/workspace/video-details-panel";
 import { VideoTimeline } from "@/components/workspace/video-timeline";
 import { VideoTemporalLabels } from "@/components/workspace/video-temporal-labels";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
-import { addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoKeyframe, deleteVideoTrack, updateVideoKeyframe, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
+import { addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoKeyframe, deleteVideoTrack, updateVideoKeyframe } from "@/lib/workspace/video-annotation-client";
 
 type VideoEngineProps = {
   asset: { id: string; filename: string; description: string | null };
@@ -48,6 +47,14 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
   const [pendingBoxName, setPendingBoxName] = useState("");
   const [pendingBoxError, setPendingBoxError] = useState<string | null>(null);
   const [pendingBoxSaving, setPendingBoxSaving] = useState(false);
+  // The toolbar's "Create track" button (unlike drawing a box, which always
+  // implies a keyframe) creates a shape with no geometry yet -- just an
+  // identity. This tiny naming dialog is that flow's own confirm/cancel
+  // gate, mirroring `pendingBox` above: nothing is created until "Create".
+  const [showCreateTrackDialog, setShowCreateTrackDialog] = useState(false);
+  const [newTrackName, setNewTrackName] = useState("");
+  const [newTrackError, setNewTrackError] = useState<string | null>(null);
+  const [newTrackSaving, setNewTrackSaving] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackCoordinators = useRef(new Map<string, TrackAutosaveCoordinator>());
   const keyframeDraftChanges = useRef(new Map<string, KeyframeChanges>());
@@ -62,6 +69,14 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
   // box on the frame.
   const selectedKeyframeId = useVideoAnnotationStore((state) => state.selectedKeyframeId);
   const setSelectedKeyframeId = useVideoAnnotationStore((state) => state.setSelectedKeyframeId);
+  // Store-backed, not derived from the `annotations` prop -- the prop is the
+  // server-rendered snapshot and never refetches after a mutation. Every
+  // create/update/delete below writes through `markSaved`/`removeTrack`/
+  // `removeKeyframe`, so these two selectors are what make a track/keyframe
+  // created this session show up immediately (frame overlay, toolbar,
+  // timeline), with no page reload.
+  const trackList = useVideoAnnotationStore((state) => state.trackList);
+  const keyframeList = useVideoAnnotationStore((state) => state.keyframeList);
   const [drawDraft, setDrawDraft] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
 
   useEffect(() => {
@@ -99,10 +114,10 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     return useVideoAnnotationStore.subscribe((state, previous) => {
       const id = state.selectedKeyframeId;
       if (!id || id === previous.selectedKeyframeId) return;
-      const keyframe = annotations.keyframes.find((item) => item.id === id);
+      const keyframe = keyframeList.find((item) => item.id === id);
       if (!keyframe) return;
       if (keyframe.trackId !== selectedTrackId) {
-        const nextTrack = annotations.tracks.find((item) => item.id === keyframe.trackId) ?? null;
+        const nextTrack = trackList.find((item) => item.id === keyframe.trackId) ?? null;
         setSelectedTrackId(keyframe.trackId);
         setDraftName(nextTrack?.name ?? "");
         setDraftLabelId(nextTrack?.labelId ?? "");
@@ -115,10 +130,10 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
       setCurrentTime(seconds);
       if (videoRef.current) { videoRef.current.currentTime = seconds; videoRef.current.pause(); }
     });
-  }, [annotations.keyframes, annotations.tracks, selectedTrackId]);
+  }, [keyframeList, trackList, selectedTrackId]);
 
-  const selectedTrack = annotations.tracks.find((track) => track.id === selectedTrackId) ?? null;
-  const trackKeyframes = useMemo(() => selectedTrack ? annotations.keyframes.filter((keyframe) => keyframe.trackId === selectedTrack.id).sort((a, b) => a.timestampMs - b.timestampMs) : [], [annotations.keyframes, selectedTrack]);
+  const selectedTrack = trackList.find((track) => track.id === selectedTrackId) ?? null;
+  const trackKeyframes = useMemo(() => selectedTrack ? keyframeList.filter((keyframe) => keyframe.trackId === selectedTrack.id).sort((a, b) => a.timestampMs - b.timestampMs) : [], [keyframeList, selectedTrack]);
   const exactKeyframeAtTime = trackKeyframes.find((keyframe) => Math.abs(keyframe.timestampMs - currentTime * 1000) < 5);
   const selectedKeyframe = trackKeyframes.find((keyframe) => keyframe.id === selectedKeyframeId) ?? exactKeyframeAtTime ?? trackKeyframes.at(-1) ?? null;
   // A persisted overlay (editable, draggable/resizable) only draws when the
@@ -144,7 +159,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     setDraftTimestampMs(keyframe?.timestampMs ?? null);
   };
   const selectTrack = (trackId: string) => {
-    const next = annotations.tracks.find((track) => track.id === trackId) ?? null;
+    const next = trackList.find((track) => track.id === trackId) ?? null;
     setSelectedTrackId(trackId || null);
     setSelectedKeyframeId(null);
     setDraftName(next?.name ?? "");
@@ -159,15 +174,47 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     trackCoordinators.current.set(track.id, coordinator);
     return coordinator;
   };
-  const addTrack = async () => {
-    setActionError(null);
+  /** Opens the naming dialog -- `confirmCreateTrack`/`cancelCreateTrack` below are its only two exits. */
+  const beginCreateTrack = () => {
+    setNewTrackName(`Track ${trackList.length + 1}`);
+    setNewTrackError(null);
+    setShowCreateTrackDialog(true);
+  };
+  const cancelCreateTrack = () => {
+    setShowCreateTrackDialog(false);
+    setNewTrackName("");
+    setNewTrackError(null);
+  };
+  /**
+   * The only path that creates a track from the toolbar. Writes the result
+   * into `useVideoAnnotationStore` via `markSaved` -- the same store
+   * `video-properties-tabs.tsx`'s Tracks tab reads -- so the new track card
+   * appears there with no reload, then requests that tab so it's the one
+   * the user actually sees it in (see `requestedTab`'s doc comment in the
+   * store).
+   */
+  const confirmCreateTrack = async () => {
+    setNewTrackSaving(true);
+    setNewTrackError(null);
     try {
-      const result = await createVideoTrack(asset.id, { name: `Track ${annotations.tracks.length + 1}`, interpolationMode: "LINEAR" });
+      const name = newTrackName.trim() || `Track ${trackList.length + 1}`;
+      const result = await createVideoTrack(asset.id, { name, interpolationMode: "LINEAR" });
+      useVideoAnnotationStore.getState().markSaved(result.track);
+      useVideoAnnotationStore.getState().setRequestedTab("tracks");
       selectTrack(result.track.id);
       setDraftName(result.track.name ?? "");
       setDraftProperties(JSON.stringify(result.track.properties ?? {}));
-    } catch { setActionError("Track could not be created. Reload and try again."); }
+      setShowCreateTrackDialog(false);
+      setNewTrackName("");
+    } catch { setNewTrackError("Track could not be created. Reload and try again."); }
+    finally { setNewTrackSaving(false); }
   };
+  /**
+   * `VideoToolbar`'s "Add keyframe here" -- the only way, besides drawing a
+   * new box (which always creates its own track), for a track/shape to grow
+   * a *second* keyframe: adds one for the already-selected track at the
+   * current playhead position.
+   */
   const addKeyframe = async () => {
     if (!selectedTrack) return;
     setActionError(null);
@@ -312,36 +359,38 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     setTool("select");
   };
   /**
-   * Dialog "OK" -- the only path that creates the Track + keyframe pair. The
-   * user-typed Object ID and Name are written into the new keyframe's own
-   * `Annotation.properties` JSON (`{ objectId, name }`), not a new column --
-   * that free-form column already exists on every Annotation row for exactly
-   * this ("Metadata, model provenance, confidence, notes, custom fields" per
-   * `prisma/schema.prisma`), so a user-assigned shape identity never
-   * required a schema change. The Track's own `name` field is still set/kept
-   * in sync too, so the track dropdown (`VideoToolbar`) stays meaningful.
+   * Dialog "OK" -- the only path that creates a bounding box. Every draw
+   * gesture is a *new* shape, so this always creates a fresh
+   * `VideoObjectTrack` -- it never reuses `selectedTrack`. (Adding another
+   * position for an *existing* shape across time is a distinct action --
+   * `VideoToolbar`'s "Add keyframe here", which explicitly targets the
+   * selected track -- and is intentionally left alone.) Reusing the
+   * selected track here was the root cause of a past bug: drawing box #2
+   * silently relabeled box #1, because both ended up on one shared track.
+   *
+   * The user-typed Object ID is written into the new track's own
+   * `properties` JSON (`{ objectId }`) -- that free-form column already
+   * exists on every `VideoObjectTrack` row ("Metadata, model provenance,
+   * confidence, notes, custom fields" per `prisma/schema.prisma`), so a
+   * user-assigned shape identity never required a schema change. Name goes
+   * into the track's own `name` column, matching `VideoToolbar`'s track
+   * dropdown.
    */
   const confirmPendingBox = async () => {
     if (!pendingBox) return;
     setPendingBoxSaving(true);
     setPendingBoxError(null);
     try {
-      let track = selectedTrack;
-      if (!track) {
-        const created = await createVideoTrack(asset.id, { name: pendingBoxName.trim() || `Track ${annotations.tracks.length + 1}`, interpolationMode: "LINEAR" });
-        track = created.track;
-        selectTrack(track.id);
-      } else if (pendingBoxName.trim() && pendingBoxName.trim() !== (track.name ?? "")) {
-        const renamed = await updateVideoTrack(track.id, { expectedTrackRevision: track.revision, name: pendingBoxName.trim() });
-        track = renamed.track;
-      }
-      const keyframeProperties = Object.fromEntries(Object.entries({ objectId: pendingBoxObjectId.trim(), name: pendingBoxName.trim() }).filter(([, value]) => value !== ""));
-      const coordinator = coordinatorFor(track!);
-      coordinator.schedule((revision) => createVideoKeyframe(track!.id, { expectedTrackRevision: revision, timestampMs: pendingBox.timestampMs, geometry: pendingBox.geometry, properties: keyframeProperties }).then((result) => {
+      const objectId = pendingBoxObjectId.trim();
+      const created = await createVideoTrack(asset.id, { name: pendingBoxName.trim() || `Track ${trackList.length + 1}`, interpolationMode: "LINEAR", properties: objectId ? { objectId } : undefined });
+      const track = created.track;
+      selectTrack(track.id);
+      const coordinator = coordinatorFor(track);
+      coordinator.schedule((revision) => createVideoKeyframe(track.id, { expectedTrackRevision: revision, timestampMs: pendingBox.timestampMs, geometry: pendingBox.geometry }).then((result) => {
         useVideoAnnotationStore.getState().markSaved(result.track, result.keyframe);
         // Selecting the new keyframe is what lets a user immediately see, on
-        // the frame and in the properties panel's Shapes tab, which saved
-        // box this was -- labelled there by the objectId/name just entered.
+        // the frame and in the properties panel's Tracks tab, which saved
+        // shape this was -- labelled there by the objectId/name just entered.
         setSelectedKeyframeId(result.keyframe.id);
         return result.track;
       }));
@@ -385,7 +434,17 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
         {selectedKeyframe && showsPersistedOverlay ? (() => {
           const geometry = draftGeometry ?? selectedKeyframe.geometry;
           const resizeCursor: Record<"nw" | "ne" | "sw" | "se", string> = { nw: "cursor-nw-resize", ne: "cursor-ne-resize", sw: "cursor-sw-resize", se: "cursor-se-resize" };
-          return <div aria-label="Selected video keyframe" className="absolute border-2 border-sky-400" style={{ left: `${geometry.x * 100}%`, top: `${geometry.y * 100}%`, width: `${geometry.width * 100}%`, height: `${geometry.height * 100}%` }}>
+          // Preserves the objectId a user typed into the create-annotation
+          // dialog (stored on the Track's own `properties.objectId`, see
+          // `confirmPendingBox`) as a tag anchored to the box's top-left
+          // corner, so it stays identifiable on the frame after saving. The
+          // tag/border color distinguishes shapes by label (falling back to
+          // the previous fixed sky-blue when none is assigned) -- the tag's
+          // text is always the objectId, never the label.
+          const objectId = typeof selectedTrack?.properties.objectId === "string" && selectedTrack.properties.objectId ? selectedTrack.properties.objectId : null;
+          const labelColor = selectedTrack?.label?.color ?? "#38bdf8";
+          return <div aria-label="Selected video keyframe" className="absolute border-2" style={{ left: `${geometry.x * 100}%`, top: `${geometry.y * 100}%`, width: `${geometry.width * 100}%`, height: `${geometry.height * 100}%`, borderColor: labelColor }}>
+            {objectId ? <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: labelColor }}>{objectId}</span> : null}
             <div aria-label="Move keyframe" className="absolute inset-0 cursor-move" onPointerDown={(event) => beginGeometryDrag(event, "move")} />
             {(["nw", "ne", "sw", "se"] as const).map((corner) => <div key={corner} aria-label={`Resize keyframe ${corner}`} onPointerDown={(event) => beginGeometryDrag(event, corner)} className={`absolute size-2.5 rounded-full border border-sky-100 bg-sky-400 ${resizeCursor[corner]} ${corner.includes("n") ? "-top-1" : "-bottom-1"} ${corner.includes("w") ? "-left-1" : "-right-1"}`} />)}
           </div>;
@@ -401,12 +460,26 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
             <input autoFocus value={pendingBoxObjectId} onChange={(event) => setPendingBoxObjectId(event.target.value)} placeholder="e.g. person-1" className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-zinc-100 outline-none focus:border-sky-500" />
           </label>
           <label className="mt-2 block">Name
-            <input value={pendingBoxName} onChange={(event) => setPendingBoxName(event.target.value)} placeholder={selectedTrack ? (selectedTrack.name ?? "Track name") : `Track ${annotations.tracks.length + 1}`} className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-zinc-100 outline-none focus:border-sky-500" />
+            <input value={pendingBoxName} onChange={(event) => setPendingBoxName(event.target.value)} placeholder={selectedTrack ? (selectedTrack.name ?? "Track name") : `Track ${trackList.length + 1}`} className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-zinc-100 outline-none focus:border-sky-500" />
           </label>
           {pendingBoxError ? <p role="alert" className="mt-2 text-rose-300">{pendingBoxError}</p> : null}
           <div className="mt-4 flex justify-end gap-2">
             <button type="button" onClick={cancelPendingBox} disabled={pendingBoxSaving} className="rounded-lg border border-zinc-700 px-3 py-1.5 font-semibold text-zinc-300 hover:bg-zinc-800 disabled:opacity-50">Cancel</button>
             <button type="button" onClick={() => void confirmPendingBox()} disabled={pendingBoxSaving} className="rounded-lg bg-sky-600 px-3 py-1.5 font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{pendingBoxSaving ? "Saving…" : "OK"}</button>
+          </div>
+        </div>
+      </div> : null}
+      {showCreateTrackDialog ? <div role="dialog" aria-modal="true" aria-label="New track" className="absolute inset-0 grid place-items-center bg-black/60 p-4">
+        <div className="w-full max-w-xs rounded-xl border border-zinc-700 bg-zinc-900 p-4 text-xs text-zinc-200 shadow-xl">
+          <h3 className="text-sm font-bold text-white">New track</h3>
+          <p className="mt-1 text-[11px] leading-4 text-zinc-400">A track is a shape/object identity with no position yet -- draw a box on the frame afterward, or add keyframes to it from the Tracks tab.</p>
+          <label className="mt-3 block">Name
+            <input autoFocus value={newTrackName} onChange={(event) => setNewTrackName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void confirmCreateTrack(); } }} placeholder={`Track ${trackList.length + 1}`} className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-2 py-1.5 text-zinc-100 outline-none focus:border-sky-500" />
+          </label>
+          {newTrackError ? <p role="alert" className="mt-2 text-rose-300">{newTrackError}</p> : null}
+          <div className="mt-4 flex justify-end gap-2">
+            <button type="button" onClick={cancelCreateTrack} disabled={newTrackSaving} className="rounded-lg border border-zinc-700 px-3 py-1.5 font-semibold text-zinc-300 hover:bg-zinc-800 disabled:opacity-50">Cancel</button>
+            <button type="button" onClick={() => void confirmCreateTrack()} disabled={newTrackSaving} className="rounded-lg bg-sky-600 px-3 py-1.5 font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{newTrackSaving ? "Creating…" : "Create"}</button>
           </div>
         </div>
       </div> : null}
@@ -426,7 +499,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
         <button type="button" title="Next keyframe" aria-label="Next keyframe" disabled={!trackKeyframes.length} onClick={() => navigateKeyframe(1)} className="rounded border border-zinc-700 px-1.5 py-1 text-[11px] disabled:opacity-50">KF▶</button>
       </div>
       <VideoTimeline
-        annotations={annotations}
+        annotations={{ ...annotations, keyframes: keyframeList }}
         durationMs={readiness.video?.durationMs ?? null}
         currentTimeMs={currentTime * 1000}
         selectedKeyframeId={selectedKeyframeId}
@@ -437,10 +510,10 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
       />
       <div className="-mx-3 -mb-2 mt-2">
         <VideoToolbar
-          tracks={annotations.tracks}
+          tracks={trackList}
           selectedTrackId={selectedTrackId}
           onSelectTrack={selectTrack}
-          onCreateTrack={() => void addTrack()}
+          onCreateTrack={beginCreateTrack}
           onAddKeyframeHere={() => void addKeyframe()}
           onSaveTrack={() => void updateTrack()}
           onDeleteTrack={() => void removeTrack()}
@@ -457,7 +530,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     <details className="mt-2 flex-none rounded-lg border border-zinc-800 bg-zinc-900/60 text-xs text-zinc-300">
       <summary className="cursor-pointer select-none px-3 py-2 font-semibold text-zinc-300 hover:text-white">
         Track, keyframe &amp; label details
-        <span className="ml-2 font-normal text-zinc-500">{annotations.tracks.length} tracks · {annotations.keyframes.length} keyframes · {annotations.temporalLabels.length} labels</span>
+        <span className="ml-2 font-normal text-zinc-500">{trackList.length} tracks · {keyframeList.length} keyframes · {annotations.temporalLabels.length} labels</span>
       </summary>
       <div className="max-h-64 overflow-y-auto px-3 pb-3">
         {localDraft ? <div className="flex items-center gap-2 pb-2 text-[11px]"><span className="text-amber-300">Unsaved local draft preserved after a conflict.</span><button type="button" onClick={() => useVideoAnnotationStore.getState().clearDraft()} className="rounded border border-amber-800 px-2 py-1 text-amber-200">Discard local draft</button></div> : null}
@@ -475,8 +548,6 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
           <label>Height<input type="number" min={0.01} max={1} step="0.01" value={(draftGeometry ?? selectedKeyframe.geometry).height} onChange={(event) => void updateKeyframe({ geometry: { ...(draftGeometry ?? selectedKeyframe.geometry), height: Number(event.target.value) } })} className="mt-1 w-full rounded bg-zinc-800 px-2 py-1" /></label>
           <button type="button" onClick={() => void saveKeyframe()} className="rounded border border-emerald-800 px-2 py-1 text-emerald-300">Save keyframe</button><button type="button" onClick={() => void removeKeyframe()} className="rounded border border-rose-900 px-2 py-1 text-rose-300">Delete keyframe</button>
         </div> : null}
-        <div className="mt-2"><VideoDetailsPanel annotations={annotations} /></div>
-        <div className="mt-2"><VideoTemporalLabels labels={annotations.temporalLabels} assetId={asset.id} durationMs={readiness.video?.durationMs ?? null} /></div>
       </div>
     </details>
   </section>;
