@@ -1,16 +1,18 @@
 "use client";
 
-import { Play, SpinnerGap, VideoCamera } from "@phosphor-icons/react";
+import { SpinnerGap, VideoCamera } from "@phosphor-icons/react";
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 import type { SafeMediaReadiness } from "@/types/media-processing";
 import type { SafeVideoAnnotations } from "@/types/video-annotation";
-import { VideoTimeline } from "@/components/workspace/video-timeline";
 import { VideoTemporalLabels } from "@/components/workspace/video-temporal-labels";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
 import { addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoKeyframe, deleteVideoTrack, updateVideoKeyframe } from "@/lib/workspace/video-annotation-client";
+import { createVideoPlaybackController, type VideoPlaybackController } from "@/lib/workspace/video-playback-controller";
+import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotations/video-time";
+import { deriveInterpolationAt } from "@/lib/annotations/video-interpolation";
 
 type VideoEngineProps = {
   asset: { id: string; filename: string; description: string | null };
@@ -25,9 +27,26 @@ type KeyframeChanges = { timestampMs?: number; geometry?: { kind: "BOUNDING_BOX"
  * falls through to ImageCanvas or exposes a storage location.
  */
 export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps) {
+  // The Video Asset's own fps, with the existing FR-016 fallback when it's
+  // missing/unreliable -- computed once here instead of re-deriving the
+  // same fallback inline at every call site (frame-index math, the
+  // `onTimeUpdate`/`durationchange` handlers, and the rAF playback-sync
+  // loop below all need the same value).
+  const fps = readiness.video?.fps && readiness.video.fps > 0 ? readiness.video.fps : 30;
   const [viewUrl, setViewUrl] = useState<string | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "unavailable">("loading");
   const [currentTime, setCurrentTime] = useState(0);
+  // Last-resort duration fallback: read directly from the `<video>`
+  // element's own `durationchange` event, which the browser fires as soon
+  // as it knows the media's real length -- independent of whether the
+  // server-side metadata-extraction job has populated `Asset.durationMs`/
+  // `VideoAsset.totalFrames` yet. Without this, a video whose server
+  // metadata is missing/zero (e.g. still processing) shows no duration at
+  // all: the scrub bar's `max` collapses to `0` while its `value` keeps
+  // growing, so the browser silently clamps the visible thumb to the start
+  // for as long as playback runs, even though the video is actually
+  // advancing normally.
+  const [nativeDurationMs, setNativeDurationMs] = useState<number | null>(null);
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(annotations.tracks[0]?.id ?? null);
   const [draftName, setDraftName] = useState("");
   const [draftLabelId, setDraftLabelId] = useState<string>("");
@@ -78,6 +97,34 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
   const trackList = useVideoAnnotationStore((state) => state.trackList);
   const keyframeList = useVideoAnnotationStore((state) => state.keyframeList);
   const [drawDraft, setDrawDraft] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  // The single playback authority (spec FR-047, US9) -- every play/pause/
+  // seek/frame-step in this component goes through this, never a bare
+  // `videoRef.current.play()/.pause()/.currentTime =` call, so
+  // `video-toolbar.tsx`/future consumers can read playback state from the
+  // store instead of each touching `videoRef`.
+  // Built inside an effect (not during render) -- React's rules of refs
+  // disallow reading `videoRef.current` while rendering, and every consumer
+  // of `playbackController` below only ever runs from an event handler or
+  // another effect, both safely post-render.
+  const playbackControllerRef = useRef<VideoPlaybackController | null>(null);
+  useEffect(() => {
+    playbackControllerRef.current = createVideoPlaybackController(() => videoRef.current);
+  }, []);
+  const playbackController = useMemo<VideoPlaybackController>(() => ({
+    play: () => playbackControllerRef.current?.play(),
+    pause: () => playbackControllerRef.current?.pause(),
+    seekToTime: (ms) => playbackControllerRef.current?.seekToTime(ms),
+    seekToFrame: (frame) => playbackControllerRef.current?.seekToFrame(frame),
+    nextFrame: () => playbackControllerRef.current?.nextFrame(),
+    previousFrame: () => playbackControllerRef.current?.previousFrame(),
+  }), []);
+  const setPlaybackSnapshot = useVideoAnnotationStore((state) => state.setPlaybackSnapshot);
+  // Mirrored from the `<video>` element's own `play`/`pause` events (see the
+  // `onPlay`/`onPause` handlers below), never assumed from which
+  // `playbackController` method was last called -- so this button's icon
+  // stays correct even if playback stops for a reason other than this
+  // button (e.g. reaching the end of the video).
+  const playbackState = useVideoAnnotationStore((state) => state.playbackState);
 
   useEffect(() => {
     let active = true;
@@ -98,6 +145,41 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     setSnapshot(annotations.tracks, annotations.keyframes);
   }, [annotations.keyframes, annotations.tracks, setSnapshot]);
   useEffect(() => () => { void Promise.all([...trackCoordinators.current.values()].map((coordinator) => coordinator.dispose())); }, []);
+
+  // Seeds the playback-state slice's fps/duration once known, so
+  // `playbackController`'s frame-stepping uses the Video Asset's actual fps
+  // (spec FR-048) as soon as it's available, without waiting for a video
+  // element event.
+  useEffect(() => {
+    setPlaybackSnapshot({ fps: readiness.video?.fps ?? null, durationMs: resolveVideoTimelineDurationMs({ totalFrames: readiness.video?.totalFrames ?? null, fps: readiness.video?.fps ?? null, durationMs: readiness.video?.durationMs ?? null }) });
+  }, [readiness.video?.fps, readiness.video?.durationMs, readiness.video?.totalFrames, setPlaybackSnapshot]);
+
+  // Continuous playhead sync while playing. The `<video>` element's own
+  // `timeupdate` event (still wired below) fires too infrequently and
+  // inconsistently across browsers -- as little as 4x/second, and not on a
+  // fixed schedule -- to keep the scrub input and `VideoTimeline`'s playhead
+  // visibly tracking playback; both read `currentTime`, so without this loop
+  // they appear frozen near the start for the entire time the video is
+  // playing. This mirrors exactly what `onTimeUpdate` already does, once per
+  // animation frame, only for as long as `playbackState === "playing"` (the
+  // same signal the Play/Pause button reads), and stops itself the instant
+  // the store reflects a pause -- including the pause that already happens
+  // automatically when the video reaches the end.
+  useEffect(() => {
+    if (playbackState !== "playing") return;
+    let frameId: number;
+    const tick = () => {
+      const video = videoRef.current;
+      if (video) {
+        const seconds = video.currentTime;
+        setCurrentTime(seconds);
+        setPlaybackSnapshot({ currentTimeMs: seconds * 1000, currentFrame: Math.round((seconds * 1000) / (1000 / fps)) });
+      }
+      frameId = requestAnimationFrame(tick);
+    };
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [playbackState, fps, setPlaybackSnapshot]);
 
   /**
    * Reacts to a keyframe selected from *outside* this component -- today
@@ -126,15 +208,22 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
       }
       setDraftGeometry(keyframe.geometry);
       setDraftTimestampMs(keyframe.timestampMs);
-      const seconds = Math.max(0, keyframe.timestampMs / 1000);
-      setCurrentTime(seconds);
-      if (videoRef.current) { videoRef.current.currentTime = seconds; videoRef.current.pause(); }
+      playbackController.pause();
+      playbackController.seekToTime(keyframe.timestampMs);
+      setCurrentTime(Math.max(0, keyframe.timestampMs / 1000));
     });
-  }, [keyframeList, trackList, selectedTrackId]);
+  }, [keyframeList, trackList, selectedTrackId, playbackController]);
 
   const selectedTrack = trackList.find((track) => track.id === selectedTrackId) ?? null;
   const trackKeyframes = useMemo(() => selectedTrack ? keyframeList.filter((keyframe) => keyframe.trackId === selectedTrack.id).sort((a, b) => a.timestampMs - b.timestampMs) : [], [keyframeList, selectedTrack]);
-  const exactKeyframeAtTime = trackKeyframes.find((keyframe) => Math.abs(keyframe.timestampMs - currentTime * 1000) < 5);
+  // Frame-index equality, not a fixed millisecond epsilon: "the playhead is
+  // on a keyframe" means the currently displayed video frame *is* that
+  // keyframe's frame, which a raw ms-difference window can miss during real
+  // playback (the rAF-driven `currentTime` above advances in ~16ms ticks
+  // that don't reliably land inside a narrow epsilon around any given
+  // keyframe's exact timestamp).
+  const currentFrameIndex = deriveFrameIndex(currentTime * 1000, fps);
+  const exactKeyframeAtTime = trackKeyframes.find((keyframe) => deriveFrameIndex(keyframe.timestampMs, fps) === currentFrameIndex);
   const selectedKeyframe = trackKeyframes.find((keyframe) => keyframe.id === selectedKeyframeId) ?? exactKeyframeAtTime ?? trackKeyframes.at(-1) ?? null;
   // A persisted overlay (editable, draggable/resizable) only draws when the
   // user explicitly selected a keyframe or the playhead sits exactly on one;
@@ -144,13 +233,19 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
   const showsPersistedOverlay = Boolean(selectedKeyframeId && trackKeyframes.some((keyframe) => keyframe.id === selectedKeyframeId)) || Boolean(exactKeyframeAtTime);
   // A derived preview -- never persisted, never draggable -- fills the gap
   // when the playhead sits between two keyframes on the selected track.
+  // Computed live from the selected track's own persisted keyframes at the
+  // current playhead position (not `annotations.interpolation`, which is
+  // only ever a single server-computed sample for whatever `fromMs`/`toMs`
+  // happened to be requested at page load, not a value that tracks a
+  // continuously advancing `currentTime` during playback) -- this is what
+  // makes the box actually appear/track smoothly between keyframes while
+  // the video plays, for whichever track is currently selected.
   const derivedPreview = !showsPersistedOverlay && selectedTrack
-    ? annotations.interpolation.find((item) => item.trackId === selectedTrack.id && Math.abs(item.timestampMs - currentTime * 1000) < 5)
+    ? deriveInterpolationAt(trackKeyframes, currentTime * 1000, selectedTrack.interpolationMode)
     : undefined;
   const seekTo = (timestampMs: number) => {
-    const seconds = Math.max(0, timestampMs / 1000);
-    setCurrentTime(seconds);
-    if (videoRef.current) videoRef.current.currentTime = seconds;
+    playbackController.seekToTime(timestampMs);
+    setCurrentTime(Math.max(0, timestampMs / 1000));
   };
   const chooseKeyframe = (id: string) => {
     const keyframe = trackKeyframes.find((item) => item.id === id);
@@ -281,6 +376,12 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
   };
   const beginGeometryDrag = (event: ReactPointerEvent<HTMLDivElement>, mode: "move" | "nw" | "ne" | "sw" | "se") => {
     if (!selectedKeyframe) return;
+    // Pause-on-interaction-start (spec FR-049): dragging/resizing an
+    // existing keyframe must never let the frame advance mid-gesture, or
+    // the geometry being edited and the frame it gets saved against can
+    // silently diverge. Never auto-resumes on completion -- there is no
+    // `.play()` call anywhere in this gesture's `move`/`up` handlers below.
+    playbackController.pause();
     event.stopPropagation();
     event.currentTarget.setPointerCapture(event.pointerId);
     const startGeometry = draftGeometry ?? selectedKeyframe.geometry;
@@ -325,7 +426,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
    */
   const beginBoxDraw = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (tool !== "box" || loadState !== "ready") return;
-    videoRef.current?.pause();
+    playbackController.pause();
     const rect = event.currentTarget.getBoundingClientRect();
     const start = { x: (event.clientX - rect.left) / rect.width, y: (event.clientY - rect.top) / rect.height };
     let latest = { x: start.x, y: start.y, width: 0, height: 0 };
@@ -410,10 +511,10 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     if (!trackKeyframes.length) return;
     const index = selectedKeyframe ? trackKeyframes.findIndex((item) => item.id === selectedKeyframe.id) : 0;
     const next = trackKeyframes[Math.min(trackKeyframes.length - 1, Math.max(0, index + direction))];
-    if (next) { setSelectedKeyframeId(next.id); setCurrentTime(next.timestampMs / 1000); if (videoRef.current) videoRef.current.currentTime = next.timestampMs / 1000; }
+    if (next) { setSelectedKeyframeId(next.id); playbackController.seekToTime(next.timestampMs); setCurrentTime(next.timestampMs / 1000); }
   };
 
-  const durationSeconds = readiness.video?.durationMs ? readiness.video.durationMs / 1000 : null;
+  const timelineDurationMs = resolveVideoTimelineDurationMs(readiness.video) ?? nativeDurationMs;
   const saveStateLabel = selectedTrack ? (trackSaveStates[selectedTrack.id] ?? mutationState) : mutationState;
   return <section className="canvas-grid flex h-full min-h-[520px] min-w-0 flex-col overflow-hidden bg-zinc-950 p-3 text-zinc-100 lg:min-h-0">
     <header className="flex items-center justify-between gap-3 pb-2 text-xs text-zinc-400">
@@ -428,7 +529,14 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     <div data-video-frame onPointerDown={beginBoxDraw} className={`relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-black ${tool === "box" ? "cursor-crosshair" : ""}`}>
       {loadState === "loading" ? <SpinnerGap className="animate-spin text-sky-400" size={28} /> : null}
       {loadState === "ready" && viewUrl ? <>
-        <video ref={videoRef} className="max-h-full max-w-full" controls preload="metadata" src={viewUrl} onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)} />
+        {/* Renderer only (spec FR-045): no native `controls`, so the
+           annotation overlay below is the only pointer-interaction surface
+           for this area -- there is no native play/pause/seek-bar/
+           fullscreen UI left for a click/drag/double-click to reach.
+           Playback state itself is mirrored from this element's own
+           `play`/`pause` events, the one authoritative signal for whether
+           playback is actually active. */}
+        <video ref={videoRef} className="max-h-full max-w-full" preload="metadata" src={viewUrl} onTimeUpdate={(event) => { const seconds = event.currentTarget.currentTime; setCurrentTime(seconds); setPlaybackSnapshot({ currentTimeMs: seconds * 1000, currentFrame: Math.round((seconds * 1000) / (1000 / fps)) }); }} onDurationChange={(event) => { const duration = event.currentTarget.duration; setNativeDurationMs(Number.isFinite(duration) && duration > 0 ? duration * 1000 : null); }} onPlay={() => setPlaybackSnapshot({ playbackState: "playing" })} onPause={() => setPlaybackSnapshot({ playbackState: "paused" })} />
         {drawDraft ? <div aria-label="Drawing new keyframe" className="pointer-events-none absolute border-2 border-dashed border-sky-400" style={{ left: `${drawDraft.x * 100}%`, top: `${drawDraft.y * 100}%`, width: `${drawDraft.width * 100}%`, height: `${drawDraft.height * 100}%` }} /> : null}
         {pendingBox ? <div aria-label="Unsaved drawn box, pending the create-annotation dialog" className="pointer-events-none absolute border-2 border-dashed border-amber-400" style={{ left: `${pendingBox.geometry.x * 100}%`, top: `${pendingBox.geometry.y * 100}%`, width: `${pendingBox.geometry.width * 100}%`, height: `${pendingBox.geometry.height * 100}%` }} /> : null}
         {selectedKeyframe && showsPersistedOverlay ? (() => {
@@ -484,46 +592,41 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
         </div>
       </div> : null}
     </div>
-    {/* Compact, always-visible chrome: scrub + frame/keyframe stepping,
-       annotation ticks, and the simplified track toolbar. Everything else
-       (track/keyframe field editors, details, temporal labels) lives in the
-       collapsed drawer below so it never competes with the frame for
-       height. */}
-    <div className="mt-2 flex-none rounded-lg border border-zinc-800 bg-zinc-900/80 px-3 py-2 text-xs text-zinc-300">
-      <div className="flex items-center gap-2">
-        <button type="button" title="Previous frame" aria-label="Previous frame" onClick={() => { if (videoRef.current) videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 1 / 30); }} className="rounded border border-zinc-700 px-1.5 py-1 text-[11px] hover:bg-zinc-800">⏮</button>
-        <button type="button" title="Next frame" aria-label="Next frame" onClick={() => { if (videoRef.current) videoRef.current.currentTime = Math.min(videoRef.current.duration || 0, videoRef.current.currentTime + 1 / 30); }} className="rounded border border-zinc-700 px-1.5 py-1 text-[11px] hover:bg-zinc-800">⏭</button>
-        <span className="inline-flex items-center gap-1"><Play size={12} /> {currentTime.toFixed(2)}s{durationSeconds !== null ? ` / ${durationSeconds.toFixed(2)}s` : ""}</span>
-        <input aria-label="Video timeline" type="range" min={0} max={durationSeconds ?? 0} step={0.01} value={Math.min(currentTime, durationSeconds ?? currentTime)} disabled={!durationSeconds} onChange={(event) => { const next = Number(event.target.value); setCurrentTime(next); if (videoRef.current) videoRef.current.currentTime = next; }} className="ml-1 min-w-0 flex-1 accent-sky-500" />
-        <button type="button" title="Previous keyframe" aria-label="Previous keyframe" disabled={!trackKeyframes.length} onClick={() => navigateKeyframe(-1)} className="rounded border border-zinc-700 px-1.5 py-1 text-[11px] disabled:opacity-50">◀KF</button>
-        <button type="button" title="Next keyframe" aria-label="Next keyframe" disabled={!trackKeyframes.length} onClick={() => navigateKeyframe(1)} className="rounded border border-zinc-700 px-1.5 py-1 text-[11px] disabled:opacity-50">KF▶</button>
-      </div>
-      <VideoTimeline
-        annotations={{ ...annotations, keyframes: keyframeList }}
-        durationMs={readiness.video?.durationMs ?? null}
-        currentTimeMs={currentTime * 1000}
-        selectedKeyframeId={selectedKeyframeId}
-        mutationState={mutationState}
-        onSelectKeyframe={chooseKeyframe}
-        onSelectDerived={(item) => { if (item.trackId !== selectedTrackId) selectTrack(item.trackId); seekTo(item.timestampMs); }}
-        onSeek={seekTo}
-      />
-      <div className="-mx-3 -mb-2 mt-2">
-        <VideoToolbar
-          tracks={trackList}
-          selectedTrackId={selectedTrackId}
-          onSelectTrack={selectTrack}
-          onCreateTrack={beginCreateTrack}
-          onAddKeyframeHere={() => void addKeyframe()}
-          onSaveTrack={() => void updateTrack()}
-          onDeleteTrack={() => void removeTrack()}
-          canAddKeyframe={Boolean(selectedTrack)}
-          canSaveTrack={Boolean(selectedTrack)}
-          canDeleteTrack={Boolean(selectedTrack)}
-          actionError={actionError}
-        />
-      </div>
-    </div>
+    {/* The transport/timeline zone: scrub + frame/keyframe stepping,
+       annotation ticks, and track lifecycle actions all live in one
+       `VideoToolbar` call -- it owns no state itself, only what's handed
+       down here. Everything else (track/keyframe field editors, details,
+       temporal labels) lives in the collapsed drawer below so it never
+       competes with the frame for height. */}
+    <VideoToolbar
+      playbackState={playbackState}
+      playbackDisabled={loadState !== "ready"}
+      onTogglePlayback={() => { if (playbackState === "playing") playbackController.pause(); else playbackController.play(); }}
+      onPreviousFrame={() => { playbackController.previousFrame(); if (videoRef.current) setCurrentTime(videoRef.current.currentTime); }}
+      onNextFrame={() => { playbackController.nextFrame(); if (videoRef.current) setCurrentTime(videoRef.current.currentTime); }}
+      currentTimeMs={currentTime * 1000}
+      durationMs={timelineDurationMs}
+      onSeek={seekTo}
+      hasTrackKeyframes={trackKeyframes.length > 0}
+      onPreviousKeyframe={() => navigateKeyframe(-1)}
+      onNextKeyframe={() => navigateKeyframe(1)}
+      annotations={{ ...annotations, keyframes: keyframeList }}
+      selectedKeyframeId={selectedKeyframeId}
+      mutationState={mutationState}
+      onSelectKeyframe={chooseKeyframe}
+      onSelectDerived={(item) => { if (item.trackId !== selectedTrackId) selectTrack(item.trackId); seekTo(item.timestampMs); }}
+      tracks={trackList}
+      selectedTrackId={selectedTrackId}
+      onSelectTrack={selectTrack}
+      onCreateTrack={beginCreateTrack}
+      onAddKeyframeHere={() => void addKeyframe()}
+      onSaveTrack={() => void updateTrack()}
+      onDeleteTrack={() => void removeTrack()}
+      canAddKeyframe={Boolean(selectedTrack)}
+      canSaveTrack={Boolean(selectedTrack)}
+      canDeleteTrack={Boolean(selectedTrack)}
+      actionError={actionError}
+    />
     {/* Collapsed by default so field editors, the summary panel, and
        temporal labels never shrink the frame; opening it doesn't remount
        anything, so in-flight drafts/autosave state are untouched. */}

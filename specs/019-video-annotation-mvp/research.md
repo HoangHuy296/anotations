@@ -185,3 +185,59 @@ config-driven, or database-backed registry was rejected as over-scoped: the
 `engine` union is closed and small, deploys already require a code change to
 add a Prisma `Modality` value, and a runtime plugin system would need its own
 security review (arbitrary component loading) with no requirement driving it.
+
+## Decision 12 — Interaction ownership: one playback controller + additive store slice, not a new video provider
+
+**Decision**: Separate three surfaces that already exist inside
+`video-engine.tsx` by pointer/playback ownership, rather than introducing any
+new rendering surface: the native `<video>` element becomes renderer-only
+(drops the `controls` attribute, is never the direct pointer target for
+annotation gestures), the annotation overlay owns every annotation pointer
+gesture (create/select/drag/resize/vertex-edit), and the timeline/toolbar
+owns playback and frame navigation exclusively through one new
+`video-playback-controller.ts` module wrapping the existing `videoRef`. That
+controller is the sole thing that calls `videoRef.current.play()/.pause()/
+.currentTime = ...`; it mirrors its resulting state into an additive
+playback-state slice (`currentTimeMs`, `currentFrame`, `playbackState`,
+`fps`, `durationMs`) on the existing `useVideoAnnotationStore` — the same
+store that already holds `tool`/`selectedKeyframeId`/`tracks`/`keyframes`/
+`requestedTab` for VIDEO — rather than a second store.
+
+**Rationale**: The failure mode this closes is concrete, not hypothetical:
+today the `<video>` element renders with native `controls`, and the frame
+wrapper's `onPointerDown` handler only intercepts pointer events when
+`tool === "box"`; for every other tool, a press on the frame reaches the
+native video element unguarded, so a user selecting/dragging/resizing a
+shape can accidentally toggle native play/pause mid-edit. Given this phase's
+Track → Keyframe → Geometry design, a keyframe is always saved against "the
+current frame" — if playback can keep advancing while a user is mid-drag
+(or a click on the frame toggles playback as a side effect), the frame
+displayed and the frame a geometry edit gets saved against can silently
+diverge, corrupting which frame a keyframe is saved at. `stopPropagation()`
+alone does not fix this because the video element is a legitimate, separate
+pointer target underneath the overlay in the DOM — it fixes bubbling, not
+who's on top; removing `controls` and keeping the overlay as the actual
+pointer target for the whole frame area is what actually removes the video
+element as an interactive surface. Extending the existing
+`useVideoAnnotationStore` (rather than adding a second store or storing the
+DOM ref in global state) keeps exactly one client-side source of truth for
+VIDEO interaction state, consistent with Decision 1–11's reuse-first pattern
+throughout this spec.
+
+**Alternatives considered**: Relying on `stopPropagation()` at each gesture's
+pointer handler was rejected — the spec explicitly calls this out
+(FR-046), and it is a whack-a-mole fix that has to be re-applied at every new
+gesture (polygon/circle/point/polyline creation, vertex editing) instead of
+being structurally true once. Replacing the native `<video>` element with
+Video.js, Plyr, or another media-provider dependency was rejected per spec
+Explicit non-goals — no browser-native limitation has been demonstrated by a
+failing test that interaction-ownership separation alone cannot fix; the
+existing HTML5 element already exposes everything this phase needs
+(`currentTime`, `duration`, `loadedmetadata`, `play()`/`pause()`). Storing
+`videoRef` itself inside the Zustand store was rejected because a DOM node
+reference does not belong in serializable-ish global client state and
+couples the store's lifecycle to one component's mount/unmount. A fixed
+`+100ms` (or similar arbitrary) frame step was rejected in favor of
+`1 / fps` seconds because it silently drifts from the actual frame boundary
+for any fps other than the one the constant happened to assume (the current
+code's `1/30` hardcoding is exactly this bug for non-30fps sources).

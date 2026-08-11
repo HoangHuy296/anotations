@@ -16,6 +16,7 @@ import { ImageStatusFields } from "@/components/workspace/image-status-fields";
 import { PlaceholderStatusFields } from "@/components/workspace/placeholder-status-fields";
 import type { SafeWorkspaceAsset } from "@/types/image-workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
+import { SafeVideoWorkspaceAsset } from "@/types/video-workspace";
 
 type Engine = WorkspaceSelection["engine"];
 
@@ -24,6 +25,7 @@ export type PropertiesTabsProps = {
   datasetId: string;
   selection: WorkspaceSelection;
   images: SafeWorkspaceAsset[];
+  videos: SafeVideoWorkspaceAsset[];
   page: number;
   pageSize: number;
   totalAssets: number;

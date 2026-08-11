@@ -34,7 +34,7 @@ export type DraftAnnotation = {
 // ---------------------------------------------------------------------------
 
 /** IMAGE tool set, read/written through `useAnnotationStore` and rendered by `image-toolbox.tsx`. */
-export type ImageAnnotationTool = "select" | "box" | "pan" | "polygon" | "circle" | "point" | "polyline" | "mask";
+export type ImageAnnotationTool = "select" | "box" | "pan" | "polygon" | "circle" | "point" | "polyline" | "mask" | "aidetect";
 
 /**
  * VIDEO tool set, read/written through `useVideoAnnotationStore` and
@@ -53,7 +53,7 @@ export type ImageAnnotationTool = "select" | "box" | "pan" | "polygon" | "circle
  * canvas rules in AGENTS.md, do not wire drawing behavior for the other
  * shapes until a later phase widens that union.
  */
-export type VideoAnnotationTool = "select" | "box" | "pan" | "track" | "polygon" | "circle" | "point" | "polyline" | "mask";
+export type VideoAnnotationTool = "select" | "box" | "pan" | "track" | "polygon" | "circle" | "point" | "polyline" | "mask"| "aidetect";
 
 /**
  * AUDIO tool set, rendered by `audio-toolbox.tsx`. `AudioEngine`
@@ -61,7 +61,7 @@ export type VideoAnnotationTool = "select" | "box" | "pan" | "track" | "polygon"
  * phase discipline: audio editing is a future phase), so nothing consumes
  * these yet beyond the toolbox highlighting the active button.
  */
-export type AudioAnnotationTool = "select" | "pan" | "timesegmentaudio" | "timestampaudio" | "speakerlabel";
+export type AudioAnnotationTool = "select" | "pan" | "timesegmentaudio" | "timestampaudio" | "speakerlabel"| "aidetect";
 
 /**
  * TEXT tool set, rendered by `text-toolbox.tsx`. `TextEngine`

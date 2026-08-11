@@ -103,9 +103,10 @@ services:
       minio:
         condition: service_healthy
     ports:
-      # Bound to loopback only so this can run alongside
-      # docker-compose.review.yaml's web on the same port 3000, published on
-      # the LAN-facing address instead. See docker-compose.review.yaml.
+      # Bound to loopback only, so this dev stack answers at
+      # http://localhost:3000 while docker-compose.review.yaml's web answers
+      # at http://10.0.0.245:3000 on the same port number, without a
+      # conflict. See docker-compose.review.yaml.
       - "127.0.0.1:3000:3000"
 
   worker:

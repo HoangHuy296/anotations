@@ -257,6 +257,72 @@ by `DatasetSidebar`/`PropertiesPanel`/the status surface.
    FR-005–FR-030 request/response shapes and revision semantics are
    unchanged.
 
+### User Story 9 — Interaction ownership separates rendering, annotation editing, and playback control (Priority: P1)
+
+A user drawing, selecting, dragging, resizing, or editing a keyframe shape
+never accidentally plays, pauses, or seeks the video, and a user operating
+playback from the timeline never accidentally creates or modifies an
+annotation. The native HTML5 `<video>` element remains a media renderer only
+(decode/render/buffer/`currentTime`/`duration`); it is not exposed as an
+interactive surface while annotating.
+
+**Why this priority**: This is a correctness and data-integrity requirement,
+not a UX nicety. Given this phase's Track → Keyframe → Geometry design, a
+keyframe is always saved against "the current frame." If pointer interaction
+on the video surface can also change playback — or if playback can keep
+advancing while a user is mid-drag on a shape — the frame the user is looking
+at and the frame a geometry edit gets saved against can silently diverge:
+autosave commits the wrong frame, or a keyframe is created at the wrong
+timestamp. Every other User Story in this spec (2, 3, 5, 6) assumes "the
+current frame" is stable while an edit is in progress; this story is what
+makes that assumption true.
+
+**Independent Test**: While playback is active, press-and-drag to draw a
+bounding box on the video frame; assert playback pauses at drag start, the
+frame does not advance during the drag, the resulting keyframe is saved
+against that exact frame, and playback does not resume on its own. Separately,
+assert clicking, double-clicking, or touch-tapping the video surface never
+toggles play/pause or triggers native fullscreen, and that dragging the timeline
+never creates or edits an annotation. Repeat the drag/select/resize cases with
+touch input and confirm identical ownership behavior to mouse input.
+
+**Acceptance Scenarios**:
+
+1. Given the video is playing, when the user begins drawing a bounding box,
+   creating a polygon/circle/point/polyline point, selecting a shape, dragging
+   a shape, resizing a shape, or editing a polygon/polyline vertex, then
+   playback pauses immediately, the current frame does not change for the
+   remainder of that interaction, and the interaction completes against that
+   frame.
+2. Given an annotation interaction has just completed, when the interaction
+   ends, then playback remains paused; the system does not auto-resume
+   playback on the user's behalf.
+3. Given the video surface is the direct pointer target, when the user clicks,
+   double-clicks, drags, or touches it while annotating, then no native
+   browser video behavior occurs (no play/pause toggle, no native seek-bar
+   drag, no native fullscreen, no native touch playback gesture); the
+   annotation overlay is the effective pointer-interaction layer, not the
+   `<video>` element, and this holds without relying on `stopPropagation()`
+   alone.
+4. Given the timeline/toolbar surface, when the user presses Play, Pause,
+   Next Frame, Previous Frame, or drags the timeline seek control, then
+   exactly that playback action occurs and no annotation is created, moved,
+   or deleted as a side effect.
+5. Given "Next Frame"/"Previous Frame", when either is pressed, then the
+   video advances or retreats by exactly one frame using the Video Asset's
+   actual fps (not a fixed arbitrary millisecond step), and the workspace's
+   current-frame indicator, visible annotations/derived interpolation, and
+   timeline playhead all update to match.
+6. Given an existing `VideoObjectTrack` is selected, when the user chooses
+   "Add keyframe here", then exactly one keyframe is created on that same
+   existing track at the current frame (per FR-008/FR-022's existing
+   track-revision contract); no new `VideoObjectTrack` is created, and the new
+   keyframe's geometry may differ from every prior keyframe on that track.
+7. Given mouse, touch, or trackpad input performing the same gesture (e.g.
+   press-drag-release on a shape), when compared, then both follow identical
+   ownership rules — pointer events, not mouse-only handlers, decide who
+   receives the interaction.
+
 ## Functional Requirements
 
 ### Read model and workspace
@@ -398,12 +464,23 @@ by `DatasetSidebar`/`PropertiesPanel`/the status surface.
   waveform/segment tools; TEXT: entity/span/relation tools) while dataset
   navigation, asset navigation, and open-directory controls remain constant
   across modalities.
-- **FR-036**: `PropertiesPanel` MUST present modality-appropriate tabs (IMAGE:
-  Details/Labels/Shapes/Assets; VIDEO: Video Details/Tracks/Labels/Shapes/
-  Properties/Assets; AUDIO: Audio Details/Labels/Segments/Properties; TEXT:
-  Text Details/Labels/Annotations) from the same shell component. Selecting a
-  VIDEO shape or track row MUST seek the player, highlight the shape, select
-  the track, and load its properties without leaving the panel.
+- **FR-036**: `PropertiesPanel` is a shared layout component and the single
+  right-sidebar dispatcher. It remains mounted independently of modality; its
+  internal content is selected from the active `WorkspaceSelection.engine`.
+  Each modality-specific properties body owns only its own modality-specific
+  panel content and MUST NOT render sidebar chrome itself. For VIDEO, that
+  body MUST preserve the existing VIDEO workspace information architecture
+  and provide access to the currently implemented VIDEO content: Description/
+  video details, Tracks, Shapes, Labels, and Assets. Additional VIDEO-specific
+  panels (for example temporal labels) MUST be added through that same
+  modality-specific panel body rather than a second, standalone VIDEO
+  sidebar; panel naming MUST follow the actual shipped UI terminology, not an
+  earlier planning label. IMAGE presents Details/Labels/Shapes/Assets; AUDIO
+  presents Audio Details/Labels/Segments/Properties; TEXT presents Text
+  Details/Labels/Annotations — each from its own modality-specific body under
+  the same shared `PropertiesPanel` dispatcher. Selecting a VIDEO shape or
+  track row MUST seek the player, highlight the shape, select the track, and
+  load its properties without leaving the panel.
 - **FR-037**: The shared status surface MUST always render save/dirty/saving/
   conflict state for the active resource, plus modality-specific fields
   (IMAGE: zoom, connection; VIDEO: current frame, timestamp, playback speed,
@@ -452,6 +529,48 @@ by `DatasetSidebar`/`PropertiesPanel`/the status surface.
   keyframes per track, temporal labels per Asset, request body bytes, property
   depth/bytes, and label/string sizes. Long videos MUST use pagination or a
   time-window instead of an unbounded annotation graph.
+
+### Interaction ownership
+
+- **FR-045**: The native `<video>` element MUST function only as a media
+  renderer (decode, render, buffer, `currentTime`, `duration`,
+  `loadedmetadata`, playback state) while in annotation mode. It MUST NOT be
+  the surface the user interacts with directly: no native browser video
+  controls, no click-to-play/pause on the video surface, no dragging the
+  native seek bar, no double-click-to-fullscreen, and no touch gesture on the
+  video surface controlling native playback.
+- **FR-046**: The annotation overlay/canvas MUST be the exclusive
+  pointer-interaction layer for creating a bounding box, polygon, circle,
+  point, or polyline; selecting, dragging, or resizing an annotation; editing
+  polygon/polyline vertices; and dragging a track keyframe's geometry. This
+  MUST hold for pointer, mouse, and touch input alike and MUST NOT depend on
+  `stopPropagation()` alone — the video element must not be reachable as a
+  pointer target for these interactions in the first place.
+- **FR-047**: Playback (play, pause, seek, previous/next frame) MUST be
+  exposed only through the timeline/toolbar surface, and MUST go through one
+  shared workspace playback authority that is the single source of truth for
+  current frame, current time, playback state, fps, and duration. No
+  annotation-editing component may drive playback directly.
+- **FR-048**: Frame navigation MUST be deterministic: "next/previous frame"
+  MUST step by exactly one frame using the Video Asset's actual fps, not an
+  arbitrary fixed millisecond increment. A frame-navigation action MUST pause
+  playback if needed, update the video's current time, update the workspace's
+  current-frame state, update visible annotations/derived interpolation, and
+  update the timeline playhead, as one consistent step.
+- **FR-049**: Beginning any annotation create/select/drag/resize/vertex-edit
+  interaction MUST pause playback if it is active and hold the current frame
+  fixed for the duration of that interaction; completing the interaction MUST
+  leave playback paused rather than auto-resuming. No such interaction may
+  itself toggle playback or seek the video, for mouse or touch input.
+- **FR-050**: Timeline pointer interaction (seek, scrub, move the playhead,
+  select a frame) MUST have its own event boundary, separate from the
+  annotation overlay's, and MUST NOT create, move, or delete an annotation as
+  a side effect of a playback action.
+- **FR-051**: "Existing track → Add keyframe here" MUST reuse the existing
+  track (FR-008/FR-022's track-revision-guarded transaction), creating exactly
+  one keyframe at the current frame on that track. It MUST NOT create a new
+  `VideoObjectTrack`; the new keyframe's geometry is independent of and may
+  differ from every other keyframe already on that track.
 
 ## Revision-domain contract
 
@@ -511,6 +630,20 @@ and cross-Dataset Labels follow concealed-resource policy.
   navigates to a different Asset, MUST still flush or guard navigation the
   same way the existing sidebar navigation guard does today, now triggered
   from the shared sidebar regardless of which engine owns the dirty state.
+- A user begins an annotation drag/resize/vertex-edit and the pointer leaves
+  the video frame area or the gesture is interrupted (e.g. `pointercancel`
+  from an OS-level gesture or app switch) MUST leave the geometry and
+  playback-paused state consistent — no partial commit, no unexpected
+  playback resume.
+- Rapid pointer-down/up on the annotation surface while playback was active
+  immediately beforehand MUST still pause playback at the start of that
+  interaction, not race it.
+- A touch-drag beginning on or near a shape MUST NOT also trigger a native
+  touch scroll/zoom/navigation gesture on the underlying page or video
+  surface.
+- Frame-stepping when fps is missing, variable, or unreliable MUST still use
+  one deterministic step (per FR-016's existing frameIndex fallback rule)
+  rather than an arbitrary fixed millisecond increment.
 
 ## Security and redaction requirements
 
@@ -565,6 +698,17 @@ permission matrix.
   only the registry module — no other shared-component file changes.
 - **SC-012**: IMAGE's registry entry reproduces IMAGE's current toolbox, tabs,
   and status fields with no observable behavior difference.
+- **SC-013**: A user can click, double-click, drag, or touch anywhere on the
+  video frame while annotating without ever toggling native playback or
+  triggering native fullscreen.
+- **SC-014**: A user editing a shape's geometry at a given frame never has
+  that edit committed against a different frame, even when playback was
+  active immediately before the edit began.
+- **SC-015**: Play, pause, next frame, and previous frame are available only
+  from the timeline/toolbar surface; next/previous frame always moves exactly
+  one frame using the Asset's actual fps.
+- **SC-016**: Adding a keyframe to an existing tracked object's "Add keyframe
+  here" action never creates a second, duplicate track for that same object.
 
 ## Known limitations
 
@@ -593,6 +737,10 @@ permission matrix.
   not introduce a database-backed or admin-configurable registry; adding a
   modality still requires a code change (one registry entry) and a normal
   deploy, not a runtime toggle.
+- The native HTML5 `<video>` element remains the video decoder/renderer for
+  this phase (FR-045). Interaction ownership (FR-045–FR-051) is solved by
+  separating pointer-event ownership between the video element, the
+  annotation overlay, and the timeline — not by replacing the video provider.
 
 ## Explicit non-goals
 
@@ -602,3 +750,9 @@ permission matrix.
   remote-linked playback, repository scheduling/synchronization/delete
   propagation, browser provider access, public worker routes, JWT, Project,
   or replacement VideoTrack/VideoKeyframe/VideoTemporalLabel tables.
+- Replacing the native HTML5 `<video>` element with Video.js, Plyr, or any
+  other media-provider dependency. This phase is interaction-ownership
+  separation only; a provider replacement is a separate, unauthorized
+  follow-up unless a failing acceptance test demonstrates an actual
+  browser-native limitation that interaction-ownership separation alone
+  cannot satisfy.

@@ -9,15 +9,17 @@ import { AssetNavigator } from "@/components/workspace/asset-navigator";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
 import { Badge } from "@/components/ui/badge";
 import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status";
-import { createVideoTrack, deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
+import { deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import type { SafeWorkspaceAsset } from "@/types/image-workspace";
+import type { SafeVideoTrack } from "@/types/video-annotation";
 import type { WorkspaceSelection } from "@/types/workspace";
 
-type PanelTab = "description" | "labels" | "shapes" | "tracks" | "assets";
+type PanelTab = "description" | "labels" | "tracks" | "assets";
 type WorkspaceLabel = { id: string; name: string; color: string };
+type TrackDraft = { objectId: string; name: string; labelId: string; interpolationMode: "LINEAR" | "NONE" };
 
 export type VideoPropertiesTabsProps = {
   datasetId: string;
@@ -71,9 +73,8 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
   const [newLabelName, setNewLabelName] = useState("");
   const [taxonomy, setTaxonomy] = useState<WorkspaceLabel[]>([]);
   const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
-  const [newTrackObjectId, setNewTrackObjectId] = useState("");
-  const [newTrackName, setNewTrackName] = useState("");
-  const [newTrackLabelId, setNewTrackLabelId] = useState("");
+  const [trackDrafts, setTrackDrafts] = useState<Record<string, TrackDraft>>({});
+  const [savingTrackId, setSavingTrackId] = useState<string | null>(null);
   const lastAttemptedDescriptionRef = useRef<string | null>(null);
   const scheduleAutosave = useAnnotationStore((store) => store.scheduleAutosave);
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
@@ -166,36 +167,55 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
 
   /**
    * A Track *is* a shape/object identity in this UI (spec: "Each shape card
-   * corresponds to a VideoObjectTrack"). Creating one here does not draw a
-   * keyframe -- a track with zero keyframes is a shape waiting for its
-   * first position, added either by drawing on the frame (which now always
-   * creates its own new track, see `video-engine.tsx`'s `confirmPendingBox`)
-   * or via `VideoToolbar`'s "Add keyframe here" once this track is selected
-   * there.
+   * corresponds to a VideoObjectTrack"). It is never created from this tab --
+   * only from `video-engine.tsx`'s toolbar ("Create track", or drawing a box
+   * via `confirmPendingBox`, which creates a track and its first keyframe
+   * together) -- this tab is view/expand/edit/delete only.
    */
-  async function createTrackRow() {
-    setShapeError(null);
-    try {
-      const objectId = newTrackObjectId.trim();
-      const result = await createVideoTrack(asset.id, { name: newTrackName.trim() || undefined, labelId: newTrackLabelId || null, interpolationMode: "LINEAR", properties: objectId ? { objectId } : undefined });
-      markSaved(result.track);
-      setExpandedTrackId(result.track.id);
-      setNewTrackObjectId("");
-      setNewTrackName("");
-      setNewTrackLabelId("");
-    } catch { setShapeError("The track could not be created."); }
+
+  function draftFromTrack(track: SafeVideoTrack): TrackDraft {
+    return { objectId: typeof track.properties.objectId === "string" ? track.properties.objectId : "", name: track.name ?? "", labelId: track.labelId ?? "", interpolationMode: track.interpolationMode };
   }
 
-  /** Every track field (objectId lives in `properties`, plus name/labelId/interpolationMode) goes through this one revision-guarded update. */
-  async function updateTrackFields(trackId: string, changes: { name?: string | null; labelId?: string | null; interpolationMode?: "LINEAR" | "NONE"; objectId?: string }) {
+  /** Seeds a fresh draft only on the collapsed->expanded transition, so an in-progress edit is never silently clobbered by the track updating elsewhere while its card stays open. */
+  function toggleTrackExpanded(track: SafeVideoTrack) {
+    const opening = expandedTrackId !== track.id;
+    setExpandedTrackId(opening ? track.id : null);
+    if (opening) setTrackDrafts((current) => ({ ...current, [track.id]: draftFromTrack(track) }));
+  }
+
+  function updateTrackDraft(trackId: string, changes: Partial<TrackDraft>) {
+    setTrackDrafts((current) => ({ ...current, [trackId]: { ...(current[trackId] ?? draftFromTrack(tracks[trackId])), ...changes } }));
+  }
+
+  function cancelTrackEdit(trackId: string) {
+    setTrackDrafts((current) => { const next = { ...current }; delete next[trackId]; return next; });
+    setExpandedTrackId(null);
+  }
+
+  /**
+   * The only path that saves a track's Object ID/Name/Label/Interpolation --
+   * one revision-guarded PATCH sending all four fields from the draft
+   * together, replacing the previous implicit save-per-field-blur behavior.
+   * Touches Track metadata only; it never creates, updates, or deletes a
+   * keyframe.
+   */
+  async function saveTrackEdit(trackId: string) {
     const track = tracks[trackId];
-    if (!track) return;
+    const draft = trackDrafts[trackId];
+    if (!track || !draft) return;
     setShapeError(null);
+    setSavingTrackId(trackId);
     try {
-      const properties = changes.objectId === undefined ? undefined : { ...track.properties, objectId: changes.objectId };
-      const result = await updateVideoTrack(trackId, { expectedTrackRevision: track.revision, ...(changes.name !== undefined ? { name: changes.name || undefined } : {}), ...(changes.labelId !== undefined ? { labelId: changes.labelId } : {}), ...(changes.interpolationMode ? { interpolationMode: changes.interpolationMode } : {}), ...(properties ? { properties } : {}) });
+      const result = await updateVideoTrack(trackId, { expectedTrackRevision: track.revision, name: draft.name.trim() || undefined, labelId: draft.labelId || null, interpolationMode: draft.interpolationMode, properties: { ...track.properties, objectId: draft.objectId.trim() } });
       markSaved(result.track);
-    } catch { setShapeError("This shape could not be updated."); }
+      setTrackDrafts((current) => { const next = { ...current }; delete next[trackId]; return next; });
+      setExpandedTrackId(null);
+    } catch (error) {
+      setShapeError((error as { code?: string }).code === "VIDEO_TRACK_REVISION_CONFLICT" ? "This track changed elsewhere. Reload and try again." : "This shape could not be saved.");
+    } finally {
+      setSavingTrackId(null);
+    }
   }
 
   async function removeKeyframeRow(keyframeId: string) {
@@ -247,7 +267,7 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
   }
 
   const selectedStatus = statuses.length === 1 ? statuses[0] : statuses.length > 1 ? "MULTIPLE" : "ALL";
-  const activeTab = (["description", "labels", "shapes", "tracks", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";
+  const activeTab = (["description", "labels", "tracks", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";
   const trackList = storeTrackList;
   const keyframeList = [...storeKeyframeList].sort((left, right) => left.timestampMs - right.timestampMs);
 
@@ -257,8 +277,8 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
       <p className="mt-3 break-all text-xs font-semibold text-zinc-800">{asset.filename}</p>
       <dl className="mt-4 space-y-2 text-xs"><Detail label="Tracks" value={String(trackList.length)} /><Detail label="Keyframes" value={String(keyframeList.length)} /></dl>
     </div>
-    <nav aria-label="Video management" className="grid grid-cols-5 border-b border-zinc-200">
-      {(["description", "labels", "shapes", "tracks", "assets"] as const).map((entry) => <button key={entry} type="button" onClick={() => setTab(entry)} className={`px-1.5 py-3 text-[11px] font-semibold capitalize ${activeTab === entry ? "border-b-2 border-sky-600 text-sky-700" : "text-zinc-500"}`}>{entry}</button>)}
+    <nav aria-label="Video management" className="grid grid-cols-4 border-b border-zinc-200">
+      {(["description", "labels", "tracks", "assets"] as const).map((entry) => <button key={entry} type="button" onClick={() => setTab(entry)} className={`px-1.5 py-3 text-[11px] font-semibold capitalize ${activeTab === entry ? "border-b-2 border-sky-600 text-sky-700" : "text-zinc-500"}`}>{entry}</button>)}
     </nav>
     {activeTab === "description" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Description</h2><span className="text-[11px] text-zinc-400">{descriptionState === "pending" ? "Saving after inactivity…" : descriptionState === "saving" ? "Saving…" : descriptionState === "saved" ? "Saved" : descriptionState === "failed" ? "Save failed" : ""}</span></div>
@@ -273,68 +293,42 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
       <div className="mt-3 space-y-2">{taxonomy.map((label) => <div key={label.id} className="flex items-center gap-2 rounded-lg border border-zinc-200 px-2 py-2"><span aria-hidden="true" className="h-3 w-3 rounded-full" style={{ backgroundColor: label.color }} /><span className="min-w-0 flex-1 truncate text-xs font-medium text-zinc-800">{label.name}</span><button type="button" onClick={() => void deleteLabel(label.id)} className="text-[11px] font-semibold text-rose-700">Remove</button></div>)}</div>
       {labelError && <p role="alert" className="mt-3 text-xs text-rose-700">{labelError}</p>}
     </section>}
-    {activeTab === "shapes" && <section className="p-4">
-      <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Shapes</h2><span className="text-xs text-zinc-400">{keyframeList.length}</span></div>
-      <p className="mt-1 text-[11px] leading-4 text-zinc-400">Every bounding box is one keyframe on a track (shape). Click one to highlight it on the paused frame. Manage a shape&apos;s Object ID, name, and label from the Tracks tab.</p>
-      <div className="mt-3 space-y-2">{keyframeList.length === 0 ? <p className="text-xs text-zinc-500">No bounding boxes yet.</p> : keyframeList.map((keyframe) => {
-        const track = tracks[keyframe.trackId];
-        const objectId = typeof track?.properties.objectId === "string" && track.properties.objectId ? track.properties.objectId : null;
-        const isSelected = keyframe.id === selectedKeyframeId;
-        return <div key={keyframe.id} role="button" tabIndex={0} onClick={() => setSelectedKeyframeId(keyframe.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedKeyframeId(keyframe.id); } }} className={`w-full cursor-pointer rounded-xl border p-2 text-left ${isSelected ? "border-sky-400 bg-sky-50" : "border-zinc-200 hover:bg-zinc-50"}`}>
-          <div className="flex items-center justify-between gap-2"><span className="truncate font-mono text-[11px] text-zinc-500">Object ID: {objectId ?? "(none)"}</span><span className="shrink-0 text-[11px] text-zinc-400">{(keyframe.timestampMs / 1000).toFixed(2)}s</span></div>
-          <div className="mt-1 flex items-center justify-between gap-2">
-            <p className="truncate text-xs font-semibold text-zinc-800">{track?.name ?? "(unnamed shape)"}</p>
-            <button type="button" onClick={(event) => { event.stopPropagation(); void removeKeyframeRow(keyframe.id); }} className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button>
-          </div>
-          {track?.label ? <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-500"><span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: track.label.color }} />{track.label.name}</span> : null}
-        </div>;
-      })}</div>
-      {shapeError && <p role="alert" className="mt-3 text-xs text-rose-700">{shapeError}</p>}
-    </section>}
     {activeTab === "tracks" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Tracks</h2><span className="text-xs text-zinc-400">{trackList.length}</span></div>
-      <p className="mt-1 text-[11px] leading-4 text-zinc-400">Each track is one shape/object tracked across frames. Click a track to view and manage its keyframes.</p>
-      <div className="mt-3 space-y-2 rounded-xl border border-zinc-200 p-2" aria-label="Create track">
-        <div className="grid grid-cols-2 gap-2">
-          <input aria-label="New track object ID" value={newTrackObjectId} onChange={(event) => setNewTrackObjectId(event.target.value)} placeholder="Object ID" className="rounded-lg border border-zinc-200 px-2 py-1.5 text-xs" />
-          <input aria-label="New track name" value={newTrackName} onChange={(event) => setNewTrackName(event.target.value)} placeholder="Name" className="rounded-lg border border-zinc-200 px-2 py-1.5 text-xs" />
-        </div>
-        <div className="flex gap-2">
-          <select aria-label="New track label" value={newTrackLabelId} onChange={(event) => setNewTrackLabelId(event.target.value)} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs">
-            <option value="">No label</option>
-            {taxonomy.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-          </select>
-          <button type="button" onClick={() => void createTrackRow()} className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white">Add track</button>
-        </div>
-      </div>
+      <p className="mt-1 text-[11px] leading-4 text-zinc-400">Each track is one shape/object tracked across frames. Click a track to view and manage its keyframes. Create a new track from the video toolbar.</p>
       <div className="mt-3 space-y-2">{trackList.length === 0 ? <p className="text-xs text-zinc-500">No tracks yet.</p> : trackList.map((track) => {
         const trackKeyframes = keyframeList.filter((keyframe) => keyframe.trackId === track.id);
-        const objectId = typeof track.properties.objectId === "string" && track.properties.objectId ? track.properties.objectId : null;
         const isExpanded = expandedTrackId === track.id;
+        const draft = trackDrafts[track.id] ?? draftFromTrack(track);
+        const isSaving = savingTrackId === track.id;
         return <div key={track.id} className={`rounded-xl border ${isExpanded ? "border-sky-300" : "border-zinc-200"}`}>
-          <div role="button" tabIndex={0} onClick={() => setExpandedTrackId(isExpanded ? null : track.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setExpandedTrackId(isExpanded ? null : track.id); } }} className="cursor-pointer p-2">
-            <div className="flex items-center justify-between gap-2"><span className="truncate font-mono text-[11px] text-zinc-500">Object ID: {objectId ?? "(none)"}</span><span className="shrink-0 text-[11px] text-zinc-400">{trackKeyframes.length} keyframes</span></div>
+          <div role="button" tabIndex={0} onClick={() => toggleTrackExpanded(track)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleTrackExpanded(track); } }} className="cursor-pointer p-2">
+            <div className="flex items-center justify-between gap-2"><span className="truncate font-mono text-[11px] text-zinc-500">Track ID: {track.id ?? "(none)"}</span><span className="shrink-0 text-[11px] text-zinc-400">{trackKeyframes.length} keyframes</span></div>
             <p className="mt-1 truncate text-xs font-semibold text-zinc-800">{track.name ?? "(unnamed shape)"}</p>
             {track.label ? <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-500"><span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: track.label.color }} />{track.label.name}</span> : null}
           </div>
           {isExpanded && <div className="space-y-2 border-t border-zinc-100 p-2">
             <div className="grid grid-cols-2 gap-2">
-              <label className="text-[11px] text-zinc-500">Object ID<input defaultValue={objectId ?? ""} onBlur={(event) => void updateTrackFields(track.id, { objectId: event.target.value.trim() })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
-              <label className="text-[11px] text-zinc-500">Name<input defaultValue={track.name ?? ""} onBlur={(event) => void updateTrackFields(track.id, { name: event.target.value.trim() || null })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
+              <label className="text-[11px] text-zinc-500">Object ID<input value={draft.objectId} onChange={(event) => updateTrackDraft(track.id, { objectId: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
+              <label className="text-[11px] text-zinc-500">Name<input value={draft.name} onChange={(event) => updateTrackDraft(track.id, { name: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <label className="text-[11px] text-zinc-500">Label
-                <select value={track.labelId ?? ""} onChange={(event) => void updateTrackFields(track.id, { labelId: event.target.value || null })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
+                <select value={draft.labelId} onChange={(event) => updateTrackDraft(track.id, { labelId: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
                   <option value="">No label</option>
                   {taxonomy.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                 </select>
               </label>
               <label className="text-[11px] text-zinc-500">Interpolation
-                <select value={track.interpolationMode} onChange={(event) => void updateTrackFields(track.id, { interpolationMode: event.target.value as "LINEAR" | "NONE" })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
+                <select value={draft.interpolationMode} onChange={(event) => updateTrackDraft(track.id, { interpolationMode: event.target.value as "LINEAR" | "NONE" })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
                   <option value="LINEAR">Linear</option>
                   <option value="NONE">None</option>
                 </select>
               </label>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button type="button" onClick={() => cancelTrackEdit(track.id)} disabled={isSaving} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-[11px] font-semibold text-zinc-600 hover:bg-zinc-50 disabled:opacity-50">Cancel</button>
+              <button type="button" onClick={() => void saveTrackEdit(track.id)} disabled={isSaving} className="rounded-lg bg-sky-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{isSaving ? "Saving…" : "Save"}</button>
             </div>
             <div>
               <h4 className="text-[11px] font-semibold text-zinc-600">Keyframes</h4>

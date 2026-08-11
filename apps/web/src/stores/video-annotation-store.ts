@@ -52,6 +52,18 @@ type VideoAnnotationState = {
    * re-fires on unrelated re-renders.
    */
   requestedTab: string | null;
+  /**
+   * Additive playback-state slice (spec FR-047, US9) -- the single source of
+   * truth for current frame/time/playback state/fps/duration, written only
+   * by `video-playback-controller.ts`. Nothing here changes the fields
+   * above; this exists so `video-toolbar.tsx` (and any future consumer) can
+   * read playback state without each independently touching `videoRef`.
+   */
+  currentTimeMs: number;
+  currentFrame: number;
+  playbackState: "paused" | "playing";
+  fps: number | null;
+  durationMs: number | null;
   setSnapshot: (tracks: SafeVideoTrack[], keyframes: SafeVideoKeyframe[]) => void;
   setTool: (tool: VideoAnnotationTool) => void;
   setSelectedKeyframeId: (id: string | null) => void;
@@ -67,6 +79,8 @@ type VideoAnnotationState = {
    */
   removeTrack: (trackId: string) => void;
   removeKeyframe: (keyframeId: string) => void;
+  /** Written by `video-playback-controller.ts` after every playback action; also used to seed `fps`/`durationMs` once known. */
+  setPlaybackSnapshot: (snapshot: Partial<Pick<VideoAnnotationState, "currentTimeMs" | "currentFrame" | "playbackState" | "fps" | "durationMs">>) => void;
   preserveConflict: (draft: SafeVideoKeyframe | null) => void;
   markError: () => void;
   clearDraft: () => void;
@@ -82,11 +96,17 @@ export const useVideoAnnotationStore = create<VideoAnnotationState>((set) => ({
   tool: "select",
   selectedKeyframeId: null,
   requestedTab: null,
+  currentTimeMs: 0,
+  currentFrame: 0,
+  playbackState: "paused",
+  fps: null,
+  durationMs: null,
   setSnapshot: (tracks, keyframes) => set({ tracks: Object.fromEntries(tracks.map((track) => [track.id, track])), keyframes: Object.fromEntries(keyframes.map((keyframe) => [keyframe.id, keyframe])), trackList: tracks, keyframeList: keyframes, mutationState: "idle" }),
   setTool: (tool) => set({ tool }),
   setSelectedKeyframeId: (selectedKeyframeId) => set({ selectedKeyframeId }),
   setRequestedTab: (requestedTab) => set({ requestedTab }),
   clearRequestedTab: () => set({ requestedTab: null }),
+  setPlaybackSnapshot: (snapshot) => set(snapshot),
   beginSave: () => set({ mutationState: "saving" }),
   markSaved: (track, keyframe) => set((state) => {
     const tracks = { ...state.tracks, [track.id]: track };

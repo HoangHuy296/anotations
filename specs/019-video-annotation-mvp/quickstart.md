@@ -411,3 +411,126 @@ is made until it is executed against the controlled Compose environment.
    re-run unchanged, to prove FR-005–FR-030 were not touched by the
    relocation.
 5. Web typecheck/lint/build and `git diff --check`.
+
+## Planned validation — interaction ownership (not yet executed)
+
+This section records what plan.md Phase 6 (FR-045–FR-051, US9) requires
+evidence for once implemented. Nothing below has been run; no pass/fail claim
+is made until it is executed. Each item maps to `contracts/
+video-playback-controller-contract.md` and the spec's Acceptance Scenarios
+for User Story 9.
+
+1. Clicking the video annotation surface does not play/pause the video.
+2. Drawing a bounding box does not change playback state.
+3. Dragging an annotation does not seek the video.
+4. Resizing an annotation does not seek the video.
+5. Polygon/polyline vertex editing does not trigger playback (once those
+   tools exist; deferred if not yet in scope this phase).
+6. Starting annotation editing pauses active playback.
+7. Completing annotation editing leaves playback paused (no auto-resume).
+8. Play works from the timeline/toolbar.
+9. Pause works from the timeline/toolbar.
+10. Next Frame advances exactly one frame (`1 / fps` seconds, not a fixed
+    millisecond constant).
+11. Previous Frame moves exactly one frame backward.
+12. Timeline seeking updates `currentFrame` correctly.
+13. Timeline interaction does not create or modify annotations.
+14. Existing Track → Add keyframe here creates a keyframe on the same
+    `VideoObjectTrack` — never a new track (reaffirms FR-008/FR-022).
+15. The new keyframe's geometry can differ from the previous keyframe's.
+16. Mouse and touch interactions follow the same ownership rules (pointer
+    events, not mouse-only handlers).
+17. No native video control (`controls` attribute, native seek bar, native
+    double-click fullscreen) is exposed in annotation mode.
+18. No annotation component (`video-engine.tsx`'s gesture handlers) directly
+    calls `videoRef.current.play()/.pause()`/sets `.currentTime` — only
+    `video-playback-controller.ts` does.
+
+Evidence for these must come from the existing VIDEO workspace UI test
+pattern (`apps/web/tests/workspace/video*.test.tsx`), extended rather than
+replaced, plus a full re-run of the existing VIDEO HTTP/race suites and the
+IMAGE regression baseline (both unaffected by a VIDEO-client-only change) —
+see plan.md Phase 6.3.
+
+## US7 verification and US9 (interaction ownership) implementation — 2026-08-11
+
+**US7 (T062–T073) audit finding**: source inspection (not assumption) found
+the shared workspace registry, `WorkspaceEngine`, `DatasetSidebar`,
+`PropertiesPanel`, and `WorkspaceHeader` already fully implemented and
+registry-driven, with `workspace-engine-registry.vitest.spec.ts` and
+`workspace-shell-boundary.test.ts` already present and passing — this work
+predates this session's audit; T062–T073 are marked `[X]` on that verified
+(not assumed) basis, not re-implemented, per this pass's "inspect before
+modifying" instruction.
+
+**US9 (T085–T098) implemented this pass**: `useVideoAnnotationStore` gained
+an additive playback-state slice (`currentTimeMs`/`currentFrame`/
+`playbackState`/`fps`/`durationMs`, T088); `apps/web/src/lib/workspace/
+video-playback-controller.ts` (T089) is now the sole authority for
+`play`/`pause`/`seekToTime`/`seekToFrame`/`nextFrame`/`previousFrame` against
+the video element; `video-engine.tsx`'s `<video>` element no longer has the
+`controls` attribute (T090); `beginBoxDraw`/`beginGeometryDrag` both pause
+via the controller before anything else, with no auto-resume anywhere
+(T091); the frame-step buttons, timeline scrub input, `seekTo`, and
+`navigateKeyframe` all route through the controller instead of touching
+`videoRef` directly (T092–T094; `video-toolbar.tsx` has no playback controls
+of its own to route — its scope is track lifecycle only, so T092 is
+satisfied by there being nothing left to migrate); the previous/next-frame
+step is now `1 / fps` (with a 30fps fallback when fps is unreliable),
+replacing the prior hardcoded `1/30` (T094); "Existing track → Add keyframe
+here" (`addKeyframe`) was confirmed unchanged — still targets the selected
+track's `expectedTrackRevision`, never calls `createVideoTrack` (T095).
+
+**Commands executed and results**:
+- `cd apps/web && ./node_modules/.bin/tsc --noEmit -p .` — clean (the one
+  pre-existing, unrelated `legacy-image-content.test.ts` failure excluded).
+- `./node_modules/.bin/eslint src/components/workspace/ src/lib/workspace/
+  src/stores/video-annotation-store.ts tests/workspace/` — 0 errors, 4
+  pre-existing unrelated warnings (`audio-toolbox.tsx` unused icons,
+  `video-engine.tsx`'s dead `VideoTemporalLabels` import per the
+  plan.md/tasks.md I1/T077 finding, `workspace-read.ts` unused type).
+- `npm run test:workspace` (node:test) — **47 tests: 30 pass, 0 fail, 17
+  skipped** (all 17 skips are pre-existing Compose/env-gated integration
+  tests — auth HTTP flows, MinIO capability checks, cross-Dataset workspace
+  reads; none are IMAGE-workspace-UI tests). All IMAGE-specific tests in
+  this suite passed (not skipped) — this is T097's IMAGE regression-baseline
+  evidence.
+- `./node_modules/.bin/vitest run` on all six `tests/workspace/*.vitest.spec.ts`
+  files (including the two new ones, T085/T086) — **33 tests, 6 files, all
+  pass**.
+- `./node_modules/.bin/next build` — succeeds, no errors.
+- `git diff --check` — clean (no whitespace errors).
+- `git diff --stat -- package.json apps/web/package.json` — empty (no new
+  dependency introduced).
+
+**Not executed, and NOT claimed complete (T096)**: the VIDEO track/keyframe/
+temporal-label authenticated HTTP/race suites require a live Docker Compose
+stack (Postgres/Redis/MinIO) with `VIDEO_ANNOTATION_HTTP_TESTS=1` and related
+env vars, per this file's earlier evidence entries. That stack was not
+available/started in this session, so those suites were not re-run. T096
+stays `[ ]` until that evidence exists — this is an honest gap, not a
+regression; nothing in this pass touched any VIDEO API route, service, or
+revision domain (FR-005–FR-030/FR-008/FR-022), only client-side pointer/
+playback ownership.
+
+**US8 (T074–T084): not implemented this pass, left `[ ]` except T078**.
+Source audit found T078 (PropertiesPanel VIDEO row-selection wired to
+`useVideoAnnotationStore`, seeking/highlighting/selecting the track) already
+implemented and working — marked `[X]` on that verified basis. The remaining
+US8 items (T074–T077, T079–T084) require relocating `VideoToolbar` (track
+create/select/save/delete, Add Keyframe Here) out of `video-engine.tsx` into
+`dataset-sidebar.tsx`'s registry-driven toolbox. `VideoToolbar` currently
+depends on state and an autosave-coordinator map (`selectedTrackId`,
+`trackCoordinators`) that live as `video-engine.tsx`-local React state/refs;
+once relocated, `VideoToolbar` and `VideoEngine` become sibling components
+(not parent/child), so that state cannot keep flowing through props. Moving
+it correctly requires deciding where it lives instead (most likely lifting
+`selectedTrackId` into `useVideoAnnotationStore`, matching the existing
+`selectedKeyframeId`/`requestedTab` pattern, and lifting the coordinator map
+to a module-level registry, matching `video-autosave.ts`'s existing
+`activeVideoCoordinators` pattern) — a real architecture decision affecting
+VIDEO's core revision-guarded autosave path, not a mechanical move. This was
+flagged back to the user rather than guessed at, per this pass's "do not
+relocate/refactor unless the task explicitly requires it" instruction and
+AGENTS.md's phase-discipline requirement to report risk before undertaking
+it.

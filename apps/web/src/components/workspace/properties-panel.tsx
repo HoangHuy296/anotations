@@ -9,12 +9,20 @@ import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import type { SafeWorkspaceAsset } from "@/types/image-workspace";
+import type { SafeVideoWorkspaceAsset } from "@/types/video-workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
 
 type PropertiesPanelProps = {
   datasetId: string;
   selection: WorkspaceSelection | null;
   images: SafeWorkspaceAsset[];
+  /**
+   * Satisfies `workspaceEngineRegistry`'s shared `PropertiesTabsProps`
+   * contract. No `Tabs` entry reads this yet — there is no server-projected
+   * video listing to source it from until a video-workspace loader exists
+   * (mirrors `workspace.page.items`'s image-only loader in `page.tsx`).
+   */
+  videos: SafeVideoWorkspaceAsset[];
   page: number;
   pageSize: number;
   totalAssets: number;
@@ -37,7 +45,7 @@ export function PropertiesPanel(props: PropertiesPanelProps) {
   return <PropertiesPanelShell key={remountKey} {...props} tab={tab} setTab={setTab} />;
 }
 
-function PropertiesPanelShell({ datasetId, selection, images, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: PropertiesPanelProps & { tab: string; setTab: (tab: string) => void }) {
+function PropertiesPanelShell({ datasetId, selection, images, videos, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: PropertiesPanelProps & { tab: string; setTab: (tab: string) => void }) {
   const router = useRouter();
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
 
@@ -55,5 +63,5 @@ function PropertiesPanelShell({ datasetId, selection, images, page, pageSize, to
   }
 
   const { Tabs } = workspaceEngineRegistry[selection.engine];
-  return <Tabs datasetId={datasetId} selection={selection} images={images} page={page} pageSize={pageSize} totalAssets={totalAssets} completedAssets={completedAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} tab={tab} setTab={setTab} />;
+  return <Tabs datasetId={datasetId} selection={selection} images={images} videos={videos} page={page} pageSize={pageSize} totalAssets={totalAssets} completedAssets={completedAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} tab={tab} setTab={setTab} />;
 }

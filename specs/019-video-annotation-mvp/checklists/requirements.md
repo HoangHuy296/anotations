@@ -44,6 +44,17 @@
 - [ ] CHK024 A synthetic fifth registry entry can be added and removed with changes confined to the registry module (SC-011).
 - [ ] CHK025 The registry is confirmed to be a static, closed-union TypeScript mapping — not a runtime/dynamic/third-party plugin system (Known limitations).
 
+## Interaction ownership
+
+- [ ] CHK026 The native `<video>` element is confirmed renderer-only in annotation mode — no native controls, no click-to-play/pause, no native seek-bar drag, no double-click fullscreen, no touch-gesture playback (FR-045).
+- [ ] CHK027 The annotation overlay/canvas is confirmed the exclusive pointer-interaction layer for create/select/drag/resize/vertex-edit, for pointer/mouse/touch alike, without relying on `stopPropagation()` alone (FR-046).
+- [ ] CHK028 Playback (play/pause/seek/frame-step) is confirmed to go only through one shared workspace playback authority reachable only from the timeline/toolbar — no annotation component drives playback directly (FR-047).
+- [ ] CHK029 Frame navigation is confirmed deterministic (one actual-fps frame per step, not an arbitrary millisecond increment) and updates current-time, current-frame state, visible annotations/interpolation, and the timeline playhead together (FR-048).
+- [ ] CHK030 Beginning an annotation interaction is confirmed to pause active playback and hold the frame fixed; completing it is confirmed to leave playback paused, not auto-resume (FR-049).
+- [ ] CHK031 Timeline pointer interaction is confirmed to have its own event boundary and never creates/moves/deletes an annotation as a side effect (FR-050).
+- [ ] CHK032 "Existing track → Add keyframe here" is confirmed to create exactly one keyframe on the existing `VideoObjectTrack` — never a new track — with independent geometry per keyframe (FR-051, reaffirming FR-008/FR-022).
+- [ ] CHK033 No new video-provider dependency (Video.js, Plyr, or similar) is introduced; the native `<video>` element remains the decoder/renderer (Explicit non-goals).
+
 ## Notes
 
 This checklist is intentionally unchecked because it gates implementation

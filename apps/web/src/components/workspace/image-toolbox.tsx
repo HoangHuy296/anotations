@@ -1,6 +1,6 @@
 "use client";
 
-import { BoundingBox, Circle, Cursor, Hand, LineSegment, MapPin, Pentagon } from "@phosphor-icons/react";
+import { BoundingBox, Circle, Cursor, Hand, LineSegment, MapPin, Pentagon, Atom } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 import { useAnnotationStore } from "@/stores/image-annotation-store";
@@ -26,6 +26,7 @@ export function ImageToolbox() {
       <ToolButton active={tool === "circle"} label="Circle" onClick={() => setTool("circle")}><Circle size={15} /></ToolButton>
       <ToolButton active={tool === "point"} label="Point" onClick={() => setTool("point")}><MapPin size={15} /></ToolButton>
       <ToolButton active={tool === "polyline"} label="Polyline" onClick={() => setTool("polyline")}><LineSegment size={15} /></ToolButton>
+      <ToolButton active={tool === "aidetect"} label="AI Detection" onClick={() => setTool("aidetect")}><Atom size={15} /></ToolButton>
       <button type="button" disabled title="Segmentation masks are read-only in this phase" className="rounded-lg border border-zinc-100 px-2 py-1.5 text-[10px] font-medium text-zinc-300">Mask (read-only)</button>
     </div>
   </>;

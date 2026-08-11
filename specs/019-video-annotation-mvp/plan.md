@@ -19,6 +19,16 @@ amount of dedicated conflict-mapping code (`video-conflicts.ts`, T049, does
 not exist yet; its behavior currently lives inline in `video-engine.tsx` and
 `video-autosave.ts`), not missing US1–US3 functionality. This phase does not
 close any of those open tasks; it only relocates existing rendered UI.
+**Update**: 2026-08-11 — adds Phase 6, Interaction ownership (User Story 9,
+FR-045–FR-051). Independent of and does not block on Phase 4/5's completion
+state: Phase 6 touches `video-engine.tsx`'s pointer-event wiring and the
+`<video>` element's attributes regardless of whether the track
+toolbar/details/temporal-label UI has finished relocating into the shared
+shell registry. It also corrects a Project Structure omission — VIDEO's
+`PropertiesPanel` tabs already render from a dedicated
+`video-properties-tabs.tsx` registry entry (not inline in `video-engine.tsx`
+as earlier Phase 5 text assumed); Phase 6 does not depend on reconciling the
+rest of that drift and does not attempt to.
 
 ## Summary
 
@@ -76,6 +86,13 @@ stays unchanged throughout. IMAGE behavior is the regression baseline.
 - **V. Validation/testing/phase discipline** — PASS with migration gate.
   Zod, authenticated tests, rollback/race evidence, and build validation are
   required. Any additive schema change needs explicit approval before coding.
+
+**Post-design re-check (Phase 6, US9)** — PASS. No Prisma model, migration,
+API route, revision domain, or npm dependency is added; `video-playback-
+controller.ts` and the `useVideoAnnotationStore` playback slice are
+client-only additions consumed exclusively by existing VIDEO components
+(`video-engine.tsx`, `video-toolbar.tsx`, `video-timeline.tsx`). No public
+worker endpoint is touched.
 
 ## Phase 0 — Research and audit
 
@@ -218,9 +235,19 @@ already-rendered UI into the registry entries Phase 4 created.
    `dataset-sidebar.tsx`, `properties-panel.tsx`, and `workspace-header.tsx`
    already read their content from it (with VIDEO/AUDIO/TEXT still holding
    placeholder toolbox/tabs content from Phase 4).
-2. Confirm `video-engine.tsx`'s current inline surfaces to relocate:
-   `VideoToolbar`, `VideoDetailsPanel`, `VideoTemporalLabels`, and an inline
-   save-state footer.
+2. **Current implementation audit**: The VIDEO workspace does not currently
+   render `VideoDetailsPanel` or `VideoTemporalLabels` directly from
+   `video-engine.tsx`. The current VIDEO Properties Panel implementation is
+   `apps/web/src/components/workspace/video-properties-tabs.tsx` — this
+   component owns the current VIDEO right-panel tabs and renders the
+   currently implemented VIDEO details, tracks, labels, shapes, description,
+   assets, and related content. `VideoDetailsPanel` and `VideoTemporalLabels`
+   may exist as imported/exported components, but they are not part of the
+   currently rendered VIDEO workspace path. Future VIDEO PropertiesPanel work
+   must extend/reconcile `video-properties-tabs.tsx` rather than assume that
+   `VideoDetailsPanel` or `VideoTemporalLabels` are currently rendered by
+   `video-engine.tsx`. `video-engine.tsx`'s only remaining inline surface to
+   relocate is `VideoToolbar` and its inline save-state footer.
 3. Confirm the exact click-to-seek contract for PropertiesPanel VIDEO
    Shapes/Tracks rows against `useVideoAnnotationStore` and `videoRef`, since
    that state currently lives inside `video-engine.tsx`.
@@ -282,6 +309,136 @@ already-rendered UI into the registry entries Phase 4 created.
 5. Record executed results in `quickstart.md`; do not record unexecuted
    claims.
 
+## Phase 6 — Interaction ownership (FR-045–FR-051, US9)
+
+Independent of Phase 4/5's completion state (see Update note above). The
+native `<video>` element, the annotation overlay, and the timeline/toolbar
+already exist as three separate surfaces inside `video-engine.tsx`; this
+phase is about which one owns which pointer/playback behavior, not about
+introducing new rendering surfaces or a new video provider (spec Explicit
+non-goals).
+
+### 6.0 Research and audit
+
+1. Audit `video-engine.tsx`'s current `<video>` element: it renders with the
+   native `controls` attribute and sits directly under
+   `onPointerDown={beginBoxDraw}`, which only intercepts pointer events when
+   `tool === "box"`. For every other tool (`select` and friends), a pointer
+   press on the frame currently reaches the native video element unguarded —
+   this is the concrete violation FR-045/FR-046 close.
+2. Audit `beginGeometryDrag`, `beginBoxDraw`, and the resize/move handle divs
+   already rendered above the video (`"Move keyframe"`,
+   `"Resize keyframe {corner}"`) — these already sit in front of the video in
+   stacking order and already use `pointerdown`/pointer capture
+   (`setPointerCapture`) for drag, confirming the overlay-ownership pattern
+   FR-046 requires already exists for editing; it needs to be extended to
+   cover every interaction path, not invented from scratch.
+3. Audit `video-toolbar.tsx` and `video-timeline.tsx` for their existing
+   play/pause/frame-step/seek controls and confirm which of them currently
+   call `videoRef.current.play()/.pause()/.currentTime = ...` directly versus
+   which already go through `video-engine.tsx`'s handlers
+   (`seekTo`, `navigateKeyframe`, the frame-step buttons using a hardcoded
+   `1/30` step — the concrete violation FR-048 closes, since it assumes 30fps
+   instead of the Video Asset's actual fps).
+4. Confirm `useVideoAnnotationStore` (`stores/video-annotation-store.ts`) as
+   the existing single-store pattern for VIDEO-only client state (it already
+   holds `tool`, `selectedKeyframeId`, `tracks`, `keyframes`, `requestedTab`);
+   confirm it is the correct place to add a playback-state slice rather than
+   introducing a second store.
+5. Confirm the Video Asset's fps is already available to `video-engine.tsx`
+   via `readiness.video?.fps` (or the equivalent safe-readiness field) for
+   deterministic one-frame stepping.
+
+### 6.1 Design and contracts
+
+1. Define the interaction-ownership boundary and the shared playback
+   controller's method surface in
+   `contracts/video-playback-controller-contract.md`: the `<video>` element
+   is renderer-only (no `controls` attribute, not a direct pointer target for
+   annotation gestures); one playback controller (`play`, `pause`,
+   `seekToTime`, `seekToFrame`, `nextFrame`, `previousFrame`) is the only
+   thing that touches `videoRef.current` for playback purposes; the
+   annotation overlay owns every annotation pointer gesture; the timeline
+   owns seek/scrub only.
+2. Extend `useVideoAnnotationStore` with an additive playback-state slice —
+   `currentTimeMs`, `currentFrame`, `playbackState` ("paused" | "playing"),
+   `fps`, `durationMs` — and playback actions that update it, without
+   changing any existing field, action, or consumer (`tool`,
+   `selectedKeyframeId`, `tracks`, `keyframes`, `requestedTab`,
+   `mutationState`, etc. stay untouched). This is the "single source of
+   truth" FR-047 requires.
+3. Design a small `apps/web/src/lib/workspace/video-playback-controller.ts`
+   module — a thin wrapper bound to `video-engine.tsx`'s existing `videoRef`
+   — exposing `play()/pause()/seekToTime()/seekToFrame()/nextFrame()/
+   previousFrame()`, each of which mutates `videoRef.current` and then writes
+   the resulting snapshot into the store slice from step 2. `video-toolbar.tsx`
+   and `video-timeline.tsx` call only this controller (via props/callbacks
+   from `video-engine.tsx`, matching their existing callback-prop pattern) —
+   neither touches `videoRef` directly, closing FR-047's "no annotation
+   component calls `video.play()`/`.pause()` directly" requirement without
+   adding prop-drilling through the shared shell registry.
+4. Design frame-step math as `1 / fps` seconds (falling back to the existing
+   safe default only when fps is missing/unreliable, per spec FR-016's
+   existing fallback rule) — replacing the current hardcoded `1/30` step —
+   and define the six-step frame-navigation sequence from spec FR-048 (pause
+   if needed → update `video.currentTime` → update store `currentFrame` →
+   recompute visible annotations/derived interpolation → update the timeline
+   playhead) as one function, not scattered across button handlers.
+5. Design the "begin annotation interaction" hook point: every entry to
+   `beginBoxDraw`, `beginGeometryDrag`, shape selection, and (once
+   polygon/circle/point/polyline exist) their create/vertex-edit gestures
+   calls the controller's `pause()` first if `playbackState === "playing"`,
+   before doing anything else — one shared guard, not one per gesture.
+6. Design removal of the native `controls` attribute and confirm the overlay
+   div (already the outer wrapper per 6.0.1) becomes the sole pointer target
+   for the video area in every tool mode, not just `"box"` — clicking/
+   dragging/touching that area always reaches the overlay's pointer handlers
+   first; the video element itself needs no `pointer-events: none` since it
+   no longer has interactive `controls` to suppress, but its z-order stays
+   below the overlay.
+
+### 6.2 Implementation slices
+
+1. Add the playback-state slice and actions to `useVideoAnnotationStore`.
+2. Add `video-playback-controller.ts` and wire it into `video-engine.tsx`
+   against the existing `videoRef`.
+3. Remove the `<video>` element's `controls` attribute; confirm the existing
+   overlay wrapper div receives pointer events for every tool mode (not only
+   `"box"`) by routing selection/drag/resize entry points through it.
+4. Replace `video-toolbar.tsx`'s and `video-timeline.tsx`'s direct
+   `videoRef`/`currentTime` manipulation (if any) with calls to the
+   controller passed down from `video-engine.tsx`.
+5. Replace the hardcoded `1/30` previous/next-frame step with the
+   fps-derived one-frame step and the unified six-step navigation sequence
+   from 6.1.4.
+6. Add the pause-on-interaction-start guard to `beginBoxDraw` and
+   `beginGeometryDrag`; confirm no code path auto-resumes playback after an
+   interaction completes (spec FR-049 — the absence of a resume call is the
+   implementation, not a new function).
+7. Confirm "Existing track → Add keyframe here" (already implemented per
+   FR-008/FR-022) is untouched by this phase: it must keep using the
+   existing track and its `expectedTrackRevision` guard, never a new
+   `VideoObjectTrack` (FR-051 reaffirms, does not change, this behavior).
+
+### 6.3 Verification and closure
+
+1. Add/extend `video-engine`/`video-toolbar`/`video-timeline` UI tests
+   proving the 18 acceptance-test statements enumerated in
+   `quickstart.md`'s "Planned validation — interaction ownership" section
+   (native-control absence, no play/pause/seek leakage from annotation
+   gestures, pause-on-interaction-start/no-auto-resume, timeline-only
+   playback with no annotation side effects, exact one-frame stepping,
+   mouse/touch parity, and the existing-track keyframe invariant).
+2. Re-run the full existing VIDEO track/keyframe/temporal-label HTTP and
+   race suites unchanged; confirm FR-005–FR-030/FR-008/FR-022 stay green
+   (this phase does not touch those routes/services).
+3. Re-run the full existing IMAGE workspace UI/autosave/conflict suite
+   unchanged (regression baseline, unaffected by a VIDEO-only change).
+4. Run web typecheck/lint/build, `git diff --check`, and confirm no new
+   `package.json` dependency was introduced (spec Explicit non-goals).
+5. Record executed results in `quickstart.md`; do not record unexecuted
+   claims.
+
 ## Project Structure
 
 ### Documentation
@@ -295,6 +452,7 @@ specs/019-video-annotation-mvp/
 ├── quickstart.md
 ├── contracts/video-annotation-api.md
 ├── contracts/workspace-shell-contract.md          # new: shared-shell registry contract
+├── contracts/video-playback-controller-contract.md # new (Phase 6/US9): interaction-ownership boundary
 └── checklists/requirements.md
 ```
 
@@ -320,13 +478,21 @@ apps/web/src/
 ├── src/components/workspace/dataset-sidebar.tsx     # generalized: toolbox sourced from the registry
 ├── src/components/workspace/properties-panel.tsx    # generalized: tabs sourced from the registry
 ├── src/components/workspace/workspace-header.tsx    # generalized: status fields sourced from the registry
-├── src/components/workspace/video-engine.tsx        # trimmed (Phase 5/US8): playback/canvas/timeline only
-├── src/components/workspace/video-toolbar.tsx        # rendered via the VIDEO registry entry now
+├── src/components/workspace/video-engine.tsx        # trimmed (Phase 5/US8): playback/canvas/timeline only;
+│                                                     #   Phase 6/US9: <video> loses `controls`, wires the
+│                                                     #   playback controller, pause-on-interaction-start guard
+├── src/components/workspace/video-toolbar.tsx        # rendered via the VIDEO registry entry now;
+│                                                     #   Phase 6/US9: calls the playback controller, not videoRef
+├── src/components/workspace/video-timeline.tsx       # Phase 6/US9: calls the playback controller for seek only
 ├── src/components/workspace/video-details-panel.tsx  # rendered via the VIDEO registry entry now
-└── src/components/workspace/video-temporal-labels.tsx # rendered via the VIDEO registry entry now
+├── src/components/workspace/video-temporal-labels.tsx # rendered via the VIDEO registry entry now
+├── src/components/workspace/video-properties-tabs.tsx # existing VIDEO PropertiesPanel tabs registry entry
+│                                                     #   (Project Structure correction, see plan.md Update note)
+├── src/stores/video-annotation-store.ts             # Phase 6/US9: additive playback-state slice
+└── src/lib/workspace/video-playback-controller.ts   # new (Phase 6/US9): single play/pause/seek/frame-step authority
 apps/web/tests/
 ├── annotations/video-annotation*.test.ts            # unchanged (data/API layer)
-├── workspace/video*.test.tsx                        # extended for shell relocation
+├── workspace/video*.test.tsx                        # extended for shell relocation and interaction ownership
 ├── workspace/image*.test.tsx                        # regression baseline, unchanged
 └── auth-ownership/video-annotation*.test.ts          # unchanged (data/API layer)
 ```
@@ -350,3 +516,4 @@ file move turns out to be the smaller diff during implementation.
 | Widen `properties-panel.tsx`'s prop type from IMAGE-only `image` to a `WorkspaceSelection`-shaped discriminant | The panel cannot render Video Details/Tracks/Shapes tabs while its own type signature only accepts an image asset | Adding a second `VideoPropertiesPanel` component would recreate exactly the duplicate-shared-component problem FR-034 forbids |
 | Generalize `workspace-header.tsx` into the shared status surface rather than introduce a new bottom-mounted `WorkspaceStatusBar` file | Reusing the existing header keeps one save-state source of truth (`useAnnotationStore`) and avoids a second component racing to show save state | A brand-new always-bottom status bar would duplicate `workspace-header.tsx`'s save/conflict logic instead of extending it, and gains nothing IMAGE doesn't already have today |
 | A shared workspace registry module (`workspace-engine-registry.ts`), added as its own phase before the VIDEO relocation | Without it, `DatasetSidebar`/`PropertiesPanel`/the status surface would each need their own independent `engine` branching, and a fifth modality would require editing four files instead of one — FR-040 would be true only by convention | Skipping straight to per-component `switch` branches (the original Phase 4 draft) works for four known modalities but re-forks exactly the layout logic FR-034 forbids the moment a fifth is added; the registry is the one-time cost that makes FR-040 structurally true |
+| A dedicated `video-playback-controller.ts` module, plus an additive playback-state slice on the existing `useVideoAnnotationStore` | FR-047 requires one single source of truth for current frame/time/playback state/fps/duration, reachable from `video-toolbar.tsx`, `video-timeline.tsx`, and every annotation-gesture entry point in `video-engine.tsx`; scattering `videoRef.current.play()/.pause()`/`currentTime=` calls across those three files is exactly what FR-047 forbids | Storing the DOM `videoRef` itself inside the Zustand store was rejected (couples global client state to a component-owned ref/SSR lifecycle); a second, separate playback store was rejected as an unnecessary second source of truth alongside the existing VIDEO store |

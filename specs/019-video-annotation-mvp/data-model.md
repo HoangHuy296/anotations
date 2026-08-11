@@ -70,6 +70,26 @@ audit finds missing for a panel to render what `VideoEngine` already reads
 today (e.g. `readiness`, `annotations`). No storage identity, credential, or
 provider field is added to `WorkspaceSelection` or the registry.
 
+## Client-only playback state (no new entity)
+
+Phase 6 (spec FR-045–FR-051, US9) introduces no Prisma model, API DTO, or
+revision domain. It adds one additive slice to the existing client-side
+`useVideoAnnotationStore` (`apps/web/src/stores/video-annotation-store.ts`):
+
+| Field | Type | Source of truth |
+|---|---|---|
+| `currentTimeMs` | `number` | Mirrors `videoRef.current.currentTime`, written only by `video-playback-controller.ts` |
+| `currentFrame` | `number` | Derived as `Math.round(currentTimeMs / (1000 / fps))` when fps is reliable (existing FR-016 fallback rule otherwise) |
+| `playbackState` | `"paused" \| "playing"` | Mirrors the `<video>` element's play/pause state |
+| `fps` | `number \| null` | Read once from the Video Asset's safe readiness metadata (`readiness.video?.fps`), not re-derived per frame |
+| `durationMs` | `number \| null` | Mirrors `videoRef.current.duration` |
+
+This slice is never sent to or received from the server — it exists only to
+give `video-toolbar.tsx`, `video-timeline.tsx`, and every annotation-gesture
+entry point in `video-engine.tsx` one shared, current view of playback state
+without each reading `videoRef` independently. It carries no storage
+identity, credential, or provider field.
+
 ## State and invariants
 
 - Track/keyframe mutations use one expected track revision and increment once.

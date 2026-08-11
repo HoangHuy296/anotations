@@ -133,18 +133,18 @@ registry lookup already wired in. Remove the entry and confirm IMAGE/VIDEO/
 AUDIO/TEXT behavior is unchanged; IMAGE's own registry-sourced content must
 match its pre-registry behavior exactly.
 
-- [ ] T062 [P] [US7] Add a registry unit test proving a synthetic fifth entry renders correctly across all four consuming lookups and that removing it removes the modality cleanly, in `apps/web/tests/workspace/workspace-engine-registry.vitest.spec.ts`
-- [ ] T063 [P] [US7] Add a structural boundary test asserting `workspace-engine.tsx`, `dataset-sidebar.tsx`, `properties-panel.tsx`, and `workspace-header.tsx` each contain at most one `workspaceEngineRegistry[...]` lookup and no independent `switch`/`if` keyed on `engine`/`asset.modality` beyond it, in `apps/web/tests/workspace/workspace-shell-boundary.test.ts` (source-text assertions via `node:test` + `node:fs`, matching this repo's no-jsdom convention — no rendering harness is added)
-- [ ] T064 [US7] Define `WorkspaceEngineRegistryEntry` (`Component`, `toolbox`, `tabs`, `statusFields`) and the `Record<WorkspaceSelection["engine"], WorkspaceEngineRegistryEntry>` type in `apps/web/src/lib/workspace/workspace-engine-registry.ts`, per `contracts/workspace-shell-contract.md`
-- [ ] T065 [US7] Add the IMAGE registry entry reproducing current IMAGE toolbox (select/pan/bounding-box/polygon/circle/point/polyline)/tabs (Details/Labels/Shapes/Assets)/status fields (zoom, connection) exactly, in `apps/web/src/lib/workspace/workspace-engine-registry.ts`
-- [ ] T066 [US7] Add VIDEO/AUDIO/TEXT registry entries with their Engine component references and placeholder toolbox/tabs/status-field content (real VIDEO content is added in Phase 11; AUDIO/TEXT stay read-only placeholders), in `apps/web/src/lib/workspace/workspace-engine-registry.ts`
-- [ ] T067 [US7] Refactor `workspace-engine.tsx` to render `workspaceEngineRegistry[selection.engine].Component` instead of its inline `switch`, preserving the existing "no asset selected" fallback
-- [ ] T068 [US7] Refactor `dataset-sidebar.tsx` to render `workspaceEngineRegistry[engine].toolbox` instead of its hard-coded IMAGE-only tool buttons, with IMAGE's rendered output unchanged; dataset/asset navigation and open-directory controls stay outside the registry lookup
-- [ ] T069 [US7] Refactor `properties-panel.tsx` to accept `WorkspaceSelection` (or an equivalent discriminated prop) and render `workspaceEngineRegistry[engine].tabs` instead of its IMAGE-only `image` prop and hard-coded tabs, with IMAGE's rendered output unchanged
-- [ ] T070 [US7] Refactor `workspace-header.tsx` into the shared status surface: keep the existing save/dirty/conflict display, and render `workspaceEngineRegistry[engine].statusFields` instead of the hard-coded "Image" badge, with IMAGE's rendered output unchanged
-- [ ] T071 [US7] Update `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx` prop wiring only if `DatasetSidebar`/`PropertiesPanel` prop names changed in T068–T070; the page must keep composing the same four regions in the same order
-- [ ] T072 [US7] Re-run the full existing IMAGE workspace test suite unchanged and confirm it stays green as the regression baseline; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
-- [ ] T073 [US7] Run web typecheck/lint/build and `git diff --check`; record exact results in `specs/019-video-annotation-mvp/quickstart.md`
+- [X] T062 [P] [US7] Add a registry unit test proving a synthetic fifth entry renders correctly across all four consuming lookups and that removing it removes the modality cleanly, in `apps/web/tests/workspace/workspace-engine-registry.vitest.spec.ts`
+- [X] T063 [P] [US7] Add a structural boundary test asserting `workspace-engine.tsx`, `dataset-sidebar.tsx`, `properties-panel.tsx`, and `workspace-header.tsx` each contain at most one `workspaceEngineRegistry[...]` lookup and no independent `switch`/`if` keyed on `engine`/`asset.modality` beyond it, in `apps/web/tests/workspace/workspace-shell-boundary.test.ts` (source-text assertions via `node:test` + `node:fs`, matching this repo's no-jsdom convention — no rendering harness is added)
+- [X] T064 [US7] Define `WorkspaceEngineRegistryEntry` (`Component`, `toolbox`, `tabs`, `statusFields`) and the `Record<WorkspaceSelection["engine"], WorkspaceEngineRegistryEntry>` type in `apps/web/src/lib/workspace/workspace-engine-registry.ts`, per `contracts/workspace-shell-contract.md`
+- [X] T065 [US7] Add the IMAGE registry entry reproducing current IMAGE toolbox (select/pan/bounding-box/polygon/circle/point/polyline)/tabs (Details/Labels/Shapes/Assets)/status fields (zoom, connection) exactly, in `apps/web/src/lib/workspace/workspace-engine-registry.ts`
+- [X] T066 [US7] Add VIDEO/AUDIO/TEXT registry entries with their Engine component references and placeholder toolbox/tabs/status-field content (real VIDEO content is added in Phase 11; AUDIO/TEXT stay read-only placeholders), in `apps/web/src/lib/workspace/workspace-engine-registry.ts`
+- [X] T067 [US7] Refactor `workspace-engine.tsx` to render `workspaceEngineRegistry[selection.engine].Component` instead of its inline `switch`, preserving the existing "no asset selected" fallback
+- [X] T068 [US7] Refactor `dataset-sidebar.tsx` to render `workspaceEngineRegistry[engine].toolbox` instead of its hard-coded IMAGE-only tool buttons, with IMAGE's rendered output unchanged; dataset/asset navigation and open-directory controls stay outside the registry lookup
+- [X] T069 [US7] Refactor `properties-panel.tsx` to accept `WorkspaceSelection` (or an equivalent discriminated prop) and render `workspaceEngineRegistry[engine].tabs` instead of its IMAGE-only `image` prop and hard-coded tabs, with IMAGE's rendered output unchanged
+- [X] T070 [US7] Refactor `workspace-header.tsx` into the shared status surface: keep the existing save/dirty/conflict display, and render `workspaceEngineRegistry[engine].statusFields` instead of the hard-coded "Image" badge, with IMAGE's rendered output unchanged
+- [X] T071 [US7] Update `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx` prop wiring only if `DatasetSidebar`/`PropertiesPanel` prop names changed in T068–T070; the page must keep composing the same four regions in the same order
+- [X] T072 [US7] Re-run the full existing IMAGE workspace test suite unchanged and confirm it stays green as the regression baseline; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
+- [X] T073 [US7] Run web typecheck/lint/build and `git diff --check`; record exact results in `specs/019-video-annotation-mvp/quickstart.md`
 
 ## Phase 11: User Story 8 — Relocate VIDEO controls into the shared shell (Priority: P1)
 
@@ -165,14 +165,52 @@ toolbar, Video Details, temporal-label, or save-state chrome.
 - [ ] T074 [P] [US8] Extend `workspace-shell-content.vitest.spec.ts` (or add `apps/web/tests/workspace/workspace-shell-video-content.vitest.spec.ts`) asserting VIDEO's registry entry now matches spec FR-035–FR-037 content (toolbox includes track create/select/save/delete + Add Keyframe Here + temporal-segment + playback; tabs include Video Details/Tracks/Labels/Shapes/Properties/Assets; status fields include current frame/timestamp/playback speed/latency), replacing Phase 10's placeholder assertions
 - [ ] T075 [P] [US8] Extend `workspace-shell-boundary.test.ts` asserting `video-engine.tsx` no longer imports `VideoToolbar`, `VideoDetailsPanel`, or `VideoTemporalLabels`
 - [ ] T076 [US8] Replace VIDEO's placeholder toolbox in `workspace-engine-registry.ts` with real content, and move `VideoToolbar` (track create/select/save/delete, Add Keyframe Here) rendering into `dataset-sidebar.tsx`'s registry-driven toolbox output, preserving the existing autosave-coordinator wiring currently in `video-engine.tsx`
-- [ ] T077 [US8] Replace VIDEO's placeholder tabs in `workspace-engine-registry.ts` with Video Details/Tracks/Labels/Shapes/Properties/Assets, rendering `VideoDetailsPanel` and `VideoTemporalLabels` from `properties-panel.tsx`'s registry-driven tab shell instead of `video-engine.tsx`
-- [ ] T078 [US8] Wire PropertiesPanel's VIDEO Shapes/Tracks row selection to seek the player, highlight the shape, select the track, and load properties via `useVideoAnnotationStore`, replacing the equivalent logic currently inline in `video-engine.tsx`
+- [ ] T077 [US8] Reconcile VIDEO PropertiesPanel with the shared PropertiesPanel architecture by using the existing `video-properties-tabs.tsx` implementation as the VIDEO-specific content body (already wired via `workspace-engine-registry.ts`'s `Tabs` entry); preserve the currently implemented VIDEO tabs and behavior, add or integrate any newly required VIDEO-specific panel content (e.g. temporal labels) through `video-properties-tabs.tsx` rather than introducing a second standalone VIDEO sidebar, do not duplicate the VIDEO PropertiesPanel implementation, and do not move currently unrendered components (`VideoDetailsPanel`, `VideoTemporalLabels`) into the active render path unless explicitly required by the corresponding functional requirement
+- [X] T078 [US8] Wire PropertiesPanel's VIDEO Shapes/Tracks row selection to seek the player, highlight the shape, select the track, and load properties via `useVideoAnnotationStore`, replacing the equivalent logic currently inline in `video-engine.tsx`
 - [ ] T079 [US8] Replace VIDEO's placeholder status fields in `workspace-engine-registry.ts` with current frame, timestamp, playback speed, and latency, sourced from state currently read inside `video-engine.tsx`
 - [ ] T080 [US8] Trim `video-engine.tsx` to playback, canvas overlay, timeline, and drag/resize interaction only; delete the now-relocated inline `VideoToolbar`, `VideoDetailsPanel`, `VideoTemporalLabels`, and save-state footer JSX (depends on T076–T079 having taken over that rendering)
 - [ ] T081 [US8] Update `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx` prop wiring only if required by T076–T080; the page must keep composing the same four regions in the same order
 - [ ] T082 [US8] Re-run the full existing IMAGE workspace test suite unchanged and confirm it stays green as the regression baseline; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
 - [ ] T083 [US8] Re-run the existing VIDEO track/keyframe/temporal-label HTTP and race tests unchanged and confirm they stay green, proving FR-005–FR-030 were not altered by the relocation; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
 - [ ] T084 [US8] Run Prisma validate/generate (no schema change expected), web typecheck/lint/build, and `git diff --check`; record exact results in `specs/019-video-annotation-mvp/quickstart.md`
+
+## Phase 12: User Story 9 — Interaction ownership separates rendering, annotation editing, and playback control (Priority: P1)
+
+**Goal**: Separate three surfaces that already exist inside `video-engine.tsx`
+by pointer/playback ownership: the native `<video>` element becomes
+renderer-only (no `controls`, never a direct pointer target for annotation
+gestures), the annotation overlay owns every annotation pointer gesture in
+every tool mode, and the timeline/toolbar owns playback/frame navigation
+exclusively through one new playback controller. Independent of US7/US8's
+completion state — this touches `video-engine.tsx`'s pointer-event wiring and
+the `<video>` element's attributes regardless of whether the shared-shell
+relocation has finished. No VIDEO API route, DTO, revision domain, Prisma
+model, or npm dependency changes. Maps to `plan.md` Phase 6 / spec
+FR-045–FR-051.
+
+**Independent Test**: While playback is active, press-and-drag to draw a
+bounding box; assert playback pauses at drag start, the frame does not
+advance during the drag, the keyframe saves against that exact frame, and
+playback does not resume on its own. Assert clicking/double-clicking/
+touch-tapping the video surface never toggles native play/pause or triggers
+native fullscreen, and that dragging the timeline never creates or edits an
+annotation. Assert "Existing track → Add keyframe here" still creates exactly
+one keyframe on the existing `VideoObjectTrack`, never a new track.
+
+- [X] T085 [P] [US9] Add `video-playback-controller.ts` unit tests proving one single source of truth (`currentTimeMs`/`currentFrame`/`playbackState`/`fps`/`durationMs`), `play`/`pause`/`seekToTime`/`seekToFrame`/`nextFrame`/`previousFrame` behavior, and fps-derived one-frame stepping (not a fixed millisecond constant, with the existing FR-016 fallback when fps is missing/unreliable) in `apps/web/tests/workspace/video-playback-controller.vitest.spec.ts`
+- [X] T086 [P] [US9] Add interaction-ownership tests proving clicking/double-clicking/dragging/touching the video surface never toggles native play/pause or triggers native fullscreen; drawing/selecting/dragging/resizing a shape never seeks or toggles playback; beginning an annotation interaction pauses active playback and completing it leaves playback paused with no auto-resume; and mouse/touch input follow identical ownership rules, in `apps/web/tests/workspace/video-interaction-ownership.vitest.spec.ts` (pure logic/store assertions, matching this repo's no-jsdom convention per T036/T063)
+- [X] T087 [P] [US9] Extend `apps/web/tests/workspace/workspace-shell-boundary.test.ts` (or add `apps/web/tests/workspace/video-timeline-ownership.test.ts`) asserting `video-toolbar.tsx` and `video-timeline.tsx` contain no direct `videoRef`/`.currentTime`/`.play()`/`.pause()` access (source-text assertions, matching T063's pattern), and that timeline seek/scrub updates `currentFrame` without creating, moving, or deleting an annotation
+- [X] T088 [US9] Add the additive playback-state slice (`currentTimeMs`, `currentFrame`, `playbackState`, `fps`, `durationMs`) and its setters to `apps/web/src/stores/video-annotation-store.ts` without altering any existing field, action, or consumer (`tool`, `selectedKeyframeId`, `tracks`, `keyframes`, `requestedTab`, `mutationState`, etc.)
+- [X] T089 [US9] Implement `apps/web/src/lib/workspace/video-playback-controller.ts` (`play`, `pause`, `seekToTime`, `seekToFrame`, `nextFrame`, `previousFrame`) bound to `video-engine.tsx`'s existing `videoRef`, writing every result into T088's store slice; `nextFrame`/`previousFrame` step by `1 / fps` seconds with the FR-016 fallback, per `contracts/video-playback-controller-contract.md`
+- [X] T090 [US9] Remove the `<video>` element's `controls` attribute and make the existing annotation-overlay frame wrapper the pointer target for every tool mode (not only `"box"`) in `apps/web/src/components/workspace/video-engine.tsx`
+- [X] T091 [US9] Add the pause-on-interaction-start guard to `beginBoxDraw`, `beginGeometryDrag`, and shape selection — call `controller.pause()` first when `playbackState === "playing"` — and confirm no code path calls `controller.play()` on interaction completion, in `apps/web/src/components/workspace/video-engine.tsx`
+- [X] T092 [US9] Route `apps/web/src/components/workspace/video-toolbar.tsx`'s play/pause/previous-frame/next-frame controls through the T089 controller (passed down as callback props from `video-engine.tsx`, matching its existing callback-prop pattern) instead of any direct `videoRef`/`currentTime` access
+- [X] T093 [US9] Route `apps/web/src/components/workspace/video-timeline.tsx`'s seek/scrub through the T089 controller's `seekToTime`, replacing any direct `videoRef` access, while confirming the timeline still never creates or modifies an annotation
+- [X] T094 [US9] Replace the hardcoded `1/30` previous/next-frame step in `video-engine.tsx` with the T089 controller's fps-derived `nextFrame`/`previousFrame`, and confirm the six-step navigation sequence (pause if needed → update `video.currentTime` → update store `currentFrame` → recompute visible annotations/derived interpolation → update the timeline playhead) runs as one unit
+- [X] T095 [US9] Verify "Existing track → Add keyframe here" (`video-toolbar.tsx`'s Add Keyframe Here control) is unaffected by T088–T094 — it must still target the already-selected track's `expectedTrackRevision` (FR-008/FR-022) and never create a new `VideoObjectTrack`; this is a confirmation checkpoint, not new implementation, and any regression found must be fixed before T096
+- [ ] T096 [US9] Re-run the full existing VIDEO track/keyframe/temporal-label HTTP and race suites unchanged; confirm FR-005–FR-030/FR-008/FR-022 stay green; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
+- [X] T097 [US9] Re-run the full existing IMAGE workspace UI/autosave/conflict suite unchanged as the regression baseline; record the exact result in `specs/019-video-annotation-mvp/quickstart.md`
+- [X] T098 [US9] Run web typecheck/lint/build, `git diff --check`, and confirm no new `package.json` dependency was introduced (spec Explicit non-goals); record exact results in `specs/019-video-annotation-mvp/quickstart.md`
 
 ## Dependencies and execution order
 
@@ -190,10 +228,19 @@ toolbar, Video Details, temporal-label, or save-state chrome.
   by building a registry around already-built UI.
 - US8 (T074–T084) depends on US7's registry (T064–T070) existing; it does not
   depend on US4–US6/Polish either, for the same reason.
+- US9 (T085–T098) depends only on US1–US3's rendered `video-engine.tsx`/
+  `video-toolbar.tsx`/`video-timeline.tsx`/`useVideoAnnotationStore` existing
+  (they do). It does NOT depend on US4–US6/Polish, or on US7/US8 having
+  finished relocating VIDEO's UI into the shared shell registry — T090–T094
+  touch `video-engine.tsx`'s pointer-event wiring and the `<video>` element
+  directly, and remain valid whether that relocation is complete or still
+  in progress, since neither changes which element owns which pointer
+  events. T095 exists specifically to catch any regression if T076–T080 (US8)
+  already relocated the Add Keyframe Here control by the time US9 runs.
 
 ## Parallel opportunities
 
-- T003–T005; T008 and T010–T014; T016–T018; T024–T027; T034–T036; T040–T042; T046–T048; T052–T053/T057–T059; T062–T063; and T074–T075 are parallelizable within their dependency boundaries.
+- T003–T005; T008 and T010–T014; T016–T018; T024–T027; T034–T036; T040–T042; T046–T048; T052–T053/T057–T059; T062–T063; T074–T075; and T085–T087 are parallelizable within their dependency boundaries.
 
 ## MVP and implementation strategy
 
@@ -210,5 +257,11 @@ toolbar, Video Details, temporal-label, or save-state chrome.
 7. US8 (relocate VIDEO controls) follows US7 directly; it is the same
    relocation the earlier single-story plan described, now expressed as
    registry-entry edits instead of ad hoc per-component branching.
+8. US9 (interaction ownership) can be scheduled any time after US1–US3 close,
+   independently of US4–US8/Polish — it is a correctness fix to pointer/
+   playback ownership inside the existing VIDEO surfaces, not new rendered
+   UI. Scheduling it before US8 finishes is safe (T095 exists to catch the
+   one place they could interact — the Add Keyframe Here control's location);
+   scheduling it after is equally safe.
 
 All tasks use the required checkbox/ID format, include concrete paths, and story tasks carry the appropriate [USn] label.

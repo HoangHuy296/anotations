@@ -64,7 +64,7 @@ services:
       DATABASE_URL: ${DATABASE_URL_DOCKER}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://10.0.0.245:9100}
-      MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:-http://localhost:3001}
+      MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:-http://10.0.0.245:3000}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-review_minio_admin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-9q5D3WV0mnZcrci9Ur1f8Bi7py1E3yRuP1BPjjmM2zEK4l//u6oprTCHjpyIh3x3}
       MINIO_BUCKET: ${MINIO_BUCKET:-fieldframe-review-assets}
@@ -102,11 +102,13 @@ services:
       migrate:
         condition: service_completed_successfully
     ports:
-      # Bound to a specific address (default: all interfaces) so this can
-      # share port 3000 with docker-compose.yaml's web, which is now
-      # loopback-only. Set WEB_REVIEW_BIND_ADDRESS to this host's LAN IP in
-      # .env.review to avoid also shadowing 127.0.0.1:3000.
-      - "${WEB_REVIEW_BIND_ADDRESS:-10.0.0.245}:${WEB_REVIEW_PORT:-3001}:3000"
+      # Published on the same port number (3000) as docker-compose.yaml's web,
+      # but bound to this host's LAN IP instead of loopback, so the two
+      # stacks coexist without a conflict: the dev stack answers at
+      # http://localhost:3000 and this review stack answers at
+      # http://10.0.0.245:3000. Set WEB_REVIEW_BIND_ADDRESS in .env.review if
+      # this host's LAN IP changes (e.g. after a DHCP renewal).
+      - "${WEB_REVIEW_BIND_ADDRESS:-10.0.0.245}:${WEB_REVIEW_PORT:-3000}:3000"
 
   worker:
     build:

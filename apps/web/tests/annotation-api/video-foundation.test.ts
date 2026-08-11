@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { deriveFrameIndex } from "@/lib/annotations/video-time";
+import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotations/video-time";
 import { deriveInterpolationAt, interpolateBoundingBox } from "@/lib/annotations/video-interpolation";
 import { addKeyframeHere } from "@/lib/workspace/video-annotation-client";
 import { videoBoundingBoxSchema, videoKeyframeCreateSchema, videoKeyframeDeleteSchema, videoTemporalLabelCreateSchema } from "@/lib/validation/video-annotation";
@@ -20,6 +20,16 @@ test("frame index is derived only from reliable fps", () => {
   assert.equal(deriveFrameIndex(1000, 25), 25);
   assert.equal(deriveFrameIndex(1000, null), null);
   assert.equal(deriveFrameIndex(1000, 0), null);
+});
+
+test("timeline duration prefers totalFrames/fps as authoritative over durationMs", () => {
+  assert.equal(resolveVideoTimelineDurationMs({ totalFrames: 300, fps: 30, durationMs: 5000 }), 10000);
+  assert.equal(resolveVideoTimelineDurationMs({ totalFrames: null, fps: 30, durationMs: 8000 }), 8000);
+  assert.equal(resolveVideoTimelineDurationMs({ totalFrames: 300, fps: null, durationMs: 8000 }), 8000);
+  assert.equal(resolveVideoTimelineDurationMs({ totalFrames: 300, fps: 0, durationMs: 8000 }), 8000);
+  assert.equal(resolveVideoTimelineDurationMs({ totalFrames: 0, fps: null, durationMs: 0 }), null);
+  assert.equal(resolveVideoTimelineDurationMs(null), null);
+  assert.equal(resolveVideoTimelineDurationMs(undefined), null);
 });
 
 test("linear interpolation is deterministic and not persisted", () => {
