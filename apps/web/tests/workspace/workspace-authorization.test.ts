@@ -4,7 +4,8 @@ import test from "node:test";
 import { DatasetMemberRole, UserRole } from "@internal/db";
 
 import { createBoundingBox, updateBoundingBoxGeometry } from "@/lib/workspace/image-mutations";
-import { readImageWorkspaceAsset, readImageWorkspacePage } from "@/lib/workspace/image-workspace";
+import { readImageWorkspaceAsset } from "@/lib/workspace/image-workspace";
+import { readWorkspacePage } from "@/lib/workspace/workspace-read";
 import { addWorkspaceMember, cleanupWorkspaceFixture, createImageAsset, createImageLabel, createWorkspaceDataset, createWorkspaceUser } from "./helpers";
 
 // Database cases are deliberately opt-in. They never replace PostgreSQL with a
@@ -30,8 +31,8 @@ test("workspace read conceals another Dataset and revision guards reject stale w
     assert.deepEqual(stale, { ok: false, status: 409 });
     assert.equal(await readImageWorkspaceAsset(outsider, dataset.id, asset.id), null);
     assert.equal(await readImageWorkspaceAsset(owner, otherDataset.id, asset.id), null);
-    assert.equal(await readImageWorkspacePage(outsider, dataset.id, { search: asset.filename }), null);
-    const progress = await readImageWorkspacePage(owner, dataset.id);
+    assert.equal(await readWorkspacePage(outsider, dataset.id, { search: asset.filename }), null);
+    const progress = await readWorkspacePage(owner, dataset.id);
     assert.equal(progress?.page.total, 1);
     assert.equal(progress?.page.completed, 0);
   } finally { await cleanupWorkspaceFixture([owner.id, labeler.id, outsider.id], [dataset.id, otherDataset.id]); }

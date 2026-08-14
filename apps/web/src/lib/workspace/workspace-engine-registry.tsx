@@ -1,7 +1,7 @@
 import type { ComponentType, ReactElement } from "react";
 import type { AssetStatus, Modality } from "@internal/db";
 
-import { AnnotationCanvas } from "@/components/workspace/annotation-canvas";
+import { ImageEngine } from "@/components/workspace/image-engine";
 import { AudioEngine } from "@/components/workspace/audio-engine";
 import { TextEngine } from "@/components/workspace/text-engine";
 import { VideoEngine } from "@/components/workspace/video-engine";
@@ -14,9 +14,8 @@ import { VideoPropertiesTabs } from "@/components/workspace/video-properties-tab
 import { PlaceholderPropertiesTabs } from "@/components/workspace/placeholder-properties-tabs";
 import { ImageStatusFields } from "@/components/workspace/image-status-fields";
 import { PlaceholderStatusFields } from "@/components/workspace/placeholder-status-fields";
-import type { SafeWorkspaceAsset } from "@/types/image-workspace";
+import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
-import { SafeVideoWorkspaceAsset } from "@/types/video-workspace";
 
 type Engine = WorkspaceSelection["engine"];
 
@@ -24,8 +23,8 @@ type Engine = WorkspaceSelection["engine"];
 export type PropertiesTabsProps = {
   datasetId: string;
   selection: WorkspaceSelection;
-  images: SafeWorkspaceAsset[];
-  videos: SafeVideoWorkspaceAsset[];
+  /** Shared, modality-neutral list for the Assets tab. */
+  assets: SafeWorkspaceAsset[];
   page: number;
   pageSize: number;
   totalAssets: number;
@@ -57,38 +56,38 @@ export type WorkspaceEngineRegistryEntry = {
 
 function ImageEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
   if (selection.engine !== "IMAGE") return null;
-  return <AnnotationCanvas image={selection.asset} annotations={selection.annotations} unsupportedAnnotations={selection.unsupportedAnnotations} labels={selection.labels} />;
+  return <ImageEngine image={selection.asset} annotations={selection.annotations} unsupportedAnnotations={selection.unsupportedAnnotations} labels={selection.labels} />;
 }
 
 function VideoEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
   if (selection.engine !== "VIDEO") return null;
-  return <VideoEngine key={selection.asset.id} asset={selection.asset} readiness={selection.readiness} annotations={selection.annotations} />;
+  return <VideoEngine key={selection.asset.id} video={selection.asset} readiness={selection.readiness} annotations={selection.annotations} />;
 }
 
 function AudioEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
   if (selection.engine !== "AUDIO") return null;
-  return <AudioEngine key={selection.asset.id} asset={selection.asset} readiness={selection.readiness} />;
+  return <AudioEngine key={selection.asset.id} audio={selection.asset} readiness={selection.readiness} />;
 }
 
 function TextEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
   if (selection.engine !== "TEXT") return null;
-  return <TextEngine key={selection.asset.id} asset={selection.asset} />;
+  return <TextEngine key={selection.asset.id} document={selection.asset} />;
 }
 
 function ImageTabsEntry(props: PropertiesTabsProps): ReactElement | null {
   if (props.selection.engine !== "IMAGE") return null;
-  return <ImagePropertiesTabs datasetId={props.datasetId} selection={props.selection} images={props.images} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} />;
+  return <ImagePropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} />;
 }
 
 function VideoTabsEntry(props: PropertiesTabsProps): ReactElement | null {
   if (props.selection.engine !== "VIDEO") return null;
-  return <VideoPropertiesTabs datasetId={props.datasetId} selection={props.selection} images={props.images} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} />;
+  return <VideoPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} />;
 }
 
 function placeholderTabsEntry(engine: "AUDIO" | "TEXT") {
   return function PlaceholderTabsEntry(props: PropertiesTabsProps): ReactElement | null {
     if (props.selection.engine !== engine) return null;
-    return <PlaceholderPropertiesTabs datasetId={props.datasetId} selection={props.selection} images={props.images} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} />;
+    return <PlaceholderPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} />;
   };
 }
 

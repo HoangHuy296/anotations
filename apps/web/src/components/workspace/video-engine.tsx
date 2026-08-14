@@ -13,9 +13,10 @@ import { addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoKeyf
 import { createVideoPlaybackController, type VideoPlaybackController } from "@/lib/workspace/video-playback-controller";
 import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotations/video-time";
 import { deriveInterpolationAt } from "@/lib/annotations/video-interpolation";
+import { Video } from "lucide-react";
 
 type VideoEngineProps = {
-  asset: { id: string; filename: string; description: string | null };
+  video: { id: string; filename: string; description: string | null };
   readiness: SafeMediaReadiness;
   annotations: SafeVideoAnnotations;
 };
@@ -26,7 +27,7 @@ type KeyframeChanges = { timestampMs?: number; geometry?: { kind: "BOUNDING_BOX"
  * behind their dedicated revision-guarded contract; this component never
  * falls through to ImageCanvas or exposes a storage location.
  */
-export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps) {
+export function VideoEngine({ video, readiness, annotations }: VideoEngineProps) {
   // The Video Asset's own fps, with the existing FR-016 fallback when it's
   // missing/unreliable -- computed once here instead of re-deriving the
   // same fallback inline at every call site (frame-index math, the
@@ -128,7 +129,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
 
   useEffect(() => {
     let active = true;
-    void fetch(`/api/assets/${encodeURIComponent(asset.id)}/view-url`, { credentials: "same-origin" })
+    void fetch(`/api/assets/${encodeURIComponent(video.id)}/view-url`, { credentials: "same-origin" })
       .then(async (response) => response.ok ? response.json() : null)
       .then((payload: { data?: { viewUrl?: unknown } } | null) => {
         if (!active) return;
@@ -139,7 +140,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
       })
       .catch(() => { if (active) setLoadState("unavailable"); });
     return () => { active = false; };
-  }, [asset.id]);
+  }, [video.id]);
 
   useEffect(() => {
     setSnapshot(annotations.tracks, annotations.keyframes);
@@ -293,7 +294,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     setNewTrackError(null);
     try {
       const name = newTrackName.trim() || `Track ${trackList.length + 1}`;
-      const result = await createVideoTrack(asset.id, { name, interpolationMode: "LINEAR" });
+      const result = await createVideoTrack(video.id, { name, interpolationMode: "LINEAR" });
       useVideoAnnotationStore.getState().markSaved(result.track);
       useVideoAnnotationStore.getState().setRequestedTab("tracks");
       selectTrack(result.track.id);
@@ -483,7 +484,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
     setPendingBoxError(null);
     try {
       const objectId = pendingBoxObjectId.trim();
-      const created = await createVideoTrack(asset.id, { name: pendingBoxName.trim() || `Track ${trackList.length + 1}`, interpolationMode: "LINEAR", properties: objectId ? { objectId } : undefined });
+      const created = await createVideoTrack(video.id, { name: pendingBoxName.trim() || `Track ${trackList.length + 1}`, interpolationMode: "LINEAR", properties: objectId ? { objectId } : undefined });
       const track = created.track;
       selectTrack(track.id);
       const coordinator = coordinatorFor(track);
@@ -518,7 +519,7 @@ export function VideoEngine({ asset, readiness, annotations }: VideoEngineProps)
   const saveStateLabel = selectedTrack ? (trackSaveStates[selectedTrack.id] ?? mutationState) : mutationState;
   return <section className="canvas-grid flex h-full min-h-[520px] min-w-0 flex-col overflow-hidden bg-zinc-950 p-3 text-zinc-100 lg:min-h-0">
     <header className="flex items-center justify-between gap-3 pb-2 text-xs text-zinc-400">
-      <span className="inline-flex items-center gap-2"><VideoCamera size={16} weight="duotone" /> VIDEO · {asset.filename}</span>
+      <span className="inline-flex items-center gap-2"><VideoCamera size={16} weight="duotone" /> VIDEO · {video.filename}</span>
       <span className="flex items-center gap-3">
         <span className={mutationState === "conflict" ? "text-amber-300" : mutationState === "error" ? "text-rose-300" : mutationState === "saving" ? "text-sky-300" : "text-emerald-300"} aria-live="polite">{saveStateLabel}</span>
         <span>{readiness.state.replaceAll("_", " ")}</span>

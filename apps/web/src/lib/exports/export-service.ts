@@ -20,6 +20,9 @@ const exportJobSelect = {
 
 type ExportJobProjection = PrismaTypes.JobGetPayload<{ select: typeof exportJobSelect }>;
 
+/** COMPLETED/FAILED/CANCELED never re-run; a new create request supersedes them instead of reusing their result forever. */
+const terminalJobStatuses = new Set<typeof JobStatus[keyof typeof JobStatus]>([JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELED]);
+
 function exportIdempotencyKey(datasetId: string) {
   return createHash("sha256").update(`fieldframe:export:v1:${datasetId}:JSON:1`).digest("hex");
 }
@@ -48,33 +51,58 @@ export async function createAuthorizedExportJob(actor: RequestActor, input: unkn
 
   const idempotencyKey = exportIdempotencyKey(parsed.data.datasetId);
   let created = false;
-  let job = await db.job.findFirst({
-    where: { datasetId: parsed.data.datasetId, idempotencyKey, type: JobType.EXPORT_DATASET },
-    select: exportJobSelect,
-  });
-  if (!job) {
+  let job: ExportJobProjection | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    created = false;
     try {
-      job = await db.job.create({
-        data: {
-          datasetId: parsed.data.datasetId,
-          createdById: actor.id,
-          type: JobType.EXPORT_DATASET,
-          status: JobStatus.QUEUED,
-          idempotencyKey,
-          input: { format: parsed.data.format, manifestSchemaVersion: parsed.data.manifestSchemaVersion },
-        },
-        select: exportJobSelect,
-      });
-      created = true;
+      job = await db.$transaction(async (tx) => {
+        const existing = await tx.job.findFirst({
+          where: { datasetId: parsed.data.datasetId, idempotencyKey, type: JobType.EXPORT_DATASET },
+          select: exportJobSelect,
+        });
+        // A pending/running export is reused outright -- this is the
+        // duplicate-start protection the canonical key exists for.
+        if (existing && !terminalJobStatuses.has(existing.status)) return existing;
+        if (existing) {
+          // The canonical key belongs to a finished export. Free it by
+          // demoting the finished predecessor to a unique historical key
+          // (its row/artifact is untouched and still independently
+          // readable via GET /api/export/[jobId]) so a fresh Job -- one
+          // that will reflect the dataset's current content -- can claim
+          // the canonical key below. Users can otherwise never export a
+          // dataset a second time once its first export finishes.
+          await tx.job.update({ where: { id: existing.id }, data: { idempotencyKey: `${idempotencyKey}:superseded:${existing.id}` } });
+        }
+        created = true;
+        return tx.job.create({
+          data: {
+            datasetId: parsed.data.datasetId,
+            createdById: actor.id,
+            type: JobType.EXPORT_DATASET,
+            status: JobStatus.QUEUED,
+            idempotencyKey,
+            input: { format: parsed.data.format, manifestSchemaVersion: parsed.data.manifestSchemaVersion },
+          },
+          select: exportJobSelect,
+        });
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+      break;
     } catch (error) {
+      // A serializable transaction may be retried after having reached the
+      // create branch. Its rolled-back local decision must not affect the
+      // response for the request that subsequently observes the winner.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034" && attempt < 2) continue;
       if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
+      created = false;
       job = await db.job.findFirst({
         where: { datasetId: parsed.data.datasetId, idempotencyKey, type: JobType.EXPORT_DATASET },
         select: exportJobSelect,
       });
       if (!job) throw error;
+      break;
     }
   }
+  if (!job) throw new Error("Export Job was not resolved.");
 
   if (job.status !== JobStatus.QUEUED) {
     return { ok: true, status: 200, job: toSafeExportJob(job), deliveryPending: false };

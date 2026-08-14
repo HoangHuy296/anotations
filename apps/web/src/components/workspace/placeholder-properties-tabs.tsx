@@ -7,13 +7,13 @@ import type { AssetStatus } from "@internal/db";
 import { AssetNavigator } from "@/components/workspace/asset-navigator";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
-import type { SafeWorkspaceAsset } from "@/types/image-workspace";
+import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
 
 export type PlaceholderPropertiesTabsProps = {
   datasetId: string;
   selection: Extract<WorkspaceSelection, { engine: "VIDEO" | "AUDIO" | "TEXT" }>;
-  images: SafeWorkspaceAsset[];
+  assets: SafeWorkspaceAsset[];
   page: number;
   pageSize: number;
   totalAssets: number;
@@ -36,7 +36,7 @@ const tabLabelsByEngine: Record<"VIDEO" | "AUDIO" | "TEXT", string[]> = {
  * this placeholder never regresses the asset-switching capability the prior
  * generic "select an image" fallback offered for any non-image selection.
  */
-export function PlaceholderPropertiesTabs({ datasetId, selection, images, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId }: PlaceholderPropertiesTabsProps) {
+export function PlaceholderPropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId }: PlaceholderPropertiesTabsProps) {
   const router = useRouter();
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const tabLabels = tabLabelsByEngine[selection.engine];
@@ -57,7 +57,7 @@ export function PlaceholderPropertiesTabs({ datasetId, selection, images, page, 
     <p className="mt-2 text-[11px] leading-5 text-zinc-400">This modality&apos;s panel content is not yet implemented; asset navigation stays available below.</p>
     <div className="mt-4 border-t border-zinc-100 pt-3">
       <h3 className="text-xs font-bold text-zinc-950">Assets</h3>
-      <AssetNavigator datasetId={datasetId} assets={images} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardNavigation} />
+      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardNavigation} />
       <p className="mt-3 text-[11px] text-zinc-400">Dataset progress: {completedAssets} / {totalAssets}</p>
     </div>
   </aside>;

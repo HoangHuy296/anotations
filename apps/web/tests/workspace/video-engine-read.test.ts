@@ -84,7 +84,7 @@ test("private VIDEO capability is object-scoped, browser-direct, and foreign acc
 
 test("VideoEngine uses the authorized capability rather than a Next.js binary proxy", async () => {
   const source = await readFile(path.resolve(process.cwd(), "src/components/workspace/video-engine.tsx"), "utf8");
-  assert.match(source, /\/api\/assets\/\$\{encodeURIComponent\(asset\.id\)\}\/view-url/);
+  assert.match(source, /\/api\/assets\/\$\{encodeURIComponent\(video\.id\)\}\/view-url/);
   assert.match(source, /<video[^>]+src=\{viewUrl\}/);
   assert.equal(source.includes("/api/videos/"), false);
   assert.equal(source.includes("arrayBuffer()"), false);

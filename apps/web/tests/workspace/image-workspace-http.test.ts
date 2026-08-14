@@ -8,7 +8,7 @@ import { AssetStatus, Modality, StorageProvider, UserRole } from "@internal/db";
 import { hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getDirectUploadProviders } from "@/lib/providers";
-import { readImageWorkspacePage } from "@/lib/workspace/image-workspace";
+import { readWorkspacePage } from "@/lib/workspace/workspace-read";
 import { cleanupWorkspaceFixture, createWorkspaceDataset, createWorkspaceUser, workspaceUnique } from "./helpers";
 
 const enabled = process.env.WORKSPACE_INTEGRATION_TESTS === "1" && process.env.MINIO_VIEW_INTEGRATION_TESTS === "1" && Boolean(process.env.DATABASE_URL);
@@ -102,11 +102,11 @@ test("250-Asset search, multi-status filtering, stable order, and 100-item pages
       orderIndex: index, status: index % 2 ? AssetStatus.IN_PROGRESS : AssetStatus.NEW,
     })) });
     const [first, second, third, match, multiStatus] = await Promise.all([
-      readImageWorkspacePage(owner, dataset.id, { page: 1 }),
-      readImageWorkspacePage(owner, dataset.id, { page: 2 }),
-      readImageWorkspacePage(owner, dataset.id, { page: 3 }),
-      readImageWorkspacePage(owner, dataset.id, { page: 1, search: "needle-outside" }),
-      readImageWorkspacePage(owner, dataset.id, { page: 1, statuses: [AssetStatus.NEW, AssetStatus.IN_PROGRESS] }),
+      readWorkspacePage(owner, dataset.id, { page: 1 }),
+      readWorkspacePage(owner, dataset.id, { page: 2 }),
+      readWorkspacePage(owner, dataset.id, { page: 3 }),
+      readWorkspacePage(owner, dataset.id, { page: 1, search: "needle-outside" }),
+      readWorkspacePage(owner, dataset.id, { page: 1, statuses: [AssetStatus.NEW, AssetStatus.IN_PROGRESS] }),
     ]);
     assert.equal(first?.page.items.length, 100);
     assert.equal(second?.page.items.length, 100);

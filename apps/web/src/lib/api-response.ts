@@ -55,6 +55,10 @@ export type ApiErrorCode =
   | "MEDIA_SOURCE_STALE"
   | "MEDIA_PROCESSOR_UNAVAILABLE"
   | "MEDIA_ENQUEUE_REFUSED"
+  | "AI_MODEL_INACTIVE"
+  | "AI_MODEL_NOT_FOUND"
+  | "ASSET_NOT_IN_DATASET"
+  | "AI_TASK_NOT_FOUND"
   | "INTERNAL_ERROR";
 
 export function apiError(

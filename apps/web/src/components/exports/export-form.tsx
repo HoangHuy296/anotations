@@ -28,18 +28,20 @@ export function ExportForm({ datasets }: { datasets: Array<{ id: string; name: s
   const [download, setDownload] = useState<Download>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  function refreshStatus(jobId: string) {
+    return fetch(`/api/export/${jobId}`, { cache: "no-store" })
+      .then(async (response) => {
+        const body = await response.json() as ApiEnvelope<{ job: ExportJob; download: Download }>;
+        if (!response.ok || !body.data) throw new Error(body.error?.message ?? "Unable to refresh export status.");
+        setJob(body.data.job);
+        setDownload(body.data.download);
+      })
+      .catch((error: unknown) => setMessage(error instanceof Error ? error.message : "Unable to refresh export status."));
+  }
+
   useEffect(() => {
     if (!job || terminalStates.has(job.status)) return;
-    const timer = window.setTimeout(() => {
-      void fetch(`/api/export/${job.id}`, { cache: "no-store" })
-        .then(async (response) => {
-          const body = await response.json() as ApiEnvelope<{ job: ExportJob; download: Download }>;
-          if (!response.ok || !body.data) throw new Error(body.error?.message ?? "Unable to refresh export status.");
-          setJob(body.data.job);
-          setDownload(body.data.download);
-        })
-        .catch((error: unknown) => setMessage(error instanceof Error ? error.message : "Unable to refresh export status."));
-    }, 1500);
+    const timer = window.setTimeout(() => void refreshStatus(job.id), 1500);
     return () => window.clearTimeout(timer);
   }, [job]);
 
@@ -51,8 +53,14 @@ export function ExportForm({ datasets }: { datasets: Array<{ id: string; name: s
         .then(async (response) => {
           const body = await response.json() as ApiEnvelope<{ job: ExportJob; deliveryPending: boolean }>;
           if (!response.ok || !body.data) throw new Error(body.error?.message ?? "The export could not be started.");
-          setJob(body.data.job);
           setMessage(body.data.deliveryPending ? "Export was saved and will begin when queue delivery recovers." : "Export started. This status updates automatically.");
+          // The create response never carries a download capability, and its
+          // Job snapshot can already be terminal -- a reused in-flight Job
+          // may finish before this response arrives, and exports commonly
+          // complete in well under a second. Always fetch authoritative
+          // status + download from the safe status endpoint instead of
+          // trusting the create response's Job as current.
+          await refreshStatus(body.data.job.id);
         })
         .catch((error: unknown) => setMessage(error instanceof Error ? error.message : "The export could not be started."));
     });

@@ -2,6 +2,7 @@ import { Database, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import { Modality } from "@internal/db";
 
 import { DatasetSidebar } from "@/components/workspace/dataset-sidebar";
 import { PropertiesPanel } from "@/components/workspace/properties-panel";
@@ -11,8 +12,7 @@ import { getRequestActor } from "@/lib/auth";
 import { isDatabaseConfigured } from "@/lib/db";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 import { workspaceListQuerySchema } from "@/lib/validation/image-workspace";
-import { readImageWorkspacePage } from "@/lib/workspace/image-workspace";
-import { readWorkspaceSelection } from "@/lib/workspace/workspace-read";
+import { readWorkspacePage, readWorkspaceSelection } from "@/lib/workspace/workspace-read";
 
 export const metadata: Metadata = { title: "Annotation Workspace" };
 
@@ -28,26 +28,39 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   const actor = await getRequestActor();
   if (!actor) notFound();
   const query = await searchParams;
-  const selectedAssetId = first(query.image) ?? first(query.video) ?? first(query.audio) ?? first(query.text);
+  // The URL always encodes modality via which key carries the id -- never
+  // inferred from the id alone -- so a mismatched pairing downstream
+  // (readWorkspacePage re-checks both) fails closed instead of resolving the
+  // wrong engine.
+  const selection = query.image !== undefined ? { assetId: first(query.image) ?? "", modality: Modality.IMAGE }
+    : query.video !== undefined ? { assetId: first(query.video) ?? "", modality: Modality.VIDEO }
+    : query.audio !== undefined ? { assetId: first(query.audio) ?? "", modality: Modality.AUDIO }
+    : query.text !== undefined ? { assetId: first(query.text) ?? "", modality: Modality.TEXT }
+    : null;
   const parsedQuery = workspaceListQuerySchema.safeParse({
     page: first(query.page),
     q: first(query.q),
     statuses: values(query.status),
-    image: selectedAssetId,
+    asset: selection?.assetId,
+    modality: selection?.modality,
   });
-  const listQuery = parsedQuery.success ? parsedQuery.data : { page: 1, q: "", statuses: [], image: undefined };
-  const workspace = await readImageWorkspacePage(actor, datasetId, { page: listQuery.page, search: listQuery.q, statuses: listQuery.statuses, selectedAssetId: listQuery.image });
+  const listQuery = parsedQuery.success ? parsedQuery.data : { page: 1, q: "", statuses: [], asset: undefined, modality: undefined };
+  const workspace = await readWorkspacePage(actor, datasetId, {
+    page: listQuery.page,
+    search: listQuery.q,
+    statuses: listQuery.statuses,
+    selectedAsset: listQuery.asset && listQuery.modality ? { id: listQuery.asset, modality: listQuery.modality } : undefined,
+  });
   if (!workspace) notFound();
-  const selectedAssetIdFromPage = workspace.page.selectedAssetId;
-  const selectedAsset = workspace.page.items.find((item) => item.id === selectedAssetIdFromPage) ?? null;
-  const selected = selectedAsset ? await readWorkspaceSelection(actor, datasetId, selectedAsset.id) : null;
+  const selectedAssetIdFromPage = workspace.page.selectedAsset?.id ?? null;
+  const selectedAssetItem = workspace.page.items.find((item) => item.id === selectedAssetIdFromPage) ?? null;
+  const selected = selectedAssetItem ? await readWorkspaceSelection(actor, datasetId, selectedAssetItem.id) : null;
   return <div className="flex min-h-[100dvh] flex-col bg-zinc-100">
     <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" engine={selected?.engine ?? null} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
       <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetIdFromPage} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={selected?.engine ?? null} />
       <WorkspaceEngine selection={selected} />
-      {/* videos={[]}: no video-workspace loader exists yet to source a server-projected video listing (see PropertiesPanelProps). */}
-      <PropertiesPanel datasetId={datasetId} selection={selected} images={workspace.page.items} videos={[]} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetIdFromPage} />
+      <PropertiesPanel datasetId={datasetId} selection={selected} assets={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetIdFromPage} />
     </div>
   </div>;
 }

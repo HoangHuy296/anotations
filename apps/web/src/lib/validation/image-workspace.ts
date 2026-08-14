@@ -1,4 +1,4 @@
-import { AssetStatus } from "@internal/db";
+import { AssetStatus, Modality } from "@internal/db";
 import { z } from "zod";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 
@@ -24,13 +24,23 @@ export const normalizedBoundingBoxSchema = z
 
 const revision = z.number().int().positive();
 
-/** Query values accepted by the shared workspace route. */
+/**
+ * Query values accepted by the shared workspace route. `asset` and `modality`
+ * are paired -- the URL always encodes modality via which navigation key
+ * produced the id (`?image=`, `?video=`, `?audio=`, `?text=`); it is never
+ * inferred from the id alone, so a stale/mismatched pair fails validation
+ * instead of silently resolving the wrong engine.
+ */
 export const workspaceListQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   q: z.string().trim().max(100).default(""),
   statuses: z.array(z.nativeEnum(AssetStatus)).max(Object.keys(AssetStatus).length).default([]),
-  image: cuid.optional(),
-}).strict();
+  asset: cuid.optional(),
+  modality: z.nativeEnum(Modality).optional(),
+}).strict().refine((value) => (value.asset === undefined) === (value.modality === undefined), {
+  message: "asset and modality must be provided together.",
+  path: ["asset"],
+});
 
 export type WorkspaceListQuery = z.infer<typeof workspaceListQuerySchema>;
 

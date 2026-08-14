@@ -33,7 +33,7 @@ const engineLabel: Record<Modality, string> = { IMAGE: "Image", VIDEO: "Video", 
  * (spec FR-035, FR-041–FR-044) — this component does not branch on modality
  * beyond that one lookup.
  */
-export function DatasetSidebar({ datasetId, datasetName, search, statuses, previous, next, engine }: DatasetSidebarProps) {
+export function DatasetSidebar({ datasetId, datasetName, selectedAssetId, search, statuses, previous, next, engine }: DatasetSidebarProps) {
   const router = useRouter();
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const [appendOpen, setAppendOpen] = useState(false);

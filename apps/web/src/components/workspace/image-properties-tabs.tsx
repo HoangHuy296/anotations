@@ -14,14 +14,15 @@ import { Badge } from "@/components/ui/badge";
 import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status";
 import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
-import type { SafeImageAnnotation, SafeImageWorkspaceAsset, SafeWorkspaceAsset, SafeWorkspaceLabel } from "@/types/image-workspace";
+import type { SafeImageAnnotation, SafeImageWorkspaceAsset, SafeWorkspaceLabel } from "@/types/image-workspace";
+import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
 
 type PanelTab = "description" | "labels" | "shapes" | "assets";
 export type ImagePropertiesTabsProps = {
   datasetId: string;
   selection: Extract<WorkspaceSelection, { engine: "IMAGE" }>;
-  images: SafeWorkspaceAsset[];
+  assets: SafeWorkspaceAsset[];
   page: number;
   pageSize: number;
   totalAssets: number;
@@ -40,7 +41,7 @@ export type ImagePropertiesTabsProps = {
  * the IMAGE entry's `Tabs` without a circular import back into the shared
  * `PropertiesPanel` shell.
  */
-export function ImagePropertiesTabs({ datasetId, selection, images, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: ImagePropertiesTabsProps) {
+export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: ImagePropertiesTabsProps) {
   const image: SafeImageWorkspaceAsset = selection.asset;
   const labels: SafeWorkspaceLabel[] = selection.labels;
   const router = useRouter();
@@ -257,7 +258,7 @@ export function ImagePropertiesTabs({ datasetId, selection, images, page, pageSi
         </div>
       </form>
       <div className="mt-3" aria-label="Dataset progress"><div className="flex justify-between text-[11px] text-zinc-500"><span>Dataset progress</span><span>{completedAssets} / {totalAssets}</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${totalAssets ? Math.round((completedAssets / totalAssets) * 100) : 0}%` }} /></div></div>
-      <AssetNavigator datasetId={datasetId} assets={images} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardImageNavigation} />
+      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardImageNavigation} />
     </section>}
   </aside>;
 }

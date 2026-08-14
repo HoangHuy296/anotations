@@ -13,7 +13,7 @@ import { deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/w
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
-import type { SafeWorkspaceAsset } from "@/types/image-workspace";
+import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { SafeVideoTrack } from "@/types/video-annotation";
 import type { WorkspaceSelection } from "@/types/workspace";
 
@@ -24,7 +24,7 @@ type TrackDraft = { objectId: string; name: string; labelId: string; interpolati
 export type VideoPropertiesTabsProps = {
   datasetId: string;
   selection: Extract<WorkspaceSelection, { engine: "VIDEO" }>;
-  images: SafeWorkspaceAsset[];
+  assets: SafeWorkspaceAsset[];
   page: number;
   pageSize: number;
   totalAssets: number;
@@ -60,7 +60,7 @@ export type VideoPropertiesTabsProps = {
  * that keyframe's track, seeking to its timestamp, and pausing -- so
  * selecting a shape here highlights it on the paused frame.
  */
-export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: VideoPropertiesTabsProps) {
+export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: VideoPropertiesTabsProps) {
   const asset = selection.asset;
   const router = useRouter();
   const [description, setDescription] = useState(asset.description ?? "");
@@ -360,7 +360,7 @@ export function VideoPropertiesTabs({ datasetId, selection, images, page, pageSi
         </div>
       </form>
       <div className="mt-3" aria-label="Dataset progress"><div className="flex justify-between text-[11px] text-zinc-500"><span>Dataset progress</span><span>{completedAssets} / {totalAssets}</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${totalAssets ? Math.round((completedAssets / totalAssets) * 100) : 0}%` }} /></div></div>
-      <AssetNavigator datasetId={datasetId} assets={images} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardNavigation} />
+      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardNavigation} />
     </section>}
   </aside>;
 }

@@ -1,5 +1,5 @@
-import type { AssetStatus, Modality } from "@internal/db";
 import type { AnnotationType } from "@internal/db";
+import type { SafeWorkspaceAsset } from "@/types/workspace";
 
 // IMAGE's tool vocabulary (`ImageAnnotationTool`) lives in
 // `types/annotation.ts`, alongside every other engine's tools -- this file
@@ -51,33 +51,8 @@ export type SafeWorkspaceLabel = {
   modality: "IMAGE" | null;
 };
 
-export type SafeWorkspaceAsset = {
-  id: string;
-  modality: Modality;
-  filename: string;
-  width: number | null;
-  height: number | null;
-  description: string | null;
-  version: number;
-  status: AssetStatus;
-  batchIndex: number;
-  orderIndex: number;
-  annotationCount: number;
-};
-
 export type SafeImageWorkspaceAsset = SafeWorkspaceAsset & {
   modality: "IMAGE";
-};
-
-export type ImageWorkspacePage = {
-  items: SafeWorkspaceAsset[];
-  total: number;
-  completed: number;
-  page: number;
-  pageSize: number;
-  selectedAssetId: string | null;
-  previous: { id: string; modality: Modality; page: number } | null;
-  next: { id: string; modality: Modality; page: number } | null;
 };
 
 export type SaveState = "idle" | "pending" | "saving" | "saved" | "failed" | "conflict";
