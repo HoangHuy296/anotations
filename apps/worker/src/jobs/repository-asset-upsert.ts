@@ -25,14 +25,14 @@ export async function reconcileMirroredRepositoryAsset(input: {
     where: { datasetId_sourceFingerprint: { datasetId: input.datasetId, sourceFingerprint: input.sourceFingerprint } },
     select: {
       id: true, modality: true, storageBucket: true, storageKey: true, sourceRevision: true, sourceFileSha: true, sizeBytes: true,
-      imageAsset: { select: { id: true } }, videoAsset: { select: { id: true } }, audioAsset: { select: { id: true } }, textDocument: { select: { id: true } },
+      imageAsset: { select: { id: true } }, videoAsset: { select: { id: true } }, audioAsset: { select: { id: true } }, textAsset: { select: { id: true } },
     },
   });
   if (!asset) return { kind: "absent" };
   const correctChild = input.candidate.modality === "IMAGE" ? Boolean(asset.imageAsset)
     : input.candidate.modality === "VIDEO" ? Boolean(asset.videoAsset)
       : input.candidate.modality === "AUDIO" ? Boolean(asset.audioAsset)
-        : Boolean(asset.textDocument);
+        : Boolean(asset.textAsset);
   const exact = asset.modality === input.candidate.modality
     && asset.storageBucket === input.bucket
     && asset.storageKey === input.objectKey
@@ -56,7 +56,7 @@ export async function upsertMirroredRepositoryAsset(input: {
   const child = input.candidate.modality === "IMAGE" ? { imageAsset: { create: {} } }
     : input.candidate.modality === "VIDEO" ? { videoAsset: { create: { metadata: {} } } }
       : input.candidate.modality === "AUDIO" ? { audioAsset: { create: { metadata: {} } } }
-        : { textDocument: { create: { tokenization: {}, metadata: {} } } };
+        : { textAsset: { create: { tokenization: {}, metadata: {} } } };
   return input.db.asset.upsert({
     where: { datasetId_sourceFingerprint: { datasetId: input.datasetId, sourceFingerprint: input.sourceFingerprint } },
     create: {

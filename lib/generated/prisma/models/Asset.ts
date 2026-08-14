@@ -596,7 +596,6 @@ export type AssetWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
-  aiTasks?: Prisma.AiTaskListRelationFilter
   annotations?: Prisma.AnnotationListRelationFilter
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
@@ -605,7 +604,7 @@ export type AssetWhereInput = {
   audioAsset?: Prisma.XOR<Prisma.AudioAssetNullableScalarRelationFilter, Prisma.AudioAssetWhereInput> | null
   imageAsset?: Prisma.XOR<Prisma.ImageAssetNullableScalarRelationFilter, Prisma.ImageAssetWhereInput> | null
   preparedImportItem?: Prisma.XOR<Prisma.PreparedImportItemNullableScalarRelationFilter, Prisma.PreparedImportItemWhereInput> | null
-  textDocument?: Prisma.XOR<Prisma.TextDocumentNullableScalarRelationFilter, Prisma.TextDocumentWhereInput> | null
+  textAsset?: Prisma.XOR<Prisma.TextAssetNullableScalarRelationFilter, Prisma.TextAssetWhereInput> | null
   videoAsset?: Prisma.XOR<Prisma.VideoAssetNullableScalarRelationFilter, Prisma.VideoAssetWhereInput> | null
 }
 
@@ -660,7 +659,6 @@ export type AssetOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  aiTasks?: Prisma.AiTaskOrderByRelationAggregateInput
   annotations?: Prisma.AnnotationOrderByRelationAggregateInput
   dataset?: Prisma.DatasetOrderByWithRelationInput
   externalRepository?: Prisma.ExternalRepositoryOrderByWithRelationInput
@@ -669,7 +667,7 @@ export type AssetOrderByWithRelationInput = {
   audioAsset?: Prisma.AudioAssetOrderByWithRelationInput
   imageAsset?: Prisma.ImageAssetOrderByWithRelationInput
   preparedImportItem?: Prisma.PreparedImportItemOrderByWithRelationInput
-  textDocument?: Prisma.TextDocumentOrderByWithRelationInput
+  textAsset?: Prisma.TextAssetOrderByWithRelationInput
   videoAsset?: Prisma.VideoAssetOrderByWithRelationInput
 }
 
@@ -730,7 +728,6 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Asset"> | Date | string
   archivedAt?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
   deletedAt?: Prisma.DateTimeNullableFilter<"Asset"> | Date | string | null
-  aiTasks?: Prisma.AiTaskListRelationFilter
   annotations?: Prisma.AnnotationListRelationFilter
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   externalRepository?: Prisma.XOR<Prisma.ExternalRepositoryNullableScalarRelationFilter, Prisma.ExternalRepositoryWhereInput> | null
@@ -739,7 +736,7 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   audioAsset?: Prisma.XOR<Prisma.AudioAssetNullableScalarRelationFilter, Prisma.AudioAssetWhereInput> | null
   imageAsset?: Prisma.XOR<Prisma.ImageAssetNullableScalarRelationFilter, Prisma.ImageAssetWhereInput> | null
   preparedImportItem?: Prisma.XOR<Prisma.PreparedImportItemNullableScalarRelationFilter, Prisma.PreparedImportItemWhereInput> | null
-  textDocument?: Prisma.XOR<Prisma.TextDocumentNullableScalarRelationFilter, Prisma.TextDocumentWhereInput> | null
+  textAsset?: Prisma.XOR<Prisma.TextAssetNullableScalarRelationFilter, Prisma.TextAssetWhereInput> | null
   videoAsset?: Prisma.XOR<Prisma.VideoAssetNullableScalarRelationFilter, Prisma.VideoAssetWhereInput> | null
 }, "id" | "storageProvider_storageBucket_storageKey" | "cacheProvider_cacheBucket_cacheKey" | "datasetId_sourceFingerprint">
 
@@ -905,7 +902,6 @@ export type AssetCreateInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
@@ -914,7 +910,7 @@ export type AssetCreateInput = {
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -969,13 +965,12 @@ export type AssetUncheckedCreateInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -1027,7 +1022,6 @@ export type AssetUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
@@ -1036,7 +1030,7 @@ export type AssetUpdateInput = {
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -1091,13 +1085,12 @@ export type AssetUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -1689,18 +1682,18 @@ export type AssetUpdateOneRequiredWithoutVideoAssetNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutVideoAssetInput, Prisma.AssetUpdateWithoutVideoAssetInput>, Prisma.AssetUncheckedUpdateWithoutVideoAssetInput>
 }
 
-export type AssetCreateNestedOneWithoutTextDocumentInput = {
-  create?: Prisma.XOR<Prisma.AssetCreateWithoutTextDocumentInput, Prisma.AssetUncheckedCreateWithoutTextDocumentInput>
-  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutTextDocumentInput
+export type AssetCreateNestedOneWithoutTextAssetInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutTextAssetInput, Prisma.AssetUncheckedCreateWithoutTextAssetInput>
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutTextAssetInput
   connect?: Prisma.AssetWhereUniqueInput
 }
 
-export type AssetUpdateOneRequiredWithoutTextDocumentNestedInput = {
-  create?: Prisma.XOR<Prisma.AssetCreateWithoutTextDocumentInput, Prisma.AssetUncheckedCreateWithoutTextDocumentInput>
-  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutTextDocumentInput
-  upsert?: Prisma.AssetUpsertWithoutTextDocumentInput
+export type AssetUpdateOneRequiredWithoutTextAssetNestedInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutTextAssetInput, Prisma.AssetUncheckedCreateWithoutTextAssetInput>
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutTextAssetInput
+  upsert?: Prisma.AssetUpsertWithoutTextAssetInput
   connect?: Prisma.AssetWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutTextDocumentInput, Prisma.AssetUpdateWithoutTextDocumentInput>, Prisma.AssetUncheckedUpdateWithoutTextDocumentInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutTextAssetInput, Prisma.AssetUpdateWithoutTextAssetInput>, Prisma.AssetUncheckedUpdateWithoutTextAssetInput>
 }
 
 export type AssetCreateNestedOneWithoutAudioAssetInput = {
@@ -1715,22 +1708,6 @@ export type AssetUpdateOneRequiredWithoutAudioAssetNestedInput = {
   upsert?: Prisma.AssetUpsertWithoutAudioAssetInput
   connect?: Prisma.AssetWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutAudioAssetInput, Prisma.AssetUpdateWithoutAudioAssetInput>, Prisma.AssetUncheckedUpdateWithoutAudioAssetInput>
-}
-
-export type AssetCreateNestedOneWithoutAiTasksInput = {
-  create?: Prisma.XOR<Prisma.AssetCreateWithoutAiTasksInput, Prisma.AssetUncheckedCreateWithoutAiTasksInput>
-  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutAiTasksInput
-  connect?: Prisma.AssetWhereUniqueInput
-}
-
-export type AssetUpdateOneWithoutAiTasksNestedInput = {
-  create?: Prisma.XOR<Prisma.AssetCreateWithoutAiTasksInput, Prisma.AssetUncheckedCreateWithoutAiTasksInput>
-  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutAiTasksInput
-  upsert?: Prisma.AssetUpsertWithoutAiTasksInput
-  disconnect?: Prisma.AssetWhereInput | boolean
-  delete?: Prisma.AssetWhereInput | boolean
-  connect?: Prisma.AssetWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutAiTasksInput, Prisma.AssetUpdateWithoutAiTasksInput>, Prisma.AssetUncheckedUpdateWithoutAiTasksInput>
 }
 
 export type AssetCreateWithoutUploadedByInput = {
@@ -1781,7 +1758,6 @@ export type AssetCreateWithoutUploadedByInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
@@ -1789,7 +1765,7 @@ export type AssetCreateWithoutUploadedByInput = {
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -1843,13 +1819,12 @@ export type AssetUncheckedCreateWithoutUploadedByInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -1983,7 +1958,6 @@ export type AssetCreateWithoutExternalRepositoryInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   uploadedBy?: Prisma.UserCreateNestedOneWithoutUploadedAssetsInput
@@ -1991,7 +1965,7 @@ export type AssetCreateWithoutExternalRepositoryInput = {
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -2045,13 +2019,12 @@ export type AssetUncheckedCreateWithoutExternalRepositoryInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -2129,7 +2102,6 @@ export type AssetCreateWithoutDatasetInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
   uploadedBy?: Prisma.UserCreateNestedOneWithoutUploadedAssetsInput
@@ -2137,7 +2109,7 @@ export type AssetCreateWithoutDatasetInput = {
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -2191,13 +2163,12 @@ export type AssetUncheckedCreateWithoutDatasetInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -2275,7 +2246,6 @@ export type AssetCreateWithoutPreparedImportItemInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
@@ -2283,7 +2253,7 @@ export type AssetCreateWithoutPreparedImportItemInput = {
   versions?: Prisma.AssetVersionCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -2338,12 +2308,11 @@ export type AssetUncheckedCreateWithoutPreparedImportItemInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -2411,7 +2380,6 @@ export type AssetUpdateWithoutPreparedImportItemInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
@@ -2419,7 +2387,7 @@ export type AssetUpdateWithoutPreparedImportItemInput = {
   versions?: Prisma.AssetVersionUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -2474,12 +2442,11 @@ export type AssetUncheckedUpdateWithoutPreparedImportItemInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -2531,7 +2498,6 @@ export type AssetCreateWithoutVersionsInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
@@ -2539,7 +2505,7 @@ export type AssetCreateWithoutVersionsInput = {
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -2594,12 +2560,11 @@ export type AssetUncheckedCreateWithoutVersionsInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -2667,7 +2632,6 @@ export type AssetUpdateWithoutVersionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
@@ -2675,7 +2639,7 @@ export type AssetUpdateWithoutVersionsInput = {
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -2730,12 +2694,11 @@ export type AssetUncheckedUpdateWithoutVersionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -2787,7 +2750,6 @@ export type AssetCreateWithoutAnnotationsInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
   uploadedBy?: Prisma.UserCreateNestedOneWithoutUploadedAssetsInput
@@ -2795,7 +2757,7 @@ export type AssetCreateWithoutAnnotationsInput = {
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -2850,12 +2812,11 @@ export type AssetUncheckedCreateWithoutAnnotationsInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -2923,7 +2884,6 @@ export type AssetUpdateWithoutAnnotationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
   uploadedBy?: Prisma.UserUpdateOneWithoutUploadedAssetsNestedInput
@@ -2931,7 +2891,7 @@ export type AssetUpdateWithoutAnnotationsInput = {
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -2986,12 +2946,11 @@ export type AssetUncheckedUpdateWithoutAnnotationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -3043,7 +3002,6 @@ export type AssetCreateWithoutImageAssetInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
@@ -3051,7 +3009,7 @@ export type AssetCreateWithoutImageAssetInput = {
   versions?: Prisma.AssetVersionCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -3106,12 +3064,11 @@ export type AssetUncheckedCreateWithoutImageAssetInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -3179,7 +3136,6 @@ export type AssetUpdateWithoutImageAssetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
@@ -3187,7 +3143,7 @@ export type AssetUpdateWithoutImageAssetInput = {
   versions?: Prisma.AssetVersionUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -3242,12 +3198,11 @@ export type AssetUncheckedUpdateWithoutImageAssetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -3299,7 +3254,6 @@ export type AssetCreateWithoutVideoAssetInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
@@ -3308,7 +3262,7 @@ export type AssetCreateWithoutVideoAssetInput = {
   audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutVideoAssetInput = {
@@ -3362,13 +3316,12 @@ export type AssetUncheckedCreateWithoutVideoAssetInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutVideoAssetInput = {
@@ -3435,7 +3388,6 @@ export type AssetUpdateWithoutVideoAssetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
@@ -3444,7 +3396,7 @@ export type AssetUpdateWithoutVideoAssetInput = {
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutVideoAssetInput = {
@@ -3498,16 +3450,15 @@ export type AssetUncheckedUpdateWithoutVideoAssetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
-export type AssetCreateWithoutTextDocumentInput = {
+export type AssetCreateWithoutTextAssetInput = {
   id?: string
   modality: $Enums.Modality
   filename: string
@@ -3555,7 +3506,6 @@ export type AssetCreateWithoutTextDocumentInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
@@ -3567,7 +3517,7 @@ export type AssetCreateWithoutTextDocumentInput = {
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
-export type AssetUncheckedCreateWithoutTextDocumentInput = {
+export type AssetUncheckedCreateWithoutTextAssetInput = {
   id?: string
   datasetId: string
   uploadedById?: string | null
@@ -3618,7 +3568,6 @@ export type AssetUncheckedCreateWithoutTextDocumentInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
@@ -3627,23 +3576,23 @@ export type AssetUncheckedCreateWithoutTextDocumentInput = {
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
-export type AssetCreateOrConnectWithoutTextDocumentInput = {
+export type AssetCreateOrConnectWithoutTextAssetInput = {
   where: Prisma.AssetWhereUniqueInput
-  create: Prisma.XOR<Prisma.AssetCreateWithoutTextDocumentInput, Prisma.AssetUncheckedCreateWithoutTextDocumentInput>
+  create: Prisma.XOR<Prisma.AssetCreateWithoutTextAssetInput, Prisma.AssetUncheckedCreateWithoutTextAssetInput>
 }
 
-export type AssetUpsertWithoutTextDocumentInput = {
-  update: Prisma.XOR<Prisma.AssetUpdateWithoutTextDocumentInput, Prisma.AssetUncheckedUpdateWithoutTextDocumentInput>
-  create: Prisma.XOR<Prisma.AssetCreateWithoutTextDocumentInput, Prisma.AssetUncheckedCreateWithoutTextDocumentInput>
+export type AssetUpsertWithoutTextAssetInput = {
+  update: Prisma.XOR<Prisma.AssetUpdateWithoutTextAssetInput, Prisma.AssetUncheckedUpdateWithoutTextAssetInput>
+  create: Prisma.XOR<Prisma.AssetCreateWithoutTextAssetInput, Prisma.AssetUncheckedCreateWithoutTextAssetInput>
   where?: Prisma.AssetWhereInput
 }
 
-export type AssetUpdateToOneWithWhereWithoutTextDocumentInput = {
+export type AssetUpdateToOneWithWhereWithoutTextAssetInput = {
   where?: Prisma.AssetWhereInput
-  data: Prisma.XOR<Prisma.AssetUpdateWithoutTextDocumentInput, Prisma.AssetUncheckedUpdateWithoutTextDocumentInput>
+  data: Prisma.XOR<Prisma.AssetUpdateWithoutTextAssetInput, Prisma.AssetUncheckedUpdateWithoutTextAssetInput>
 }
 
-export type AssetUpdateWithoutTextDocumentInput = {
+export type AssetUpdateWithoutTextAssetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
   filename?: Prisma.StringFieldUpdateOperationsInput | string
@@ -3691,7 +3640,6 @@ export type AssetUpdateWithoutTextDocumentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
@@ -3703,7 +3651,7 @@ export type AssetUpdateWithoutTextDocumentInput = {
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
-export type AssetUncheckedUpdateWithoutTextDocumentInput = {
+export type AssetUncheckedUpdateWithoutTextAssetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
   uploadedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3754,7 +3702,6 @@ export type AssetUncheckedUpdateWithoutTextDocumentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
@@ -3811,7 +3758,6 @@ export type AssetCreateWithoutAudioAssetInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
@@ -3819,7 +3765,7 @@ export type AssetCreateWithoutAudioAssetInput = {
   versions?: Prisma.AssetVersionCreateNestedManyWithoutAssetInput
   imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
 }
 
@@ -3874,12 +3820,11 @@ export type AssetUncheckedCreateWithoutAudioAssetInput = {
   updatedAt?: Date | string
   archivedAt?: Date | string | null
   deletedAt?: Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutAssetInput
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
   versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
   imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
   videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
 }
 
@@ -3947,7 +3892,6 @@ export type AssetUpdateWithoutAudioAssetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
@@ -3955,7 +3899,7 @@ export type AssetUpdateWithoutAudioAssetInput = {
   versions?: Prisma.AssetVersionUpdateManyWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -4010,268 +3954,11 @@ export type AssetUncheckedUpdateWithoutAudioAssetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
-  videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
-}
-
-export type AssetCreateWithoutAiTasksInput = {
-  id?: string
-  modality: $Enums.Modality
-  filename: string
-  originalFilename?: string | null
-  mimeType: string
-  sizeBytes?: bigint | number | null
-  width?: number | null
-  height?: number | null
-  durationMs?: number | null
-  textLength?: number | null
-  sourceMode?: $Enums.DatasetSourceMode
-  storageProvider?: $Enums.StorageProvider | null
-  storageBucket?: string | null
-  storageKey?: string | null
-  checksum?: string | null
-  sourceProvider?: $Enums.RepoProvider | null
-  sourceRef?: string | null
-  sourceRevision?: string | null
-  sourcePath?: string | null
-  sourceFileSha?: string | null
-  sourceBlobSha?: string | null
-  sourceLfsOid?: string | null
-  sourceEtag?: string | null
-  sourceUrl?: string | null
-  sourceFingerprint: string
-  cacheStatus?: $Enums.CacheStatus
-  cacheProvider?: $Enums.StorageProvider | null
-  cacheBucket?: string | null
-  cacheKey?: string | null
-  cacheChecksum?: string | null
-  cachedAt?: Date | string | null
-  cacheExpiresAt?: Date | string | null
-  cacheError?: string | null
-  currentVersionId?: string | null
-  syncStatus?: $Enums.AssetSyncStatus
-  lastSyncedAt?: Date | string | null
-  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: $Enums.AssetStatus
-  batchIndex?: number
-  orderIndex?: number
-  description?: string | null
-  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  revision?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  archivedAt?: Date | string | null
-  deletedAt?: Date | string | null
-  annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
-  dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
-  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
-  uploadedBy?: Prisma.UserCreateNestedOneWithoutUploadedAssetsInput
-  versions?: Prisma.AssetVersionCreateNestedManyWithoutAssetInput
-  audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
-  imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
-  preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentCreateNestedOneWithoutAssetInput
-  videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
-}
-
-export type AssetUncheckedCreateWithoutAiTasksInput = {
-  id?: string
-  datasetId: string
-  uploadedById?: string | null
-  modality: $Enums.Modality
-  filename: string
-  originalFilename?: string | null
-  mimeType: string
-  sizeBytes?: bigint | number | null
-  width?: number | null
-  height?: number | null
-  durationMs?: number | null
-  textLength?: number | null
-  sourceMode?: $Enums.DatasetSourceMode
-  storageProvider?: $Enums.StorageProvider | null
-  storageBucket?: string | null
-  storageKey?: string | null
-  checksum?: string | null
-  externalRepositoryId?: string | null
-  sourceProvider?: $Enums.RepoProvider | null
-  sourceRef?: string | null
-  sourceRevision?: string | null
-  sourcePath?: string | null
-  sourceFileSha?: string | null
-  sourceBlobSha?: string | null
-  sourceLfsOid?: string | null
-  sourceEtag?: string | null
-  sourceUrl?: string | null
-  sourceFingerprint: string
-  cacheStatus?: $Enums.CacheStatus
-  cacheProvider?: $Enums.StorageProvider | null
-  cacheBucket?: string | null
-  cacheKey?: string | null
-  cacheChecksum?: string | null
-  cachedAt?: Date | string | null
-  cacheExpiresAt?: Date | string | null
-  cacheError?: string | null
-  currentVersionId?: string | null
-  syncStatus?: $Enums.AssetSyncStatus
-  lastSyncedAt?: Date | string | null
-  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: $Enums.AssetStatus
-  batchIndex?: number
-  orderIndex?: number
-  description?: string | null
-  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  revision?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  archivedAt?: Date | string | null
-  deletedAt?: Date | string | null
-  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
-  versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
-  audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
-  imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
-  preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
-  textDocument?: Prisma.TextDocumentUncheckedCreateNestedOneWithoutAssetInput
-  videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
-}
-
-export type AssetCreateOrConnectWithoutAiTasksInput = {
-  where: Prisma.AssetWhereUniqueInput
-  create: Prisma.XOR<Prisma.AssetCreateWithoutAiTasksInput, Prisma.AssetUncheckedCreateWithoutAiTasksInput>
-}
-
-export type AssetUpsertWithoutAiTasksInput = {
-  update: Prisma.XOR<Prisma.AssetUpdateWithoutAiTasksInput, Prisma.AssetUncheckedUpdateWithoutAiTasksInput>
-  create: Prisma.XOR<Prisma.AssetCreateWithoutAiTasksInput, Prisma.AssetUncheckedCreateWithoutAiTasksInput>
-  where?: Prisma.AssetWhereInput
-}
-
-export type AssetUpdateToOneWithWhereWithoutAiTasksInput = {
-  where?: Prisma.AssetWhereInput
-  data: Prisma.XOR<Prisma.AssetUpdateWithoutAiTasksInput, Prisma.AssetUncheckedUpdateWithoutAiTasksInput>
-}
-
-export type AssetUpdateWithoutAiTasksInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
-  filename?: Prisma.StringFieldUpdateOperationsInput | string
-  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  sizeBytes?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
-  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  textLength?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
-  storageProvider?: Prisma.NullableEnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider | null
-  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBlobSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceLfsOid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceEtag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
-  cacheStatus?: Prisma.EnumCacheStatusFieldUpdateOperationsInput | $Enums.CacheStatus
-  cacheProvider?: Prisma.NullableEnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider | null
-  cacheBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cacheKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cacheChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cachedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cacheExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cacheError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currentVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.EnumAssetStatusFieldUpdateOperationsInput | $Enums.AssetStatus
-  batchIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  revision?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
-  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
-  uploadedBy?: Prisma.UserUpdateOneWithoutUploadedAssetsNestedInput
-  versions?: Prisma.AssetVersionUpdateManyWithoutAssetNestedInput
-  audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
-  imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
-  preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
-  videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
-}
-
-export type AssetUncheckedUpdateWithoutAiTasksInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  uploadedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
-  filename?: Prisma.StringFieldUpdateOperationsInput | string
-  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
-  sizeBytes?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
-  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  textLength?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
-  storageProvider?: Prisma.NullableEnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider | null
-  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
-  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceBlobSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceLfsOid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceEtag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  sourceFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
-  cacheStatus?: Prisma.EnumCacheStatusFieldUpdateOperationsInput | $Enums.CacheStatus
-  cacheProvider?: Prisma.NullableEnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider | null
-  cacheBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cacheKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cacheChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cachedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cacheExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  cacheError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  currentVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
-  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  status?: Prisma.EnumAssetStatusFieldUpdateOperationsInput | $Enums.AssetStatus
-  batchIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  revision?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
-  versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
-  audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
-  imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
-  preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -4375,7 +4062,6 @@ export type AssetUpdateWithoutUploadedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
@@ -4383,7 +4069,7 @@ export type AssetUpdateWithoutUploadedByInput = {
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -4437,13 +4123,12 @@ export type AssetUncheckedUpdateWithoutUploadedByInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -4599,7 +4284,6 @@ export type AssetUpdateWithoutExternalRepositoryInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
   uploadedBy?: Prisma.UserUpdateOneWithoutUploadedAssetsNestedInput
@@ -4607,7 +4291,7 @@ export type AssetUpdateWithoutExternalRepositoryInput = {
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -4661,13 +4345,12 @@ export type AssetUncheckedUpdateWithoutExternalRepositoryInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -4823,7 +4506,6 @@ export type AssetUpdateWithoutDatasetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
   uploadedBy?: Prisma.UserUpdateOneWithoutUploadedAssetsNestedInput
@@ -4831,7 +4513,7 @@ export type AssetUpdateWithoutDatasetInput = {
   audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
 }
 
@@ -4885,13 +4567,12 @@ export type AssetUncheckedUpdateWithoutDatasetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutAssetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
   audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
-  textDocument?: Prisma.TextDocumentUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
   videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
 }
 
@@ -4953,13 +4634,11 @@ export type AssetUncheckedUpdateManyWithoutDatasetInput = {
  */
 
 export type AssetCountOutputType = {
-  aiTasks: number
   annotations: number
   versions: number
 }
 
 export type AssetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  aiTasks?: boolean | AssetCountOutputTypeCountAiTasksArgs
   annotations?: boolean | AssetCountOutputTypeCountAnnotationsArgs
   versions?: boolean | AssetCountOutputTypeCountVersionsArgs
 }
@@ -4972,13 +4651,6 @@ export type AssetCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
    * Select specific fields to fetch from the AssetCountOutputType
    */
   select?: Prisma.AssetCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * AssetCountOutputType without action
- */
-export type AssetCountOutputTypeCountAiTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AiTaskWhereInput
 }
 
 /**
@@ -5047,7 +4719,6 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   updatedAt?: boolean
   archivedAt?: boolean
   deletedAt?: boolean
-  aiTasks?: boolean | Prisma.Asset$aiTasksArgs<ExtArgs>
   annotations?: boolean | Prisma.Asset$annotationsArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   externalRepository?: boolean | Prisma.Asset$externalRepositoryArgs<ExtArgs>
@@ -5056,7 +4727,7 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   audioAsset?: boolean | Prisma.Asset$audioAssetArgs<ExtArgs>
   imageAsset?: boolean | Prisma.Asset$imageAssetArgs<ExtArgs>
   preparedImportItem?: boolean | Prisma.Asset$preparedImportItemArgs<ExtArgs>
-  textDocument?: boolean | Prisma.Asset$textDocumentArgs<ExtArgs>
+  textAsset?: boolean | Prisma.Asset$textAssetArgs<ExtArgs>
   videoAsset?: boolean | Prisma.Asset$videoAssetArgs<ExtArgs>
   _count?: boolean | Prisma.AssetCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asset"]>
@@ -5228,7 +4899,6 @@ export type AssetSelectScalar = {
 
 export type AssetOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "uploadedById" | "modality" | "filename" | "originalFilename" | "mimeType" | "sizeBytes" | "width" | "height" | "durationMs" | "textLength" | "sourceMode" | "storageProvider" | "storageBucket" | "storageKey" | "checksum" | "externalRepositoryId" | "sourceProvider" | "sourceRef" | "sourceRevision" | "sourcePath" | "sourceFileSha" | "sourceBlobSha" | "sourceLfsOid" | "sourceEtag" | "sourceUrl" | "sourceFingerprint" | "cacheStatus" | "cacheProvider" | "cacheBucket" | "cacheKey" | "cacheChecksum" | "cachedAt" | "cacheExpiresAt" | "cacheError" | "currentVersionId" | "syncStatus" | "lastSyncedAt" | "syncSummary" | "status" | "batchIndex" | "orderIndex" | "description" | "metadata" | "revision" | "createdAt" | "updatedAt" | "archivedAt" | "deletedAt", ExtArgs["result"]["asset"]>
 export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  aiTasks?: boolean | Prisma.Asset$aiTasksArgs<ExtArgs>
   annotations?: boolean | Prisma.Asset$annotationsArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   externalRepository?: boolean | Prisma.Asset$externalRepositoryArgs<ExtArgs>
@@ -5237,7 +4907,7 @@ export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   audioAsset?: boolean | Prisma.Asset$audioAssetArgs<ExtArgs>
   imageAsset?: boolean | Prisma.Asset$imageAssetArgs<ExtArgs>
   preparedImportItem?: boolean | Prisma.Asset$preparedImportItemArgs<ExtArgs>
-  textDocument?: boolean | Prisma.Asset$textDocumentArgs<ExtArgs>
+  textAsset?: boolean | Prisma.Asset$textAssetArgs<ExtArgs>
   videoAsset?: boolean | Prisma.Asset$videoAssetArgs<ExtArgs>
   _count?: boolean | Prisma.AssetCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -5255,7 +4925,6 @@ export type AssetIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Asset"
   objects: {
-    aiTasks: Prisma.$AiTaskPayload<ExtArgs>[]
     annotations: Prisma.$AnnotationPayload<ExtArgs>[]
     dataset: Prisma.$DatasetPayload<ExtArgs>
     externalRepository: Prisma.$ExternalRepositoryPayload<ExtArgs> | null
@@ -5264,7 +4933,7 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     audioAsset: Prisma.$AudioAssetPayload<ExtArgs> | null
     imageAsset: Prisma.$ImageAssetPayload<ExtArgs> | null
     preparedImportItem: Prisma.$PreparedImportItemPayload<ExtArgs> | null
-    textDocument: Prisma.$TextDocumentPayload<ExtArgs> | null
+    textAsset: Prisma.$TextAssetPayload<ExtArgs> | null
     videoAsset: Prisma.$VideoAssetPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -5712,7 +5381,6 @@ readonly fields: AssetFieldRefs;
  */
 export interface Prisma__AssetClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  aiTasks<T extends Prisma.Asset$aiTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$aiTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   annotations<T extends Prisma.Asset$annotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$annotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   externalRepository<T extends Prisma.Asset$externalRepositoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$externalRepositoryArgs<ExtArgs>>): Prisma.Prisma__ExternalRepositoryClient<runtime.Types.Result.GetResult<Prisma.$ExternalRepositoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -5721,7 +5389,7 @@ export interface Prisma__AssetClient<T, Null = never, ExtArgs extends runtime.Ty
   audioAsset<T extends Prisma.Asset$audioAssetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$audioAssetArgs<ExtArgs>>): Prisma.Prisma__AudioAssetClient<runtime.Types.Result.GetResult<Prisma.$AudioAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   imageAsset<T extends Prisma.Asset$imageAssetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$imageAssetArgs<ExtArgs>>): Prisma.Prisma__ImageAssetClient<runtime.Types.Result.GetResult<Prisma.$ImageAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   preparedImportItem<T extends Prisma.Asset$preparedImportItemArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$preparedImportItemArgs<ExtArgs>>): Prisma.Prisma__PreparedImportItemClient<runtime.Types.Result.GetResult<Prisma.$PreparedImportItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  textDocument<T extends Prisma.Asset$textDocumentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$textDocumentArgs<ExtArgs>>): Prisma.Prisma__TextDocumentClient<runtime.Types.Result.GetResult<Prisma.$TextDocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  textAsset<T extends Prisma.Asset$textAssetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$textAssetArgs<ExtArgs>>): Prisma.Prisma__TextAssetClient<runtime.Types.Result.GetResult<Prisma.$TextAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   videoAsset<T extends Prisma.Asset$videoAssetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$videoAssetArgs<ExtArgs>>): Prisma.Prisma__VideoAssetClient<runtime.Types.Result.GetResult<Prisma.$VideoAssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -6198,30 +5866,6 @@ export type AssetDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
- * Asset.aiTasks
- */
-export type Asset$aiTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AiTask
-   */
-  select?: Prisma.AiTaskSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the AiTask
-   */
-  omit?: Prisma.AiTaskOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AiTaskInclude<ExtArgs> | null
-  where?: Prisma.AiTaskWhereInput
-  orderBy?: Prisma.AiTaskOrderByWithRelationInput | Prisma.AiTaskOrderByWithRelationInput[]
-  cursor?: Prisma.AiTaskWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AiTaskScalarFieldEnum | Prisma.AiTaskScalarFieldEnum[]
-}
-
-/**
  * Asset.annotations
  */
 export type Asset$annotationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6365,22 +6009,22 @@ export type Asset$preparedImportItemArgs<ExtArgs extends runtime.Types.Extension
 }
 
 /**
- * Asset.textDocument
+ * Asset.textAsset
  */
-export type Asset$textDocumentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Asset$textAssetArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the TextDocument
+   * Select specific fields to fetch from the TextAsset
    */
-  select?: Prisma.TextDocumentSelect<ExtArgs> | null
+  select?: Prisma.TextAssetSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the TextDocument
+   * Omit specific fields from the TextAsset
    */
-  omit?: Prisma.TextDocumentOmit<ExtArgs> | null
+  omit?: Prisma.TextAssetOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.TextDocumentInclude<ExtArgs> | null
-  where?: Prisma.TextDocumentWhereInput
+  include?: Prisma.TextAssetInclude<ExtArgs> | null
+  where?: Prisma.TextAssetWhereInput
 }
 
 /**

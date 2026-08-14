@@ -66,10 +66,11 @@ export const ModelName = {
   ImageAsset: 'ImageAsset',
   VideoAsset: 'VideoAsset',
   VideoObjectTrack: 'VideoObjectTrack',
-  TextDocument: 'TextDocument',
+  TextAsset: 'TextAsset',
   AudioAsset: 'AudioAsset',
   AudioSpeaker: 'AudioSpeaker',
-  AiTask: 'AiTask'
+  AiTask: 'AiTask',
+  AiModel: 'AiModel'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -516,7 +517,7 @@ export const VideoObjectTrackScalarFieldEnum = {
 export type VideoObjectTrackScalarFieldEnum = (typeof VideoObjectTrackScalarFieldEnum)[keyof typeof VideoObjectTrackScalarFieldEnum]
 
 
-export const TextDocumentScalarFieldEnum = {
+export const TextAssetScalarFieldEnum = {
   id: 'id',
   assetId: 'assetId',
   content: 'content',
@@ -525,7 +526,7 @@ export const TextDocumentScalarFieldEnum = {
   metadata: 'metadata'
 } as const
 
-export type TextDocumentScalarFieldEnum = (typeof TextDocumentScalarFieldEnum)[keyof typeof TextDocumentScalarFieldEnum]
+export type TextAssetScalarFieldEnum = (typeof TextAssetScalarFieldEnum)[keyof typeof TextAssetScalarFieldEnum]
 
 
 export const AudioAssetScalarFieldEnum = {
@@ -561,27 +562,45 @@ export const AiTaskScalarFieldEnum = {
   id: 'id',
   externalTaskId: 'externalTaskId',
   datasetId: 'datasetId',
-  assetId: 'assetId',
   jobId: 'jobId',
   createdById: 'createdById',
-  provider: 'provider',
   type: 'type',
   status: 'status',
   modality: 'modality',
-  modelName: 'modelName',
-  modelVersion: 'modelVersion',
+  modelId: 'modelId',
+  modelNameSnapshot: 'modelNameSnapshot',
+  modelVersionSnapshot: 'modelVersionSnapshot',
+  modelKeySnapshot: 'modelKeySnapshot',
   input: 'input',
   output: 'output',
   summary: 'summary',
   error: 'error',
   errorCode: 'errorCode',
   errorDetails: 'errorDetails',
+  pollAttempts: 'pollAttempts',
+  nextPollAt: 'nextPollAt',
   resultStorageKey: 'resultStorageKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type AiTaskScalarFieldEnum = (typeof AiTaskScalarFieldEnum)[keyof typeof AiTaskScalarFieldEnum]
+
+
+export const AiModelScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  displayName: 'displayName',
+  provider: 'provider',
+  modality: 'modality',
+  taskType: 'taskType',
+  isActive: 'isActive',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiModelScalarFieldEnum = (typeof AiModelScalarFieldEnum)[keyof typeof AiModelScalarFieldEnum]
 
 
 export const SortOrder = {

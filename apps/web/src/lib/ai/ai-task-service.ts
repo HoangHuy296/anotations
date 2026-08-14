@@ -5,6 +5,7 @@ import { JobStatus, JobType, AiTaskStatus } from "@internal/db";
 import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { cancelAuthorizedJob } from "@/lib/jobs/authorization";
 import { enqueueExistingJob } from "@/lib/queue/enqueue-job";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { AiTaskError } from "@/lib/ai/ai-task-errors";
@@ -104,4 +105,35 @@ export async function createAiTask(actor: RequestActor, input: unknown): Promise
   if (!delivery.ok) return { ok: false, status: delivery.status, code: delivery.status === 400 ? "INVALID_REQUEST" : "JOB_CONFLICT" };
 
   return { ok: true, status: 202, taskId: created.aiTask.id, jobId: created.job.id };
+}
+
+export type CancelAiTaskFailureCode = "AI_TASK_NOT_FOUND" | "FORBIDDEN" | "JOB_CONFLICT";
+
+export type CancelAiTaskResult =
+  | { ok: true; status: 200; taskId: string; jobId: string; jobStatus: "CANCELED" | "CANCELING" }
+  | { ok: false; status: 403 | 404 | 409; code: CancelAiTaskFailureCode };
+
+/**
+ * Cancels an AiTask by its own id (`POST /api/ai/tasks/{aiTaskId}/cancel`) --
+ * the caller only ever needs `taskId`, not `jobId`. Resolves `taskId ->
+ * jobId` (concealed as `AI_TASK_NOT_FOUND` the same way `readAuthorizedAiTask`
+ * conceals a task whose dataset the actor cannot access) and delegates the
+ * actual authorization + cancellation transaction entirely to
+ * `cancelAuthorizedJob` — this is still cancelling the underlying `Job`
+ * (AGENTS.md: a common `Job` is the source of truth for lifecycle/state),
+ * only the entry point changes from `jobId` to `taskId`.
+ */
+export async function cancelAuthorizedAiTask(actor: RequestActor, taskId: string): Promise<CancelAiTaskResult> {
+  const aiTask = await db.aiTask.findUnique({ where: { id: taskId }, select: { id: true, jobId: true } });
+  if (!aiTask) return { ok: false, status: 404, code: "AI_TASK_NOT_FOUND" };
+
+  const result = await cancelAuthorizedJob(actor, aiTask.jobId);
+  if (!result.ok) {
+    // cancelAuthorizedJob conceals a Job the actor cannot access as 404 too
+    // (job.cancel permission on the AiTask's own Dataset) -- surfaced here
+    // under the AI task's own not-found code rather than a Job-shaped one.
+    const code: CancelAiTaskFailureCode = result.status === 404 ? "AI_TASK_NOT_FOUND" : result.status === 403 ? "FORBIDDEN" : "JOB_CONFLICT";
+    return { ok: false, status: result.status, code };
+  }
+  return { ok: true, status: 200, taskId: aiTask.id, jobId: aiTask.jobId, jobStatus: result.cancellationStatus };
 }

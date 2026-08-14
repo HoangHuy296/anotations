@@ -24,6 +24,10 @@
     "./media-processing": {
       "types": "./dist/media-processing.d.ts",
       "default": "./dist/media-processing.js"
+    },
+    "./ai-provider": {
+      "types": "./dist/ai-provider.d.ts",
+      "default": "./dist/ai-provider.js"
     }
   },
   "scripts": {

@@ -12,7 +12,7 @@ const assetWithChildren = {
   ...assetMetadataSelect,
   imageAsset: { select: { id: true } },
   videoAsset: { select: { id: true } },
-  textDocument: { select: { id: true } },
+  textAsset: { select: { id: true } },
   audioAsset: { select: { id: true } },
 } as const;
 
@@ -37,11 +37,11 @@ type PublishedAsset = {
   updatedAt: Date;
   imageAsset: { id: string } | null;
   videoAsset: { id: string } | null;
-  textDocument: { id: string } | null;
+  textAsset: { id: string } | null;
   audioAsset: { id: string } | null;
 };
 
-export type SafeUploadedAsset = Omit<PublishedAsset, "imageAsset" | "videoAsset" | "textDocument" | "audioAsset" | "sizeBytes"> & {
+export type SafeUploadedAsset = Omit<PublishedAsset, "imageAsset" | "videoAsset" | "textAsset" | "audioAsset" | "sizeBytes"> & {
   sizeBytes: string | null;
 };
 
@@ -55,15 +55,15 @@ export class UploadPublicationFailure extends Error {
 function hasMatchingChild(asset: PublishedAsset) {
   return (asset.modality === Modality.IMAGE && Boolean(asset.imageAsset))
     || (asset.modality === Modality.VIDEO && Boolean(asset.videoAsset))
-    || (asset.modality === Modality.TEXT && Boolean(asset.textDocument))
+    || (asset.modality === Modality.TEXT && Boolean(asset.textAsset))
     || (asset.modality === Modality.AUDIO && Boolean(asset.audioAsset));
 }
 
 function safeAsset(asset: PublishedAsset): SafeUploadedAsset {
-  const { imageAsset, videoAsset, textDocument, audioAsset, ...safe } = asset;
+  const { imageAsset, videoAsset, textAsset, audioAsset, ...safe } = asset;
   void imageAsset;
   void videoAsset;
-  void textDocument;
+  void textAsset;
   void audioAsset;
   return { ...safe, sizeBytes: safe.sizeBytes?.toString() ?? null };
 }
@@ -120,7 +120,7 @@ export async function publishUploadedAsset(input: {
         case Modality.VIDEO:
           return { asset: await tx.asset.create({ data: { ...common, videoAsset: { create: { metadata: {} } } }, select: assetWithChildren }), replayed: false };
         case Modality.TEXT:
-          return { asset: await tx.asset.create({ data: { ...common, textDocument: { create: { tokenization: {}, metadata: {} } } }, select: assetWithChildren }), replayed: false };
+          return { asset: await tx.asset.create({ data: { ...common, textAsset: { create: { tokenization: {}, metadata: {} } } }, select: assetWithChildren }), replayed: false };
         case Modality.AUDIO:
           return { asset: await tx.asset.create({ data: { ...common, audioAsset: { create: { metadata: {} } } }, select: assetWithChildren }), replayed: false };
       }

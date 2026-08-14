@@ -576,7 +576,7 @@ export type JobWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   retryOfJobId?: Prisma.StringNullableFilter<"Job"> | string | null
-  aiTasks?: Prisma.AiTaskListRelationFilter
+  aiTasks?: Prisma.XOR<Prisma.AiTaskNullableScalarRelationFilter, Prisma.AiTaskWhereInput> | null
   canceledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
@@ -637,7 +637,7 @@ export type JobOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   retryOfJobId?: Prisma.SortOrderInput | Prisma.SortOrder
-  aiTasks?: Prisma.AiTaskOrderByRelationAggregateInput
+  aiTasks?: Prisma.AiTaskOrderByWithRelationInput
   canceledBy?: Prisma.UserOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
   dataset?: Prisma.DatasetOrderByWithRelationInput
@@ -702,7 +702,7 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   resultFilename?: Prisma.StringNullableFilter<"Job"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
-  aiTasks?: Prisma.AiTaskListRelationFilter
+  aiTasks?: Prisma.XOR<Prisma.AiTaskNullableScalarRelationFilter, Prisma.AiTaskWhereInput> | null
   canceledBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
@@ -867,7 +867,7 @@ export type JobCreateInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -928,7 +928,7 @@ export type JobUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
@@ -977,7 +977,7 @@ export type JobUpdateInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -1038,7 +1038,7 @@ export type JobUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
@@ -1721,12 +1721,10 @@ export type JobCreateNestedOneWithoutAiTasksInput = {
   connect?: Prisma.JobWhereUniqueInput
 }
 
-export type JobUpdateOneWithoutAiTasksNestedInput = {
+export type JobUpdateOneRequiredWithoutAiTasksNestedInput = {
   create?: Prisma.XOR<Prisma.JobCreateWithoutAiTasksInput, Prisma.JobUncheckedCreateWithoutAiTasksInput>
   connectOrCreate?: Prisma.JobCreateOrConnectWithoutAiTasksInput
   upsert?: Prisma.JobUpsertWithoutAiTasksInput
-  disconnect?: Prisma.JobWhereInput | boolean
-  delete?: Prisma.JobWhereInput | boolean
   connect?: Prisma.JobWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.JobUpdateToOneWithWhereWithoutAiTasksInput, Prisma.JobUpdateWithoutAiTasksInput>, Prisma.JobUncheckedUpdateWithoutAiTasksInput>
 }
@@ -1774,7 +1772,7 @@ export type JobCreateWithoutCanceledByInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
@@ -1833,7 +1831,7 @@ export type JobUncheckedCreateWithoutCanceledByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
@@ -1892,7 +1890,7 @@ export type JobCreateWithoutCreatedByInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
@@ -1951,7 +1949,7 @@ export type JobUncheckedCreateWithoutCreatedByInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
@@ -2096,7 +2094,7 @@ export type JobCreateWithoutRetrySuccessorInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2156,7 +2154,7 @@ export type JobUncheckedCreateWithoutRetrySuccessorInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
@@ -2209,7 +2207,7 @@ export type JobCreateWithoutRetryOfJobInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2268,7 +2266,7 @@ export type JobUncheckedCreateWithoutRetryOfJobInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
@@ -2333,7 +2331,7 @@ export type JobUpdateWithoutRetrySuccessorInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -2393,7 +2391,7 @@ export type JobUncheckedUpdateWithoutRetrySuccessorInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
@@ -2452,7 +2450,7 @@ export type JobUpdateWithoutRetryOfJobInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -2511,7 +2509,7 @@ export type JobUncheckedUpdateWithoutRetryOfJobInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
@@ -2560,7 +2558,7 @@ export type JobCreateWithoutEventsInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2620,7 +2618,7 @@ export type JobUncheckedCreateWithoutEventsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
 }
@@ -2684,7 +2682,7 @@ export type JobUpdateWithoutEventsInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -2744,7 +2742,7 @@ export type JobUncheckedUpdateWithoutEventsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
@@ -2792,7 +2790,7 @@ export type JobCreateWithoutExternalRepositoryInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2851,7 +2849,7 @@ export type JobUncheckedCreateWithoutExternalRepositoryInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
@@ -2926,7 +2924,7 @@ export type JobCreateWithoutSourceConnectionInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -2985,7 +2983,7 @@ export type JobUncheckedCreateWithoutSourceConnectionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
@@ -3060,7 +3058,7 @@ export type JobCreateWithoutDatasetInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
@@ -3119,7 +3117,7 @@ export type JobUncheckedCreateWithoutDatasetInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
@@ -3194,7 +3192,7 @@ export type JobCreateWithoutPreparedImportInput = {
   resultFilename?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
   canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
   createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
@@ -3254,7 +3252,7 @@ export type JobUncheckedCreateWithoutPreparedImportInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   retryOfJobId?: string | null
-  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutJobInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
 }
@@ -3318,7 +3316,7 @@ export type JobUpdateWithoutPreparedImportInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -3378,7 +3376,7 @@ export type JobUncheckedUpdateWithoutPreparedImportInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
 }
@@ -3758,7 +3756,7 @@ export type JobUpdateWithoutCanceledByInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
@@ -3817,7 +3815,7 @@ export type JobUncheckedUpdateWithoutCanceledByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
@@ -3916,7 +3914,7 @@ export type JobUpdateWithoutCreatedByInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
@@ -3975,7 +3973,7 @@ export type JobUncheckedUpdateWithoutCreatedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
@@ -4124,7 +4122,7 @@ export type JobUpdateWithoutExternalRepositoryInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -4183,7 +4181,7 @@ export type JobUncheckedUpdateWithoutExternalRepositoryInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
@@ -4332,7 +4330,7 @@ export type JobUpdateWithoutSourceConnectionInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
@@ -4391,7 +4389,7 @@ export type JobUncheckedUpdateWithoutSourceConnectionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
@@ -4540,7 +4538,7 @@ export type JobUpdateWithoutDatasetInput = {
   resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  aiTasks?: Prisma.AiTaskUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
   canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
   externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
@@ -4599,7 +4597,7 @@ export type JobUncheckedUpdateWithoutDatasetInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutJobNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
@@ -4661,12 +4659,10 @@ export type JobUncheckedUpdateManyWithoutDatasetInput = {
  */
 
 export type JobCountOutputType = {
-  aiTasks: number
   events: number
 }
 
 export type JobCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  aiTasks?: boolean | JobCountOutputTypeCountAiTasksArgs
   events?: boolean | JobCountOutputTypeCountEventsArgs
 }
 
@@ -4678,13 +4674,6 @@ export type JobCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensio
    * Select specific fields to fetch from the JobCountOutputType
    */
   select?: Prisma.JobCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * JobCountOutputType without action
- */
-export type JobCountOutputTypeCountAiTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.AiTaskWhereInput
 }
 
 /**
@@ -4956,7 +4945,7 @@ export type JobIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Job"
   objects: {
-    aiTasks: Prisma.$AiTaskPayload<ExtArgs>[]
+    aiTasks: Prisma.$AiTaskPayload<ExtArgs> | null
     canceledBy: Prisma.$UserPayload<ExtArgs> | null
     createdBy: Prisma.$UserPayload<ExtArgs>
     dataset: Prisma.$DatasetPayload<ExtArgs>
@@ -5441,7 +5430,7 @@ readonly fields: JobFieldRefs;
  */
 export interface Prisma__JobClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  aiTasks<T extends Prisma.Job$aiTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$aiTasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AiTaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  aiTasks<T extends Prisma.Job$aiTasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$aiTasksArgs<ExtArgs>>): Prisma.Prisma__AiTaskClient<runtime.Types.Result.GetResult<Prisma.$AiTaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   canceledBy<T extends Prisma.Job$canceledByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$canceledByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
@@ -5940,11 +5929,6 @@ export type Job$aiTasksArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    */
   include?: Prisma.AiTaskInclude<ExtArgs> | null
   where?: Prisma.AiTaskWhereInput
-  orderBy?: Prisma.AiTaskOrderByWithRelationInput | Prisma.AiTaskOrderByWithRelationInput[]
-  cursor?: Prisma.AiTaskWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.AiTaskScalarFieldEnum | Prisma.AiTaskScalarFieldEnum[]
 }
 
 /**

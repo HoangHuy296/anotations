@@ -6,6 +6,7 @@ import { Circle, Group, Image as KonvaImage, Layer, Line, Rect, Stage, Transform
 
 import { Toolbar } from "@/components/workspace/toolbar";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
+import { isAiPredictionAnnotation } from "@/lib/ai/ai-detect-view";
 import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 import { normalizeBoundingBox, viewportPointToImage } from "@/lib/workspace/geometry";
@@ -301,7 +302,13 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
             // non-interactive: dragging/resizing it before the server
             // confirms the id would race the create for its own revision.
             const interactive = selected && !pendingCreateIds.has(annotation.id);
-            const common = { stroke: colorFor(annotation, labels), strokeWidth: selected ? 3 : 2, onClick: (event: { cancelBubble: boolean }) => { event.cancelBubble = true; setSelectedId(annotation.id); }, onTap: (event: { cancelBubble: boolean }) => { event.cancelBubble = true; setSelectedId(annotation.id); } };
+            // AI-suggested boxes (source: AI, status: DRAFT, still awaiting
+            // review -- ai-prediction-writer.ts) render dashed, the same
+            // visual language already used for an in-progress draft shape
+            // below, so a pre-annotation reads as provisional at a glance
+            // without a second annotation representation or a `source`
+            // field round-tripping through `SafeImageAnnotation`.
+            const common = { stroke: colorFor(annotation, labels), strokeWidth: selected ? 3 : 2, dash: isAiPredictionAnnotation(annotation) ? [6, 4] : undefined, onClick: (event: { cancelBubble: boolean }) => { event.cancelBubble = true; setSelectedId(annotation.id); }, onTap: (event: { cancelBubble: boolean }) => { event.cancelBubble = true; setSelectedId(annotation.id); } };
             if (isBox(annotation)) { const box = annotation.geometry; return <Rect key={annotation.id} ref={(node) => { if (interactive) selectedNodeRef.current = node; }} x={box.x * originalWidth} y={box.y * originalHeight} width={box.width * originalWidth} height={box.height * originalHeight} fill={`${colorFor(annotation, labels)}22`} draggable={tool === "select" && interactive} {...common} onDragEnd={(event) => { const next = { x: event.target.x(), y: event.target.y(), width: event.target.width(), height: event.target.height() }; const geometry = normalizeBoundingBox(next, originalWidth, originalHeight); if (!geometry) return; upsertSafeAnnotation({ ...annotation, geometry }); setSaveState("pending"); scheduleAutosave(`annotation:${annotation.id}`, () => persistGeometry(annotation, geometry)); }} onTransformEnd={(event) => { const node = event.target; const scaleX = node.scaleX(); const scaleY = node.scaleY(); node.scale({ x: 1, y: 1 }); const next = { x: node.x(), y: node.y(), width: Math.max(1, node.width() * scaleX), height: Math.max(1, node.height() * scaleY) }; const geometry = normalizeBoundingBox(next, originalWidth, originalHeight); if (!geometry) return; upsertSafeAnnotation({ ...annotation, geometry }); setSaveState("pending"); scheduleAutosave(`annotation:${annotation.id}`, () => persistGeometry(annotation, geometry)); }} />; }
             const geometry = annotation.geometry as Record<string, unknown>;
             const persistTranslation = (event: Konva.KonvaEventObject<DragEvent>) => {

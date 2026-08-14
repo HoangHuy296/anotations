@@ -14,7 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status";
 import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
-import type { SafeImageAnnotation, SafeImageWorkspaceAsset, SafeWorkspaceLabel } from "@/types/image-workspace";
+import { useDatasetLabels, useDatasetLabelsStore, type DatasetLabel } from "@/stores/dataset-labels-store";
+import type { SafeImageAnnotation, SafeImageWorkspaceAsset } from "@/types/image-workspace";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
 
@@ -43,7 +44,6 @@ export type ImagePropertiesTabsProps = {
  */
 export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: ImagePropertiesTabsProps) {
   const image: SafeImageWorkspaceAsset = selection.asset;
-  const labels: SafeWorkspaceLabel[] = selection.labels;
   const router = useRouter();
   const [description, setDescription] = useState(image.description ?? "");
   const [serverDescription, setServerDescription] = useState(image.description ?? "");
@@ -53,7 +53,7 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
   const [shapeError, setShapeError] = useState<string | null>(null);
   const [labelError, setLabelError] = useState<string | null>(null);
   const [newLabelName, setNewLabelName] = useState("");
-  const [taxonomy, setTaxonomy] = useState(labels);
+  const taxonomy = useDatasetLabels(datasetId);
   const lastAttemptedDescriptionRef = useRef<string | null>(null);
   const annotations = useAnnotationStore((store) => store.persistedAnnotations);
   const selectedId = useAnnotationStore((store) => store.selectedId);
@@ -63,6 +63,18 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
   const scheduleAutosave = useAnnotationStore((store) => store.scheduleAutosave);
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const setConflictDraftInStore = useAnnotationStore((store) => store.setConflictDraft);
+
+  // `selection.labels` (SSR-projected, still used as-is by `image-engine.tsx`
+  // for annotation coloring) seeds this dataset's entry so the Labels tab
+  // never flashes empty on first paint -- but `ensureLoaded` still performs
+  // its own fetch regardless, so this store stays the single authoritative,
+  // always-fresh source rather than trusting a snapshot that may already be
+  // stale by the time hydration runs. `useDatasetLabelsStore` is a
+  // module-level singleton, so once loaded for `datasetId` this resolves
+  // with no network call on every later mount (every asset switch remounts
+  // this component via `PropertiesPanel`'s `key`, and switching back from
+  // VIDEO does too).
+  useEffect(() => { void useDatasetLabelsStore.getState().ensureLoaded(datasetId, selection.labels); }, [datasetId, selection.labels]);
 
   useEffect(() => {
     if (description === serverDescription || lastAttemptedDescriptionRef.current === description) return;
@@ -145,12 +157,12 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, color: "#0EA5E9", description: "", hotkey: "" }),
     });
-    const payload = await response.json().catch(() => null) as { data?: SafeWorkspaceLabel; error?: { message?: string } } | null;
+    const payload = await response.json().catch(() => null) as { data?: DatasetLabel; error?: { message?: string } } | null;
     if (!response.ok || !payload?.data) {
       setLabelError(payload?.error?.message ?? "The label could not be created.");
       return;
     }
-    setTaxonomy((current) => [...current, payload.data!].sort((left, right) => left.name.localeCompare(right.name)));
+    useDatasetLabelsStore.getState().addLabel(datasetId, payload.data);
     setNewLabelName("");
   }
 
@@ -158,7 +170,7 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
     setLabelError(null);
     const response = await fetch(`/api/labels/${labelId}`, { method: "DELETE", credentials: "same-origin" });
     if (response.status === 204) {
-      setTaxonomy((current) => current.filter((label) => label.id !== labelId));
+      useDatasetLabelsStore.getState().removeLabel(datasetId, labelId);
       return;
     }
     const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null;

@@ -84,7 +84,13 @@ test("private VIDEO capability is object-scoped, browser-direct, and foreign acc
 
 test("VideoEngine uses the authorized capability rather than a Next.js binary proxy", async () => {
   const source = await readFile(path.resolve(process.cwd(), "src/components/workspace/video-engine.tsx"), "utf8");
-  assert.match(source, /\/api\/assets\/\$\{encodeURIComponent\(video\.id\)\}\/view-url/);
+  // `getViewUrl` (a private, in-flight-deduped/TTL-cached wrapper -- mirrors
+  // `canvas-stage.tsx`'s own copy, added to stop Strict Mode's double mount
+  // effect from firing this fetch twice) is the one place that calls the
+  // authorized `/api/assets/{id}/view-url` capability; VideoEngine's mount
+  // effect calls it with the video's own id.
+  assert.match(source, /\/api\/assets\/\$\{encodeURIComponent\(assetId\)\}\/view-url/);
+  assert.match(source, /getViewUrl\(video\.id\)/);
   assert.match(source, /<video[^>]+src=\{viewUrl\}/);
   assert.equal(source.includes("/api/videos/"), false);
   assert.equal(source.includes("arrayBuffer()"), false);

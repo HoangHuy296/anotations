@@ -115,7 +115,7 @@ model Job {
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
   retryOfJobId         String?             @unique
-  aiTasks              AiTask[]
+  aiTasks              AiTask?
   canceledBy           User?               @relation("JobCanceledBy", fields: [canceledById], references: [id])
   createdBy            User                @relation("JobCreatedBy", fields: [createdById], references: [id])
   dataset              Dataset             @relation("DatasetJobs", fields: [datasetId], references: [id], onDelete: Cascade)
@@ -385,7 +385,6 @@ model Asset {
   updatedAt            DateTime            @updatedAt
   archivedAt           DateTime?
   deletedAt            DateTime?
-  aiTasks              AiTask[]
   annotations          Annotation[]
   dataset              Dataset             @relation(fields: [datasetId], references: [id], onDelete: Cascade)
   externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
@@ -394,7 +393,7 @@ model Asset {
   audioAsset           AudioAsset?
   imageAsset           ImageAsset?
   preparedImportItem   PreparedImportItem?
-  textDocument         TextDocument?
+  textAsset            TextAsset?
   videoAsset           VideoAsset?
 
   @@unique([storageProvider, storageBucket, storageKey])
@@ -626,7 +625,7 @@ model VideoObjectTrack {
   @@index([createdById])
 }
 
-model TextDocument {
+model TextAsset {
   id           String  @id @default(cuid())
   assetId      String  @unique
   content      String?
@@ -674,36 +673,54 @@ model AiTask {
   id               String       @id @default(cuid())
   externalTaskId   String?      @unique
   datasetId        String
-  assetId          String?
-  jobId            String?
+  jobId            String       @unique
   createdById      String
-  provider         String
   type             AiTaskType
   status           AiTaskStatus @default(QUEUED)
   modality         Modality?
-  modelName        String?
-  modelVersion     String?
+  modelId          String
+  modelNameSnapshot    String
+  modelVersionSnapshot String?
+  modelKeySnapshot String
   input            Json         @default("{}")
   output           Json?
   summary          Json         @default("{}")
   error            String?
   errorCode        String?
   errorDetails     Json?
+  pollAttempts     Int          @default(0)
+  nextPollAt       DateTime?
   resultStorageKey String?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
-  asset            Asset?       @relation(fields: [assetId], references: [id])
   createdBy        User         @relation("AiTaskCreatedBy", fields: [createdById], references: [id])
   dataset          Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  job              Job?         @relation(fields: [jobId], references: [id])
+  job              Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  model            AiModel      @relation(fields: [modelId], references: [id])
 
   @@index([datasetId])
-  @@index([assetId])
-  @@index([jobId])
   @@index([createdById])
   @@index([status])
+  @@index([modelId])
+  @@index([nextPollAt])
+}
+
+model AiModel {
+  id           String       @id @default(cuid())
+  key          String       @unique   // định danh ổn định, dùng khi gọi API đồng nghiệp
+  displayName  String
+  provider     String                  // khớp AiProviderAdapter registry, VD: "colleague-api"
+  modality     Modality?               // null = hỗ trợ đa modality
+  taskType     AiTaskType
+  isActive     Boolean      @default(true)
+  metadata     Json         @default("{}")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  aiTasks      AiTask[]
+
   @@index([provider])
-  @@index([type])
+  @@index([taskType])
+  @@index([isActive])
 }
 
 enum UserRole {

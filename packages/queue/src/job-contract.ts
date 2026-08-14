@@ -24,6 +24,8 @@ export const supportedQueueJobTypes = [
   "IMPORT_DATASET",
   "EXTRACT_VIDEO_METADATA",
   "GENERATE_AUDIO_WAVEFORM",
+  "AI_PREANNOTATE_ASSET",
+  "AI_PREANNOTATE_DATASET",
 ] as const;
 export type SupportedQueueJobType = (typeof supportedQueueJobTypes)[number];
 

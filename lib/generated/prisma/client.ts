@@ -133,10 +133,10 @@ export type VideoAsset = Prisma.VideoAssetModel
  */
 export type VideoObjectTrack = Prisma.VideoObjectTrackModel
 /**
- * Model TextDocument
+ * Model TextAsset
  * 
  */
-export type TextDocument = Prisma.TextDocumentModel
+export type TextAsset = Prisma.TextAssetModel
 /**
  * Model AudioAsset
  * 
@@ -152,3 +152,8 @@ export type AudioSpeaker = Prisma.AudioSpeakerModel
  * 
  */
 export type AiTask = Prisma.AiTaskModel
+/**
+ * Model AiModel
+ * 
+ */
+export type AiModel = Prisma.AiModelModel

@@ -23,6 +23,39 @@ type VideoEngineProps = {
 type KeyframeChanges = { timestampMs?: number; geometry?: { kind: "BOUNDING_BOX"; x: number; y: number; width: number; height: number } };
 
 /**
+ * Same shape as `canvas-stage.tsx`'s private `getViewUrl` for
+ * `GET /api/assets/{assetId}/view-url` -- a short-lived, object-scoped MinIO
+ * presigned URL. Two guards, for two different problems:
+ * - `cachedViewUrls` (TTL): re-visiting the same asset shortly after
+ *   shouldn't re-request a presigned URL that's still valid.
+ * - `inFlightViewUrls`: React 18 Strict Mode (development, intentionally
+ *   left on) double-invokes every mount effect -- switching to a video asset
+ *   (e.g. clicking it in the Assets tab) mounts a fresh `VideoEngine`, and
+ *   without this its mount effect below fired this fetch twice, back-to-back,
+ *   before either resolved. A caller that arrives mid-flight reuses that same
+ *   pending request instead of starting a second one.
+ */
+const VIEW_URL_CACHE_MS = 4 * 60 * 1000;
+const cachedViewUrls = new Map<string, { url: string; expiresAt: number }>();
+const inFlightViewUrls = new Map<string, Promise<string>>();
+
+async function getViewUrl(assetId: string): Promise<string> {
+  const cached = cachedViewUrls.get(assetId);
+  if (cached && cached.expiresAt > Date.now()) return cached.url;
+  const inFlight = inFlightViewUrls.get(assetId);
+  if (inFlight) return inFlight;
+  const request = (async () => {
+    const response = await fetch(`/api/assets/${encodeURIComponent(assetId)}/view-url`, { credentials: "same-origin" });
+    const payload = await response.json().catch(() => null) as { data?: { viewUrl?: unknown } } | null;
+    if (!response.ok || typeof payload?.data?.viewUrl !== "string") throw new Error("unavailable");
+    cachedViewUrls.set(assetId, { url: payload.data.viewUrl, expiresAt: Date.now() + VIEW_URL_CACHE_MS });
+    return payload.data.viewUrl;
+  })();
+  inFlightViewUrls.set(assetId, request);
+  try { return await request; } finally { inFlightViewUrls.delete(assetId); }
+}
+
+/**
  * Read-only Phase 018 VIDEO surface. Frame/track/keyframe mutations stay
  * behind their dedicated revision-guarded contract; this component never
  * falls through to ImageCanvas or exposes a storage location.
@@ -129,15 +162,8 @@ export function VideoEngine({ video, readiness, annotations }: VideoEngineProps)
 
   useEffect(() => {
     let active = true;
-    void fetch(`/api/assets/${encodeURIComponent(video.id)}/view-url`, { credentials: "same-origin" })
-      .then(async (response) => response.ok ? response.json() : null)
-      .then((payload: { data?: { viewUrl?: unknown } } | null) => {
-        if (!active) return;
-        if (typeof payload?.data?.viewUrl === "string") {
-          setViewUrl(payload.data.viewUrl);
-          setLoadState("ready");
-        } else setLoadState("unavailable");
-      })
+    void getViewUrl(video.id)
+      .then((url) => { if (active) { setViewUrl(url); setLoadState("ready"); } })
       .catch(() => { if (active) setLoadState("unavailable"); });
     return () => { active = false; };
   }, [video.id]);

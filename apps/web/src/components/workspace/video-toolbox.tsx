@@ -1,6 +1,6 @@
 "use client";
 
-import { BoundingBox, Circle, Cursor, Hand, LineSegment, MapPin, Pentagon, MagicWandIcon, VideoConferenceIcon } from "@phosphor-icons/react";
+import { BoundingBox, Circle, Cursor, Hand, LineSegment, MapPin, Pentagon, VideoConferenceIcon, Atom } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
@@ -30,8 +30,8 @@ export function VideoToolbox() {
       <ToolButton active={tool === "circle"} label="Circle" onClick={() => setTool("circle")}><Circle size={15} /></ToolButton>
       <ToolButton active={tool === "point"} label="Point" onClick={() => setTool("point")}><MapPin size={15} /></ToolButton>
       <ToolButton active={tool === "polyline"} label="Polyline" onClick={() => setTool("polyline")}><LineSegment size={15} /></ToolButton>
-      <ToolButton active={tool === "mask"} label="Mask" onClick={() => setTool("mask")}><MagicWandIcon size={15} /></ToolButton>
       <ToolButton active={tool === "track"} label="Video" onClick={() => setTool("track")}><VideoConferenceIcon size={15} /></ToolButton>
+      <ToolButton active={tool === "aidetect"} label="AI Detection" onClick={() => setTool("aidetect")}><Atom size={15} /></ToolButton>
     </div>
   </>;
 }

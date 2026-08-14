@@ -12,13 +12,13 @@ import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status"
 import { deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
+import { useDatasetLabels, useDatasetLabelsStore, type DatasetLabel } from "@/stores/dataset-labels-store";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { SafeVideoTrack } from "@/types/video-annotation";
 import type { WorkspaceSelection } from "@/types/workspace";
 
 type PanelTab = "description" | "labels" | "tracks" | "assets";
-type WorkspaceLabel = { id: string; name: string; color: string };
 type TrackDraft = { objectId: string; name: string; labelId: string; interpolationMode: "LINEAR" | "NONE" };
 
 export type VideoPropertiesTabsProps = {
@@ -42,9 +42,10 @@ export type VideoPropertiesTabsProps = {
  * conventions but reading/writing VIDEO's own stores and endpoints:
  * `useVideoAnnotationStore` for tracks/keyframes (kept in sync by
  * `video-engine.tsx`'s `setSnapshot`), `updateVideoDescriptionAction` for the
- * asset description, and the shared dataset labels endpoint for the taxonomy
- * (VIDEO has no server-projected `labels` in `WorkspaceSelection`, so this
- * component fetches it itself).
+ * asset description, and `useDatasetLabelsStore` (`dataset-labels-store.ts`)
+ * for the taxonomy -- VIDEO has no server-projected `labels` in
+ * `WorkspaceSelection` (unlike IMAGE), so this component is what asks the
+ * shared store to load them, the same store `ImagePropertiesTabs` reads.
  *
  * "Shapes" lists every persisted keyframe -- each one *is* one bounding-box
  * video annotation. Its Object ID/Name are read from the keyframe's own
@@ -71,7 +72,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
   const [labelError, setLabelError] = useState<string | null>(null);
   const [shapeError, setShapeError] = useState<string | null>(null);
   const [newLabelName, setNewLabelName] = useState("");
-  const [taxonomy, setTaxonomy] = useState<WorkspaceLabel[]>([]);
+  const taxonomy = useDatasetLabels(datasetId);
   const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
   const [trackDrafts, setTrackDrafts] = useState<Record<string, TrackDraft>>({});
   const [savingTrackId, setSavingTrackId] = useState<string | null>(null);
@@ -101,14 +102,12 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
     useVideoAnnotationStore.getState().clearRequestedTab();
   }, [requestedTab, setTab]);
 
-  useEffect(() => {
-    let active = true;
-    void fetch(`/api/datasets/${datasetId}/labels`, { credentials: "same-origin" })
-      .then(async (response) => response.ok ? response.json() : null)
-      .then((payload: { data?: { items?: WorkspaceLabel[] } } | null) => { if (active && payload?.data?.items) setTaxonomy(payload.data.items); })
-      .catch(() => undefined);
-    return () => { active = false; };
-  }, [datasetId]);
+  // `useDatasetLabelsStore` is a module-level singleton, not component
+  // state -- once loaded for `datasetId`, this resolves immediately without
+  // a network call on every later mount (every asset switch remounts this
+  // component via `PropertiesPanel`'s `key`, and switching back from IMAGE
+  // does too).
+  useEffect(() => { void useDatasetLabelsStore.getState().ensureLoaded(datasetId); }, [datasetId]);
 
   useEffect(() => {
     if (description === serverDescription || lastAttemptedDescriptionRef.current === description) return;
@@ -145,12 +144,12 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, color: "#0EA5E9", description: "", hotkey: "" }),
     });
-    const payload = await response.json().catch(() => null) as { data?: WorkspaceLabel; error?: { message?: string } } | null;
+    const payload = await response.json().catch(() => null) as { data?: DatasetLabel; error?: { message?: string } } | null;
     if (!response.ok || !payload?.data) {
       setLabelError(payload?.error?.message ?? "The label could not be created.");
       return;
     }
-    setTaxonomy((current) => [...current, payload.data!].sort((left, right) => left.name.localeCompare(right.name)));
+    useDatasetLabelsStore.getState().addLabel(datasetId, payload.data);
     setNewLabelName("");
   }
 
@@ -158,7 +157,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
     setLabelError(null);
     const response = await fetch(`/api/labels/${labelId}`, { method: "DELETE", credentials: "same-origin" });
     if (response.status === 204) {
-      setTaxonomy((current) => current.filter((label) => label.id !== labelId));
+      useDatasetLabelsStore.getState().removeLabel(datasetId, labelId);
       return;
     }
     const payload = await response.json().catch(() => null) as { error?: { message?: string } } | null;

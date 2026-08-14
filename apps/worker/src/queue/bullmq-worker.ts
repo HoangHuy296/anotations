@@ -24,8 +24,18 @@ async function waitForRedisEnd(connection: Redis, timeoutMs = 2_000) {
   });
 }
 
-export function createFoundationWorker(input: { config: ProviderConfig; db: PrismaClient; connection?: Redis }) {
-  const workerId = `worker-${randomBytes(12).toString("hex")}`;
+export function createFoundationWorker(input: { config: ProviderConfig; db: PrismaClient; connection?: Redis; workerId?: string }) {
+  // `job-lock.ts#renewOrReclaimLock`'s scanner-driven re-entry (used only by
+  // AI polling) only ever renews a lease for the *same* `workerId` that
+  // currently owns it, or reclaims one whose lease has already expired
+  // (`job-claim-lock.ts#claimJob`'s claim at submit time -- 5 minutes). A
+  // caller that later polls under a *different* random `workerId` than the
+  // one this queue-delivery claim used can't renew that lease, and has to
+  // wait out the full 5 minutes for it to expire before it can reclaim it —
+  // `readiness.ts` passes its own `aiPollWorkerId` in here for exactly this
+  // reason, so one worker process's queue-claim identity and its AI-poll
+  // identity are the same and polling can pick a submitted task up promptly.
+  const workerId = input.workerId ?? `worker-${randomBytes(12).toString("hex")}`;
   const ownsConnection = input.connection === undefined;
   const connection = input.connection ?? new Redis({
     host: input.config.REDIS_HOST,

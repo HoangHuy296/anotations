@@ -407,10 +407,11 @@ export const ModelName = {
   ImageAsset: 'ImageAsset',
   VideoAsset: 'VideoAsset',
   VideoObjectTrack: 'VideoObjectTrack',
-  TextDocument: 'TextDocument',
+  TextAsset: 'TextAsset',
   AudioAsset: 'AudioAsset',
   AudioSpeaker: 'AudioSpeaker',
-  AiTask: 'AiTask'
+  AiTask: 'AiTask',
+  AiModel: 'AiModel'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -426,7 +427,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "authSession" | "job" | "jobEvent" | "externalRepository" | "sourceConnection" | "dataset" | "preparedImport" | "preparedImportItem" | "datasetMember" | "asset" | "assetVersion" | "label" | "annotation" | "imageAsset" | "videoAsset" | "videoObjectTrack" | "textDocument" | "audioAsset" | "audioSpeaker" | "aiTask"
+    modelProps: "user" | "authSession" | "job" | "jobEvent" | "externalRepository" | "sourceConnection" | "dataset" | "preparedImport" | "preparedImportItem" | "datasetMember" | "asset" | "assetVersion" | "label" | "annotation" | "imageAsset" | "videoAsset" | "videoObjectTrack" | "textAsset" | "audioAsset" | "audioSpeaker" | "aiTask" | "aiModel"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1688,77 +1689,77 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    TextDocument: {
-      payload: Prisma.$TextDocumentPayload<ExtArgs>
-      fields: Prisma.TextDocumentFieldRefs
+    TextAsset: {
+      payload: Prisma.$TextAssetPayload<ExtArgs>
+      fields: Prisma.TextAssetFieldRefs
       operations: {
         findUnique: {
-          args: Prisma.TextDocumentFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload> | null
+          args: Prisma.TextAssetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload> | null
         }
         findUniqueOrThrow: {
-          args: Prisma.TextDocumentFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>
+          args: Prisma.TextAssetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>
         }
         findFirst: {
-          args: Prisma.TextDocumentFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload> | null
+          args: Prisma.TextAssetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload> | null
         }
         findFirstOrThrow: {
-          args: Prisma.TextDocumentFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>
+          args: Prisma.TextAssetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>
         }
         findMany: {
-          args: Prisma.TextDocumentFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>[]
+          args: Prisma.TextAssetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>[]
         }
         create: {
-          args: Prisma.TextDocumentCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>
+          args: Prisma.TextAssetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>
         }
         createMany: {
-          args: Prisma.TextDocumentCreateManyArgs<ExtArgs>
+          args: Prisma.TextAssetCreateManyArgs<ExtArgs>
           result: BatchPayload
         }
         createManyAndReturn: {
-          args: Prisma.TextDocumentCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>[]
+          args: Prisma.TextAssetCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>[]
         }
         delete: {
-          args: Prisma.TextDocumentDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>
+          args: Prisma.TextAssetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>
         }
         update: {
-          args: Prisma.TextDocumentUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>
+          args: Prisma.TextAssetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>
         }
         deleteMany: {
-          args: Prisma.TextDocumentDeleteManyArgs<ExtArgs>
+          args: Prisma.TextAssetDeleteManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateMany: {
-          args: Prisma.TextDocumentUpdateManyArgs<ExtArgs>
+          args: Prisma.TextAssetUpdateManyArgs<ExtArgs>
           result: BatchPayload
         }
         updateManyAndReturn: {
-          args: Prisma.TextDocumentUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>[]
+          args: Prisma.TextAssetUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>[]
         }
         upsert: {
-          args: Prisma.TextDocumentUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextDocumentPayload>
+          args: Prisma.TextAssetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TextAssetPayload>
         }
         aggregate: {
-          args: Prisma.TextDocumentAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateTextDocument>
+          args: Prisma.TextAssetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTextAsset>
         }
         groupBy: {
-          args: Prisma.TextDocumentGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TextDocumentGroupByOutputType>[]
+          args: Prisma.TextAssetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TextAssetGroupByOutputType>[]
         }
         count: {
-          args: Prisma.TextDocumentCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.TextDocumentCountAggregateOutputType> | number
+          args: Prisma.TextAssetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TextAssetCountAggregateOutputType> | number
         }
       }
     }
@@ -1981,6 +1982,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AiTaskCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AiTaskCountAggregateOutputType> | number
+        }
+      }
+    }
+    AiModel: {
+      payload: Prisma.$AiModelPayload<ExtArgs>
+      fields: Prisma.AiModelFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiModelFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiModelFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>
+        }
+        findFirst: {
+          args: Prisma.AiModelFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiModelFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>
+        }
+        findMany: {
+          args: Prisma.AiModelFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>[]
+        }
+        create: {
+          args: Prisma.AiModelCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>
+        }
+        createMany: {
+          args: Prisma.AiModelCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AiModelCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>[]
+        }
+        delete: {
+          args: Prisma.AiModelDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>
+        }
+        update: {
+          args: Prisma.AiModelUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>
+        }
+        deleteMany: {
+          args: Prisma.AiModelDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiModelUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AiModelUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>[]
+        }
+        upsert: {
+          args: Prisma.AiModelUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiModelPayload>
+        }
+        aggregate: {
+          args: Prisma.AiModelAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiModel>
+        }
+        groupBy: {
+          args: Prisma.AiModelGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiModelGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiModelCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiModelCountAggregateOutputType> | number
         }
       }
     }
@@ -2451,7 +2526,7 @@ export const VideoObjectTrackScalarFieldEnum = {
 export type VideoObjectTrackScalarFieldEnum = (typeof VideoObjectTrackScalarFieldEnum)[keyof typeof VideoObjectTrackScalarFieldEnum]
 
 
-export const TextDocumentScalarFieldEnum = {
+export const TextAssetScalarFieldEnum = {
   id: 'id',
   assetId: 'assetId',
   content: 'content',
@@ -2460,7 +2535,7 @@ export const TextDocumentScalarFieldEnum = {
   metadata: 'metadata'
 } as const
 
-export type TextDocumentScalarFieldEnum = (typeof TextDocumentScalarFieldEnum)[keyof typeof TextDocumentScalarFieldEnum]
+export type TextAssetScalarFieldEnum = (typeof TextAssetScalarFieldEnum)[keyof typeof TextAssetScalarFieldEnum]
 
 
 export const AudioAssetScalarFieldEnum = {
@@ -2496,27 +2571,45 @@ export const AiTaskScalarFieldEnum = {
   id: 'id',
   externalTaskId: 'externalTaskId',
   datasetId: 'datasetId',
-  assetId: 'assetId',
   jobId: 'jobId',
   createdById: 'createdById',
-  provider: 'provider',
   type: 'type',
   status: 'status',
   modality: 'modality',
-  modelName: 'modelName',
-  modelVersion: 'modelVersion',
+  modelId: 'modelId',
+  modelNameSnapshot: 'modelNameSnapshot',
+  modelVersionSnapshot: 'modelVersionSnapshot',
+  modelKeySnapshot: 'modelKeySnapshot',
   input: 'input',
   output: 'output',
   summary: 'summary',
   error: 'error',
   errorCode: 'errorCode',
   errorDetails: 'errorDetails',
+  pollAttempts: 'pollAttempts',
+  nextPollAt: 'nextPollAt',
   resultStorageKey: 'resultStorageKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type AiTaskScalarFieldEnum = (typeof AiTaskScalarFieldEnum)[keyof typeof AiTaskScalarFieldEnum]
+
+
+export const AiModelScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  displayName: 'displayName',
+  provider: 'provider',
+  modality: 'modality',
+  taskType: 'taskType',
+  isActive: 'isActive',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiModelScalarFieldEnum = (typeof AiModelScalarFieldEnum)[keyof typeof AiModelScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3145,10 +3238,11 @@ export type GlobalOmitConfig = {
   imageAsset?: Prisma.ImageAssetOmit
   videoAsset?: Prisma.VideoAssetOmit
   videoObjectTrack?: Prisma.VideoObjectTrackOmit
-  textDocument?: Prisma.TextDocumentOmit
+  textAsset?: Prisma.TextAssetOmit
   audioAsset?: Prisma.AudioAssetOmit
   audioSpeaker?: Prisma.AudioSpeakerOmit
   aiTask?: Prisma.AiTaskOmit
+  aiModel?: Prisma.AiModelOmit
 }
 
 /* Types for Logging */

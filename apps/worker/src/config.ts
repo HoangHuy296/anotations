@@ -25,3 +25,19 @@ const repositoryImportPolicySchema = z.object({
 export function getRepositoryImportPolicy(environment: NodeJS.ProcessEnv = process.env) {
   return repositoryImportPolicySchema.parse(environment);
 }
+
+const aiozCompanyProviderConfigSchema = z.object({
+  AIOZ_COMPANY_API_BASE_URL: z.string().url(),
+  AIOZ_COMPANY_API_KEY: z.string().min(1),
+});
+
+export type AiozCompanyProviderConfig = z.infer<typeof aiozCompanyProviderConfigSchema>;
+
+/**
+ * Worker-only credentials for the external AIOZ-company AI provider. Never
+ * read from apps/web; never placed in AiTask/Job input, output, or a queue
+ * payload. Consumed only by apps/worker/src/providers/ai/aioz-company.provider.ts.
+ */
+export function getAiozCompanyProviderConfig(environment: NodeJS.ProcessEnv = process.env): AiozCompanyProviderConfig {
+  return aiozCompanyProviderConfigSchema.parse(environment);
+}

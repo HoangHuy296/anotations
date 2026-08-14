@@ -20,25 +20,37 @@ export type AiTaskModel = runtime.Types.Result.DefaultSelection<Prisma.$AiTaskPa
 
 export type AggregateAiTask = {
   _count: AiTaskCountAggregateOutputType | null
+  _avg: AiTaskAvgAggregateOutputType | null
+  _sum: AiTaskSumAggregateOutputType | null
   _min: AiTaskMinAggregateOutputType | null
   _max: AiTaskMaxAggregateOutputType | null
+}
+
+export type AiTaskAvgAggregateOutputType = {
+  pollAttempts: number | null
+}
+
+export type AiTaskSumAggregateOutputType = {
+  pollAttempts: number | null
 }
 
 export type AiTaskMinAggregateOutputType = {
   id: string | null
   externalTaskId: string | null
   datasetId: string | null
-  assetId: string | null
   jobId: string | null
   createdById: string | null
-  provider: string | null
   type: $Enums.AiTaskType | null
   status: $Enums.AiTaskStatus | null
   modality: $Enums.Modality | null
-  modelName: string | null
-  modelVersion: string | null
+  modelId: string | null
+  modelNameSnapshot: string | null
+  modelVersionSnapshot: string | null
+  modelKeySnapshot: string | null
   error: string | null
   errorCode: string | null
+  pollAttempts: number | null
+  nextPollAt: Date | null
   resultStorageKey: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -48,17 +60,19 @@ export type AiTaskMaxAggregateOutputType = {
   id: string | null
   externalTaskId: string | null
   datasetId: string | null
-  assetId: string | null
   jobId: string | null
   createdById: string | null
-  provider: string | null
   type: $Enums.AiTaskType | null
   status: $Enums.AiTaskStatus | null
   modality: $Enums.Modality | null
-  modelName: string | null
-  modelVersion: string | null
+  modelId: string | null
+  modelNameSnapshot: string | null
+  modelVersionSnapshot: string | null
+  modelKeySnapshot: string | null
   error: string | null
   errorCode: string | null
+  pollAttempts: number | null
+  nextPollAt: Date | null
   resultStorageKey: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -68,21 +82,23 @@ export type AiTaskCountAggregateOutputType = {
   id: number
   externalTaskId: number
   datasetId: number
-  assetId: number
   jobId: number
   createdById: number
-  provider: number
   type: number
   status: number
   modality: number
-  modelName: number
-  modelVersion: number
+  modelId: number
+  modelNameSnapshot: number
+  modelVersionSnapshot: number
+  modelKeySnapshot: number
   input: number
   output: number
   summary: number
   error: number
   errorCode: number
   errorDetails: number
+  pollAttempts: number
+  nextPollAt: number
   resultStorageKey: number
   createdAt: number
   updatedAt: number
@@ -90,21 +106,31 @@ export type AiTaskCountAggregateOutputType = {
 }
 
 
+export type AiTaskAvgAggregateInputType = {
+  pollAttempts?: true
+}
+
+export type AiTaskSumAggregateInputType = {
+  pollAttempts?: true
+}
+
 export type AiTaskMinAggregateInputType = {
   id?: true
   externalTaskId?: true
   datasetId?: true
-  assetId?: true
   jobId?: true
   createdById?: true
-  provider?: true
   type?: true
   status?: true
   modality?: true
-  modelName?: true
-  modelVersion?: true
+  modelId?: true
+  modelNameSnapshot?: true
+  modelVersionSnapshot?: true
+  modelKeySnapshot?: true
   error?: true
   errorCode?: true
+  pollAttempts?: true
+  nextPollAt?: true
   resultStorageKey?: true
   createdAt?: true
   updatedAt?: true
@@ -114,17 +140,19 @@ export type AiTaskMaxAggregateInputType = {
   id?: true
   externalTaskId?: true
   datasetId?: true
-  assetId?: true
   jobId?: true
   createdById?: true
-  provider?: true
   type?: true
   status?: true
   modality?: true
-  modelName?: true
-  modelVersion?: true
+  modelId?: true
+  modelNameSnapshot?: true
+  modelVersionSnapshot?: true
+  modelKeySnapshot?: true
   error?: true
   errorCode?: true
+  pollAttempts?: true
+  nextPollAt?: true
   resultStorageKey?: true
   createdAt?: true
   updatedAt?: true
@@ -134,21 +162,23 @@ export type AiTaskCountAggregateInputType = {
   id?: true
   externalTaskId?: true
   datasetId?: true
-  assetId?: true
   jobId?: true
   createdById?: true
-  provider?: true
   type?: true
   status?: true
   modality?: true
-  modelName?: true
-  modelVersion?: true
+  modelId?: true
+  modelNameSnapshot?: true
+  modelVersionSnapshot?: true
+  modelKeySnapshot?: true
   input?: true
   output?: true
   summary?: true
   error?: true
   errorCode?: true
   errorDetails?: true
+  pollAttempts?: true
+  nextPollAt?: true
   resultStorageKey?: true
   createdAt?: true
   updatedAt?: true
@@ -193,6 +223,18 @@ export type AiTaskAggregateArgs<ExtArgs extends runtime.Types.Extensions.Interna
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: AiTaskAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: AiTaskSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: AiTaskMinAggregateInputType
@@ -223,6 +265,8 @@ export type AiTaskGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   _count?: AiTaskCountAggregateInputType | true
+  _avg?: AiTaskAvgAggregateInputType
+  _sum?: AiTaskSumAggregateInputType
   _min?: AiTaskMinAggregateInputType
   _max?: AiTaskMaxAggregateInputType
 }
@@ -231,25 +275,29 @@ export type AiTaskGroupByOutputType = {
   id: string
   externalTaskId: string | null
   datasetId: string
-  assetId: string | null
-  jobId: string | null
+  jobId: string
   createdById: string
-  provider: string
   type: $Enums.AiTaskType
   status: $Enums.AiTaskStatus
   modality: $Enums.Modality | null
-  modelName: string | null
-  modelVersion: string | null
+  modelId: string
+  modelNameSnapshot: string
+  modelVersionSnapshot: string | null
+  modelKeySnapshot: string
   input: runtime.JsonValue
   output: runtime.JsonValue | null
   summary: runtime.JsonValue
   error: string | null
   errorCode: string | null
   errorDetails: runtime.JsonValue | null
+  pollAttempts: number
+  nextPollAt: Date | null
   resultStorageKey: string | null
   createdAt: Date
   updatedAt: Date
   _count: AiTaskCountAggregateOutputType | null
+  _avg: AiTaskAvgAggregateOutputType | null
+  _sum: AiTaskSumAggregateOutputType | null
   _min: AiTaskMinAggregateOutputType | null
   _max: AiTaskMaxAggregateOutputType | null
 }
@@ -276,114 +324,124 @@ export type AiTaskWhereInput = {
   id?: Prisma.StringFilter<"AiTask"> | string
   externalTaskId?: Prisma.StringNullableFilter<"AiTask"> | string | null
   datasetId?: Prisma.StringFilter<"AiTask"> | string
-  assetId?: Prisma.StringNullableFilter<"AiTask"> | string | null
-  jobId?: Prisma.StringNullableFilter<"AiTask"> | string | null
+  jobId?: Prisma.StringFilter<"AiTask"> | string
   createdById?: Prisma.StringFilter<"AiTask"> | string
-  provider?: Prisma.StringFilter<"AiTask"> | string
   type?: Prisma.EnumAiTaskTypeFilter<"AiTask"> | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFilter<"AiTask"> | $Enums.AiTaskStatus
   modality?: Prisma.EnumModalityNullableFilter<"AiTask"> | $Enums.Modality | null
-  modelName?: Prisma.StringNullableFilter<"AiTask"> | string | null
-  modelVersion?: Prisma.StringNullableFilter<"AiTask"> | string | null
+  modelId?: Prisma.StringFilter<"AiTask"> | string
+  modelNameSnapshot?: Prisma.StringFilter<"AiTask"> | string
+  modelVersionSnapshot?: Prisma.StringNullableFilter<"AiTask"> | string | null
+  modelKeySnapshot?: Prisma.StringFilter<"AiTask"> | string
   input?: Prisma.JsonFilter<"AiTask">
   output?: Prisma.JsonNullableFilter<"AiTask">
   summary?: Prisma.JsonFilter<"AiTask">
   error?: Prisma.StringNullableFilter<"AiTask"> | string | null
   errorCode?: Prisma.StringNullableFilter<"AiTask"> | string | null
   errorDetails?: Prisma.JsonNullableFilter<"AiTask">
+  pollAttempts?: Prisma.IntFilter<"AiTask"> | number
+  nextPollAt?: Prisma.DateTimeNullableFilter<"AiTask"> | Date | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"AiTask"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
-  asset?: Prisma.XOR<Prisma.AssetNullableScalarRelationFilter, Prisma.AssetWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
-  job?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
+  job?: Prisma.XOR<Prisma.JobScalarRelationFilter, Prisma.JobWhereInput>
+  model?: Prisma.XOR<Prisma.AiModelScalarRelationFilter, Prisma.AiModelWhereInput>
 }
 
 export type AiTaskOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   externalTaskId?: Prisma.SortOrderInput | Prisma.SortOrder
   datasetId?: Prisma.SortOrder
-  assetId?: Prisma.SortOrderInput | Prisma.SortOrder
-  jobId?: Prisma.SortOrderInput | Prisma.SortOrder
+  jobId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   modality?: Prisma.SortOrderInput | Prisma.SortOrder
-  modelName?: Prisma.SortOrderInput | Prisma.SortOrder
-  modelVersion?: Prisma.SortOrderInput | Prisma.SortOrder
+  modelId?: Prisma.SortOrder
+  modelNameSnapshot?: Prisma.SortOrder
+  modelVersionSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  modelKeySnapshot?: Prisma.SortOrder
   input?: Prisma.SortOrder
   output?: Prisma.SortOrderInput | Prisma.SortOrder
   summary?: Prisma.SortOrder
   error?: Prisma.SortOrderInput | Prisma.SortOrder
   errorCode?: Prisma.SortOrderInput | Prisma.SortOrder
   errorDetails?: Prisma.SortOrderInput | Prisma.SortOrder
+  pollAttempts?: Prisma.SortOrder
+  nextPollAt?: Prisma.SortOrderInput | Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  asset?: Prisma.AssetOrderByWithRelationInput
   createdBy?: Prisma.UserOrderByWithRelationInput
   dataset?: Prisma.DatasetOrderByWithRelationInput
   job?: Prisma.JobOrderByWithRelationInput
+  model?: Prisma.AiModelOrderByWithRelationInput
 }
 
 export type AiTaskWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   externalTaskId?: string
+  jobId?: string
   AND?: Prisma.AiTaskWhereInput | Prisma.AiTaskWhereInput[]
   OR?: Prisma.AiTaskWhereInput[]
   NOT?: Prisma.AiTaskWhereInput | Prisma.AiTaskWhereInput[]
   datasetId?: Prisma.StringFilter<"AiTask"> | string
-  assetId?: Prisma.StringNullableFilter<"AiTask"> | string | null
-  jobId?: Prisma.StringNullableFilter<"AiTask"> | string | null
   createdById?: Prisma.StringFilter<"AiTask"> | string
-  provider?: Prisma.StringFilter<"AiTask"> | string
   type?: Prisma.EnumAiTaskTypeFilter<"AiTask"> | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFilter<"AiTask"> | $Enums.AiTaskStatus
   modality?: Prisma.EnumModalityNullableFilter<"AiTask"> | $Enums.Modality | null
-  modelName?: Prisma.StringNullableFilter<"AiTask"> | string | null
-  modelVersion?: Prisma.StringNullableFilter<"AiTask"> | string | null
+  modelId?: Prisma.StringFilter<"AiTask"> | string
+  modelNameSnapshot?: Prisma.StringFilter<"AiTask"> | string
+  modelVersionSnapshot?: Prisma.StringNullableFilter<"AiTask"> | string | null
+  modelKeySnapshot?: Prisma.StringFilter<"AiTask"> | string
   input?: Prisma.JsonFilter<"AiTask">
   output?: Prisma.JsonNullableFilter<"AiTask">
   summary?: Prisma.JsonFilter<"AiTask">
   error?: Prisma.StringNullableFilter<"AiTask"> | string | null
   errorCode?: Prisma.StringNullableFilter<"AiTask"> | string | null
   errorDetails?: Prisma.JsonNullableFilter<"AiTask">
+  pollAttempts?: Prisma.IntFilter<"AiTask"> | number
+  nextPollAt?: Prisma.DateTimeNullableFilter<"AiTask"> | Date | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"AiTask"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
-  asset?: Prisma.XOR<Prisma.AssetNullableScalarRelationFilter, Prisma.AssetWhereInput> | null
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
-  job?: Prisma.XOR<Prisma.JobNullableScalarRelationFilter, Prisma.JobWhereInput> | null
-}, "id" | "externalTaskId">
+  job?: Prisma.XOR<Prisma.JobScalarRelationFilter, Prisma.JobWhereInput>
+  model?: Prisma.XOR<Prisma.AiModelScalarRelationFilter, Prisma.AiModelWhereInput>
+}, "id" | "externalTaskId" | "jobId">
 
 export type AiTaskOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   externalTaskId?: Prisma.SortOrderInput | Prisma.SortOrder
   datasetId?: Prisma.SortOrder
-  assetId?: Prisma.SortOrderInput | Prisma.SortOrder
-  jobId?: Prisma.SortOrderInput | Prisma.SortOrder
+  jobId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   modality?: Prisma.SortOrderInput | Prisma.SortOrder
-  modelName?: Prisma.SortOrderInput | Prisma.SortOrder
-  modelVersion?: Prisma.SortOrderInput | Prisma.SortOrder
+  modelId?: Prisma.SortOrder
+  modelNameSnapshot?: Prisma.SortOrder
+  modelVersionSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
+  modelKeySnapshot?: Prisma.SortOrder
   input?: Prisma.SortOrder
   output?: Prisma.SortOrderInput | Prisma.SortOrder
   summary?: Prisma.SortOrder
   error?: Prisma.SortOrderInput | Prisma.SortOrder
   errorCode?: Prisma.SortOrderInput | Prisma.SortOrder
   errorDetails?: Prisma.SortOrderInput | Prisma.SortOrder
+  pollAttempts?: Prisma.SortOrder
+  nextPollAt?: Prisma.SortOrderInput | Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AiTaskCountOrderByAggregateInput
+  _avg?: Prisma.AiTaskAvgOrderByAggregateInput
   _max?: Prisma.AiTaskMaxOrderByAggregateInput
   _min?: Prisma.AiTaskMinOrderByAggregateInput
+  _sum?: Prisma.AiTaskSumOrderByAggregateInput
 }
 
 export type AiTaskScalarWhereWithAggregatesInput = {
@@ -393,21 +451,23 @@ export type AiTaskScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"AiTask"> | string
   externalTaskId?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
   datasetId?: Prisma.StringWithAggregatesFilter<"AiTask"> | string
-  assetId?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
-  jobId?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
+  jobId?: Prisma.StringWithAggregatesFilter<"AiTask"> | string
   createdById?: Prisma.StringWithAggregatesFilter<"AiTask"> | string
-  provider?: Prisma.StringWithAggregatesFilter<"AiTask"> | string
   type?: Prisma.EnumAiTaskTypeWithAggregatesFilter<"AiTask"> | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusWithAggregatesFilter<"AiTask"> | $Enums.AiTaskStatus
   modality?: Prisma.EnumModalityNullableWithAggregatesFilter<"AiTask"> | $Enums.Modality | null
-  modelName?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
-  modelVersion?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
+  modelId?: Prisma.StringWithAggregatesFilter<"AiTask"> | string
+  modelNameSnapshot?: Prisma.StringWithAggregatesFilter<"AiTask"> | string
+  modelVersionSnapshot?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
+  modelKeySnapshot?: Prisma.StringWithAggregatesFilter<"AiTask"> | string
   input?: Prisma.JsonWithAggregatesFilter<"AiTask">
   output?: Prisma.JsonNullableWithAggregatesFilter<"AiTask">
   summary?: Prisma.JsonWithAggregatesFilter<"AiTask">
   error?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
   errorCode?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
   errorDetails?: Prisma.JsonNullableWithAggregatesFilter<"AiTask">
+  pollAttempts?: Prisma.IntWithAggregatesFilter<"AiTask"> | number
+  nextPollAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AiTask"> | Date | string | null
   resultStorageKey?: Prisma.StringNullableWithAggregatesFilter<"AiTask"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AiTask"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AiTask"> | Date | string
@@ -416,46 +476,50 @@ export type AiTaskScalarWhereWithAggregatesInput = {
 export type AiTaskCreateInput = {
   id?: string
   externalTaskId?: string | null
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  asset?: Prisma.AssetCreateNestedOneWithoutAiTasksInput
   createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
-  job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
+  job: Prisma.JobCreateNestedOneWithoutAiTasksInput
+  model: Prisma.AiModelCreateNestedOneWithoutAiTasksInput
 }
 
 export type AiTaskUncheckedCreateInput = {
   id?: string
   externalTaskId?: string | null
   datasetId: string
-  assetId?: string | null
-  jobId?: string | null
+  jobId: string
   createdById: string
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelId: string
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -464,46 +528,50 @@ export type AiTaskUncheckedCreateInput = {
 export type AiTaskUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  asset?: Prisma.AssetUpdateOneWithoutAiTasksNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
-  job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
+  job?: Prisma.JobUpdateOneRequiredWithoutAiTasksNestedInput
+  model?: Prisma.AiModelUpdateOneRequiredWithoutAiTasksNestedInput
 }
 
 export type AiTaskUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelId?: Prisma.StringFieldUpdateOperationsInput | string
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -513,21 +581,23 @@ export type AiTaskCreateManyInput = {
   id?: string
   externalTaskId?: string | null
   datasetId: string
-  assetId?: string | null
-  jobId?: string | null
+  jobId: string
   createdById: string
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelId: string
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -536,18 +606,20 @@ export type AiTaskCreateManyInput = {
 export type AiTaskUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -557,21 +629,23 @@ export type AiTaskUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelId?: Prisma.StringFieldUpdateOperationsInput | string
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -587,45 +661,58 @@ export type AiTaskOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type AiTaskNullableScalarRelationFilter = {
+  is?: Prisma.AiTaskWhereInput | null
+  isNot?: Prisma.AiTaskWhereInput | null
+}
+
 export type AiTaskCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   externalTaskId?: Prisma.SortOrder
   datasetId?: Prisma.SortOrder
-  assetId?: Prisma.SortOrder
   jobId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   modality?: Prisma.SortOrder
-  modelName?: Prisma.SortOrder
-  modelVersion?: Prisma.SortOrder
+  modelId?: Prisma.SortOrder
+  modelNameSnapshot?: Prisma.SortOrder
+  modelVersionSnapshot?: Prisma.SortOrder
+  modelKeySnapshot?: Prisma.SortOrder
   input?: Prisma.SortOrder
   output?: Prisma.SortOrder
   summary?: Prisma.SortOrder
   error?: Prisma.SortOrder
   errorCode?: Prisma.SortOrder
   errorDetails?: Prisma.SortOrder
+  pollAttempts?: Prisma.SortOrder
+  nextPollAt?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AiTaskAvgOrderByAggregateInput = {
+  pollAttempts?: Prisma.SortOrder
 }
 
 export type AiTaskMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   externalTaskId?: Prisma.SortOrder
   datasetId?: Prisma.SortOrder
-  assetId?: Prisma.SortOrder
   jobId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   modality?: Prisma.SortOrder
-  modelName?: Prisma.SortOrder
-  modelVersion?: Prisma.SortOrder
+  modelId?: Prisma.SortOrder
+  modelNameSnapshot?: Prisma.SortOrder
+  modelVersionSnapshot?: Prisma.SortOrder
+  modelKeySnapshot?: Prisma.SortOrder
   error?: Prisma.SortOrder
   errorCode?: Prisma.SortOrder
+  pollAttempts?: Prisma.SortOrder
+  nextPollAt?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -635,20 +722,26 @@ export type AiTaskMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   externalTaskId?: Prisma.SortOrder
   datasetId?: Prisma.SortOrder
-  assetId?: Prisma.SortOrder
   jobId?: Prisma.SortOrder
   createdById?: Prisma.SortOrder
-  provider?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
   modality?: Prisma.SortOrder
-  modelName?: Prisma.SortOrder
-  modelVersion?: Prisma.SortOrder
+  modelId?: Prisma.SortOrder
+  modelNameSnapshot?: Prisma.SortOrder
+  modelVersionSnapshot?: Prisma.SortOrder
+  modelKeySnapshot?: Prisma.SortOrder
   error?: Prisma.SortOrder
   errorCode?: Prisma.SortOrder
+  pollAttempts?: Prisma.SortOrder
+  nextPollAt?: Prisma.SortOrder
   resultStorageKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AiTaskSumOrderByAggregateInput = {
+  pollAttempts?: Prisma.SortOrder
 }
 
 export type AiTaskCreateNestedManyWithoutCreatedByInput = {
@@ -693,46 +786,36 @@ export type AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput = {
   deleteMany?: Prisma.AiTaskScalarWhereInput | Prisma.AiTaskScalarWhereInput[]
 }
 
-export type AiTaskCreateNestedManyWithoutJobInput = {
-  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput> | Prisma.AiTaskCreateWithoutJobInput[] | Prisma.AiTaskUncheckedCreateWithoutJobInput[]
-  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutJobInput | Prisma.AiTaskCreateOrConnectWithoutJobInput[]
-  createMany?: Prisma.AiTaskCreateManyJobInputEnvelope
-  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+export type AiTaskCreateNestedOneWithoutJobInput = {
+  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput>
+  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutJobInput
+  connect?: Prisma.AiTaskWhereUniqueInput
 }
 
-export type AiTaskUncheckedCreateNestedManyWithoutJobInput = {
-  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput> | Prisma.AiTaskCreateWithoutJobInput[] | Prisma.AiTaskUncheckedCreateWithoutJobInput[]
-  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutJobInput | Prisma.AiTaskCreateOrConnectWithoutJobInput[]
-  createMany?: Prisma.AiTaskCreateManyJobInputEnvelope
-  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+export type AiTaskUncheckedCreateNestedOneWithoutJobInput = {
+  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput>
+  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutJobInput
+  connect?: Prisma.AiTaskWhereUniqueInput
 }
 
-export type AiTaskUpdateManyWithoutJobNestedInput = {
-  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput> | Prisma.AiTaskCreateWithoutJobInput[] | Prisma.AiTaskUncheckedCreateWithoutJobInput[]
-  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutJobInput | Prisma.AiTaskCreateOrConnectWithoutJobInput[]
-  upsert?: Prisma.AiTaskUpsertWithWhereUniqueWithoutJobInput | Prisma.AiTaskUpsertWithWhereUniqueWithoutJobInput[]
-  createMany?: Prisma.AiTaskCreateManyJobInputEnvelope
-  set?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  disconnect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  delete?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  update?: Prisma.AiTaskUpdateWithWhereUniqueWithoutJobInput | Prisma.AiTaskUpdateWithWhereUniqueWithoutJobInput[]
-  updateMany?: Prisma.AiTaskUpdateManyWithWhereWithoutJobInput | Prisma.AiTaskUpdateManyWithWhereWithoutJobInput[]
-  deleteMany?: Prisma.AiTaskScalarWhereInput | Prisma.AiTaskScalarWhereInput[]
+export type AiTaskUpdateOneWithoutJobNestedInput = {
+  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput>
+  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutJobInput
+  upsert?: Prisma.AiTaskUpsertWithoutJobInput
+  disconnect?: Prisma.AiTaskWhereInput | boolean
+  delete?: Prisma.AiTaskWhereInput | boolean
+  connect?: Prisma.AiTaskWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AiTaskUpdateToOneWithWhereWithoutJobInput, Prisma.AiTaskUpdateWithoutJobInput>, Prisma.AiTaskUncheckedUpdateWithoutJobInput>
 }
 
-export type AiTaskUncheckedUpdateManyWithoutJobNestedInput = {
-  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput> | Prisma.AiTaskCreateWithoutJobInput[] | Prisma.AiTaskUncheckedCreateWithoutJobInput[]
-  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutJobInput | Prisma.AiTaskCreateOrConnectWithoutJobInput[]
-  upsert?: Prisma.AiTaskUpsertWithWhereUniqueWithoutJobInput | Prisma.AiTaskUpsertWithWhereUniqueWithoutJobInput[]
-  createMany?: Prisma.AiTaskCreateManyJobInputEnvelope
-  set?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  disconnect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  delete?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  update?: Prisma.AiTaskUpdateWithWhereUniqueWithoutJobInput | Prisma.AiTaskUpdateWithWhereUniqueWithoutJobInput[]
-  updateMany?: Prisma.AiTaskUpdateManyWithWhereWithoutJobInput | Prisma.AiTaskUpdateManyWithWhereWithoutJobInput[]
-  deleteMany?: Prisma.AiTaskScalarWhereInput | Prisma.AiTaskScalarWhereInput[]
+export type AiTaskUncheckedUpdateOneWithoutJobNestedInput = {
+  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput>
+  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutJobInput
+  upsert?: Prisma.AiTaskUpsertWithoutJobInput
+  disconnect?: Prisma.AiTaskWhereInput | boolean
+  delete?: Prisma.AiTaskWhereInput | boolean
+  connect?: Prisma.AiTaskWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AiTaskUpdateToOneWithWhereWithoutJobInput, Prisma.AiTaskUpdateWithoutJobInput>, Prisma.AiTaskUncheckedUpdateWithoutJobInput>
 }
 
 export type AiTaskCreateNestedManyWithoutDatasetInput = {
@@ -777,48 +860,6 @@ export type AiTaskUncheckedUpdateManyWithoutDatasetNestedInput = {
   deleteMany?: Prisma.AiTaskScalarWhereInput | Prisma.AiTaskScalarWhereInput[]
 }
 
-export type AiTaskCreateNestedManyWithoutAssetInput = {
-  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutAssetInput, Prisma.AiTaskUncheckedCreateWithoutAssetInput> | Prisma.AiTaskCreateWithoutAssetInput[] | Prisma.AiTaskUncheckedCreateWithoutAssetInput[]
-  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutAssetInput | Prisma.AiTaskCreateOrConnectWithoutAssetInput[]
-  createMany?: Prisma.AiTaskCreateManyAssetInputEnvelope
-  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-}
-
-export type AiTaskUncheckedCreateNestedManyWithoutAssetInput = {
-  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutAssetInput, Prisma.AiTaskUncheckedCreateWithoutAssetInput> | Prisma.AiTaskCreateWithoutAssetInput[] | Prisma.AiTaskUncheckedCreateWithoutAssetInput[]
-  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutAssetInput | Prisma.AiTaskCreateOrConnectWithoutAssetInput[]
-  createMany?: Prisma.AiTaskCreateManyAssetInputEnvelope
-  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-}
-
-export type AiTaskUpdateManyWithoutAssetNestedInput = {
-  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutAssetInput, Prisma.AiTaskUncheckedCreateWithoutAssetInput> | Prisma.AiTaskCreateWithoutAssetInput[] | Prisma.AiTaskUncheckedCreateWithoutAssetInput[]
-  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutAssetInput | Prisma.AiTaskCreateOrConnectWithoutAssetInput[]
-  upsert?: Prisma.AiTaskUpsertWithWhereUniqueWithoutAssetInput | Prisma.AiTaskUpsertWithWhereUniqueWithoutAssetInput[]
-  createMany?: Prisma.AiTaskCreateManyAssetInputEnvelope
-  set?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  disconnect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  delete?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  update?: Prisma.AiTaskUpdateWithWhereUniqueWithoutAssetInput | Prisma.AiTaskUpdateWithWhereUniqueWithoutAssetInput[]
-  updateMany?: Prisma.AiTaskUpdateManyWithWhereWithoutAssetInput | Prisma.AiTaskUpdateManyWithWhereWithoutAssetInput[]
-  deleteMany?: Prisma.AiTaskScalarWhereInput | Prisma.AiTaskScalarWhereInput[]
-}
-
-export type AiTaskUncheckedUpdateManyWithoutAssetNestedInput = {
-  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutAssetInput, Prisma.AiTaskUncheckedCreateWithoutAssetInput> | Prisma.AiTaskCreateWithoutAssetInput[] | Prisma.AiTaskUncheckedCreateWithoutAssetInput[]
-  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutAssetInput | Prisma.AiTaskCreateOrConnectWithoutAssetInput[]
-  upsert?: Prisma.AiTaskUpsertWithWhereUniqueWithoutAssetInput | Prisma.AiTaskUpsertWithWhereUniqueWithoutAssetInput[]
-  createMany?: Prisma.AiTaskCreateManyAssetInputEnvelope
-  set?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  disconnect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  delete?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
-  update?: Prisma.AiTaskUpdateWithWhereUniqueWithoutAssetInput | Prisma.AiTaskUpdateWithWhereUniqueWithoutAssetInput[]
-  updateMany?: Prisma.AiTaskUpdateManyWithWhereWithoutAssetInput | Prisma.AiTaskUpdateManyWithWhereWithoutAssetInput[]
-  deleteMany?: Prisma.AiTaskScalarWhereInput | Prisma.AiTaskScalarWhereInput[]
-}
-
 export type EnumAiTaskTypeFieldUpdateOperationsInput = {
   set?: $Enums.AiTaskType
 }
@@ -827,47 +868,93 @@ export type EnumAiTaskStatusFieldUpdateOperationsInput = {
   set?: $Enums.AiTaskStatus
 }
 
+export type AiTaskCreateNestedManyWithoutModelInput = {
+  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutModelInput, Prisma.AiTaskUncheckedCreateWithoutModelInput> | Prisma.AiTaskCreateWithoutModelInput[] | Prisma.AiTaskUncheckedCreateWithoutModelInput[]
+  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutModelInput | Prisma.AiTaskCreateOrConnectWithoutModelInput[]
+  createMany?: Prisma.AiTaskCreateManyModelInputEnvelope
+  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+}
+
+export type AiTaskUncheckedCreateNestedManyWithoutModelInput = {
+  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutModelInput, Prisma.AiTaskUncheckedCreateWithoutModelInput> | Prisma.AiTaskCreateWithoutModelInput[] | Prisma.AiTaskUncheckedCreateWithoutModelInput[]
+  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutModelInput | Prisma.AiTaskCreateOrConnectWithoutModelInput[]
+  createMany?: Prisma.AiTaskCreateManyModelInputEnvelope
+  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+}
+
+export type AiTaskUpdateManyWithoutModelNestedInput = {
+  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutModelInput, Prisma.AiTaskUncheckedCreateWithoutModelInput> | Prisma.AiTaskCreateWithoutModelInput[] | Prisma.AiTaskUncheckedCreateWithoutModelInput[]
+  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutModelInput | Prisma.AiTaskCreateOrConnectWithoutModelInput[]
+  upsert?: Prisma.AiTaskUpsertWithWhereUniqueWithoutModelInput | Prisma.AiTaskUpsertWithWhereUniqueWithoutModelInput[]
+  createMany?: Prisma.AiTaskCreateManyModelInputEnvelope
+  set?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+  disconnect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+  delete?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+  update?: Prisma.AiTaskUpdateWithWhereUniqueWithoutModelInput | Prisma.AiTaskUpdateWithWhereUniqueWithoutModelInput[]
+  updateMany?: Prisma.AiTaskUpdateManyWithWhereWithoutModelInput | Prisma.AiTaskUpdateManyWithWhereWithoutModelInput[]
+  deleteMany?: Prisma.AiTaskScalarWhereInput | Prisma.AiTaskScalarWhereInput[]
+}
+
+export type AiTaskUncheckedUpdateManyWithoutModelNestedInput = {
+  create?: Prisma.XOR<Prisma.AiTaskCreateWithoutModelInput, Prisma.AiTaskUncheckedCreateWithoutModelInput> | Prisma.AiTaskCreateWithoutModelInput[] | Prisma.AiTaskUncheckedCreateWithoutModelInput[]
+  connectOrCreate?: Prisma.AiTaskCreateOrConnectWithoutModelInput | Prisma.AiTaskCreateOrConnectWithoutModelInput[]
+  upsert?: Prisma.AiTaskUpsertWithWhereUniqueWithoutModelInput | Prisma.AiTaskUpsertWithWhereUniqueWithoutModelInput[]
+  createMany?: Prisma.AiTaskCreateManyModelInputEnvelope
+  set?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+  disconnect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+  delete?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+  connect?: Prisma.AiTaskWhereUniqueInput | Prisma.AiTaskWhereUniqueInput[]
+  update?: Prisma.AiTaskUpdateWithWhereUniqueWithoutModelInput | Prisma.AiTaskUpdateWithWhereUniqueWithoutModelInput[]
+  updateMany?: Prisma.AiTaskUpdateManyWithWhereWithoutModelInput | Prisma.AiTaskUpdateManyWithWhereWithoutModelInput[]
+  deleteMany?: Prisma.AiTaskScalarWhereInput | Prisma.AiTaskScalarWhereInput[]
+}
+
 export type AiTaskCreateWithoutCreatedByInput = {
   id?: string
   externalTaskId?: string | null
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  asset?: Prisma.AssetCreateNestedOneWithoutAiTasksInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
-  job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
+  job: Prisma.JobCreateNestedOneWithoutAiTasksInput
+  model: Prisma.AiModelCreateNestedOneWithoutAiTasksInput
 }
 
 export type AiTaskUncheckedCreateWithoutCreatedByInput = {
   id?: string
   externalTaskId?: string | null
   datasetId: string
-  assetId?: string | null
-  jobId?: string | null
-  provider: string
+  jobId: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelId: string
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -906,21 +993,23 @@ export type AiTaskScalarWhereInput = {
   id?: Prisma.StringFilter<"AiTask"> | string
   externalTaskId?: Prisma.StringNullableFilter<"AiTask"> | string | null
   datasetId?: Prisma.StringFilter<"AiTask"> | string
-  assetId?: Prisma.StringNullableFilter<"AiTask"> | string | null
-  jobId?: Prisma.StringNullableFilter<"AiTask"> | string | null
+  jobId?: Prisma.StringFilter<"AiTask"> | string
   createdById?: Prisma.StringFilter<"AiTask"> | string
-  provider?: Prisma.StringFilter<"AiTask"> | string
   type?: Prisma.EnumAiTaskTypeFilter<"AiTask"> | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFilter<"AiTask"> | $Enums.AiTaskStatus
   modality?: Prisma.EnumModalityNullableFilter<"AiTask"> | $Enums.Modality | null
-  modelName?: Prisma.StringNullableFilter<"AiTask"> | string | null
-  modelVersion?: Prisma.StringNullableFilter<"AiTask"> | string | null
+  modelId?: Prisma.StringFilter<"AiTask"> | string
+  modelNameSnapshot?: Prisma.StringFilter<"AiTask"> | string
+  modelVersionSnapshot?: Prisma.StringNullableFilter<"AiTask"> | string | null
+  modelKeySnapshot?: Prisma.StringFilter<"AiTask"> | string
   input?: Prisma.JsonFilter<"AiTask">
   output?: Prisma.JsonNullableFilter<"AiTask">
   summary?: Prisma.JsonFilter<"AiTask">
   error?: Prisma.StringNullableFilter<"AiTask"> | string | null
   errorCode?: Prisma.StringNullableFilter<"AiTask"> | string | null
   errorDetails?: Prisma.JsonNullableFilter<"AiTask">
+  pollAttempts?: Prisma.IntFilter<"AiTask"> | number
+  nextPollAt?: Prisma.DateTimeNullableFilter<"AiTask"> | Date | string | null
   resultStorageKey?: Prisma.StringNullableFilter<"AiTask"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AiTask"> | Date | string
@@ -929,44 +1018,48 @@ export type AiTaskScalarWhereInput = {
 export type AiTaskCreateWithoutJobInput = {
   id?: string
   externalTaskId?: string | null
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  asset?: Prisma.AssetCreateNestedOneWithoutAiTasksInput
   createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
+  model: Prisma.AiModelCreateNestedOneWithoutAiTasksInput
 }
 
 export type AiTaskUncheckedCreateWithoutJobInput = {
   id?: string
   externalTaskId?: string | null
   datasetId: string
-  assetId?: string | null
   createdById: string
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelId: string
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -977,68 +1070,112 @@ export type AiTaskCreateOrConnectWithoutJobInput = {
   create: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput>
 }
 
-export type AiTaskCreateManyJobInputEnvelope = {
-  data: Prisma.AiTaskCreateManyJobInput | Prisma.AiTaskCreateManyJobInput[]
-  skipDuplicates?: boolean
-}
-
-export type AiTaskUpsertWithWhereUniqueWithoutJobInput = {
-  where: Prisma.AiTaskWhereUniqueInput
+export type AiTaskUpsertWithoutJobInput = {
   update: Prisma.XOR<Prisma.AiTaskUpdateWithoutJobInput, Prisma.AiTaskUncheckedUpdateWithoutJobInput>
   create: Prisma.XOR<Prisma.AiTaskCreateWithoutJobInput, Prisma.AiTaskUncheckedCreateWithoutJobInput>
+  where?: Prisma.AiTaskWhereInput
 }
 
-export type AiTaskUpdateWithWhereUniqueWithoutJobInput = {
-  where: Prisma.AiTaskWhereUniqueInput
+export type AiTaskUpdateToOneWithWhereWithoutJobInput = {
+  where?: Prisma.AiTaskWhereInput
   data: Prisma.XOR<Prisma.AiTaskUpdateWithoutJobInput, Prisma.AiTaskUncheckedUpdateWithoutJobInput>
 }
 
-export type AiTaskUpdateManyWithWhereWithoutJobInput = {
-  where: Prisma.AiTaskScalarWhereInput
-  data: Prisma.XOR<Prisma.AiTaskUpdateManyMutationInput, Prisma.AiTaskUncheckedUpdateManyWithoutJobInput>
+export type AiTaskUpdateWithoutJobInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
+  status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
+  model?: Prisma.AiModelUpdateOneRequiredWithoutAiTasksNestedInput
+}
+
+export type AiTaskUncheckedUpdateWithoutJobInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
+  status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  modelId?: Prisma.StringFieldUpdateOperationsInput | string
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type AiTaskCreateWithoutDatasetInput = {
   id?: string
   externalTaskId?: string | null
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  asset?: Prisma.AssetCreateNestedOneWithoutAiTasksInput
   createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
-  job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
+  job: Prisma.JobCreateNestedOneWithoutAiTasksInput
+  model: Prisma.AiModelCreateNestedOneWithoutAiTasksInput
 }
 
 export type AiTaskUncheckedCreateWithoutDatasetInput = {
   id?: string
   externalTaskId?: string | null
-  assetId?: string | null
-  jobId?: string | null
+  jobId: string
   createdById: string
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelId: string
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1070,96 +1207,102 @@ export type AiTaskUpdateManyWithWhereWithoutDatasetInput = {
   data: Prisma.XOR<Prisma.AiTaskUpdateManyMutationInput, Prisma.AiTaskUncheckedUpdateManyWithoutDatasetInput>
 }
 
-export type AiTaskCreateWithoutAssetInput = {
+export type AiTaskCreateWithoutModelInput = {
   id?: string
   externalTaskId?: string | null
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy: Prisma.UserCreateNestedOneWithoutAiTasksCreatedInput
   dataset: Prisma.DatasetCreateNestedOneWithoutAiTasksInput
-  job?: Prisma.JobCreateNestedOneWithoutAiTasksInput
+  job: Prisma.JobCreateNestedOneWithoutAiTasksInput
 }
 
-export type AiTaskUncheckedCreateWithoutAssetInput = {
+export type AiTaskUncheckedCreateWithoutModelInput = {
   id?: string
   externalTaskId?: string | null
   datasetId: string
-  jobId?: string | null
+  jobId: string
   createdById: string
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
-export type AiTaskCreateOrConnectWithoutAssetInput = {
+export type AiTaskCreateOrConnectWithoutModelInput = {
   where: Prisma.AiTaskWhereUniqueInput
-  create: Prisma.XOR<Prisma.AiTaskCreateWithoutAssetInput, Prisma.AiTaskUncheckedCreateWithoutAssetInput>
+  create: Prisma.XOR<Prisma.AiTaskCreateWithoutModelInput, Prisma.AiTaskUncheckedCreateWithoutModelInput>
 }
 
-export type AiTaskCreateManyAssetInputEnvelope = {
-  data: Prisma.AiTaskCreateManyAssetInput | Prisma.AiTaskCreateManyAssetInput[]
+export type AiTaskCreateManyModelInputEnvelope = {
+  data: Prisma.AiTaskCreateManyModelInput | Prisma.AiTaskCreateManyModelInput[]
   skipDuplicates?: boolean
 }
 
-export type AiTaskUpsertWithWhereUniqueWithoutAssetInput = {
+export type AiTaskUpsertWithWhereUniqueWithoutModelInput = {
   where: Prisma.AiTaskWhereUniqueInput
-  update: Prisma.XOR<Prisma.AiTaskUpdateWithoutAssetInput, Prisma.AiTaskUncheckedUpdateWithoutAssetInput>
-  create: Prisma.XOR<Prisma.AiTaskCreateWithoutAssetInput, Prisma.AiTaskUncheckedCreateWithoutAssetInput>
+  update: Prisma.XOR<Prisma.AiTaskUpdateWithoutModelInput, Prisma.AiTaskUncheckedUpdateWithoutModelInput>
+  create: Prisma.XOR<Prisma.AiTaskCreateWithoutModelInput, Prisma.AiTaskUncheckedCreateWithoutModelInput>
 }
 
-export type AiTaskUpdateWithWhereUniqueWithoutAssetInput = {
+export type AiTaskUpdateWithWhereUniqueWithoutModelInput = {
   where: Prisma.AiTaskWhereUniqueInput
-  data: Prisma.XOR<Prisma.AiTaskUpdateWithoutAssetInput, Prisma.AiTaskUncheckedUpdateWithoutAssetInput>
+  data: Prisma.XOR<Prisma.AiTaskUpdateWithoutModelInput, Prisma.AiTaskUncheckedUpdateWithoutModelInput>
 }
 
-export type AiTaskUpdateManyWithWhereWithoutAssetInput = {
+export type AiTaskUpdateManyWithWhereWithoutModelInput = {
   where: Prisma.AiTaskScalarWhereInput
-  data: Prisma.XOR<Prisma.AiTaskUpdateManyMutationInput, Prisma.AiTaskUncheckedUpdateManyWithoutAssetInput>
+  data: Prisma.XOR<Prisma.AiTaskUpdateManyMutationInput, Prisma.AiTaskUncheckedUpdateManyWithoutModelInput>
 }
 
 export type AiTaskCreateManyCreatedByInput = {
   id?: string
   externalTaskId?: string | null
   datasetId: string
-  assetId?: string | null
-  jobId?: string | null
-  provider: string
+  jobId: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelId: string
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1168,44 +1311,48 @@ export type AiTaskCreateManyCreatedByInput = {
 export type AiTaskUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  asset?: Prisma.AssetUpdateOneWithoutAiTasksNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
-  job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
+  job?: Prisma.JobUpdateOneRequiredWithoutAiTasksNestedInput
+  model?: Prisma.AiModelUpdateOneRequiredWithoutAiTasksNestedInput
 }
 
 export type AiTaskUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelId?: Prisma.StringFieldUpdateOperationsInput | string
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1215,112 +1362,22 @@ export type AiTaskUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelId?: Prisma.StringFieldUpdateOperationsInput | string
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type AiTaskCreateManyJobInput = {
-  id?: string
-  externalTaskId?: string | null
-  datasetId: string
-  assetId?: string | null
-  createdById: string
-  provider: string
-  type: $Enums.AiTaskType
-  status?: $Enums.AiTaskStatus
-  modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  error?: string | null
-  errorCode?: string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  resultStorageKey?: string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type AiTaskUpdateWithoutJobInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
-  status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
-  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  asset?: Prisma.AssetUpdateOneWithoutAiTasksNestedInput
-  createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
-  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
-}
-
-export type AiTaskUncheckedUpdateWithoutJobInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
-  status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
-  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type AiTaskUncheckedUpdateManyWithoutJobInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
-  type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
-  status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
-  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1329,21 +1386,23 @@ export type AiTaskUncheckedUpdateManyWithoutJobInput = {
 export type AiTaskCreateManyDatasetInput = {
   id?: string
   externalTaskId?: string | null
-  assetId?: string | null
-  jobId?: string | null
+  jobId: string
   createdById: string
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelId: string
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1352,44 +1411,48 @@ export type AiTaskCreateManyDatasetInput = {
 export type AiTaskUpdateWithoutDatasetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  asset?: Prisma.AssetUpdateOneWithoutAiTasksNestedInput
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
-  job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
+  job?: Prisma.JobUpdateOneRequiredWithoutAiTasksNestedInput
+  model?: Prisma.AiModelUpdateOneRequiredWithoutAiTasksNestedInput
 }
 
 export type AiTaskUncheckedUpdateWithoutDatasetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelId?: Prisma.StringFieldUpdateOperationsInput | string
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1398,113 +1461,123 @@ export type AiTaskUncheckedUpdateWithoutDatasetInput = {
 export type AiTaskUncheckedUpdateManyWithoutDatasetInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelId?: Prisma.StringFieldUpdateOperationsInput | string
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type AiTaskCreateManyAssetInput = {
+export type AiTaskCreateManyModelInput = {
   id?: string
   externalTaskId?: string | null
   datasetId: string
-  jobId?: string | null
+  jobId: string
   createdById: string
-  provider: string
   type: $Enums.AiTaskType
   status?: $Enums.AiTaskStatus
   modality?: $Enums.Modality | null
-  modelName?: string | null
-  modelVersion?: string | null
+  modelNameSnapshot: string
+  modelVersionSnapshot?: string | null
+  modelKeySnapshot: string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: string | null
   errorCode?: string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: number
+  nextPollAt?: Date | string | null
   resultStorageKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
-export type AiTaskUpdateWithoutAssetInput = {
+export type AiTaskUpdateWithoutModelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutAiTasksNestedInput
-  job?: Prisma.JobUpdateOneWithoutAiTasksNestedInput
+  job?: Prisma.JobUpdateOneRequiredWithoutAiTasksNestedInput
 }
 
-export type AiTaskUncheckedUpdateWithoutAssetInput = {
+export type AiTaskUncheckedUpdateWithoutModelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type AiTaskUncheckedUpdateManyWithoutAssetInput = {
+export type AiTaskUncheckedUpdateManyWithoutModelInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   externalTaskId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   datasetId?: Prisma.StringFieldUpdateOperationsInput | string
-  jobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  jobId?: Prisma.StringFieldUpdateOperationsInput | string
   createdById?: Prisma.StringFieldUpdateOperationsInput | string
-  provider?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumAiTaskTypeFieldUpdateOperationsInput | $Enums.AiTaskType
   status?: Prisma.EnumAiTaskStatusFieldUpdateOperationsInput | $Enums.AiTaskStatus
   modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
-  modelName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  modelVersion?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
+  modelVersionSnapshot?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modelKeySnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   output?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  pollAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  nextPollAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1516,157 +1589,167 @@ export type AiTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   id?: boolean
   externalTaskId?: boolean
   datasetId?: boolean
-  assetId?: boolean
   jobId?: boolean
   createdById?: boolean
-  provider?: boolean
   type?: boolean
   status?: boolean
   modality?: boolean
-  modelName?: boolean
-  modelVersion?: boolean
+  modelId?: boolean
+  modelNameSnapshot?: boolean
+  modelVersionSnapshot?: boolean
+  modelKeySnapshot?: boolean
   input?: boolean
   output?: boolean
   summary?: boolean
   error?: boolean
   errorCode?: boolean
   errorDetails?: boolean
+  pollAttempts?: boolean
+  nextPollAt?: boolean
   resultStorageKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
+  job?: boolean | Prisma.JobDefaultArgs<ExtArgs>
+  model?: boolean | Prisma.AiModelDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["aiTask"]>
 
 export type AiTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   externalTaskId?: boolean
   datasetId?: boolean
-  assetId?: boolean
   jobId?: boolean
   createdById?: boolean
-  provider?: boolean
   type?: boolean
   status?: boolean
   modality?: boolean
-  modelName?: boolean
-  modelVersion?: boolean
+  modelId?: boolean
+  modelNameSnapshot?: boolean
+  modelVersionSnapshot?: boolean
+  modelKeySnapshot?: boolean
   input?: boolean
   output?: boolean
   summary?: boolean
   error?: boolean
   errorCode?: boolean
   errorDetails?: boolean
+  pollAttempts?: boolean
+  nextPollAt?: boolean
   resultStorageKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
+  job?: boolean | Prisma.JobDefaultArgs<ExtArgs>
+  model?: boolean | Prisma.AiModelDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["aiTask"]>
 
 export type AiTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   externalTaskId?: boolean
   datasetId?: boolean
-  assetId?: boolean
   jobId?: boolean
   createdById?: boolean
-  provider?: boolean
   type?: boolean
   status?: boolean
   modality?: boolean
-  modelName?: boolean
-  modelVersion?: boolean
+  modelId?: boolean
+  modelNameSnapshot?: boolean
+  modelVersionSnapshot?: boolean
+  modelKeySnapshot?: boolean
   input?: boolean
   output?: boolean
   summary?: boolean
   error?: boolean
   errorCode?: boolean
   errorDetails?: boolean
+  pollAttempts?: boolean
+  nextPollAt?: boolean
   resultStorageKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
+  job?: boolean | Prisma.JobDefaultArgs<ExtArgs>
+  model?: boolean | Prisma.AiModelDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["aiTask"]>
 
 export type AiTaskSelectScalar = {
   id?: boolean
   externalTaskId?: boolean
   datasetId?: boolean
-  assetId?: boolean
   jobId?: boolean
   createdById?: boolean
-  provider?: boolean
   type?: boolean
   status?: boolean
   modality?: boolean
-  modelName?: boolean
-  modelVersion?: boolean
+  modelId?: boolean
+  modelNameSnapshot?: boolean
+  modelVersionSnapshot?: boolean
+  modelKeySnapshot?: boolean
   input?: boolean
   output?: boolean
   summary?: boolean
   error?: boolean
   errorCode?: boolean
   errorDetails?: boolean
+  pollAttempts?: boolean
+  nextPollAt?: boolean
   resultStorageKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AiTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalTaskId" | "datasetId" | "assetId" | "jobId" | "createdById" | "provider" | "type" | "status" | "modality" | "modelName" | "modelVersion" | "input" | "output" | "summary" | "error" | "errorCode" | "errorDetails" | "resultStorageKey" | "createdAt" | "updatedAt", ExtArgs["result"]["aiTask"]>
+export type AiTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "externalTaskId" | "datasetId" | "jobId" | "createdById" | "type" | "status" | "modality" | "modelId" | "modelNameSnapshot" | "modelVersionSnapshot" | "modelKeySnapshot" | "input" | "output" | "summary" | "error" | "errorCode" | "errorDetails" | "pollAttempts" | "nextPollAt" | "resultStorageKey" | "createdAt" | "updatedAt", ExtArgs["result"]["aiTask"]>
 export type AiTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
+  job?: boolean | Prisma.JobDefaultArgs<ExtArgs>
+  model?: boolean | Prisma.AiModelDefaultArgs<ExtArgs>
 }
 export type AiTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
+  job?: boolean | Prisma.JobDefaultArgs<ExtArgs>
+  model?: boolean | Prisma.AiModelDefaultArgs<ExtArgs>
 }
 export type AiTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  asset?: boolean | Prisma.AiTask$assetArgs<ExtArgs>
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
-  job?: boolean | Prisma.AiTask$jobArgs<ExtArgs>
+  job?: boolean | Prisma.JobDefaultArgs<ExtArgs>
+  model?: boolean | Prisma.AiModelDefaultArgs<ExtArgs>
 }
 
 export type $AiTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "AiTask"
   objects: {
-    asset: Prisma.$AssetPayload<ExtArgs> | null
     createdBy: Prisma.$UserPayload<ExtArgs>
     dataset: Prisma.$DatasetPayload<ExtArgs>
-    job: Prisma.$JobPayload<ExtArgs> | null
+    job: Prisma.$JobPayload<ExtArgs>
+    model: Prisma.$AiModelPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     externalTaskId: string | null
     datasetId: string
-    assetId: string | null
-    jobId: string | null
+    jobId: string
     createdById: string
-    provider: string
     type: $Enums.AiTaskType
     status: $Enums.AiTaskStatus
     modality: $Enums.Modality | null
-    modelName: string | null
-    modelVersion: string | null
+    modelId: string
+    modelNameSnapshot: string
+    modelVersionSnapshot: string | null
+    modelKeySnapshot: string
     input: runtime.JsonValue
     output: runtime.JsonValue | null
     summary: runtime.JsonValue
     error: string | null
     errorCode: string | null
     errorDetails: runtime.JsonValue | null
+    pollAttempts: number
+    nextPollAt: Date | null
     resultStorageKey: string | null
     createdAt: Date
     updatedAt: Date
@@ -2064,10 +2147,10 @@ readonly fields: AiTaskFieldRefs;
  */
 export interface Prisma__AiTaskClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  asset<T extends Prisma.AiTask$assetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AiTask$assetArgs<ExtArgs>>): Prisma.Prisma__AssetClient<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   createdBy<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  job<T extends Prisma.AiTask$jobArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AiTask$jobArgs<ExtArgs>>): Prisma.Prisma__JobClient<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  job<T extends Prisma.JobDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.JobDefaultArgs<ExtArgs>>): Prisma.Prisma__JobClient<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  model<T extends Prisma.AiModelDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AiModelDefaultArgs<ExtArgs>>): Prisma.Prisma__AiModelClient<runtime.Types.Result.GetResult<Prisma.$AiModelPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2100,21 +2183,23 @@ export interface AiTaskFieldRefs {
   readonly id: Prisma.FieldRef<"AiTask", 'String'>
   readonly externalTaskId: Prisma.FieldRef<"AiTask", 'String'>
   readonly datasetId: Prisma.FieldRef<"AiTask", 'String'>
-  readonly assetId: Prisma.FieldRef<"AiTask", 'String'>
   readonly jobId: Prisma.FieldRef<"AiTask", 'String'>
   readonly createdById: Prisma.FieldRef<"AiTask", 'String'>
-  readonly provider: Prisma.FieldRef<"AiTask", 'String'>
   readonly type: Prisma.FieldRef<"AiTask", 'AiTaskType'>
   readonly status: Prisma.FieldRef<"AiTask", 'AiTaskStatus'>
   readonly modality: Prisma.FieldRef<"AiTask", 'Modality'>
-  readonly modelName: Prisma.FieldRef<"AiTask", 'String'>
-  readonly modelVersion: Prisma.FieldRef<"AiTask", 'String'>
+  readonly modelId: Prisma.FieldRef<"AiTask", 'String'>
+  readonly modelNameSnapshot: Prisma.FieldRef<"AiTask", 'String'>
+  readonly modelVersionSnapshot: Prisma.FieldRef<"AiTask", 'String'>
+  readonly modelKeySnapshot: Prisma.FieldRef<"AiTask", 'String'>
   readonly input: Prisma.FieldRef<"AiTask", 'Json'>
   readonly output: Prisma.FieldRef<"AiTask", 'Json'>
   readonly summary: Prisma.FieldRef<"AiTask", 'Json'>
   readonly error: Prisma.FieldRef<"AiTask", 'String'>
   readonly errorCode: Prisma.FieldRef<"AiTask", 'String'>
   readonly errorDetails: Prisma.FieldRef<"AiTask", 'Json'>
+  readonly pollAttempts: Prisma.FieldRef<"AiTask", 'Int'>
+  readonly nextPollAt: Prisma.FieldRef<"AiTask", 'DateTime'>
   readonly resultStorageKey: Prisma.FieldRef<"AiTask", 'String'>
   readonly createdAt: Prisma.FieldRef<"AiTask", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AiTask", 'DateTime'>
@@ -2511,44 +2596,6 @@ export type AiTaskDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many AiTasks to delete.
    */
   limit?: number
-}
-
-/**
- * AiTask.asset
- */
-export type AiTask$assetArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Asset
-   */
-  select?: Prisma.AssetSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Asset
-   */
-  omit?: Prisma.AssetOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AssetInclude<ExtArgs> | null
-  where?: Prisma.AssetWhereInput
-}
-
-/**
- * AiTask.job
- */
-export type AiTask$jobArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Job
-   */
-  select?: Prisma.JobSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Job
-   */
-  omit?: Prisma.JobOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.JobInclude<ExtArgs> | null
-  where?: Prisma.JobWhereInput
 }
 
 /**
