@@ -19,7 +19,7 @@ test("each supported local-folder modality creates exactly its canonical child r
   const cases = [
     { contentType: "image/png", filename: "image.png", modality: Modality.IMAGE, child: "imageAsset" },
     { contentType: "video/mp4", filename: "video.mp4", modality: Modality.VIDEO, child: "videoAsset" },
-    { contentType: "text/plain", filename: "notes.txt", modality: Modality.TEXT, child: "textDocument" },
+    { contentType: "text/plain", filename: "notes.txt", modality: Modality.TEXT, child: "textAsset" },
     { contentType: "audio/wav", filename: "audio.wav", modality: Modality.AUDIO, child: "audioAsset" },
   ] as const;
   const preparation = await app.start({ items: cases.map(({ contentType, filename }) => ({ logicalPath: `mixed/${filename}`, contentType })) });
@@ -34,11 +34,11 @@ test("each supported local-folder modality creates exactly its canonical child r
     assert.equal(completion.status, 201);
     const assetId = (await completion.json() as { data: { assetId: string } }).data.assetId;
     const asset = await db.asset.findUniqueOrThrow({
-      where: { id: assetId }, include: { imageAsset: true, videoAsset: true, textDocument: true, audioAsset: true },
+      where: { id: assetId }, include: { imageAsset: true, videoAsset: true, textAsset: true, audioAsset: true },
     });
     assert.equal(asset.modality, expected.modality);
     assert.ok(asset[expected.child]);
-    for (const child of ["imageAsset", "videoAsset", "textDocument", "audioAsset"] as const) {
+    for (const child of ["imageAsset", "videoAsset", "textAsset", "audioAsset"] as const) {
       if (child !== expected.child) assert.equal(asset[child], null, `${expected.modality} must not create ${child}`);
     }
     const replay = await app.complete(preparation.id, item.id, capability.fileId);
@@ -48,8 +48,8 @@ test("each supported local-folder modality creates exactly its canonical child r
       ? await db.imageAsset.count({ where: { assetId } })
       : expected.child === "videoAsset"
         ? await db.videoAsset.count({ where: { assetId } })
-        : expected.child === "textDocument"
-          ? await db.textDocument.count({ where: { assetId } })
+        : expected.child === "textAsset"
+          ? await db.textAsset.count({ where: { assetId } })
           : await db.audioAsset.count({ where: { assetId } });
     assert.equal(childCount, 1);
   }

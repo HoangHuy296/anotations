@@ -12,6 +12,17 @@ import { toSafeAnnotation, type SafeAnnotation } from "@/lib/annotations/safe-an
 export type AnnotationServiceFailure = "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "WRITE_UNSUPPORTED" | "CREATE_REPLAY_CONFLICT";
 export type AnnotationServiceResult<T> = { ok: true; value: T } | { ok: false; reason: AnnotationServiceFailure };
 
+// Defensive cap only -- not true pagination. `readAssetAnnotations` backs
+// `image-engine.tsx`'s AI-detect-apply-results flow, which re-fetches every
+// annotation on an asset and filters client-side for ones matching a given
+// AI task id; truncating this into a real page/pageSize/total envelope
+// would silently drop AI-detect results beyond the first page, a real
+// correctness regression. The response shape (`{ annotations }`) is
+// unchanged -- only an upper bound is added, at a magnitude far beyond any
+// realistic single-asset annotation count (see VIDEO_ANNOTATION_LIMITS for
+// the equivalent per-track/per-asset order of magnitude used elsewhere).
+const ANNOTATIONS_PER_ASSET_READ_LIMIT = 5_000;
+
 const annotationSelect = {
   id: true, assetId: true, labelId: true, modality: true, type: true, geometry: true,
   status: true, properties: true, revision: true, createdAt: true, updatedAt: true,
@@ -40,6 +51,7 @@ export async function readAssetAnnotations(actor: RequestActor, assetId: string)
   const annotations = await db.annotation.findMany({
     where: { assetId: resolved.asset.id, datasetId: resolved.asset.datasetId },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }], select: annotationSelect,
+    take: ANNOTATIONS_PER_ASSET_READ_LIMIT,
   });
   return { ok: true, value: annotations.map(toSafeAnnotation) };
 }

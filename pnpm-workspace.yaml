@@ -5,6 +5,11 @@ packages:
 allowBuilds:
   '@prisma/client': true
   '@prisma/engines': true
+  # scarf.sh is an anonymous install-telemetry pinger pulled in transitively
+  # by swagger-ui-dist (a docs-only devDependency, see specs/api/README.md).
+  # Its postinstall script is not required for swagger-ui-dist's static
+  # JS/CSS assets to work, so it stays disallowed.
+  '@scarf/scarf': false
   esbuild: true
   msgpackr-extract: true
   prisma: true

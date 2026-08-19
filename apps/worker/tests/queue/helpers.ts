@@ -1,4 +1,5 @@
 import { createQueueTransport, readSafeLocalQueueTestConfig, type SafeLocalQueueTestConfig } from "@fieldframe/queue";
+import type { Prisma } from "../../../../lib/generated/prisma/client.js";
 import { createWorkerDatabase } from "../../src/providers/db.js";
 import { getWorkerConfig } from "../../src/config.js";
 import { createWorkerMinio } from "../../src/providers/minio.js";
@@ -35,7 +36,24 @@ export async function createWorkerJobFixture() {
     db,
     ownerId: owner.id,
     datasetId: dataset.id,
-    createJob: (data: { datasetId?: string; type?: "EXPORT_DATASET" | "IMPORT_DATASET"; status?: "QUEUED" | "RUNNING"; cancelRequestedAt?: Date | null; enqueuedAt?: Date | null; input?: Record<string, unknown> } = {}) => db.job.create({
+    createJob: (data: {
+      datasetId?: string;
+      type?: "EXPORT_DATASET" | "IMPORT_DATASET";
+      status?: "QUEUED" | "RUNNING" | "RETRYING" | "FAILED" | "COMPLETED" | "CANCELED";
+      cancelRequestedAt?: Date | null;
+      enqueuedAt?: Date | null;
+      input?: Record<string, unknown>;
+      // 021-production-hardening-garbage-collection: lease/attempt state for
+      // stale-job-detector fixtures.
+      lockedBy?: string | null;
+      lockToken?: string | null;
+      lockedAt?: Date | null;
+      lockedUntil?: Date | null;
+      heartbeatAt?: Date | null;
+      startedAt?: Date | null;
+      attempts?: number;
+      maxAttempts?: number;
+    } = {}) => db.job.create({
       data: {
         datasetId: data.datasetId ?? dataset.id,
         createdById: owner.id,
@@ -43,7 +61,15 @@ export async function createWorkerJobFixture() {
         status: data.status ?? "QUEUED",
         cancelRequestedAt: data.cancelRequestedAt ?? null,
         enqueuedAt: data.enqueuedAt ?? null,
-        input: data.input ?? {},
+        input: (data.input ?? {}) as Prisma.InputJsonValue,
+        ...(data.lockedBy !== undefined ? { lockedBy: data.lockedBy } : {}),
+        ...(data.lockToken !== undefined ? { lockToken: data.lockToken } : {}),
+        ...(data.lockedAt !== undefined ? { lockedAt: data.lockedAt } : {}),
+        ...(data.lockedUntil !== undefined ? { lockedUntil: data.lockedUntil } : {}),
+        ...(data.heartbeatAt !== undefined ? { heartbeatAt: data.heartbeatAt } : {}),
+        ...(data.startedAt !== undefined ? { startedAt: data.startedAt } : {}),
+        ...(data.attempts !== undefined ? { attempts: data.attempts } : {}),
+        ...(data.maxAttempts !== undefined ? { maxAttempts: data.maxAttempts } : {}),
       },
       select: { id: true },
     }),

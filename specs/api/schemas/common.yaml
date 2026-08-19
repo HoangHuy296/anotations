@@ -1,0 +1,57 @@
+# Shared schema fragments reused across every tag.
+#
+# Source of truth: apps/web/src/lib/api-response.ts
+#
+# Every route in this codebase responds with one of two envelopes:
+#   success -> { "data": <payload> }
+#   failure -> { "error": { "code": "...", "message": "...", "fieldErrors"?: {...} } }
+# There is no bare/untyped response body anywhere in the inventoried routes.
+
+ApiError:
+  type: object
+  description: >-
+    The uniform failure envelope produced by apiError() (apps/web/src/lib/api-response.ts).
+    Every documented 4xx/5xx response uses this shape.
+  required: [error]
+  properties:
+    error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: >-
+            Machine-readable error code. Codes are route-specific; see each operation's
+            documented responses for the exact codes it can return. Some codes (for example
+            GITEA_NOT_FOUND) are reused generically across domains in the current
+            implementation rather than renamed per resource -- this schema documents the
+            code strings the API actually returns, not an idealized naming scheme.
+          examples: [INVALID_REQUEST]
+        message:
+          type: string
+          description: Human-readable, safe-to-display error message.
+          examples: ["The request is invalid."]
+        fieldErrors:
+          type: object
+          description: >-
+            Optional per-field validation messages, present only on some INVALID_REQUEST
+            responses that originate from a Zod safeParse() failure via
+            error.flatten().fieldErrors.
+          additionalProperties:
+            type: array
+            items:
+              type: string
+      additionalProperties: false
+  additionalProperties: false
+
+Cuid:
+  type: string
+  description: >-
+    Opaque CUID identifier (Prisma `@default(cuid())`). Not a UUID -- do not validate
+    against a UUID pattern.
+  examples: [cly3x9f2q0000u8j4h2m5k9p1]
+
+Timestamp:
+  type: string
+  format: date-time
+  description: ISO-8601 timestamp (Prisma DateTime serialized by NextResponse.json).

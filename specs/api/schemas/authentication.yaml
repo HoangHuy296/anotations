@@ -1,0 +1,115 @@
+# Authentication domain schemas.
+#
+# Source of truth:
+#   apps/web/src/lib/auth.ts               (RequestActor / SafeUser, session cookie)
+#   apps/web/src/lib/validation/auth.ts    (credentialsSchema, registrationSchema,
+#                                            profileSchema, passwordChangeSchema)
+#   apps/web/src/app/api/auth/**/route.ts
+
+UserRole:
+  type: string
+  description: >-
+    Prisma UserRole enum. Self-service registration (POST /api/auth/signup) can only
+    create MANAGER, LABELER, or REVIEWER accounts -- ADMIN is excluded by
+    registrationSchema and can only exist via a channel outside this API.
+  enum: [ADMIN, MANAGER, LABELER, REVIEWER]
+
+AuthenticatedUser:
+  type: object
+  description: >-
+    The safe actor projection (RequestActor) returned by every authentication endpoint
+    that returns a user. Never includes passwordHash or any session/token material.
+  required: [id, email, name, role]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    email:
+      type: string
+      format: email
+    name:
+      type: string
+      description: Display name; falls back to the account email when no name was set.
+    role:
+      $ref: '#/UserRole'
+  additionalProperties: false
+
+LoginRequest:
+  type: object
+  description: "Source: credentialsSchema (apps/web/src/lib/validation/auth.ts). Zod .strict() -- unknown fields are rejected."
+  required: [email, password]
+  properties:
+    email:
+      type: string
+      format: email
+      maxLength: 320
+    password:
+      type: string
+      minLength: 12
+      maxLength: 256
+  additionalProperties: false
+
+SignupRequest:
+  type: object
+  description: >-
+    Source: registrationSchema, which extends credentialsSchema. Zod .strict() --
+    unknown fields (including "role": "ADMIN") are rejected outright, not silently
+    dropped.
+  required: [email, password, role]
+  properties:
+    email:
+      type: string
+      format: email
+      maxLength: 320
+    password:
+      type: string
+      minLength: 12
+      maxLength: 256
+    name:
+      type: string
+      minLength: 1
+      maxLength: 100
+    role:
+      type: string
+      enum: [MANAGER, LABELER, REVIEWER]
+      description: ADMIN is intentionally not an allowed value for self-service signup.
+  additionalProperties: false
+
+ProfileUpdateRequest:
+  type: object
+  description: >-
+    Source: profileSchema. Deliberately excludes email and role -- those are not
+    self-service editable fields in the current implementation.
+  required: [name]
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 100
+  additionalProperties: false
+
+PasswordChangeRequest:
+  type: object
+  description: >-
+    Source: passwordChangeSchema. The schema itself rejects newPassword equal to
+    currentPassword (Zod .refine on the object, surfaced as a fieldErrors entry on
+    "newPassword").
+  required: [currentPassword, newPassword]
+  properties:
+    currentPassword:
+      type: string
+      minLength: 1
+      maxLength: 256
+    newPassword:
+      type: string
+      minLength: 12
+      maxLength: 256
+  additionalProperties: false
+
+PasswordChangeResponse:
+  type: object
+  required: [changed]
+  properties:
+    changed:
+      type: boolean
+      enum: [true]
+  additionalProperties: false

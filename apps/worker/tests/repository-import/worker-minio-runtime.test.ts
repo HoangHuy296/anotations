@@ -34,12 +34,12 @@ test("controlled public Gitea file mirrors to one private object, one Asset/Imag
     assert.equal(completed.successItems, 1);
     assert.ok(completed.events.some((event) => event.message === "IMPORT_BATCH_COMPLETED"));
     assert.equal(JSON.stringify({ input: completed.input, summary: completed.summary, events: completed.events }).includes("token"), false);
-    const assets = await db.asset.findMany({ where: { datasetId: dataset.id }, include: { imageAsset: true, videoAsset: true, audioAsset: true, textDocument: true } });
+    const assets = await db.asset.findMany({ where: { datasetId: dataset.id }, include: { imageAsset: true, videoAsset: true, audioAsset: true, textAsset: true } });
     assert.equal(assets.length, 1);
     const asset = assets[0]!;
     assert.equal(asset.modality, "IMAGE");
     assert.ok(asset.imageAsset);
-    assert.equal(Boolean(asset.videoAsset) || Boolean(asset.audioAsset) || Boolean(asset.textDocument), false);
+    assert.equal(Boolean(asset.videoAsset) || Boolean(asset.audioAsset) || Boolean(asset.textAsset), false);
     assert.equal(asset.storageProvider, "MINIO");
     assert.ok(asset.storageKey?.startsWith(`repository-imports/${dataset.id}/`));
     objectKey = asset.storageKey;

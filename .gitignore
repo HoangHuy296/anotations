@@ -52,3 +52,10 @@ packages/*/dist/
 .pnpm-store/
 compose.override.yaml
 docker-data/
+
+# local sync scratch space (scripts/sync-dev-to-review.sh)
+/tmp/
+
+# generated OpenAPI bundle + standalone Swagger UI docs page
+# (pnpm docs:build -> scripts/bundle-openapi.py + scripts/generate-swagger-ui.mjs)
+/specs/api/dist/

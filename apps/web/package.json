@@ -19,7 +19,11 @@
     "test:repository-import-request": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/repository-import-request/**/*.test.ts",
     "test:repository-import-worker": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/repository-import-worker/**/*.test.ts",
     "test:ai": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/ai/**/*.test.ts",
-    "test:source-connections:vitest": "vitest run tests/source-connections/source-access-policy.vitest.spec.ts --environment node"
+    "test:source-connections:vitest": "vitest run tests/source-connections/source-access-policy.vitest.spec.ts --environment node",
+    "test:rate-limit": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/rate-limit/**/*.test.ts",
+    "test:pagination": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/pagination/**/*.test.ts",
+    "test:health": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/health/**/*.test.ts",
+    "test:openapi-contract": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/openapi-contract/**/*.test.ts"
   },
   "dependencies": {
     "@fieldframe/domain": "workspace:*",
@@ -30,6 +34,7 @@
     "@radix-ui/react-slot": "^1.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "ioredis": "5.10.1",
     "konva": "^10.3.0",
     "lucide-react": "^1.21.0",
     "minio": "^8.0.5",

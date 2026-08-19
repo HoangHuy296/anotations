@@ -115,14 +115,6 @@ export function Toolbar({
         >
           <MagnifyingGlassPlus aria-hidden="true" size={18} />
         </button>
-        <button
-          type="button"
-          className="grid size-9 place-items-center rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white"
-          aria-label="Fit image to viewport"
-          onClick={onFit}
-        >
-          <ArrowsOut aria-hidden="true" size={18} />
-        </button>
       </div>
     </div>
   );

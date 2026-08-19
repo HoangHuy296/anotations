@@ -1,0 +1,682 @@
+# Annotations domain schemas.
+#
+# The annotation API is Asset-scoped in the current implementation. There is no
+# /api/annotations route.
+#
+# This file covers both IMAGE annotations (the original GET/PUT batch endpoint)
+# and the VIDEO annotation sub-domain (tracks, keyframes, temporal labels), which
+# also persists as Annotation/VideoObjectTrack rows and is grouped under the same
+# Annotations tag rather than under Assets or Media.
+#
+# Source of truth (IMAGE):
+#   apps/web/src/lib/annotations/safe-annotation.ts     (SafeAnnotation projection)
+#   apps/web/src/lib/annotations/annotation-service.ts   (read/write behavior, error reasons)
+#   apps/web/src/lib/validation/annotation-api.ts         (annotationChangeSetSchema, geometry union)
+#   apps/web/src/app/api/assets/[assetId]/annotations/route.ts
+#
+# Source of truth (VIDEO):
+#   apps/web/src/types/video-annotation.ts                (SafeVideoTrack/Keyframe/TemporalLabel/Annotations)
+#   apps/web/src/lib/annotations/video-projection.ts       (toSafeVideo* projections)
+#   apps/web/src/lib/annotations/video-read-service.ts     (GET .../video-annotations)
+#   apps/web/src/lib/annotations/video-track-service.ts    (track create/update/delete)
+#   apps/web/src/lib/annotations/video-keyframe-service.ts (keyframe create/update/delete)
+#   apps/web/src/lib/annotations/video-temporal-label-service.ts (temporal label create/update/delete)
+#   apps/web/src/lib/validation/video-annotation.ts        (all VIDEO request schemas)
+#   apps/web/src/app/api/assets/[assetId]/video-annotations/route.ts
+#   apps/web/src/app/api/assets/[assetId]/video-object-tracks/route.ts
+#   apps/web/src/app/api/video-object-tracks/[trackId]/route.ts
+#   apps/web/src/app/api/video-object-tracks/[trackId]/keyframes/route.ts
+#   apps/web/src/app/api/video-keyframes/[annotationId]/route.ts
+#   apps/web/src/app/api/assets/[assetId]/temporal-labels/route.ts
+#   apps/web/src/app/api/temporal-labels/[annotationId]/route.ts
+#   prisma/schema.prisma (AnnotationType, AnnotationStatus enums)
+
+AnnotationType:
+  type: string
+  description: >-
+    Full Prisma AnnotationType enum. GET returns whatever type an annotation was
+    persisted with, including types created outside this write endpoint (for example
+    by an AI prediction pipeline). PUT (see AnnotationChangeSet) only accepts the five
+    geometry-backed types below -- BOUNDING_BOX, POLYGON, CIRCLE, POINT, POLYLINE --
+    because imageAnnotationGeometrySchema is a closed discriminated union over just
+    those five. Read is intentionally broader than write; this is not a contract bug.
+  enum:
+    - BOUNDING_BOX
+    - ROTATED_BOUNDING_BOX
+    - POLYGON
+    - CIRCLE
+    - POINT
+    - POLYLINE
+    - SEGMENTATION_MASK
+    - KEYPOINT
+    - IMAGE_CLASSIFICATION
+    - VIDEO_CLASSIFICATION
+
+WritableAnnotationType:
+  type: string
+  description: The closed set of types accepted by PUT .../annotations (imageAnnotationGeometrySchema).
+  enum: [BOUNDING_BOX, POLYGON, CIRCLE, POINT, POLYLINE]
+
+AnnotationStatus:
+  type: string
+  enum: [DRAFT, IN_PROGRESS, COMPLETED, SUBMITTED, REVIEWED, ACCEPTED, REJECTED]
+
+Coordinate:
+  type: number
+  minimum: 0
+  maximum: 1
+  description: Coordinates are normalized to the original image, in the [0, 1] range.
+
+Point2D:
+  type: array
+  items:
+    $ref: '#/Coordinate'
+  minItems: 2
+  maxItems: 2
+
+BoundingBoxGeometry:
+  type: object
+  required: [x, y, width, height]
+  properties:
+    x: { $ref: '#/Coordinate' }
+    y: { $ref: '#/Coordinate' }
+    width:
+      type: number
+      exclusiveMinimum: 0
+      maximum: 1
+    height:
+      type: number
+      exclusiveMinimum: 0
+      maximum: 1
+  additionalProperties: false
+  description: Server also rejects (x + width > 1) or (y + height > 1) -- box must stay within the image.
+
+PolygonGeometry:
+  type: object
+  required: [points]
+  properties:
+    points:
+      type: array
+      items: { $ref: '#/Point2D' }
+      minItems: 3
+      maxItems: 1000
+      description: Points must be pairwise distinct.
+  additionalProperties: false
+
+PolylineGeometry:
+  type: object
+  required: [points]
+  properties:
+    points:
+      type: array
+      items: { $ref: '#/Point2D' }
+      minItems: 2
+      maxItems: 1000
+      description: Points must be pairwise distinct.
+  additionalProperties: false
+
+CircleGeometry:
+  type: object
+  required: [cx, cy, r]
+  properties:
+    cx: { $ref: '#/Coordinate' }
+    cy: { $ref: '#/Coordinate' }
+    r:
+      type: number
+      exclusiveMinimum: 0
+      maximum: 1
+  additionalProperties: false
+  description: Server also rejects a circle whose bounds fall outside [0, 1].
+
+PointGeometry:
+  type: object
+  required: [px, py]
+  properties:
+    px: { $ref: '#/Coordinate' }
+    py: { $ref: '#/Coordinate' }
+  additionalProperties: false
+
+AnnotationGeometry:
+  description: >-
+    Discriminated union matching imageAnnotationGeometrySchema. The `type` field
+    determines which `geometry` shape is required.
+  oneOf:
+    - type: object
+      required: [type, geometry]
+      properties:
+        type: { type: string, enum: [BOUNDING_BOX] }
+        geometry: { $ref: '#/BoundingBoxGeometry' }
+      additionalProperties: false
+    - type: object
+      required: [type, geometry]
+      properties:
+        type: { type: string, enum: [POLYGON] }
+        geometry: { $ref: '#/PolygonGeometry' }
+      additionalProperties: false
+    - type: object
+      required: [type, geometry]
+      properties:
+        type: { type: string, enum: [CIRCLE] }
+        geometry: { $ref: '#/CircleGeometry' }
+      additionalProperties: false
+    - type: object
+      required: [type, geometry]
+      properties:
+        type: { type: string, enum: [POINT] }
+        geometry: { $ref: '#/PointGeometry' }
+      additionalProperties: false
+    - type: object
+      required: [type, geometry]
+      properties:
+        type: { type: string, enum: [POLYLINE] }
+        geometry: { $ref: '#/PolylineGeometry' }
+      additionalProperties: false
+
+AnnotationLabel:
+  type: [object, "null"]
+  description: Safe label projection embedded in an annotation. Null when labelId is null.
+  required: [id, name, color]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    name:
+      type: string
+    color:
+      type: string
+  additionalProperties: false
+
+Annotation:
+  type: object
+  description: >-
+    Safe annotation projection (SafeAnnotation). Returned by both GET and PUT. Never
+    includes createdById/updatedById/reviewedById or any other internal actor
+    reference.
+  required:
+    - id
+    - assetId
+    - labelId
+    - label
+    - modality
+    - type
+    - geometry
+    - status
+    - properties
+    - revision
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    assetId:
+      $ref: './common.yaml#/Cuid'
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    label:
+      $ref: '#/AnnotationLabel'
+    modality:
+      $ref: './assets.yaml#/Modality'
+    type:
+      $ref: '#/AnnotationType'
+    geometry:
+      description: >-
+        Shape matches the geometry variant for `type`. Typed as an open schema here
+        because GET does not re-validate persisted geometry against the write-time
+        union.
+      type: object
+    status:
+      $ref: '#/AnnotationStatus'
+    properties:
+      description: Free-form per-annotation properties bag. Empty object ({}) for annotations created through this API.
+      type: object
+    revision:
+      type: integer
+      minimum: 1
+      description: Optimistic-concurrency counter. Required on every update/delete to guard against stale overwrites.
+    createdAt:
+      $ref: './common.yaml#/Timestamp'
+    updatedAt:
+      $ref: './common.yaml#/Timestamp'
+  additionalProperties: false
+
+AnnotationListResponse:
+  type: object
+  required: [annotations]
+  properties:
+    annotations:
+      type: array
+      items:
+        $ref: '#/Annotation'
+      description: Empty array when the asset has no annotations. Never null.
+  additionalProperties: false
+
+AnnotationCreate:
+  description: >-
+    One new annotation. `id` is client-supplied (used as an idempotency/replay key --
+    a duplicate create with an identical id+type+geometry+labelId from the same actor
+    on the same asset is accepted as a no-op replay rather than an error; a duplicate
+    id with different content is rejected as ANNOTATION_CREATE_REPLAY_CONFLICT).
+  allOf:
+    - type: object
+      required: [id]
+      properties:
+        id:
+          $ref: './common.yaml#/Cuid'
+        labelId:
+          oneOf:
+            - $ref: './common.yaml#/Cuid'
+            - type: "null"
+      additionalProperties: false
+    - $ref: '#/AnnotationGeometry'
+
+AnnotationUpdate:
+  type: object
+  description: >-
+    At least one of geometry or labelId must be present (server rejects an update that
+    changes neither). labelId: null explicitly clears the label; omitting labelId
+    leaves it unchanged.
+  required: [id, revision]
+  minProperties: 3
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    revision:
+      type: integer
+      minimum: 1
+      description: Must match the annotation's current persisted revision or the update is rejected as a conflict.
+    geometry:
+      description: One of BoundingBoxGeometry / PolygonGeometry / CircleGeometry / PointGeometry / PolylineGeometry, matching the annotation's existing (immutable) type.
+      oneOf:
+        - $ref: '#/BoundingBoxGeometry'
+        - $ref: '#/PolygonGeometry'
+        - $ref: '#/CircleGeometry'
+        - $ref: '#/PointGeometry'
+        - $ref: '#/PolylineGeometry'
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+  additionalProperties: false
+
+AnnotationDelete:
+  type: object
+  required: [id, revision]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    revision:
+      type: integer
+      minimum: 1
+  additionalProperties: false
+
+AnnotationChangeSet:
+  type: object
+  description: >-
+    Bounded, transactional mutation batch. Source: annotationChangeSetSchema. Combined
+    creates+updates+deletes must not exceed 100 items; an id may not repeat within
+    updates+deletes, and may not repeat within creates. All three arrays default to []
+    when omitted.
+  properties:
+    creates:
+      type: array
+      items:
+        $ref: '#/AnnotationCreate'
+      maxItems: 100
+      default: []
+    updates:
+      type: array
+      items:
+        $ref: '#/AnnotationUpdate'
+      maxItems: 100
+      default: []
+    deletes:
+      type: array
+      items:
+        $ref: '#/AnnotationDelete'
+      maxItems: 100
+      default: []
+  additionalProperties: false
+
+# ===========================================================================
+# VIDEO annotation sub-domain
+# ===========================================================================
+# A VIDEO annotation is never a bare shape: every keyframe geometry belongs to
+# a VideoObjectTrack (an "object" being tracked across the clip) and is
+# anchored to a timestamp. Frames between two persisted keyframes on the same
+# track are filled by server-computed interpolation, which is returned on GET
+# but never itself writable or persisted.
+
+VideoInterpolationMode:
+  type: string
+  enum: [LINEAR, NONE]
+
+VideoBoundingBoxGeometry:
+  type: object
+  description: The only geometry kind VIDEO keyframes currently support.
+  required: [x, y, width, height]
+  properties:
+    kind:
+      type: string
+      enum: [BOUNDING_BOX]
+      default: BOUNDING_BOX
+    x: { $ref: '#/Coordinate' }
+    y: { $ref: '#/Coordinate' }
+    width:
+      type: number
+      exclusiveMinimum: 0
+      maximum: 1
+    height:
+      type: number
+      exclusiveMinimum: 0
+      maximum: 1
+  additionalProperties: false
+  examples: [{ kind: BOUNDING_BOX, x: 0.1, y: 0.1, width: 0.2, height: 0.2 }]
+
+VideoObjectTrack:
+  type: object
+  description: Safe projection of a VideoObjectTrack row (SafeVideoTrack).
+  required: [id, videoAssetId, labelId, label, name, annotationType, interpolationMode, status, revision, properties, createdAt, updatedAt]
+  properties:
+    id: { $ref: './common.yaml#/Cuid' }
+    videoAssetId: { $ref: './common.yaml#/Cuid' }
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    label:
+      $ref: '#/AnnotationLabel'
+    name:
+      type: [string, "null"]
+    annotationType:
+      description: Currently always BOUNDING_BOX -- videoTrackCreateSchema pins this literal.
+      type: string
+      enum: [BOUNDING_BOX]
+    interpolationMode:
+      $ref: '#/VideoInterpolationMode'
+    status:
+      $ref: '#/AnnotationStatus'
+    revision:
+      type: integer
+      minimum: 1
+      description: Optimistic-concurrency counter for this track. Every keyframe/temporal-label mutation under it is guarded by expectedTrackRevision matching this value.
+    properties:
+      type: object
+    createdAt: { $ref: './common.yaml#/Timestamp' }
+    updatedAt: { $ref: './common.yaml#/Timestamp' }
+  additionalProperties: false
+
+VideoKeyframe:
+  type: object
+  description: Safe projection of an Annotation row with trackId set and isKeyframe true (SafeVideoKeyframe).
+  required: [id, trackId, assetId, labelId, type, geometry, properties, timestampMs, revision, createdAt, updatedAt]
+  properties:
+    id: { $ref: './common.yaml#/Cuid' }
+    trackId: { $ref: './common.yaml#/Cuid' }
+    assetId: { $ref: './common.yaml#/Cuid' }
+    labelId:
+      description: Per-keyframe label override; independent of the parent track's labelId.
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    type:
+      type: string
+      enum: [BOUNDING_BOX]
+    geometry:
+      $ref: '#/VideoBoundingBoxGeometry'
+    properties:
+      type: object
+    timestampMs:
+      type: integer
+      minimum: 0
+    revision:
+      type: integer
+      minimum: 1
+    createdAt: { $ref: './common.yaml#/Timestamp' }
+    updatedAt: { $ref: './common.yaml#/Timestamp' }
+  additionalProperties: false
+
+VideoTemporalLabelType:
+  type: string
+  enum: [EVENT, SCENE, SHOT_BOUNDARY]
+
+VideoTemporalLabel:
+  type: object
+  description: Safe projection of an untracked Annotation row (no trackId) typed EVENT/SCENE/SHOT_BOUNDARY (SafeVideoTemporalLabel).
+  required: [id, assetId, labelId, type, startMs, endMs, revision, properties, createdAt, updatedAt]
+  properties:
+    id: { $ref: './common.yaml#/Cuid' }
+    assetId: { $ref: './common.yaml#/Cuid' }
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    type:
+      $ref: '#/VideoTemporalLabelType'
+    startMs:
+      type: integer
+      minimum: 0
+    endMs:
+      type: integer
+      minimum: 0
+      description: Must be strictly greater than startMs (enforced on create).
+    revision:
+      type: integer
+      minimum: 1
+    properties:
+      type: object
+    createdAt: { $ref: './common.yaml#/Timestamp' }
+    updatedAt: { $ref: './common.yaml#/Timestamp' }
+  additionalProperties: false
+
+DerivedVideoInterpolation:
+  type: object
+  description: >-
+    Computed, read-only frame between two persisted keyframes on the same track.
+    Never a persisted row of its own -- only returned when both fromMs and toMs
+    query parameters are supplied to GET .../video-annotations.
+  allOf:
+    - $ref: '#/VideoBoundingBoxGeometry'
+    - type: object
+      required: [timestampMs, trackId, derived]
+      properties:
+        timestampMs:
+          type: integer
+        trackId:
+          $ref: './common.yaml#/Cuid'
+        derived:
+          type: boolean
+          enum: [true]
+
+VideoAnnotationsResponse:
+  type: object
+  description: Full VIDEO read model for one Asset -- persisted tracks/keyframes/temporal labels plus derived-only interpolation frames.
+  required: [assetId, durationMs, fps, tracks, keyframes, temporalLabels, interpolation]
+  properties:
+    assetId: { $ref: './common.yaml#/Cuid' }
+    durationMs:
+      type: [integer, "null"]
+    fps:
+      type: [number, "null"]
+    tracks:
+      type: array
+      items: { $ref: '#/VideoObjectTrack' }
+    keyframes:
+      type: array
+      items: { $ref: '#/VideoKeyframe' }
+      description: Filtered to [fromMs, toMs] when both query params are supplied.
+    temporalLabels:
+      type: array
+      items: { $ref: '#/VideoTemporalLabel' }
+      description: Included when its [startMs, endMs] intersects the requested [fromMs, toMs] window.
+    interpolation:
+      type: array
+      items: { $ref: '#/DerivedVideoInterpolation' }
+      description: One entry per track, only when both fromMs and toMs are supplied.
+  additionalProperties: false
+
+VideoTrackCreateRequest:
+  type: object
+  description: "Source: videoTrackCreateSchema."
+  properties:
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    name:
+      type: string
+      minLength: 1
+      maxLength: 160
+    annotationType:
+      type: string
+      enum: [BOUNDING_BOX]
+      default: BOUNDING_BOX
+    interpolationMode:
+      $ref: '#/VideoInterpolationMode'
+      default: LINEAR
+    properties:
+      type: object
+      default: {}
+  additionalProperties: false
+
+VideoTrackUpdateRequest:
+  type: object
+  description: >-
+    Source: videoTrackUpdateSchema. Must change at least one field besides
+    expectedTrackRevision.
+  required: [expectedTrackRevision]
+  minProperties: 2
+  properties:
+    expectedTrackRevision:
+      type: integer
+      minimum: 1
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    name:
+      type: string
+      minLength: 1
+      maxLength: 160
+    status:
+      $ref: '#/AnnotationStatus'
+    interpolationMode:
+      $ref: '#/VideoInterpolationMode'
+    properties:
+      type: object
+  additionalProperties: false
+
+VideoTrackDeleteRequest:
+  type: object
+  description: "Source: videoTrackDeleteSchema. DELETE carries a JSON body (not query params) with the expected revision."
+  required: [expectedTrackRevision]
+  properties:
+    expectedTrackRevision:
+      type: integer
+      minimum: 1
+  additionalProperties: false
+
+VideoKeyframeCreateRequest:
+  type: object
+  description: "Source: videoKeyframeCreateSchema."
+  required: [expectedTrackRevision, timestampMs, geometry]
+  properties:
+    expectedTrackRevision:
+      type: integer
+      minimum: 1
+    timestampMs:
+      type: integer
+      minimum: 0
+    geometry:
+      $ref: '#/VideoBoundingBoxGeometry'
+    properties:
+      type: object
+      default: {}
+  additionalProperties: false
+
+VideoKeyframeUpdateRequest:
+  type: object
+  description: "Source: videoKeyframeUpdateSchema. Must change at least one of timestampMs/geometry/properties/labelId."
+  required: [expectedTrackRevision]
+  minProperties: 2
+  properties:
+    expectedTrackRevision:
+      type: integer
+      minimum: 1
+    timestampMs:
+      type: integer
+      minimum: 0
+    geometry:
+      $ref: '#/VideoBoundingBoxGeometry'
+    properties:
+      type: object
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+  additionalProperties: false
+
+VideoKeyframeDeleteRequest:
+  type: object
+  description: "Source: videoKeyframeDeleteSchema."
+  required: [expectedTrackRevision]
+  properties:
+    expectedTrackRevision:
+      type: integer
+      minimum: 1
+  additionalProperties: false
+
+VideoTemporalLabelCreateRequest:
+  type: object
+  description: "Source: videoTemporalLabelCreateSchema. startMs must be strictly less than endMs."
+  required: [type, startMs, endMs]
+  properties:
+    type:
+      $ref: '#/VideoTemporalLabelType'
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    startMs:
+      type: integer
+      minimum: 0
+    endMs:
+      type: integer
+      minimum: 0
+    properties:
+      type: object
+      default: {}
+  additionalProperties: false
+
+VideoTemporalLabelUpdateRequest:
+  type: object
+  description: "Source: videoTemporalLabelUpdateSchema. Must change at least one field besides expectedRevision."
+  required: [expectedRevision]
+  minProperties: 2
+  properties:
+    expectedRevision:
+      type: integer
+      minimum: 1
+    labelId:
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    startMs:
+      type: integer
+      minimum: 0
+    endMs:
+      type: integer
+      minimum: 0
+    properties:
+      type: object
+  additionalProperties: false
+
+VideoTemporalLabelDeleteRequest:
+  type: object
+  description: "Source: videoTemporalLabelDeleteSchema."
+  required: [expectedRevision]
+  properties:
+    expectedRevision:
+      type: integer
+      minimum: 1
+  additionalProperties: false

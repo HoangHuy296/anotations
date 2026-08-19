@@ -1,0 +1,150 @@
+# AI domain schemas.
+#
+# Source of truth:
+#   apps/web/src/lib/ai/ai-model-service.ts       (AiModelDto, GET /api/ai/models)
+#   apps/web/src/lib/ai/ai-task-service.ts        (createAiTask, cancelAuthorizedAiTask)
+#   apps/web/src/lib/ai/ai-task-read-service.ts   (AiTaskStatusDto, GET /api/ai/tasks/{aiTaskId})
+#   apps/web/src/lib/validation/ai-task.ts        (createAiTaskSchema)
+#   prisma/schema.prisma (AiTaskType, AiTaskStatus)
+#
+# An AI task is a thin actor-facing wrapper around a durable Job (JobType
+# AI_PREANNOTATE_ASSET/AI_PREANNOTATE_DATASET); cancellation goes through the same
+# Job cancellation the Jobs tag already exposes, scoped by taskId instead of jobId.
+
+AiModel:
+  type: object
+  description: >-
+    Safe AI model projection (AiModelDto). `provider` is deliberately not
+    selected/exposed -- it is an internal resolution detail.
+  required: [id, key, displayName, modality, taskType]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    key:
+      type: string
+    displayName:
+      type: string
+    modality:
+      description: Null on a model that supports more than one modality -- callers must not assume single-modality.
+      oneOf:
+        - $ref: './assets.yaml#/Modality'
+        - type: "null"
+    taskType:
+      type: string
+      description: Prisma AiTaskType value this model performs.
+  additionalProperties: false
+
+AiModelListResponse:
+  type: object
+  description: >-
+    Offset-paginated per 021-production-hardening-garbage-collection's
+    contracts/pagination-envelope.md. `page`/`pageSize` request query
+    parameters are optional; default pageSize is a generous 100 (the active
+    AI-model catalog is small), so the existing client
+    (`listActiveAiModelsClient()`, which reads only `models` and ignores
+    unknown fields) is unaffected by these additive fields.
+  required: [models, page, pageSize, total]
+  properties:
+    models:
+      type: array
+      items:
+        $ref: '#/AiModel'
+    page:
+      type: integer
+      minimum: 1
+      examples: [1]
+    pageSize:
+      type: integer
+      minimum: 1
+      examples: [100]
+    total:
+      type: integer
+      minimum: 0
+      examples: [4]
+  additionalProperties: false
+
+CreateAiTaskRequest:
+  type: object
+  description: "Source: createAiTaskSchema."
+  required: [datasetId, modelId, assetIds]
+  properties:
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    modelId:
+      type: string
+      minLength: 1
+    assetIds:
+      type: array
+      items:
+        type: string
+        minLength: 1
+      minItems: 1
+      description: Every asset must belong to datasetId (validated server-side; a mismatch is rejected as 409 ASSET_NOT_IN_DATASET).
+  additionalProperties: false
+
+CreateAiTaskResponse:
+  type: object
+  description: >-
+    Returned with 202 -- creation is a Job+AiTask created in one transaction and
+    enqueued strictly after commit. This route never waits on the AI provider.
+  required: [taskId, jobId]
+  properties:
+    taskId:
+      $ref: './common.yaml#/Cuid'
+    jobId:
+      $ref: './common.yaml#/Cuid'
+  additionalProperties: false
+
+AiTaskStatus:
+  type: object
+  description: >-
+    Safe AI task projection (AiTaskStatusDto). Deliberately excludes
+    externalTaskId, raw provider output, and any lock/worker field.
+  required: [taskId, jobId, datasetId, status, type, modality, modelNameSnapshot, modelVersionSnapshot, pollAttempts, createdAt, updatedAt, error, errorCode]
+  properties:
+    taskId:
+      $ref: './common.yaml#/Cuid'
+    jobId:
+      $ref: './common.yaml#/Cuid'
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    status:
+      type: string
+      enum: [QUEUED, RUNNING, SUCCEEDED, FAILED, CANCELED]
+      description: Prisma AiTaskStatus.
+    type:
+      type: string
+      enum: [PREANNOTATE_ASSET, PREANNOTATE_DATASET, TRANSCRIBE_AUDIO, DETECT_OBJECTS, SEGMENT_IMAGE, CLASSIFY_TEXT, CLASSIFY_AUDIO, CUSTOM]
+      description: Prisma AiTaskType.
+    modality:
+      oneOf:
+        - $ref: './assets.yaml#/Modality'
+        - type: "null"
+    modelNameSnapshot:
+      type: string
+    modelVersionSnapshot:
+      type: [string, "null"]
+    pollAttempts:
+      type: integer
+    createdAt:
+      $ref: './common.yaml#/Timestamp'
+    updatedAt:
+      $ref: './common.yaml#/Timestamp'
+    error:
+      type: [string, "null"]
+    errorCode:
+      type: [string, "null"]
+  additionalProperties: false
+
+CancelAiTaskResponse:
+  type: object
+  required: [taskId, jobId, status]
+  properties:
+    taskId:
+      $ref: './common.yaml#/Cuid'
+    jobId:
+      $ref: './common.yaml#/Cuid'
+    status:
+      type: string
+      description: The underlying Job's status after the cancellation request (Prisma JobStatus).
+  additionalProperties: false

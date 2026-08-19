@@ -1,0 +1,632 @@
+# Import / Repository domain schemas.
+#
+# The largest and most security-sensitive domain in the API: creating Datasets
+# from an external Git repository (GitHub/Gitea), managing saved Gitea source
+# connections, browsing Gitea repositories/trees for the import UI, and the
+# local-folder (browser directory) import flow. AGENTS.md's security rules
+# apply most directly here -- no provider token, MinIO credential, or private
+# repository URL is ever returned to the browser; a one-time PAT is accepted
+# only as transient request memory.
+#
+# Source of truth:
+#   apps/web/src/lib/validation/repository-import-request.ts (repositoryImportRequestSchema)
+#   apps/web/src/lib/validation/repository-preflight.ts       (repositoryPreflightSchema)
+#   apps/web/src/lib/validation/source-connection.ts           (sourceConnectionCreateSchema, sourceImportPreflightSchema)
+#   apps/web/src/lib/validation/local-folder-import.ts         (start/append/complete/upload-capabilities schemas)
+#   apps/web/src/lib/validation/gitea.ts                       (repository list/tree query schemas)
+#   apps/web/src/lib/repository-import/acceptance.ts, types.ts (RepositoryImportAcceptance)
+#   apps/web/src/lib/repository-import/../providers/provider.types.ts (PreflightResult)
+#   apps/web/src/lib/source-connection-dto.ts                   (SafeSourceConnection)
+#   apps/web/src/lib/imports/prepare-local-folder-import.ts, complete-local-folder-item.ts, local-folder-upload.ts
+#   apps/web/src/app/api/datasets/from-repository/route.ts
+#   apps/web/src/app/api/source-repositories/preflight/route.ts
+#   apps/web/src/app/api/source-import-preflight/route.ts
+#   apps/web/src/app/api/source-connections/route.ts, [id]/route.ts
+#   apps/web/src/app/api/gitea/repos/route.ts, [owner]/[repo]/tree/route.ts
+#   apps/web/src/app/api/imports/local-folder/route.ts
+#   apps/web/src/app/api/datasets/[datasetId]/imports/local-folder/route.ts
+#   apps/web/src/app/api/imports/[preparedImportId]/upload-capabilities/route.ts
+#   apps/web/src/app/api/imports/[preparedImportId]/items/[itemId]/complete/route.ts
+#   apps/web/src/app/api/gitea/import/route.ts (deprecated, 410)
+#   apps/web/src/app/api/source-import-jobs/route.ts (deprecated, 410)
+
+# --- Repository identity / credentials ---------------------------------------
+
+RepositoryProvider:
+  type: string
+  enum: [GITHUB, GITEA]
+
+RepositoryVisibility:
+  type: string
+  enum: [PUBLIC, PRIVATE]
+
+CredentialMode:
+  type: string
+  enum: [PUBLIC, EXISTING_SOURCE_CONNECTION, ONE_TIME_PAT]
+  description: >-
+    GITHUB imports only ever use PUBLIC. GITEA imports use PUBLIC (server-known
+    public Gitea root), EXISTING_SOURCE_CONNECTION (a saved SourceConnection), or
+    ONE_TIME_PAT (a token supplied for this request only, retained only in
+    server-request memory and never echoed back, logged, or persisted unless
+    explicitly saved as a connection).
+
+# --- POST /api/datasets/from-repository --------------------------------------
+
+RepositoryImportRequest:
+  type: object
+  description: >-
+    Source: repositoryImportRequestSchema. The only public durable request that
+    creates a new repository-backed Dataset. Field requirements vary by
+    provider/credentialMode (see the per-field descriptions); the server
+    rejects a combination that supplies credentials it does not expect for the
+    chosen mode.
+  required: [provider, repository, credentialMode, datasetName, idempotencyKey]
+  properties:
+    provider:
+      $ref: '#/RepositoryProvider'
+    repository:
+      type: object
+      required: [owner, name, ref, expectedVisibility]
+      properties:
+        owner:
+          type: string
+          pattern: '^[A-Za-z0-9_.-]+$'
+          maxLength: 100
+        name:
+          type: string
+          pattern: '^[A-Za-z0-9_.-]+$'
+          maxLength: 100
+        repoUrl:
+          type: string
+          format: uri
+          maxLength: 2048
+          description: Required for GITHUB; must be the canonical https://github.com/{owner}/{name} URL.
+        ref:
+          type: string
+          maxLength: 255
+        rootPath:
+          type: string
+          maxLength: 1024
+        expectedVisibility:
+          $ref: '#/RepositoryVisibility'
+      additionalProperties: false
+    credentialMode:
+      $ref: '#/CredentialMode'
+    sourceConnectionId:
+      type: string
+      maxLength: 128
+      description: Required (and only meaningful) when credentialMode is EXISTING_SOURCE_CONNECTION.
+    serverUrl:
+      type: string
+      format: uri
+      maxLength: 2048
+      description: Required for GITEA when credentialMode is PUBLIC or ONE_TIME_PAT.
+    personalAccessToken:
+      type: string
+      maxLength: 4096
+      description: Required when credentialMode is ONE_TIME_PAT. Never returned, logged, or persisted unless saveAsSourceConnection is true.
+    saveAsSourceConnection:
+      type: boolean
+      description: Only meaningful with ONE_TIME_PAT.
+    connectionName:
+      type: string
+      maxLength: 80
+    datasetName:
+      type: string
+      minLength: 1
+      maxLength: 160
+    idempotencyKey:
+      type: string
+      minLength: 16
+      maxLength: 160
+      description: Caller-generated key. A replayed key returns the already-accepted result rather than creating a second Dataset/Job.
+  additionalProperties: false
+
+RepositoryImportAcceptance:
+  type: object
+  description: >-
+    Returned with 202 on first acceptance, or 200 when idempotencyKey replayed
+    an already-accepted request. The Dataset/Job are created together in one
+    transaction; import content is populated asynchronously by the private
+    worker, not by this request.
+  required: [dataset, job, progressPath]
+  properties:
+    dataset:
+      type: object
+      required: [id, name]
+      properties:
+        id: { $ref: './common.yaml#/Cuid' }
+        name: { type: string }
+      additionalProperties: false
+    job:
+      type: object
+      required: [id, datasetId, type, status]
+      properties:
+        id: { $ref: './common.yaml#/Cuid' }
+        datasetId: { $ref: './common.yaml#/Cuid' }
+        type: { type: string, enum: [IMPORT_DATASET] }
+        status: { $ref: './jobs.yaml#/JobStatus' }
+      additionalProperties: false
+    progressPath:
+      type: string
+      description: App route the browser should poll/navigate to for import progress (a GET /api/jobs/{jobId}-style path).
+  additionalProperties: false
+
+# --- POST /api/source-repositories/preflight ---------------------------------
+
+RepositoryPreflightRequest:
+  type: object
+  description: >-
+    Source: repositoryPreflightSchema. Read-only; does not create a Dataset,
+    Job, SourceConnection, queue delivery, or storage object.
+  required: [provider, repository]
+  properties:
+    provider:
+      $ref: '#/RepositoryProvider'
+    repository:
+      type: object
+      required: [owner, name]
+      properties:
+        owner: { type: string, maxLength: 100 }
+        name: { type: string, maxLength: 100 }
+        baseUrl:
+          type: string
+          format: uri
+          maxLength: 2048
+          description: GITEA only; server-controlled for GITHUB.
+      additionalProperties: false
+    ref:
+      type: string
+      maxLength: 255
+    rootPath:
+      type: string
+      maxLength: 1024
+    sourceConnectionId:
+      type: string
+      maxLength: 128
+      description: GITEA only. Deliberately not format-validated -- a malformed id is concealed as the same outcome as an unknown/foreign connection.
+  additionalProperties: false
+
+RepositoryPreflightResult:
+  type: object
+  description: Provider-agnostic preflight result (PreflightResult), wrapped as { preflight }.
+  required: [provider, repository, visibility, ref, rootPath, assetPreview]
+  properties:
+    provider:
+      $ref: '#/RepositoryProvider'
+    repository:
+      type: object
+      required: [owner, name]
+      properties:
+        owner: { type: string }
+        name: { type: string }
+      additionalProperties: false
+    visibility:
+      $ref: '#/RepositoryVisibility'
+    ref:
+      type: object
+      required: [requested, resolved, revision]
+      properties:
+        requested: { type: [string, "null"] }
+        resolved: { type: string }
+        revision: { type: [string, "null"] }
+      additionalProperties: false
+    rootPath:
+      type: object
+      required: [requested, normalized, exists]
+      properties:
+        requested: { type: [string, "null"] }
+        normalized: { type: [string, "null"] }
+        exists: { type: boolean }
+      additionalProperties: false
+    assetPreview:
+      type: [object, "null"]
+      description: Bounded, transient preview only; never a persisted import manifest.
+      required: [detectedAssetCount, detectedBytes, truncated, sample]
+      properties:
+        detectedAssetCount: { type: integer }
+        detectedBytes: { type: integer }
+        truncated: { type: boolean }
+        sample:
+          type: array
+          items:
+            type: object
+            required: [path, size, modality]
+            properties:
+              path: { type: string }
+              size: { type: [integer, "null"] }
+              modality: { type: string, enum: [IMAGE, VIDEO, AUDIO, TEXT] }
+            additionalProperties: false
+      additionalProperties: false
+  additionalProperties: false
+
+RepositoryPreflightResponse:
+  type: object
+  required: [preflight]
+  properties:
+    preflight:
+      $ref: '#/RepositoryPreflightResult'
+  additionalProperties: false
+
+# --- POST /api/source-import-preflight ----------------------------------------
+
+SourceImportPreflightRequest:
+  type: object
+  description: >-
+    Source: sourceImportPreflightSchema. GITEA only. Same credentialMode rules
+    as RepositoryImportRequest. Read-only preview -- does not create a Dataset,
+    Job, or SourceConnection.
+  required: [provider, datasetName, repository, credentialMode]
+  properties:
+    provider:
+      type: string
+      enum: [GITEA]
+    datasetName:
+      type: string
+      minLength: 1
+      maxLength: 160
+    repository:
+      type: object
+      required: [owner, repo, ref, expectedVisibility]
+      properties:
+        owner: { type: string, maxLength: 160 }
+        repo: { type: string, maxLength: 160 }
+        ref: { type: string, maxLength: 255 }
+        rootPath: { type: string, maxLength: 4096 }
+        expectedVisibility: { $ref: '#/RepositoryVisibility' }
+      additionalProperties: false
+    credentialMode:
+      $ref: '#/CredentialMode'
+    sourceConnectionId:
+      type: string
+      maxLength: 128
+    serverUrl:
+      type: string
+      format: uri
+      maxLength: 2048
+    personalAccessToken:
+      type: string
+      maxLength: 4096
+    saveAsSourceConnection:
+      type: boolean
+    connectionName:
+      type: string
+      maxLength: 80
+  additionalProperties: false
+
+SourceImportPreflightResponse:
+  type: object
+  required: [readyForImport, repository, assetPreview, availableRefs, visibility]
+  properties:
+    readyForImport:
+      type: boolean
+      description: True when the actual repository visibility matches repository.expectedVisibility.
+    repository:
+      type: object
+      required: [provider, fullName, ref, rootPath, visibility]
+      properties:
+        provider: { type: string, enum: [GITEA] }
+        fullName: { type: string, description: "owner/repo" }
+        ref: { type: string }
+        rootPath: { type: [string, "null"] }
+        visibility: { $ref: '#/RepositoryVisibility' }
+      additionalProperties: false
+    assetPreview:
+      $ref: '#/RepositoryPreflightResult'
+      description: Reuses the same bounded preview shape as RepositoryPreflightResult.assetPreview.
+    availableRefs:
+      type: array
+      items:
+        type: string
+    visibility:
+      type: object
+      required: [expected, actual, matches]
+      properties:
+        expected: { $ref: '#/RepositoryVisibility' }
+        actual: { $ref: '#/RepositoryVisibility' }
+        matches: { type: boolean }
+      additionalProperties: false
+  additionalProperties: false
+
+# --- Source connections --------------------------------------------------------
+
+SourceConnectionProvider:
+  type: string
+  enum: [GITEA]
+  description: The only provider a saved SourceConnection currently supports (GITHUB import is always PUBLIC/credential-free).
+
+SourceConnectionStatus:
+  type: string
+  enum: [ACTIVE, EXPIRED, REVOKED, ERROR]
+
+SourceConnection:
+  type: object
+  description: Safe source-connection projection (SafeSourceConnection). Never includes baseUrl or the encrypted/decrypted token.
+  required: [id, provider, name, status, tokenExpiresAt, createdAt, updatedAt]
+  properties:
+    id: { $ref: './common.yaml#/Cuid' }
+    provider: { $ref: '#/SourceConnectionProvider' }
+    name:
+      type: [string, "null"]
+    status: { $ref: '#/SourceConnectionStatus' }
+    tokenExpiresAt:
+      oneOf:
+        - $ref: './common.yaml#/Timestamp'
+        - type: "null"
+    createdAt: { $ref: './common.yaml#/Timestamp' }
+    updatedAt: { $ref: './common.yaml#/Timestamp' }
+  additionalProperties: false
+
+SourceConnectionListResponse:
+  type: object
+  description: >-
+    Offset-paginated per 021-production-hardening-garbage-collection's
+    contracts/pagination-envelope.md. `page`/`pageSize` request query
+    parameters are optional; default pageSize is a generous 100 (a user's
+    saved source-connection list is small).
+  required: [connections, page, pageSize, total]
+  properties:
+    connections:
+      type: array
+      items: { $ref: '#/SourceConnection' }
+    page:
+      type: integer
+      minimum: 1
+      examples: [1]
+    pageSize:
+      type: integer
+      minimum: 1
+      examples: [100]
+    total:
+      type: integer
+      minimum: 0
+      examples: [3]
+  additionalProperties: false
+
+CreateSourceConnectionRequest:
+  type: object
+  description: "Source: sourceConnectionCreateSchema. baseUrl and token are write-only -- never echoed back in the response."
+  required: [provider, baseUrl, token]
+  properties:
+    provider:
+      type: string
+      enum: [GITEA]
+    name:
+      type: string
+      maxLength: 80
+    baseUrl:
+      type: string
+      maxLength: 2048
+    token:
+      type: string
+      maxLength: 4096
+  additionalProperties: false
+
+CreateSourceConnectionResponse:
+  type: object
+  required: [connection]
+  properties:
+    connection: { $ref: '#/SourceConnection' }
+  additionalProperties: false
+
+GetSourceConnectionResponse:
+  type: object
+  required: [connection]
+  properties:
+    connection: { $ref: '#/SourceConnection' }
+  additionalProperties: false
+
+# --- Gitea repository browsing (used by the import UI) ------------------------
+
+GiteaRepositorySummary:
+  type: object
+  description: Passed through from the Gitea provider client; shape is provider-defined and not independently re-validated field-by-field here.
+  additionalProperties: true
+
+GiteaRepositoryListResponse:
+  type: object
+  required: [items, pagination]
+  properties:
+    items:
+      type: array
+      items: { $ref: '#/GiteaRepositorySummary' }
+    pagination:
+      type: object
+      required: [page, limit, totalCount]
+      properties:
+        page: { type: integer }
+        limit: { type: integer }
+        totalCount: { type: integer }
+      additionalProperties: false
+  additionalProperties: false
+
+GiteaTreeEntry:
+  type: object
+  description: Provider-defined tree entry shape, filtered server-side to the requested rootPath.
+  additionalProperties: true
+
+GiteaRepositoryTreeResponse:
+  type: object
+  required: [repository, sha, truncated, entries]
+  properties:
+    repository:
+      type: object
+      required: [owner, name, ref, rootPath]
+      properties:
+        owner: { type: string }
+        name: { type: string }
+        ref: { type: string }
+        rootPath: { type: [string, "null"] }
+      additionalProperties: false
+    sha:
+      type: string
+    truncated:
+      type: boolean
+    entries:
+      type: array
+      items: { $ref: '#/GiteaTreeEntry' }
+  additionalProperties: false
+
+# --- Local-folder (browser directory) import -----------------------------------
+
+LocalFolderManifestItem:
+  type: object
+  description: 'Source: localFolderManifestItemSchema. logicalPath must be relative (no leading slash, no drive letter, no ".." segment) and unique (case-insensitive) within the manifest.'
+  required: [logicalPath, contentType, sizeBytes, fingerprint]
+  properties:
+    logicalPath:
+      type: string
+      minLength: 1
+      maxLength: 1024
+    contentType:
+      type: string
+      enum: [image/png, image/jpeg, image/webp, video/mp4, video/webm, text/plain, text/csv, application/json, audio/wav, audio/mpeg, audio/ogg]
+    sizeBytes:
+      type: integer
+      minimum: 1
+      maximum: 104857600
+    fingerprint:
+      type: string
+      pattern: '^[a-f0-9]{64}$'
+      description: SHA-256 hex digest.
+  additionalProperties: false
+
+StartLocalFolderImportRequest:
+  type: object
+  description: "Source: startLocalFolderImportSchema. Creates a new Dataset."
+  required: [idempotencyKey, items, name]
+  properties:
+    idempotencyKey:
+      type: string
+      minLength: 16
+      maxLength: 160
+    items:
+      type: array
+      items: { $ref: '#/LocalFolderManifestItem' }
+      minItems: 1
+      maxItems: 1000
+    name:
+      type: string
+      minLength: 1
+      maxLength: 160
+    description:
+      type: string
+      maxLength: 2000
+  additionalProperties: false
+
+AppendLocalFolderImportRequest:
+  type: object
+  description: "Source: appendLocalFolderImportSchema. Appends into the Dataset selected by the path -- name/description are not accepted here."
+  required: [idempotencyKey, items]
+  properties:
+    idempotencyKey:
+      type: string
+      minLength: 16
+      maxLength: 160
+    items:
+      type: array
+      items: { $ref: '#/LocalFolderManifestItem' }
+      minItems: 1
+      maxItems: 1000
+  additionalProperties: false
+
+LocalFolderImportPreparation:
+  type: object
+  required: [id, datasetId, jobId, expectedItemCount, deadlineAt, items]
+  properties:
+    id:
+      type: string
+      description: Prepared-import id (a UUID generated before persistence, not a CUID).
+    datasetId: { $ref: './common.yaml#/Cuid' }
+    jobId: { $ref: './common.yaml#/Cuid' }
+    expectedItemCount: { type: integer }
+    deadlineAt: { $ref: './common.yaml#/Timestamp' }
+    items:
+      type: array
+      items:
+        type: object
+        required: [id]
+        properties:
+          id: { type: string }
+        additionalProperties: false
+  additionalProperties: false
+
+StartOrAppendLocalFolderImportResponse:
+  type: object
+  required: [preparation, replayed, deliveryPending]
+  properties:
+    preparation: { $ref: '#/LocalFolderImportPreparation' }
+    replayed:
+      type: boolean
+      description: True when idempotencyKey matched an existing preparation instead of creating a new one.
+    deliveryPending:
+      type: boolean
+  additionalProperties: false
+
+UploadCapabilitiesRequest:
+  type: object
+  description: "Source: uploadCapabilitiesSchema."
+  required: [itemIds]
+  properties:
+    itemIds:
+      type: array
+      items: { type: string, minLength: 1 }
+      minItems: 1
+      maxItems: 100
+  additionalProperties: false
+
+LocalFolderUploadCapability:
+  type: object
+  description: Per-item presigned POST upload, structurally identical to PresignedUploadResponse plus itemId.
+  required: [itemId, uploadUrl, method, formFields, fileId, expiresInSeconds]
+  properties:
+    itemId:
+      type: string
+    uploadUrl:
+      type: string
+      format: uri
+    method:
+      type: string
+      enum: [POST]
+    formFields:
+      type: object
+      additionalProperties:
+        type: string
+    fileId:
+      type: string
+    expiresInSeconds:
+      type: integer
+  additionalProperties: false
+
+UploadCapabilitiesResponse:
+  type: object
+  required: [capabilities]
+  properties:
+    capabilities:
+      type: array
+      items: { $ref: '#/LocalFolderUploadCapability' }
+  additionalProperties: false
+
+CompleteLocalFolderItemRequest:
+  type: object
+  description: "Source: completeLocalFolderItemSchema."
+  required: [fileId]
+  properties:
+    fileId:
+      type: string
+      minLength: 32
+      maxLength: 8192
+  additionalProperties: false
+
+CompleteLocalFolderItemResponse:
+  type: object
+  required: [assetId, replayed, completed, total]
+  properties:
+    assetId: { $ref: './common.yaml#/Cuid' }
+    replayed:
+      type: boolean
+    completed:
+      type: integer
+    total:
+      type: integer
+  additionalProperties: false

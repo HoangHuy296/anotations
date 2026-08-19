@@ -24,6 +24,15 @@ export const safeJobEventMessages = [
   "CANCEL_REQUESTED",
   "IMPORT_INCOMPLETE",
   "IMPORT_COMMITTED",
+  // 021-production-hardening-garbage-collection: the browser-safe subset of
+  // apps/worker/src/jobs/job-event-writer.ts's JobEventKind. Internal-only GC
+  // markers (MINIO_ORPHAN_DETECTED, ASSET_STORAGE_CLEANED, etc.) are
+  // deliberately left out of this list — they are operator/observability
+  // detail, not something a job's own event history should surface to the
+  // browser, and an unrecognized message is safely omitted by toSafeJobEvent
+  // above rather than rendered.
+  "JOB_RECOVERED",
+  "JOB_DEAD_LETTERED",
 ] as const;
 
 export const safeJobEventReasons = [
@@ -37,6 +46,10 @@ export const safeJobEventReasons = [
   "QUEUE_UNAVAILABLE",
   "IMPORT_INCOMPLETE",
   "IMPORT_COMMIT_TIMEOUT",
+  // 021-production-hardening-garbage-collection.
+  "LEASE_EXPIRED",
+  "MAX_RUNTIME_EXCEEDED",
+  "RECOVERY_EXHAUSTED",
 ] as const;
 
 const safeJobEventMessageSchema = z.enum(safeJobEventMessages);

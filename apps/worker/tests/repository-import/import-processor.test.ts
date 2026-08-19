@@ -158,9 +158,9 @@ test("mixed two-batch repository outcome persists only aggregate safe counters",
       { message: "IMPORT_BATCH_COMPLETED", data: { imported: 50, skipped: 1, failed: 1 } },
       { message: "JOB_COMPLETED", data: {} },
     ]);
-    const assets = await db.asset.findMany({ where: { datasetId: dataset.id }, select: { storageKey: true, imageAsset: { select: { id: true } }, videoAsset: { select: { id: true } }, audioAsset: { select: { id: true } }, textDocument: { select: { id: true } } } });
+    const assets = await db.asset.findMany({ where: { datasetId: dataset.id }, select: { storageKey: true, imageAsset: { select: { id: true } }, videoAsset: { select: { id: true } }, audioAsset: { select: { id: true } }, textAsset: { select: { id: true } } } });
     assert.equal(assets.length, 50);
-    assert.ok(assets.every((asset) => asset.imageAsset && !asset.videoAsset && !asset.audioAsset && !asset.textDocument));
+    assert.ok(assets.every((asset) => asset.imageAsset && !asset.videoAsset && !asset.audioAsset && !asset.textAsset));
     for (const asset of assets) if (asset.storageKey) keys.push(asset.storageKey);
     assert.equal((await Promise.all(keys.map((key) => createWorkerMinio(config).statObject(config.MINIO_BUCKET, key)))).length, 50);
   } finally {

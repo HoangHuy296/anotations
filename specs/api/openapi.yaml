@@ -1,0 +1,2742 @@
+openapi: 3.1.0
+
+info:
+  title: Fieldframe Annotation Platform API
+  version: 0.2.0
+  description: >-
+    Documentation-only OpenAPI description of the Fieldframe Next.js backend API, as
+    actually implemented. This document does not redesign, rename, or extend the API --
+    every path, parameter, request body, response body, and status code below is
+    derived directly from the route handlers under apps/web/src/app/api and the
+    validation/service code they call.
+
+
+    Scope: every route file under apps/web/src/app/api is grouped into one of the nine
+    tags below. GET /api/health (an unauthenticated liveness probe) is intentionally not
+    tagged or documented -- it is an infrastructure endpoint, not a product API surface,
+    and none of the nine tags fit it; see the accompanying report if a System/Health tag
+    is wanted later.
+
+
+    Private infrastructure (PostgreSQL, Redis/BullMQ, MinIO, the private worker
+    process) is never addressed directly by a browser client and is therefore not
+    documented as part of this public API surface, per AGENTS.md.
+  contact:
+    name: Fieldframe
+
+servers:
+  - url: /
+    description: Same-origin Next.js application (Route Handlers are same-origin only; there is no separate API host).
+  - url: http://10.0.0.123:3001
+    description: >-
+      Review environment. This is a specific machine's LAN address, not a public
+      or stable hostname -- update or remove this entry if the review environment
+      moves. The standalone Swagger UI docs page is served same-origin at
+      http://10.0.0.123:3001/docs by a Review-only nginx proxy in front of the app
+      (docker/review-proxy.conf), specifically so "Try it out" needs no CORS
+      support from the application -- the default "/" entry above already resolves
+      correctly to this same host from that page; this explicit entry is for
+      opening the docs from anywhere else (e.g. a plain `python3 -m http.server`
+      preview) where a relative "/" would resolve to the wrong origin. See
+      specs/api/README.md's "Review environment testing" section.
+
+tags:
+  - name: Authentication
+    description: Session-cookie authentication, account registration, and self-service account management.
+  - name: Assets
+    description: Direct-to-storage asset upload, asset viewing, and dataset asset listing.
+  - name: Annotations
+    description: Asset-scoped IMAGE annotation read/write, and the VIDEO annotation sub-domain (object tracks, keyframes, temporal labels).
+  - name: AI
+    description: AI model listing and AI pre-annotation task creation/read/cancel. Each task is a thin, taskId-scoped wrapper around a durable Job.
+  - name: Jobs
+    description: Durable Job read/cancel/retry/events, import commit, and dataset export (an export is a Job of type EXPORT_DATASET).
+  - name: Dataset
+    description: Dataset CRUD (list, create, read, update, archive).
+  - name: Labels
+    description: Dataset-scoped label CRUD.
+  - name: Import / Repository
+    description: >-
+      Creating a Dataset from an external Git repository (GitHub/Gitea), managing saved
+      Gitea source connections, browsing Gitea repositories/trees, and the local-folder
+      (browser directory) import flow.
+  - name: Media
+    description: Scheduling/reading VIDEO and AUDIO media-processing Jobs, and the IMAGE dimensions backfill endpoint.
+
+security:
+  - sessionCookie: []
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: fieldframe_session
+      description: >-
+        Opaque, httpOnly, sameSite=lax session cookie (apps/web/src/lib/auth.ts). Not a
+        JWT and not inspectable/settable by browser JS. Issued by POST /api/auth/login
+        and rotated by POST /api/auth/refresh and POST /api/auth/password. Endpoints
+        marked as requiring authentication return 401 AUTH_REQUIRED when this cookie is
+        missing, invalid, or expired.
+
+  schemas:
+    # --- common -------------------------------------------------------------
+    ApiError:
+      $ref: './schemas/common.yaml#/ApiError'
+
+    # --- authentication -------------------------------------------------------
+    UserRole:
+      $ref: './schemas/authentication.yaml#/UserRole'
+    AuthenticatedUser:
+      $ref: './schemas/authentication.yaml#/AuthenticatedUser'
+    LoginRequest:
+      $ref: './schemas/authentication.yaml#/LoginRequest'
+    SignupRequest:
+      $ref: './schemas/authentication.yaml#/SignupRequest'
+    ProfileUpdateRequest:
+      $ref: './schemas/authentication.yaml#/ProfileUpdateRequest'
+    PasswordChangeRequest:
+      $ref: './schemas/authentication.yaml#/PasswordChangeRequest'
+    PasswordChangeResponse:
+      $ref: './schemas/authentication.yaml#/PasswordChangeResponse'
+
+    # --- assets -----------------------------------------------------------
+    Modality:
+      $ref: './schemas/assets.yaml#/Modality'
+    AssetStatus:
+      $ref: './schemas/assets.yaml#/AssetStatus'
+    Asset:
+      $ref: './schemas/assets.yaml#/Asset'
+    AssetListPage:
+      $ref: './schemas/assets.yaml#/AssetListPage'
+    PresignedUploadRequest:
+      $ref: './schemas/assets.yaml#/PresignedUploadRequest'
+    PresignedUploadResponse:
+      $ref: './schemas/assets.yaml#/PresignedUploadResponse'
+    CompleteUploadRequest:
+      $ref: './schemas/assets.yaml#/CompleteUploadRequest'
+    CompleteUploadResponse:
+      $ref: './schemas/assets.yaml#/CompleteUploadResponse'
+    AssetViewUrlResponse:
+      $ref: './schemas/assets.yaml#/AssetViewUrlResponse'
+
+    # --- annotations --------------------------------------------------------
+    AnnotationType:
+      $ref: './schemas/annotations.yaml#/AnnotationType'
+    AnnotationStatus:
+      $ref: './schemas/annotations.yaml#/AnnotationStatus'
+    Annotation:
+      $ref: './schemas/annotations.yaml#/Annotation'
+    AnnotationListResponse:
+      $ref: './schemas/annotations.yaml#/AnnotationListResponse'
+    AnnotationChangeSet:
+      $ref: './schemas/annotations.yaml#/AnnotationChangeSet'
+    VideoObjectTrack:
+      $ref: './schemas/annotations.yaml#/VideoObjectTrack'
+    VideoKeyframe:
+      $ref: './schemas/annotations.yaml#/VideoKeyframe'
+    VideoTemporalLabel:
+      $ref: './schemas/annotations.yaml#/VideoTemporalLabel'
+    VideoAnnotationsResponse:
+      $ref: './schemas/annotations.yaml#/VideoAnnotationsResponse'
+    VideoTrackCreateRequest:
+      $ref: './schemas/annotations.yaml#/VideoTrackCreateRequest'
+    VideoTrackUpdateRequest:
+      $ref: './schemas/annotations.yaml#/VideoTrackUpdateRequest'
+    VideoTrackDeleteRequest:
+      $ref: './schemas/annotations.yaml#/VideoTrackDeleteRequest'
+    VideoKeyframeCreateRequest:
+      $ref: './schemas/annotations.yaml#/VideoKeyframeCreateRequest'
+    VideoKeyframeUpdateRequest:
+      $ref: './schemas/annotations.yaml#/VideoKeyframeUpdateRequest'
+    VideoKeyframeDeleteRequest:
+      $ref: './schemas/annotations.yaml#/VideoKeyframeDeleteRequest'
+    VideoTemporalLabelCreateRequest:
+      $ref: './schemas/annotations.yaml#/VideoTemporalLabelCreateRequest'
+    VideoTemporalLabelUpdateRequest:
+      $ref: './schemas/annotations.yaml#/VideoTemporalLabelUpdateRequest'
+    VideoTemporalLabelDeleteRequest:
+      $ref: './schemas/annotations.yaml#/VideoTemporalLabelDeleteRequest'
+
+    # --- AI -------------------------------------------------------------------
+    AiModel:
+      $ref: './schemas/ai.yaml#/AiModel'
+    AiModelListResponse:
+      $ref: './schemas/ai.yaml#/AiModelListResponse'
+    CreateAiTaskRequest:
+      $ref: './schemas/ai.yaml#/CreateAiTaskRequest'
+    CreateAiTaskResponse:
+      $ref: './schemas/ai.yaml#/CreateAiTaskResponse'
+    AiTaskStatus:
+      $ref: './schemas/ai.yaml#/AiTaskStatus'
+    CancelAiTaskResponse:
+      $ref: './schemas/ai.yaml#/CancelAiTaskResponse'
+
+    # --- Jobs (and Export) ------------------------------------------------------
+    JobType:
+      $ref: './schemas/jobs.yaml#/JobType'
+    JobStatus:
+      $ref: './schemas/jobs.yaml#/JobStatus'
+    JobStage:
+      $ref: './schemas/jobs.yaml#/JobStage'
+    Job:
+      $ref: './schemas/jobs.yaml#/Job'
+    JobEvent:
+      $ref: './schemas/jobs.yaml#/JobEvent'
+    JobEventPage:
+      $ref: './schemas/jobs.yaml#/JobEventPage'
+    CancelJobResponse:
+      $ref: './schemas/jobs.yaml#/CancelJobResponse'
+    RetryJobResponse:
+      $ref: './schemas/jobs.yaml#/RetryJobResponse'
+    CommitImportJobResponse:
+      $ref: './schemas/jobs.yaml#/CommitImportJobResponse'
+    ExportRequest:
+      $ref: './schemas/jobs.yaml#/ExportRequest'
+    ExportJob:
+      $ref: './schemas/jobs.yaml#/ExportJob'
+    CreateExportResponse:
+      $ref: './schemas/jobs.yaml#/CreateExportResponse'
+    GetExportResponse:
+      $ref: './schemas/jobs.yaml#/GetExportResponse'
+
+    # --- Dataset ----------------------------------------------------------------
+    DatasetType:
+      $ref: './schemas/dataset.yaml#/DatasetType'
+    Dataset:
+      $ref: './schemas/dataset.yaml#/Dataset'
+    DatasetListResponse:
+      $ref: './schemas/dataset.yaml#/DatasetListResponse'
+    CreateDatasetRequest:
+      $ref: './schemas/dataset.yaml#/CreateDatasetRequest'
+    UpdateDatasetRequest:
+      $ref: './schemas/dataset.yaml#/UpdateDatasetRequest'
+
+    # --- Labels -----------------------------------------------------------------
+    LabelScope:
+      $ref: './schemas/labels.yaml#/LabelScope'
+    Label:
+      $ref: './schemas/labels.yaml#/Label'
+    LabelListResponse:
+      $ref: './schemas/labels.yaml#/LabelListResponse'
+    LabelMutationRequest:
+      $ref: './schemas/labels.yaml#/LabelMutationRequest'
+
+    # --- Import / Repository -------------------------------------------------
+    RepositoryImportRequest:
+      $ref: './schemas/import-repository.yaml#/RepositoryImportRequest'
+    RepositoryImportAcceptance:
+      $ref: './schemas/import-repository.yaml#/RepositoryImportAcceptance'
+    RepositoryPreflightRequest:
+      $ref: './schemas/import-repository.yaml#/RepositoryPreflightRequest'
+    RepositoryPreflightResponse:
+      $ref: './schemas/import-repository.yaml#/RepositoryPreflightResponse'
+    SourceImportPreflightRequest:
+      $ref: './schemas/import-repository.yaml#/SourceImportPreflightRequest'
+    SourceImportPreflightResponse:
+      $ref: './schemas/import-repository.yaml#/SourceImportPreflightResponse'
+    SourceConnection:
+      $ref: './schemas/import-repository.yaml#/SourceConnection'
+    SourceConnectionListResponse:
+      $ref: './schemas/import-repository.yaml#/SourceConnectionListResponse'
+    CreateSourceConnectionRequest:
+      $ref: './schemas/import-repository.yaml#/CreateSourceConnectionRequest'
+    CreateSourceConnectionResponse:
+      $ref: './schemas/import-repository.yaml#/CreateSourceConnectionResponse'
+    GetSourceConnectionResponse:
+      $ref: './schemas/import-repository.yaml#/GetSourceConnectionResponse'
+    GiteaRepositoryListResponse:
+      $ref: './schemas/import-repository.yaml#/GiteaRepositoryListResponse'
+    GiteaRepositoryTreeResponse:
+      $ref: './schemas/import-repository.yaml#/GiteaRepositoryTreeResponse'
+    StartLocalFolderImportRequest:
+      $ref: './schemas/import-repository.yaml#/StartLocalFolderImportRequest'
+    AppendLocalFolderImportRequest:
+      $ref: './schemas/import-repository.yaml#/AppendLocalFolderImportRequest'
+    StartOrAppendLocalFolderImportResponse:
+      $ref: './schemas/import-repository.yaml#/StartOrAppendLocalFolderImportResponse'
+    UploadCapabilitiesRequest:
+      $ref: './schemas/import-repository.yaml#/UploadCapabilitiesRequest'
+    UploadCapabilitiesResponse:
+      $ref: './schemas/import-repository.yaml#/UploadCapabilitiesResponse'
+    CompleteLocalFolderItemRequest:
+      $ref: './schemas/import-repository.yaml#/CompleteLocalFolderItemRequest'
+    CompleteLocalFolderItemResponse:
+      $ref: './schemas/import-repository.yaml#/CompleteLocalFolderItemResponse'
+
+    # --- Media ------------------------------------------------------------------
+    ScheduleMediaProcessingRequest:
+      $ref: './schemas/media.yaml#/ScheduleMediaProcessingRequest'
+    ScheduleMediaProcessingResponse:
+      $ref: './schemas/media.yaml#/ScheduleMediaProcessingResponse'
+    MediaReadiness:
+      $ref: './schemas/media.yaml#/MediaReadiness'
+    SetImageDimensionsRequest:
+      $ref: './schemas/media.yaml#/SetImageDimensionsRequest'
+    SetImageDimensionsResponse:
+      $ref: './schemas/media.yaml#/SetImageDimensionsResponse'
+
+  responses:
+    Unauthorized:
+      description: No valid session cookie was presented.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            default:
+              value: { error: { code: AUTH_REQUIRED, message: Authentication is required. } }
+    Forbidden:
+      description: Authenticated, but the actor lacks permission for this Dataset/action.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            default:
+              value: { error: { code: FORBIDDEN, message: You do not have permission for this action. } }
+    ValidationError:
+      description: Request body or parameters failed validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            default:
+              value: { error: { code: INVALID_REQUEST, message: The request is invalid. } }
+    InternalError:
+      description: Unexpected server-side failure.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            default:
+              value: { error: { code: INTERNAL_ERROR, message: The request could not be completed. } }
+
+paths:
+  # ===================== Authentication =====================
+  /api/auth/login:
+    post:
+      tags: [Authentication]
+      operationId: login
+      summary: Authenticate with email and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Authenticated. Sets the fieldframe_session cookie.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+              description: fieldframe_session, httpOnly, sameSite=lax, 14-day expiry.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthenticatedUser' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401':
+          description: Invalid email or password.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: AUTH_REQUIRED, message: Invalid email or password. } }
+
+  /api/auth/signup:
+    post:
+      tags: [Authentication]
+      operationId: signup
+      summary: Register a new account
+      description: >-
+        Creates the account only; it does not create a session. The caller must sign in
+        afterward through POST /api/auth/login.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SignupRequest' }
+      responses:
+        '201':
+          description: Account created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthenticatedUser' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409':
+          description: An account with this email already exists.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: INVALID_REQUEST, message: An account with this email already exists. } }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/auth/logout:
+    post:
+      tags: [Authentication]
+      operationId: logout
+      summary: End the current session
+      description: Always succeeds, including when no session cookie is present.
+      security: []
+      responses:
+        '204':
+          description: Session revoked; fieldframe_session cookie cleared.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+              description: fieldframe_session cleared (expired immediately).
+
+  /api/auth/me:
+    get:
+      tags: [Authentication]
+      operationId: getCurrentUser
+      summary: Get the authenticated actor
+      responses:
+        '200':
+          description: Current authenticated actor.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthenticatedUser' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/auth/refresh:
+    post:
+      tags: [Authentication]
+      operationId: refreshSession
+      summary: Rotate the session token
+      description: >-
+        Requires a same-origin request (rejected with 401 AUTH_REQUIRED if the Origin
+        header is present and does not match the request origin).
+      responses:
+        '200':
+          description: Session rotated.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+              description: Replacement fieldframe_session cookie.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthenticatedUser' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/auth/password:
+    post:
+      tags: [Authentication]
+      operationId: changePassword
+      summary: Change the authenticated actor's password
+      description: >-
+        Requires a same-origin request and the correct current password. Rotates the
+        session token and revokes every other active session for the account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PasswordChangeRequest' }
+      responses:
+        '200':
+          description: Password changed.
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+              description: Replacement fieldframe_session cookie.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/PasswordChangeResponse' }
+        '400':
+          description: Invalid input, or the current password is incorrect.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/auth/profile:
+    patch:
+      tags: [Authentication]
+      operationId: updateProfile
+      summary: Update the authenticated actor's display name
+      description: Requires a same-origin request. Email and role are not editable through this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileUpdateRequest' }
+      responses:
+        '200':
+          description: Profile updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AuthenticatedUser' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ===================== Assets =====================
+  /api/assets/presigned-upload:
+    post:
+      tags: [Assets]
+      operationId: createPresignedUpload
+      summary: Request a presigned direct-to-storage upload
+      description: >-
+        Requires dataset "asset.upload" permission on the target dataset. Returns a
+        short-lived, object-scoped MinIO presigned POST policy; the browser uploads
+        directly to storage and then calls POST /api/assets/complete-upload.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PresignedUploadRequest' }
+      responses:
+        '201':
+          description: Presigned upload issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/PresignedUploadResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Dataset not found (also returned when it exists but is outside the actor's scope).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: GITEA_NOT_FOUND, message: The dataset was not found. } }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/assets/complete-upload:
+    post:
+      tags: [Assets]
+      operationId: completeUpload
+      summary: Publish a directly-uploaded object as an Asset
+      description: >-
+        Verifies the object actually landed in storage (size, content) before
+        publishing. Idempotent: a duplicate completion call for the same upload
+        capability replays the already-published Asset instead of erroring.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompleteUploadRequest' }
+      responses:
+        '200':
+          description: Replayed an already-published Asset for this upload capability.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CompleteUploadResponse' }
+        '201':
+          description: Asset newly published.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CompleteUploadResponse' }
+        '400':
+          description: Invalid input, or the upload capability is invalid/expired, or it belongs to a prepared import.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: The dataset referenced by the upload capability was not found.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: GITEA_NOT_FOUND, message: The dataset was not found. } }
+        '409':
+          description: UPLOAD_NOT_READY (object not yet visible/complete in storage) or UPLOAD_CONFLICT (publication conflict).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '415':
+          description: UNSUPPORTED_MEDIA -- uploaded object's actual content type is not supported.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: UNSUPPORTED_MEDIA, message: The uploaded object type is not supported. } }
+        '422':
+          description: INVALID_MEDIA -- uploaded object failed content verification.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/assets/{assetId}/view-url:
+    get:
+      tags: [Assets]
+      operationId: getAssetViewUrl
+      summary: Get a short-lived view URL for an Asset's stored object
+      description: Requires dataset "dataset.read" permission on the Asset's dataset.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: Asset id (CUID-formatted in practice; not pattern-validated by this route).
+      responses:
+        '200':
+          description: Presigned view URL issued.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AssetViewUrlResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Asset not found, soft-deleted, or archived.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: GITEA_NOT_FOUND, message: The asset was not found. } }
+        '409':
+          description: ASSET_UNAVAILABLE -- the asset has no stored object, or the object is missing from storage.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/datasets/{datasetId}/assets:
+    get:
+      tags: [Assets]
+      operationId: listDatasetAssets
+      summary: List Assets in a Dataset
+      description: Requires dataset "dataset.read" permission.
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: Dataset id (CUID or UUID; validated by datasetIdSchema).
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+          description: Asset id to resume pagination after (CUID).
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 25 }
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/AssetStatus' }
+        - name: modality
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/Modality' }
+        - name: q
+          in: query
+          required: false
+          schema: { type: string, minLength: 1, maxLength: 100 }
+          description: Case-insensitive substring match against filename, originalFilename, or description.
+      responses:
+        '200':
+          description: Page of Assets.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AssetListPage' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Dataset not found (also returned when it exists but is outside the actor's scope).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: GITEA_NOT_FOUND, message: The dataset was not found. } }
+
+  # ===================== Annotations =====================
+  /api/assets/{assetId}/annotations:
+    get:
+      tags: [Annotations]
+      operationId: listAssetAnnotations
+      summary: List Annotations for an Asset
+      description: >-
+        Requires dataset "dataset.read" permission on the Asset's dataset. Returns an
+        empty array (never an error) when the asset has no annotations yet. Supported
+        for every asset Modality -- reading annotations is not IMAGE-only.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: Asset id (CUID-formatted in practice; not pattern-validated by this route).
+      responses:
+        '200':
+          description: Annotations for the asset.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AnnotationListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: >-
+            ANNOTATION_NOT_FOUND. Returned both when the Asset genuinely does not exist
+            and when it exists but is outside the actor's Dataset scope -- these two
+            cases are deliberately indistinguishable to the caller.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: ANNOTATION_NOT_FOUND, message: The annotation resource was not found. } }
+
+    put:
+      tags: [Annotations]
+      operationId: mutateAssetAnnotations
+      summary: Batch-create, update, and delete Annotations for an Asset
+      description: >-
+        Applies creates, updates, and deletes as one transaction and returns the
+        asset's full, refreshed annotation list. Writes are supported only when the
+        Asset's Modality is IMAGE; every other modality is rejected with 422
+        ANNOTATION_WRITE_UNSUPPORTED_FOR_MODALITY. Each create/update/delete carries
+        its own revision-based optimistic-concurrency and permission checks (create
+        requires "annotation.create"; update/delete requires "annotation.updateOwn" on
+        annotations the actor authored, or "annotation.updateAny" otherwise).
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: Asset id (CUID-formatted in practice; not pattern-validated by this route).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AnnotationChangeSet' }
+      responses:
+        '200':
+          description: Mutation applied; refreshed annotation list for the asset.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AnnotationListResponse' }
+        '400':
+          description: >-
+            INVALID_REQUEST -- request body failed annotationChangeSetSchema
+            validation (includes malformed geometry, duplicate ids within the change
+            set, or a change set exceeding 100 total items), or an update's geometry
+            does not match the annotation's persisted type.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: FORBIDDEN -- authenticated, but lacking the required annotation.* permission for one of the requested mutations.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '404':
+          description: >-
+            ANNOTATION_NOT_FOUND -- the Asset does not exist or is outside the actor's
+            Dataset scope (indistinguishable, as with GET), a referenced labelId does
+            not exist in the Asset's Dataset, or an update/delete targets an
+            annotation id that does not exist.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: >-
+            Conflict. ANNOTATION_REVISION_CONFLICT when an update or delete's
+            `revision` no longer matches the persisted annotation (stale overwrite);
+            ANNOTATION_CREATE_REPLAY_CONFLICT when a create id already exists with
+            different content than the create replay it would otherwise be treated as.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                revisionConflict:
+                  value: { error: { code: ANNOTATION_REVISION_CONFLICT, message: An annotation changed. Reload before saving. } }
+                createReplayConflict:
+                  value: { error: { code: ANNOTATION_CREATE_REPLAY_CONFLICT, message: The create replay identity conflicts with an existing annotation. } }
+        '422':
+          description: ANNOTATION_WRITE_UNSUPPORTED_FOR_MODALITY -- the Asset's modality is not IMAGE.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: ANNOTATION_WRITE_UNSUPPORTED_FOR_MODALITY, message: Annotation writes are not supported for this asset modality. } }
+
+  # --------------- Annotations: VIDEO sub-domain ---------------
+  /api/assets/{assetId}/video-annotations:
+    get:
+      tags: [Annotations]
+      operationId: listVideoAnnotations
+      summary: Read the full VIDEO annotation state for an Asset
+      description: >-
+        Requires dataset "dataset.read" permission. Returns persisted tracks,
+        keyframes, and temporal labels, plus derived (non-persisted)
+        interpolation frames when both fromMs and toMs are supplied.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: fromMs
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0 }
+        - name: toMs
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0 }
+          description: Must be greater than fromMs when both are supplied.
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+          description: Accepted and schema-validated (videoReadQuerySchema) but currently unused by readVideoAnnotations -- tracks/keyframes/temporal labels are read with fixed VIDEO_ANNOTATION_LIMITS caps, not cursor-paginated. Documented as-is rather than implying real pagination.
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 500, default: 100 }
+          description: Accepted and schema-validated but currently unused by readVideoAnnotations for the same reason as cursor.
+      responses:
+        '200':
+          description: VIDEO annotation state for the asset.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/VideoAnnotationsResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: ANNOTATION_NOT_FOUND -- asset is not a VIDEO asset, does not exist, or is outside the actor's scope (indistinguishable, as with the IMAGE annotation route).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/assets/{assetId}/video-object-tracks:
+    post:
+      tags: [Annotations]
+      operationId: createVideoObjectTrack
+      summary: Create a VideoObjectTrack on a VIDEO Asset
+      description: Requires "annotation.create" on the asset's dataset.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoTrackCreateRequest' }
+      responses:
+        '201':
+          description: Track created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [track]
+                    properties:
+                      track: { $ref: '#/components/schemas/VideoObjectTrack' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND -- asset is not a VIDEO asset, does not exist, or is outside the actor's scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/video-object-tracks/{trackId}:
+    patch:
+      tags: [Annotations]
+      operationId: updateVideoObjectTrack
+      summary: Update a VideoObjectTrack
+      description: Requires "annotation.updateAny" on the track's dataset.
+      parameters:
+        - name: trackId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoTrackUpdateRequest' }
+      responses:
+        '200':
+          description: Track updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [track]
+                    properties:
+                      track: { $ref: '#/components/schemas/VideoObjectTrack' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: VIDEO_TRACK_REVISION_CONFLICT -- expectedTrackRevision is stale.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+    delete:
+      tags: [Annotations]
+      operationId: deleteVideoObjectTrack
+      summary: Delete a VideoObjectTrack (and its keyframes)
+      description: Requires "annotation.updateAny". The request carries a JSON body with the expected revision, not query parameters.
+      parameters:
+        - name: trackId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        description: >-
+          Required by the current API for optimistic-concurrency/revision checking:
+          deleteVideoObjectTrack (apps/web/src/lib/annotations/video-track-service.ts)
+          rejects the delete with 409 VIDEO_TRACK_REVISION_CONFLICT unless
+          expectedTrackRevision matches the track's current persisted revision. This
+          is genuine, load-bearing request data, not a documentation artifact --
+          some tooling (e.g. Swagger Editor) flags a DELETE requestBody as unusual
+          per the OpenAPI spec's "does not have well-defined semantics" guidance for
+          GET/HEAD/DELETE; that guidance describes what most APIs do, not a hard
+          rule, and this endpoint's real, implemented contract takes precedence over
+          silencing that advisory. See specs/api/README.md for the same note.
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoTrackDeleteRequest' }
+      responses:
+        '200':
+          description: Track deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [deleted]
+                    properties:
+                      deleted: { type: boolean, enum: [true] }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: VIDEO_TRACK_REVISION_CONFLICT
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/video-object-tracks/{trackId}/keyframes:
+    post:
+      tags: [Annotations]
+      operationId: createVideoKeyframe
+      summary: Create a keyframe on a VideoObjectTrack
+      description: Requires "annotation.create" on the track's dataset.
+      parameters:
+        - name: trackId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoKeyframeCreateRequest' }
+      responses:
+        '201':
+          description: Keyframe created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/VideoKeyframe' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: VIDEO_TRACK_REVISION_CONFLICT, or VIDEO_KEYFRAME_TIMESTAMP_CONFLICT when a keyframe already exists at timestampMs on this track.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                trackRevision:
+                  value: { error: { code: VIDEO_TRACK_REVISION_CONFLICT, message: A video track changed. Reload before saving. } }
+                duplicateTimestamp:
+                  value: { error: { code: VIDEO_KEYFRAME_TIMESTAMP_CONFLICT, message: A keyframe already exists at this timestamp. } }
+
+  /api/video-keyframes/{annotationId}:
+    patch:
+      tags: [Annotations]
+      operationId: updateVideoKeyframe
+      summary: Update a keyframe
+      description: Requires "annotation.updateAny" on the keyframe's dataset.
+      parameters:
+        - name: annotationId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoKeyframeUpdateRequest' }
+      responses:
+        '200':
+          description: Keyframe updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/VideoKeyframe' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: VIDEO_TRACK_REVISION_CONFLICT or VIDEO_KEYFRAME_TIMESTAMP_CONFLICT.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+    delete:
+      tags: [Annotations]
+      operationId: deleteVideoKeyframe
+      summary: Delete a keyframe
+      description: Requires "annotation.updateAny". Request carries a JSON body with the expected track revision.
+      parameters:
+        - name: annotationId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        description: >-
+          Required by the current API for optimistic-concurrency/revision checking:
+          deleteVideoKeyframe (apps/web/src/lib/annotations/video-keyframe-service.ts)
+          rejects the delete with 409 VIDEO_TRACK_REVISION_CONFLICT unless
+          expectedTrackRevision matches the parent track's current persisted
+          revision. This is genuine, load-bearing request data, not a documentation
+          artifact -- see the equivalent note on deleteVideoObjectTrack and
+          specs/api/README.md.
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoKeyframeDeleteRequest' }
+      responses:
+        '200':
+          description: Keyframe deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/VideoKeyframe' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: VIDEO_TRACK_REVISION_CONFLICT
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/assets/{assetId}/temporal-labels:
+    post:
+      tags: [Annotations]
+      operationId: createVideoTemporalLabel
+      summary: Create a temporal label (EVENT/SCENE/SHOT_BOUNDARY) on a VIDEO Asset
+      description: Requires "annotation.create" on the asset's dataset.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoTemporalLabelCreateRequest' }
+      responses:
+        '201':
+          description: Temporal label created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [temporalLabel]
+                    properties:
+                      temporalLabel: { $ref: '#/components/schemas/VideoTemporalLabel' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/temporal-labels/{annotationId}:
+    patch:
+      tags: [Annotations]
+      operationId: updateVideoTemporalLabel
+      summary: Update a temporal label
+      description: Requires "annotation.updateOwn" (own) or "annotation.updateAny".
+      parameters:
+        - name: annotationId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoTemporalLabelUpdateRequest' }
+      responses:
+        '200':
+          description: Temporal label updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [temporalLabel]
+                    properties:
+                      temporalLabel: { $ref: '#/components/schemas/VideoTemporalLabel' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: ANNOTATION_REVISION_CONFLICT -- expectedRevision is stale.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+    delete:
+      tags: [Annotations]
+      operationId: deleteVideoTemporalLabel
+      summary: Delete a temporal label
+      description: Requires "annotation.updateOwn" (own) or "annotation.updateAny". Request carries a JSON body with the expected revision.
+      parameters:
+        - name: annotationId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        description: >-
+          Required by the current API for optimistic-concurrency/revision checking:
+          deleteVideoTemporalLabel
+          (apps/web/src/lib/annotations/video-temporal-label-service.ts) rejects the
+          delete with 409 ANNOTATION_REVISION_CONFLICT unless expectedRevision
+          matches the temporal label's current persisted revision. This is genuine,
+          load-bearing request data, not a documentation artifact -- see the
+          equivalent note on deleteVideoObjectTrack and specs/api/README.md.
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VideoTemporalLabelDeleteRequest' }
+      responses:
+        '200':
+          description: Temporal label deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [deleted]
+                    properties:
+                      deleted: { type: boolean, enum: [true] }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: ANNOTATION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: ANNOTATION_REVISION_CONFLICT
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  # --------------- AI ---------------
+  /api/ai/models:
+    get:
+      tags: [AI]
+      operationId: listAiModels
+      summary: List active AI models available for pre-annotation
+      responses:
+        '200':
+          description: Active AI models.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AiModelListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/ai/tasks:
+    post:
+      tags: [AI]
+      operationId: createAiTask
+      summary: Request AI pre-annotation for one or more Assets
+      description: >-
+        Requires "annotation.create" on the dataset. Creates a Job + AiTask in one
+        transaction and enqueues strictly after commit; this route never waits on
+        the AI provider (hence 202, not 200/201).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateAiTaskRequest' }
+      responses:
+        '202':
+          description: AI task accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CreateAiTaskResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: DATASET_NOT_FOUND or AI_MODEL_NOT_FOUND.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: AI_MODEL_INACTIVE, ASSET_NOT_IN_DATASET, or JOB_CONFLICT.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/ai/tasks/{aiTaskId}:
+    get:
+      tags: [AI]
+      operationId: getAiTask
+      summary: Read the status of a previously submitted AI task
+      parameters:
+        - name: aiTaskId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: AI task status.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AiTaskStatus' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: AI_TASK_NOT_FOUND -- also returned when the task's dataset is outside the actor's scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/ai/tasks/{aiTaskId}/cancel:
+    post:
+      tags: [AI]
+      operationId: cancelAiTask
+      summary: Cancel an AI task by its taskId
+      description: >-
+        Cancels the underlying Job -- a taskId-scoped entry point onto the same
+        cancellation exposed at POST /api/jobs/{jobId}/cancel, not a second
+        cancellation mechanism.
+      parameters:
+        - name: aiTaskId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Cancellation requested.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CancelAiTaskResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: AI_TASK_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: JOB_CONFLICT -- the task cannot be canceled in its current state.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  # --------------- Jobs ---------------
+  /api/jobs/{jobId}:
+    get:
+      tags: [Jobs]
+      operationId: getJob
+      summary: Read a Job's current status
+      description: Requires dataset read access on the Job's dataset.
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+          description: CUID or UUID (jobIdSchema).
+      responses:
+        '200':
+          description: Job status.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Job' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: JOB_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/jobs/{jobId}/cancel:
+    post:
+      tags: [Jobs]
+      operationId: cancelJob
+      summary: Request cancellation of a Job
+      description: >-
+        Accepts neither a lock token nor queue data -- only the worker holding the
+        current lease acknowledges a running cancellation. Requires "job.cancel"
+        on the Job's dataset.
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Cancellation requested/acknowledged.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CancelJobResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: JOB_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: JOB_CONFLICT -- the Job cannot be canceled in its current state.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/jobs/{jobId}/retry:
+    post:
+      tags: [Jobs]
+      operationId: retryJob
+      summary: Retry a failed/canceled Job
+      description: >-
+        Requires "job.retry" on the Job's dataset. An authorized retry creates or
+        reuses one successor Job linked to its predecessor (AGENTS.md's retry
+        idempotency rule).
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Retry reused an existing successor Job.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/RetryJobResponse' }
+        '201':
+          description: A new successor Job was created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/RetryJobResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: JOB_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: JOB_CONFLICT -- the Job is not eligible for retry.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/jobs/{jobId}/events:
+    get:
+      tags: [Jobs]
+      operationId: listJobEvents
+      summary: Read a Job's safe operational event history
+      description: Newest-first, cursor-paginated. Raw JobEvent.data never leaves the server; unrecognized persisted event kinds are silently omitted.
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string }
+          description: Opaque cursor from a previous page's nextCursor.
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        '200':
+          description: Page of Job events.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/JobEventPage' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: JOB_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/jobs/{jobId}/commit-import:
+    post:
+      tags: [Jobs]
+      operationId: commitImportJob
+      summary: Commit a prepared local-folder import Job once every item has completed
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Import committed.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CommitImportJobResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: JOB_NOT_FOUND -- the import Job was not found.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: IMPORT_INCOMPLETE -- not every prepared file has completed, or JOB_CONFLICT -- the import cannot be committed in its current state.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/export:
+    post:
+      tags: [Jobs]
+      operationId: createExportJob
+      summary: Start (or idempotently reuse) a dataset export
+      description: >-
+        Requires "job.createExport" on the dataset. One canonical export format
+        (JSON) exists today; a repeated request while a pending/running export
+        exists reuses it outright. A finished export's canonical key is freed so a
+        fresh export reflecting current dataset content can be started.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExportRequest' }
+      responses:
+        '200':
+          description: An in-progress export was reused.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CreateExportResponse' }
+        '201':
+          description: A new export Job was created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CreateExportResponse' }
+        '202':
+          description: A new export Job was created; queue delivery is still pending.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CreateExportResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: JOB_NOT_FOUND -- the dataset was not found.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: JOB_CONFLICT -- the export could not be started.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/export/{jobId}:
+    get:
+      tags: [Jobs]
+      operationId: getExportJob
+      summary: Read an export Job's status and, once complete, its download URL
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Export status (download is null until the Job is COMPLETED).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/GetExportResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: JOB_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: The export artifact is unavailable (Job completed but its stored object cannot be confirmed/signed).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  # --------------- Dataset ---------------
+  /api/datasets:
+    get:
+      tags: [Dataset]
+      operationId: listDatasets
+      summary: List Datasets the actor owns or is a member of
+      description: An ADMIN actor sees every non-deleted/non-archived Dataset.
+      responses:
+        '200':
+          description: Datasets.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/DatasetListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Dataset]
+      operationId: createDataset
+      summary: Create a Dataset
+      description: Requires the actor's role to be MANAGER or ADMIN (canCreateDataset).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateDatasetRequest' }
+      responses:
+        '201':
+          description: Dataset created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Dataset' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/datasets/{datasetId}:
+    get:
+      tags: [Dataset]
+      operationId: getDataset
+      summary: Read a Dataset
+      description: Requires "dataset.read".
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: CUID or UUID (datasetIdSchema).
+      responses:
+        '200':
+          description: Dataset.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Dataset' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND -- the dataset was not found (also returned when it exists but is outside the actor's scope).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+    patch:
+      tags: [Dataset]
+      operationId: updateDataset
+      summary: Update a Dataset
+      description: Requires "dataset.update".
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateDatasetRequest' }
+      responses:
+        '200':
+          description: Dataset updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Dataset' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+    delete:
+      tags: [Dataset]
+      operationId: archiveDataset
+      summary: Archive a Dataset
+      description: Requires "dataset.delete". This is a soft archive (archivedAt is set); the row and its content are not physically removed by this route.
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Dataset archived.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Dataset' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  # --------------- Labels ---------------
+  /api/datasets/{datasetId}/labels:
+    get:
+      tags: [Labels]
+      operationId: listDatasetLabels
+      summary: List a Dataset's Labels
+      description: Requires "dataset.read".
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Labels.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/LabelListResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+    post:
+      tags: [Labels]
+      operationId: createLabel
+      summary: Create a Label in a Dataset
+      description: Requires "label.manage".
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LabelMutationRequest' }
+      responses:
+        '201':
+          description: Label created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Label' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: INVALID_REQUEST -- a label with this normalized name already exists in the dataset.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/labels/{labelId}:
+    patch:
+      tags: [Labels]
+      operationId: updateLabel
+      summary: Update a Label
+      description: Requires "label.manage" on the label's dataset.
+      parameters:
+        - name: labelId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LabelMutationRequest' }
+      responses:
+        '200':
+          description: Label updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/Label' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND -- the label was not found.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: INVALID_REQUEST -- a label with this normalized name already exists.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+    delete:
+      tags: [Labels]
+      operationId: deleteLabel
+      summary: Delete a Label
+      description: Requires "label.manage". Rejected if the label is still assigned to any annotation.
+      parameters:
+        - name: labelId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Label deleted.
+        '400':
+          description: INVALID_REQUEST -- labelId is not a valid CUID.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: INVALID_REQUEST -- a label assigned to annotations cannot be deleted.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  # --------------- Import / Repository ---------------
+  /api/datasets/from-repository:
+    post:
+      tags: [Import / Repository]
+      operationId: createRepositoryDataset
+      summary: Create a Dataset from an external Git repository (GitHub or Gitea)
+      description: >-
+        The only public durable Dataset-from-repository creation boundary (the
+        legacy /api/gitea/import and /api/source-import-jobs routes are retired
+        in favor of this one). Repeats read-only preflight before a serializable
+        transaction; import content itself is populated asynchronously by the
+        private worker.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepositoryImportRequest' }
+      responses:
+        '200':
+          description: idempotencyKey replayed an already-accepted request.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/RepositoryImportAcceptance' }
+        '202':
+          description: Repository import accepted; Dataset/Job created, content import is asynchronous.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/RepositoryImportAcceptance' }
+        '400':
+          description: >-
+            INVALID_REQUEST, or UNSAFE_REPOSITORY_URL surfaced from the repeated
+            preflight this route runs before its transaction (see
+            safePreflightFailure in apps/web/src/lib/providers/provider-errors.ts,
+            caught around the whole acceptRepositoryImportRequest call).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: FORBIDDEN, or REPOSITORY_ACCESS_DENIED from the repeated preflight.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '404':
+          description: >-
+            SOURCE_CONNECTION_NOT_FOUND (both from the acceptance's own check and
+            from the repeated preflight), or REPOSITORY_NOT_FOUND / REF_NOT_FOUND /
+            ROOT_PATH_NOT_FOUND from the repeated preflight.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: IDEMPOTENCY_KEY_CONFLICT (key reused for a different request) or JOB_CONFLICT.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: >-
+            SOURCE_IMPORT_LIMIT_EXCEEDED, ONE_TIME_PAT_REQUIRES_SAVE_FOR_ASYNC_IMPORT,
+            or SOURCE_TOKEN_EXPIRED / SOURCE_TOKEN_INVALID from the repeated preflight.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: SOURCE_PROVIDER_UNAVAILABLE from the repeated preflight.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/source-repositories/preflight:
+    post:
+      tags: [Import / Repository]
+      operationId: preflightSourceRepository
+      summary: Read-only repository preflight (GitHub or Gitea)
+      description: Does not create a Dataset, Job, SourceConnection, queue delivery, or storage object.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RepositoryPreflightRequest' }
+      responses:
+        '200':
+          description: Preflight result.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RepositoryPreflightResponse' }
+        '400':
+          description: INVALID_REQUEST, UNSUPPORTED_PROVIDER (a provider value that is not GITHUB/GITEA), or UNSAFE_REPOSITORY_URL.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: REPOSITORY_ACCESS_DENIED.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '404':
+          description: REPOSITORY_NOT_FOUND, REF_NOT_FOUND, ROOT_PATH_NOT_FOUND, or SOURCE_CONNECTION_NOT_FOUND (an explicit sourceConnectionId that does not resolve).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: SOURCE_TOKEN_EXPIRED or SOURCE_TOKEN_INVALID.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: SOURCE_PROVIDER_UNAVAILABLE.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/source-import-preflight:
+    post:
+      tags: [Import / Repository]
+      operationId: preflightSourceImport
+      summary: Read-only Gitea source-import preview
+      description: Does not create a Dataset, Job, SourceConnection, queue delivery, or storage object.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SourceImportPreflightRequest' }
+      responses:
+        '200':
+          description: Preview result.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SourceImportPreflightResponse' }
+        '400':
+          description: INVALID_REQUEST or UNSAFE_REPOSITORY_URL.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: REPOSITORY_ACCESS_DENIED.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '404':
+          description: REPOSITORY_NOT_FOUND, REF_NOT_FOUND, ROOT_PATH_NOT_FOUND, or SOURCE_CONNECTION_NOT_FOUND (an explicit sourceConnectionId that does not resolve).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: SOURCE_TOKEN_EXPIRED or SOURCE_TOKEN_INVALID.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: SOURCE_PROVIDER_UNAVAILABLE.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/source-connections:
+    get:
+      tags: [Import / Repository]
+      operationId: listSourceConnections
+      summary: List the actor's saved Gitea source connections
+      description: An ADMIN actor sees every actor's connections.
+      responses:
+        '200':
+          description: Source connections.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/SourceConnectionListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Import / Repository]
+      operationId: createSourceConnection
+      summary: Save a Gitea source connection
+      description: baseUrl and token are validated and the token encrypted server-side; neither is ever echoed back.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSourceConnectionRequest' }
+      responses:
+        '201':
+          description: Connection created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CreateSourceConnectionResponse' }
+        '400':
+          description: >-
+            INVALID_REQUEST, SOURCE_URL_UNSAFE (baseUrl rejected by SSRF policy),
+            or SOURCE_DESTINATION_NOT_ALLOWED.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409':
+          description: SOURCE_CONNECTION_EXISTS -- an active connection already exists.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: SOURCE_TOKEN_EXPIRED or SOURCE_TOKEN_INVALID.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: SOURCE_PROVIDER_UNAVAILABLE.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/source-connections/{id}:
+    get:
+      tags: [Import / Repository]
+      operationId: getSourceConnection
+      summary: Read a saved source connection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          description: CUID.
+      responses:
+        '200':
+          description: Source connection.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/GetSourceConnectionResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: SOURCE_CONNECTION_NOT_FOUND -- also returned for a malformed id or a connection owned by another actor.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+    delete:
+      tags: [Import / Repository]
+      operationId: deleteSourceConnection
+      summary: Delete a saved source connection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Connection deleted.
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: SOURCE_CONNECTION_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: SOURCE_CONNECTION_IN_USE -- referenced by active work.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/gitea/repos:
+    get:
+      tags: [Import / Repository]
+      operationId: listGiteaRepositories
+      summary: List repositories visible to a saved Gitea connection
+      parameters:
+        - name: sourceConnectionId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 1000, default: 1 }
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 30 }
+      responses:
+        '200':
+          description: Repositories.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/GiteaRepositoryListResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: GITEA_NOT_FOUND -- the source connection was not found, or (from the live Gitea call) the repository itself.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: SOURCE_TOKEN_EXPIRED or SOURCE_TOKEN_INVALID -- from the live Gitea call (giteaErrorResponse).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '429':
+          description: GITEA_RATE_LIMITED.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502':
+          description: GITEA_RESPONSE_INVALID or GITEA_UNAVAILABLE.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: GITEA_CONFIGURATION_ERROR.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/gitea/repos/{owner}/{repo}/tree:
+    get:
+      tags: [Import / Repository]
+      operationId: getGiteaRepositoryTree
+      summary: Browse a Gitea repository's file tree
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema: { type: string }
+        - name: repo
+          in: path
+          required: true
+          schema: { type: string }
+        - name: sourceConnectionId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: ref
+          in: query
+          required: false
+          schema: { type: string, default: main }
+        - name: path
+          in: query
+          required: false
+          schema: { type: string, default: "" }
+          description: Must be relative and free of traversal segments.
+      responses:
+        '200':
+          description: Filtered tree entries under path.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/GiteaRepositoryTreeResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: GITEA_NOT_FOUND -- the source connection was not found, or (from the live Gitea call) the repository/ref itself.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: SOURCE_TOKEN_EXPIRED or SOURCE_TOKEN_INVALID -- from the live Gitea call (giteaErrorResponse).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '429':
+          description: GITEA_RATE_LIMITED.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+        '502':
+          description: GITEA_RESPONSE_INVALID or GITEA_UNAVAILABLE.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: GITEA_CONFIGURATION_ERROR.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/imports/local-folder:
+    post:
+      tags: [Import / Repository]
+      operationId: startLocalFolderImport
+      summary: Prepare a new Dataset import from a browser-selected local folder
+      description: Requires the actor be able to create a Dataset. Creates a PreparedImport + Dataset + Job; assets are populated as the browser uploads each item.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/StartLocalFolderImportRequest' }
+      responses:
+        '200':
+          description: idempotencyKey replayed an existing preparation.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/StartOrAppendLocalFolderImportResponse' }
+        '201':
+          description: New preparation created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/StartOrAppendLocalFolderImportResponse' }
+        '202':
+          description: New preparation created; queue delivery still pending.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/StartOrAppendLocalFolderImportResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/datasets/{datasetId}/imports/local-folder:
+    post:
+      tags: [Import / Repository]
+      operationId: appendLocalFolderImport
+      summary: Prepare a local-folder import that appends into an existing Dataset
+      description: The target Dataset is the one selected by the path, never browser input.
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AppendLocalFolderImportRequest' }
+      responses:
+        '200':
+          description: idempotencyKey replayed an existing preparation.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/StartOrAppendLocalFolderImportResponse' }
+        '201':
+          description: New preparation created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/StartOrAppendLocalFolderImportResponse' }
+        '202':
+          description: New preparation created; queue delivery still pending.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/StartOrAppendLocalFolderImportResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: DATASET_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/imports/{preparedImportId}/upload-capabilities:
+    post:
+      tags: [Import / Repository]
+      operationId: createLocalFolderUploadCapabilities
+      summary: Request presigned uploads for a batch of prepared-import items
+      parameters:
+        - name: preparedImportId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UploadCapabilitiesRequest' }
+      responses:
+        '200':
+          description: Presigned upload capabilities, one per requested item.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/UploadCapabilitiesResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: JOB_NOT_FOUND -- the import preparation was not found (also returned when it is not owned by the actor, is past its deadline, or is no longer in PREPARING state).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+  /api/imports/{preparedImportId}/items/{itemId}/complete:
+    post:
+      tags: [Import / Repository]
+      operationId: completeLocalFolderImportItem
+      summary: Publish one uploaded prepared-import item as an Asset
+      description: Idempotent -- a duplicate completion call for the same item replays the already-published Asset.
+      parameters:
+        - name: preparedImportId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: itemId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompleteLocalFolderItemRequest' }
+      responses:
+        '200':
+          description: Replayed an already-completed item.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CompleteLocalFolderItemResponse' }
+        '201':
+          description: Item newly completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/CompleteLocalFolderItemResponse' }
+        '400':
+          description: >-
+            INVALID_REQUEST -- malformed request body, or the fileId capability does
+            not match this preparedImportId/itemId/actor/dataset.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: >-
+            INVALID_REQUEST -- the preparation or item was not found (also returned
+            when the preparation is not owned by the actor, is not in PREPARING
+            state, or the item's stored properties no longer match the upload
+            capability). The route's single error path always uses the
+            INVALID_REQUEST code even at this status; the HTTP status is what
+            actually varies with the failure.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: >-
+            UPLOAD_NOT_READY (object not yet visible/complete in storage),
+            INVALID_MEDIA, or UPLOAD_CONFLICT (publication conflict). Note this
+            route maps INVALID_MEDIA to 409, unlike POST /api/assets/complete-upload
+            which maps it to 422 -- the two upload-completion routes are not
+            perfectly symmetric in the current implementation.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '415':
+          description: UNSUPPORTED_MEDIA -- uploaded object's actual content type is not supported.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '500':
+          description: INVALID_REQUEST -- unexpected server-side failure while verifying/publishing the uploaded object; the route falls back to this code even at 500.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/gitea/import:
+    post:
+      tags: [Import / Repository]
+      operationId: giteaImportDeprecated
+      summary: (Deprecated) Legacy direct Gitea import
+      deprecated: true
+      description: >-
+        Retired. Previously persisted a Dataset and Assets directly. Always
+        returns 410; use POST /api/source-repositories/preflight followed by
+        POST /api/datasets/from-repository instead.
+      responses:
+        '410':
+          description: GITEA_IMPORT_DEPRECATED
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: GITEA_IMPORT_DEPRECATED, message: Use the source import preflight and source import Job endpoints. } }
+
+  /api/source-import-jobs:
+    post:
+      tags: [Import / Repository]
+      operationId: sourceImportJobsDeprecated
+      summary: (Deprecated) Legacy source-import Job creation
+      deprecated: true
+      description: Retired. Always returns 410; use POST /api/datasets/from-repository instead.
+      responses:
+        '410':
+          description: SOURCE_IMPORT_JOBS_DEPRECATED
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: SOURCE_IMPORT_JOBS_DEPRECATED, message: Use /api/datasets/from-repository for repository Dataset imports. } }
+
+  # --------------- Media ---------------
+  /api/assets/{assetId}/media-processing:
+    post:
+      tags: [Media]
+      operationId: scheduleMediaProcessing
+      summary: Schedule a VIDEO/AUDIO media-processing Job for an Asset
+      description: >-
+        Ensures (creates or reuses) a Job for the Asset's current binary. The
+        Dataset is resolved server-side from assetId; it is never accepted from
+        the browser.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ScheduleMediaProcessingRequest' }
+      responses:
+        '200':
+          description: An existing Job for this asset+type was reused.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ScheduleMediaProcessingResponse' }
+        '201':
+          description: A new Job was created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ScheduleMediaProcessingResponse' }
+        '202':
+          description: A new Job was created; queue delivery still pending.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ScheduleMediaProcessingResponse' }
+        '400':
+          description: >-
+            MEDIA_REQUEST_INVALID -- malformed JSON body or failed
+            mediaProcessingRequestSchema validation, or (less commonly)
+            MEDIA_ENQUEUE_REFUSED if the queue delivery attempt itself is rejected
+            with a non-409 status.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: >-
+            MEDIA_ASSET_NOT_FOUND, not FORBIDDEN -- a dataset-permission failure at
+            this route is concealed with the same code as a missing asset (see
+            ensureMediaProcessingJob in
+            apps/web/src/lib/media-processing/ensure-media-processing-job.ts).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '404':
+          description: MEDIA_ASSET_NOT_FOUND -- concealed identically whether the asset is missing or outside the actor's scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: MEDIA_PROCESSOR_UNAVAILABLE, MEDIA_SOURCE_STALE, or MEDIA_ENQUEUE_REFUSED (when the queue delivery attempt is rejected with a 409).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: MEDIA_ASSET_INELIGIBLE (wrong modality/type combination) or MEDIA_SOURCE_MISSING (asset has no complete storage reference yet).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/assets/{assetId}/media-processing/status:
+    get:
+      tags: [Media]
+      operationId: getMediaProcessingStatus
+      summary: Read an Asset's media-processing readiness
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Media readiness.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/MediaReadiness' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: MEDIA_ASSET_NOT_FOUND
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/images/{imageId}/dimensions:
+    patch:
+      tags: [Media]
+      operationId: setImageDimensions
+      summary: Backfill an IMAGE Asset's width/height
+      description: >-
+        Requires "dataset.update". Only takes effect while width or height is
+        still null -- a call against an asset that already has both set matches
+        zero rows and returns updated: false rather than an error.
+      parameters:
+        - name: imageId
+          in: path
+          required: true
+          schema: { type: string }
+          description: CUID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SetImageDimensionsRequest' }
+      responses:
+        '200':
+          description: Dimensions applied (or already set -- see updated).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/SetImageDimensionsResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND -- the image was not found (also returned when it is not modality IMAGE, or outside the actor's scope).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: INTERNAL_ERROR -- database access is not configured.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }

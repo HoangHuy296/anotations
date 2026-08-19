@@ -1,0 +1,130 @@
+# Dataset domain schemas.
+#
+# Source of truth:
+#   apps/web/src/lib/dataset-metadata.ts        (datasetMetadataSelect)
+#   apps/web/src/lib/validation/dataset.ts      (createDatasetSchema, updateDatasetSchema, datasetIdSchema)
+#   apps/web/src/app/api/datasets/route.ts
+#   apps/web/src/app/api/datasets/[datasetId]/route.ts
+#   prisma/schema.prisma (DatasetType, DatasetSourceMode)
+
+DatasetType:
+  type: string
+  enum: [IMAGE_LABELING, VIDEO_LABELING, TEXT_LABELING, AUDIO_LABELING, MULTI_MODAL]
+
+DatasetSourceMode:
+  type: string
+  enum: [UPLOAD, MIRROR_TO_MINIO, EXTERNAL_REF, HYBRID_CACHE]
+
+DatasetWorkflowStatus:
+  type: string
+  enum: [IN_PROGRESS, COMPLETED, REVIEWED]
+  description: Write-only convenience field on PATCH; persisted inside the Dataset's metadata JSON rather than as its own column.
+
+Dataset:
+  type: object
+  description: Safe dataset projection (datasetMetadataSelect). Never includes ownerId, member rows, or source-connection detail.
+  required: [id, name, description, type, primaryModality, sourceMode, createdAt, updatedAt, archivedAt]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    name:
+      type: string
+    description:
+      type: [string, "null"]
+    type:
+      $ref: '#/DatasetType'
+    primaryModality:
+      oneOf:
+        - $ref: './assets.yaml#/Modality'
+        - type: "null"
+    sourceMode:
+      $ref: '#/DatasetSourceMode'
+    createdAt:
+      $ref: './common.yaml#/Timestamp'
+    updatedAt:
+      $ref: './common.yaml#/Timestamp'
+    archivedAt:
+      oneOf:
+        - $ref: './common.yaml#/Timestamp'
+        - type: "null"
+  additionalProperties: false
+
+DatasetListResponse:
+  type: object
+  description: >-
+    Offset-paginated per 021-production-hardening-garbage-collection's
+    contracts/pagination-envelope.md. `page`/`pageSize` request query
+    parameters are optional (default page 1, default pageSize 20, hard-capped
+    at the server's configured PAGINATION_MAX_PAGE_SIZE regardless of what the
+    caller requests); the response always includes all four fields below.
+  required: [items, page, pageSize, total]
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Dataset'
+    page:
+      type: integer
+      minimum: 1
+      examples: [1]
+    pageSize:
+      type: integer
+      minimum: 1
+      examples: [20]
+    total:
+      type: integer
+      minimum: 0
+      description: Total matching Dataset count across all pages, not just this page's item count.
+      examples: [137]
+  additionalProperties: false
+
+CreateDatasetRequest:
+  type: object
+  description: >-
+    Source: createDatasetSchema. Requires the actor to pass canCreateDataset
+    (MANAGER or ADMIN role).
+  required: [name]
+  properties:
+    name:
+      type: string
+      minLength: 2
+      maxLength: 120
+    description:
+      type: string
+      maxLength: 2000
+    type:
+      $ref: '#/DatasetType'
+      default: MULTI_MODAL
+    primaryModality:
+      oneOf:
+        - $ref: './assets.yaml#/Modality'
+        - type: "null"
+    metadata:
+      type: object
+      description: Free-form JSON object; defaults to {}.
+  additionalProperties: false
+
+UpdateDatasetRequest:
+  type: object
+  description: "Source: updateDatasetSchema. At least one field is required."
+  minProperties: 1
+  properties:
+    name:
+      type: string
+      minLength: 2
+      maxLength: 120
+    description:
+      type: string
+      maxLength: 2000
+    type:
+      $ref: '#/DatasetType'
+    primaryModality:
+      oneOf:
+        - $ref: './assets.yaml#/Modality'
+        - type: "null"
+    metadata:
+      type: object
+      description: When provided, replaces the metadata object except for the workflowStatus key (merged separately when workflowStatus is also present).
+    workflowStatus:
+      $ref: '#/DatasetWorkflowStatus'
+  additionalProperties: false

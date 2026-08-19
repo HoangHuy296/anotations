@@ -14,6 +14,13 @@ import type {
   SafeWorkspaceLabel,
 } from "@/types/image-workspace";
 
+// Defensive cap only, same rationale as ANNOTATIONS_PER_ASSET_READ_LIMIT in
+// annotation-service.ts: this is a dataset-scoped taxonomy reference set the
+// image workspace loads in full for label-assignment UI, not a browseable
+// list, so it stays a bare array with a generous upper bound rather than a
+// page/pageSize/total envelope.
+const IMAGE_WORKSPACE_LABEL_READ_LIMIT = 1_000;
+
 export async function readImageWorkspaceAsset(actor: RequestActor, datasetId: string, assetId: string) {
   const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
   if (!access || access.forbidden) return null;
@@ -25,7 +32,7 @@ export async function readImageWorkspaceAsset(actor: RequestActor, datasetId: st
         _count: { select: { annotations: true } },
       },
     }),
-    db.label.findMany({ where: { datasetId, OR: [{ modality: null }, { modality: Modality.IMAGE }] }, orderBy: { normalizedName: "asc" }, select: { id: true, name: true, color: true, modality: true } }),
+    db.label.findMany({ where: { datasetId, OR: [{ modality: null }, { modality: Modality.IMAGE }] }, orderBy: { normalizedName: "asc" }, select: { id: true, name: true, color: true, modality: true }, take: IMAGE_WORKSPACE_LABEL_READ_LIMIT }),
   ]);
   if (!asset) return null;
   const listed = await readAssetAnnotations(actor, asset.id);

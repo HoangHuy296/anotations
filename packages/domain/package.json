@@ -28,6 +28,10 @@
     "./ai-provider": {
       "types": "./dist/ai-provider.d.ts",
       "default": "./dist/ai-provider.js"
+    },
+    "./log": {
+      "types": "./dist/log.d.ts",
+      "default": "./dist/log.js"
     }
   },
   "scripts": {

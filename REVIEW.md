@@ -10,18 +10,20 @@ network, volumes, and host ports, so it can start alongside
 ```mermaid
 flowchart TD
     subgraph fieldframe-review-net
+        PX[proxy nginx\n:3001 -> / and /api/*\n:3001/docs -> static]
         PG[(postgres\n:5434)]
         RD[(redis\n:6380)]
         MI[(minio\n:9100 api / :9101 console)]
         MG[migrate\none-off]
         SD[seed\none-off]
-        WB[web\n:3001]
+        WB[web\nno host port]
         WK[worker]
         GPG[(gitea-postgres)]
         GT[gitea\n:3101 http / :2223 ssh]
         GF[github-fixture\n:18081]
     end
 
+    PX --> WB
     PG -->|healthy| MG --> WB
     MG --> SD
     PG -->|healthy| WB
@@ -36,6 +38,7 @@ flowchart TD
     WB --- GF
 ```
 
+- **proxy** — nginx, Review-only. The single published host port (`3001`): reverse-proxies `/` and `/api/*` to `web` unchanged, and separately serves the standalone Swagger UI docs (`specs/api/dist/`, built by `pnpm docs:build`) at `/docs`, same-origin with the app and API so "Try it out" needs no CORS support. See `docker/review-proxy.conf` and `specs/api/README.md`.
 - **postgres / redis / minio** — same roles as the main dev stack, scoped to this review environment.
 - **migrate** — one-off container that runs `prisma migrate deploy` against a fresh database, then exits.
 - **seed** — one-off container that runs `prisma/review.seed.ts` right after `migrate` exits successfully: creates a demo admin user, demo Dataset, and 4 demo Labels, purely as a convenience.
@@ -69,6 +72,17 @@ To stop and remove everything (including the review-scoped volumes):
 ```bash
 docker compose -f docker-compose.review.yaml -p fieldframe-review down -v
 ```
+
+## API documentation
+
+Swagger UI for the API is served by the `proxy` container at
+**`http://10.0.0.123:3001/docs`** (same host/port as the app itself, just a
+different path — see `specs/api/README.md`). It reads a static, pre-built
+bundle (`specs/api/dist/`, run `pnpm docs:build` on the host to
+generate/refresh it) — restart just that container to pick up a change to
+`docker/review-proxy.conf` itself: `docker compose -f docker-compose.review.yaml
+--env-file .env.review restart proxy` (no restart needed after a plain
+`pnpm docs:build`, only after editing the nginx config).
 
 ## Logging in
 

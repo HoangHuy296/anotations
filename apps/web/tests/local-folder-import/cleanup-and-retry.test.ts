@@ -18,7 +18,7 @@ test("cleanup removes only unreferenced objects inside its Dataset's prefix and 
   const outside = "prepared-imports/another-dataset/outside";
   try {
     await Promise.all([uploadTestObject(orphan), uploadTestObject(published), uploadTestObject(outside)]);
-    await db.asset.create({ data: { datasetId: fixture.dataset.id, uploadedById: fixture.owner.id, modality: Modality.TEXT, filename: "published.txt", mimeType: "text/plain", sourceMode: DatasetSourceMode.UPLOAD, storageProvider: StorageProvider.MINIO, storageBucket: config.MINIO_BUCKET, storageKey: published, sourceFingerprint: published, status: AssetStatus.READY, textDocument: { create: { tokenization: {}, metadata: {} } } } });
+    await db.asset.create({ data: { datasetId: fixture.dataset.id, uploadedById: fixture.owner.id, modality: Modality.TEXT, filename: "published.txt", mimeType: "text/plain", sourceMode: DatasetSourceMode.UPLOAD, storageProvider: StorageProvider.MINIO, storageBucket: config.MINIO_BUCKET, storageKey: published, sourceFingerprint: published, status: AssetStatus.READY, textAsset: { create: { tokenization: {}, metadata: {} } } } });
     const first = await cleanupPreparedImportOrphans({ minio, bucket: config.MINIO_BUCKET, datasetId: fixture.dataset.id });
     const second = await cleanupPreparedImportOrphans({ minio, bucket: config.MINIO_BUCKET, datasetId: fixture.dataset.id });
     assert.equal(first.removed, 1); assert.equal(second.removed, 0);

@@ -2,6 +2,7 @@ import "server-only";
 
 import { DatasetSourceMode, JobStatus, Prisma, RepoProvider, type JobType } from "@internal/db";
 import { getQueueDeliveryId, jobQueuePayloadSchema } from "@fieldframe/queue";
+import { logJobEvent, logRedisEvent } from "@fieldframe/domain";
 
 import type { RequestActor } from "@/lib/auth";
 import { authorizeFoundationJobSubmission } from "@/lib/jobs/authorization";
@@ -30,6 +31,7 @@ export async function createAndEnqueueFoundationJob(actor: RequestActor, input: 
     datasetId: authorized.input.datasetId, createdById: actor.id, type: authorized.input.type,
     status: JobStatus.QUEUED, input: authorized.input.input,
   }, select: { id: true, datasetId: true, status: true, queueName: true, queueJobId: true, enqueuedAt: true } });
+  logJobEvent("JOB_CREATED", { jobId: job.id, type: authorized.input.type, status: job.status });
 
   return enqueueExistingJob(job.id, authorized.queueName, job);
 }
@@ -124,6 +126,11 @@ export async function createAndEnqueueSourceImportJob(actor: RequestActor, input
   if (!created) return { ok: false as const, status: 409 as const };
   const queueName = resolveQueueName("IMPORT_DATASET");
   if (!queueName) return { ok: false as const, status: 400 as const };
+  // Logged once here (post-commit), not inside the transaction callback
+  // above — that callback can retry on a serialization conflict
+  // (P2034), and logging inside it would double-log a single eventual
+  // success.
+  logJobEvent("JOB_CREATED", { jobId: created.id, type: "IMPORT_DATASET", status: created.status });
   // $transaction resolves only after commit; transport is strictly post-commit.
   return enqueueExistingJob(created.id, queueName, created);
 }
@@ -300,6 +307,10 @@ export async function createAndEnqueueNewDatasetSourceImportJob(
   }
   const queueName = resolveQueueName("IMPORT_DATASET");
   if (!queueName) return { ok: false as const, status: 400 as const };
+  // Post-commit, and only for a genuine fresh creation — the "reused"
+  // (idempotent replay) branch above returns before this point and is
+  // deliberately not logged as a second creation.
+  logJobEvent("JOB_CREATED", { jobId: created.job.id, type: "IMPORT_DATASET", status: created.job.status });
   const delivery = await enqueueExistingJob(created.job.id, queueName, created.job);
   if (!delivery.ok) return delivery;
   return { ...delivery, datasetId: created.job.datasetId, sourceConnectionId: created.sourceConnectionId, reused: false as const };
@@ -324,6 +335,18 @@ export function buildDurableJobQueueDelivery(jobId: string) {
   };
 }
 
+/**
+ * 021-production-hardening-garbage-collection (FR-016/FR-017): every
+ * Job-creating path in this file — `createAndEnqueueFoundationJob`,
+ * `createAndEnqueueSourceImportJob`, `createAndEnqueueNewDatasetSourceImportJob`
+ * — terminates in this one function, and only here. A Redis/queue outage
+ * therefore has exactly one place to be handled honestly: on a `queue.add()`
+ * failure, the Job's `queueName`/`queueJobId`/`enqueuedAt` are never
+ * stamped, a `QUEUE_DELIVERY_PENDING` event is recorded, and the caller
+ * receives `deliveryPending: true` (never a false "queued" success). A
+ * future Job-creation path must call this function rather than
+ * `queue.add()` directly, or it silently loses this guarantee.
+ */
 export async function enqueueExistingJob(
   jobId: string,
   expectedQueueName?: string,
@@ -362,8 +385,15 @@ export async function enqueueExistingJob(
     }
     const stamped = await db.job.findUniqueOrThrow({ where: { id: job.id }, select: { id: true, datasetId: true, status: true, queueName: true, queueJobId: true, enqueuedAt: true } });
     await writeQueueEvent(job.id, "QUEUE_ENQUEUED", { queueName, queueJobId: deliveryId });
+    logJobEvent("QUEUE_ENQUEUED", { jobId: job.id, status: stamped.status });
     return { ok: true as const, status: 201 as const, job: stamped, deliveryPending: false };
-  } catch {
+  } catch (error) {
+    // 021-production-hardening-garbage-collection (FR-017): a Redis/queue
+    // enqueue failure is never swallowed — it is always both recorded as a
+    // JobEvent (above the browser-safe line — see safe-job-event.ts) and
+    // logged here, in addition to the honest `deliveryPending: true` this
+    // function already returns instead of a false "queued" success.
+    logRedisEvent("ENQUEUE_FAILED", { detail: error instanceof Error ? error.message : "unknown error" }, "error");
     await writeQueueEvent(job.id, "QUEUE_DELIVERY_PENDING", { queueName, reason: "QUEUE_UNAVAILABLE" });
     return { ok: true as const, status: 202 as const, job, deliveryPending: true };
   } finally { await client?.close().catch(() => undefined); }

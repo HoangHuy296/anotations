@@ -1,3 +1,4 @@
+name: AnnotationPlatformDev
 services:
   postgres:
     image: postgres:16-alpine
@@ -95,6 +96,13 @@ services:
       SOURCE_MAX_IMPORT_ITEMS: ${SOURCE_MAX_IMPORT_ITEMS:-}
       SOURCE_MAX_DECLARED_BYTES: ${SOURCE_MAX_DECLARED_BYTES:-}
       SOURCE_MAX_DURATION_MS: ${SOURCE_MAX_DURATION_MS:-}
+      # 021-production-hardening-garbage-collection (US7/US8) -- web-only.
+      # See apps/web/src/lib/config/production-hardening.ts for the
+      # authoritative defaults/bounds this mirrors.
+      RATE_LIMIT_AI_TASK_PER_MINUTE: ${RATE_LIMIT_AI_TASK_PER_MINUTE:-10}
+      RATE_LIMIT_IMPORT_PER_MINUTE: ${RATE_LIMIT_IMPORT_PER_MINUTE:-10}
+      RATE_LIMIT_EXPORT_PER_MINUTE: ${RATE_LIMIT_EXPORT_PER_MINUTE:-10}
+      PAGINATION_MAX_PAGE_SIZE: ${PAGINATION_MAX_PAGE_SIZE:-100}
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,9 +113,9 @@ services:
     ports:
       # Bound to loopback only, so this dev stack answers at
       # http://localhost:3000 while docker-compose.review.yaml's web answers
-      # at http://10.0.0.245:3000 on the same port number, without a
+      # at http://10.0.0.123:3001 on its own port/LAN IP, without a
       # conflict. See docker-compose.review.yaml.
-      - "127.0.0.1:3000:3000"
+      - "3000:3000"
 
   worker:
     build:
@@ -141,6 +149,23 @@ services:
       SOURCE_MAX_IMPORT_ITEMS: ${SOURCE_MAX_IMPORT_ITEMS:-}
       SOURCE_MAX_DECLARED_BYTES: ${SOURCE_MAX_DECLARED_BYTES:-}
       SOURCE_MAX_DURATION_MS: ${SOURCE_MAX_DURATION_MS:-}
+      # 021-production-hardening-garbage-collection (US1/US4/US5) -- worker-only.
+      # See apps/worker/src/config.ts's productionHardeningPolicySchema for
+      # the authoritative defaults/bounds this mirrors. MINIO_ORPHAN_SCAN_DRY_RUN
+      # defaults to true deliberately -- never flip this in a shared compose
+      # file; enable a live sweep only per-run, with explicit review of the
+      # candidate list first.
+      JOB_RECOVERY_LEASE_GRACE_MS: ${JOB_RECOVERY_LEASE_GRACE_MS:-60000}
+      JOB_MAX_RUNTIME_MS: ${JOB_MAX_RUNTIME_MS:-3600000}
+      JOB_LOCK_DURATION_MS: ${JOB_LOCK_DURATION_MS:-30000}
+      JOB_STALLED_INTERVAL_MS: ${JOB_STALLED_INTERVAL_MS:-30000}
+      JOB_MAX_STALLED_COUNT: ${JOB_MAX_STALLED_COUNT:-1}
+      JOB_EVENT_RETENTION_DAYS: ${JOB_EVENT_RETENTION_DAYS:-30}
+      JOB_EVENT_CLEANUP_BATCH_SIZE: ${JOB_EVENT_CLEANUP_BATCH_SIZE:-500}
+      MINIO_ORPHAN_GRACE_PERIOD_MS: ${MINIO_ORPHAN_GRACE_PERIOD_MS:-86400000}
+      MINIO_ORPHAN_SCAN_DRY_RUN: ${MINIO_ORPHAN_SCAN_DRY_RUN:-true}
+      TEMP_UPLOAD_RETENTION_MS: ${TEMP_UPLOAD_RETENTION_MS:-86400000}
+      MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS: ${MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS:-7}
     depends_on:
       postgres:
         condition: service_healthy
@@ -253,9 +278,19 @@ services:
           - github-blocked-target
 
 volumes:
+  # Pinned to the volume names already in use on disk (from before the
+  # top-level `name:` above existed, when Compose derived them from the
+  # "anotations" directory-name project). Pinning `name:` here keeps this
+  # stack attached to its real data now that the project name changed —
+  # without it, Compose would compute new project-prefixed volume names and
+  # start every service against empty volumes.
   postgres-data:
+    name: anotations_postgres-data
   redis-data:
+    name: anotations_redis-data
   minio-data:
-  
+    name: anotations_minio-data
   gitea-data:
+    name: anotations_gitea-data
   gitea-postgres-data:
+    name: anotations_gitea-postgres-data

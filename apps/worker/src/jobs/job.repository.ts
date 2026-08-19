@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import { logJobEvent } from "@fieldframe/domain";
+
 import type { Job, PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
 /**
@@ -37,5 +39,11 @@ export async function claimJob(db: PrismaClient, jobId: string, workerId: string
     RETURNING *
   `;
   const job = rows[0];
+  if (job) {
+    // 021-production-hardening-garbage-collection (FR-046): covers both
+    // "claimed" and "started" — this one atomic UPDATE is every job type's
+    // single claim path.
+    logJobEvent("JOB_CLAIMED", { jobId: job.id, type: job.type, status: job.status });
+  }
   return job ? { job, lockToken } : null;
 }

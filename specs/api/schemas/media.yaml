@@ -1,0 +1,136 @@
+# Media domain schemas.
+#
+# Covers scheduling/reading VIDEO and AUDIO media-processing Jobs, and the
+# narrow IMAGE dimensions backfill endpoint. Does not cover the VIDEO annotation
+# read/write surface (tracks/keyframes/temporal labels) -- that is Annotation
+# data and is documented under the Annotations tag.
+#
+# Source of truth:
+#   apps/web/src/lib/media-processing/ensure-media-processing-job.ts
+#   apps/web/src/lib/media-processing/contracts.ts   (mediaProcessingRequestSchema, job types)
+#   apps/web/src/types/media-processing.ts           (SafeMediaReadiness)
+#   apps/web/src/app/api/assets/[assetId]/media-processing/route.ts
+#   apps/web/src/app/api/assets/[assetId]/media-processing/status/route.ts
+#   apps/web/src/app/api/images/[imageId]/dimensions/route.ts
+
+MediaProcessingJobType:
+  type: string
+  enum: [EXTRACT_VIDEO_METADATA, GENERATE_AUDIO_WAVEFORM]
+  description: >-
+    The two media-processing job types reachable through this route today.
+    GENERATE_THUMBNAILS/EXTRACT_VIDEO_FRAMES/AUTO_TRANSCRIBE_AUDIO exist as
+    JobType values but are not accepted by this request schema.
+
+ScheduleMediaProcessingRequest:
+  type: object
+  description: "Source: mediaProcessingRequestSchema. assetId itself comes from the path, not the body."
+  required: [type]
+  properties:
+    type:
+      $ref: '#/MediaProcessingJobType'
+  additionalProperties: false
+
+ScheduleMediaProcessingResponse:
+  type: object
+  required: [jobId, status, deliveryPending, reused]
+  properties:
+    jobId:
+      $ref: './common.yaml#/Cuid'
+    status:
+      type: string
+      description: Prisma JobStatus of the (possibly reused) media-processing Job.
+    deliveryPending:
+      type: boolean
+      description: True when the Job committed to PostgreSQL but its BullMQ enqueue has not yet been confirmed delivered.
+    reused:
+      type: boolean
+      description: True when an existing Job for this asset+type+source-fingerprint was reused instead of creating a new one.
+  additionalProperties: false
+
+MediaReadinessState:
+  type: string
+  enum: [NOT_REQUESTED, QUEUED, RUNNING, RETRYING, COMPLETED, FAILED, CANCELING, CANCELED]
+
+MediaReadiness:
+  type: object
+  description: Safe media-processing readiness projection (SafeMediaReadiness). Only VIDEO/AUDIO assets are meaningful callers.
+  required: [assetId, modality, state, stage, progress, counters, outcome]
+  properties:
+    assetId:
+      $ref: './common.yaml#/Cuid'
+    modality:
+      type: string
+      enum: [VIDEO, AUDIO]
+    state:
+      $ref: '#/MediaReadinessState'
+    stage:
+      $ref: './jobs.yaml#/JobStage'
+    progress:
+      type: [integer, "null"]
+    counters:
+      type: object
+      required: [total, processed, succeeded, failed, skipped]
+      properties:
+        total: { type: [integer, "null"] }
+        processed: { type: [integer, "null"] }
+        succeeded: { type: [integer, "null"] }
+        failed: { type: [integer, "null"] }
+        skipped: { type: [integer, "null"] }
+      additionalProperties: false
+    outcome:
+      type: [object, "null"]
+      required: [code, message]
+      properties:
+        code: { type: [string, "null"] }
+        message: { type: [string, "null"] }
+      additionalProperties: false
+    video:
+      type: object
+      properties:
+        durationMs: { type: [integer, "null"] }
+        fps: { type: [number, "null"] }
+        totalFrames: { type: [integer, "null"] }
+        codec: { type: [string, "null"] }
+      additionalProperties: false
+    audio:
+      type: object
+      properties:
+        durationMs: { type: [integer, "null"] }
+        sampleRate: { type: [integer, "null"] }
+        channels: { type: [integer, "null"] }
+        codec: { type: [string, "null"] }
+        bitRate: { type: [integer, "null"] }
+        waveformReady: { type: boolean }
+      additionalProperties: false
+  additionalProperties: false
+
+SetImageDimensionsRequest:
+  type: object
+  description: "Source: dimensionsSchema (inline in the route). Rejected once width/height are already set (see path description)."
+  required: [width, height]
+  properties:
+    width:
+      type: integer
+      minimum: 1
+      maximum: 100000
+    height:
+      type: integer
+      minimum: 1
+      maximum: 100000
+  additionalProperties: false
+
+SetImageDimensionsResponse:
+  type: object
+  required: [updated, dimensions]
+  properties:
+    updated:
+      type: boolean
+      description: False when the asset's width/height were already set (the update matched zero rows) -- this is not reported as an error.
+    dimensions:
+      type: object
+      required: [width, height]
+      properties:
+        width: { type: integer }
+        height: { type: integer }
+      additionalProperties: false
+  additionalProperties: false

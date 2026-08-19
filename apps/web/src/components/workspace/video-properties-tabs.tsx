@@ -72,6 +72,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
   const [labelError, setLabelError] = useState<string | null>(null);
   const [shapeError, setShapeError] = useState<string | null>(null);
   const [newLabelName, setNewLabelName] = useState("");
+  const [newLabelColor, setNewLabelColor] = useState("#0EA5E9");
   const taxonomy = useDatasetLabels(datasetId);
   const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
   const [trackDrafts, setTrackDrafts] = useState<Record<string, TrackDraft>>({});
@@ -137,12 +138,13 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
   async function createCustomLabel() {
     const name = newLabelName.trim();
     if (!name) return;
+    const color = /^#[0-9A-Fa-f]{6}$/.test(newLabelColor) ? newLabelColor : "#0EA5E9";
     setLabelError(null);
     const response = await fetch(`/api/datasets/${datasetId}/labels`, {
       method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, color: "#0EA5E9", description: "", hotkey: "" }),
+      body: JSON.stringify({ name, color, description: "", hotkey: "" }),
     });
     const payload = await response.json().catch(() => null) as { data?: DatasetLabel; error?: { message?: string } } | null;
     if (!response.ok || !payload?.data) {
@@ -151,6 +153,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
     }
     useDatasetLabelsStore.getState().addLabel(datasetId, payload.data);
     setNewLabelName("");
+    setNewLabelColor("#0EA5E9");
   }
 
   async function deleteLabel(labelId: string) {
@@ -288,7 +291,12 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
     </section>}
     {activeTab === "labels" && <section className="p-4">
       <h2 className="text-sm font-bold text-zinc-950">Labels</h2>
-      <div className="mt-3 flex gap-2"><input aria-label="New label name" value={newLabelName} onChange={(event) => setNewLabelName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void createCustomLabel(); } }} className="min-w-0 flex-1 rounded-lg border border-zinc-200 px-2 py-2 text-xs" placeholder="Custom label" /><button type="button" onClick={() => void createCustomLabel()} className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white">Add</button></div>
+      <div className="mt-3 flex gap-2">
+        <input aria-label="New label name" value={newLabelName} onChange={(event) => setNewLabelName(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void createCustomLabel(); } }} className="min-w-0 flex-1 rounded-lg border border-zinc-200 px-2 py-2 text-xs" placeholder="Custom label" />
+        <input aria-label="Label color" type="color" value={newLabelColor} onChange={(event) => setNewLabelColor(event.target.value)} className="h-8.5 w-9 shrink-0 cursor-pointer rounded-lg border border-zinc-200 p-0.5" title="Choose label color" />
+        <input aria-label="Label color code" value={newLabelColor} onChange={(event) => setNewLabelColor(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); void createCustomLabel(); } }} className="w-20 shrink-0 rounded-lg border border-zinc-200 px-2 py-2 font-mono text-xs uppercase" placeholder="#0EA5E9" maxLength={7} />
+        <button type="button" onClick={() => void createCustomLabel()} className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white">Add</button>
+      </div>
       <div className="mt-3 space-y-2">{taxonomy.map((label) => <div key={label.id} className="flex items-center gap-2 rounded-lg border border-zinc-200 px-2 py-2"><span aria-hidden="true" className="h-3 w-3 rounded-full" style={{ backgroundColor: label.color }} /><span className="min-w-0 flex-1 truncate text-xs font-medium text-zinc-800">{label.name}</span><button type="button" onClick={() => void deleteLabel(label.id)} className="text-[11px] font-semibold text-rose-700">Remove</button></div>)}</div>
       {labelError && <p role="alert" className="mt-3 text-xs text-rose-700">{labelError}</p>}
     </section>}

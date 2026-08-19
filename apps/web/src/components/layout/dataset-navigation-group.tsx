@@ -12,9 +12,6 @@ type DatasetNavigationGroupProps = { activePath: string };
 export function DatasetNavigationGroup({ activePath }: DatasetNavigationGroupProps) {
   const isDatasetPath = activePath === "/datasets" || activePath.startsWith("/datasets/");
   const [expanded, setExpanded] = useState(isDatasetPath);
-  // A selected child owns the active styling. The parent only appears active
-  // while it is being used as the disclosure control from another section.
-  const parentActive = expanded && !isDatasetPath;
   const childLinkClass = (active: boolean) =>
     cn(
       "flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400",
@@ -29,13 +26,12 @@ export function DatasetNavigationGroup({ activePath }: DatasetNavigationGroupPro
         aria-controls="dataset-navigation-actions"
         aria-expanded={expanded}
         className={cn(
-          "flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400",
-          parentActive ? "bg-zinc-950 text-white" : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-950",
+          "flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400",
         )}
         onClick={() => setExpanded((value) => !value)}
         type="button"
       >
-        <Database aria-hidden="true" size={18} weight={parentActive ? "fill" : "regular"} />
+        <Database aria-hidden="true" size={18} weight="regular" />
         <span className="flex-1">Datasets</span>
         <CaretDown aria-hidden="true" className={expanded ? "rotate-180 transition-transform" : "transition-transform"} size={14} weight="bold" />
       </button>

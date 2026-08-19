@@ -147,17 +147,17 @@ test("authorized image upload appears in the Dataset asset list within ten secon
 test("all initial modalities publish exactly one matching child row without text body persistence", { skip: !hasIntegrationDatabase }, async () => {
   const cases = [
     ["video/mp4", "clip.mp4", Modality.VIDEO, "videoAsset"],
-    ["text/plain", "notes.txt", Modality.TEXT, "textDocument"],
+    ["text/plain", "notes.txt", Modality.TEXT, "textAsset"],
     ["audio/wav", "sound.wav", Modality.AUDIO, "audioAsset"],
   ] as const;
   for (const [contentType, filename, modality, relation] of cases) {
     const { completion } = await uploadAndComplete(contentType, filename);
     if (completion.status !== 201) assert.fail(`Completion failed (${completion.status}): ${await completion.text()}`);
     const assetId = (await completion.json() as { data: { asset: { id: string; modality: Modality } } }).data.asset.id;
-    const asset = await db.asset.findUnique({ where: { id: assetId }, include: { imageAsset: true, videoAsset: true, textDocument: true, audioAsset: true } });
+    const asset = await db.asset.findUnique({ where: { id: assetId }, include: { imageAsset: true, videoAsset: true, textAsset: true, audioAsset: true } });
     assert.equal(asset?.modality, modality);
     assert.ok(asset?.[relation]);
-    if (modality === Modality.TEXT) assert.equal(asset?.textDocument?.content, null);
+    if (modality === Modality.TEXT) assert.equal(asset?.textAsset?.content, null);
   }
 });
 

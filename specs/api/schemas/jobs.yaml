@@ -1,0 +1,289 @@
+# Jobs domain schemas.
+#
+# A common PostgreSQL Job is the source of truth for every asynchronous workflow
+# (AGENTS.md). Export is documented here, not under a separate tag, because
+# POST /api/export and GET /api/export/{jobId} create/read a Job of type
+# EXPORT_DATASET through the same safe Job projection as every other route below.
+#
+# Source of truth:
+#   apps/web/src/lib/jobs/safe-job-status.ts   (SafeJobStatus / toSafeJobStatus)
+#   apps/web/src/lib/jobs/safe-job-event.ts    (SafeJobEvent, browser-safe message/reason vocab)
+#   apps/web/src/lib/jobs/safe-job-stage.ts    (SafeJobStage)
+#   apps/web/src/lib/jobs/authorization.ts     (readAuthorizedJob, cancelAuthorizedJob)
+#   apps/web/src/lib/jobs/retry-job.ts         (retryAuthorizedJob)
+#   apps/web/src/lib/imports/commit-local-folder-import.ts
+#   apps/web/src/lib/exports/export-service.ts, export-download.ts
+#   apps/web/src/lib/validation/export.ts, job.ts
+#   prisma/schema.prisma (JobType, JobStatus, JobStage)
+
+JobType:
+  type: string
+  enum:
+    - CLONE_REPOSITORY
+    - IMPORT_DATASET
+    - SYNC_REPOSITORY
+    - EXPORT_DATASET
+    - GENERATE_THUMBNAILS
+    - EXTRACT_VIDEO_METADATA
+    - EXTRACT_VIDEO_FRAMES
+    - GENERATE_AUDIO_WAVEFORM
+    - AUTO_TRANSCRIBE_AUDIO
+    - AUTO_LABEL_DATASET
+    - AI_PREANNOTATE_ASSET
+    - AI_PREANNOTATE_DATASET
+    - AI_TASK_SYNC
+
+JobStatus:
+  type: string
+  enum: [QUEUED, RUNNING, RETRYING, COMPLETED, FAILED, CANCELING, CANCELED]
+
+JobStage:
+  type: [string, "null"]
+  description: >-
+    Safe stage projection (SafeJobStage, apps/web/src/lib/jobs/safe-job-stage.ts).
+    This is NOT the raw Prisma JobStage enum (which has 27 fine-grained internal
+    values such as CLONING_REPOSITORY, MAPPING_LABELS, GENERATING_WAVEFORM,
+    CREATING_AI_TASK, EXPORTING_DATASET, etc.) -- toSafeJobStage collapses every
+    persisted stage down to this fixed 8-value browser vocabulary (e.g.
+    SCANNING_FILES/PARSING_IMPORT_FILE/VALIDATING_IMPORT_ROWS all become
+    SCANNING; most stages without an explicit mapping, including every AI/export
+    stage, collapse to FINALIZING). null only when no Job.stage is persisted yet.
+  enum:
+    - WAITING
+    - VALIDATING_INPUT
+    - SCANNING
+    - FILTERING
+    - UPLOADING_OBJECTS
+    - WRITING_ASSETS
+    - FINALIZING
+    - FINISHED
+
+JobSafeSummary:
+  type: [object, "null"]
+  description: >-
+    Small, strict summary schema (safeJobSummarySchema). Raw Job.summary JSON is
+    never returned as-is; an invalid/unrecognized shape sanitizes to null rather
+    than partially leaking fields.
+  properties:
+    message:
+      type: string
+      maxLength: 280
+    outcome:
+      type: string
+      enum: [completed, failed, canceled]
+    completedAt:
+      type: string
+      format: date-time
+    resultCount:
+      type: integer
+      minimum: 0
+    imported:
+      type: integer
+      minimum: 0
+    skipped:
+      type: integer
+      minimum: 0
+    failed:
+      type: integer
+      minimum: 0
+  additionalProperties: false
+
+Job:
+  type: object
+  description: Safe Job projection (SafeJobStatus). Never includes queue transport fields, lock/lease data, or raw provider error detail.
+  required: [id, jobId, datasetId, type, status, stage, progress, totalItems, processedItems, successCount, failedCount, skippedCount, summary, errorCode, errorMessage, createdAt, startedAt, finishedAt, updatedAt]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    jobId:
+      $ref: './common.yaml#/Cuid'
+      description: Identical to id; kept for client convenience.
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    type:
+      $ref: '#/JobType'
+    status:
+      $ref: '#/JobStatus'
+    stage:
+      $ref: '#/JobStage'
+    progress:
+      type: [integer, "null"]
+    totalItems:
+      type: [integer, "null"]
+    processedItems:
+      type: [integer, "null"]
+    successCount:
+      type: [integer, "null"]
+    failedCount:
+      type: [integer, "null"]
+    skippedCount:
+      type: [integer, "null"]
+    summary:
+      $ref: '#/JobSafeSummary'
+    errorCode:
+      type: [string, "null"]
+      description: Only a small allowlisted set of codes is ever surfaced (see errorMessage); other internal codes are suppressed to both null.
+    errorMessage:
+      type: [string, "null"]
+    createdAt:
+      $ref: './common.yaml#/Timestamp'
+    startedAt:
+      oneOf:
+        - $ref: './common.yaml#/Timestamp'
+        - type: "null"
+    finishedAt:
+      oneOf:
+        - $ref: './common.yaml#/Timestamp'
+        - type: "null"
+    updatedAt:
+      $ref: './common.yaml#/Timestamp'
+  additionalProperties: false
+
+JobEventLevel:
+  type: string
+  description: Prisma JobEventLevel.
+
+JobEvent:
+  type: object
+  description: Safe Job operational history entry (SafeJobEvent). Raw JobEvent.data never leaves the server.
+  required: [id, createdAt, level, stage, message, reason]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    createdAt:
+      $ref: './common.yaml#/Timestamp'
+    level:
+      $ref: '#/JobEventLevel'
+    stage:
+      $ref: '#/JobStage'
+    message:
+      type: string
+      description: One of a fixed, browser-safe message vocabulary; an unrecognized persisted message is omitted entirely rather than surfaced.
+      enum: [QUEUE_ENQUEUED, QUEUE_DELIVERY_PENDING, QUEUE_RECEIVED, QUEUE_SKIPPED, JOB_CLAIMED, JOB_HEARTBEAT, JOB_PROGRESS, IMPORT_BATCH_COMPLETED, JOB_COMPLETED, JOB_FAILED, JOB_CANCELED, CANCEL_REQUESTED, IMPORT_INCOMPLETE, IMPORT_COMMITTED, JOB_RECOVERED, JOB_DEAD_LETTERED]
+    reason:
+      type: [string, "null"]
+      enum: [MALFORMED_PAYLOAD, UNKNOWN_JOB, NOT_QUEUED, CANCELED, INACTIVE_DATASET, UNSUPPORTED_TYPE, TRANSPORT_CONFLICT, QUEUE_UNAVAILABLE, IMPORT_INCOMPLETE, IMPORT_COMMIT_TIMEOUT, LEASE_EXPIRED, MAX_RUNTIME_EXCEEDED, RECOVERY_EXHAUSTED]
+  additionalProperties: false
+
+JobEventPage:
+  type: object
+  required: [events, nextCursor]
+  properties:
+    events:
+      type: array
+      items:
+        $ref: '#/JobEvent'
+      description: Newest-first.
+    nextCursor:
+      type: [string, "null"]
+      description: Opaque base64url cursor; null when no further page exists.
+  additionalProperties: false
+
+CancelJobResponse:
+  type: object
+  required: [id, status]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    status:
+      type: string
+      description: Cancellation status returned by cancelAuthorizedJob (a JobStatus value, typically CANCELING or CANCELED).
+  additionalProperties: false
+
+RetryJobResponse:
+  type: object
+  required: [id, datasetId, type, status]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    type:
+      $ref: '#/JobType'
+    status:
+      $ref: '#/JobStatus'
+  additionalProperties: false
+
+CommitImportJobResponse:
+  type: object
+  required: [id, status, replayed, completed, total]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    status:
+      type: string
+      enum: [COMPLETED]
+    replayed:
+      type: boolean
+    completed:
+      type: integer
+    total:
+      type: integer
+  additionalProperties: false
+
+# --- Export (a Job of type EXPORT_DATASET) -----------------------------------
+
+ExportRequest:
+  type: object
+  description: >-
+    Source: exportRequestSchema. Phase 012 intentionally supports one bounded,
+    metadata-only export format.
+  required: [datasetId]
+  properties:
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    format:
+      type: string
+      enum: [JSON]
+      default: JSON
+    manifestSchemaVersion:
+      type: string
+      enum: ["1"]
+      default: "1"
+  additionalProperties: false
+
+ExportJob:
+  description: A Job (see the Job schema) narrowed to type EXPORT_DATASET.
+  allOf:
+    - $ref: '#/Job'
+    - type: object
+      properties:
+        type:
+          type: string
+          enum: [EXPORT_DATASET]
+
+CreateExportResponse:
+  type: object
+  required: [job, deliveryPending]
+  properties:
+    job:
+      $ref: '#/ExportJob'
+    deliveryPending:
+      type: boolean
+      description: True when the Job committed to PostgreSQL but its BullMQ enqueue has not yet been confirmed delivered.
+  additionalProperties: false
+
+ExportDownload:
+  type: [object, "null"]
+  description: Null when the export Job has not yet reached COMPLETED.
+  required: [url, expiresAt, filename]
+  properties:
+    url:
+      type: string
+      format: uri
+      description: Short-lived, object-scoped MinIO presigned GET URL for the export artifact.
+    expiresAt:
+      $ref: './common.yaml#/Timestamp'
+    filename:
+      type: string
+  additionalProperties: false
+
+GetExportResponse:
+  type: object
+  required: [job, download]
+  properties:
+    job:
+      $ref: '#/ExportJob'
+    download:
+      $ref: '#/ExportDownload'
+  additionalProperties: false

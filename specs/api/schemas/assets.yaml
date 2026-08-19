@@ -1,0 +1,211 @@
+# Assets domain schemas.
+#
+# Scope note: this initial pass documents only the core upload/view/list surface
+# (POST /api/assets/presigned-upload, POST /api/assets/complete-upload,
+# GET /api/assets/{assetId}/view-url, GET /api/datasets/{datasetId}/assets).
+# Asset-scoped sub-domains that exist in the repository but are out of scope for
+# this pass -- media-processing, temporal-labels, video-annotations,
+# video-object-tracks -- are intentionally not documented here; see the final
+# report for the full excluded-route list.
+#
+# Source of truth:
+#   apps/web/src/lib/asset-upload.ts            (PublishedAsset / SafeUploadedAsset)
+#   apps/web/src/lib/validation/upload.ts        (presignedUploadSchema, completeUploadSchema)
+#   apps/web/src/lib/validation/asset-list.ts    (assetListQuerySchema)
+#   apps/web/src/app/api/assets/**/route.ts
+#   apps/web/src/app/api/datasets/[datasetId]/assets/route.ts
+#   prisma/schema.prisma (Modality, AssetStatus enums)
+
+Modality:
+  type: string
+  enum: [IMAGE, VIDEO, TEXT, AUDIO]
+
+AssetStatus:
+  type: string
+  enum: [NEW, PROCESSING, READY, IN_PROGRESS, COMPLETED, NEEDS_REVIEW, REVIEWED, REJECTED, SKIPPED, ARCHIVED, FAILED]
+
+Asset:
+  type: object
+  description: >-
+    Safe asset projection. Identical field set is used both for a single published/
+    viewed asset and for each item in the dataset asset list -- both routes select
+    the same assetMetadataSelect plus sizeBytes normalization (BigInt -> string).
+    Never includes storageProvider/storageBucket/storageKey or any other
+    storage-location detail.
+  required:
+    - id
+    - datasetId
+    - modality
+    - filename
+    - originalFilename
+    - mimeType
+    - sizeBytes
+    - width
+    - height
+    - durationMs
+    - textLength
+    - status
+    - batchIndex
+    - orderIndex
+    - description
+    - revision
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    modality:
+      $ref: '#/Modality'
+    filename:
+      type: string
+    originalFilename:
+      type: [string, "null"]
+    mimeType:
+      type: string
+    sizeBytes:
+      type: [string, "null"]
+      description: BigInt serialized as a decimal string.
+    width:
+      type: [integer, "null"]
+    height:
+      type: [integer, "null"]
+    durationMs:
+      type: [integer, "null"]
+    textLength:
+      type: [integer, "null"]
+    status:
+      $ref: '#/AssetStatus'
+    batchIndex:
+      type: integer
+    orderIndex:
+      type: integer
+    description:
+      type: [string, "null"]
+    revision:
+      type: integer
+    createdAt:
+      $ref: './common.yaml#/Timestamp'
+    updatedAt:
+      $ref: './common.yaml#/Timestamp'
+  additionalProperties: false
+
+AssetListPage:
+  type: object
+  description: Cursor pagination envelope returned by GET /api/datasets/{datasetId}/assets.
+  required: [items, page]
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Asset'
+    page:
+      type: object
+      required: [limit, nextCursor, hasNextPage]
+      properties:
+        limit:
+          type: integer
+        nextCursor:
+          $ref: './common.yaml#/Cuid'
+        hasNextPage:
+          type: boolean
+      additionalProperties: false
+  additionalProperties: false
+
+PresignedUploadRequest:
+  type: object
+  description: "Source: presignedUploadSchema (apps/web/src/lib/validation/upload.ts)."
+  required: [datasetId, filename, contentType, sizeBytes]
+  properties:
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    filename:
+      type: string
+      minLength: 1
+      maxLength: 255
+    contentType:
+      type: string
+      enum:
+        - image/png
+        - image/jpeg
+        - image/webp
+        - video/mp4
+        - video/webm
+        - text/plain
+        - text/csv
+        - application/json
+        - audio/wav
+        - audio/mpeg
+        - audio/ogg
+    sizeBytes:
+      type: integer
+      minimum: 1
+      maximum: 104857600
+      description: Hard cap is 100 MiB (MAX_DIRECT_UPLOAD_BYTES).
+  additionalProperties: false
+
+PresignedUploadResponse:
+  type: object
+  description: >-
+    A backend-generated, object-scoped MinIO presigned POST policy. formFields must be
+    submitted verbatim to uploadUrl and are not persisted or reusable beyond
+    expiresInSeconds; see AGENTS.md security rules.
+  required: [uploadUrl, method, formFields, fileId, expiresInSeconds]
+  properties:
+    uploadUrl:
+      type: string
+      format: uri
+    method:
+      type: string
+      enum: [POST]
+    formFields:
+      type: object
+      description: Provider-required signed multipart form fields for this one upload only.
+      additionalProperties:
+        type: string
+    fileId:
+      type: string
+      description: >-
+        Opaque upload-capability token to pass to POST /api/assets/complete-upload.
+        Not a MinIO credential.
+    expiresInSeconds:
+      type: integer
+  additionalProperties: false
+
+CompleteUploadRequest:
+  type: object
+  description: "Source: completeUploadSchema (apps/web/src/lib/validation/upload.ts)."
+  required: [fileId]
+  properties:
+    fileId:
+      type: string
+      minLength: 32
+      maxLength: 8192
+  additionalProperties: false
+
+CompleteUploadResponse:
+  type: object
+  required: [asset, replayed]
+  properties:
+    asset:
+      $ref: '#/Asset'
+    replayed:
+      type: boolean
+      description: >-
+        True when the object was already published by an earlier, duplicate completion
+        call for the same upload capability (idempotent replay), rather than newly
+        created by this request.
+  additionalProperties: false
+
+AssetViewUrlResponse:
+  type: object
+  required: [viewUrl, expiresAt]
+  properties:
+    viewUrl:
+      type: string
+      format: uri
+      description: Short-lived, object-scoped MinIO presigned GET URL.
+    expiresAt:
+      $ref: './common.yaml#/Timestamp'
+  additionalProperties: false

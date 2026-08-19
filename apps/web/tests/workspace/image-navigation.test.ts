@@ -37,14 +37,17 @@ test("selected Asset reconciliation and previous/next stay in a filtered order a
     const selected = await readWorkspacePage(owner, dataset.id, {
       page: 1, search: "FILTERED", statuses: [AssetStatus.COMPLETED], selectedAsset: { id: assets[100]!.id, modality: Modality.IMAGE },
     });
-    assert.equal(selected?.page.page, 1);
-    // The one NEW item is excluded, so original index 100 is filtered index 99.
+    // The one NEW item is excluded, so original index 100 is filtered index 99;
+    // at WORKSPACE_ASSET_PAGE_SIZE = 10 that lands on page 10 (filtered index
+    // 99 -> floor(99/10)+1). The adjacency (previous/next id) assertions below
+    // are page-size-independent, but the page numbers they land on are not.
+    assert.equal(selected?.page.page, 10);
     assert.equal(selected?.page.selectedAsset?.id, assets[100]!.id);
     assert.equal(selected?.page.selectedAsset?.modality, Modality.IMAGE);
     assert.equal(selected?.page.previous?.id, assets[99]!.id);
     assert.equal(selected?.page.next?.id, assets[101]!.id);
-    assert.equal(selected?.page.previous?.page, 1);
-    assert.equal(selected?.page.next?.page, 2);
+    assert.equal(selected?.page.previous?.page, 10);
+    assert.equal(selected?.page.next?.page, 11);
     const empty = await readWorkspacePage(owner, dataset.id, { search: "does-not-exist", selectedAsset: { id: assets[0]!.id, modality: Modality.IMAGE } });
     assert.equal(empty?.page.total, 0);
     assert.equal(empty?.page.selectedAsset, null);

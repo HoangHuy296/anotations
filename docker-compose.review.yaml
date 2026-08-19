@@ -1,3 +1,4 @@
+name: AnnotationPlatformReview
 services:
   postgres:
     image: postgres:16-alpine
@@ -63,8 +64,8 @@ services:
       SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-Review Operator}
       DATABASE_URL: ${DATABASE_URL_DOCKER}
       MINIO_ENDPOINT: http://minio:9000
-      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://10.0.0.245:9100}
-      MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:-http://10.0.0.245:3000}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://10.0.0.123:9100}
+      MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:-http://10.0.0.123:3001}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-review_minio_admin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-9q5D3WV0mnZcrci9Ur1f8Bi7py1E3yRuP1BPjjmM2zEK4l//u6oprTCHjpyIh3x3}
       MINIO_BUCKET: ${MINIO_BUCKET:-fieldframe-review-assets}
@@ -76,7 +77,7 @@ services:
       BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe-review}
       EXPORT_QUEUE_NAME: ${EXPORT_QUEUE_NAME:-export-dataset}
       SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-u6VLCxDEgcV0NNsGFvXFTkAeHT4A9rX+zIKEEPnSD9Q=}
-      GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.245:3101}
+      GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.123:3101}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
       FIELDFRAME_RUNTIME: compose
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "0"
@@ -92,6 +93,13 @@ services:
       # just literally "localhost") without the browser silently dropping the
       # session cookie. Never set this to false for a real deployment.
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      # 021-production-hardening-garbage-collection (US7/US8) -- web-only.
+      # Same defaults as docker-compose.yaml; see
+      # apps/web/src/lib/config/production-hardening.ts.
+      RATE_LIMIT_AI_TASK_PER_MINUTE: ${RATE_LIMIT_AI_TASK_PER_MINUTE:-10}
+      RATE_LIMIT_IMPORT_PER_MINUTE: ${RATE_LIMIT_IMPORT_PER_MINUTE:-10}
+      RATE_LIMIT_EXPORT_PER_MINUTE: ${RATE_LIMIT_EXPORT_PER_MINUTE:-10}
+      PAGINATION_MAX_PAGE_SIZE: ${PAGINATION_MAX_PAGE_SIZE:-100}
     depends_on:
       postgres:
         condition: service_healthy
@@ -101,14 +109,35 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+    # No host port published here anymore: the `proxy` service below is now
+    # the single public entry point at :3001 (both the app and /docs need to
+    # share that one origin -- see docker/review-proxy.conf). `web` is still
+    # reachable from other containers on the compose network as `web:3000`.
+
+  # Review-only reverse proxy: puts the app (proxied, unchanged) and the
+  # standalone Swagger UI docs (specs/api/dist/, static) behind one origin
+  # so Swagger's "Try it out" is same-origin and needs no CORS support from
+  # the app. Not part of docker-compose.yaml (Dev) or the application image.
+  proxy:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./docker/review-proxy.conf:/etc/nginx/nginx.conf:ro
+      # Read-only bind mount of the host's pre-built docs -- generate/refresh
+      # with `pnpm docs:build` before `up`/`restart proxy`; nginx reads these
+      # files fresh on every request, so no image rebuild is needed to pick
+      # up a new build, only re-running that command on the host.
+      - ./specs/api/dist:/usr/share/nginx/docs:ro
     ports:
-      # Published on the same port number (3000) as docker-compose.yaml's web,
-      # but bound to this host's LAN IP instead of loopback, so the two
-      # stacks coexist without a conflict: the dev stack answers at
+      # Bound to this host's LAN IP on its own port, so the two stacks
+      # coexist without a conflict: the dev stack answers at
       # http://localhost:3000 and this review stack answers at
-      # http://10.0.0.245:3000. Set WEB_REVIEW_BIND_ADDRESS in .env.review if
-      # this host's LAN IP changes (e.g. after a DHCP renewal).
-      - "${WEB_REVIEW_BIND_ADDRESS:-10.0.0.245}:${WEB_REVIEW_PORT:-3000}:3000"
+      # http://10.0.0.123:3001. Set WEB_REVIEW_BIND_ADDRESS/WEB_REVIEW_PORT in
+      # .env.review if this host's LAN IP or the review port changes (e.g.
+      # after a DHCP renewal).
+      - "3001:80"
+    depends_on:
+      web:
+        condition: service_started
 
   worker:
     build:
@@ -127,12 +156,27 @@ services:
       BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe-review}
       EXPORT_QUEUE_NAME: ${EXPORT_QUEUE_NAME:-export-dataset}
       SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-u6VLCxDEgcV0NNsGFvXFTkAeHT4A9rX+zIKEEPnSD9Q=}
-      GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.245:3101}
+      GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.123:3101}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
       GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
       FIELDFRAME_RUNTIME: compose
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "0"
       SOURCE_ALLOWED_IP_CIDRS: ${SOURCE_ALLOWED_IP_CIDRS:-}
+      # 021-production-hardening-garbage-collection (US1/US4/US5) -- worker-only.
+      # Same defaults as docker-compose.yaml; see apps/worker/src/config.ts's
+      # productionHardeningPolicySchema. MINIO_ORPHAN_SCAN_DRY_RUN stays true
+      # here too -- do not flip it in a shared compose file.
+      JOB_RECOVERY_LEASE_GRACE_MS: ${JOB_RECOVERY_LEASE_GRACE_MS:-60000}
+      JOB_MAX_RUNTIME_MS: ${JOB_MAX_RUNTIME_MS:-3600000}
+      JOB_LOCK_DURATION_MS: ${JOB_LOCK_DURATION_MS:-30000}
+      JOB_STALLED_INTERVAL_MS: ${JOB_STALLED_INTERVAL_MS:-30000}
+      JOB_MAX_STALLED_COUNT: ${JOB_MAX_STALLED_COUNT:-1}
+      JOB_EVENT_RETENTION_DAYS: ${JOB_EVENT_RETENTION_DAYS:-30}
+      JOB_EVENT_CLEANUP_BATCH_SIZE: ${JOB_EVENT_CLEANUP_BATCH_SIZE:-500}
+      MINIO_ORPHAN_GRACE_PERIOD_MS: ${MINIO_ORPHAN_GRACE_PERIOD_MS:-86400000}
+      MINIO_ORPHAN_SCAN_DRY_RUN: ${MINIO_ORPHAN_SCAN_DRY_RUN:-true}
+      TEMP_UPLOAD_RETENTION_MS: ${TEMP_UPLOAD_RETENTION_MS:-86400000}
+      MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS: ${MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS:-7}
     depends_on:
       postgres:
         condition: service_healthy
@@ -204,10 +248,10 @@ services:
       GITEA__database__PASSWD: ${GITEA_DB_PASSWORD:-LKTJQtJZGtSsaQz4DZMPj/bplwDegHCL}
       GITEA__database__SSL_MODE: disable
       GITEA__server__PROTOCOL: http
-      GITEA__server__DOMAIN: 10.0.0.245
+      GITEA__server__DOMAIN: 10.0.0.123
       GITEA__server__HTTP_ADDR: 0.0.0.0
       GITEA__server__HTTP_PORT: 3000
-      GITEA__server__ROOT_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.245:3101}
+      GITEA__server__ROOT_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.123:3101}
       GITEA__server__SSH_DOMAIN: localhost
       GITEA__server__SSH_PORT: ${GITEA_SSH_REVIEW_PORT:-2223}
       GITEA__server__DISABLE_SSH: "false"

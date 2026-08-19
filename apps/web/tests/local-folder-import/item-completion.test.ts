@@ -39,13 +39,13 @@ test("item capability, MinIO POST, completion, and replay publish one Asset", { 
   noSecrets(completeBody);
   assert.equal(completeBody.data.replayed, false);
   const asset = await db.asset.findUniqueOrThrow({
-    where: { id: completeBody.data.assetId }, include: { imageAsset: true, videoAsset: true, audioAsset: true, textDocument: true },
+    where: { id: completeBody.data.assetId }, include: { imageAsset: true, videoAsset: true, audioAsset: true, textAsset: true },
   });
   assert.equal(asset.storageProvider, StorageProvider.MINIO);
   assert.equal(asset.modality, Modality.IMAGE);
   assert.ok(asset.storageBucket && asset.storageKey && await objectExists(asset.storageKey));
   assert.ok(asset.imageAsset);
-  assert.equal(asset.videoAsset, null); assert.equal(asset.audioAsset, null); assert.equal(asset.textDocument, null);
+  assert.equal(asset.videoAsset, null); assert.equal(asset.audioAsset, null); assert.equal(asset.textAsset, null);
 
   const replay = await app.complete(preparation.id, item.id, capability.fileId);
   assert.equal(replay.status, 200);
@@ -59,16 +59,16 @@ test("missing object and denied completion do not publish an Asset or child meta
   const preparation = await app.start({ items: [{ logicalPath: "missing/notes.txt", contentType: "text/plain", body: "text" }] });
   const item = preparation.items[0]!;
   const capability = (await (await app.capabilities(preparation.id, [item.id])).json() as { data: { capabilities: UploadCapability[] } }).data.capabilities[0]!;
-  const before = await Promise.all([db.asset.count({ where: { datasetId: preparation.datasetId } }), db.textDocument.count()]);
+  const before = await Promise.all([db.asset.count({ where: { datasetId: preparation.datasetId } }), db.textAsset.count()]);
   const missing = await app.complete(preparation.id, item.id, capability.fileId);
   assert.equal(missing.status, 409);
   noSecrets(await missing.json());
-  assert.deepEqual(await Promise.all([db.asset.count({ where: { datasetId: preparation.datasetId } }), db.textDocument.count()]), before);
+  assert.deepEqual(await Promise.all([db.asset.count({ where: { datasetId: preparation.datasetId } }), db.textAsset.count()]), before);
 
   const outsider = await app.cookieFor("outsider");
   const denied = await app.complete(preparation.id, item.id, capability.fileId, outsider);
   assert.equal(denied.status, 404);
   noSecrets(await denied.json());
-  assert.deepEqual(await Promise.all([db.asset.count({ where: { datasetId: preparation.datasetId } }), db.textDocument.count()]), before);
+  assert.deepEqual(await Promise.all([db.asset.count({ where: { datasetId: preparation.datasetId } }), db.textAsset.count()]), before);
 });
 

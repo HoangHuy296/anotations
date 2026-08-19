@@ -59,6 +59,7 @@ export type ApiErrorCode =
   | "AI_MODEL_NOT_FOUND"
   | "ASSET_NOT_IN_DATASET"
   | "AI_TASK_NOT_FOUND"
+  | "RATE_LIMITED"
   | "INTERNAL_ERROR";
 
 export function apiError(
@@ -66,6 +67,7 @@ export function apiError(
   code: ApiErrorCode,
   message: string,
   fieldErrors?: Record<string, string[]>,
+  headers?: Record<string, string>,
 ) {
   return NextResponse.json(
     {
@@ -80,6 +82,7 @@ export function apiError(
       headers: {
         "Cache-Control": "no-store",
         "X-Content-Type-Options": "nosniff",
+        ...headers,
       },
     },
   );

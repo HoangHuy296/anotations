@@ -25,7 +25,7 @@ test("compensation deletes only unreferenced in-scope objects and preserves Asse
     createdDataset = dataset.id;
     const key = (value: string) => value.replace(datasetId, dataset.id);
     await Promise.all([minio.putObject(config.MINIO_BUCKET, key(orphanKey), Buffer.from("x")), minio.putObject(config.MINIO_BUCKET, key(referencedKey), Buffer.from("x")), minio.putObject(config.MINIO_BUCKET, key(outOfScopeKey), Buffer.from("x"))]);
-    await db.asset.create({ data: { datasetId: dataset.id, modality: "TEXT", filename: "referenced.txt", mimeType: "text/plain", sourceMode: "MIRROR_TO_MINIO", storageProvider: "MINIO", storageBucket: config.MINIO_BUCKET, storageKey: key(referencedKey), sourceFingerprint: `phase016-cleanup-${suffix}`, textDocument: { create: { tokenization: {}, metadata: {} } } } });
+    await db.asset.create({ data: { datasetId: dataset.id, modality: "TEXT", filename: "referenced.txt", mimeType: "text/plain", sourceMode: "MIRROR_TO_MINIO", storageProvider: "MINIO", storageBucket: config.MINIO_BUCKET, storageKey: key(referencedKey), sourceFingerprint: `phase016-cleanup-${suffix}`, textAsset: { create: { tokenization: {}, metadata: {} } } } });
     assert.equal(await safeCleanupUnpublishedObject(db, { bucket: config.MINIO_BUCKET, objectKey: key(orphanKey), datasetId: dataset.id }), true);
     await assert.rejects(() => minio.statObject(config.MINIO_BUCKET, key(orphanKey)));
     assert.equal(await safeCleanupUnpublishedObject(db, { bucket: config.MINIO_BUCKET, objectKey: key(referencedKey), datasetId: dataset.id }), false);

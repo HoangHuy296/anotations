@@ -8,6 +8,6 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@fieldframe/domain", "@fieldframe/queue"],
 };
 module.exports = {
-  allowedDevOrigins: ['10.0.0.245'],
+  allowedDevOrigins: ['10.0.0.123'],
 }
 export default nextConfig;

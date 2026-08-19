@@ -91,7 +91,7 @@ test("authorized image view capability reads MinIO while cross-Dataset access is
   assert.equal(denied.status, 404);
 });
 
-test("250-Asset search, multi-status filtering, stable order, and 100-item pages are Dataset-scoped", { skip: !databaseEnabled }, async () => {
+test("250-Asset search, multi-status filtering, stable order, and 10-item pages are Dataset-scoped", { skip: !databaseEnabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const dataset = await createWorkspaceDataset(owner.id);
   try {
@@ -101,16 +101,23 @@ test("250-Asset search, multi-status filtering, stable order, and 100-item pages
       mimeType: "image/png", sourceFingerprint: workspaceUnique(`page-${index}`), batchIndex: Math.floor(index / 100),
       orderIndex: index, status: index % 2 ? AssetStatus.IN_PROGRESS : AssetStatus.NEW,
     })) });
-    const [first, second, third, match, multiStatus] = await Promise.all([
+    // FR-043 sets WORKSPACE_ASSET_PAGE_SIZE = 10: 250 assets is exactly 25
+    // full pages of 10, so page 25 is the last populated page and page 26 is
+    // the "beyond the last page" case -- empty items, real total, never an
+    // error, per contracts/pagination-envelope.md.
+    const [first, second, last, beyondLast, match, multiStatus] = await Promise.all([
       readWorkspacePage(owner, dataset.id, { page: 1 }),
       readWorkspacePage(owner, dataset.id, { page: 2 }),
-      readWorkspacePage(owner, dataset.id, { page: 3 }),
+      readWorkspacePage(owner, dataset.id, { page: 25 }),
+      readWorkspacePage(owner, dataset.id, { page: 26 }),
       readWorkspacePage(owner, dataset.id, { page: 1, search: "needle-outside" }),
       readWorkspacePage(owner, dataset.id, { page: 1, statuses: [AssetStatus.NEW, AssetStatus.IN_PROGRESS] }),
     ]);
-    assert.equal(first?.page.items.length, 100);
-    assert.equal(second?.page.items.length, 100);
-    assert.equal(third?.page.items.length, 50);
+    assert.equal(first?.page.items.length, 10);
+    assert.equal(second?.page.items.length, 10);
+    assert.equal(last?.page.items.length, 10);
+    assert.equal(beyondLast?.page.items.length, 0);
+    assert.equal(beyondLast?.page.total, 250);
     assert.equal(first?.page.total, 250);
     assert.equal(first?.page.completed, 125);
     assert.notEqual(first?.page.items.at(-1)?.id, second?.page.items[0]?.id);

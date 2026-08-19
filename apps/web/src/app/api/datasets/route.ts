@@ -5,23 +5,31 @@ import { getRequestActor } from "@/lib/auth";
 import { canCreateDataset } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { datasetMetadataSelect } from "@/lib/dataset-metadata";
+import { parsePageRequest } from "@/lib/pagination";
 import { createDatasetSchema } from "@/lib/validation/dataset";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+// No internal caller reads this route today (`(app)/datasets/page.tsx` runs
+// its own direct `db.dataset.findMany` query and never fetches this route --
+// confirmed by audit before adding pagination here). Default page size
+// mirrors that Server Component's own page size.
+const DEFAULT_PAGE_SIZE = 20;
+
+export async function GET(request: Request) {
   const actor = await getRequestActor();
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
-  const datasets = await db.dataset.findMany({
-    where: {
-      deletedAt: null,
-      archivedAt: null,
-      ...(actor.role === UserRole.ADMIN ? {} : { OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] }),
-    },
-    orderBy: { updatedAt: "desc" },
-    select: datasetMetadataSelect,
-  });
-  return apiSuccess({ items: datasets });
+  const where = {
+    deletedAt: null,
+    archivedAt: null,
+    ...(actor.role === UserRole.ADMIN ? {} : { OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] }),
+  };
+  const { page, pageSize, skip, take } = parsePageRequest(new URL(request.url).searchParams, DEFAULT_PAGE_SIZE);
+  const [datasets, total] = await Promise.all([
+    db.dataset.findMany({ where, orderBy: { updatedAt: "desc" }, select: datasetMetadataSelect, skip, take }),
+    db.dataset.count({ where }),
+  ]);
+  return apiSuccess({ items: datasets, page, pageSize, total });
 }
 
 export async function POST(request: Request) {

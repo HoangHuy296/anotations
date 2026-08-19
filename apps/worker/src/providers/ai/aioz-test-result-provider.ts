@@ -36,7 +36,7 @@ export const TEST_LABEL_KEY = "test-object";
  * canonical, directly renderable geometry on the wire.
  */
 export const TEST_BOUNDING_BOX = { x: 0.25, y: 0.25, width: 0.2, height: 0.2 } as const;
-export const TEST_CONFIDENCE = 0.87;
+export const TEST_CONFIDENCE = 0.69;
 
 /** This adapter's own raw wire shape -- deliberately *not* `AiProviderPrediction`'s shape, so `normalizePredictions()` below does real field-mapping work rather than a formality passthrough, the same as a real adapter would for its provider's actual response body. */
 const rawPredictionSchema = z.object({

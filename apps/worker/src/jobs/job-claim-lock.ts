@@ -1,3 +1,5 @@
+import { logJobEvent } from "@fieldframe/domain";
+
 import type { JobStatus, PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { z } from "zod";
 
@@ -102,6 +104,7 @@ export async function completeJob(db: PrismaClient, input: unknown): Promise<Lea
   });
   if (updated.count !== 1) return { kind: "refused" };
   await writeSafeJobEvent(db, { jobId, kind: "JOB_COMPLETED" });
+  logJobEvent("JOB_COMPLETED", { jobId, status: "COMPLETED" });
   return { kind: "updated" };
 }
 
@@ -112,6 +115,7 @@ export async function failJob(db: PrismaClient, input: unknown): Promise<LeaseMu
   const updated = await db.job.updateMany({ where: { ...currentLeaseWhere(parsed.data.jobId, parsed.data.lockToken, now), status: "RUNNING" }, data: terminalData("FAILED", now) });
   if (updated.count !== 1) return { kind: "refused" };
   await writeSafeJobEvent(db, { jobId: parsed.data.jobId, kind: "JOB_FAILED" });
+  logJobEvent("JOB_FAILED", { jobId: parsed.data.jobId, status: "FAILED" }, "error");
   return { kind: "updated" };
 }
 
@@ -125,5 +129,6 @@ export async function cancelJob(db: PrismaClient, input: unknown): Promise<Lease
   });
   if (updated.count !== 1) return { kind: "refused" };
   await writeSafeJobEvent(db, { jobId: parsed.data.jobId, kind: "JOB_CANCELED" });
+  logJobEvent("JOB_CANCELED", { jobId: parsed.data.jobId, status: "CANCELED" });
   return { kind: "updated" };
 }

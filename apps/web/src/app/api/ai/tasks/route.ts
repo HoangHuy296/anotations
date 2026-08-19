@@ -1,6 +1,7 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
 import { createAiTask } from "@/lib/ai/ai-task-service";
+import { enforceRateLimit } from "@/lib/rate-limit/enforce";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,9 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   const actor = await getRequestActor();
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
+
+  const limited = await enforceRateLimit(actor.id, "ai-task");
+  if (limited) return limited;
 
   const result = await createAiTask(actor, await request.json().catch(() => null));
   if (!result.ok) {

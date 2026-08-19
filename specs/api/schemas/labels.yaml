@@ -1,0 +1,102 @@
+# Labels domain schemas.
+#
+# Source of truth:
+#   apps/web/src/lib/dataset-metadata.ts        (labelMetadataSelect)
+#   apps/web/src/lib/validation/label.ts        (labelMutationSchema, labelIdSchema)
+#   apps/web/src/lib/workspace/label-management.ts (deleteUnreferencedLabel)
+#   apps/web/src/app/api/datasets/[datasetId]/labels/route.ts
+#   apps/web/src/app/api/labels/[labelId]/route.ts
+#   prisma/schema.prisma (LabelScope, Label model)
+
+LabelScope:
+  type: string
+  enum: [OBJECT, SEGMENTATION, KEYPOINT, CLASSIFICATION, ACTION, EVENT, SCENE, ENTITY]
+  description: Not settable through this API today -- always OBJECT (the Prisma column default) for every label created via POST .../labels.
+
+Label:
+  type: object
+  description: Safe label projection (labelMetadataSelect).
+  required: [id, datasetId, modality, scope, name, normalizedName, color, description, hotkey, createdAt, updatedAt]
+  properties:
+    id:
+      $ref: './common.yaml#/Cuid'
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    modality:
+      description: Null when the label applies across every modality in the dataset.
+      oneOf:
+        - $ref: './assets.yaml#/Modality'
+        - type: "null"
+    scope:
+      $ref: '#/LabelScope'
+    name:
+      type: string
+    normalizedName:
+      type: string
+      description: Lowercased form used for the dataset-scoped uniqueness constraint.
+    color:
+      type: string
+      pattern: '^#[0-9A-F]{6}$'
+    description:
+      type: [string, "null"]
+      description: Persisted as null, not empty string, when the create/update request supplied an empty description ("" is normalized to null on write).
+    hotkey:
+      type: [string, "null"]
+      description: Persisted as null, not empty string, when the create/update request supplied an empty hotkey ("" is normalized to null on write).
+    createdAt:
+      $ref: './common.yaml#/Timestamp'
+    updatedAt:
+      $ref: './common.yaml#/Timestamp'
+  additionalProperties: false
+
+LabelListResponse:
+  type: object
+  description: >-
+    Offset-paginated per 021-production-hardening-garbage-collection's
+    contracts/pagination-envelope.md. `page`/`pageSize` request query
+    parameters are optional; default pageSize is a generous 100 (a dataset's
+    label taxonomy is a small reference set, not a browseable list) so an
+    unparameterized request keeps returning the full taxonomy unless a
+    dataset genuinely exceeds that many labels.
+  required: [items, page, pageSize, total]
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Label'
+    page:
+      type: integer
+      minimum: 1
+      examples: [1]
+    pageSize:
+      type: integer
+      minimum: 1
+      examples: [100]
+    total:
+      type: integer
+      minimum: 0
+      examples: [12]
+  additionalProperties: false
+
+LabelMutationRequest:
+  type: object
+  description: "Source: labelMutationSchema. Shared by POST (create) and PATCH (update)."
+  required: [name, color]
+  properties:
+    name:
+      type: string
+      minLength: 2
+      maxLength: 50
+    color:
+      type: string
+      pattern: '^#[0-9A-Fa-f]{6}$'
+      description: Normalized to uppercase server-side.
+    description:
+      type: string
+      maxLength: 280
+      default: ""
+    hotkey:
+      type: string
+      description: Must be empty or exactly one letter/number; normalized to uppercase.
+      default: ""
+  additionalProperties: false

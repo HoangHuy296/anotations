@@ -1,9 +1,19 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
+import { paginateInMemory, parsePageRequest } from "@/lib/pagination";
 import { listSourceConnections, createSourceConnection } from "@/lib/source-connection-service";
 import { sourceConnectionCreateSchema } from "@/lib/validation/source-connection";
 
 export const dynamic = "force-dynamic";
+
+// `imports-screen.tsx` (the only internal render path that lists source
+// connections) runs its own direct `db.sourceConnection.findMany` query and
+// never fetches this route -- confirmed by audit before adding pagination
+// here. `listSourceConnections` has no Prisma-level skip/take of its own (a
+// per-user connection list is small), so this route paginates the already-
+// fetched array in memory rather than adding new pagination plumbing to the
+// service layer for a result set this size.
+const DEFAULT_PAGE_SIZE = 100;
 
 function sourceError(code: string) {
   const details: Record<string, [number, string]> = {
@@ -18,10 +28,12 @@ function sourceError(code: string) {
   return apiError(status, code as never, message);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const actor = await getRequestActor();
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
-  return apiSuccess({ connections: await listSourceConnections(actor) });
+  const pageRequest = parsePageRequest(new URL(request.url).searchParams, DEFAULT_PAGE_SIZE);
+  const { items, page, pageSize, total } = paginateInMemory(await listSourceConnections(actor), pageRequest);
+  return apiSuccess({ connections: items, page, pageSize, total });
 }
 
 export async function POST(request: Request) {

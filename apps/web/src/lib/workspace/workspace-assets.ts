@@ -4,7 +4,7 @@ import type { AssetStatus, Modality } from "@internal/db";
 
 import type { SafeWorkspaceAsset } from "@/types/workspace";
 
-export const WORKSPACE_ASSET_PAGE_SIZE = 100;
+export const WORKSPACE_ASSET_PAGE_SIZE = 10;
 
 /**
  * Split out from `workspace-read.ts` so `image-workspace.ts` (which

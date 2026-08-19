@@ -2,6 +2,7 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
 import { readBoundedJsonRequest } from "@/lib/gitea-route";
 import { safePreflightFailure } from "@/lib/providers/provider-errors";
+import { enforceRateLimit } from "@/lib/rate-limit/enforce";
 import { acceptRepositoryImportRequest } from "@/lib/repository-import/acceptance";
 import { repositoryImportRequestSchema } from "@/lib/validation/repository-import-request";
 
@@ -18,6 +19,8 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   const actor = await getRequestActor();
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
+  const limited = await enforceRateLimit(actor.id, "import");
+  if (limited) return limited;
 
   const body = await readBoundedJsonRequest(request);
   if (!body.success) return body.response;
