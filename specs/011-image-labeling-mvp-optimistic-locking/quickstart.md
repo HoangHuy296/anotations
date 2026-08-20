@@ -71,17 +71,17 @@ docker compose exec postgres psql -U fieldframe -d fieldframe -c \
 Focused Feature 011 test command (it does not print credentials):
 
 ```bash
-pnpm --filter @fieldframe/web test:workspace
+pnpm --filter @annotationplatform/web test:workspace
 ```
 
 For real PostgreSQL evidence, run the same suite with the explicit opt-in:
 
 ```bash
-WORKSPACE_INTEGRATION_TESTS=1 pnpm --filter @fieldframe/web test:workspace
+WORKSPACE_INTEGRATION_TESTS=1 pnpm --filter @annotationplatform/web test:workspace
 ```
 
 2026-07-17 PostgreSQL evidence: `WORKSPACE_INTEGRATION_TESTS=1 pnpm --filter
-@fieldframe/web test:workspace` passed 5/5 against the controlled Compose
+@annotationplatform/web test:workspace` passed 5/5 against the controlled Compose
 database. The explicitly approved migration
 `20260717134447_align_annotation_revision` aligned `Annotation.version` to
 `Annotation.revision`; it resets old lock values to `1` rather than preserving
@@ -94,11 +94,11 @@ PostgreSQL and MinIO services. Authentication used the normal opaque HTTP-only
 cookie flow; no auth bypass or browser-readable JWT was enabled.
 
 ```bash
-pnpm --filter @fieldframe/web typecheck
-pnpm --filter @fieldframe/web lint
-pnpm --filter @fieldframe/web build
-WORKSPACE_INTEGRATION_TESTS=1 AUTH_PAGE_HTTP_INTEGRATION_TESTS=1 MINIO_VIEW_INTEGRATION_TESTS=1 pnpm --filter @fieldframe/web test:workspace
-pnpm --filter @fieldframe/web test:auth-ownership
+pnpm --filter @annotationplatform/web typecheck
+pnpm --filter @annotationplatform/web lint
+pnpm --filter @annotationplatform/web build
+WORKSPACE_INTEGRATION_TESTS=1 AUTH_PAGE_HTTP_INTEGRATION_TESTS=1 MINIO_VIEW_INTEGRATION_TESTS=1 pnpm --filter @annotationplatform/web test:workspace
+pnpm --filter @annotationplatform/web test:auth-ownership
 ```
 
 Results: typecheck, lint, and production build passed. The workspace run passed

@@ -79,7 +79,7 @@ services:
       SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-u6VLCxDEgcV0NNsGFvXFTkAeHT4A9rX+zIKEEPnSD9Q=}
       GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.123:3101}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
-      FIELDFRAME_RUNTIME: compose
+      ANNOTATIONPLATFORM_RUNTIME: compose
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "0"
       GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
       GITHUB_WEB_BASE_URL: ${GITHUB_WEB_BASE_URL:-https://github.com}
@@ -159,7 +159,7 @@ services:
       GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://10.0.0.123:3101}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
       GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
-      FIELDFRAME_RUNTIME: compose
+      ANNOTATIONPLATFORM_RUNTIME: compose
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "0"
       SOURCE_ALLOWED_IP_CIDRS: ${SOURCE_ALLOWED_IP_CIDRS:-}
       # 021-production-hardening-garbage-collection (US1/US4/US5) -- worker-only.
@@ -239,7 +239,7 @@ services:
     environment:
       USER_UID: ${GITEA_USER_UID:-1000}
       USER_GID: ${GITEA_USER_GID:-1000}
-      GITEA__DEFAULT__APP_NAME: FieldFrame Git Service (Review)
+      GITEA__DEFAULT__APP_NAME: Annotation Platform Git Service (Review)
       GITEA__DEFAULT__RUN_MODE: prod
       GITEA__database__DB_TYPE: postgres
       GITEA__database__HOST: gitea-postgres:5432

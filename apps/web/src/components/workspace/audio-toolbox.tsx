@@ -1,6 +1,6 @@
 "use client";
 
-import { FileAudioIcon, SpeakerHigh, Cursor, Hand, StampIcon, NotePencilIcon, HighlighterIcon } from "@phosphor-icons/react";
+import { FileAudioIcon, SpeakerHigh, Cursor, Hand, StampIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 import { useAnnotationStore } from "@/stores/image-annotation-store";

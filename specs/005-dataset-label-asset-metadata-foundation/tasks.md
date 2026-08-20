@@ -52,7 +52,7 @@
 ## Phase 6: Polish and Validation
 
 - [X] T017 Run the complete Dataset/Label/Asset role matrix with Prisma no-side-effect assertions and record results in `specs/005-dataset-label-asset-metadata-foundation/quickstart.md`.
-- [X] T018 Run the Phase 005 Node tests, `pnpm typecheck`, and `pnpm --filter @fieldframe/web lint`; record results in `specs/005-dataset-label-asset-metadata-foundation/quickstart.md`.
+- [X] T018 Run the Phase 005 Node tests, `pnpm typecheck`, and `pnpm --filter @annotationplatform/web lint`; record results in `specs/005-dataset-label-asset-metadata-foundation/quickstart.md`.
 - [X] T019 Review all metadata responses for binary, storage, source URL, token, encrypted-value, and ownership leakage in `specs/005-dataset-label-asset-metadata-foundation/contracts/access-coverage.md`.
 - [X] T020 Confirm no Prisma schema, migration, generated client, worker, queue-processing, or binary-storage changes in `specs/005-dataset-label-asset-metadata-foundation/quickstart.md`.
 - [X] T021 Run focused authenticated HTTP integration coverage for Dataset CRUD/archive, Label collision/denial, and Asset pagination/filtering in `apps/web/tests/dataset-metadata/http-routes.test.ts`.

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { UserRole } from "@internal/db";
-import { probeProvider } from "@fieldframe/domain";
+import { probeProvider } from "@annotationplatform/domain";
 
 import { getRequestActor } from "@/lib/auth";
 import { db } from "@/lib/db";

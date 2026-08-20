@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { normalizeSourceRootPath, readSourceAccessPolicy, validateSourceBaseUrl, validateSourceImportLimits } from "@fieldframe/domain";
+import { normalizeSourceRootPath, readSourceAccessPolicy, validateSourceBaseUrl, validateSourceImportLimits } from "@annotationplatform/domain";
 
 test("source URL policy denies numeric hosts unless a server allowlist matches", async () => {
   const denied = await validateSourceBaseUrl("https://203.0.113.8", readSourceAccessPolicy({ NODE_ENV: "test" }));

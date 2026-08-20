@@ -1,4 +1,4 @@
-import type { AiProviderAdapter } from "@fieldframe/domain/ai-provider";
+import type { AiProviderAdapter } from "@annotationplatform/domain/ai-provider";
 
 import { AIOZ_TEST_RESULT_PROVIDER_KEY, AiozTestResultProvider } from "./aioz-test-result-provider.js";
 import type { AiTask, PrismaClient } from "../../../../../lib/generated/prisma/client.js";

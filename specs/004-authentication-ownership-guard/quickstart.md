@@ -31,7 +31,7 @@ Run the existing project checks from the repository root:
 
 ```bash
 pnpm typecheck
-pnpm --filter @fieldframe/web lint
+pnpm --filter @annotationplatform/web lint
 node --import tsx --test apps/web/tests/auth-ownership/**/*.test.ts
 ```
 
@@ -39,10 +39,10 @@ A passing integration-test result must include every mandatory authentication an
 
 ## Phase 004 execution record (2026-07-14)
 
-- `pnpm --filter @fieldframe/web typecheck` passed.
-- `pnpm --filter @fieldframe/web lint` passed.
-- `pnpm --filter @fieldframe/web build` passed outside the restricted shell; the restricted shell cannot bind Turbopack's internal worker port.
-- `pnpm --filter @fieldframe/web test:auth-ownership` passed in a short-lived Compose-network container: 13 tests passed, 0 failed. The host command cannot reach the Compose-only `postgres` hostname. Test fixtures use Prisma only, create uniquely named temporary records, and remove them after each case.
+- `pnpm --filter @annotationplatform/web typecheck` passed.
+- `pnpm --filter @annotationplatform/web lint` passed.
+- `pnpm --filter @annotationplatform/web build` passed outside the restricted shell; the restricted shell cannot bind Turbopack's internal worker port.
+- `pnpm --filter @annotationplatform/web test:auth-ownership` passed in a short-lived Compose-network container: 13 tests passed, 0 failed. The host command cannot reach the Compose-only `postgres` hostname. Test fixtures use Prisma only, create uniquely named temporary records, and remove them after each case.
 - The matrix covers owner/manager/reviewer/labeler/outsider outcomes, session expiry/revocation/rotation, SourceConnection ownership, cross-dataset Asset/Label references, Job denial side effects, and queue payload shape.
 
 ## Security review record

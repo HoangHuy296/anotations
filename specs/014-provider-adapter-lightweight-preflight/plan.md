@@ -17,7 +17,7 @@ repository, downloads source bytes, or persists a manifest.
 **Language/Version**: TypeScript 5.9; Node.js 22; Next.js App Router 16.2.
 
 **Primary Dependencies**: Next.js Route Handlers, Zod 4, Prisma client,
-existing opaque-cookie authentication, `@fieldframe/domain` source-access
+existing opaque-cookie authentication, `@annotationplatform/domain` source-access
 policy, Node fetch/streams. No new dependency is planned.
 
 **Storage**: PostgreSQL SourceConnection is read-only during preflight; its

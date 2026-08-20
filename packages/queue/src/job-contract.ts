@@ -12,7 +12,8 @@ export function getQueueDeliveryId(jobId: string) {
   return jobQueuePayloadSchema.parse({ jobId }).jobId;
 }
 
-export const fieldframeQueueName = "fieldframe-jobs";
+/** Transport queue name — a persisted BullMQ/Redis identifier; kept stable across the FieldFrame → Annotation Platform rename. */
+export const annotationPlatformQueueName = "fieldframe-jobs";
 
 /**
  * Only Job types with a registered private processor may be delivered. Media
@@ -30,7 +31,7 @@ export const supportedQueueJobTypes = [
 export type SupportedQueueJobType = (typeof supportedQueueJobTypes)[number];
 
 export function queueNameForJobType(type: string): string | null {
-  return (supportedQueueJobTypes as readonly string[]).includes(type) ? fieldframeQueueName : null;
+  return (supportedQueueJobTypes as readonly string[]).includes(type) ? annotationPlatformQueueName : null;
 }
 
 export function createQueueTransport(input: {
@@ -42,7 +43,7 @@ export function createQueueTransport(input: {
   /** Opt-in bounded failure behavior for controlled outage tests and one-shot probes. */
   failFast?: boolean;
 }) {
-  return new Queue(fieldframeQueueName, {
+  return new Queue(annotationPlatformQueueName, {
     connection: {
       host: input.host,
       port: input.port,
@@ -55,10 +56,6 @@ export function createQueueTransport(input: {
     },
     prefix: input.prefix,
   });
-}
-
-export function getPrefixedQueueName(prefix: string) {
-  return `${prefix}:${fieldframeQueueName}`;
 }
 
 const safeLocalQueueTestConfigSchema = z.object({

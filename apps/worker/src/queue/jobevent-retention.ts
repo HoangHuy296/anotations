@@ -1,4 +1,4 @@
-import { logMaintenanceEvent } from "@fieldframe/domain";
+import { logMaintenanceEvent } from "@annotationplatform/domain";
 
 import { Prisma, type PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { GC_LOCK_KEYS, withAdvisoryLock } from "./gc-coordination.js";

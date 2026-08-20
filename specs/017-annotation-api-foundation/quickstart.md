@@ -36,16 +36,16 @@
 
 ```bash
 WORKSPACE_INTEGRATION_TESTS=1 \
-pnpm --filter @fieldframe/web test:workspace
+pnpm --filter @annotationplatform/web test:workspace
 
 ANNOTATION_API_INTEGRATION_TESTS=1 \
-pnpm --filter @fieldframe/web test:annotation-api
+pnpm --filter @annotationplatform/web test:annotation-api
 
 pnpm exec prisma validate
 pnpm exec prisma generate
-pnpm --filter @fieldframe/web typecheck
-pnpm --filter @fieldframe/web lint
-pnpm --filter @fieldframe/web build
+pnpm --filter @annotationplatform/web typecheck
+pnpm --filter @annotationplatform/web lint
+pnpm --filter @annotationplatform/web build
 git diff --check
 ```
 
@@ -63,9 +63,9 @@ No migration or new dependency is expected.
 ## Executed implementation checks — 2026-07-29
 
 - `pnpm exec prisma validate` — passed.
-- `pnpm --filter @fieldframe/web lint` — passed.
-- `pnpm --filter @fieldframe/web typecheck` — passed.
-- `pnpm --filter @fieldframe/web test:workspace` — rerun after the five-shape
+- `pnpm --filter @annotationplatform/web lint` — passed.
+- `pnpm --filter @annotationplatform/web typecheck` — passed.
+- `pnpm --filter @annotationplatform/web test:workspace` — rerun after the five-shape
   editing and read-only visualization changes: 18 passed, 0 failed, duration
   8.36 seconds.
 - Focused command
@@ -144,8 +144,8 @@ record. No credentials or connection strings are recorded here.
 
 - `pnpm exec prisma validate` — passed.
 - `pnpm exec prisma generate` — passed.
-- `pnpm --filter @fieldframe/web lint` — passed.
-- `pnpm --filter @fieldframe/web typecheck` — passed.
+- `pnpm --filter @annotationplatform/web lint` — passed.
+- `pnpm --filter @annotationplatform/web typecheck` — passed.
 - Workspace suite — 18 passed, 0 failed.
 - Workspace suite with `WORKSPACE_INTEGRATION_TESTS=1` — 34 passed, 0 failed,
   2 intentional MinIO/auth opt-in skips, duration 12.97 seconds. The legacy

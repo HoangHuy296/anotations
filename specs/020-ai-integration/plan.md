@@ -14,7 +14,7 @@ Turn AI provider output into new draft `Annotation` rows without ever touching m
 
 **Language/Version**: TypeScript (Next.js App Router web app on Node.js; private worker as a separate Node.js process), matching every prior phase.
 
-**Primary Dependencies**: Next.js Route Handlers, Prisma (`@internal/db` path alias to the generated client), BullMQ (`@fieldframe/queue` shared package), Zod for request/service validation, `ioredis` for the worker's Redis connection. No new npm package is introduced.
+**Primary Dependencies**: Next.js Route Handlers, Prisma (`@internal/db` path alias to the generated client), BullMQ (`@annotationplatform/queue` shared package), Zod for request/service validation, `ioredis` for the worker's Redis connection. No new npm package is introduced.
 
 **Storage**: PostgreSQL via Prisma is the source of truth for `Job`, `AiTask`, `AiModel`, and `Annotation`. Redis/BullMQ is transport-only (`{ jobId }` payload). MinIO is not written to by this feature (AI predictions carry geometry/labels, not binaries); `AiTask.resultStorageKey` exists in the schema for a future large-result-to-MinIO path but is out of scope here.
 
@@ -126,7 +126,7 @@ apps/worker/src/providers/ai/
                                       # (see research.md "Open Dependency"); must not be written from a guess.
 └── ai-provider-registry.ts          # resolveAiProviderForTask(db, aiTask): AiTask.modelId → AiModel row
                                       # (Prisma lookup, worker-only) → AiModel.provider → adapter, via the
-                                      # pure AiProviderAdapter contract from @fieldframe/domain/ai-provider.
+                                      # pure AiProviderAdapter contract from @annotationplatform/domain/ai-provider.
                                       # Never reads or writes Job.provider.
 
 apps/worker/src/jobs/

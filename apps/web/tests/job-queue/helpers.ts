@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 
 import { DatasetMemberRole, JobStatus, JobType, UserRole } from "@internal/db";
-import { createQueueTransport, readSafeLocalQueueTestConfig, type SafeLocalQueueTestConfig } from "@fieldframe/queue";
+import { createQueueTransport, readSafeLocalQueueTestConfig, type SafeLocalQueueTestConfig } from "@annotationplatform/queue";
 
 import { db } from "@/lib/db";
 

@@ -16,7 +16,7 @@ export function AppMark({ compact = false, className }: AppMarkProps) {
       {!compact && (
         <span className="leading-none">
           <span className="block text-sm font-bold tracking-[-0.02em] text-zinc-950">
-            Fieldframe
+            Annotation Platform
           </span>
           <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.16em] text-zinc-400">
             Annotation desk

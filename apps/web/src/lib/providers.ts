@@ -2,7 +2,7 @@ import "server-only";
 
 import { Client as MinioClient } from "minio";
 
-import { readDirectUploadConfig, readProviderConfig } from "@fieldframe/domain";
+import { readDirectUploadConfig, readProviderConfig } from "@annotationplatform/domain";
 
 import { db } from "@/lib/db";
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getQueueDeliveryId } from "@fieldframe/queue";
+import { getQueueDeliveryId } from "@annotationplatform/queue";
 
 import { db } from "@/lib/db";
 

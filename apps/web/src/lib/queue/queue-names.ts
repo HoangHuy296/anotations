@@ -1,6 +1,6 @@
 import "server-only";
 
-import { queueNameForJobType, type SupportedQueueJobType } from "@fieldframe/queue";
+import { queueNameForJobType, type SupportedQueueJobType } from "@annotationplatform/queue";
 import { JobType } from "@internal/db";
 
 export function resolveQueueName(type: JobType): string | null {

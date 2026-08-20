@@ -2,7 +2,7 @@ import {
   ProviderConfigError,
   readProviderConfig,
   type ProviderConfig,
-} from "@fieldframe/domain";
+} from "@annotationplatform/domain";
 import { z } from "zod";
 
 export function getWorkerConfig(): ProviderConfig {

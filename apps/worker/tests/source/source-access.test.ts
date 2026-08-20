@@ -11,13 +11,13 @@ const skip = "source worker integration skipped: controlled PostgreSQL or source
 
 test("worker maps only the exact configured public Compose Gitea root to its server-controlled internal endpoint", () => {
   const environment = {
-    FIELDFRAME_RUNTIME: "compose",
+    ANNOTATIONPLATFORM_RUNTIME: "compose",
     GITEA_PUBLIC_URL: "http://localhost:3100/",
     GITEA_INTERNAL_URL: "http://gitea:3000",
   };
   assert.equal(resolveWorkerReachableGiteaBaseUrl("http://localhost:3100", environment), "http://gitea:3000");
   assert.equal(resolveWorkerReachableGiteaBaseUrl("http://untrusted.invalid:3100", environment), "http://untrusted.invalid:3100");
-  assert.equal(resolveWorkerReachableGiteaBaseUrl("http://localhost:3100", { ...environment, FIELDFRAME_RUNTIME: "host" }), "http://localhost:3100");
+  assert.equal(resolveWorkerReachableGiteaBaseUrl("http://localhost:3100", { ...environment, ANNOTATIONPLATFORM_RUNTIME: "host" }), "http://localhost:3100");
 });
 
 function encryptForWorker(token: string) {

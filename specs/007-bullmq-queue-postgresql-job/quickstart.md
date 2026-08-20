@@ -40,10 +40,10 @@ This phase adds durable queue transport only. It does not change the Prisma sche
 
 ```bash
 pnpm typecheck
-pnpm --filter @fieldframe/web lint
-pnpm --filter @fieldframe/web test:auth-ownership
-pnpm --filter @fieldframe/web test:job-queue
-pnpm --filter @fieldframe/worker test:queue
+pnpm --filter @annotationplatform/web lint
+pnpm --filter @annotationplatform/web test:auth-ownership
+pnpm --filter @annotationplatform/web test:job-queue
+pnpm --filter @annotationplatform/worker test:queue
 docker compose up --build
 ```
 

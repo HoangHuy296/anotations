@@ -3,7 +3,7 @@ import test from "node:test";
 import { Worker, type Job as QueueJob } from "bullmq";
 import { Redis } from "ioredis";
 
-import { fieldframeQueueName } from "@fieldframe/queue";
+import { annotationPlatformQueueName } from "@annotationplatform/queue";
 
 import { getWorkerConfig } from "../../src/config.js";
 import { claimJob } from "../../src/jobs/job-claim-lock.js";
@@ -58,7 +58,7 @@ test("a genuinely stalled BullMQ delivery is redetected and redelivered, and the
   // must be disconnected explicitly, or the process never exits.
   const connection1 = new Redis(connectionOptions());
   const connection2 = new Redis(connectionOptions());
-  const worker1 = new Worker(fieldframeQueueName, processor(), {
+  const worker1 = new Worker(annotationPlatformQueueName, processor(), {
     connection: connection1, prefix: config.BULLMQ_PREFIX,
     lockDuration: 300, stalledInterval: 200, maxStalledCount: 2,
   });
@@ -78,7 +78,7 @@ test("a genuinely stalled BullMQ delivery is redetected and redelivered, and the
 
     // The worker that "comes back" — its own stalled-check timer detects
     // worker1's now-expired, never-renewed lock and is redelivered the Job.
-    worker2 = new Worker(fieldframeQueueName, processor(), {
+    worker2 = new Worker(annotationPlatformQueueName, processor(), {
       connection: connection2, prefix: config.BULLMQ_PREFIX,
       lockDuration: 300, stalledInterval: 200, maxStalledCount: 2,
     });

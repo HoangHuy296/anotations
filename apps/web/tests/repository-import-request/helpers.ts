@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { promisify } from "node:util";
 
-import { createQueueTransport, readSafeLocalQueueTestConfig } from "@fieldframe/queue";
+import { createQueueTransport, readSafeLocalQueueTestConfig } from "@annotationplatform/queue";
 
 import { db } from "@/lib/db";
 import { getDirectUploadProviders } from "@/lib/providers";

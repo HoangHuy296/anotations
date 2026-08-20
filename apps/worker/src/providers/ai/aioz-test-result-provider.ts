@@ -6,7 +6,7 @@ import type {
   AiProviderStatusResult,
   AiProviderSubmitInput,
   AiProviderSubmitResult,
-} from "@fieldframe/domain/ai-provider";
+} from "@annotationplatform/domain/ai-provider";
 
 /**
  * Test-only fake `AiProviderAdapter`, registered in `ai-provider-registry.ts`

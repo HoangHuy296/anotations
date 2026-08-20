@@ -78,14 +78,14 @@ and worker count after controlled tests.
 Executed independently on 2026-07-29 (controlled local environment):
 
 - `node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/annotation-api/video-foundation.test.ts` — 1 suite, 5 assertions, 1 passed, 0 failed, 0 skipped.
-- `pnpm --filter @fieldframe/web typecheck` — passed.
-- `pnpm --filter @fieldframe/worker typecheck` — passed.
-- `pnpm --filter @fieldframe/worker build` — passed.
-- `pnpm --filter @fieldframe/web lint` — passed with one pre-existing unused-import warning.
+- `pnpm --filter @annotationplatform/web typecheck` — passed.
+- `pnpm --filter @annotationplatform/worker typecheck` — passed.
+- `pnpm --filter @annotationplatform/worker build` — passed.
+- `pnpm --filter @annotationplatform/web lint` — passed with one pre-existing unused-import warning.
 - `pnpm exec prisma validate` — passed.
 - `pnpm exec prisma migrate status` — passed; controlled database is up to date.
-- `pnpm --filter @fieldframe/web test:workspace` — 18 suites passed, 0 failed, 0 skipped.
-- `pnpm --filter @fieldframe/web build` — initial sandbox run was blocked by a process-port permission error; rerun with approved process permissions after final client/store changes compiled successfully, passed TypeScript, generated 24 static pages, and exited 0.
+- `pnpm --filter @annotationplatform/web test:workspace` — 18 suites passed, 0 failed, 0 skipped.
+- `pnpm --filter @annotationplatform/web build` — initial sandbox run was blocked by a process-port permission error; rerun with approved process permissions after final client/store changes compiled successfully, passed TypeScript, generated 24 static pages, and exited 0.
 
 This checkpoint validates strict keyframe authority DTOs, interpolation
 foundations, existing workspace regressions, Prisma state, and type safety.
@@ -98,13 +98,13 @@ Phase 019 closure record.
 - `pnpm exec prisma generate` — passed with Prisma 6.19.3.
 - `pnpm exec prisma validate` — passed.
 - `pnpm exec prisma migrate status` — passed; 10 migrations, database up to date.
-- `pnpm --filter @fieldframe/web typecheck` — passed.
-- `pnpm --filter @fieldframe/web lint` — passed with one existing unused-import warning.
-- `pnpm --filter @fieldframe/worker typecheck` — passed.
-- `pnpm --filter @fieldframe/worker build` — passed.
-- `pnpm --filter @fieldframe/web test:workspace` — 18 passed, 0 failed, 0 skipped.
+- `pnpm --filter @annotationplatform/web typecheck` — passed.
+- `pnpm --filter @annotationplatform/web lint` — passed with one existing unused-import warning.
+- `pnpm --filter @annotationplatform/worker typecheck` — passed.
+- `pnpm --filter @annotationplatform/worker build` — passed.
+- `pnpm --filter @annotationplatform/web test:workspace` — 18 passed, 0 failed, 0 skipped.
 - Focused foundation and gated HTTP test files — 2 suites passed; HTTP lifecycle suite intentionally skipped because no web service was listening on the configured test port.
-- `pnpm --filter @fieldframe/web build` — passed with approved process permissions; TypeScript and 24 static pages completed successfully.
+- `pnpm --filter @annotationplatform/web build` — passed with approved process permissions; TypeScript and 24 static pages completed successfully.
 - `git diff --check` — exit 2; only tracked generated Prisma files report trailing whitespace after pinned regeneration (`prismaNamespace.ts` and `VideoObjectTrack.ts`). No exclusions or manual generated-file edits were used.
 
 The authenticated HTTP, two-session PostgreSQL race, duplicate-index,
@@ -169,16 +169,16 @@ Implemented (runtime evidence still required before task checkboxes change):
 
 Validation after these edits:
 
-- `pnpm --filter @fieldframe/web typecheck` — passed.
-- `pnpm --filter @fieldframe/web lint` — 0 errors, one existing unused
+- `pnpm --filter @annotationplatform/web typecheck` — passed.
+- `pnpm --filter @annotationplatform/web lint` — 0 errors, one existing unused
   `SafeMediaReadiness` warning.
 - The newly expanded authenticated HTTP suite could not execute in this
   checkpoint because `127.0.0.1:3000` was not listening and Docker socket
   access was unavailable in the current shell. No pass is claimed for that
   suite.
-- `pnpm --filter @fieldframe/web test:workspace` — 18 passed, 0 failed,
+- `pnpm --filter @annotationplatform/web test:workspace` — 18 passed, 0 failed,
   0 skipped after the UI and autosave-coordinator additions.
-- `pnpm --filter @fieldframe/web build` — passed with approved process
+- `pnpm --filter @annotationplatform/web build` — passed with approved process
   permissions; compilation, TypeScript, and 24 static pages completed with
   exit code 0.
 - A second production build after temporal-label boundary/relabel controls —
@@ -234,18 +234,18 @@ browser-level workflow remain open and are not claimed here.
   and keyframe create/update/delete. It serializes all mutations for a Track,
   uses the latest successful Track revision for work queued while a request is
   in flight, and is flushed by workspace navigation alongside image autosaves.
-- `pnpm --filter @fieldframe/web exec vitest run
+- `pnpm --filter @annotationplatform/web exec vitest run
   tests/workspace/video-autosave.vitest.spec.ts
   tests/workspace/video-temporal-boundary.vitest.spec.ts --environment node`
   — 2 files, 5 passed, 0 failed. Covers fake-timer debounce, later edit while
   an older request is in flight, no automatic conflict retry, independent
   temporal revision use, and interval-bound invariants.
-- `pnpm --filter @fieldframe/web typecheck` — passed.
-- `pnpm --filter @fieldframe/web lint` — 0 errors; one existing unused import
+- `pnpm --filter @annotationplatform/web typecheck` — passed.
+- `pnpm --filter @annotationplatform/web lint` — 0 errors; one existing unused import
   warning in `workspace-read.ts`.
-- `pnpm --filter @fieldframe/web build` — passed with exit code 0; TypeScript
+- `pnpm --filter @annotationplatform/web build` — passed with exit code 0; TypeScript
   completed and 24 static pages generated after the coordinator wiring.
-- `pnpm --filter @fieldframe/web test:workspace` — 18 passed, 0 failed,
+- `pnpm --filter @annotationplatform/web test:workspace` — 18 passed, 0 failed,
   0 skipped after navigation began flushing Video coordinators.
 
 This is implementation and focused unit evidence only. A delayed real-HTTP
@@ -309,7 +309,7 @@ T041 is marked complete from this service-level race evidence. The broader authe
 ## Focused service regression — 2026-07-30
 
 - `NODE_ENV=test VIDEO_ANNOTATION_SERVICE_TESTS=1 VIDEO_ANNOTATION_RACE_TESTS=1 node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/annotations/video-track-contract.test.ts tests/annotations/video-keyframe-contract.test.ts tests/annotations/video-temporal-label-contract.test.ts tests/annotations/video-temporal-label-revision.test.ts` — 5 passed, 0 failed, 0 skipped (3.39 s) against the controlled PostgreSQL database.
-- `pnpm --filter @fieldframe/web typecheck` — passed after the focused additions. `git diff --check` — exit 0. Lint continues to have no errors and one pre-existing unused `SafeMediaReadiness` warning.
+- `pnpm --filter @annotationplatform/web typecheck` — passed after the focused additions. `git diff --check` — exit 0. Lint continues to have no errors and one pre-existing unused `SafeMediaReadiness` warning.
 
 ## Rebuilt authenticated mutation HTTP checkpoint — 2026-07-30
 

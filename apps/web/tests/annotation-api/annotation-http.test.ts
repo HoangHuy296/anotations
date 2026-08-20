@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import test, { after, before } from "node:test";
 
 import { DatasetMemberRole, Modality, UserRole } from "@internal/db";
-import { createQueueTransport, readSafeLocalQueueTestConfig } from "@fieldframe/queue";
+import { createQueueTransport, readSafeLocalQueueTestConfig } from "@annotationplatform/queue";
 
 import { db } from "@/lib/db";
 import { getDirectUploadProviders } from "@/lib/providers";

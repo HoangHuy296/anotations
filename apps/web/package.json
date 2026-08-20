@@ -1,5 +1,5 @@
 {
-  "name": "@fieldframe/web",
+  "name": "@annotationplatform/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -26,8 +26,8 @@
     "test:openapi-contract": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/openapi-contract/**/*.test.ts"
   },
   "dependencies": {
-    "@fieldframe/domain": "workspace:*",
-    "@fieldframe/queue": "workspace:*",
+    "@annotationplatform/domain": "workspace:*",
+    "@annotationplatform/queue": "workspace:*",
     "@hookform/resolvers": "^5.4.0",
     "@phosphor-icons/react": "^2.1.10",
     "@prisma/client": "^6.19.3",

@@ -10,4 +10,4 @@ export {
   type SourceAccessFailure,
   type SourceAccessPolicy,
   type SourceAccessResult,
-} from "@fieldframe/domain";
+} from "@annotationplatform/domain";

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getQueueDeliveryId, jobQueuePayloadSchema, queueNameForJobType } from "@fieldframe/queue";
+import { getQueueDeliveryId, jobQueuePayloadSchema, queueNameForJobType } from "@annotationplatform/queue";
 import { foundationJobInputSchema, safeJobSummarySchema } from "@/lib/validation/job";
 
 test("queue payload remains exactly one durable job id", () => {

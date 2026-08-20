@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import test, { after, before } from "node:test";
 
 import { AnnotationType, Modality, UserRole } from "@internal/db";
-import { createQueueTransport } from "@fieldframe/queue";
+import { createQueueTransport } from "@annotationplatform/queue";
 import { createVideoKeyframe, deleteVideoKeyframe, updateVideoKeyframe } from "@/lib/annotations/video-keyframe-service";
 import { deleteVideoObjectTrack, updateVideoObjectTrack } from "@/lib/annotations/video-track-service";
 import { db } from "@/lib/db";

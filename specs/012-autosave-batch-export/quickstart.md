@@ -26,7 +26,7 @@ Expected: all commands exit successfully. This phase should require no migration
 ## Focused workspace validation
 
 ```bash
-pnpm --filter @fieldframe/web test:workspace
+pnpm --filter @annotationplatform/web test:workspace
 ```
 
 Verify the workspace suite includes:
@@ -42,8 +42,8 @@ Verify the workspace suite includes:
 Start or verify controlled local services using the repository's Compose instructions. Then set only non-secret test mode/Redis-isolation variables in the command environment, using a configured passworded loopback Redis connection, and run:
 
 ```bash
-pnpm --filter @fieldframe/web test:job-queue
-pnpm --filter @fieldframe/worker test:queue
+pnpm --filter @annotationplatform/web test:job-queue
+pnpm --filter @annotationplatform/worker test:queue
 ```
 
 The implementation's dedicated export tests must also be included in those suites or exposed as documented focused targets. The run must prove:
@@ -90,13 +90,13 @@ pnpm lint
 pnpm build
 ```
 
-Result: all five commands passed. The final `pnpm build` compiled `@fieldframe/domain`, `@fieldframe/queue`, the Next.js production application, and the private worker. Prisma generation did not change the schema or create a migration.
+Result: all five commands passed. The final `pnpm build` compiled `@annotationplatform/domain`, `@annotationplatform/queue`, the Next.js production application, and the private worker. Prisma generation did not change the schema or create a migration.
 
 Workspace validation:
 
 ```bash
 WORKSPACE_INTEGRATION_TESTS=1 MINIO_VIEW_INTEGRATION_TESTS=1 \
-pnpm --filter @fieldframe/web test:workspace
+pnpm --filter @annotationplatform/web test:workspace
 ```
 
 Result: 34 tests; 33 passed, 0 failed, 1 skipped. The skipped test is an unrelated explicitly guarded auth-flow case; the real PostgreSQL revision, MinIO view capability, 250-Asset search/pagination, filtered navigation, authorization, autosave, flush, and conflict tests passed. The skip remains documented and is not a Phase 012 completion blocker; opening a separate authentication-hardening task requires explicit approval.
@@ -107,7 +107,7 @@ Controlled web queue/export suite:
 QUEUE_INTEGRATION_TESTS=1 EXPORT_INTEGRATION_TESTS=1 \
 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase012-test REDIS_TEST_PREFIX=fieldframe-phase012-test \
-pnpm --filter @fieldframe/web test:job-queue
+pnpm --filter @annotationplatform/web test:job-queue
 ```
 
 Final result: 34 tests; 34 passed, 0 failed, 0 skipped. This includes authenticated create/status/download, role and cross-Dataset denial, denial no-side-effects, Redis payload redaction, real transport outage/recovery, and the complete export E2E test.
@@ -118,7 +118,7 @@ Controlled private-worker suite:
 QUEUE_INTEGRATION_TESTS=1 EXPORT_INTEGRATION_TESTS=1 \
 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase012-test REDIS_TEST_PREFIX=fieldframe-phase012-test \
-pnpm --filter @fieldframe/worker test:queue
+pnpm --filter @annotationplatform/worker test:queue
 ```
 
 Result: 23 tests; 23 passed, 0 failed, 0 skipped. The suite proves atomic claim ownership, progress, cancellation acknowledgement, expired/foreign-lock denial, deterministic artifact reconciliation, redacted manifest construction, duplicate delivery safety, and legacy import routing regression safety.

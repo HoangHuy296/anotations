@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getQueueDeliveryId, jobQueuePayloadSchema } from "@fieldframe/queue";
+import { getQueueDeliveryId, jobQueuePayloadSchema } from "@annotationplatform/queue";
 
 test("repository import queue transport admits only the durable Job reference", () => {
   const jobId = "job-phase016-queue-redaction";

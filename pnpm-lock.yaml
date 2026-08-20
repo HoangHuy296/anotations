@@ -33,10 +33,10 @@ importers:
 
   apps/web:
     dependencies:
-      '@fieldframe/domain':
+      '@annotationplatform/domain':
         specifier: workspace:*
         version: link:../../packages/domain
-      '@fieldframe/queue':
+      '@annotationplatform/queue':
         specifier: workspace:*
         version: link:../../packages/queue
       '@hookform/resolvers':
@@ -124,10 +124,10 @@ importers:
 
   apps/worker:
     dependencies:
-      '@fieldframe/domain':
+      '@annotationplatform/domain':
         specifier: workspace:*
         version: link:../../packages/domain
-      '@fieldframe/queue':
+      '@annotationplatform/queue':
         specifier: workspace:*
         version: link:../../packages/queue
       '@prisma/client':

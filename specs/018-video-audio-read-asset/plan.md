@@ -16,7 +16,7 @@ image engine.
 ## Technical Context
 
 **Language/Version**: TypeScript 5.9, Node.js 22, Next.js App Router 16  
-**Primary Dependencies**: Prisma, Zod, BullMQ/ioredis through `@fieldframe/queue`, MinIO client, React/Konva; approved worker image tooling gate for `ffprobe`/`ffmpeg`  
+**Primary Dependencies**: Prisma, Zod, BullMQ/ioredis through `@annotationplatform/queue`, MinIO client, React/Konva; approved worker image tooling gate for `ffprobe`/`ffmpeg`  
 **Storage**: PostgreSQL canonical metadata/Job state; Redis/BullMQ transport only; private MinIO binaries/derivatives  
 **Testing**: Node test runner + tsx, controlled Compose PostgreSQL/Redis/MinIO/web/worker tests, browser-facing opaque-cookie HTTP tests  
 **Target Platform**: Linux Compose development/runtime; browser workspace  

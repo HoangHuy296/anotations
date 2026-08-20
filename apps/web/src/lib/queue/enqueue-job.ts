@@ -1,8 +1,8 @@
 import "server-only";
 
 import { DatasetSourceMode, JobStatus, Prisma, RepoProvider, type JobType } from "@internal/db";
-import { getQueueDeliveryId, jobQueuePayloadSchema } from "@fieldframe/queue";
-import { logJobEvent, logRedisEvent } from "@fieldframe/domain";
+import { getQueueDeliveryId, jobQueuePayloadSchema } from "@annotationplatform/queue";
+import { logJobEvent, logRedisEvent } from "@annotationplatform/domain";
 
 import type { RequestActor } from "@/lib/auth";
 import { authorizeFoundationJobSubmission } from "@/lib/jobs/authorization";

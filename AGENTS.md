@@ -1,4 +1,4 @@
-# Fieldframe Agent Governance
+# Annotation Platform Agent Governance
 
 ## Architecture authority
 
@@ -16,7 +16,7 @@ documents.
 
 ## Product boundary
 
-Fieldframe is an image annotation product. The public application is a Next.js
+Annotation Platform is an image annotation product. The public application is a Next.js
 App Router application. It owns browser-facing pages and APIs, authentication,
 authorization, validation, metadata writes, durable Job creation, and enqueue
 requests.

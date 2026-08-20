@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:net";
 import test from "node:test";
 
-import { createQueueTransport, readSafeLocalQueueTestConfig } from "@fieldframe/queue";
+import { createQueueTransport, readSafeLocalQueueTestConfig } from "@annotationplatform/queue";
 
 import { db } from "@/lib/db";
 import { enqueueExistingJob } from "@/lib/queue/enqueue-job";

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import test, { after } from "node:test";
 import { Redis } from "ioredis";
 
-import { readProviderConfig } from "@fieldframe/domain";
+import { readProviderConfig } from "@annotationplatform/domain";
 
 import { checkRateLimit } from "@/lib/rate-limit/fixed-window";
 

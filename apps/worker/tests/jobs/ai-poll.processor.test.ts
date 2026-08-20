@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { AiProviderAdapter, AiProviderStatusResult } from "@fieldframe/domain/ai-provider";
+import type { AiProviderAdapter, AiProviderStatusResult } from "@annotationplatform/domain/ai-provider";
 
 import { processAiPoll } from "../../src/jobs/ai-poll.processor.js";
 import { createAiPollFixture, hasIntegrationDatabase } from "./ai-fixtures.js";

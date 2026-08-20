@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
-import { mediaProcessingJobInputSchema } from "@fieldframe/domain/media-processing";
+import { mediaProcessingJobInputSchema } from "@annotationplatform/domain/media-processing";
 import { defaultMediaProcessingPolicy, assertMediaSourceWithinPolicy } from "../media/policy.js";
 import { materializePrivateSource } from "../media/source-materialization.js";
 import { withJobTempWorkspace } from "../media/temp-workspace.js";

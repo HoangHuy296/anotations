@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
-import { jobQueuePayloadSchema, queueNameForJobType } from "@fieldframe/queue";
+import { jobQueuePayloadSchema, queueNameForJobType } from "@annotationplatform/queue";
 
 import { writeSafeJobEvent, type JobEventReason } from "../jobs/job-event-writer.js";
 import { claimJob } from "../jobs/job-claim-lock.js";

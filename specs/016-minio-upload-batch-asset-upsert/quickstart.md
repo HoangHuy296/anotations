@@ -63,7 +63,7 @@ REPOSITORY_IMPORT_RUNTIME_TESTS=1 \
 SOURCE_CONNECTION_TEST_MODE=1 \
 SOURCE_ALLOWED_IP_CIDRS=127.0.0.1/32 \
 GITEA_INTERNAL_URL=http://127.0.0.1:3100 \
-pnpm --filter @fieldframe/worker test:repository-import
+pnpm --filter @annotationplatform/worker test:repository-import
 ```
 
 Result: 7 passed, 0 failed. The runtime test proved a `{ jobId }` delivery was
@@ -115,7 +115,7 @@ QUEUE_INTEGRATION_TESTS=1 REDIS_HOST=127.0.0.1 \
 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase016-test \
 REDIS_TEST_PREFIX=fieldframe-phase016-test \
-pnpm --filter @fieldframe/worker test:queue
+pnpm --filter @annotationplatform/worker test:queue
 ```
 
 Result: 19 passed, 0 failed, 4 skipped (unrelated opt-in export integration
@@ -205,7 +205,7 @@ raw-file requests, so the losing worker made no provider, MinIO, Asset,
 progress, or terminal-event side effect.
 
 The broad queue baseline was also rerun under the isolated Redis namespace:
-`pnpm --filter @fieldframe/worker test:queue` with the variables above.
+`pnpm --filter @annotationplatform/worker test:queue` with the variables above.
 Result: 20 passed, 0 failed, 4 explicitly skipped opt-in export tests.
 It includes runtime-owned Redis reaching `end` after `runtime.close()`, and a
 caller-owned Redis connection remaining open until its caller calls `quit()`.
@@ -366,7 +366,7 @@ LOCAL_IMPORT_INTEGRATION_TESTS=1 QUEUE_INTEGRATION_TESTS=1 \
 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase016-test \
 REDIS_TEST_PREFIX=fieldframe-phase016-test \
-pnpm --filter @fieldframe/web test:local-folder-import
+pnpm --filter @annotationplatform/web test:local-folder-import
 ```
 
 Result: 18 passed, 0 failed, 0 skipped; duration 18.274 seconds. This was a

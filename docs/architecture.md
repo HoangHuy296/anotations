@@ -1,4 +1,4 @@
-# Fieldframe Architecture Lock
+# Annotation Platform Architecture Lock
 
 ## Status and scope
 

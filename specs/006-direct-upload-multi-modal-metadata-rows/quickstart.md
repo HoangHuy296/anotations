@@ -45,8 +45,8 @@ Verify normal API responses, browser state, logs, queue payloads, and Dataset as
 
 ```bash
 pnpm typecheck
-pnpm --filter @fieldframe/web lint
-pnpm --filter @fieldframe/web test:direct-upload
+pnpm --filter @annotationplatform/web lint
+pnpm --filter @annotationplatform/web test:direct-upload
 docker compose up --build
 ```
 
@@ -64,6 +64,6 @@ If integration tests must resolve the Compose-only database host, run them in th
 
 - The approved direct-transfer exception is limited to backend-generated, short-lived, object-scoped MinIO presigned POST policies and view URLs. Upload completion capabilities are authenticated-encrypted with server-only signing material. The POST policy binds its exact object key, exact accepted content type, size range, and expiry; no credential is returned.
 - Required configuration names are `MINIO_PUBLIC_ENDPOINT`, `MINIO_CORS_ALLOWED_ORIGIN`, and `UPLOAD_CAPABILITY_SECRET`. They are server/runtime configuration; values are not placed in browser code or this document. `UPLOAD_CAPABILITY_SECRET` must contain at least 32 bytes of entropy; local tests inject one only into the process environment. MinIO CORS must return the configured origin and allow `POST`.
-- `pnpm --filter @fieldframe/web test:direct-upload` passed in a short-lived Compose-network container using a temporary process-only upload signing secret: 8 tests passed, 0 failed. Coverage uses real PostgreSQL and MinIO, Prisma assertions, opaque-cookie authentication, IMAGE/VIDEO/TEXT/AUDIO child rows, replay, expiration/tampering, denied no-side-effects, invalid media, authorized view URLs, strict POST-policy MIME/size rejection, CORS POST preflight, publication-failure orphan cleanup, published-object retention on replay, and HTTP Dataset asset-list visibility of a READY IMAGE within 10 seconds after completion.
-- `pnpm typecheck`, `pnpm --filter @fieldframe/web lint`, and `pnpm --filter @fieldframe/web build` passed. The production build needs the normal unsandboxed Turbopack worker-port permission.
+- `pnpm --filter @annotationplatform/web test:direct-upload` passed in a short-lived Compose-network container using a temporary process-only upload signing secret: 8 tests passed, 0 failed. Coverage uses real PostgreSQL and MinIO, Prisma assertions, opaque-cookie authentication, IMAGE/VIDEO/TEXT/AUDIO child rows, replay, expiration/tampering, denied no-side-effects, invalid media, authorized view URLs, strict POST-policy MIME/size rejection, CORS POST preflight, publication-failure orphan cleanup, published-object retention on replay, and HTTP Dataset asset-list visibility of a READY IMAGE within 10 seconds after completion.
+- `pnpm typecheck`, `pnpm --filter @annotationplatform/web lint`, and `pnpm --filter @annotationplatform/web build` passed. The production build needs the normal unsandboxed Turbopack worker-port permission.
 - Audit confirmed no changes to `prisma/schema.prisma`, `prisma/migrations/`, generated Prisma client, `apps/worker/`, queue contracts, Redis Job state, or modality-specific workspace routes.

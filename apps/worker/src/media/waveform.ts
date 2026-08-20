@@ -77,17 +77,6 @@ export function serializeAudioWaveform(waveform: AudioWaveform): Buffer {
   return gzipSync(JSON.stringify(waveform), { level: 6 });
 }
 
-/** Deterministic safe artifact used by the first audio processor slice. */
-export function buildWaveformArtifact(metadata: AudioMetadata): Buffer {
-  const waveform: AudioWaveform = {
-    format: AUDIO_WAVEFORM_FORMAT,
-    sampleRate: metadata.sampleRate ?? 0,
-    channels: 1,
-    peaks: [],
-  };
-  return serializeAudioWaveform(waveform);
-}
-
 export function buildWaveformArtifactFromPcm(input: { pcm: Buffer; sampleRate: number; maxPeaks?: number }): Buffer | null {
   const waveform = buildAudioWaveform(input);
   return waveform ? serializeAudioWaveform(waveform) : null;

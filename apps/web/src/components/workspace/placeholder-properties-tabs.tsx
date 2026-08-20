@@ -12,7 +12,7 @@ import type { WorkspaceSelection } from "@/types/workspace";
 
 export type PlaceholderPropertiesTabsProps = {
   datasetId: string;
-  selection: Extract<WorkspaceSelection, { engine: "VIDEO" | "AUDIO" | "TEXT" }>;
+  selection: Extract<WorkspaceSelection, { engine: | "AUDIO" | "TEXT" }>;
   assets: SafeWorkspaceAsset[];
   page: number;
   pageSize: number;
@@ -23,8 +23,7 @@ export type PlaceholderPropertiesTabsProps = {
   selectedAssetId: string | null;
 };
 
-const tabLabelsByEngine: Record<"VIDEO" | "AUDIO" | "TEXT", string[]> = {
-  VIDEO: ["Video Details", "Tracks", "Labels", "Shapes", "Properties", "Assets"],
+const tabLabelsByEngine: Record< "AUDIO" | "TEXT", string[]> = {
   AUDIO: ["Audio Details", "Labels", "Segments", "Properties"],
   TEXT: ["Text Details", "Labels", "Annotations"],
 };
@@ -49,7 +48,7 @@ export function PlaceholderPropertiesTabs({ datasetId, selection, assets, page, 
   }
 
   return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white p-4">
-    <h2 className="text-sm font-bold text-zinc-950">{selection.engine === "VIDEO" ? "Video" : selection.engine === "AUDIO" ? "Audio" : "Text"} details</h2>
+    <h2 className="text-sm font-bold text-zinc-950">{selection.engine === "AUDIO" ? "AUDIO" : "TEXT"} details</h2>
     <p className="mt-1 break-all text-xs font-semibold text-zinc-800">{selection.asset.filename}</p>
     <nav aria-label={`${selection.engine} panel tabs`} className="mt-4 flex flex-wrap gap-1.5">
       {tabLabels.map((label) => <span key={label} className="rounded-lg border border-zinc-100 px-2 py-1.5 text-[11px] font-medium text-zinc-300" title="Not yet available in this phase">{label}</span>)}

@@ -2,7 +2,7 @@ import "server-only";
 
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 
-import type { DirectUploadConfig } from "@fieldframe/domain";
+import type { DirectUploadConfig } from "@annotationplatform/domain";
 
 export const UPLOAD_CAPABILITY_TTL_SECONDS = 10 * 60;
 export const VIEW_CAPABILITY_TTL_SECONDS = 5 * 60;

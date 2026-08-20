@@ -23,11 +23,11 @@ credentials, database URL, or Redis password.
 ```bash
 pnpm exec prisma validate
 pnpm exec prisma generate
-pnpm --filter @fieldframe/web typecheck
-pnpm --filter @fieldframe/web lint
-pnpm --filter @fieldframe/web test:repository-import-request
-pnpm --filter @fieldframe/worker test:queue
-pnpm --filter @fieldframe/web build
+pnpm --filter @annotationplatform/web typecheck
+pnpm --filter @annotationplatform/web lint
+pnpm --filter @annotationplatform/web test:repository-import-request
+pnpm --filter @annotationplatform/worker test:queue
+pnpm --filter @annotationplatform/web build
 git diff --check
 ```
 
@@ -45,7 +45,7 @@ GITHUB_API_BASE_URL=http://127.0.0.1:18080 \
 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase015-test \
 REDIS_TEST_PREFIX=fieldframe-phase015-test \
-pnpm --filter @fieldframe/web test:repository-import-request
+pnpm --filter @annotationplatform/web test:repository-import-request
 ```
 
 ## Controlled runtime scenario
@@ -110,7 +110,7 @@ The normal production/local queue namespace remains untouched.
   `git diff --check` passed. The host `pnpm build` wrote a fresh Next build
   artifact; the controlled `COMPOSE_BAKE=false docker compose build web` also
   completed the domain, queue, and production web build. Worker build passed
-  with `pnpm --filter @fieldframe/worker build`.
+  with `pnpm --filter @annotationplatform/worker build`.
 
 ## Scope review — single public write boundary confirmed
 

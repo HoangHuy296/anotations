@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import test, { after } from "node:test";
 
 import { RepoAuthType, RepoProvider, SourceConnectionStatus } from "@internal/db";
-import { getQueueDeliveryId } from "@fieldframe/queue";
+import { getQueueDeliveryId } from "@annotationplatform/queue";
 
 import { db } from "@/lib/db";
 import { createAndEnqueueSourceImportJob } from "@/lib/queue/enqueue-job";

@@ -1,6 +1,6 @@
 import type { Client as MinioClient } from "minio";
 
-import { logStorageEvent } from "@fieldframe/domain";
+import { logStorageEvent } from "@annotationplatform/domain";
 
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { GC_LOCK_KEYS, withAdvisoryLock } from "./gc-coordination.js";

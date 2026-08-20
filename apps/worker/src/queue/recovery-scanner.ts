@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
-import { queueNameForJobType } from "@fieldframe/queue";
+import { queueNameForJobType } from "@annotationplatform/queue";
 
 import { writeSafeJobEvent } from "../jobs/job-event-writer.js";
 

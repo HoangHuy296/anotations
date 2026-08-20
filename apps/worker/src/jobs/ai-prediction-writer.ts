@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { AiProviderPrediction } from "@fieldframe/domain/ai-provider";
+import type { AiProviderPrediction } from "@annotationplatform/domain/ai-provider";
 
 import { releaseLock } from "../queue/job-lock.js";
 import type { AiTask, PrismaClient } from "../../../../lib/generated/prisma/client.js";

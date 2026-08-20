@@ -14,7 +14,7 @@ No new database model, migration, queue payload shape, public backend, or depend
 
 **Language/Version**: TypeScript 5, Node.js 22, Next.js 16 App Router, React 19.
 
-**Primary Dependencies**: Existing Prisma client, Zod, Zustand, React/Konva workspace components, MinIO client, BullMQ/ioredis through `@fieldframe/queue`; no new package.
+**Primary Dependencies**: Existing Prisma client, Zod, Zustand, React/Konva workspace components, MinIO client, BullMQ/ioredis through `@annotationplatform/queue`; no new package.
 
 **Storage**: PostgreSQL/Prisma is canonical for Datasets, Assets, Labels, Annotations, `AuthSession`, and Job lifecycle/result metadata. MinIO stores only private source and export bytes. Redis/BullMQ transports only `{ jobId }`.
 
@@ -129,7 +129,7 @@ apps/worker/tests/queue/             # Export claim/cancel/retry/manifest/MinIO 
 ### Phase 012.2 — Export through the Durable Job System
 
 7. Define strict server-side export request, safe status/download, and manifest schemas. Support JSON only; allowlist the persisted input to Dataset identity plus a canonical format/version. Derive idempotency from server-validated Dataset/config context and return the existing durable Job for a repeated identical start request.
-8. Implement `POST /api/export`: resolve current session actor, validate Zod input, require Dataset `job.createExport`, create/reconcile the common `EXPORT_DATASET` Job in PostgreSQL, enqueue through `@fieldframe/queue` using exactly `{ jobId }`, and return only a safe Job DTO. On enqueue failure leave a recoverable queued Job and no false completion.
+8. Implement `POST /api/export`: resolve current session actor, validate Zod input, require Dataset `job.createExport`, create/reconcile the common `EXPORT_DATASET` Job in PostgreSQL, enqueue through `@annotationplatform/queue` using exactly `{ jobId }`, and return only a safe Job DTO. On enqueue failure leave a recoverable queued Job and no false completion.
 9. Implement `GET /api/export/[jobId]`: authorize Dataset-scoped Job read, project only the established safe status fields, and when completed create a short-lived authorized download capability from private artifact metadata. Never serialize `resultStorageKey`, bucket, raw input/state/result/errors/events, transport/lock fields, or provider config.
 10. Add `EXPORT_DATASET` to the private router after the existing atomic claim. The processor loads the canonical Job, verifies active Dataset and cancellation state, reads all authorized Dataset/Asset/Label/Annotation metadata with stable ordering, produces a bounded JSON manifest, uploads a deterministic private artifact, and updates progress, safe summary, result metadata, events, and terminal status using existing lock-token helpers.
 11. Make export recovery/retry/cancellation idempotent. A duplicate delivery for one Job reuses/reconciles its deterministic artifact. The existing successor-based retry contract must preserve only allowlisted export context; it must not copy raw `Job.input` or create duplicate output for the same successor Job.

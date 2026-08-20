@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 
 import { UserRole } from "@internal/db";
-import { createQueueTransport } from "@fieldframe/queue";
+import { createQueueTransport } from "@annotationplatform/queue";
 
 import { hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";

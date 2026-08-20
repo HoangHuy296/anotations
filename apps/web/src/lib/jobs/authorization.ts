@@ -1,7 +1,7 @@
 import "server-only";
 
 import { JobStatus, JobType } from "@internal/db";
-import { jobQueuePayloadSchema } from "@fieldframe/queue";
+import { jobQueuePayloadSchema } from "@annotationplatform/queue";
 import { z } from "zod";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 import type { RequestActor } from "@/lib/auth";
@@ -10,7 +10,7 @@ import { db } from "@/lib/db";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { foundationJobInputSchema } from "@/lib/validation/job";
 
-export { jobQueuePayloadSchema } from "@fieldframe/queue";
+export { jobQueuePayloadSchema } from "@annotationplatform/queue";
 
 /**
  * Minimal durable lookup used only to establish the Dataset authorization

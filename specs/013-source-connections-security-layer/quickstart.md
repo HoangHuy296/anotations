@@ -33,11 +33,11 @@ Use the repository's established targeted source-connection test command, then w
 pnpm db:validate
 pnpm typecheck
 pnpm lint
-pnpm --filter @fieldframe/web test:auth-ownership
-pnpm --filter @fieldframe/web test:source-connections
-pnpm --filter @fieldframe/worker test:source-access
-pnpm --filter @fieldframe/web build
-pnpm --filter @fieldframe/worker build
+pnpm --filter @annotationplatform/web test:auth-ownership
+pnpm --filter @annotationplatform/web test:source-connections
+pnpm --filter @annotationplatform/worker test:source-access
+pnpm --filter @annotationplatform/web build
+pnpm --filter @annotationplatform/worker build
 ```
 
 Replace a test target only after it is created by the Phase 013 task plan; do not silently substitute mocked database, Redis, or provider behavior for required controlled integration evidence.
@@ -86,8 +86,8 @@ The controlled PostgreSQL-backed source suite was run with the repository test
 command (environment values were loaded without being printed):
 
 ```bash
-pnpm --filter @fieldframe/web test:source-connections
-pnpm --filter @fieldframe/web typecheck
+pnpm --filter @annotationplatform/web test:source-connections
+pnpm --filter @annotationplatform/web typecheck
 ```
 
 Result: **7 passed, 0 failed**. This includes the Prisma-backed owner,
@@ -399,7 +399,7 @@ LOCAL_IMPORT_INTEGRATION_TESTS=1 QUEUE_INTEGRATION_TESTS=1 \
 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase013-regression \
 REDIS_TEST_PREFIX=fieldframe-phase013-regression \
-pnpm --filter @fieldframe/web test:local-folder-import
+pnpm --filter @annotationplatform/web test:local-folder-import
 ```
 
 Result: **16 passed, 0 failed, 0 skipped**. This covers canonical
@@ -468,16 +468,16 @@ Final commands:
 ```bash
 pnpm exec prisma validate
 pnpm exec prisma generate
-pnpm --filter @fieldframe/web typecheck
-pnpm --filter @fieldframe/web lint
-pnpm --filter @fieldframe/web build
-pnpm --filter @fieldframe/worker typecheck
-pnpm --filter @fieldframe/worker build
+pnpm --filter @annotationplatform/web typecheck
+pnpm --filter @annotationplatform/web lint
+pnpm --filter @annotationplatform/web build
+pnpm --filter @annotationplatform/worker typecheck
+pnpm --filter @annotationplatform/worker build
 LOCAL_IMPORT_INTEGRATION_TESTS=1 QUEUE_INTEGRATION_TESTS=1 \
 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase013-regression \
 REDIS_TEST_PREFIX=fieldframe-phase013-regression \
-pnpm --filter @fieldframe/web test:local-folder-import
+pnpm --filter @annotationplatform/web test:local-folder-import
 curl -fsS http://127.0.0.1:3000/api/health
 docker compose exec -T postgres pg_isready -U fieldframe -d fieldframe
 docker compose exec -T redis sh -lc 'REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli PING'

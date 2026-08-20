@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { jobQueuePayloadSchema, queueNameForJobType } from "@fieldframe/queue";
+import { jobQueuePayloadSchema, queueNameForJobType } from "@annotationplatform/queue";
 
 import { appendLocalFolderImportSchema, startLocalFolderImportSchema } from "@/lib/validation/local-folder-import";
 import { safeManifestItem } from "./helpers";

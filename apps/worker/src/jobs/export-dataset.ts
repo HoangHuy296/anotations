@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import { Queue } from "bullmq";
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
 import { getWorkerConfig } from "../config.js";

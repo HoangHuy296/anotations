@@ -12,7 +12,7 @@ import {
   type MediaProcessingJobType,
   type MediaSourceIdentity,
   type SafeMediaErrorCode,
-} from "@fieldframe/domain/media-processing";
+} from "@annotationplatform/domain/media-processing";
 import { z } from "zod";
 
 export {

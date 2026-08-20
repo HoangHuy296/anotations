@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
 
-import { createQueueTransport } from "@fieldframe/queue";
+import { createQueueTransport } from "@annotationplatform/queue";
 import { createWorkerDatabase } from "../../src/providers/db.js";
 import { getWorkerConfig } from "../../src/config.js";
 import { createWorkerMinio } from "../../src/providers/minio.js";

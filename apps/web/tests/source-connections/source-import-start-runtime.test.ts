@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import test, { after } from "node:test";
 
-import { createQueueTransport, getQueueDeliveryId } from "@fieldframe/queue";
+import { createQueueTransport, getQueueDeliveryId } from "@annotationplatform/queue";
 
 import { db } from "@/lib/db";
 import { getDirectUploadProviders } from "@/lib/providers";

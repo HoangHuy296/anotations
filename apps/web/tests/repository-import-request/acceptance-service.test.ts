@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { jobQueuePayloadSchema } from "@fieldframe/queue";
+import { jobQueuePayloadSchema } from "@annotationplatform/queue";
 
 import { buildDurableJobQueueDelivery } from "@/lib/queue/enqueue-job";
 import {

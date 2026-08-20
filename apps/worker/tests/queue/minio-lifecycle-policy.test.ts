@@ -17,8 +17,8 @@ test("the temp-upload lifecycle policy is applied, prefix-scoped only to prepare
   assert.ok(lifecycle && "Rule" in lifecycle);
   const rules = (lifecycle as { Rule: Array<{ ID: string; Status: string; Filter?: { Prefix?: string }; Expiration?: { Days?: number } }> }).Rule;
 
-  const preparedImportsRule = rules.find((rule) => rule.ID === "fieldframe-expire-prepared-imports");
-  const directUploadsRule = rules.find((rule) => rule.ID === "fieldframe-expire-direct-uploads");
+  const preparedImportsRule = rules.find((rule) => rule.ID === "annotationplatform-expire-prepared-imports");
+  const directUploadsRule = rules.find((rule) => rule.ID === "annotationplatform-expire-direct-uploads");
   assert.ok(preparedImportsRule, "expected a rule scoped to prepared-imports/");
   assert.ok(directUploadsRule, "expected a rule scoped to direct-uploads/");
   assert.equal(preparedImportsRule!.Filter?.Prefix, "prepared-imports/");

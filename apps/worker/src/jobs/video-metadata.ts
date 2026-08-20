@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
-import { mediaProcessingJobInputSchema } from "@fieldframe/domain/media-processing";
+import { mediaProcessingJobInputSchema } from "@annotationplatform/domain/media-processing";
 
 import { getWorkerConfig } from "../config.js";
 import { defaultMediaProcessingPolicy, assertMediaSourceWithinPolicy } from "../media/policy.js";

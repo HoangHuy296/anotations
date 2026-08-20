@@ -5,7 +5,7 @@ import { AssetStatus, Modality } from "@internal/db";
 import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
-import { readSafeMediaReadiness, type SafeMediaReadiness } from "@/lib/media-processing/safe-media-readiness";
+import { readSafeMediaReadiness } from "@/lib/media-processing/safe-media-readiness";
 import { readVideoAnnotations } from "@/lib/annotations/video-read-service";
 import { readImageWorkspaceAsset } from "@/lib/workspace/image-workspace";
 import { toSafeWorkspaceAsset, WORKSPACE_ASSET_PAGE_SIZE } from "@/lib/workspace/workspace-assets";

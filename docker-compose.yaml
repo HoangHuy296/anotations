@@ -77,7 +77,7 @@ services:
       SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-wSA2xXBH4KiKxAjt9b38M8bqk6QbYzbs0p9AZkUp+4I=}
       GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
-      FIELDFRAME_RUNTIME: compose
+      ANNOTATIONPLATFORM_RUNTIME: compose
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: ${REPOSITORY_PREFLIGHT_INTEGRATION_TESTS:-0}
       # Public GitHub is the normal deployment endpoint. The controlled
       # preflight override is the only place that substitutes github-fixture.
@@ -137,7 +137,7 @@ services:
       GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}  
       GITHUB_API_BASE_URL: ${GITHUB_API_BASE_URL:-https://api.github.com}
-      FIELDFRAME_RUNTIME: compose
+      ANNOTATIONPLATFORM_RUNTIME: compose
       # Required only by the controlled fixture override; production remains
       # disabled by default and cannot enable it through browser input.
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: ${REPOSITORY_PREFLIGHT_INTEGRATION_TESTS:-0}
@@ -202,7 +202,7 @@ services:
       USER_GID: ${GITEA_USER_GID:-1000}
 
       # Application
-      GITEA__DEFAULT__APP_NAME: FieldFrame Git Service
+      GITEA__DEFAULT__APP_NAME: Annotation Platform Git Service
       GITEA__DEFAULT__RUN_MODE: prod
 
       # Database

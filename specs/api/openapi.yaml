@@ -1,10 +1,10 @@
 openapi: 3.1.0
 
 info:
-  title: Fieldframe Annotation Platform API
+  title: Annotation Platform API
   version: 0.2.0
   description: >-
-    Documentation-only OpenAPI description of the Fieldframe Next.js backend API, as
+    Documentation-only OpenAPI description of the Annotation Platform Next.js backend API, as
     actually implemented. This document does not redesign, rename, or extend the API --
     every path, parameter, request body, response body, and status code below is
     derived directly from the route handlers under apps/web/src/app/api and the
@@ -22,7 +22,7 @@ info:
     process) is never addressed directly by a browser client and is therefore not
     documented as part of this public API surface, per AGENTS.md.
   contact:
-    name: Fieldframe
+    name: Annotation Platform
 
 servers:
   - url: /

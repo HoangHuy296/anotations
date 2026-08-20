@@ -1,4 +1,4 @@
-import { createQueueTransport, readSafeLocalQueueTestConfig, type SafeLocalQueueTestConfig } from "@fieldframe/queue";
+import { createQueueTransport, readSafeLocalQueueTestConfig, type SafeLocalQueueTestConfig } from "@annotationplatform/queue";
 import type { Prisma } from "../../../../lib/generated/prisma/client.js";
 import { createWorkerDatabase } from "../../src/providers/db.js";
 import { getWorkerConfig } from "../../src/config.js";

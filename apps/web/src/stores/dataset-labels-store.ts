@@ -11,8 +11,15 @@ import type { Modality } from "@internal/db";
  * for "applies everywhere") -- unlike `types/image-workspace.ts`'s
  * `SafeWorkspaceLabel`, which narrows it to `"IMAGE" | null` because that
  * type only ever describes the IMAGE canvas's own SSR-projected labels.
+ *
+ * `description`/`hotkey` are optional because IMAGE's SSR seed
+ * (`SafeWorkspaceLabel`, passed to `ensureLoaded`'s `seed` param) doesn't
+ * carry them -- they're absent only for that brief pre-fetch paint; the
+ * authoritative `GET`/`PATCH` responses this store otherwise stores always
+ * include them (`labelMetadataSelect`), so `label-edit-dialog.tsx` treats a
+ * missing value the same as `null`.
  */
-export type DatasetLabel = { id: string; name: string; color: string; modality: Modality | null };
+export type DatasetLabel = { id: string; name: string; color: string; modality: Modality | null; description?: string | null; hotkey?: string | null };
 
 type LoadStatus = "idle" | "loading" | "loaded" | "error";
 type DatasetLabelsEntry = { labels: DatasetLabel[]; status: LoadStatus; pending: Promise<void> | null };
@@ -43,6 +50,7 @@ type DatasetLabelsState = {
   /** Forces the next `ensureLoaded` call for `datasetId` to hit the network again. */
   invalidate: (datasetId: string) => void;
   addLabel: (datasetId: string, label: DatasetLabel) => void;
+  updateLabel: (datasetId: string, label: DatasetLabel) => void;
   removeLabel: (datasetId: string, labelId: string) => void;
 };
 
@@ -87,6 +95,14 @@ export const useDatasetLabelsStore = create<DatasetLabelsState>((set, get) => ({
   addLabel: (datasetId, label) => set((state) => {
     const entry = state.entries[datasetId] ?? EMPTY_ENTRY;
     return { entries: { ...state.entries, [datasetId]: { ...entry, labels: [...entry.labels, label].sort((left, right) => left.name.localeCompare(right.name)) } } };
+  }),
+
+  // Re-sorts by name too -- a rename can change this label's place in the
+  // `normalizedName`-ordered list the server hands back, same as `addLabel`.
+  updateLabel: (datasetId, label) => set((state) => {
+    const entry = state.entries[datasetId];
+    if (!entry) return state;
+    return { entries: { ...state.entries, [datasetId]: { ...entry, labels: entry.labels.map((item) => (item.id === label.id ? label : item)).sort((left, right) => left.name.localeCompare(right.name)) } } };
   }),
 
   removeLabel: (datasetId, labelId) => set((state) => {

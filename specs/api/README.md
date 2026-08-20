@@ -1,6 +1,6 @@
-# Fieldframe API documentation (OpenAPI)
+# Annotation Platform API documentation (OpenAPI)
 
-This directory documents the Fieldframe Next.js backend API **as it is actually
+This directory documents the Annotation Platform Next.js backend API **as it is actually
 implemented**. It is a documentation layer only: nothing under `apps/web` was
 changed to produce it, and no endpoint, field, status code, or auth mechanism here
 was invented ahead of the implementation.

@@ -35,7 +35,7 @@ SOURCE_IMPORT_JOBS_DEPRECATED`; it cannot remain a compatibility writer.
 
 **Primary Dependencies**: Next.js Route Handlers and Server Components, Zod 4,
 Prisma 6, existing opaque-cookie authentication/authorization, existing
-`@fieldframe/queue` package, BullMQ, existing Phase-014 provider-preflight
+`@annotationplatform/queue` package, BullMQ, existing Phase-014 provider-preflight
 coordinator. No new dependency is planned.
 
 **Storage**: PostgreSQL is canonical for `Dataset`, `Job`, and `JobEvent`.

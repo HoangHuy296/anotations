@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import test from "node:test";
 
 import { AnnotationSource, AnnotationStatus, AnnotationType, Modality, UserRole } from "@internal/db";
-import { createQueueTransport } from "@fieldframe/queue";
+import { createQueueTransport } from "@annotationplatform/queue";
 import { db } from "@/lib/db";
 import { getDirectUploadProviders } from "@/lib/providers";
 import { cleanupAnnotationFixture, createAnnotationDataset, createAnnotationUser } from "../annotation-api/helpers";

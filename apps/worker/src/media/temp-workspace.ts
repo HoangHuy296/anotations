@@ -10,7 +10,7 @@ export type JobTempWorkspace = {
 function workspacePrefix(jobId: string) {
   // The Job id never reaches a browser path. Still constrain it so this helper
   // cannot turn arbitrary data into a path segment.
-  return `fieldframe-media-${jobId.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 96)}-`;
+  return `annotationplatform-media-${jobId.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 96)}-`;
 }
 
 export async function createJobTempWorkspace(jobId: string): Promise<JobTempWorkspace> {

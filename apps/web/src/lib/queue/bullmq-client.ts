@@ -1,7 +1,7 @@
 import "server-only";
 
-import { readProviderConfig } from "@fieldframe/domain";
-import { createQueueTransport } from "@fieldframe/queue";
+import { readProviderConfig } from "@annotationplatform/domain";
+import { createQueueTransport } from "@annotationplatform/queue";
 
 export function createWebQueue() {
   const config = readProviderConfig();

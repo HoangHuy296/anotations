@@ -1,4 +1,4 @@
-# Fieldframe — Review / Demo Environment
+# Annotation Platform — Review / Demo Environment
 
 An isolated Docker Compose stack for colleagues to review the annotation
 platform, without touching anyone's local dev stack. It runs on its own

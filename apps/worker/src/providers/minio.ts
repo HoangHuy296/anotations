@@ -1,6 +1,6 @@
 import { Client as MinioClient } from "minio";
 
-import type { ProviderConfig } from "@fieldframe/domain";
+import type { ProviderConfig } from "@annotationplatform/domain";
 
 export function createWorkerMinio(config: ProviderConfig) {
   const endpoint = new URL(config.MINIO_ENDPOINT);
@@ -45,8 +45,8 @@ export async function ensureBucket(client: MinioClient, bucket: string) {
 export async function ensureTempUploadLifecyclePolicy(client: MinioClient, bucket: string, expirationDays: number) {
   await client.setBucketLifecycle(bucket, {
     Rule: [
-      { ID: "fieldframe-expire-prepared-imports", Status: "Enabled", Filter: { Prefix: "prepared-imports/" }, Expiration: { Days: expirationDays } },
-      { ID: "fieldframe-expire-direct-uploads", Status: "Enabled", Filter: { Prefix: "direct-uploads/" }, Expiration: { Days: expirationDays } },
+      { ID: "annotationplatform-expire-prepared-imports", Status: "Enabled", Filter: { Prefix: "prepared-imports/" }, Expiration: { Days: expirationDays } },
+      { ID: "annotationplatform-expire-direct-uploads", Status: "Enabled", Filter: { Prefix: "direct-uploads/" }, Expiration: { Days: expirationDays } },
     ],
   });
 }

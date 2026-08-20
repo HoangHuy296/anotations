@@ -4,8 +4,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Fieldframe",
-    template: "%s · Fieldframe",
+    default: "Annotation Platform",
+    template: "%s · Annotation Platform",
   },
   description: "Gitea-backed image annotation workspace.",
 };

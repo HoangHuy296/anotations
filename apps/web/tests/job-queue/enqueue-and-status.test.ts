@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { JobStatus, JobType } from "@internal/db";
-import { fieldframeQueueName } from "@fieldframe/queue";
+import { annotationPlatformQueueName } from "@annotationplatform/queue";
 
 import { db } from "@/lib/db";
 import { createAndEnqueueFoundationJob } from "@/lib/queue/enqueue-job";
@@ -26,7 +26,7 @@ test("an authorized foundation Job is durable, delivered by its own id, and tran
     } });
     assert.equal(persisted.datasetId, fixture.datasetId);
     assert.equal(persisted.status, JobStatus.QUEUED);
-    assert.equal(persisted.queueName, fieldframeQueueName);
+    assert.equal(persisted.queueName, annotationPlatformQueueName);
     assert.equal(persisted.queueJobId, persisted.id);
     assert.ok(persisted.enqueuedAt);
 

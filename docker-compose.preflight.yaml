@@ -6,7 +6,7 @@ services:
     command:
       - sh
       - -c
-      - cd /workspace && exec pnpm --filter @fieldframe/web exec next dev
+      - cd /workspace && exec pnpm --filter @annotationplatform/web exec next dev
     environment:
       NODE_ENV: development
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "1"

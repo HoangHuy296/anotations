@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getQueueDeliveryId, jobQueuePayloadSchema } from "@fieldframe/queue";
+import { getQueueDeliveryId, jobQueuePayloadSchema } from "@annotationplatform/queue";
 
 import {
   cleanupRepositoryImportUser,

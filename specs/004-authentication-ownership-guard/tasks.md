@@ -106,7 +106,7 @@
 
 **Purpose**: Verify the complete phase without expanding into later processing or storage features.
 
-- [X] T031 Run the Phase 004 Node tests, `pnpm typecheck`, and `pnpm --filter @fieldframe/web lint`; record exact safe results in `specs/004-authentication-ownership-guard/quickstart.md`.
+- [X] T031 Run the Phase 004 Node tests, `pnpm typecheck`, and `pnpm --filter @annotationplatform/web lint`; record exact safe results in `specs/004-authentication-ownership-guard/quickstart.md`.
 - [X] T032 Review browser responses, cookies, error paths, logs, and queue payload construction for password, session, provider-token, storage-credential, and encrypted-connection leakage in `specs/004-authentication-ownership-guard/quickstart.md`.
 - [X] T033 Confirm all protected routes in `specs/004-authentication-ownership-guard/contracts/route-coverage.md` use the central session/authorization boundary and have a matching test or explicit out-of-scope record.
 - [X] T034 Confirm no edits were made to `prisma/schema.prisma`, `prisma/migrations/`, generated Prisma files, worker processors, or binary-storage behavior; record Phase 004 limitations and stop in `specs/004-authentication-ownership-guard/quickstart.md`.

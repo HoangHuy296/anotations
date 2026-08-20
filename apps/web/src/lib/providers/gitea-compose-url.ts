@@ -20,7 +20,7 @@ function canonicalUrl(url: URL) {
 export function resolveServerReachableGiteaUrl(raw: string): { baseUrl: string; usesConfiguredInternalUrl: boolean } {
   const configuredPublic = process.env.GITEA_PUBLIC_URL;
   const configuredInternal = process.env.GITEA_INTERNAL_URL;
-  if (process.env.FIELDFRAME_RUNTIME !== "compose" || !configuredPublic || !configuredInternal) return { baseUrl: raw, usesConfiguredInternalUrl: false };
+  if (process.env.ANNOTATIONPLATFORM_RUNTIME !== "compose" || !configuredPublic || !configuredInternal) return { baseUrl: raw, usesConfiguredInternalUrl: false };
   try {
     return canonicalUrl(new URL(raw)) === canonicalUrl(new URL(configuredPublic))
       ? { baseUrl: configuredInternal, usesConfiguredInternalUrl: true }

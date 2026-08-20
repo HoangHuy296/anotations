@@ -1,4 +1,4 @@
-import { logJobEvent } from "@fieldframe/domain";
+import { logJobEvent } from "@annotationplatform/domain";
 
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 

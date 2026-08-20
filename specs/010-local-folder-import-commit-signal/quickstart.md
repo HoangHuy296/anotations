@@ -25,18 +25,18 @@ start an unauthenticated Redis instance.
 ```bash
 pnpm exec prisma validate
 pnpm exec prisma generate
-pnpm --filter @fieldframe/web test:local-folder-import
-pnpm --filter @fieldframe/web typecheck
-pnpm --filter @fieldframe/worker typecheck
+pnpm --filter @annotationplatform/web test:local-folder-import
+pnpm --filter @annotationplatform/web typecheck
+pnpm --filter @annotationplatform/worker typecheck
 ```
 
 ## Validation record — 2026-07-17
 
 - Additive migration `20260717010000_add_prepared_imports` applied to the local
   Compose PostgreSQL database.
-- `pnpm --filter @fieldframe/web build`: passed outside the restricted
+- `pnpm --filter @annotationplatform/web build`: passed outside the restricted
   sandbox (Turbopack requires process/port capability).
-- `pnpm --filter @fieldframe/worker build`: passed.
+- `pnpm --filter @annotationplatform/worker build`: passed.
 - PostgreSQL commit race/no-side-effect tests: passed when given the Compose
   database URL.
 - Private-network MinIO cleanup test: passed in an ephemeral web container on
@@ -75,7 +75,7 @@ LOCAL_IMPORT_INTEGRATION_TESTS=1 QUEUE_INTEGRATION_TESTS=1 \
 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase010-test \
 REDIS_TEST_PREFIX=fieldframe-phase010-test \
-pnpm --filter @fieldframe/web test:local-folder-import
+pnpm --filter @annotationplatform/web test:local-folder-import
 ```
 
 Result: **5 passed, 3 failed, 0 skipped**. The host test runner could not
@@ -113,7 +113,7 @@ LOCAL_IMPORT_INTEGRATION_TESTS=1 QUEUE_INTEGRATION_TESTS=1 \
 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 \
 BULLMQ_PREFIX=fieldframe-phase010-test \
 REDIS_TEST_PREFIX=fieldframe-phase010-test \
-pnpm --filter @fieldframe/web test:local-folder-import
+pnpm --filter @annotationplatform/web test:local-folder-import
 ```
 
 - Authentication: normal `/api/auth/login` opaque cookie session. Test users
@@ -129,11 +129,11 @@ pnpm --filter @fieldframe/web test:local-folder-import
 - Result: **16 passed, 0 failed, 0 skipped**. Tests used real PostgreSQL,
   MinIO POST uploads, and Redis; no provider/database/queue mock was used.
 - Worker command (same isolated Redis configuration):
-  `QUEUE_INTEGRATION_TESTS=1 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 BULLMQ_PREFIX=fieldframe-phase010-test REDIS_TEST_PREFIX=fieldframe-phase010-test pnpm --filter @fieldframe/worker test:queue`
+  `QUEUE_INTEGRATION_TESTS=1 REDIS_HOST=127.0.0.1 REDIS_DB=15 REDIS_TEST_DB=15 BULLMQ_PREFIX=fieldframe-phase010-test REDIS_TEST_PREFIX=fieldframe-phase010-test pnpm --filter @annotationplatform/worker test:queue`
   → **18 passed, 0 failed, 0 skipped**.
 - Validation: `pnpm exec prisma migrate status` reported the database up to
   date; `pnpm exec prisma validate`, `pnpm exec prisma generate`, web and
-  worker typechecks, `pnpm --filter @fieldframe/web build`, and worker build
+  worker typechecks, `pnpm --filter @annotationplatform/web build`, and worker build
   passed.
 - Secret handling: commands and test assertions did not print credentials,
   passwords, tokens, database URLs, capability secrets, or presigned query

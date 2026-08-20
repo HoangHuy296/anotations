@@ -40,7 +40,7 @@ HTTP 200
 }
 ```
 
-- `checks.*` reuses the same `probeProvider` result shape `apps/worker/src/readiness.ts` already produces at startup (`@fieldframe/domain`'s `ProviderReadiness`), applied here to a live, on-demand web-side call instead of a one-time worker-startup probe.
+- `checks.*` reuses the same `probeProvider` result shape `apps/worker/src/readiness.ts` already produces at startup (`@annotationplatform/domain`'s `ProviderReadiness`), applied here to a live, on-demand web-side call instead of a one-time worker-startup probe.
 - `jobs.*` counts come from grouped Prisma `count()` queries against `Job.status` (`active` = `RUNNING`+`QUEUED`+`RETRYING`+`CANCELING`; `stale` = the derived stale-job predicate from `data-model.md`; `deadLettered` = the derived dead-letter predicate) and `queueBacklog` from BullMQ's own `Queue.getJobCounts()`.
 - `cleanup.*` timestamps come from the most recent successful run of each scheduled pass — sourced from the most recent matching `JobEvent`/internal marker each scanner writes, not a new table.
 - **Never included, at any nesting level**: connection strings, credentials, Redis/MinIO/Postgres URLs, signed URLs, or any `Job.input`/`Job.state` payload content — this endpoint reports counts and booleans only, per AGENTS.md's security rules and FR-050.

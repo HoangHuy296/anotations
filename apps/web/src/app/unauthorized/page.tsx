@@ -22,7 +22,7 @@ export default async function UnauthorizedPage({
         <p className="mt-2 text-sm leading-6 text-zinc-500">
           {configurationError
             ? "Configure the trusted reverse-proxy secret before exposing this deployment."
-            : "Open Fieldframe through the authenticated reverse proxy, or configure DEV_AUTH_EMAIL during local development."}
+            : "Open Annotation Platform through the authenticated reverse proxy, or configure DEV_AUTH_EMAIL during local development."}
         </p>
       </div>
     </main>

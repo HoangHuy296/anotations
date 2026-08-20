@@ -21,10 +21,10 @@
 ```bash
 pnpm exec prisma migrate dev --name add_job_retry_lineage
 pnpm exec prisma generate
-pnpm --filter @fieldframe/web typecheck
-pnpm --filter @fieldframe/web build
-pnpm --filter @fieldframe/web test:job-queue
-pnpm --filter @fieldframe/worker test:queue
+pnpm --filter @annotationplatform/web typecheck
+pnpm --filter @annotationplatform/web build
+pnpm --filter @annotationplatform/web test:job-queue
+pnpm --filter @annotationplatform/worker test:queue
 ```
 
 Run database-mutating test suites in the Compose network when host DNS cannot resolve service names.
@@ -52,8 +52,8 @@ localhost fallback.
 
 - `pnpm exec prisma validate` and `pnpm exec prisma generate`: passed before applying the additive retry-lineage migration.
 - `20260717000000_add_job_retry_lineage` was applied successfully to the local Compose PostgreSQL instance at its published host port. The local `.env` was not modified.
-- `pnpm --filter @fieldframe/web typecheck` and `pnpm --filter @fieldframe/worker typecheck`: passed.
-- `pnpm --filter @fieldframe/web build`: passed when run with normal host process permissions. The workspace sandbox alone blocks Turbopack from binding a helper port.
+- `pnpm --filter @annotationplatform/web typecheck` and `pnpm --filter @annotationplatform/worker typecheck`: passed.
+- `pnpm --filter @annotationplatform/web build`: passed when run with normal host process permissions. The workspace sandbox alone blocks Turbopack from binding a helper port.
 - The pure Job progress/safe-summary tests pass. Full queue integration is only enabled through the explicit safe-local Redis variables described above; ordinary runs skip it instead of falling back to an unauthenticated local Redis.
 - Redis was recreated as a password-required listener at `127.0.0.1:6379`.
   Full queue integration passed: web Job suite **24/24** and worker queue suite

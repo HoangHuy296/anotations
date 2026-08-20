@@ -20,8 +20,8 @@
 ## Expected commands after implementation
 
 ```bash
-pnpm --filter @fieldframe/worker typecheck
-pnpm --filter @fieldframe/worker test:queue
+pnpm --filter @annotationplatform/worker typecheck
+pnpm --filter @annotationplatform/worker test:queue
 docker compose -f docker-compose.yaml run --rm --no-deps worker ...
 ```
 
@@ -38,11 +38,11 @@ JobEvents.
 Validated commands:
 
 ```sh
-pnpm --filter @fieldframe/worker build
-pnpm --filter @fieldframe/worker typecheck
-pnpm --filter @fieldframe/web typecheck
-pnpm --filter @fieldframe/web lint
-docker compose exec -T worker pnpm --filter @fieldframe/worker test:queue
+pnpm --filter @annotationplatform/worker build
+pnpm --filter @annotationplatform/worker typecheck
+pnpm --filter @annotationplatform/web typecheck
+pnpm --filter @annotationplatform/web lint
+docker compose exec -T worker pnpm --filter @annotationplatform/worker test:queue
 ```
 
 The test uses two distinct private worker identities against the same durable

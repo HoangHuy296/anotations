@@ -1,6 +1,6 @@
-# Fieldframe
+# Annotation Platform
 
-Fieldframe is a multi-modal annotation platform. The public application is a
+Annotation Platform is a multi-modal annotation product. The public application is a
 Next.js App Router app; a separate private worker processes durable Jobs.
 
 ## Architecture
@@ -93,8 +93,8 @@ pnpm build
 Unit/schema tests:
 
 ```bash
-pnpm --filter @fieldframe/web test:local-folder-import
-pnpm --filter @fieldframe/worker test:queue
+pnpm --filter @annotationplatform/web test:local-folder-import
+pnpm --filter @annotationplatform/worker test:queue
 ```
 
 Full queue integration is intentionally opt-in and must use passworded Redis
@@ -104,8 +104,8 @@ bound to `127.0.0.1`, a non-zero dedicated DB, and an isolated key prefix:
 QUEUE_INTEGRATION_TESTS=1 \
 REDIS_HOST=127.0.0.1 \
 REDIS_DB=15 REDIS_TEST_DB=15 \
-BULLMQ_PREFIX=fieldframe-test REDIS_TEST_PREFIX=fieldframe-test \
-pnpm --filter @fieldframe/worker test:queue
+BULLMQ_PREFIX=annotationplatform-test REDIS_TEST_PREFIX=annotationplatform-test \
+pnpm --filter @annotationplatform/worker test:queue
 ```
 
 Do not use the normal `annotation-platform` queue prefix for integration tests.

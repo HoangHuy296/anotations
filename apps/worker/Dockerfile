@@ -20,12 +20,12 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-RUN pnpm --filter @fieldframe/domain build \
-  && pnpm --filter @fieldframe/queue build \
-  && pnpm --filter @fieldframe/worker build
+RUN pnpm --filter @annotationplatform/domain build \
+  && pnpm --filter @annotationplatform/queue build \
+  && pnpm --filter @annotationplatform/worker build
 
 RUN mkdir -p apps/worker/dist/lib/generated/prisma \
   && cp lib/generated/prisma/*.so.node \
     apps/worker/dist/lib/generated/prisma/
 
-CMD ["pnpm", "--filter", "@fieldframe/worker", "start"]
+CMD ["pnpm", "--filter", "@annotationplatform/worker", "start"]

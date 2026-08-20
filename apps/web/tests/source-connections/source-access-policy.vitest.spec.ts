@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { readSourceAccessPolicy, validateSourceBaseUrl } from "@fieldframe/domain";
+import { readSourceAccessPolicy, validateSourceBaseUrl } from "@annotationplatform/domain";
 
 describe("source destination policy with injected resolver", () => {
   it("fails closed for private, mixed, and unavailable DNS answers", async () => {

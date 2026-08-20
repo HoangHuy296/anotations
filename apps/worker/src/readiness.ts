@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 
-import { probeProvider, type ProviderReadiness } from "@fieldframe/domain";
+import { probeProvider, type ProviderReadiness } from "@annotationplatform/domain";
 
 import { getProductionHardeningPolicy, getSafeStartupMessage, getWorkerConfig } from "./config.js";
 import {
@@ -146,7 +146,7 @@ export async function startWorkerReadiness() {
     };
     process.once("SIGTERM", shutdown);
     process.once("SIGINT", shutdown);
-    console.info("Fieldframe worker ready.");
+    console.info("Annotation Platform worker ready.");
   } catch (error: unknown) {
     await closeOnError?.();
     console.error(getSafeStartupMessage(error));

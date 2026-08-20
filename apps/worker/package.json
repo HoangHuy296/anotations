@@ -1,5 +1,5 @@
 {
-  "name": "@fieldframe/worker",
+  "name": "@annotationplatform/worker",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,8 +15,8 @@
     "test:repository-import": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/repository-import/**/*.test.ts"
   },
   "dependencies": {
-    "@fieldframe/domain": "workspace:*",
-    "@fieldframe/queue": "workspace:*",
+    "@annotationplatform/domain": "workspace:*",
+    "@annotationplatform/queue": "workspace:*",
     "@prisma/client": "^6.19.3",
     "bullmq": "^5.79.3",
     "ioredis": "5.10.1",

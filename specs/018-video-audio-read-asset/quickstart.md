@@ -43,11 +43,11 @@
 
 ## Executed foundation evidence
 
-- 2026-07-29 — `pnpm --filter @fieldframe/domain build`: passed.
+- 2026-07-29 — `pnpm --filter @annotationplatform/domain build`: passed.
 - 2026-07-29 — `node --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test tests/media-processing/contracts.test.ts` from `apps/web`: 1 passed, 0 failed, 0 skipped.
-- 2026-07-29 — `pnpm --filter @fieldframe/worker typecheck`,
-  `pnpm --filter @fieldframe/web typecheck`, and
-  `pnpm --filter @fieldframe/domain typecheck`: passed.
+- 2026-07-29 — `pnpm --filter @annotationplatform/worker typecheck`,
+  `pnpm --filter @annotationplatform/web typecheck`, and
+  `pnpm --filter @annotationplatform/domain typecheck`: passed.
 
 This evidence covers only T007's deterministic, credential-free identity and
 finite-policy foundation. It is not worker-image, queue, storage, or runtime
@@ -56,7 +56,7 @@ evidence.
 - 2026-07-29 — `node --import tsx tests/media/subprocess.test.ts` from
   `apps/worker`: 4 passed, 0 failed, 0 skipped (no-shell execution, bounded
   output, cancellation termination, and temp-workspace cleanup).
-- 2026-07-29 — `pnpm --filter @fieldframe/worker typecheck`: passed after the
+- 2026-07-29 — `pnpm --filter @annotationplatform/worker typecheck`: passed after the
   media worker primitive addition.
 - 2026-07-29 — `node --import tsx tests/media/source-materialization.test.ts`
   from `apps/worker`: 3 passed, 0 failed, 0 skipped (bounded verified source
@@ -70,12 +70,12 @@ evidence.
   `media-tools-ok` (no versions, credentials, or runtime configuration logged).
 - 2026-07-29 — `node --import tsx tests/media/video-metadata.test.ts` from
   `apps/worker`: 2 passed, 0 failed, 0 skipped (bounded ffprobe parsing and
-  malformed/unbounded output refusal). `@fieldframe/domain`, queue, web, and
+  malformed/unbounded output refusal). `@annotationplatform/domain`, queue, web, and
   worker builds/typechecks passed after adding the VIDEO processor and route.
   Controlled PostgreSQL/MinIO worker evidence is still required for T015/T021.
-- 2026-07-29 — `pnpm --filter @fieldframe/domain build`,
-  `pnpm --filter @fieldframe/queue build`, `pnpm --filter @fieldframe/web
-  typecheck`, `pnpm --filter @fieldframe/worker typecheck`, and `git diff
+- 2026-07-29 — `pnpm --filter @annotationplatform/domain build`,
+  `pnpm --filter @annotationplatform/queue build`, `pnpm --filter @annotationplatform/web
+  typecheck`, `pnpm --filter @annotationplatform/worker typecheck`, and `git diff
   --check`: passed after the server-only scheduling/readiness adapters. HTTP,
   PostgreSQL, Redis, and MinIO integration evidence remains open.
 
@@ -85,8 +85,8 @@ evidence.
   `apps/worker`: 2 passed, 0 failed, 0 skipped. This covers bounded ffprobe
   audio metadata parsing, normalized waveform bucket serialization, and the
   versioned `fieldframe.audio-waveform.v1` artifact envelope.
-- 2026-07-29 — `pnpm --filter @fieldframe/worker typecheck`,
-  `pnpm --filter @fieldframe/worker build`, `pnpm --filter @fieldframe/queue
+- 2026-07-29 — `pnpm --filter @annotationplatform/worker typecheck`,
+  `pnpm --filter @annotationplatform/worker build`, `pnpm --filter @annotationplatform/queue
   build`, and `git diff --check`: passed after adding the AUDIO queue route,
   private processor foundation, bounded ffmpeg decode validation, and exact
   unreferenced derivative compensation guard.
@@ -126,9 +126,9 @@ evidence remain open; Phase 018 is not closed.
   the `annotation-platform` namespace after the two-worker run.
 - 2026-07-29 — `pnpm exec prisma validate`, `pnpm exec prisma generate`,
   domain/queue/worker builds, web typecheck, and `git diff --check`: passed.
-  `pnpm --filter @fieldframe/web build`: production build completed
+  `pnpm --filter @annotationplatform/web build`: production build completed
   successfully (all routes generated; no secrets or runtime values recorded).
-- 2026-07-29 — `pnpm --filter @fieldframe/worker test:repository-import`:
+- 2026-07-29 — `pnpm --filter @annotationplatform/worker test:repository-import`:
   27 tests, 13 passed, 0 failed, 14 explicit controlled-runtime skips. The
   non-runtime repository regressions remained green; skipped cases require
   their separately gated provider/MinIO/two-worker fixtures.

@@ -55,7 +55,7 @@ ambiguous boundary.
 **Purpose**: Implement the safe, single-Asset scheduling and shared modality
 read boundaries required by all user stories.
 
-- [X] T007 Add canonical media processor version, credential-free request-identity, finite policy, and safe error schemas in `apps/web/src/lib/media-processing/contracts.ts` and `apps/worker/src/media/policy.ts`; the version is exported from `@fieldframe/domain/media-processing` to prevent web/worker drift.
+- [X] T007 Add canonical media processor version, credential-free request-identity, finite policy, and safe error schemas in `apps/web/src/lib/media-processing/contracts.ts` and `apps/worker/src/media/policy.ts`; the version is exported from `@annotationplatform/domain/media-processing` to prevent web/worker drift.
 - [ ] T008 [P] Extend allowed queue Job type/name validation for `EXTRACT_VIDEO_METADATA` and `GENERATE_AUDIO_WAVEFORM` in `packages/queue/src/job-contract.ts`, `apps/web/src/lib/queue/queue-names.ts`, and `apps/worker/src/queue/queue-names.ts`; preserve exact `{ jobId }` payload tests in `packages/queue/src/job-contract.test.ts`.
 - [X] T009 Implement `ensureMediaProcessingJob` with Dataset/Asset authorization, source freshness revalidation, concurrent idempotency, durable commit-before-enqueue, and existing recovery semantics in `apps/web/src/lib/media-processing/ensure-media-processing-job.ts`.
 - [X] T010 [P] Implement one safe media-readiness projection and canonical server-side polymorphic workspace read service in `apps/web/src/lib/media-processing/safe-media-readiness.ts` and `apps/web/src/lib/workspace/workspace-read.ts`.

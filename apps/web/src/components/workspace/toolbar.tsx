@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import {
-  ArrowsOut,
   BoundingBox,
   Circle,
   Cursor,
@@ -34,7 +33,6 @@ type ToolbarProps = {
 
 export function Toolbar({
   zoomPercent,
-  onFit,
   onZoomIn,
   onZoomOut,
   tool,

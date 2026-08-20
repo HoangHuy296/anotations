@@ -9,7 +9,7 @@ import { cleanupUnreferencedMediaDerivative } from "../../src/media/minio-compen
 import { materializePrivateSource } from "../../src/media/source-materialization.js";
 
 test("materializes only a verified private source within its configured bound", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "fieldframe-media-source-test-"));
+  const directory = await mkdtemp(join(tmpdir(), "annotationplatform-media-source-test-"));
   try {
     const result = await materializePrivateSource({
       minio: {

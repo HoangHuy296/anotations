@@ -1,7 +1,6 @@
-import { MEDIA_PROCESSOR_VERSION } from "@fieldframe/domain/media-processing";
 import { z } from "zod";
 
-export { MEDIA_PROCESSOR_VERSION } from "@fieldframe/domain/media-processing";
+export { MEDIA_PROCESSOR_VERSION } from "@annotationplatform/domain/media-processing";
 
 export const mediaProcessingPolicySchema = z.object({
   maxSourceBytes: z.bigint().positive(),

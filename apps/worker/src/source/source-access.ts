@@ -1,7 +1,7 @@
 import { createDecipheriv } from "node:crypto";
 
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
-import { normalizeSourceRootPath, validateSourceBaseUrl, validateSourceImportLimits } from "@fieldframe/domain";
+import { normalizeSourceRootPath, validateSourceBaseUrl, validateSourceImportLimits } from "@annotationplatform/domain";
 import { parseRepositoryImportInput, type RepositoryAccess } from "../jobs/repository-import-source.js";
 
 export type SourceAccessResolution =
@@ -40,7 +40,7 @@ function canonicalBaseUrl(value: string) {
 export function resolveWorkerReachableGiteaBaseUrl(raw: string, environment: NodeJS.ProcessEnv = process.env) {
   const publicUrl = environment.GITEA_PUBLIC_URL;
   const internalUrl = environment.GITEA_INTERNAL_URL;
-  if (environment.FIELDFRAME_RUNTIME !== "compose" || !publicUrl || !internalUrl) return raw;
+  if (environment.ANNOTATIONPLATFORM_RUNTIME !== "compose" || !publicUrl || !internalUrl) return raw;
   try {
     const canonicalRaw = canonicalBaseUrl(raw);
     const canonicalPublic = canonicalBaseUrl(publicUrl);

@@ -20,10 +20,10 @@ ephemerally with shell tracing disabled; do not print them.
 
 ```bash
 pnpm exec prisma validate
-pnpm --filter @fieldframe/web typecheck
-pnpm --filter @fieldframe/web lint
-pnpm --filter @fieldframe/web test:repository-preflight
-pnpm --filter @fieldframe/web build
+pnpm --filter @annotationplatform/web typecheck
+pnpm --filter @annotationplatform/web lint
+pnpm --filter @annotationplatform/web test:repository-preflight
+pnpm --filter @annotationplatform/web build
 ```
 
 No schema change is planned, so `prisma migrate` is not part of this phase.
@@ -35,7 +35,7 @@ must not create or mutate a Dataset, Job, JobEvent, SourceConnection,
 ExternalRepository, Asset, persisted manifest, Redis/BullMQ delivery, or
 MinIO object. It must not clone, download source bytes, call legacy import
 routes, add a dependency, use raw SQL, change `schema.prisma`, or create a
-migration. Use `pnpm --filter @fieldframe/web test:repository-preflight` for
+migration. Use `pnpm --filter @annotationplatform/web test:repository-preflight` for
 the targeted suite; do not substitute an import/worker test for this boundary.
 
 ## Controlled HTTP checks
@@ -65,14 +65,14 @@ Phase 014 task is marked complete.
 
 ## Validation record — 2026-07-23
 
-- Server-only adapter target: `pnpm --filter @fieldframe/web
+- Server-only adapter target: `pnpm --filter @annotationplatform/web
   test:repository-preflight` completed with **11 passed, 0 failed, 2 skipped**.
   The passing coverage uses only a loopback controlled provider fixture and
   validates strict request fields, GitHub/Gitea bounded metadata checks,
   exact/default refs, redirect-hop rejection, safe projection, and the
   unreachable `downloadFile` contract.
-- `pnpm exec prisma validate`, `pnpm --filter @fieldframe/web typecheck`, and
-  `pnpm --filter @fieldframe/web lint` passed. The production web build also
+- `pnpm exec prisma validate`, `pnpm --filter @annotationplatform/web typecheck`, and
+  `pnpm --filter @annotationplatform/web lint` passed. The production web build also
   passed outside the execution sandbox, which requires an internal local port
   for Turbopack.
 - No credential, provider URL, session cookie, database URL, Redis password,
@@ -100,7 +100,7 @@ Phase 014 task is marked complete.
   REPOSITORY_PREFLIGHT_INTEGRATION_TESTS=1 REDIS_HOST=127.0.0.1 \
   REDIS_DB=15 REDIS_TEST_DB=15 BULLMQ_PREFIX=fieldframe-phase014-test \
   REDIS_TEST_PREFIX=fieldframe-phase014-test \
-  pnpm --filter @fieldframe/web test:repository-preflight
+  pnpm --filter @annotationplatform/web test:repository-preflight
   ```
 
 - Result: **14 passed, 0 failed, 0 skipped** in 6.23 seconds. The authenticated
@@ -127,7 +127,7 @@ Phase 014 task is marked complete.
 - Redacted command: `REPOSITORY_PREFLIGHT_INTEGRATION_TESTS=1`, loopback web,
   Redis DB `15`, prefix `fieldframe-phase014-test`, and a PAT sourced only
   from untracked local test environment, followed by
-  `pnpm --filter @fieldframe/web test:repository-preflight`.
+  `pnpm --filter @annotationplatform/web test:repository-preflight`.
 - Result: **19 passed, 0 failed, 0 skipped** in 6.83 seconds. Authenticated
   HTTP coverage proved public GitHub, public Gitea, and an owned ACTIVE Gitea
   SourceConnection preflight. Every successful and tested rejected preflight
@@ -157,7 +157,7 @@ Phase 014 task is marked complete.
   or stack sentinel. The route now distinguishes an explicit unsupported
   provider from an otherwise malformed request; malformed bodies still return
   `INVALID_REQUEST`.
-- `pnpm --filter @fieldframe/web typecheck`, `pnpm --filter @fieldframe/web
+- `pnpm --filter @annotationplatform/web typecheck`, `pnpm --filter @annotationplatform/web
   lint`, and `git diff --check` passed. This is still partial US2 evidence:
   T022 stays open until access-denial and forbidden-body HTTP cases are added;
   DNS, redirect, concealment, expired-token, parity, and full-matrix tasks are
@@ -202,7 +202,7 @@ is contract-only and its Phase-014 implementation rejects invocation.
   REPOSITORY_PREFLIGHT_INTEGRATION_TESTS=1 REDIS_HOST=127.0.0.1 \
   REDIS_DB=15 REDIS_TEST_DB=15 BULLMQ_PREFIX=fieldframe-phase014-test \
   REDIS_TEST_PREFIX=fieldframe-phase014-test \
-  pnpm --filter @fieldframe/web test:repository-preflight
+  pnpm --filter @annotationplatform/web test:repository-preflight
   ```
 
 - Result: **18 passed, 0 failed, 0 skipped**. It used normal
@@ -217,7 +217,7 @@ is contract-only and its Phase-014 implementation rejects invocation.
   leaves PostgreSQL, Redis/BullMQ, and MinIO snapshots unchanged. It also
   proves authenticated legacy endpoint deprecation as
   `410 GITEA_IMPORT_DEPRECATED`.
-- `pnpm --filter @fieldframe/web typecheck`, targeted ESLint, the web
+- `pnpm --filter @annotationplatform/web typecheck`, targeted ESLint, the web
   production image build, and `git diff --check` passed.
 - Still open: a controlled Gitea repository/token happy path proving
   full UI credential-mode matrix and all response redaction cases. Therefore
@@ -240,7 +240,7 @@ T041. It records only the completed T022–T027/T032 security tranche.
   `SOURCE_CONNECTION_TEST_MODE=1`, isolated Redis DB/prefix
   `15`/`fieldframe-phase014-test`, `PHASE014_DNS_MATRIX=1`,
   `PHASE014_TIMING_MATRIX=1`, then
-  `pnpm --filter @fieldframe/web test:repository-preflight`.
+  `pnpm --filter @annotationplatform/web test:repository-preflight`.
 - Result: **30 passed, 0 failed, 0 skipped** in 35.26 seconds. The suite
   covered forbidden request bodies, public-with-connection and
   existing-connection-with-PAT denials, foreign/malformed/unknown connection
@@ -351,9 +351,9 @@ does not mark T041 complete.
 - T041 timing rerun: max median delta **5.45ms**, fixed threshold **100ms**,
   **PASS**. Only aggregate timing output was retained.
 - Final commands passed: `pnpm exec prisma validate`,
-  `pnpm --filter @fieldframe/web typecheck`,
-  `pnpm --filter @fieldframe/web lint`,
-  `pnpm --filter @fieldframe/web build`, and `git diff --check`.
+  `pnpm --filter @annotationplatform/web typecheck`,
+  `pnpm --filter @annotationplatform/web lint`,
+  `pnpm --filter @annotationplatform/web build`, and `git diff --check`.
 - Scope confirmation: no schema/migration/dependency/JWT/auth-bypass change;
   no provider clone/download/persisted manifest during preflight; no provider
   credential, encrypted token, private URL, storage/database/Redis setting,

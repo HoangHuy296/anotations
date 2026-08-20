@@ -61,7 +61,7 @@ export function CredentialsForm({ mode, returnTo }: CredentialsFormProps) {
     }
   }
 
-  const title = mode === "login" ? "Sign in to Fieldframe" : "Create your Fieldframe account";
+  const title = mode === "login" ? "Sign in to Annotation Platform" : "Create your Annotation Platform account";
   const alternateHref = mode === "login" ? `/register?returnTo=${encodeURIComponent(destination)}` : `/login?returnTo=${encodeURIComponent(destination)}`;
 
   function selectRole(role: RegistrationRole) {
@@ -82,7 +82,7 @@ export function CredentialsForm({ mode, returnTo }: CredentialsFormProps) {
   return (
     <main className="grid min-h-[100dvh] place-items-center bg-zinc-50 px-4 py-10">
       <section className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-[0_24px_70px_-45px_rgba(24,24,27,0.45)] sm:p-8">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-sky-700">Fieldframe</p>
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-sky-700">Annotation Platform</p>
         <h1 className="mt-3 text-2xl font-bold tracking-[-0.03em] text-zinc-950">{title}</h1>
         <p className="mt-2 text-sm leading-6 text-zinc-500">Your session is kept in a secure HTTP-only cookie.</p>
         <form className="mt-7 space-y-5" onSubmit={submit}>
@@ -115,7 +115,7 @@ export function CredentialsForm({ mode, returnTo }: CredentialsFormProps) {
           {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">{error}</p>}
           <button type="submit" className="h-11 w-full rounded-xl bg-sky-600 px-4 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-50" disabled={pending || (mode === "register" && !selectedRole)}>{pending ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}</button>
         </form>
-        <p className="mt-6 text-center text-sm text-zinc-500">{mode === "login" ? "New to Fieldframe?" : "Already have an account?"} <Link className="font-semibold text-sky-700 hover:text-sky-800" href={alternateHref}>{mode === "login" ? "Register" : "Sign in"}</Link></p>
+        <p className="mt-6 text-center text-sm text-zinc-500">{mode === "login" ? "New to Annotation Platform?" : "Already have an account?"} <Link className="font-semibold text-sky-700 hover:text-sky-800" href={alternateHref}>{mode === "login" ? "Register" : "Sign in"}</Link></p>
       </section>
     </main>
   );

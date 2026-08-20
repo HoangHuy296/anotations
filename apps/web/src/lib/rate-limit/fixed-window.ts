@@ -2,8 +2,8 @@ import "server-only";
 
 import { Redis } from "ioredis";
 
-import { logRedisEvent } from "@fieldframe/domain";
-import { readProviderConfig } from "@fieldframe/domain";
+import { logRedisEvent } from "@annotationplatform/domain";
+import { readProviderConfig } from "@annotationplatform/domain";
 
 /**
  * Redis-backed per-user rate limiting

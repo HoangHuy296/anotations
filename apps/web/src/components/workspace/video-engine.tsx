@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 
 import type { SafeMediaReadiness } from "@/types/media-processing";
 import type { SafeVideoAnnotations } from "@/types/video-annotation";
-import { VideoTemporalLabels } from "@/components/workspace/video-temporal-labels";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
@@ -13,7 +12,6 @@ import { addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoKeyf
 import { createVideoPlaybackController, type VideoPlaybackController } from "@/lib/workspace/video-playback-controller";
 import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotations/video-time";
 import { deriveInterpolationAt } from "@/lib/annotations/video-interpolation";
-import { Video } from "lucide-react";
 
 type VideoEngineProps = {
   video: { id: string; filename: string; description: string | null };

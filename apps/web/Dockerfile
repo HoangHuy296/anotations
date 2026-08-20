@@ -15,9 +15,9 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN cp lib/generated/prisma/*.so.node lib/generated/
-RUN pnpm --filter @fieldframe/domain build \
-  && pnpm --filter @fieldframe/queue build \
-  && pnpm --filter @fieldframe/web build
+RUN pnpm --filter @annotationplatform/domain build \
+  && pnpm --filter @annotationplatform/queue build \
+  && pnpm --filter @annotationplatform/web build
 
 EXPOSE 3000
-CMD ["pnpm", "--filter", "@fieldframe/web", "start"]
+CMD ["pnpm", "--filter", "@annotationplatform/web", "start"]

@@ -3,9 +3,9 @@ import { Redis } from "ioredis";
 import { randomBytes } from "node:crypto";
 
 
-import type { ProviderConfig } from "@fieldframe/domain";
-import { logRedisEvent } from "@fieldframe/domain";
-import { fieldframeQueueName } from "@fieldframe/queue";
+import type { ProviderConfig } from "@annotationplatform/domain";
+import { logRedisEvent } from "@annotationplatform/domain";
+import { annotationPlatformQueueName } from "@annotationplatform/queue";
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
 import { getProductionHardeningPolicy } from "../config.js";
@@ -68,7 +68,7 @@ export function createFoundationWorker(input: {
   });
   const hardening = getProductionHardeningPolicy();
   const worker = new Worker(
-    fieldframeQueueName,
+    annotationPlatformQueueName,
     async (delivery) => routeQueueDelivery({ db: input.db, payload: delivery.data, workerId }),
     {
       connection,

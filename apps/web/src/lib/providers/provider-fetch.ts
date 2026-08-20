@@ -30,7 +30,7 @@ async function assertSafeDestination(url: URL) {
  * another host still go through the normal SSRF policy above.
  */
 function isConfiguredGiteaInternalDestination(destination: URL) {
-  if (process.env.FIELDFRAME_RUNTIME !== "compose") return false;
+  if (process.env.ANNOTATIONPLATFORM_RUNTIME !== "compose") return false;
   const raw = process.env.GITEA_INTERNAL_URL;
   if (!raw) return false;
   try {

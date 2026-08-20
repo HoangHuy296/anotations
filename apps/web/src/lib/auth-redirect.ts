@@ -10,8 +10,8 @@ export function safeReturnTarget(value: string | null | undefined): string {
   }
 
   try {
-    const candidate = new URL(value, "https://fieldframe.local");
-    if (candidate.origin !== "https://fieldframe.local") {
+    const candidate = new URL(value, "https://annotationplatform.local");
+    if (candidate.origin !== "https://annotationplatform.local") {
       return DEFAULT_AUTHENTICATED_PATH;
     }
     return `${candidate.pathname}${candidate.search}${candidate.hash}`;

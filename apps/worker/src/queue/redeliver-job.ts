@@ -1,7 +1,7 @@
 import type { Queue } from "bullmq";
 
-import { getQueueDeliveryId, queueNameForJobType } from "@fieldframe/queue";
-import { logRedisEvent } from "@fieldframe/domain";
+import { getQueueDeliveryId, queueNameForJobType } from "@annotationplatform/queue";
+import { logRedisEvent } from "@annotationplatform/domain";
 
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { writeSafeJobEvent } from "../jobs/job-event-writer.js";

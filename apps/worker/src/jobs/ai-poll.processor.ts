@@ -1,4 +1,4 @@
-import type { AiProviderAdapter } from "@fieldframe/domain/ai-provider";
+import type { AiProviderAdapter } from "@annotationplatform/domain/ai-provider";
 
 import { handleAiTaskCompleted } from "./ai-prediction-writer.js";
 import {

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { ProviderConfigError, probeProvider } from "@fieldframe/domain";
+import { ProviderConfigError, probeProvider } from "@annotationplatform/domain";
 
 import { getWebProviders } from "@/lib/providers";
 

@@ -59,7 +59,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   const selectedAssetId = workspace.page.selectedAsset?.id ?? null;
   const selected = selectedAssetId ? await readWorkspaceSelection(actor, datasetId, selectedAssetId) : null;
   return <div className="flex min-h-100dvh flex-col bg-zinc-100">
-    <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" engine={selected?.engine ?? null} />
+    <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" engine={selected?.engine ?? null} actor={{ email: actor.email, name: actor.name }} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
       <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={selected?.engine ?? null} />
       <WorkspaceEngine selection={selected} />

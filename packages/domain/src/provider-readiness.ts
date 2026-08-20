@@ -14,7 +14,3 @@ export async function probeProvider(
     return { provider, ready: false };
   }
 }
-
-export function allProvidersReady(results: ProviderReadiness[]) {
-  return results.every((result) => result.ready);
-}

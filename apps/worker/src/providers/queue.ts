@@ -2,8 +2,8 @@ import { Queue } from "bullmq";
 import { Redis } from "ioredis";
 
 
-import type { ProviderConfig } from "@fieldframe/domain";
-import { fieldframeQueueName } from "@fieldframe/queue";
+import type { ProviderConfig } from "@annotationplatform/domain";
+import { annotationPlatformQueueName } from "@annotationplatform/queue";
 
 export function createWorkerQueue(config: ProviderConfig) {
   const connection = new Redis({
@@ -13,7 +13,7 @@ export function createWorkerQueue(config: ProviderConfig) {
     db: config.REDIS_DB,
     maxRetriesPerRequest: null,
   });
-  const queue = new Queue(fieldframeQueueName, {
+  const queue = new Queue(annotationPlatformQueueName, {
     connection,
     prefix: config.BULLMQ_PREFIX,
   });
