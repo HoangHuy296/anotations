@@ -39,6 +39,18 @@ export type LockResult = { acquired: true; lockToken: string } | { acquired: fal
  * the current row — token equality alone is not sufficient proof of
  * ownership.
  *
+ * Matches `status IN ('RUNNING', 'CANCELING')`, not bare `'RUNNING'` — the
+ * same pattern every other job type's cancellation-aware lease check already
+ * uses (`job-claim-lock.ts`'s `cancelJob`, `audio-waveform.ts`,
+ * `video-metadata.ts`, `import-dataset.ts`, `export-dataset.ts`). A Job the
+ * poll processor is mid-polling can be moved to `CANCELING` out from under
+ * it (`lib/jobs/authorization.ts#cancelAuthorizedJob`) specifically so the
+ * *next* poll step notices and finalizes the cancellation
+ * (`ai-poll.processor.ts`'s own step 3 comment). Requiring bare `'RUNNING'`
+ * here would permanently exclude that row from ever being reclaimed again —
+ * a real deadlock, not just a missed renewal — leaving both the AiTask and
+ * the Job wedged forever regardless of how stale the lease gets.
+ *
  * **`lockToken` rotates on every successful call, renew or reclaim alike.**
  * This is required, not cosmetic: if it did not rotate, two concurrent calls
  * racing with the same `observedLockToken` (e.g. two overlapping scanner
@@ -80,7 +92,7 @@ export async function renewOrReclaimLock(
       "heartbeatAt" = NOW(),
       "updatedAt" = NOW()
     WHERE "id" = ${jobId}
-      AND "status" = 'RUNNING'
+      AND "status" IN ('RUNNING', 'CANCELING')
       AND (
         "lockedUntil" IS NULL
         OR "lockedUntil" < NOW()

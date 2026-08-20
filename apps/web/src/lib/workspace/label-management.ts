@@ -13,9 +13,9 @@ const DEFAULT_IMAGE_LABELS = [
   { name: "vehicle", color: "#F59E0B" },
   { name: "animal", color: "#10B981" },
   { name: "text", color: "#E11D48" },
+  { name: "aidetect", color: "#ff99fc" },
 ] as const;
 
-/** Establish defaults only on an authorized explicit request; duplicate calls are safe. */
 export async function ensureDefaultImageLabels(actor: RequestActor, datasetId: string) {
   const access = await requireDatasetPermission(actor, datasetId, "label.manage");
   if (!access) return { ok: false as const, status: 404 as const };

@@ -24,7 +24,7 @@ import type {
 export const AIOZ_TEST_RESULT_PROVIDER_KEY = "aioz-test-result";
 
 /** The `Label.normalizedName` a completed task's prediction resolves against -- a test fixture must create a Label with this normalized name. */
-export const TEST_LABEL_KEY = "test-object";
+export const TEST_LABEL_KEY = "aidetect";
 
 /**
  * The deterministic `NormalizedBoundingBox` (`apps/web/src/types/image-workspace.ts`)

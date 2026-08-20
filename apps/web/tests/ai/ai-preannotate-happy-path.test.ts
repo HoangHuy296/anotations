@@ -62,7 +62,7 @@ async function createHappyPathFixture(ownerId: string) {
     select: { id: true },
   });
   const label = await db.label.create({
-    data: { datasetId: dataset.id, modality: "IMAGE", name: "Test Object", normalizedName: TEST_LABEL_KEY, color: "#22c55e" },
+    data: { datasetId: dataset.id, modality: "IMAGE", name: "AI Detect", normalizedName: TEST_LABEL_KEY, color: "#22c55e" },
     select: { id: true },
   });
   // The test-only provider, never "aioz-company" (T006/production is untouched).

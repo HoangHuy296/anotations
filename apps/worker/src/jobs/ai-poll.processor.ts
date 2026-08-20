@@ -134,11 +134,27 @@ export async function processAiPoll(
  * Only advances a non-terminal AiTask — a second cancellation on an
  * already-terminal task is a no-op (idempotent), matching the existing
  * Job-cancel route's own terminal-state guard.
+ *
+ * Also advances the Job itself from CANCELING to the terminal CANCELED
+ * (mirroring `job-claim-lock.ts#cancelJob`'s terminal-cancel data, the
+ * pattern every other job type uses to close out a mid-flight cancellation)
+ * -- `authorization.ts#cancelAuthorizedJob` only ever parks a RUNNING Job at
+ * CANCELING and relies on the owning processor's next step to finish the
+ * transition; leaving it at CANCELING here would wedge the Job in a
+ * non-terminal state forever even after its AiTask correctly reaches
+ * CANCELED.
  */
 export async function finalizeCanceledAiTask(db: PrismaClient, jobId: string, lockToken: string, workerId: string): Promise<void> {
-  await db.aiTask.updateMany({
-    where: { jobId, status: { in: ["QUEUED", "RUNNING"] } },
-    data: { status: "CANCELED" },
+  const now = new Date();
+  await db.$transaction(async (tx) => {
+    await tx.aiTask.updateMany({
+      where: { jobId, status: { in: ["QUEUED", "RUNNING"] } },
+      data: { status: "CANCELED" },
+    });
+    await tx.job.updateMany({
+      where: { id: jobId, status: "CANCELING" },
+      data: { status: "CANCELED", finishedAt: now, canceledAt: now },
+    });
   });
   await releaseLock(db, jobId, lockToken, workerId);
 }
