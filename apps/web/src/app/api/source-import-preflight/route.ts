@@ -26,13 +26,16 @@ export async function POST(request: Request) {
       repository: {
         provider: "GITEA",
         fullName: `${preflight.result.repository.owner}/${preflight.result.repository.name}`,
-        ref: preflight.result.ref.resolved,
+        // The branch, not the raw resolved ref -- stays stable even while
+        // `revision` below is pinned to one specific commit on that branch.
+        ref: preflight.displayRef,
         revision: preflight.result.ref.revision,
         rootPath: preflight.result.rootPath.normalized,
         visibility: actual,
       },
       assetPreview: preflight.result.assetPreview,
       availableRefs: preflight.availableRefs,
+      availableCommits: preflight.availableCommits,
       visibility: { expected: parsed.data.repository.expectedVisibility, actual, matches: actual === parsed.data.repository.expectedVisibility },
     });
   } catch (error) {

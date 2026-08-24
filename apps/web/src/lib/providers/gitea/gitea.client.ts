@@ -74,6 +74,30 @@ export async function getGiteaBranches(baseUrl: string, repository: RepositoryId
   }).slice(0, 100);
 }
 
+/**
+ * A bounded commit projection for the browser's read-only Import Preview,
+ * scoped to one branch/ref. Provider metadata only: no file body or
+ * credential is returned.
+ */
+export async function getGiteaCommits(baseUrl: string, repository: RepositoryIdentity, ref: string, credential: ServerCredentialContext | null): Promise<Array<{ sha: string; message: string }>> {
+  const body = await requestProviderJson({
+    baseUrl: apiBaseUrl(baseUrl),
+    path: `repos/${encodePath(repository.owner, repository.name)}/commits?sha=${encodeURIComponent(ref)}&stat=false&limit=50&page=1`,
+    headers: authHeaders(credential),
+  });
+  if (!Array.isArray(body)) throw new ProviderTransportError("INVALID_RESPONSE");
+  return body.flatMap((entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+    const record = entry as Record<string, unknown>;
+    const sha = record.sha;
+    const commit = record.commit;
+    if (typeof sha !== "string" || sha.length === 0 || sha.length > 128 || !commit || typeof commit !== "object" || Array.isArray(commit)) return [];
+    const rawMessage = (commit as Record<string, unknown>).message;
+    const message = typeof rawMessage === "string" ? rawMessage.split("\n")[0].trim().slice(0, 120) : "";
+    return [{ sha, message }];
+  }).slice(0, 50);
+}
+
 export async function giteaRootExists(baseUrl: string, repository: RepositoryIdentity, ref: string, rootPath: string, credential: ServerCredentialContext | null): Promise<boolean> {
   const relative = rootPath ? `/${rootPath.split("/").map(encodeURIComponent).join("/")}` : "";
   await requestProviderJson({

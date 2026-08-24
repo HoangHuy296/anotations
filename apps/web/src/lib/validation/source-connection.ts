@@ -62,6 +62,9 @@ const sourceImportRepositorySchema = z.object({
   owner: z.string().trim().min(1).max(160),
   repo: z.string().trim().min(1).max(160),
   ref: z.string().trim().min(1).max(255),
+  // Optional pin to one commit on `ref`'s branch. Kept separate from `ref` so
+  // the branch stays the picker/display anchor even while a commit is pinned.
+  commit: z.string().trim().min(1).max(128).optional(),
   rootPath: z.string().max(4096).optional(),
   expectedVisibility: z.enum(["PUBLIC", "PRIVATE"]),
 }).strict();

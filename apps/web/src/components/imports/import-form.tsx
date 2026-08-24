@@ -15,6 +15,7 @@ type ImportPreview = {
   repository: { provider: "GITEA"; fullName: string; ref: string; revision: string | null; rootPath: string | null; visibility: Visibility };
   assetPreview: { detectedAssetCount: number; detectedBytes: number; truncated: boolean; sample: Array<{ path: string; size: number | null; modality: "IMAGE" | "VIDEO" | "AUDIO" | "TEXT" }> } | null;
   availableRefs: string[];
+  availableCommits: Array<{ sha: string; message: string }>;
   visibility: { expected: Visibility; actual: Visibility; matches: boolean };
 };
 type ApiEnvelope<T> = { data?: T; error?: { code?: string; message?: string; fieldErrors?: Record<string, string[]> } };
@@ -36,6 +37,7 @@ function requestFromForm(form: FormData, credentialMode: CredentialMode) {
       owner: value(form, "owner"),
       repo: value(form, "repo"),
       ref: value(form, "ref"),
+      commit: value(form, "commit") || undefined,
       rootPath: value(form, "rootPath") || undefined,
       expectedVisibility: value(form, "expectedVisibility") || "PUBLIC",
     },
@@ -62,6 +64,12 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
   const [preview, setPreview] = useState<ImportPreview | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [selectedRef, setSelectedRef] = useState("main");
+  // "" means no commit is pinned -- the branch tip of `selectedRef` is used.
+  // Set only when the user explicitly picks a commit from the list. Kept as
+  // a field separate from `selectedRef` end-to-end (form, request, response)
+  // so the branch stays the stable display/list anchor while a commit pin
+  // only narrows what gets resolved.
+  const [selectedCommit, setSelectedCommit] = useState("");
 
   function request(endpoint: string, payload: Record<string, unknown>) {
     return fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
@@ -105,7 +113,13 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
     }
     const form = new FormData(formRef.current);
     form.set("ref", ref);
+    // A newly chosen branch drops any commit pinned on the previous branch --
+    // its commit list no longer applies. The hidden "commit" input still
+    // holds the stale value at this point in the render, so clear it in the
+    // outgoing snapshot explicitly rather than relying on the next render.
+    form.set("commit", "");
     setMessage(null);
+    setSelectedCommit("");
     startTransition(() => {
       void request("/api/source-import-preflight", requestFromForm(form, mode))
         .then((data) => {
@@ -119,20 +133,49 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
     });
   }
 
+  function previewSelectedCommit(sha: string) {
+    if (!formRef.current) return;
+    const commit = sha.trim();
+    if (!commit) {
+      // Clearing the pin re-previews the branch tip already selected above.
+      setSelectedCommit("");
+      previewSelectedRef(selectedRef);
+      return;
+    }
+    const form = new FormData(formRef.current);
+    // `ref` (the branch) is left untouched -- only the pinned commit changes.
+    form.set("commit", commit);
+    setMessage(null);
+    startTransition(() => {
+      void request("/api/source-import-preflight", requestFromForm(form, mode))
+        .then((data) => {
+          const next = data as ImportPreview;
+          setPreview(next);
+          setSelectedCommit(commit);
+          importIdempotencyKeyRef.current = null;
+          setMessage(next.readyForImport ? "The selected commit is available and the repository preview has been refreshed." : "Repository visibility does not match the selected expectation.");
+        })
+        .catch((error: unknown) => setMessage(error instanceof Error ? error.message : "The selected commit could not be previewed."));
+    });
+  }
+
   function startImport() {
     if (!formRef.current || !preview) return;
     // The Settings form stays mounted but is visually hidden on Preview.
     // Use the controlled mode state rather than relying on hidden radio input
     // serialization when Start Import constructs the durable request.
     const requestPayload = requestFromForm(new FormData(formRef.current), mode);
-    const previewRepository = requestPayload.repository as { repo: string; [key: string]: unknown };
-    const { repo, ...repository } = previewRepository;
+    const previewRepository = requestPayload.repository as { repo: string; ref: string; commit?: string; [key: string]: unknown };
+    const { repo, commit, ref, ...repository } = previewRepository;
     const payload = {
       ...requestPayload,
-      // The Phase-014 preview contract names the repository segment `repo`.
-      // The sole Phase-015 durable contract names it `name`; translate only
+      // The Phase-014 preview contract names the repository segment `repo`
+      // and carries `ref`/`commit` as two fields. The sole Phase-015 durable
+      // contract names it `name` and accepts a single `ref`; translate only
       // at this UI adapter boundary rather than retaining a second API route.
-      repository: { ...repository, name: repo },
+      // A pinned commit takes the exact commit Preview most recently
+      // verified; otherwise the branch tip is imported.
+      repository: { ...repository, name: repo, ref: commit || ref },
       // Retain this key for a failed-network retry of the same preview. The
       // server computes its request hash and remains the idempotency authority.
       idempotencyKey: importIdempotencyKeyRef.current ??= randomUUIDAuto(),
@@ -162,6 +205,7 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
 
       <form ref={formRef} className={`mt-6 rounded-2xl border border-zinc-200 bg-zinc-50 p-5 lg:p-6 ${activeTab === "settings" ? "" : "hidden"}`} id="import-settings-panel" onSubmit={previewImport} role="tabpanel" aria-labelledby="import-settings">
         <input name="ref" type="hidden" value={selectedRef} readOnly />
+        <input name="commit" type="hidden" value={selectedCommit} readOnly />
         <div className="flex flex-wrap items-start justify-between gap-4 border-b border-zinc-200 pb-5">
           <div><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Repository settings</p><p className="mt-2 text-sm leading-6 text-zinc-500">Preview is read-only. Start Import creates durable work only after it checks the repository again.</p></div>
           <label className="block"><span className="text-xs font-semibold text-zinc-700">Provider</span><select aria-label="Repository provider" className="mt-2 h-8 rounded-lg border border-sky-200 bg-sky-50 px-2 text-xs font-semibold text-sky-700" defaultValue="GITEA" disabled name="provider"><option value="GITEA">Gitea</option></select></label>
@@ -181,15 +225,16 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
         <Button className="mt-6" disabled={isPending || (mode === "EXISTING_SOURCE_CONNECTION" && connections.length === 0)} type="submit">{isPending ? <SpinnerGap className="animate-spin" aria-hidden="true" size={17} /> : <Eye aria-hidden="true" size={17} />}{isPending ? "Checking repository..." : "Preview import"}</Button>
       </form>
 
-      {activeTab === "preview" && <section className="mt-6 min-h-96 rounded-2xl border border-zinc-200 bg-white p-5 lg:p-6" id="import-preview-panel" role="tabpanel" aria-labelledby="import-preview">{preview && <Preview preview={preview} isPending={isPending} message={message} oneTimeWithoutSave={oneTimeWithoutSave} selectedRef={selectedRef} onRefChange={setSelectedRef} onPreviewRef={previewSelectedRef} onImport={startImport} />}</section>}
+      {activeTab === "preview" && <section className="mt-6 min-h-96 rounded-2xl border border-zinc-200 bg-white p-5 lg:p-6" id="import-preview-panel" role="tabpanel" aria-labelledby="import-preview">{preview && <Preview preview={preview} isPending={isPending} message={message} oneTimeWithoutSave={oneTimeWithoutSave} selectedRef={selectedRef} onRefChange={setSelectedRef} onPreviewRef={previewSelectedRef} selectedCommit={selectedCommit} onPreviewCommit={previewSelectedCommit} onImport={startImport} />}</section>}
       {message && activeTab === "settings" && <p className="mt-4 text-sm text-rose-700" aria-live="polite">{message}</p>}
     </div>
   );
 }
 
-function Preview({ preview, isPending, message, oneTimeWithoutSave, selectedRef, onRefChange, onPreviewRef, onImport }: { preview: ImportPreview; isPending: boolean; message: string | null; oneTimeWithoutSave: boolean; selectedRef: string; onRefChange: (value: string) => void; onPreviewRef: (ref?: string) => void; onImport: () => void }) {
+function Preview({ preview, isPending, message, oneTimeWithoutSave, selectedRef, onRefChange, onPreviewRef, selectedCommit, onPreviewCommit, onImport }: { preview: ImportPreview; isPending: boolean; message: string | null; oneTimeWithoutSave: boolean; selectedRef: string; onRefChange: (value: string) => void; onPreviewRef: (ref?: string) => void; selectedCommit: string; onPreviewCommit: (sha: string) => void; onImport: () => void }) {
   const assets = preview.assetPreview;
-  return <><div className="grid gap-6 lg:grid-cols-[minmax(220px,0.42fr)_minmax(0,1fr)]"><section className="rounded-xl border border-zinc-200 bg-zinc-50 p-4"><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Choose ref / branch</p><h2 className="mt-2 text-sm font-bold text-zinc-950">Choose an available branch</h2><p className="mt-1 text-xs leading-5 text-zinc-500">The picker is read from the verified repository. Selecting a different branch automatically reloads the bounded asset preview.</p><label className="mt-4 block"><span className="text-xs font-semibold text-zinc-700">Available ref or branch</span><select className={inputClassName} disabled={isPending} onChange={(event) => { const ref = event.currentTarget.value; onRefChange(ref); onPreviewRef(ref); }} value={selectedRef}>{preview.availableRefs.map((ref) => <option key={ref} value={ref}>{ref}</option>)}</select></label><p className="mt-3 text-[11px] leading-4 text-zinc-500">Current resolved ref: <span className="font-mono text-zinc-700">{preview.repository.ref}</span></p></section><section><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Resolved repository</p><h2 className="mt-2 text-lg font-bold text-zinc-950">{preview.repository.fullName}</h2><p className="mt-1 font-mono text-xs text-zinc-500">branch {preview.repository.ref} · commit {preview.repository.revision?.slice(0, 12) ?? "unresolved"} · {preview.repository.rootPath || "/"} · {preview.repository.visibility === "PRIVATE" ? "Private" : "Public"}</p></div>{preview.readyForImport ? <CheckCircle aria-hidden="true" className="text-emerald-600" size={24} weight="fill" /> : <WarningCircle aria-hidden="true" className="text-amber-600" size={24} weight="fill" />}</div>{!preview.visibility.matches && <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">Gitea reports this repository as <strong>{preview.visibility.actual.toLowerCase()}</strong>. Return to Settings and select that visibility before importing.</div>}{assets && <><div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200"><Metric label={assets.truncated ? "Assets detected (bounded)" : "Assets detected"} value={String(assets.detectedAssetCount)} /><Metric label="Preview bytes" value={formatBytes(assets.detectedBytes)} /></div>{assets.truncated && <p className="mt-3 text-xs text-zinc-500">The provider preview reached its safety limit; the displayed asset count is a lower bound, not a full manifest.</p>}{assets.sample.length > 0 && <div className="mt-5 max-h-52 overflow-y-auto border-y border-zinc-200">{assets.sample.map((asset) => <div key={asset.path} className="flex items-center justify-between gap-3 border-b border-zinc-100 py-2 text-xs last:border-b-0"><span className="truncate font-medium text-zinc-700">{asset.path}</span><span className="shrink-0 font-mono text-[10px] text-zinc-400">{asset.modality} · {asset.size === null ? "unknown" : formatBytes(asset.size)}</span></div>)}</div>}</>}</section></div><Button className="mt-5 w-full" disabled={!preview.readyForImport || oneTimeWithoutSave || isPending} onClick={onImport} type="button">Start import <ArrowRight aria-hidden="true" size={17} /></Button><p className={`mt-4 text-xs leading-5 ${preview.readyForImport ? "text-emerald-700" : "text-rose-700"}`} aria-live="polite">{oneTimeWithoutSave ? "Save the one-time PAT as a source connection to start asynchronous import." : message}</p></>;
+  const currentCommit = selectedCommit || preview.repository.revision || "";
+  return <><div className="grid gap-6 lg:grid-cols-[minmax(220px,0.42fr)_minmax(0,1fr)]"><section className="rounded-xl border border-zinc-200 bg-zinc-50 p-4"><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Choose ref / branch</p><h2 className="mt-2 text-sm font-bold text-zinc-950">Choose an available branch</h2><p className="mt-1 text-xs leading-5 text-zinc-500">The picker is read from the verified repository. Selecting a different branch automatically reloads the bounded asset preview.</p><label className="mt-4 block"><span className="text-xs font-semibold text-zinc-700">Available ref or branch</span><select className={inputClassName} disabled={isPending} onChange={(event) => { const ref = event.currentTarget.value; onRefChange(ref); onPreviewRef(ref); }} value={selectedRef}>{preview.availableRefs.map((ref) => <option key={ref} value={ref}>{ref}</option>)}</select></label><label className="mt-4 block"><span className="text-xs font-semibold text-zinc-700">Choose commit</span><select className={inputClassName} disabled={isPending || preview.availableCommits.length === 0} onChange={(event) => onPreviewCommit(event.currentTarget.value)} value={currentCommit}>{preview.availableCommits.map((commit) => <option key={commit.sha} value={commit.sha}>{commit.sha.slice(0, 8)}{commit.message ? ` · ${commit.message}` : ""}</option>)}</select><span className="mt-1 block text-[11px] leading-4 text-zinc-500">Pins the import to that exact commit on the selected branch.</span></label><p className="mt-3 text-[11px] leading-4 text-zinc-500">Current resolved ref: <span className="font-mono text-zinc-700">{preview.repository.ref}</span></p></section><section><div className="flex flex-wrap items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Resolved repository</p><h2 className="mt-2 text-lg font-bold text-zinc-950">{preview.repository.fullName}</h2><p className="mt-1 font-mono text-xs text-zinc-500">branch {preview.repository.ref} · commit {preview.repository.revision?.slice(0, 12) ?? "unresolved"} · {preview.repository.rootPath || "/"} · {preview.repository.visibility === "PRIVATE" ? "Private" : "Public"}</p></div>{preview.readyForImport ? <CheckCircle aria-hidden="true" className="text-emerald-600" size={24} weight="fill" /> : <WarningCircle aria-hidden="true" className="text-amber-600" size={24} weight="fill" />}</div>{!preview.visibility.matches && <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">Gitea reports this repository as <strong>{preview.visibility.actual.toLowerCase()}</strong>. Return to Settings and select that visibility before importing.</div>}{assets && <><div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200"><Metric label={assets.truncated ? "Assets detected (bounded)" : "Assets detected"} value={String(assets.detectedAssetCount)} /><Metric label="Preview bytes" value={formatBytes(assets.detectedBytes)} /></div>{assets.truncated && <p className="mt-3 text-xs text-zinc-500">The provider preview reached its safety limit; the displayed asset count is a lower bound, not a full manifest.</p>}{assets.sample.length > 0 && <div className="mt-5 max-h-52 overflow-y-auto border-y border-zinc-200">{assets.sample.map((asset) => <div key={asset.path} className="flex items-center justify-between gap-3 border-b border-zinc-100 py-2 text-xs last:border-b-0"><span className="truncate font-medium text-zinc-700">{asset.path}</span><span className="shrink-0 font-mono text-[10px] text-zinc-400">{asset.modality} · {asset.size === null ? "unknown" : formatBytes(asset.size)}</span></div>)}</div>}</>}</section></div><Button className="mt-5 w-full" disabled={!preview.readyForImport || oneTimeWithoutSave || isPending} onClick={onImport} type="button">Start import <ArrowRight aria-hidden="true" size={17} /></Button><p className={`mt-4 text-xs leading-5 ${preview.readyForImport ? "text-emerald-700" : "text-rose-700"}`} aria-live="polite">{oneTimeWithoutSave ? "Save the one-time PAT as a source connection to start asynchronous import." : message}</p></>;
 }
 
 function Tab({ active, disabled, id, label, onClick, panelId }: { active: boolean; disabled?: boolean; id: string; label: string; onClick: () => void; panelId: string }) { return <button aria-controls={panelId} aria-selected={active} className={`border-b-2 px-4 py-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-sky-400 ${active ? "border-zinc-950 text-zinc-950" : "border-transparent text-zinc-500 hover:text-zinc-900"}`} disabled={disabled} id={id} onClick={onClick} role="tab" type="button">{label}</button>; }

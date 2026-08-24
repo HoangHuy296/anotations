@@ -3,7 +3,7 @@ import "server-only";
 import type { RequestActor } from "@/lib/auth";
 import { PreflightError } from "@/lib/providers/provider-errors";
 import { getRepositoryProvider } from "@/lib/providers/provider-registry";
-import { getGiteaBranches } from "@/lib/providers/gitea/gitea.client";
+import { getGiteaBranches, getGiteaCommits } from "@/lib/providers/gitea/gitea.client";
 import { resolvePreflightGiteaCredential } from "@/lib/providers/token-check";
 import { configuredInternalBaseUrl, resolveServerReachableGiteaUrl } from "@/lib/providers/gitea-compose-url";
 import type { PreflightResult, ServerCredentialContext } from "@/lib/providers/provider.types";
@@ -23,7 +23,16 @@ export type SourceImportPreflight = {
    * never the internal Compose alias. Persist this on a new SourceConnection. */
   durableBaseUrl: string;
   sourceConnectionId: string | null;
+  /** The requested branch/tag, independent of any pinned commit. This is the
+   * anchor for the branch picker and the "Choose commit" list -- it never
+   * becomes a raw commit SHA, even while `result.ref` is pinned to one. */
+  displayRef: string;
   availableRefs: string[];
+  /** Commit history of `displayRef`'s branch, bounded for the Import
+   * Preview's "Choose commit" picker. Provider metadata only. Always scoped
+   * to the branch, never rebased onto a pinned commit, so pinning an older
+   * commit does not shrink the list. */
+  availableCommits: Array<{ sha: string; message: string }>;
 };
 
 /**
@@ -74,14 +83,30 @@ export async function preflightSourceImport(
     }
   }
 
+  // A pinned commit narrows what gets resolved/previewed (assetPreview,
+  // revision), but `input.repository.ref` -- the branch -- stays the anchor
+  // for display and for the commit/branch pickers below.
   const result = await getRepositoryProvider("GITEA").preflight({
     provider: "GITEA",
     repository: { owner: input.repository.owner, name: input.repository.repo },
     baseUrl,
-    ref: input.repository.ref,
+    ref: input.repository.commit ?? input.repository.ref,
     rootPath: root.value || null,
     credential,
   });
+  const displayRef = input.repository.ref;
+  let availableCommits: Array<{ sha: string; message: string }>;
+  try {
+    availableCommits = await getGiteaCommits(baseUrl, { owner: input.repository.owner, name: input.repository.repo }, displayRef, credential);
+  } catch (error) {
+    // A repository can be valid even when its provider refuses commit listing.
+    // Fall back to the verified resolved revision as a safe, usable picker option.
+    if (error instanceof PreflightError) throw error;
+    availableCommits = [];
+  }
+  if (result.ref.revision && !availableCommits.some((commit) => commit.sha === result.ref.revision)) {
+    availableCommits.unshift({ sha: result.ref.revision, message: "Current commit" });
+  }
   let availableRefs: string[];
   try {
     availableRefs = await getGiteaBranches(baseUrl, { owner: input.repository.owner, name: input.repository.repo }, credential);
@@ -89,8 +114,8 @@ export async function preflightSourceImport(
     // A repository can be valid even when its provider refuses branch listing.
     // Preserve the verified selected ref as a safe, usable picker option.
     if (error instanceof PreflightError) throw error;
-    availableRefs = [result.ref.resolved];
+    availableRefs = [displayRef];
   }
-  if (!availableRefs.includes(result.ref.resolved)) availableRefs.unshift(result.ref.resolved);
-  return { result, baseUrl, durableBaseUrl, sourceConnectionId, availableRefs };
+  if (!availableRefs.includes(displayRef)) availableRefs.unshift(displayRef);
+  return { result, baseUrl, durableBaseUrl, sourceConnectionId, displayRef, availableRefs, availableCommits };
 }
