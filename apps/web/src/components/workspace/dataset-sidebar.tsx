@@ -59,7 +59,7 @@ export function DatasetSidebar({ datasetId, datasetName, search, statuses, previ
   return <aside className="min-h-0 border-r border-zinc-200 bg-white p-3" aria-label={`${engineLabel[activeEngine]} annotation tools`}>
     <div className="flex items-center justify-between"><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Toolbox</p><span className="text-[10px] font-semibold text-sky-700">{engineLabel[activeEngine]}</span></div>
     <Toolbox />
-    <button type="button" onClick={() => setAppendOpen(true)} className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"><FolderOpen size={15} />Open directory</button>
+    <button type="button" onClick={() => setAppendOpen(true)} className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"><FolderOpen size={15} />Add files</button>
     <div className="mt-2 grid grid-cols-2 gap-1.5"><AssetNavigation href={previous ? hrefFor(previous) : null} label="Previous" onNavigate={guardNavigation} /><AssetNavigation href={next ? hrefFor(next) : null} label="Next" onNavigate={guardNavigation} /></div>
     {appendOpen && <WorkspaceAppendFolderDialog datasetId={datasetId} datasetName={datasetName} onClose={() => setAppendOpen(false)} />}
   </aside>;
