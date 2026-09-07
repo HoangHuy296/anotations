@@ -71,10 +71,70 @@ export type PreparedImportItem = Prisma.PreparedImportItemModel
  */
 export type DatasetMember = Prisma.DatasetMemberModel
 /**
+ * Model DatasetInvitation
+ * Durable, existing-user invitation. A pending invitation is not a
+ * DatasetMember and therefore never grants access before acceptance.
+ */
+export type DatasetInvitation = Prisma.DatasetInvitationModel
+/**
  * Model Asset
  * 
  */
 export type Asset = Prisma.AssetModel
+/**
+ * Model AssetAssignment
+ * The single current responsibility slot for each asset/type. Assignment
+ * history is append-only in AssetAssignmentEvent, so removing this slot does
+ * not erase attribution.
+ */
+export type AssetAssignment = Prisma.AssetAssignmentModel
+/**
+ * Model AssetAssignmentEvent
+ * 
+ */
+export type AssetAssignmentEvent = Prisma.AssetAssignmentEventModel
+/**
+ * Model AssetComment
+ * 
+ */
+export type AssetComment = Prisma.AssetCommentModel
+/**
+ * Model CommentMention
+ * 
+ */
+export type CommentMention = Prisma.CommentMentionModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model DatasetMembershipEvent
+ * 
+ */
+export type DatasetMembershipEvent = Prisma.DatasetMembershipEventModel
+/**
+ * Model CollaborationOutboxEvent
+ * Durable delivery intent. It is not Activity and it is never consumed by a
+ * browser or gateway. The private worker resolves it through the linked Job.
+ */
+export type CollaborationOutboxEvent = Prisma.CollaborationOutboxEventModel
+/**
+ * Model AssetWorkflowEvent
+ * Append-only audit trail for the Asset.status review workflow. This is
+ * history only; Asset.status remains the sole workflow-state authority.
+ */
+export type AssetWorkflowEvent = Prisma.AssetWorkflowEventModel
+/**
+ * Model AssetLabel
+ * *
+ * * Asset-level metadata label attachment (Phase 022). Fully independent of
+ * * `Annotation.labelId`: attaching/detaching an AssetLabel never creates,
+ * * modifies, or deletes an Annotation, even when an Annotation on the same
+ * * Asset happens to reference the same Label. See
+ * * specs/022-asset-browser-dataset-management-workspace/data-model.md.
+ */
+export type AssetLabel = Prisma.AssetLabelModel
 /**
  * Model AssetVersion
  * 

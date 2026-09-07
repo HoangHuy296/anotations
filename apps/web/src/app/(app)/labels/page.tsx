@@ -228,10 +228,9 @@ async function loadLabelPageData() {
       }) as LabelSummary[]
       : [];
 
-    // Keep the taxonomy page useful for a new IMAGE dataset: defaults are
-    // established through the same guarded service used by the workspace.
-    // This is idempotent and only runs for an actor allowed to manage labels.
-    if (dataset && labels.length === 0 && access && !access.forbidden) {
+    // Keep the taxonomy consistent for every authorized reader. The shared
+    // service backfills only missing defaults, so custom labels are preserved.
+    if (dataset) {
       await ensureDefaultImageLabels(actor, dataset.id);
       labels = await db.label.findMany({
         where: { datasetId: dataset.id },

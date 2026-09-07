@@ -8,8 +8,9 @@ import { db } from "@/lib/db";
 import type { AnnotationChangeSet } from "@/lib/validation/annotation-api";
 import { isValidImageGeometryForType } from "@/lib/validation/annotation-api";
 import { toSafeAnnotation, type SafeAnnotation } from "@/lib/annotations/safe-annotation";
+import { claimEditableAssetContent } from "@/lib/workflow/asset-workflow-service";
 
-export type AnnotationServiceFailure = "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "WRITE_UNSUPPORTED" | "CREATE_REPLAY_CONFLICT";
+export type AnnotationServiceFailure = "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "WRITE_UNSUPPORTED" | "WORKFLOW_LOCKED" | "CREATE_REPLAY_CONFLICT";
 export type AnnotationServiceResult<T> = { ok: true; value: T } | { ok: false; reason: AnnotationServiceFailure };
 
 // Defensive cap only -- not true pagination. `readAssetAnnotations` backs
@@ -85,6 +86,12 @@ export async function mutateImageAnnotations(actor: RequestActor, assetId: strin
     }
 
     const annotations = await db.$transaction(async (tx) => {
+      // Claim the Asset content revision before child writes. A reviewer that
+      // loaded an earlier revision will therefore fail its guarded decision;
+      // the transaction rolls this claim back if any annotation write fails.
+      if (changeSet.creates.length || changeSet.updates.length || changeSet.deletes.length) {
+        if (!(await claimEditableAssetContent(tx, resolved.asset.id, resolved.asset.datasetId))) throw new ServiceError("WORKFLOW_LOCKED");
+      }
       for (const item of changeSet.creates) {
         const existing = await tx.annotation.findUnique({ where: { id: item.id }, select: { id: true, assetId: true, datasetId: true, createdById: true, type: true, geometry: true, labelId: true } });
         if (existing) {

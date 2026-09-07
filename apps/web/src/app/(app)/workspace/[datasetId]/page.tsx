@@ -11,11 +11,17 @@ import { getRequestActor } from "@/lib/auth";
 import { isDatabaseConfigured } from "@/lib/db";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 import { workspaceListQuerySchema } from "@/lib/validation/image-workspace";
-import { readWorkspacePage, readWorkspaceSelection } from "@/lib/workspace/workspace-read";
+import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
+import { readWorkspacePage, readWorkspaceSelection, readWorkspaceWorkflow } from "@/lib/workspace/workspace-read";
 
 export const metadata: Metadata = { title: "Annotation Workspace" };
 
-type SearchParams = { q?: string | string[]; status?: string | string[]; image?: string | string[]; video?: string | string[]; audio?: string | string[]; text?: string | string[]; page?: string | string[] };
+type SearchParams = {
+  q?: string | string[]; status?: string | string[]; image?: string | string[]; video?: string | string[]; audio?: string | string[]; text?: string | string[]; page?: string | string[];
+  filterModality?: string | string[]; labelId?: string | string[]; assignedToId?: string | string[];
+  createdFrom?: string | string[]; createdTo?: string | string[]; updatedFrom?: string | string[]; updatedTo?: string | string[];
+  sort?: string | string[]; order?: string | string[];
+};
 const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
 const values = (value: string | string[] | undefined) => Array.isArray(value) ? value : value ? [value] : [];
 
@@ -26,6 +32,9 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   if (!isDatabaseConfigured()) return <WorkspaceSetupState />;
   const actor = await getRequestActor();
   if (!actor) notFound();
+  // The shared Labels tab must always receive the dataset's default taxonomy
+  // on its initial server render, including for read-only members.
+  await ensureDefaultImageLabels(actor, datasetId);
   const query = await searchParams;
   const image = first(query.image)|| undefined;
   const video = first(query.video)|| undefined;
@@ -46,24 +55,54 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
     statuses: values(query.status),
     asset: selection?.asset,
     modality: selection?.modality,
+    filterModality: first(query.filterModality),
+    labelId: values(query.labelId),
+    assignedToId: first(query.assignedToId),
+    createdFrom: first(query.createdFrom),
+    createdTo: first(query.createdTo),
+    updatedFrom: first(query.updatedFrom),
+    updatedTo: first(query.updatedTo),
+    sort: first(query.sort),
+    order: first(query.order),
   });
-  const listQuery = parsedQuery.success ? parsedQuery.data : { page: 1, q: "", statuses: [], asset: undefined, modality: undefined, };
+  const listQuery = parsedQuery.success ? parsedQuery.data : {
+    page: 1, q: "", statuses: [], asset: undefined, modality: undefined,
+    filterModality: undefined, labelId: [], assignedToId: undefined,
+    createdFrom: undefined, createdTo: undefined, updatedFrom: undefined, updatedTo: undefined,
+    sort: undefined, order: "desc" as const,
+  };
   const selectedAsset = listQuery.asset && listQuery.modality ? {id: listQuery.asset, modality: listQuery.modality,}: undefined;
   const workspace = await readWorkspacePage(actor, datasetId, {
     page: listQuery.page,
     search: listQuery.q,
     statuses: listQuery.statuses,
     selectedAsset,
+    modality: listQuery.filterModality,
+    labelId: listQuery.labelId,
+    assignedToId: listQuery.assignedToId,
+    createdFrom: listQuery.createdFrom,
+    createdTo: listQuery.createdTo,
+    updatedFrom: listQuery.updatedFrom,
+    updatedTo: listQuery.updatedTo,
+    sort: listQuery.sort,
+    order: listQuery.order,
   });
   if (!workspace) notFound();
   const selectedAssetId = workspace.page.selectedAsset?.id ?? null;
   const selected = selectedAssetId ? await readWorkspaceSelection(actor, datasetId, selectedAssetId) : null;
+  const workflow = selectedAssetId ? await readWorkspaceWorkflow(actor, datasetId, selectedAssetId) : null;
+  const filters = {
+    filterModality: listQuery.filterModality, labelId: listQuery.labelId,
+    createdFrom: listQuery.createdFrom, createdTo: listQuery.createdTo,
+    updatedFrom: listQuery.updatedFrom, updatedTo: listQuery.updatedTo,
+    sort: listQuery.sort, order: listQuery.order,
+  };
   return <div className="flex min-h-100dvh flex-col bg-zinc-100">
-    <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" engine={selected?.engine ?? null} actor={{ email: actor.email, name: actor.name }} />
+    <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" engine={selected?.engine ?? null} actor={{ email: actor.email, name: actor.name }} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId }} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
-      <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={selected?.engine ?? null} />
+      <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={selected?.engine ?? null} filters={filters} />
       <WorkspaceEngine selection={selected} />
-      <PropertiesPanel datasetId={datasetId} selection={selected} assets={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetId} />
+      <PropertiesPanel datasetId={datasetId} selection={selected} assets={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetId} filters={filters} />
     </div>
   </div>;
 }

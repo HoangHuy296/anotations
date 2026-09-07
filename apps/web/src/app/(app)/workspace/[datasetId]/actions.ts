@@ -26,8 +26,8 @@ function fromStatus(status: 400 | 403 | 404 | 409): ActionFailure {
   return { ok: false, status, error: status === 403 ? "FORBIDDEN" : status === 404 ? "NOT_FOUND" : status === 409 ? "CONFLICT" : "INVALID_REQUEST" };
 }
 
-function fromMutationReason(reason: "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "WRITE_UNSUPPORTED" | "CREATE_REPLAY_CONFLICT"): ActionFailure {
-  return reason === "NOT_FOUND" ? fromStatus(404) : reason === "FORBIDDEN" ? fromStatus(403) : reason === "CONFLICT" || reason === "CREATE_REPLAY_CONFLICT" ? fromStatus(409) : fromStatus(400);
+function fromMutationReason(reason: "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "WRITE_UNSUPPORTED" | "WORKFLOW_LOCKED" | "CREATE_REPLAY_CONFLICT"): ActionFailure {
+  return reason === "NOT_FOUND" ? fromStatus(404) : reason === "FORBIDDEN" ? fromStatus(403) : reason === "CONFLICT" || reason === "WORKFLOW_LOCKED" || reason === "CREATE_REPLAY_CONFLICT" ? fromStatus(409) : fromStatus(400);
 }
 
 export async function createBoundingBoxAction(input: unknown) {

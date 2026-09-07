@@ -60,7 +60,23 @@ export type ApiErrorCode =
   | "ASSET_NOT_IN_DATASET"
   | "AI_TASK_NOT_FOUND"
   | "RATE_LIMITED"
-  | "INTERNAL_ERROR";
+  | "INTERNAL_ERROR"
+  | "SELECTION_TOO_LARGE"
+  | "ANNOTATION_REFERENCE_WARNING"
+  | "INVALID_ASSIGNEE"
+  | "LABEL_NOT_FOUND"
+  | "BULK_ACTION_NOT_IMPLEMENTED"
+  | "STALE_REVISION"
+  | "INVALID_TRANSITION"
+  | "WORKFLOW_STATUS_REQUIRES_TRANSITION"
+  | "INVITATION_NOT_FOUND"
+  | "INVITATION_CONFLICT"
+  | "COLLABORATION_MEMBER_NOT_FOUND"
+  | "COLLABORATION_ASSIGNMENT_NOT_FOUND"
+  | "COLLABORATION_COMMENT_NOT_FOUND"
+  | "COLLABORATION_COMMENT_DEPTH_INVALID"
+  | "COLLABORATION_NOTIFICATION_NOT_FOUND"
+  | "REALTIME_TICKET_INVALID";
 
 export function apiError(
   status: number,
@@ -68,6 +84,7 @@ export function apiError(
   message: string,
   fieldErrors?: Record<string, string[]>,
   headers?: Record<string, string>,
+  extra?: Record<string, unknown>,
 ) {
   return NextResponse.json(
     {
@@ -75,6 +92,7 @@ export function apiError(
         code,
         message,
         ...(fieldErrors ? { fieldErrors } : {}),
+        ...(extra ?? {}),
       },
     },
     {

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { Modality, Prisma } from "@internal/db";
+import { Modality } from "@internal/db";
 
 import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
@@ -17,21 +17,18 @@ const DEFAULT_IMAGE_LABELS = [
 ] as const;
 
 export async function ensureDefaultImageLabels(actor: RequestActor, datasetId: string) {
-  const access = await requireDatasetPermission(actor, datasetId, "label.manage");
+  // A dataset's baseline taxonomy is reference data, not a label-management
+  // mutation requested by the user. Any authorized reader must be able to
+  // see the same defaults in `/labels` and the workspace Labels tab; creation
+  // remains dataset-scoped and idempotent.
+  const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
   if (!access) return { ok: false as const, status: 404 as const };
   if (access.forbidden) return { ok: false as const, status: 403 as const };
-  const existing = await db.label.count({ where: { datasetId } });
-  if (existing > 0) return { ok: true as const, created: 0 };
-  let created = 0;
-  for (const label of DEFAULT_IMAGE_LABELS) {
-    try {
-      await db.label.create({ data: { datasetId, modality: Modality.IMAGE, name: label.name, normalizedName: normalizeLabelName(label.name), color: label.color } });
-      created += 1;
-    } catch (error) {
-      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
-    }
-  }
-  return { ok: true as const, created };
+  const created = await db.label.createMany({
+    data: DEFAULT_IMAGE_LABELS.map((label) => ({ datasetId, modality: Modality.IMAGE, name: label.name, normalizedName: normalizeLabelName(label.name), color: label.color })),
+    skipDuplicates: true,
+  });
+  return { ok: true as const, created: created.count };
 }
 
 export async function deleteUnreferencedLabel(actor: RequestActor, labelId: string) {

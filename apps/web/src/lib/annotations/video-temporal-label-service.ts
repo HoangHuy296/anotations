@@ -6,6 +6,7 @@ import { assertAnnotationPermission, requireDatasetPermission } from "@/lib/auth
 import { db } from "@/lib/db";
 import { toSafeVideoTemporalLabel } from "@/lib/annotations/video-projection";
 import { videoTemporalLabelCreateSchema, videoTemporalLabelDeleteSchema, videoTemporalLabelUpdateSchema } from "@/lib/validation/video-annotation";
+import { AssetContentWriteConflict, isAssetContentWriteConflict, mutateEditableAssetContent } from "@/lib/workflow/asset-workflow-service";
 
 export type TemporalLabelFailure = "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT";
 export type TemporalLabelResult<T> = { ok: true; value: T } | { ok: false; reason: TemporalLabelFailure };
@@ -43,8 +44,13 @@ export async function createVideoTemporalLabel(actor: RequestActor, assetId: str
   const permission = await assertAnnotationPermission(actor, resolved.asset.datasetId, "annotation.create");
   if (!permission) return { ok: false, reason: "NOT_FOUND" };
   if (permission.forbidden || !(await sameDatasetLabel(parsed.data.labelId, resolved.asset.datasetId))) return { ok: false, reason: permission.forbidden ? "FORBIDDEN" : "NOT_FOUND" };
-  const annotation = await db.annotation.create({ data: { datasetId: resolved.asset.datasetId, assetId, labelId: parsed.data.labelId ?? null, createdById: actor.id, modality: Modality.VIDEO, type: parsed.data.type as AnnotationType, source: AnnotationSource.MANUAL, geometry: {}, properties: parsed.data.properties as Prisma.InputJsonValue, status: AnnotationStatus.DRAFT, startMs: parsed.data.startMs, endMs: parsed.data.endMs, isKeyframe: false, isInterpolated: false }, select });
-  return { ok: true, value: toSafeVideoTemporalLabel({ ...annotation, type: annotation.type as "EVENT" | "SCENE" | "SHOT_BOUNDARY", startMs: annotation.startMs as number, endMs: annotation.endMs as number }) };
+  try {
+    const annotation = await mutateEditableAssetContent(assetId, resolved.asset.datasetId, (tx) => tx.annotation.create({ data: { datasetId: resolved.asset.datasetId, assetId, labelId: parsed.data.labelId ?? null, createdById: actor.id, modality: Modality.VIDEO, type: parsed.data.type as AnnotationType, source: AnnotationSource.MANUAL, geometry: {}, properties: parsed.data.properties as Prisma.InputJsonValue, status: AnnotationStatus.DRAFT, startMs: parsed.data.startMs, endMs: parsed.data.endMs, isKeyframe: false, isInterpolated: false }, select }));
+    return { ok: true, value: toSafeVideoTemporalLabel({ ...annotation, type: annotation.type as "EVENT" | "SCENE" | "SHOT_BOUNDARY", startMs: annotation.startMs as number, endMs: annotation.endMs as number }) };
+  } catch (error) {
+    if (isAssetContentWriteConflict(error)) return { ok: false, reason: "CONFLICT" };
+    throw error;
+  }
 }
 
 async function resolveExisting(actor: RequestActor, annotationId: string) {
@@ -70,9 +76,17 @@ export async function updateVideoTemporalLabel(actor: RequestActor, annotationId
   const data: Prisma.AnnotationUncheckedUpdateManyInput = { revision: { increment: 1 }, updatedById: actor.id, startMs, endMs };
   if (parsed.data.labelId !== undefined) data.labelId = parsed.data.labelId;
   if (parsed.data.properties !== undefined) data.properties = parsed.data.properties as Prisma.InputJsonValue;
-  const changed = await db.annotation.updateMany({ where: { id: annotationId, revision: parsed.data.expectedRevision }, data });
-  if (changed.count !== 1) return { ok: false, reason: "CONFLICT" };
-  const current = await db.annotation.findUniqueOrThrow({ where: { id: annotationId }, select });
+  let current;
+  try {
+    current = await mutateEditableAssetContent(resolved.annotation.assetId, resolved.annotation.datasetId, async (tx) => {
+      const changed = await tx.annotation.updateMany({ where: { id: annotationId, revision: parsed.data.expectedRevision }, data });
+      if (changed.count !== 1) throw new AssetContentWriteConflict();
+      return tx.annotation.findUniqueOrThrow({ where: { id: annotationId }, select });
+    });
+  } catch (error) {
+    if (isAssetContentWriteConflict(error)) return { ok: false, reason: "CONFLICT" };
+    throw error;
+  }
   return { ok: true, value: toSafeVideoTemporalLabel({ ...current, type: current.type as "EVENT" | "SCENE" | "SHOT_BOUNDARY", startMs: current.startMs as number, endMs: current.endMs as number }) };
 }
 
@@ -84,6 +98,14 @@ export async function deleteVideoTemporalLabel(actor: RequestActor, annotationId
   const permission = await assertAnnotationPermission(actor, resolved.annotation.datasetId, resolved.annotation.createdById === actor.id ? "annotation.updateOwn" : "annotation.updateAny");
   if (!permission) return { ok: false, reason: "NOT_FOUND" };
   if (permission.forbidden) return { ok: false, reason: "FORBIDDEN" };
-  const removed = await db.annotation.deleteMany({ where: { id: annotationId, revision: parsed.data.expectedRevision } });
-  return removed.count === 1 ? { ok: true, value: null } : { ok: false, reason: "CONFLICT" };
+  try {
+    await mutateEditableAssetContent(resolved.annotation.assetId, resolved.annotation.datasetId, async (tx) => {
+      const removed = await tx.annotation.deleteMany({ where: { id: annotationId, revision: parsed.data.expectedRevision } });
+      if (removed.count !== 1) throw new AssetContentWriteConflict();
+    });
+    return { ok: true, value: null };
+  } catch (error) {
+    if (isAssetContentWriteConflict(error)) return { ok: false, reason: "CONFLICT" };
+    throw error;
+  }
 }

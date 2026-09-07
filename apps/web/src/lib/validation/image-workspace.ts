@@ -37,6 +37,18 @@ export const workspaceListQuerySchema = z.object({
   statuses: z.array(z.nativeEnum(AssetStatus)).max(Object.keys(AssetStatus).length).default([]),
   asset: cuid.optional(),
   modality: z.nativeEnum(Modality).optional(),
+  // Asset Browser filters (022) -- deliberately separate names from
+  // `asset`/`modality` above, which identify the *selected* asset, not a
+  // browse filter.
+  filterModality: z.nativeEnum(Modality).optional(),
+  labelId: z.array(cuid).max(50).default([]),
+  assignedToId: cuid.optional(),
+  createdFrom: z.string().datetime().optional(),
+  createdTo: z.string().datetime().optional(),
+  updatedFrom: z.string().datetime().optional(),
+  updatedTo: z.string().datetime().optional(),
+  sort: z.enum(["createdAt", "updatedAt", "filename"]).optional(),
+  order: z.enum(["asc", "desc"]).default("desc"),
 }).strict().refine((value) => (value.asset === undefined) === (value.modality === undefined), {
   message: "asset and modality must be provided together.",
   path: ["asset"],

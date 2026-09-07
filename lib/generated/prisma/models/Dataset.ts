@@ -337,6 +337,13 @@ export type DatasetWhereInput = {
   jobs?: Prisma.JobListRelationFilter
   labels?: Prisma.LabelListRelationFilter
   preparedImports?: Prisma.PreparedImportListRelationFilter
+  invitations?: Prisma.DatasetInvitationListRelationFilter
+  assignmentSlots?: Prisma.AssetAssignmentListRelationFilter
+  assignmentEvents?: Prisma.AssetAssignmentEventListRelationFilter
+  comments?: Prisma.AssetCommentListRelationFilter
+  membershipEvents?: Prisma.DatasetMembershipEventListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  outboxEvents?: Prisma.CollaborationOutboxEventListRelationFilter
 }
 
 export type DatasetOrderByWithRelationInput = {
@@ -376,6 +383,13 @@ export type DatasetOrderByWithRelationInput = {
   jobs?: Prisma.JobOrderByRelationAggregateInput
   labels?: Prisma.LabelOrderByRelationAggregateInput
   preparedImports?: Prisma.PreparedImportOrderByRelationAggregateInput
+  invitations?: Prisma.DatasetInvitationOrderByRelationAggregateInput
+  assignmentSlots?: Prisma.AssetAssignmentOrderByRelationAggregateInput
+  assignmentEvents?: Prisma.AssetAssignmentEventOrderByRelationAggregateInput
+  comments?: Prisma.AssetCommentOrderByRelationAggregateInput
+  membershipEvents?: Prisma.DatasetMembershipEventOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  outboxEvents?: Prisma.CollaborationOutboxEventOrderByRelationAggregateInput
 }
 
 export type DatasetWhereUniqueInput = Prisma.AtLeast<{
@@ -419,6 +433,13 @@ export type DatasetWhereUniqueInput = Prisma.AtLeast<{
   jobs?: Prisma.JobListRelationFilter
   labels?: Prisma.LabelListRelationFilter
   preparedImports?: Prisma.PreparedImportListRelationFilter
+  invitations?: Prisma.DatasetInvitationListRelationFilter
+  assignmentSlots?: Prisma.AssetAssignmentListRelationFilter
+  assignmentEvents?: Prisma.AssetAssignmentEventListRelationFilter
+  comments?: Prisma.AssetCommentListRelationFilter
+  membershipEvents?: Prisma.DatasetMembershipEventListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  outboxEvents?: Prisma.CollaborationOutboxEventListRelationFilter
 }, "id" | "ownerId_creationIdempotencyKey">
 
 export type DatasetOrderByWithAggregationInput = {
@@ -517,6 +538,13 @@ export type DatasetCreateInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateInput = {
@@ -553,6 +581,13 @@ export type DatasetUncheckedCreateInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUpdateInput = {
@@ -589,6 +624,13 @@ export type DatasetUpdateInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateInput = {
@@ -625,6 +667,13 @@ export type DatasetUncheckedUpdateInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateManyInput = {
@@ -802,6 +851,11 @@ export type DatasetMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
   archivedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+}
+
+export type DatasetNullableScalarRelationFilter = {
+  is?: Prisma.DatasetWhereInput | null
+  isNot?: Prisma.DatasetWhereInput | null
 }
 
 export type DatasetCreateNestedManyWithoutOwnerInput = {
@@ -984,6 +1038,20 @@ export type DatasetUpdateOneRequiredWithoutMembersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutMembersInput, Prisma.DatasetUpdateWithoutMembersInput>, Prisma.DatasetUncheckedUpdateWithoutMembersInput>
 }
 
+export type DatasetCreateNestedOneWithoutInvitationsInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutInvitationsInput, Prisma.DatasetUncheckedCreateWithoutInvitationsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutInvitationsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+}
+
+export type DatasetUpdateOneRequiredWithoutInvitationsNestedInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutInvitationsInput, Prisma.DatasetUncheckedCreateWithoutInvitationsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutInvitationsInput
+  upsert?: Prisma.DatasetUpsertWithoutInvitationsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutInvitationsInput, Prisma.DatasetUpdateWithoutInvitationsInput>, Prisma.DatasetUncheckedUpdateWithoutInvitationsInput>
+}
+
 export type DatasetCreateNestedOneWithoutAssetsInput = {
   create?: Prisma.XOR<Prisma.DatasetCreateWithoutAssetsInput, Prisma.DatasetUncheckedCreateWithoutAssetsInput>
   connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutAssetsInput
@@ -996,6 +1064,92 @@ export type DatasetUpdateOneRequiredWithoutAssetsNestedInput = {
   upsert?: Prisma.DatasetUpsertWithoutAssetsInput
   connect?: Prisma.DatasetWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutAssetsInput, Prisma.DatasetUpdateWithoutAssetsInput>, Prisma.DatasetUncheckedUpdateWithoutAssetsInput>
+}
+
+export type DatasetCreateNestedOneWithoutAssignmentSlotsInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutAssignmentSlotsInput, Prisma.DatasetUncheckedCreateWithoutAssignmentSlotsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutAssignmentSlotsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+}
+
+export type DatasetUpdateOneRequiredWithoutAssignmentSlotsNestedInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutAssignmentSlotsInput, Prisma.DatasetUncheckedCreateWithoutAssignmentSlotsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutAssignmentSlotsInput
+  upsert?: Prisma.DatasetUpsertWithoutAssignmentSlotsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutAssignmentSlotsInput, Prisma.DatasetUpdateWithoutAssignmentSlotsInput>, Prisma.DatasetUncheckedUpdateWithoutAssignmentSlotsInput>
+}
+
+export type DatasetCreateNestedOneWithoutAssignmentEventsInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutAssignmentEventsInput, Prisma.DatasetUncheckedCreateWithoutAssignmentEventsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutAssignmentEventsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+}
+
+export type DatasetUpdateOneRequiredWithoutAssignmentEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutAssignmentEventsInput, Prisma.DatasetUncheckedCreateWithoutAssignmentEventsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutAssignmentEventsInput
+  upsert?: Prisma.DatasetUpsertWithoutAssignmentEventsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutAssignmentEventsInput, Prisma.DatasetUpdateWithoutAssignmentEventsInput>, Prisma.DatasetUncheckedUpdateWithoutAssignmentEventsInput>
+}
+
+export type DatasetCreateNestedOneWithoutCommentsInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutCommentsInput, Prisma.DatasetUncheckedCreateWithoutCommentsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutCommentsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+}
+
+export type DatasetUpdateOneRequiredWithoutCommentsNestedInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutCommentsInput, Prisma.DatasetUncheckedCreateWithoutCommentsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutCommentsInput
+  upsert?: Prisma.DatasetUpsertWithoutCommentsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutCommentsInput, Prisma.DatasetUpdateWithoutCommentsInput>, Prisma.DatasetUncheckedUpdateWithoutCommentsInput>
+}
+
+export type DatasetCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutNotificationsInput, Prisma.DatasetUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+}
+
+export type DatasetUpdateOneWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutNotificationsInput, Prisma.DatasetUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.DatasetUpsertWithoutNotificationsInput
+  disconnect?: Prisma.DatasetWhereInput | boolean
+  delete?: Prisma.DatasetWhereInput | boolean
+  connect?: Prisma.DatasetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutNotificationsInput, Prisma.DatasetUpdateWithoutNotificationsInput>, Prisma.DatasetUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type DatasetCreateNestedOneWithoutMembershipEventsInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutMembershipEventsInput, Prisma.DatasetUncheckedCreateWithoutMembershipEventsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutMembershipEventsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+}
+
+export type DatasetUpdateOneRequiredWithoutMembershipEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutMembershipEventsInput, Prisma.DatasetUncheckedCreateWithoutMembershipEventsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutMembershipEventsInput
+  upsert?: Prisma.DatasetUpsertWithoutMembershipEventsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutMembershipEventsInput, Prisma.DatasetUpdateWithoutMembershipEventsInput>, Prisma.DatasetUncheckedUpdateWithoutMembershipEventsInput>
+}
+
+export type DatasetCreateNestedOneWithoutOutboxEventsInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutOutboxEventsInput, Prisma.DatasetUncheckedCreateWithoutOutboxEventsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutOutboxEventsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+}
+
+export type DatasetUpdateOneRequiredWithoutOutboxEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutOutboxEventsInput, Prisma.DatasetUncheckedCreateWithoutOutboxEventsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutOutboxEventsInput
+  upsert?: Prisma.DatasetUpsertWithoutOutboxEventsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutOutboxEventsInput, Prisma.DatasetUpdateWithoutOutboxEventsInput>, Prisma.DatasetUncheckedUpdateWithoutOutboxEventsInput>
 }
 
 export type DatasetCreateNestedOneWithoutAssetVersionsInput = {
@@ -1087,6 +1241,13 @@ export type DatasetCreateWithoutOwnerInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutOwnerInput = {
@@ -1122,6 +1283,13 @@ export type DatasetUncheckedCreateWithoutOwnerInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutOwnerInput = {
@@ -1214,6 +1382,13 @@ export type DatasetCreateWithoutJobsInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutJobsInput = {
@@ -1249,6 +1424,13 @@ export type DatasetUncheckedCreateWithoutJobsInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutJobsInput = {
@@ -1300,6 +1482,13 @@ export type DatasetUpdateWithoutJobsInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutJobsInput = {
@@ -1335,6 +1524,13 @@ export type DatasetUncheckedUpdateWithoutJobsInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutExternalRepositoryInput = {
@@ -1370,6 +1566,13 @@ export type DatasetCreateWithoutExternalRepositoryInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutExternalRepositoryInput = {
@@ -1405,6 +1608,13 @@ export type DatasetUncheckedCreateWithoutExternalRepositoryInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutExternalRepositoryInput = {
@@ -1466,6 +1676,13 @@ export type DatasetCreateWithoutSourceConnectionInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutSourceConnectionInput = {
@@ -1501,6 +1718,13 @@ export type DatasetUncheckedCreateWithoutSourceConnectionInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutSourceConnectionInput = {
@@ -1562,6 +1786,13 @@ export type DatasetCreateWithoutPreparedImportsInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutPreparedImportsInput = {
@@ -1597,6 +1828,13 @@ export type DatasetUncheckedCreateWithoutPreparedImportsInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutPreparedImportsInput = {
@@ -1648,6 +1886,13 @@ export type DatasetUpdateWithoutPreparedImportsInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutPreparedImportsInput = {
@@ -1683,6 +1928,13 @@ export type DatasetUncheckedUpdateWithoutPreparedImportsInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutMembersInput = {
@@ -1718,6 +1970,13 @@ export type DatasetCreateWithoutMembersInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutMembersInput = {
@@ -1753,6 +2012,13 @@ export type DatasetUncheckedCreateWithoutMembersInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutMembersInput = {
@@ -1804,6 +2070,13 @@ export type DatasetUpdateWithoutMembersInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutMembersInput = {
@@ -1839,6 +2112,197 @@ export type DatasetUncheckedUpdateWithoutMembersInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetCreateWithoutInvitationsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutDatasetInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutDatasetsInput
+  owner: Prisma.UserCreateNestedOneWithoutOwnedDatasetsInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
+  members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetUncheckedCreateWithoutInvitationsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  externalRepositoryId?: string | null
+  sourceConnectionId?: string | null
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
+  members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetCreateOrConnectWithoutInvitationsInput = {
+  where: Prisma.DatasetWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutInvitationsInput, Prisma.DatasetUncheckedCreateWithoutInvitationsInput>
+}
+
+export type DatasetUpsertWithoutInvitationsInput = {
+  update: Prisma.XOR<Prisma.DatasetUpdateWithoutInvitationsInput, Prisma.DatasetUncheckedUpdateWithoutInvitationsInput>
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutInvitationsInput, Prisma.DatasetUncheckedCreateWithoutInvitationsInput>
+  where?: Prisma.DatasetWhereInput
+}
+
+export type DatasetUpdateToOneWithWhereWithoutInvitationsInput = {
+  where?: Prisma.DatasetWhereInput
+  data: Prisma.XOR<Prisma.DatasetUpdateWithoutInvitationsInput, Prisma.DatasetUncheckedUpdateWithoutInvitationsInput>
+}
+
+export type DatasetUpdateWithoutInvitationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUpdateManyWithoutDatasetNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutDatasetsNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
+  members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetUncheckedUpdateWithoutInvitationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
+  members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAssetsInput = {
@@ -1874,6 +2338,13 @@ export type DatasetCreateWithoutAssetsInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAssetsInput = {
@@ -1909,6 +2380,13 @@ export type DatasetUncheckedCreateWithoutAssetsInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAssetsInput = {
@@ -1960,6 +2438,13 @@ export type DatasetUpdateWithoutAssetsInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAssetsInput = {
@@ -1995,6 +2480,1117 @@ export type DatasetUncheckedUpdateWithoutAssetsInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetCreateWithoutAssignmentSlotsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutDatasetInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutDatasetsInput
+  owner: Prisma.UserCreateNestedOneWithoutOwnedDatasetsInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
+  members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetUncheckedCreateWithoutAssignmentSlotsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  externalRepositoryId?: string | null
+  sourceConnectionId?: string | null
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
+  members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetCreateOrConnectWithoutAssignmentSlotsInput = {
+  where: Prisma.DatasetWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutAssignmentSlotsInput, Prisma.DatasetUncheckedCreateWithoutAssignmentSlotsInput>
+}
+
+export type DatasetUpsertWithoutAssignmentSlotsInput = {
+  update: Prisma.XOR<Prisma.DatasetUpdateWithoutAssignmentSlotsInput, Prisma.DatasetUncheckedUpdateWithoutAssignmentSlotsInput>
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutAssignmentSlotsInput, Prisma.DatasetUncheckedCreateWithoutAssignmentSlotsInput>
+  where?: Prisma.DatasetWhereInput
+}
+
+export type DatasetUpdateToOneWithWhereWithoutAssignmentSlotsInput = {
+  where?: Prisma.DatasetWhereInput
+  data: Prisma.XOR<Prisma.DatasetUpdateWithoutAssignmentSlotsInput, Prisma.DatasetUncheckedUpdateWithoutAssignmentSlotsInput>
+}
+
+export type DatasetUpdateWithoutAssignmentSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUpdateManyWithoutDatasetNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutDatasetsNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
+  members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetUncheckedUpdateWithoutAssignmentSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
+  members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetCreateWithoutAssignmentEventsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutDatasetInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutDatasetsInput
+  owner: Prisma.UserCreateNestedOneWithoutOwnedDatasetsInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
+  members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetUncheckedCreateWithoutAssignmentEventsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  externalRepositoryId?: string | null
+  sourceConnectionId?: string | null
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
+  members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetCreateOrConnectWithoutAssignmentEventsInput = {
+  where: Prisma.DatasetWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutAssignmentEventsInput, Prisma.DatasetUncheckedCreateWithoutAssignmentEventsInput>
+}
+
+export type DatasetUpsertWithoutAssignmentEventsInput = {
+  update: Prisma.XOR<Prisma.DatasetUpdateWithoutAssignmentEventsInput, Prisma.DatasetUncheckedUpdateWithoutAssignmentEventsInput>
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutAssignmentEventsInput, Prisma.DatasetUncheckedCreateWithoutAssignmentEventsInput>
+  where?: Prisma.DatasetWhereInput
+}
+
+export type DatasetUpdateToOneWithWhereWithoutAssignmentEventsInput = {
+  where?: Prisma.DatasetWhereInput
+  data: Prisma.XOR<Prisma.DatasetUpdateWithoutAssignmentEventsInput, Prisma.DatasetUncheckedUpdateWithoutAssignmentEventsInput>
+}
+
+export type DatasetUpdateWithoutAssignmentEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUpdateManyWithoutDatasetNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutDatasetsNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
+  members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetUncheckedUpdateWithoutAssignmentEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
+  members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetCreateWithoutCommentsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutDatasetInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutDatasetsInput
+  owner: Prisma.UserCreateNestedOneWithoutOwnedDatasetsInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
+  members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetUncheckedCreateWithoutCommentsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  externalRepositoryId?: string | null
+  sourceConnectionId?: string | null
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
+  members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetCreateOrConnectWithoutCommentsInput = {
+  where: Prisma.DatasetWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutCommentsInput, Prisma.DatasetUncheckedCreateWithoutCommentsInput>
+}
+
+export type DatasetUpsertWithoutCommentsInput = {
+  update: Prisma.XOR<Prisma.DatasetUpdateWithoutCommentsInput, Prisma.DatasetUncheckedUpdateWithoutCommentsInput>
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutCommentsInput, Prisma.DatasetUncheckedCreateWithoutCommentsInput>
+  where?: Prisma.DatasetWhereInput
+}
+
+export type DatasetUpdateToOneWithWhereWithoutCommentsInput = {
+  where?: Prisma.DatasetWhereInput
+  data: Prisma.XOR<Prisma.DatasetUpdateWithoutCommentsInput, Prisma.DatasetUncheckedUpdateWithoutCommentsInput>
+}
+
+export type DatasetUpdateWithoutCommentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUpdateManyWithoutDatasetNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutDatasetsNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
+  members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetUncheckedUpdateWithoutCommentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
+  members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetCreateWithoutNotificationsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutDatasetInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutDatasetsInput
+  owner: Prisma.UserCreateNestedOneWithoutOwnedDatasetsInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
+  members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  externalRepositoryId?: string | null
+  sourceConnectionId?: string | null
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
+  members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.DatasetWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutNotificationsInput, Prisma.DatasetUncheckedCreateWithoutNotificationsInput>
+}
+
+export type DatasetUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.DatasetUpdateWithoutNotificationsInput, Prisma.DatasetUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutNotificationsInput, Prisma.DatasetUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.DatasetWhereInput
+}
+
+export type DatasetUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.DatasetWhereInput
+  data: Prisma.XOR<Prisma.DatasetUpdateWithoutNotificationsInput, Prisma.DatasetUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type DatasetUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUpdateManyWithoutDatasetNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutDatasetsNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
+  members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
+  members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetCreateWithoutMembershipEventsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutDatasetInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutDatasetsInput
+  owner: Prisma.UserCreateNestedOneWithoutOwnedDatasetsInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
+  members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetUncheckedCreateWithoutMembershipEventsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  externalRepositoryId?: string | null
+  sourceConnectionId?: string | null
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
+  members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetCreateOrConnectWithoutMembershipEventsInput = {
+  where: Prisma.DatasetWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutMembershipEventsInput, Prisma.DatasetUncheckedCreateWithoutMembershipEventsInput>
+}
+
+export type DatasetUpsertWithoutMembershipEventsInput = {
+  update: Prisma.XOR<Prisma.DatasetUpdateWithoutMembershipEventsInput, Prisma.DatasetUncheckedUpdateWithoutMembershipEventsInput>
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutMembershipEventsInput, Prisma.DatasetUncheckedCreateWithoutMembershipEventsInput>
+  where?: Prisma.DatasetWhereInput
+}
+
+export type DatasetUpdateToOneWithWhereWithoutMembershipEventsInput = {
+  where?: Prisma.DatasetWhereInput
+  data: Prisma.XOR<Prisma.DatasetUpdateWithoutMembershipEventsInput, Prisma.DatasetUncheckedUpdateWithoutMembershipEventsInput>
+}
+
+export type DatasetUpdateWithoutMembershipEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUpdateManyWithoutDatasetNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutDatasetsNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
+  members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetUncheckedUpdateWithoutMembershipEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
+  members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetCreateWithoutOutboxEventsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutDatasetInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutDatasetsInput
+  owner: Prisma.UserCreateNestedOneWithoutOwnedDatasetsInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
+  members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetUncheckedCreateWithoutOutboxEventsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  externalRepositoryId?: string | null
+  sourceConnectionId?: string | null
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
+  members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetCreateOrConnectWithoutOutboxEventsInput = {
+  where: Prisma.DatasetWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutOutboxEventsInput, Prisma.DatasetUncheckedCreateWithoutOutboxEventsInput>
+}
+
+export type DatasetUpsertWithoutOutboxEventsInput = {
+  update: Prisma.XOR<Prisma.DatasetUpdateWithoutOutboxEventsInput, Prisma.DatasetUncheckedUpdateWithoutOutboxEventsInput>
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutOutboxEventsInput, Prisma.DatasetUncheckedCreateWithoutOutboxEventsInput>
+  where?: Prisma.DatasetWhereInput
+}
+
+export type DatasetUpdateToOneWithWhereWithoutOutboxEventsInput = {
+  where?: Prisma.DatasetWhereInput
+  data: Prisma.XOR<Prisma.DatasetUpdateWithoutOutboxEventsInput, Prisma.DatasetUncheckedUpdateWithoutOutboxEventsInput>
+}
+
+export type DatasetUpdateWithoutOutboxEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUpdateManyWithoutDatasetNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutDatasetsNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
+  members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetUncheckedUpdateWithoutOutboxEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
+  members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAssetVersionsInput = {
@@ -2030,6 +3626,13 @@ export type DatasetCreateWithoutAssetVersionsInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAssetVersionsInput = {
@@ -2065,6 +3668,13 @@ export type DatasetUncheckedCreateWithoutAssetVersionsInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAssetVersionsInput = {
@@ -2116,6 +3726,13 @@ export type DatasetUpdateWithoutAssetVersionsInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAssetVersionsInput = {
@@ -2151,6 +3768,13 @@ export type DatasetUncheckedUpdateWithoutAssetVersionsInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutLabelsInput = {
@@ -2186,6 +3810,13 @@ export type DatasetCreateWithoutLabelsInput = {
   members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutLabelsInput = {
@@ -2221,6 +3852,13 @@ export type DatasetUncheckedCreateWithoutLabelsInput = {
   members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutLabelsInput = {
@@ -2272,6 +3910,13 @@ export type DatasetUpdateWithoutLabelsInput = {
   members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutLabelsInput = {
@@ -2307,6 +3952,13 @@ export type DatasetUncheckedUpdateWithoutLabelsInput = {
   members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAnnotationsInput = {
@@ -2342,6 +3994,13 @@ export type DatasetCreateWithoutAnnotationsInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAnnotationsInput = {
@@ -2377,6 +4036,13 @@ export type DatasetUncheckedCreateWithoutAnnotationsInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAnnotationsInput = {
@@ -2428,6 +4094,13 @@ export type DatasetUpdateWithoutAnnotationsInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAnnotationsInput = {
@@ -2463,6 +4136,13 @@ export type DatasetUncheckedUpdateWithoutAnnotationsInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAiTasksInput = {
@@ -2498,6 +4178,13 @@ export type DatasetCreateWithoutAiTasksInput = {
   jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAiTasksInput = {
@@ -2533,6 +4220,13 @@ export type DatasetUncheckedCreateWithoutAiTasksInput = {
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
   labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAiTasksInput = {
@@ -2584,6 +4278,13 @@ export type DatasetUpdateWithoutAiTasksInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAiTasksInput = {
@@ -2619,6 +4320,13 @@ export type DatasetUncheckedUpdateWithoutAiTasksInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateManyOwnerInput = {
@@ -2681,6 +4389,13 @@ export type DatasetUpdateWithoutOwnerInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutOwnerInput = {
@@ -2716,6 +4431,13 @@ export type DatasetUncheckedUpdateWithoutOwnerInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutOwnerInput = {
@@ -2805,6 +4527,13 @@ export type DatasetUpdateWithoutExternalRepositoryInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutExternalRepositoryInput = {
@@ -2840,6 +4569,13 @@ export type DatasetUncheckedUpdateWithoutExternalRepositoryInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutExternalRepositoryInput = {
@@ -2929,6 +4665,13 @@ export type DatasetUpdateWithoutSourceConnectionInput = {
   jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutSourceConnectionInput = {
@@ -2964,6 +4707,13 @@ export type DatasetUncheckedUpdateWithoutSourceConnectionInput = {
   jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
   labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutSourceConnectionInput = {
@@ -3007,6 +4757,13 @@ export type DatasetCountOutputType = {
   jobs: number
   labels: number
   preparedImports: number
+  invitations: number
+  assignmentSlots: number
+  assignmentEvents: number
+  comments: number
+  membershipEvents: number
+  notifications: number
+  outboxEvents: number
 }
 
 export type DatasetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3018,6 +4775,13 @@ export type DatasetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   jobs?: boolean | DatasetCountOutputTypeCountJobsArgs
   labels?: boolean | DatasetCountOutputTypeCountLabelsArgs
   preparedImports?: boolean | DatasetCountOutputTypeCountPreparedImportsArgs
+  invitations?: boolean | DatasetCountOutputTypeCountInvitationsArgs
+  assignmentSlots?: boolean | DatasetCountOutputTypeCountAssignmentSlotsArgs
+  assignmentEvents?: boolean | DatasetCountOutputTypeCountAssignmentEventsArgs
+  comments?: boolean | DatasetCountOutputTypeCountCommentsArgs
+  membershipEvents?: boolean | DatasetCountOutputTypeCountMembershipEventsArgs
+  notifications?: boolean | DatasetCountOutputTypeCountNotificationsArgs
+  outboxEvents?: boolean | DatasetCountOutputTypeCountOutboxEventsArgs
 }
 
 /**
@@ -3086,6 +4850,55 @@ export type DatasetCountOutputTypeCountPreparedImportsArgs<ExtArgs extends runti
   where?: Prisma.PreparedImportWhereInput
 }
 
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountInvitationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DatasetInvitationWhereInput
+}
+
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountAssignmentSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetAssignmentWhereInput
+}
+
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountAssignmentEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetAssignmentEventWhereInput
+}
+
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountCommentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetCommentWhereInput
+}
+
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountMembershipEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DatasetMembershipEventWhereInput
+}
+
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountOutboxEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CollaborationOutboxEventWhereInput
+}
+
 
 export type DatasetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3124,6 +4937,13 @@ export type DatasetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   jobs?: boolean | Prisma.Dataset$jobsArgs<ExtArgs>
   labels?: boolean | Prisma.Dataset$labelsArgs<ExtArgs>
   preparedImports?: boolean | Prisma.Dataset$preparedImportsArgs<ExtArgs>
+  invitations?: boolean | Prisma.Dataset$invitationsArgs<ExtArgs>
+  assignmentSlots?: boolean | Prisma.Dataset$assignmentSlotsArgs<ExtArgs>
+  assignmentEvents?: boolean | Prisma.Dataset$assignmentEventsArgs<ExtArgs>
+  comments?: boolean | Prisma.Dataset$commentsArgs<ExtArgs>
+  membershipEvents?: boolean | Prisma.Dataset$membershipEventsArgs<ExtArgs>
+  notifications?: boolean | Prisma.Dataset$notificationsArgs<ExtArgs>
+  outboxEvents?: boolean | Prisma.Dataset$outboxEventsArgs<ExtArgs>
   _count?: boolean | Prisma.DatasetCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dataset"]>
 
@@ -3230,6 +5050,13 @@ export type DatasetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   jobs?: boolean | Prisma.Dataset$jobsArgs<ExtArgs>
   labels?: boolean | Prisma.Dataset$labelsArgs<ExtArgs>
   preparedImports?: boolean | Prisma.Dataset$preparedImportsArgs<ExtArgs>
+  invitations?: boolean | Prisma.Dataset$invitationsArgs<ExtArgs>
+  assignmentSlots?: boolean | Prisma.Dataset$assignmentSlotsArgs<ExtArgs>
+  assignmentEvents?: boolean | Prisma.Dataset$assignmentEventsArgs<ExtArgs>
+  comments?: boolean | Prisma.Dataset$commentsArgs<ExtArgs>
+  membershipEvents?: boolean | Prisma.Dataset$membershipEventsArgs<ExtArgs>
+  notifications?: boolean | Prisma.Dataset$notificationsArgs<ExtArgs>
+  outboxEvents?: boolean | Prisma.Dataset$outboxEventsArgs<ExtArgs>
   _count?: boolean | Prisma.DatasetCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DatasetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3257,6 +5084,13 @@ export type $DatasetPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     jobs: Prisma.$JobPayload<ExtArgs>[]
     labels: Prisma.$LabelPayload<ExtArgs>[]
     preparedImports: Prisma.$PreparedImportPayload<ExtArgs>[]
+    invitations: Prisma.$DatasetInvitationPayload<ExtArgs>[]
+    assignmentSlots: Prisma.$AssetAssignmentPayload<ExtArgs>[]
+    assignmentEvents: Prisma.$AssetAssignmentEventPayload<ExtArgs>[]
+    comments: Prisma.$AssetCommentPayload<ExtArgs>[]
+    membershipEvents: Prisma.$DatasetMembershipEventPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    outboxEvents: Prisma.$CollaborationOutboxEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3689,6 +5523,13 @@ export interface Prisma__DatasetClient<T, Null = never, ExtArgs extends runtime.
   jobs<T extends Prisma.Dataset$jobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$jobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   labels<T extends Prisma.Dataset$labelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$labelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   preparedImports<T extends Prisma.Dataset$preparedImportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$preparedImportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PreparedImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invitations<T extends Prisma.Dataset$invitationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$invitationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetInvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignmentSlots<T extends Prisma.Dataset$assignmentSlotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$assignmentSlotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignmentEvents<T extends Prisma.Dataset$assignmentEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$assignmentEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetAssignmentEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  comments<T extends Prisma.Dataset$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  membershipEvents<T extends Prisma.Dataset$membershipEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$membershipEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetMembershipEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.Dataset$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  outboxEvents<T extends Prisma.Dataset$outboxEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$outboxEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollaborationOutboxEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4366,6 +6207,174 @@ export type Dataset$preparedImportsArgs<ExtArgs extends runtime.Types.Extensions
   take?: number
   skip?: number
   distinct?: Prisma.PreparedImportScalarFieldEnum | Prisma.PreparedImportScalarFieldEnum[]
+}
+
+/**
+ * Dataset.invitations
+ */
+export type Dataset$invitationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DatasetInvitation
+   */
+  select?: Prisma.DatasetInvitationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DatasetInvitation
+   */
+  omit?: Prisma.DatasetInvitationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatasetInvitationInclude<ExtArgs> | null
+  where?: Prisma.DatasetInvitationWhereInput
+  orderBy?: Prisma.DatasetInvitationOrderByWithRelationInput | Prisma.DatasetInvitationOrderByWithRelationInput[]
+  cursor?: Prisma.DatasetInvitationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DatasetInvitationScalarFieldEnum | Prisma.DatasetInvitationScalarFieldEnum[]
+}
+
+/**
+ * Dataset.assignmentSlots
+ */
+export type Dataset$assignmentSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetAssignment
+   */
+  select?: Prisma.AssetAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetAssignment
+   */
+  omit?: Prisma.AssetAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetAssignmentInclude<ExtArgs> | null
+  where?: Prisma.AssetAssignmentWhereInput
+  orderBy?: Prisma.AssetAssignmentOrderByWithRelationInput | Prisma.AssetAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.AssetAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetAssignmentScalarFieldEnum | Prisma.AssetAssignmentScalarFieldEnum[]
+}
+
+/**
+ * Dataset.assignmentEvents
+ */
+export type Dataset$assignmentEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetAssignmentEvent
+   */
+  select?: Prisma.AssetAssignmentEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetAssignmentEvent
+   */
+  omit?: Prisma.AssetAssignmentEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetAssignmentEventInclude<ExtArgs> | null
+  where?: Prisma.AssetAssignmentEventWhereInput
+  orderBy?: Prisma.AssetAssignmentEventOrderByWithRelationInput | Prisma.AssetAssignmentEventOrderByWithRelationInput[]
+  cursor?: Prisma.AssetAssignmentEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetAssignmentEventScalarFieldEnum | Prisma.AssetAssignmentEventScalarFieldEnum[]
+}
+
+/**
+ * Dataset.comments
+ */
+export type Dataset$commentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetComment
+   */
+  select?: Prisma.AssetCommentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetComment
+   */
+  omit?: Prisma.AssetCommentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetCommentInclude<ExtArgs> | null
+  where?: Prisma.AssetCommentWhereInput
+  orderBy?: Prisma.AssetCommentOrderByWithRelationInput | Prisma.AssetCommentOrderByWithRelationInput[]
+  cursor?: Prisma.AssetCommentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetCommentScalarFieldEnum | Prisma.AssetCommentScalarFieldEnum[]
+}
+
+/**
+ * Dataset.membershipEvents
+ */
+export type Dataset$membershipEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DatasetMembershipEvent
+   */
+  select?: Prisma.DatasetMembershipEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DatasetMembershipEvent
+   */
+  omit?: Prisma.DatasetMembershipEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatasetMembershipEventInclude<ExtArgs> | null
+  where?: Prisma.DatasetMembershipEventWhereInput
+  orderBy?: Prisma.DatasetMembershipEventOrderByWithRelationInput | Prisma.DatasetMembershipEventOrderByWithRelationInput[]
+  cursor?: Prisma.DatasetMembershipEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DatasetMembershipEventScalarFieldEnum | Prisma.DatasetMembershipEventScalarFieldEnum[]
+}
+
+/**
+ * Dataset.notifications
+ */
+export type Dataset$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * Dataset.outboxEvents
+ */
+export type Dataset$outboxEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollaborationOutboxEvent
+   */
+  select?: Prisma.CollaborationOutboxEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CollaborationOutboxEvent
+   */
+  omit?: Prisma.CollaborationOutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollaborationOutboxEventInclude<ExtArgs> | null
+  where?: Prisma.CollaborationOutboxEventWhereInput
+  orderBy?: Prisma.CollaborationOutboxEventOrderByWithRelationInput | Prisma.CollaborationOutboxEventOrderByWithRelationInput[]
+  cursor?: Prisma.CollaborationOutboxEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CollaborationOutboxEventScalarFieldEnum | Prisma.CollaborationOutboxEventScalarFieldEnum[]
 }
 
 /**

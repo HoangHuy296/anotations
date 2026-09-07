@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { AssetStatus } from "@internal/db";
 
-import { AssetNavigator } from "@/components/workspace/asset-navigator";
+import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
@@ -23,6 +23,8 @@ type PropertiesPanelProps = {
   search: string;
   statuses: AssetStatus[];
   selectedAssetId: string | null;
+  /** Active Asset Browser filters/sort (022). */
+  filters: AssetNavigatorFilters;
 };
 
 /**
@@ -38,7 +40,7 @@ export function PropertiesPanel(props: PropertiesPanelProps) {
   return <PropertiesPanelShell key={remountKey} {...props} tab={tab} setTab={setTab} />;
 }
 
-function PropertiesPanelShell({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: PropertiesPanelProps & { tab: string; setTab: (tab: string) => void }) {
+function PropertiesPanelShell({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, filters, tab, setTab }: PropertiesPanelProps & { tab: string; setTab: (tab: string) => void }) {
   const router = useRouter();
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
 
@@ -46,7 +48,7 @@ function PropertiesPanelShell({ datasetId, selection, assets, page, pageSize, to
     return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white p-4">
       <h2 className="text-sm font-bold text-zinc-950">Assets</h2>
       <p className="mt-1 text-xs leading-5 text-zinc-500">Select an asset from the list to open its details.</p>
-      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={async (event, href) => {
+      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} filters={filters} onNavigate={async (event, href) => {
         event.preventDefault();
         await flushAllAutosaves();
         await flushVideoAutosaves();
@@ -56,5 +58,5 @@ function PropertiesPanelShell({ datasetId, selection, assets, page, pageSize, to
   }
 
   const { Tabs } = workspaceEngineRegistry[selection.engine];
-  return <Tabs datasetId={datasetId} selection={selection} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} completedAssets={completedAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} tab={tab} setTab={setTab} />;
+  return <Tabs datasetId={datasetId} selection={selection} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} completedAssets={completedAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} filters={filters} tab={tab} setTab={setTab} />;
 }

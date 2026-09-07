@@ -1,0 +1,55 @@
+# Annotation and review workflow (023) public API schemas.
+# Source of truth: specs/023-annotation-review-workflow/contracts/asset-workflow.md
+
+AssetWorkflowAction:
+  type: string
+  enum: [START, SUBMIT, OPEN_REVIEW, APPROVE, REJECT, START_REWORK, RESUBMIT]
+
+AssetWorkflowActionRequest:
+  type: object
+  required: [action, expectedRevision]
+  additionalProperties: false
+  properties:
+    action: { $ref: '#/AssetWorkflowAction' }
+    expectedRevision: { type: integer, minimum: 1 }
+    feedback:
+      type: string
+      minLength: 1
+      maxLength: 2000
+      description: Required only for REJECT; forbidden for all other actions.
+
+AssetWorkflowEvent:
+  type: object
+  required: [id, action, assetRevision, createdAt]
+  properties:
+    id: { $ref: './common.yaml#/Cuid' }
+    action: { $ref: '#/AssetWorkflowAction' }
+    fromStatus: { oneOf: [{ $ref: './assets.yaml#/AssetStatus' }, { type: 'null' }] }
+    toStatus: { oneOf: [{ $ref: './assets.yaml#/AssetStatus' }, { type: 'null' }] }
+    assetRevision: { type: integer, minimum: 1 }
+    feedback: { type: [string, 'null'] }
+    createdAt: { $ref: './common.yaml#/Timestamp' }
+
+AssetWorkflowAsset:
+  type: object
+  required: [id, status, revision]
+  properties:
+    id: { $ref: './common.yaml#/Cuid' }
+    status: { $ref: './assets.yaml#/AssetStatus' }
+    revision: { type: integer, minimum: 1 }
+
+AssetWorkflowReadResponse:
+  type: object
+  required: [asset, history]
+  properties:
+    asset: { $ref: '#/AssetWorkflowAsset' }
+    history:
+      type: array
+      items: { $ref: '#/AssetWorkflowEvent' }
+
+AssetWorkflowActionResponse:
+  type: object
+  required: [asset, event]
+  properties:
+    asset: { $ref: '#/AssetWorkflowAsset' }
+    event: { $ref: '#/AssetWorkflowEvent' }

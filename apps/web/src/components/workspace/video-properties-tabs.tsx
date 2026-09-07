@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { AssetStatus } from "@internal/db";
 
 import { updateVideoDescriptionAction } from "@/app/(app)/workspace/[datasetId]/actions";
-import { AssetNavigator } from "@/components/workspace/asset-navigator";
+import { AssetBrowserFilters } from "@/components/workspace/asset-browser-filters";
+import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
+import { BulkActionBar } from "@/components/workspace/bulk-action-bar";
+import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-panel";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
+import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import { Badge } from "@/components/ui/badge";
-import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status";
 import { deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
@@ -33,6 +36,7 @@ export type VideoPropertiesTabsProps = {
   search: string;
   statuses: AssetStatus[];
   selectedAssetId: string | null;
+  filters: AssetNavigatorFilters;
   tab: string;
   setTab: (tab: string) => void;
 };
@@ -62,8 +66,9 @@ export type VideoPropertiesTabsProps = {
  * that keyframe's track, seeking to its timestamp, and pausing -- so
  * selecting a shape here highlights it on the paused frame.
  */
-export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: VideoPropertiesTabsProps) {
+export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, filters, tab, setTab }: VideoPropertiesTabsProps) {
   const asset = selection.asset;
+  const readOnly = asset.status === "NEEDS_REVIEW" || asset.status === "REVIEWED" || asset.status === "REJECTED";
   const router = useRouter();
   const [description, setDescription] = useState(asset.description ?? "");
   const [serverDescription, setServerDescription] = useState(asset.description ?? "");
@@ -115,6 +120,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
   useEffect(() => { void useDatasetLabelsStore.getState().ensureLoaded(datasetId); }, [datasetId]);
 
   useEffect(() => {
+    if (readOnly) return;
     if (description === serverDescription || lastAttemptedDescriptionRef.current === description) return;
     const resourceKey = `video-description:${asset.id}`;
     setDescriptionState("pending");
@@ -137,7 +143,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
       setDescriptionState("failed");
       return "failed";
     });
-  }, [asset.id, datasetId, description, scheduleAutosave, serverDescription, setConflictDraftInStore, version]);
+  }, [asset.id, datasetId, description, readOnly, scheduleAutosave, serverDescription, setConflictDraftInStore, version]);
 
   async function createCustomLabel() {
     const name = newLabelName.trim();
@@ -261,6 +267,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
    * keyframe.
    */
   async function saveTrackEdit(trackId: string) {
+    if (readOnly) return;
     const track = tracks[trackId];
     const draft = trackDrafts[trackId];
     if (!track || !draft) return;
@@ -279,6 +286,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
   }
 
   async function removeKeyframeRow(keyframeId: string) {
+    if (readOnly) return;
     const keyframe = keyframes[keyframeId];
     const track = keyframe ? tracks[keyframe.trackId] : undefined;
     if (!keyframe || !track) return;
@@ -291,6 +299,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
   }
 
   async function removeTrackRow(trackId: string) {
+    if (readOnly) return;
     const track = tracks[trackId];
     if (!track || !window.confirm("Delete this track and its keyframes?")) return;
     setShapeError(null);
@@ -312,21 +321,6 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
     return true;
   }
 
-  async function applyAssetFilters(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formElement = event.currentTarget;
-    if (!(await flushBeforeNavigation())) return;
-    const form = new FormData(formElement);
-    const params = new URLSearchParams({ page: "1" });
-    const nextSearch = String(form.get("q") ?? "").trim();
-    if (nextSearch) params.set("q", nextSearch);
-    const nextStatus = String(form.get("status") ?? "ALL");
-    if (nextStatus === "MULTIPLE") { for (const status of statuses) params.append("status", status); }
-    else if (imageStatusOptions.includes(nextStatus as AssetStatus)) params.set("status", nextStatus);
-    router.push(`/workspace/${datasetId}?${params.toString()}`);
-  }
-
-  const selectedStatus = statuses.length === 1 ? statuses[0] : statuses.length > 1 ? "MULTIPLE" : "ALL";
   const activeTab = (["description", "labels", "tracks", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";
   const trackList = storeTrackList;
   const keyframeList = [...storeKeyframeList].sort((left, right) => left.timestampMs - right.timestampMs);
@@ -342,10 +336,12 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
     </nav>
     {activeTab === "description" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Description</h2><span className="text-[11px] text-zinc-400">{descriptionState === "pending" ? "Saving after inactivity…" : descriptionState === "saving" ? "Saving…" : descriptionState === "saved" ? "Saved" : descriptionState === "failed" ? "Save failed" : ""}</span></div>
-      <textarea value={description} onChange={(event) => { lastAttemptedDescriptionRef.current = null; setDescription(event.target.value); }} maxLength={10_000} rows={7} className="mt-3 w-full resize-y rounded-xl border border-zinc-200 p-3 text-sm text-zinc-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" placeholder="Scene context, notes, or quality flags" />
+      <textarea readOnly={readOnly} value={description} onChange={(event) => { if (!readOnly) { lastAttemptedDescriptionRef.current = null; setDescription(event.target.value); } }} maxLength={10_000} rows={7} className="mt-3 w-full resize-y rounded-xl border border-zinc-200 p-3 text-sm text-zinc-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" placeholder="Scene context, notes, or quality flags" />
       {descriptionState === "conflict" && <div className="mt-3"><SaveConflictPanel message="Your description draft is still visible and was not sent again." onReload={() => window.location.reload()} onDiscard={() => { setDescription(serverDescription); setConflictDraft(null); setDescriptionState("idle"); }} /></div>}
       {descriptionState === "failed" && <p role="alert" className="mt-3 text-xs text-rose-700">Description was not saved. Edit it again to retry.</p>}
       {conflictDraft && <p className="sr-only">Local draft preserved.</p>}
+      <AssetAssignmentPanel datasetId={datasetId} assetId={asset.id} />
+      <WorkflowHistoryPanel datasetId={datasetId} assetId={asset.id} />
     </section>}
     {activeTab === "labels" && <section className="p-4">
       <h2 className="text-sm font-bold text-zinc-950">Labels</h2>
@@ -386,6 +382,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
     {activeTab === "tracks" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Tracks</h2><span className="text-xs text-zinc-400">{trackList.length}</span></div>
       <p className="mt-1 text-[11px] leading-4 text-zinc-400">Each track is one shape/object tracked across frames. Click a track to view and manage its keyframes. Create a new track from the video toolbar.</p>
+      {readOnly ? <p className="mt-2 text-xs text-amber-700">Review mode: video annotations are read-only.</p> : null}
       <div className="mt-3 space-y-2">{trackList.length === 0 ? <p className="text-xs text-zinc-500">No tracks yet.</p> : trackList.map((track) => {
         const trackKeyframes = keyframeList.filter((keyframe) => keyframe.trackId === track.id);
         const isExpanded = expandedTrackId === track.id;
@@ -399,18 +396,18 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
           </div>
           {isExpanded && <div className="space-y-2 border-t border-zinc-100 p-2">
             <div className="grid grid-cols-2 gap-2">
-              <label className="text-[11px] text-zinc-500">Object ID<input value={draft.objectId} onChange={(event) => updateTrackDraft(track.id, { objectId: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
-              <label className="text-[11px] text-zinc-500">Name<input value={draft.name} onChange={(event) => updateTrackDraft(track.id, { name: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
+              <label className="text-[11px] text-zinc-500">Object ID<input disabled={readOnly} value={draft.objectId} onChange={(event) => updateTrackDraft(track.id, { objectId: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
+              <label className="text-[11px] text-zinc-500">Name<input disabled={readOnly} value={draft.name} onChange={(event) => updateTrackDraft(track.id, { name: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <label className="text-[11px] text-zinc-500">Label
-                <select value={draft.labelId} onChange={(event) => updateTrackDraft(track.id, { labelId: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
+                <select disabled={readOnly} value={draft.labelId} onChange={(event) => updateTrackDraft(track.id, { labelId: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
                   <option value="">No label</option>
                   {taxonomy.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                 </select>
               </label>
               <label className="text-[11px] text-zinc-500">Interpolation
-                <select value={draft.interpolationMode} onChange={(event) => updateTrackDraft(track.id, { interpolationMode: event.target.value as "LINEAR" | "NONE" })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
+                <select disabled={readOnly} value={draft.interpolationMode} onChange={(event) => updateTrackDraft(track.id, { interpolationMode: event.target.value as "LINEAR" | "NONE" })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
                   <option value="LINEAR">Linear</option>
                   <option value="NONE">None</option>
                 </select>
@@ -418,16 +415,16 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
             </div>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => cancelTrackEdit(track.id)} disabled={isSaving} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-[11px] font-semibold text-zinc-600 hover:bg-zinc-50 disabled:opacity-50">Cancel</button>
-              <button type="button" onClick={() => void saveTrackEdit(track.id)} disabled={isSaving} className="rounded-lg bg-sky-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{isSaving ? "Saving…" : "Save"}</button>
+              {!readOnly ? <button type="button" onClick={() => void saveTrackEdit(track.id)} disabled={isSaving} className="rounded-lg bg-sky-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{isSaving ? "Saving…" : "Save"}</button> : null}
             </div>
             <div>
               <h4 className="text-[11px] font-semibold text-zinc-600">Keyframes</h4>
               <div className="mt-1 space-y-1">{trackKeyframes.length === 0 ? <p className="text-[11px] text-zinc-400">No keyframes yet -- draw on the frame or use &quot;Add keyframe here&quot;.</p> : trackKeyframes.sort((left, right) => left.timestampMs - right.timestampMs).map((keyframe) => <div key={keyframe.id} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-[11px] ${keyframe.id === selectedKeyframeId ? "bg-sky-50 text-sky-800" : "text-zinc-600 hover:bg-zinc-50"}`}>
                 <button type="button" onClick={() => setSelectedKeyframeId(keyframe.id)} className="flex-1 text-left">{(keyframe.timestampMs / 1000).toFixed(2)}s</button>
-                <button type="button" onClick={() => void removeKeyframeRow(keyframe.id)} className="font-semibold text-rose-700">Delete</button>
+                {!readOnly ? <button type="button" onClick={() => void removeKeyframeRow(keyframe.id)} className="font-semibold text-rose-700">Delete</button> : null}
               </div>)}</div>
             </div>
-            <button type="button" onClick={() => void removeTrackRow(track.id)} className="w-full rounded-lg px-2 py-1.5 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete track</button>
+            {!readOnly ? <button type="button" onClick={() => void removeTrackRow(track.id)} className="w-full rounded-lg px-2 py-1.5 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete track</button> : null}
           </div>}
         </div>;
       })}</div>
@@ -436,21 +433,10 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
     {activeTab === "assets" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Assets</h2><span className="text-xs text-zinc-400">Page {page}</span></div>
       <p className="mt-1 text-xs text-zinc-500">This workspace page is limited to {pageSize} assets.</p>
-      <form method="get" onSubmit={(event) => { void applyAssetFilters(event); }} className="mt-3 space-y-2">
-        <label className="sr-only" htmlFor="workspace-asset-search">Search assets</label>
-        <input id="workspace-asset-search" name="q" type="search" defaultValue={search} placeholder="Search assets" className="w-full rounded-lg border border-zinc-200 px-2 py-2 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
-        <div className="flex gap-2">
-          <label className="sr-only" htmlFor="workspace-asset-status">Filter by status</label>
-          <select id="workspace-asset-status" name="status" defaultValue={selectedStatus} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-2 text-xs text-zinc-700">
-            <option value="ALL">All statuses</option>
-            {statuses.length > 1 && <option value="MULTIPLE">Keep multiple status filters</option>}
-            {imageStatusOptions.map((option) => <option key={option} value={option}>{imageStatusPresentation[option].label}</option>)}
-          </select>
-          <button type="submit" className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white hover:bg-zinc-800">Apply</button>
-        </div>
-      </form>
+      <AssetBrowserFilters datasetId={datasetId} search={search} statuses={statuses} filterModality={filters.filterModality} beforeNavigate={flushBeforeNavigation} />
       <div className="mt-3" aria-label="Dataset progress"><div className="flex justify-between text-[11px] text-zinc-500"><span>Dataset progress</span><span>{completedAssets} / {totalAssets}</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${totalAssets ? Math.round((completedAssets / totalAssets) * 100) : 0}%` }} /></div></div>
-      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardNavigation} />
+      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} filters={filters} onNavigate={guardNavigation} />
+      <BulkActionBar datasetId={datasetId} labels={taxonomy} />
     </section>}
   </aside>;
 }

@@ -237,6 +237,7 @@ export type LabelWhereInput = {
   annotations?: Prisma.AnnotationListRelationFilter
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   videoTracks?: Prisma.VideoObjectTrackListRelationFilter
+  assetLabels?: Prisma.AssetLabelListRelationFilter
 }
 
 export type LabelOrderByWithRelationInput = {
@@ -255,6 +256,7 @@ export type LabelOrderByWithRelationInput = {
   annotations?: Prisma.AnnotationOrderByRelationAggregateInput
   dataset?: Prisma.DatasetOrderByWithRelationInput
   videoTracks?: Prisma.VideoObjectTrackOrderByRelationAggregateInput
+  assetLabels?: Prisma.AssetLabelOrderByRelationAggregateInput
 }
 
 export type LabelWhereUniqueInput = Prisma.AtLeast<{
@@ -277,6 +279,7 @@ export type LabelWhereUniqueInput = Prisma.AtLeast<{
   annotations?: Prisma.AnnotationListRelationFilter
   dataset?: Prisma.XOR<Prisma.DatasetScalarRelationFilter, Prisma.DatasetWhereInput>
   videoTracks?: Prisma.VideoObjectTrackListRelationFilter
+  assetLabels?: Prisma.AssetLabelListRelationFilter
 }, "id" | "datasetId_normalizedName">
 
 export type LabelOrderByWithAggregationInput = {
@@ -330,6 +333,7 @@ export type LabelCreateInput = {
   annotations?: Prisma.AnnotationCreateNestedManyWithoutLabelInput
   dataset: Prisma.DatasetCreateNestedOneWithoutLabelsInput
   videoTracks?: Prisma.VideoObjectTrackCreateNestedManyWithoutLabelInput
+  assetLabels?: Prisma.AssetLabelCreateNestedManyWithoutLabelInput
 }
 
 export type LabelUncheckedCreateInput = {
@@ -347,6 +351,7 @@ export type LabelUncheckedCreateInput = {
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutLabelInput
   videoTracks?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutLabelInput
+  assetLabels?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutLabelInput
 }
 
 export type LabelUpdateInput = {
@@ -364,6 +369,7 @@ export type LabelUpdateInput = {
   annotations?: Prisma.AnnotationUpdateManyWithoutLabelNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutLabelsNestedInput
   videoTracks?: Prisma.VideoObjectTrackUpdateManyWithoutLabelNestedInput
+  assetLabels?: Prisma.AssetLabelUpdateManyWithoutLabelNestedInput
 }
 
 export type LabelUncheckedUpdateInput = {
@@ -381,6 +387,7 @@ export type LabelUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutLabelNestedInput
   videoTracks?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutLabelNestedInput
+  assetLabels?: Prisma.AssetLabelUncheckedUpdateManyWithoutLabelNestedInput
 }
 
 export type LabelCreateManyInput = {
@@ -435,6 +442,11 @@ export type LabelListRelationFilter = {
 
 export type LabelOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type LabelScalarRelationFilter = {
+  is?: Prisma.LabelWhereInput
+  isNot?: Prisma.LabelWhereInput
 }
 
 export type LabelDatasetIdNormalizedNameCompoundUniqueInput = {
@@ -532,6 +544,20 @@ export type LabelUncheckedUpdateManyWithoutDatasetNestedInput = {
   deleteMany?: Prisma.LabelScalarWhereInput | Prisma.LabelScalarWhereInput[]
 }
 
+export type LabelCreateNestedOneWithoutAssetLabelsInput = {
+  create?: Prisma.XOR<Prisma.LabelCreateWithoutAssetLabelsInput, Prisma.LabelUncheckedCreateWithoutAssetLabelsInput>
+  connectOrCreate?: Prisma.LabelCreateOrConnectWithoutAssetLabelsInput
+  connect?: Prisma.LabelWhereUniqueInput
+}
+
+export type LabelUpdateOneRequiredWithoutAssetLabelsNestedInput = {
+  create?: Prisma.XOR<Prisma.LabelCreateWithoutAssetLabelsInput, Prisma.LabelUncheckedCreateWithoutAssetLabelsInput>
+  connectOrCreate?: Prisma.LabelCreateOrConnectWithoutAssetLabelsInput
+  upsert?: Prisma.LabelUpsertWithoutAssetLabelsInput
+  connect?: Prisma.LabelWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LabelUpdateToOneWithWhereWithoutAssetLabelsInput, Prisma.LabelUpdateWithoutAssetLabelsInput>, Prisma.LabelUncheckedUpdateWithoutAssetLabelsInput>
+}
+
 export type EnumLabelScopeFieldUpdateOperationsInput = {
   set?: $Enums.LabelScope
 }
@@ -582,6 +608,7 @@ export type LabelCreateWithoutDatasetInput = {
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationCreateNestedManyWithoutLabelInput
   videoTracks?: Prisma.VideoObjectTrackCreateNestedManyWithoutLabelInput
+  assetLabels?: Prisma.AssetLabelCreateNestedManyWithoutLabelInput
 }
 
 export type LabelUncheckedCreateWithoutDatasetInput = {
@@ -598,6 +625,7 @@ export type LabelUncheckedCreateWithoutDatasetInput = {
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutLabelInput
   videoTracks?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutLabelInput
+  assetLabels?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutLabelInput
 }
 
 export type LabelCreateOrConnectWithoutDatasetInput = {
@@ -644,6 +672,90 @@ export type LabelScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Label"> | Date | string
 }
 
+export type LabelCreateWithoutAssetLabelsInput = {
+  id?: string
+  modality?: $Enums.Modality | null
+  scope?: $Enums.LabelScope
+  name: string
+  normalizedName: string
+  color: string
+  description?: string | null
+  hotkey?: string | null
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutLabelInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutLabelsInput
+  videoTracks?: Prisma.VideoObjectTrackCreateNestedManyWithoutLabelInput
+}
+
+export type LabelUncheckedCreateWithoutAssetLabelsInput = {
+  id?: string
+  datasetId: string
+  modality?: $Enums.Modality | null
+  scope?: $Enums.LabelScope
+  name: string
+  normalizedName: string
+  color: string
+  description?: string | null
+  hotkey?: string | null
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutLabelInput
+  videoTracks?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutLabelInput
+}
+
+export type LabelCreateOrConnectWithoutAssetLabelsInput = {
+  where: Prisma.LabelWhereUniqueInput
+  create: Prisma.XOR<Prisma.LabelCreateWithoutAssetLabelsInput, Prisma.LabelUncheckedCreateWithoutAssetLabelsInput>
+}
+
+export type LabelUpsertWithoutAssetLabelsInput = {
+  update: Prisma.XOR<Prisma.LabelUpdateWithoutAssetLabelsInput, Prisma.LabelUncheckedUpdateWithoutAssetLabelsInput>
+  create: Prisma.XOR<Prisma.LabelCreateWithoutAssetLabelsInput, Prisma.LabelUncheckedCreateWithoutAssetLabelsInput>
+  where?: Prisma.LabelWhereInput
+}
+
+export type LabelUpdateToOneWithWhereWithoutAssetLabelsInput = {
+  where?: Prisma.LabelWhereInput
+  data: Prisma.XOR<Prisma.LabelUpdateWithoutAssetLabelsInput, Prisma.LabelUncheckedUpdateWithoutAssetLabelsInput>
+}
+
+export type LabelUpdateWithoutAssetLabelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  scope?: Prisma.EnumLabelScopeFieldUpdateOperationsInput | $Enums.LabelScope
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedName?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hotkey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  annotations?: Prisma.AnnotationUpdateManyWithoutLabelNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutLabelsNestedInput
+  videoTracks?: Prisma.VideoObjectTrackUpdateManyWithoutLabelNestedInput
+}
+
+export type LabelUncheckedUpdateWithoutAssetLabelsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  scope?: Prisma.EnumLabelScopeFieldUpdateOperationsInput | $Enums.LabelScope
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedName?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  hotkey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  properties?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutLabelNestedInput
+  videoTracks?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutLabelNestedInput
+}
+
 export type LabelCreateWithoutAnnotationsInput = {
   id?: string
   modality?: $Enums.Modality | null
@@ -658,6 +770,7 @@ export type LabelCreateWithoutAnnotationsInput = {
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutLabelsInput
   videoTracks?: Prisma.VideoObjectTrackCreateNestedManyWithoutLabelInput
+  assetLabels?: Prisma.AssetLabelCreateNestedManyWithoutLabelInput
 }
 
 export type LabelUncheckedCreateWithoutAnnotationsInput = {
@@ -674,6 +787,7 @@ export type LabelUncheckedCreateWithoutAnnotationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   videoTracks?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutLabelInput
+  assetLabels?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutLabelInput
 }
 
 export type LabelCreateOrConnectWithoutAnnotationsInput = {
@@ -706,6 +820,7 @@ export type LabelUpdateWithoutAnnotationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutLabelsNestedInput
   videoTracks?: Prisma.VideoObjectTrackUpdateManyWithoutLabelNestedInput
+  assetLabels?: Prisma.AssetLabelUpdateManyWithoutLabelNestedInput
 }
 
 export type LabelUncheckedUpdateWithoutAnnotationsInput = {
@@ -722,6 +837,7 @@ export type LabelUncheckedUpdateWithoutAnnotationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   videoTracks?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutLabelNestedInput
+  assetLabels?: Prisma.AssetLabelUncheckedUpdateManyWithoutLabelNestedInput
 }
 
 export type LabelCreateWithoutVideoTracksInput = {
@@ -738,6 +854,7 @@ export type LabelCreateWithoutVideoTracksInput = {
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationCreateNestedManyWithoutLabelInput
   dataset: Prisma.DatasetCreateNestedOneWithoutLabelsInput
+  assetLabels?: Prisma.AssetLabelCreateNestedManyWithoutLabelInput
 }
 
 export type LabelUncheckedCreateWithoutVideoTracksInput = {
@@ -754,6 +871,7 @@ export type LabelUncheckedCreateWithoutVideoTracksInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutLabelInput
+  assetLabels?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutLabelInput
 }
 
 export type LabelCreateOrConnectWithoutVideoTracksInput = {
@@ -786,6 +904,7 @@ export type LabelUpdateWithoutVideoTracksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUpdateManyWithoutLabelNestedInput
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutLabelsNestedInput
+  assetLabels?: Prisma.AssetLabelUpdateManyWithoutLabelNestedInput
 }
 
 export type LabelUncheckedUpdateWithoutVideoTracksInput = {
@@ -802,6 +921,7 @@ export type LabelUncheckedUpdateWithoutVideoTracksInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutLabelNestedInput
+  assetLabels?: Prisma.AssetLabelUncheckedUpdateManyWithoutLabelNestedInput
 }
 
 export type LabelCreateManyDatasetInput = {
@@ -832,6 +952,7 @@ export type LabelUpdateWithoutDatasetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUpdateManyWithoutLabelNestedInput
   videoTracks?: Prisma.VideoObjectTrackUpdateManyWithoutLabelNestedInput
+  assetLabels?: Prisma.AssetLabelUpdateManyWithoutLabelNestedInput
 }
 
 export type LabelUncheckedUpdateWithoutDatasetInput = {
@@ -848,6 +969,7 @@ export type LabelUncheckedUpdateWithoutDatasetInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutLabelNestedInput
   videoTracks?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutLabelNestedInput
+  assetLabels?: Prisma.AssetLabelUncheckedUpdateManyWithoutLabelNestedInput
 }
 
 export type LabelUncheckedUpdateManyWithoutDatasetInput = {
@@ -872,11 +994,13 @@ export type LabelUncheckedUpdateManyWithoutDatasetInput = {
 export type LabelCountOutputType = {
   annotations: number
   videoTracks: number
+  assetLabels: number
 }
 
 export type LabelCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   annotations?: boolean | LabelCountOutputTypeCountAnnotationsArgs
   videoTracks?: boolean | LabelCountOutputTypeCountVideoTracksArgs
+  assetLabels?: boolean | LabelCountOutputTypeCountAssetLabelsArgs
 }
 
 /**
@@ -903,6 +1027,13 @@ export type LabelCountOutputTypeCountVideoTracksArgs<ExtArgs extends runtime.Typ
   where?: Prisma.VideoObjectTrackWhereInput
 }
 
+/**
+ * LabelCountOutputType without action
+ */
+export type LabelCountOutputTypeCountAssetLabelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetLabelWhereInput
+}
+
 
 export type LabelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -920,6 +1051,7 @@ export type LabelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   annotations?: boolean | Prisma.Label$annotationsArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   videoTracks?: boolean | Prisma.Label$videoTracksArgs<ExtArgs>
+  assetLabels?: boolean | Prisma.Label$assetLabelsArgs<ExtArgs>
   _count?: boolean | Prisma.LabelCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["label"]>
 
@@ -975,6 +1107,7 @@ export type LabelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   annotations?: boolean | Prisma.Label$annotationsArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
   videoTracks?: boolean | Prisma.Label$videoTracksArgs<ExtArgs>
+  assetLabels?: boolean | Prisma.Label$assetLabelsArgs<ExtArgs>
   _count?: boolean | Prisma.LabelCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LabelIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -990,6 +1123,7 @@ export type $LabelPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     annotations: Prisma.$AnnotationPayload<ExtArgs>[]
     dataset: Prisma.$DatasetPayload<ExtArgs>
     videoTracks: Prisma.$VideoObjectTrackPayload<ExtArgs>[]
+    assetLabels: Prisma.$AssetLabelPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1401,6 +1535,7 @@ export interface Prisma__LabelClient<T, Null = never, ExtArgs extends runtime.Ty
   annotations<T extends Prisma.Label$annotationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Label$annotationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dataset<T extends Prisma.DatasetDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DatasetDefaultArgs<ExtArgs>>): Prisma.Prisma__DatasetClient<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   videoTracks<T extends Prisma.Label$videoTracksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Label$videoTracksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoObjectTrackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assetLabels<T extends Prisma.Label$assetLabelsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Label$assetLabelsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1883,6 +2018,30 @@ export type Label$videoTracksArgs<ExtArgs extends runtime.Types.Extensions.Inter
   take?: number
   skip?: number
   distinct?: Prisma.VideoObjectTrackScalarFieldEnum | Prisma.VideoObjectTrackScalarFieldEnum[]
+}
+
+/**
+ * Label.assetLabels
+ */
+export type Label$assetLabelsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetLabel
+   */
+  select?: Prisma.AssetLabelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetLabel
+   */
+  omit?: Prisma.AssetLabelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetLabelInclude<ExtArgs> | null
+  where?: Prisma.AssetLabelWhereInput
+  orderBy?: Prisma.AssetLabelOrderByWithRelationInput | Prisma.AssetLabelOrderByWithRelationInput[]
+  cursor?: Prisma.AssetLabelWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetLabelScalarFieldEnum | Prisma.AssetLabelScalarFieldEnum[]
 }
 
 /**

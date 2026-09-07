@@ -1,12 +1,15 @@
 import "server-only";
 
+import { createHash } from "node:crypto";
+
 import { DatasetSourceMode, JobStatus, Prisma, RepoProvider, type JobType } from "@internal/db";
 import { getQueueDeliveryId, jobQueuePayloadSchema } from "@annotationplatform/queue";
 import { logJobEvent, logRedisEvent } from "@annotationplatform/domain";
+import type { BulkAssetJobInput } from "@annotationplatform/domain/bulk-asset-job";
 
 import type { RequestActor } from "@/lib/auth";
 import { authorizeFoundationJobSubmission } from "@/lib/jobs/authorization";
-import { requireDatasetPermission } from "@/lib/authorization";
+import { requireDatasetPermission, type DatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { createWebQueue } from "@/lib/queue/bullmq-client";
 import { resolveQueueName } from "@/lib/queue/queue-names";
@@ -321,6 +324,56 @@ type QueueClient = {
   close: () => Promise<void>;
 };
 type EnqueueOptions = { createQueue?: () => QueueClient };
+
+function bulkAssetJobIdempotencyKey(type: JobType, datasetId: string, selection: BulkAssetJobInput) {
+  const fingerprint = createHash("sha256").update(JSON.stringify(selection)).digest("hex");
+  return createHash("sha256").update(`fieldframe:bulk:v1:${type}:${datasetId}:${fingerprint}`).digest("hex");
+}
+
+/**
+ * Creates (or, for an exact-duplicate concurrent submission, safely reuses)
+ * the background Job for a bulk Delete/Export Selected action that exceeded
+ * `BULK_SYNC_MAX_ASSETS` (022 User Story 3/4). `Job.input` carries only the
+ * `selection` (mode + explicit ids, or mode + query) -- the worker
+ * re-resolves it server-side at execution time (research.md §4/§12), never
+ * a pre-materialized asset list beyond what `EXPLICIT` mode already is.
+ * Unlike Dataset Export's single canonical-key-per-dataset design, each
+ * distinct selection gets its own permanent idempotency key here (bulk
+ * actions are not "one per dataset forever"); a truly identical resubmission
+ * collides on that key and reuses the existing Job instead of double-queuing.
+ */
+export async function createAndEnqueueBulkAssetJob(actor: RequestActor, input: {
+  datasetId: string;
+  type: Extract<JobType, "BULK_DELETE_ASSETS" | "BULK_EXPORT_SELECTED">;
+  permission: DatasetPermission;
+  selection: BulkAssetJobInput;
+  resolvedCount: number;
+}) {
+  const access = await requireDatasetPermission(actor, input.datasetId, input.permission);
+  if (!access) return { ok: false as const, status: 404 as const };
+  if (access.forbidden) return { ok: false as const, status: 403 as const };
+  const idempotencyKey = bulkAssetJobIdempotencyKey(input.type, input.datasetId, input.selection);
+  const jobSelect = { id: true, datasetId: true, status: true, queueName: true, queueJobId: true, enqueuedAt: true } as const;
+  let job;
+  try {
+    job = await db.job.create({
+      data: { datasetId: input.datasetId, createdById: actor.id, type: input.type, status: JobStatus.QUEUED, idempotencyKey, input: input.selection, totalItems: input.resolvedCount },
+      select: jobSelect,
+    });
+  } catch (error) {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
+    const existing = await db.job.findFirst({ where: { datasetId: input.datasetId, idempotencyKey, type: input.type }, select: jobSelect });
+    if (!existing) throw error;
+    if (existing.status !== JobStatus.QUEUED) return { ok: true as const, status: 200 as const, job: existing, deliveryPending: false };
+    return enqueueExistingJob(existing.id, resolveQueueName(input.type) ?? undefined, existing);
+  }
+  logJobEvent("JOB_CREATED", { jobId: job.id, type: input.type, status: job.status });
+  // `jobSelect` doesn't carry `type` (kept minimal), so the queue name is
+  // resolved explicitly here rather than relying on `enqueueExistingJob`'s
+  // `"type" in job` fallback, which would otherwise silently resolve to
+  // `null` and fail every bulk-asset Job's delivery.
+  return enqueueExistingJob(job.id, resolveQueueName(input.type) ?? undefined, job);
+}
 
 /**
  * The queue transport contract is deliberately constructed in one place: it

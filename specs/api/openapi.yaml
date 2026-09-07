@@ -62,6 +62,11 @@ tags:
       (browser directory) import flow.
   - name: Media
     description: Scheduling/reading VIDEO and AUDIO media-processing Jobs, and the IMAGE dimensions backfill endpoint.
+  - name: Collaboration
+    description: >-
+      Phase 024 collaboration schemas. REST commands are added only with their
+      implemented Route Handlers; realtime delivery is documented separately
+      and never accepts commands.
 
 security:
   - sessionCookie: []
@@ -119,6 +124,70 @@ components:
       $ref: './schemas/assets.yaml#/CompleteUploadResponse'
     AssetViewUrlResponse:
       $ref: './schemas/assets.yaml#/AssetViewUrlResponse'
+
+    # --- bulk asset operations (022) ---------------------------------------
+    AssetBulkAction:
+      $ref: './schemas/bulk-assets.yaml#/AssetBulkAction'
+    AssetBulkSelection:
+      $ref: './schemas/bulk-assets.yaml#/AssetBulkSelection'
+    AssetBulkRequest:
+      $ref: './schemas/bulk-assets.yaml#/AssetBulkRequest'
+    AssetBulkOperationResult:
+      $ref: './schemas/bulk-assets.yaml#/AssetBulkOperationResult'
+    AssetBulkResponse:
+      $ref: './schemas/bulk-assets.yaml#/AssetBulkResponse'
+    DatasetMember:
+      $ref: './schemas/bulk-assets.yaml#/DatasetMember'
+    DatasetMemberListResponse:
+      $ref: './schemas/bulk-assets.yaml#/DatasetMemberListResponse'
+    ExportSelectedDownload:
+      $ref: './schemas/bulk-assets.yaml#/ExportSelectedDownload'
+
+    # --- annotation workflow (023) -----------------------------------------
+    AssetWorkflowAction:
+      $ref: './schemas/asset-workflow.yaml#/AssetWorkflowAction'
+    AssetWorkflowActionRequest:
+      $ref: './schemas/asset-workflow.yaml#/AssetWorkflowActionRequest'
+    AssetWorkflowEvent:
+      $ref: './schemas/asset-workflow.yaml#/AssetWorkflowEvent'
+    AssetWorkflowReadResponse:
+      $ref: './schemas/asset-workflow.yaml#/AssetWorkflowReadResponse'
+    AssetWorkflowActionResponse:
+      $ref: './schemas/asset-workflow.yaml#/AssetWorkflowActionResponse'
+
+    # --- collaboration (024 foundation; routes added with implementation) ---
+    DatasetInvitationStatus:
+      $ref: './schemas/collaboration.yaml#/DatasetInvitationStatus'
+    AssetAssignmentType:
+      $ref: './schemas/collaboration.yaml#/AssetAssignmentType'
+    NotificationType:
+      $ref: './schemas/collaboration.yaml#/NotificationType'
+    DatasetInvitation:
+      $ref: './schemas/collaboration.yaml#/DatasetInvitation'
+    DatasetInvitationCreateRequest:
+      $ref: './schemas/collaboration.yaml#/DatasetInvitationCreateRequest'
+    DatasetMemberRoleChangeRequest:
+      $ref: './schemas/collaboration.yaml#/DatasetMemberRoleChangeRequest'
+    AssetAssignment:
+      $ref: './schemas/collaboration.yaml#/AssetAssignment'
+    AssetAssignmentWriteRequest:
+      $ref: './schemas/collaboration.yaml#/AssetAssignmentWriteRequest'
+    AssetAssignmentEvent:
+      $ref: './schemas/collaboration.yaml#/AssetAssignmentEvent'
+    AssetComment:
+      $ref: './schemas/collaboration.yaml#/AssetComment'
+    AssetCommentCreateRequest:
+      $ref: './schemas/collaboration.yaml#/AssetCommentCreateRequest'
+    AssetCommentUpdateRequest:
+      $ref: './schemas/collaboration.yaml#/AssetCommentUpdateRequest'
+    AssetCommentThread:
+      $ref: './schemas/collaboration.yaml#/AssetCommentThread'
+    Notification:
+      $ref: './schemas/collaboration.yaml#/Notification'
+    NotificationPage:
+      $ref: './schemas/collaboration.yaml#/NotificationPage'
+    RealtimeDeliveryEnvelope:
+      $ref: './schemas/collaboration.yaml#/RealtimeDeliveryEnvelope'
 
     # --- annotations --------------------------------------------------------
     AnnotationType:
@@ -678,6 +747,43 @@ paths:
           required: false
           schema: { type: string, minLength: 1, maxLength: 100 }
           description: Case-insensitive substring match against filename, originalFilename, or description.
+        - name: labelId
+          in: query
+          required: false
+          schema: { type: array, items: { type: string } }
+          description: (022) Repeatable. Matches Assets with an AssetLabel attachment for any listed Label.
+          style: form
+          explode: true
+        - name: assignedToId
+          in: query
+          required: false
+          schema: { type: string }
+          description: (022) Assignment-filtering boundary (FR-004).
+        - name: createdFrom
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: createdTo
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: updatedFrom
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: updatedTo
+          in: query
+          required: false
+          schema: { type: string, format: date-time }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, enum: [createdAt, updatedAt, filename] }
+          description: (022) Display-only; never defines Selection membership.
+        - name: order
+          in: query
+          required: false
+          schema: { type: string, enum: [asc, desc], default: desc }
       responses:
         '200':
           description: Page of Assets.
@@ -699,6 +805,474 @@ paths:
               examples:
                 default:
                   value: { error: { code: GITEA_NOT_FOUND, message: The dataset was not found. } }
+
+  /api/datasets/{datasetId}/assets/bulk:
+    post:
+      tags: [Assets]
+      operationId: bulkMutateDatasetAssets
+      summary: Apply a bulk action to a selection of Assets (022)
+      description: >-
+        One coherent bulk-operation boundary for Add Label, Remove Label, Change Status,
+        Assign, Delete, and Export Selected. Requires "dataset.update" (organize actions),
+        "asset.delete" (DELETE), or "job.createExport" (EXPORT_SELECTED). A selection is
+        always resolved server-side, scoped to datasetId -- the client never supplies
+        which Assets are affected beyond its own selection criteria. EXPORT_SELECTED
+        always runs as a background Job; DELETE runs synchronously up to
+        BULK_SYNC_MAX_ASSETS (200) and as a background Job above it; the four organize
+        actions have no background path and return 422 above that limit.
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssetBulkRequest' }
+      responses:
+        '200':
+          description: Synchronous action completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AssetBulkResponse' }
+        '202':
+          description: Background Job created and enqueued (Delete over the sync cap, or any Export Selected).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AssetBulkResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Dataset not found (also returned when it exists but is outside the actor's scope).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: Remove Label found Annotations referencing the label and confirmedAnnotationWarning was not set.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: ANNOTATION_REFERENCE_WARNING, message: Some selected assets have annotations using this label; removing it will not affect those annotations. } }
+        '422':
+          description: An organize action's resolved selection exceeds BULK_SYNC_MAX_ASSETS.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: SELECTION_TOO_LARGE, message: Selection matches 345 assets, exceeding the maximum of 200 assets for a synchronous bulk action. } }
+        '501':
+          description: The requested action's execution is not yet available in this deployment.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/datasets/{datasetId}/assets/{assetId}/workflow:
+    get:
+      tags: [Assets]
+      operationId: getAssetWorkflow
+      summary: Read an Asset's annotation workflow state and history (023)
+      description: Requires dataset `dataset.read` permission. Workflow state is carried exclusively by Asset.status.
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: assetId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Current workflow state and ordered append-only history.
+          content:
+            application/json:
+              schema: { type: object, required: [data], properties: { data: { $ref: '#/components/schemas/AssetWorkflowReadResponse' } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Assets]
+      operationId: applyAssetWorkflowAction
+      summary: Apply a revision-guarded Asset workflow action (023)
+      description: >-
+        Applies one server-validated action. State-changing actions require the Asset revision
+        observed by the actor. If Asset content changed, including its annotations, the server
+        returns 409 STALE_REVISION and performs no write.
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: assetId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssetWorkflowActionRequest' }
+      responses:
+        '200':
+          description: Action applied.
+          content:
+            application/json:
+              schema: { type: object, required: [data], properties: { data: { $ref: '#/components/schemas/AssetWorkflowActionResponse' } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: STALE_REVISION (reload before deciding) or INVALID_TRANSITION.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/datasets/{datasetId}/members:
+    get:
+      tags: [Collaboration]
+      operationId: listDatasetMembers
+      summary: List active Dataset collaborators
+      description: >-
+        Includes the Dataset owner and current DatasetMember rows. This is an
+        authorized directory read; role changes use the member-specific route.
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Dataset members.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/DatasetMemberListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Dataset not found (also returned when it exists but is outside the actor's scope).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/datasets/{datasetId}/assets/{assetId}/assignments:
+    get:
+      tags: [Collaboration]
+      operationId: getAssetAssignments
+      summary: Read current typed responsibilities and append-only assignment history
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: assetId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Authorized current assignment slots and safe history.
+          content: { application/json: { schema: { type: object, required: [data], properties: { data: { type: object, required: [assignments, history], properties: { assignments: { type: array, items: { $ref: '#/components/schemas/AssetAssignment' } }, history: { type: array, items: { $ref: '#/components/schemas/AssetAssignmentEvent' } } } } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Dataset or asset is unavailable to the actor. }
+
+  /api/datasets/{datasetId}/assets/{assetId}/comments:
+    get:
+      tags: [Collaboration]
+      operationId: listAssetComments
+      summary: List authorized root discussion threads and direct replies
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: assetId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Discussion threads. Soft-deleted comments retain thread context.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/AssetCommentThread' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Dataset or asset unavailable. }
+    post:
+      tags: [Collaboration]
+      operationId: createAssetComment
+      summary: Create a root comment or direct reply
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: assetId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssetCommentCreateRequest' }
+      responses:
+        '201':
+          description: Comment, mentions, notifications, and outbox intent committed atomically.
+          content:
+            application/json:
+              schema: { type: object, required: [data], properties: { data: { type: object, required: [id], properties: { id: { type: string } } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Dataset, asset, or parent unavailable. }
+        '409': { description: Parent is a reply; thread depth exceeds one. }
+
+  /api/comments/{commentId}:
+    patch:
+      tags: [Collaboration]
+      operationId: updateAssetComment
+      summary: Edit own comment or a moderator-visible comment
+      parameters: [ { name: commentId, in: path, required: true, schema: { type: string } } ]
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/AssetCommentUpdateRequest' } } }
+      responses: { '200': { description: Comment update and only newly added valid mentions committed atomically. }, '400': { $ref: '#/components/responses/ValidationError' }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Comment unavailable. } }
+    delete:
+      tags: [Collaboration]
+      operationId: deleteAssetComment
+      summary: Soft-delete a comment while retaining thread continuity
+      parameters: [ { name: commentId, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: Soft deletion committed. }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Comment unavailable. } }
+
+  /api/comments/{commentId}/resolve:
+    post:
+      tags: [Collaboration]
+      operationId: resolveAssetCommentThread
+      summary: Resolve the root thread for a comment or direct reply
+      parameters: [ { name: commentId, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: Root thread resolved without workflow mutation. }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Comment unavailable. } }
+
+  /api/comments/{commentId}/reopen:
+    post:
+      tags: [Collaboration]
+      operationId: reopenAssetCommentThread
+      summary: Reopen the root thread for a comment or direct reply
+      parameters: [ { name: commentId, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: Root thread reopened without workflow mutation. }, '401': { $ref: '#/components/responses/Unauthorized' }, '403': { $ref: '#/components/responses/Forbidden' }, '404': { description: Comment unavailable. } }
+
+  /api/notifications:
+    get:
+      tags: [Collaboration]
+      operationId: listNotifications
+      summary: List the current user's durable notification history
+      parameters:
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 100, default: 25 } }
+        - { name: type, in: query, required: false, schema: { $ref: '#/components/schemas/NotificationType' } }
+        - { name: unreadOnly, in: query, required: false, schema: { type: boolean } }
+      responses:
+        '200': { description: Recipient-scoped notification history with safe unavailable-context redaction., content: { application/json: { schema: { type: object, required: [data], properties: { data: { $ref: '#/components/schemas/NotificationPage' } } } } } }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/notifications/{notificationId}/read:
+    post:
+      tags: [Collaboration]
+      operationId: markNotificationRead
+      summary: Mark one current-user notification read
+      parameters: [ { name: notificationId, in: path, required: true, schema: { type: string } } ]
+      responses: { '200': { description: Read state recorded idempotently. }, '400': { $ref: '#/components/responses/ValidationError' }, '401': { $ref: '#/components/responses/Unauthorized' }, '404': { description: Notification unavailable to this recipient. } }
+
+  /api/notifications/read-all:
+    post:
+      tags: [Collaboration]
+      operationId: markAllNotificationsRead
+      summary: Mark all current-user notifications read
+      responses: { '200': { description: Number of unread rows acknowledged. }, '401': { $ref: '#/components/responses/Unauthorized' } }
+
+  /api/datasets/{datasetId}/assets/{assetId}/assignments/{type}:
+    put:
+      tags: [Collaboration]
+      operationId: upsertAssetAssignment
+      summary: Assign or reassign one ANNOTATION or REVIEW responsibility
+      description: >-
+        ANNOTATION requires a current LABELER; REVIEW requires a current REVIEWER.
+        This never changes Asset.status, Asset.revision, Annotation state, or workflow history.
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: assetId, in: path, required: true, schema: { type: string } }
+        - { name: type, in: path, required: true, schema: { $ref: '#/components/schemas/AssetAssignmentType' } }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/AssetAssignmentWriteRequest' } } }
+      responses:
+        '200': { description: Idempotent replay of the existing responsibility slot. }
+        '201': { description: Current slot, append-only event, notification/outbox intent, and legacy annotation mirror committed atomically. }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Dataset or asset is unavailable to the actor. }
+        '409': { description: Target is not an eligible current dataset member. }
+    delete:
+      tags: [Collaboration]
+      operationId: removeAssetAssignment
+      summary: Unassign one responsibility slot
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: assetId, in: path, required: true, schema: { type: string } }
+        - { name: type, in: path, required: true, schema: { $ref: '#/components/schemas/AssetAssignmentType' } }
+      responses:
+        '200': { description: Current slot removed atomically; an absent slot is an idempotent no-op. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Dataset or asset is unavailable to the actor. }
+
+  /api/datasets/{datasetId}/invitations:
+    get:
+      tags: [Collaboration]
+      operationId: listDatasetInvitations
+      summary: List Dataset invitations for an authorized Owner or Manager
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Invitation lifecycle rows; elapsed pending invitations are normalized to EXPIRED.
+          content: { application/json: { schema: { type: object, required: [data], properties: { data: { type: object, required: [items], properties: { items: { type: array, items: { $ref: '#/components/schemas/DatasetInvitation' } } } } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Collaboration]
+      operationId: createDatasetInvitation
+      summary: Create or safely replay a pending invitation for an existing user
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DatasetInvitationCreateRequest' } } }
+      responses:
+        '200': { description: Idempotent replay of the same pending invitation. }
+        '201': { description: Invitation, notification, audit event, and outbox intent committed. }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: Existing member, incompatible manager action, or a conflicting pending invitation. }
+
+  /api/invitations/{invitationId}/accept:
+    post:
+      tags: [Collaboration]
+      operationId: acceptDatasetInvitation
+      summary: Atomically accept the current actor's pending invitation
+      parameters:
+        - { name: invitationId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Idempotent replay of a prior successful acceptance. }
+        '201': { description: DatasetMember, membership audit event, recipient notification, and outbox intent committed. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { description: Invitation is unknown or not owned by the actor. }
+        '409': { description: Invitation was expired, declined, revoked, or otherwise resolved. }
+
+  /api/invitations/{invitationId}/decline:
+    post:
+      tags: [Collaboration]
+      operationId: declineDatasetInvitation
+      summary: Decline the current actor's pending invitation
+      parameters:
+        - { name: invitationId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Idempotent replay of a prior decline. }
+        '201': { description: Decline state, audit event, and outbox intent committed. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { description: Invitation is unknown or not owned by the actor. }
+        '409': { description: Invitation is expired, revoked, accepted, or otherwise resolved. }
+
+  /api/datasets/{datasetId}/invitations/{invitationId}/revoke:
+    post:
+      tags: [Collaboration]
+      operationId: revokeDatasetInvitation
+      summary: Revoke a pending invitation
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: invitationId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Idempotent replay of a prior revocation. }
+        '201': { description: Revocation, audit event, and outbox intent committed. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Dataset/invitation scope is unavailable to the actor. }
+        '409': { description: Invitation was already terminal. }
+
+  /api/datasets/{datasetId}/members/{userId}:
+    patch:
+      tags: [Collaboration]
+      operationId: changeDatasetMemberRole
+      summary: Change an eligible non-owner collaborator role
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: userId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/DatasetMemberRoleChangeRequest' } } }
+      responses:
+        '200': { description: Idempotent no-change replay. }
+        '201': { description: Role change, incompatible assignment cleanup, audit event, and outbox intent committed. }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Dataset/member scope is unavailable to the actor. }
+        '409': { description: Owner protection or an invalid role transition. }
+    delete:
+      tags: [Collaboration]
+      operationId: removeDatasetMember
+      summary: Remove an eligible non-owner collaborator and clean incompatible assignments
+      parameters:
+        - { name: datasetId, in: path, required: true, schema: { type: string } }
+        - { name: userId, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Member removal, assignment cleanup, audit event, and revocation outbox intent committed. }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Dataset/member scope is unavailable to the actor. }
+        '409': { description: Owner protection. }
+
+  /api/export-selected/{jobId}:
+    get:
+      tags: [Jobs]
+      operationId: getExportSelectedDownload
+      summary: Resolve a completed BULK_EXPORT_SELECTED Job's download URL (022)
+      description: >-
+        The Export Selected counterpart to GET /api/export/{jobId} -- a fully separate
+        route/authorization path (type-scoped to BULK_EXPORT_SELECTED only) so this
+        feature can never affect Dataset Export's existing contract. Job status/progress
+        itself is polled via the existing generic GET /api/jobs/{jobId}.
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Download resolution (null until the Job is COMPLETED).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/ExportSelectedDownload' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Job not found, or not a BULK_EXPORT_SELECTED Job.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: The Job is not COMPLETED, has no result artifact, or the artifact is unavailable.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
 
   # ===================== Annotations =====================
   /api/assets/{assetId}/annotations:

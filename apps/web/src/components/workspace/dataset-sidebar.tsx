@@ -10,6 +10,8 @@ import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { flushVideoAutosaves, hasVideoAutosaveConflict } from "@/lib/workspace/video-autosave";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import { WorkspaceAppendFolderDialog } from "@/components/imports/local-folder-import-form";
+import type { AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
+import { ExportSelectedButton } from "@/components/workspace/export-selected-button";
 import type { Modality } from "@internal/db";
 
 type DatasetSidebarProps = {
@@ -23,6 +25,8 @@ type DatasetSidebarProps = {
   next: { id: string; modality: Modality; page: number } | null;
   /** The active selection's engine, or `null` when no asset is selected (defaults to the IMAGE toolbox). */
   engine: Modality | null;
+  /** Active Asset Browser filters/sort (022), carried onto Previous/Next so they never silently drop the active query. */
+  filters?: AssetNavigatorFilters;
 };
 
 const engineLabel: Record<Modality, string> = { IMAGE: "Image", VIDEO: "Video", AUDIO: "Audio", TEXT: "Text" };
@@ -33,7 +37,7 @@ const engineLabel: Record<Modality, string> = { IMAGE: "Image", VIDEO: "Video", 
  * (spec FR-035, FR-041–FR-044) — this component does not branch on modality
  * beyond that one lookup.
  */
-export function DatasetSidebar({ datasetId, datasetName, search, statuses, previous, next, engine }: DatasetSidebarProps) {
+export function DatasetSidebar({ datasetId, datasetName, search, statuses, previous, next, engine, filters }: DatasetSidebarProps) {
   const router = useRouter();
   const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const [appendOpen, setAppendOpen] = useState(false);
@@ -43,6 +47,13 @@ export function DatasetSidebar({ datasetId, datasetName, search, statuses, previ
     const params = new URLSearchParams({ [target.modality.toLowerCase()]: target.id });
     if (search) params.set("q", search);
     for (const status of statuses) params.append("status", status);
+    if (filters?.filterModality) params.set("filterModality", filters.filterModality);
+    for (const label of filters?.labelId ?? []) params.append("labelId", label);
+    if (filters?.createdFrom) params.set("createdFrom", filters.createdFrom);
+    if (filters?.createdTo) params.set("createdTo", filters.createdTo);
+    if (filters?.updatedFrom) params.set("updatedFrom", filters.updatedFrom);
+    if (filters?.updatedTo) params.set("updatedTo", filters.updatedTo);
+    if (filters?.sort) { params.set("sort", filters.sort); params.set("order", filters.order ?? "desc"); }
     if (target.page > 1) params.set("page", String(target.page));
     return `/workspace/${datasetId}?${params.toString()}`;
   };
@@ -60,6 +71,7 @@ export function DatasetSidebar({ datasetId, datasetName, search, statuses, previ
     <div className="flex items-center justify-between"><p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Toolbox</p><span className="text-[10px] font-semibold text-sky-700">{engineLabel[activeEngine]}</span></div>
     <Toolbox />
     <button type="button" onClick={() => setAppendOpen(true)} className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"><FolderOpen size={15} />Add files</button>
+    <ExportSelectedButton datasetId={datasetId} />
     <div className="mt-2 grid grid-cols-2 gap-1.5"><AssetNavigation href={previous ? hrefFor(previous) : null} label="Previous" onNavigate={guardNavigation} /><AssetNavigation href={next ? hrefFor(next) : null} label="Next" onNavigate={guardNavigation} /></div>
     {appendOpen && <WorkspaceAppendFolderDialog datasetId={datasetId} datasetName={datasetName} onClose={() => setAppendOpen(false)} />}
   </aside>;

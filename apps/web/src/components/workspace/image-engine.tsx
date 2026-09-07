@@ -27,9 +27,10 @@ type ImageEngineProps = {
   annotations: SafeImageAnnotation[];
   unsupportedAnnotations: SafeReadOnlyImageAnnotation[];
   labels: SafeWorkspaceLabel[];
+  readOnly?: boolean;
 };
 
-export function ImageEngine({ image, annotations, unsupportedAnnotations, labels }: ImageEngineProps) {
+export function ImageEngine({ image, annotations, unsupportedAnnotations, labels, readOnly = false }: ImageEngineProps) {
   const tool = useAnnotationStore((store) => store.tool);
   const setTool = useAnnotationStore((store) => store.setTool);
   const upsertSafeAnnotation = useAnnotationStore((store) => store.upsertSafeAnnotation);
@@ -55,7 +56,7 @@ export function ImageEngine({ image, annotations, unsupportedAnnotations, labels
   }
 
   return <>
-    <CanvasStage key={`canvas-${currentImage.id}`} image={currentImage} annotations={annotations} unsupportedAnnotations={unsupportedAnnotations} labels={labels} tool={tool} onToolChange={setTool} />
-    {tool === "aidetect" && <AiDetectDialog key={`ai-detect-${currentImage.id}`} assetId={currentImage.id} modality={currentImage.modality} onClose={() => setTool("select")} onCompleted={applyAiResults} />}
+    <CanvasStage key={`canvas-${currentImage.id}`} image={currentImage} annotations={annotations} unsupportedAnnotations={unsupportedAnnotations} labels={labels} tool={tool} onToolChange={setTool} readOnly={readOnly} />
+    {!readOnly && tool === "aidetect" && <AiDetectDialog key={`ai-detect-${currentImage.id}`} assetId={currentImage.id} modality={currentImage.modality} onClose={() => setTool("select")} onCompleted={applyAiResults} />}
   </>;
 }

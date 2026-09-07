@@ -5,11 +5,12 @@ import { annotationChangeSetSchema } from "@/lib/validation/annotation-api";
 
 export const dynamic = "force-dynamic";
 
-function failure(reason: "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "WRITE_UNSUPPORTED" | "CREATE_REPLAY_CONFLICT") {
+function failure(reason: "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "WRITE_UNSUPPORTED" | "WORKFLOW_LOCKED" | "CREATE_REPLAY_CONFLICT") {
   if (reason === "NOT_FOUND") return apiError(404, "ANNOTATION_NOT_FOUND", "The annotation resource was not found.");
   if (reason === "FORBIDDEN") return apiError(403, "FORBIDDEN", "You do not have permission for this action.");
   if (reason === "CONFLICT") return apiError(409, "ANNOTATION_REVISION_CONFLICT", "An annotation changed. Reload before saving.");
   if (reason === "WRITE_UNSUPPORTED") return apiError(422, "ANNOTATION_WRITE_UNSUPPORTED_FOR_MODALITY", "Annotation writes are not supported for this asset modality.");
+  if (reason === "WORKFLOW_LOCKED") return apiError(409, "INVALID_TRANSITION", "Annotations cannot be changed while this asset is awaiting or has completed review.");
   if (reason === "CREATE_REPLAY_CONFLICT") return apiError(409, "ANNOTATION_CREATE_REPLAY_CONFLICT", "The create replay identity conflicts with an existing annotation.");
   return apiError(400, "INVALID_REQUEST", "The annotation request is invalid.");
 }

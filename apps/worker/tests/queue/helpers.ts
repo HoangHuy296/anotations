@@ -38,7 +38,7 @@ export async function createWorkerJobFixture() {
     datasetId: dataset.id,
     createJob: (data: {
       datasetId?: string;
-      type?: "EXPORT_DATASET" | "IMPORT_DATASET";
+      type?: "EXPORT_DATASET" | "IMPORT_DATASET" | "BULK_DELETE_ASSETS" | "BULK_EXPORT_SELECTED" | "COLLABORATION_OUTBOX_DISPATCH";
       status?: "QUEUED" | "RUNNING" | "RETRYING" | "FAILED" | "COMPLETED" | "CANCELED";
       cancelRequestedAt?: Date | null;
       enqueuedAt?: Date | null;

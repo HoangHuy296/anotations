@@ -14,6 +14,7 @@
     "db:normalize-generated": "bash scripts/normalize-generated-prisma-whitespace.sh",
     "db:validate": "prisma validate",
     "db:migrate": "prisma migrate dev",
+    "db:backfill-collaboration-assignments": "tsx scripts/backfill-collaboration-assignments.ts",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "review:sync-from-dev": "bash scripts/sync-dev-to-review.sh",

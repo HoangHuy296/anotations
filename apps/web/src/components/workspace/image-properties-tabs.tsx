@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { AssetStatus } from "@internal/db";
 
@@ -8,10 +8,14 @@ import {
   ensureDefaultImageLabelsAction,
   updateImageDescriptionAction,
 } from "@/app/(app)/workspace/[datasetId]/actions";
-import { AssetNavigator } from "@/components/workspace/asset-navigator";
+import { AssetBrowserFilters } from "@/components/workspace/asset-browser-filters";
+import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
+import { BulkActionBar } from "@/components/workspace/bulk-action-bar";
+import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-panel";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
+import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import { Badge } from "@/components/ui/badge";
-import { imageStatusOptions, imageStatusPresentation } from "@/lib/image-status";
+import { imageStatusPresentation } from "@/lib/image-status";
 import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { useDatasetLabels, useDatasetLabelsStore, type DatasetLabel } from "@/stores/dataset-labels-store";
@@ -32,6 +36,7 @@ export type ImagePropertiesTabsProps = {
   search: string;
   statuses: AssetStatus[];
   selectedAssetId: string | null;
+  filters: AssetNavigatorFilters;
   tab: string;
   setTab: (tab: string) => void;
 };
@@ -43,8 +48,9 @@ export type ImagePropertiesTabsProps = {
  * the IMAGE entry's `Tabs` without a circular import back into the shared
  * `PropertiesPanel` shell.
  */
-export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, tab, setTab }: ImagePropertiesTabsProps) {
+export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, filters, tab, setTab }: ImagePropertiesTabsProps) {
   const image: SafeImageWorkspaceAsset = selection.asset;
+  const readOnly = image.status === "NEEDS_REVIEW" || image.status === "REVIEWED" || image.status === "REJECTED";
   const router = useRouter();
   const [description, setDescription] = useState(image.description ?? "");
   const [serverDescription, setServerDescription] = useState(image.description ?? "");
@@ -115,6 +121,7 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
   const presentation = imageStatusPresentation[image.status];
 
   function scheduleLabelChange(annotationId: string, labelId: string | null) {
+    if (readOnly) return;
     const annotation = annotations.find((item) => item.id === annotationId);
     if (!annotation) return;
     upsertSafeAnnotation({ ...annotation, labelId });
@@ -140,6 +147,7 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
   }
 
   async function deleteShape(annotationId: string) {
+    if (readOnly) return;
     const annotation = annotations.find((item) => item.id === annotationId);
     if (!annotation) return;
     const result = await putAssetAnnotations(currentAssetId, {
@@ -261,30 +269,6 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
     return !needsResolution || window.confirm("An image edit could not be saved or has a conflict. Discard the local draft and leave this image?");
   }
 
-  async function applyAssetFilters(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    // React clears currentTarget once the synchronous handler exits. Capture the
-    // actual form before awaiting an autosave flush so status clicks/submits
-    // cannot hand FormData a non-form target.
-    const formElement = event.currentTarget;
-    if (!(await flushBeforeNavigation())) return;
-    const form = new FormData(formElement);
-    const params = new URLSearchParams({ page: "1" });
-    const nextSearch = String(form.get("q") ?? "").trim();
-    if (nextSearch) params.set("q", nextSearch);
-    const nextStatus = String(form.get("status") ?? "ALL");
-    if (nextStatus === "MULTIPLE") {
-      for (const status of statuses) params.append("status", status);
-    } else if (imageStatusOptions.includes(nextStatus as AssetStatus)) {
-      params.set("status", nextStatus);
-    }
-    router.push(`/workspace/${datasetId}?${params.toString()}`);
-  }
-
-  // The previous Images-tab UX used one clear status choice plus an explicit
-  // “All statuses” reset. Preserve multi-status query compatibility for old
-  // links, while rendering that proven, less error-prone control.
-  const selectedStatus = statuses.length === 1 ? statuses[0] : statuses.length > 1 ? "MULTIPLE" : "ALL";
   const activeTab = (["description", "labels", "shapes", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";
 
   return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white">
@@ -302,6 +286,8 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
       {descriptionState === "conflict" && <div className="mt-3"><SaveConflictPanel message="Your description draft is still visible and was not sent again." onReload={() => window.location.reload()} onDiscard={() => { setDescription(serverDescription); setConflictDraft(null); setDescriptionState("idle"); }} /></div>}
       {descriptionState === "failed" && <p role="alert" className="mt-3 text-xs text-rose-700">Description was not saved. Edit it again to retry.</p>}
       {conflictDraft && <p className="sr-only">Local draft preserved.</p>}
+      <AssetAssignmentPanel datasetId={datasetId} assetId={image.id} />
+      <WorkflowHistoryPanel datasetId={datasetId} assetId={image.id} />
     </section>}
     {activeTab === "labels" && <section className="p-4">
       <div className="flex items-center justify-between">
@@ -345,27 +331,16 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
     </section>}
     {activeTab === "shapes" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Shapes</h2><span className="text-xs text-zinc-400">{annotations.length}</span></div>
-      <div className="mt-3 space-y-2">{annotations.length === 0 ? <p className="text-xs text-zinc-500">No annotations yet.</p> : annotations.map((annotation) => <div key={annotation.id} className={`rounded-xl border p-2 ${annotation.id === selectedId ? "border-sky-300 bg-sky-50" : "border-zinc-200"}`}><button type="button" onClick={() => setSelectedId(annotation.id)} className="w-full text-left text-xs font-semibold text-zinc-800">{annotation.type.replaceAll("_", " ")} · {taxonomy.find((label) => label.id === annotation.labelId)?.name ?? "No label"}</button><div className="mt-2 flex gap-1"><select aria-label={`Label for ${annotation.id}`} value={annotation.labelId ?? ""} onChange={(event) => scheduleLabelChange(annotation.id, event.target.value || null)} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-[11px]"><option value="">No label</option>{taxonomy.map((label) => <option key={label.id} value={label.id}>{label.name}</option>)}</select><button type="button" onClick={() => void deleteShape(annotation.id)} className="rounded-lg px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button></div></div>)}</div>
+      <div className="mt-3 space-y-2">{readOnly ? <p className="text-xs text-amber-700">Review mode: annotations are read-only.</p> : null}{annotations.length === 0 ? <p className="text-xs text-zinc-500">No annotations yet.</p> : annotations.map((annotation) => <div key={annotation.id} className={`rounded-xl border p-2 ${annotation.id === selectedId ? "border-sky-300 bg-sky-50" : "border-zinc-200"}`}><button type="button" onClick={() => setSelectedId(annotation.id)} className="w-full text-left text-xs font-semibold text-zinc-800">{annotation.type.replaceAll("_", " ")} · {taxonomy.find((label) => label.id === annotation.labelId)?.name ?? "No label"}</button><div className="mt-2 flex gap-1"><select disabled={readOnly} aria-label={`Label for ${annotation.id}`} value={annotation.labelId ?? ""} onChange={(event) => scheduleLabelChange(annotation.id, event.target.value || null)} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-1 text-[11px]"><option value="">No label</option>{taxonomy.map((label) => <option key={label.id} value={label.id}>{label.name}</option>)}</select>{!readOnly ? <button type="button" onClick={() => void deleteShape(annotation.id)} className="rounded-lg px-2 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button> : null}</div></div>)}</div>
       {shapeError && <p role="alert" className="mt-3 text-xs text-rose-700">{shapeError}</p>}
     </section>}
     {activeTab === "assets" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Assets</h2><span className="text-xs text-zinc-400">Page {page}</span></div>
       <p className="mt-1 text-xs text-zinc-500">This workspace page is limited to {pageSize} assets.</p>
-      <form method="get" onSubmit={(event) => { void applyAssetFilters(event); }} className="mt-3 space-y-2">
-        <label className="sr-only" htmlFor="workspace-asset-search">Search assets</label>
-        <input id="workspace-asset-search" name="q" type="search" defaultValue={search} placeholder="Search assets" className="w-full rounded-lg border border-zinc-200 px-2 py-2 text-xs outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" />
-        <div className="flex gap-2">
-          <label className="sr-only" htmlFor="workspace-asset-status">Filter by status</label>
-          <select id="workspace-asset-status" name="status" defaultValue={selectedStatus} className="min-w-0 flex-1 rounded-lg border border-zinc-200 bg-white px-2 py-2 text-xs text-zinc-700">
-            <option value="ALL">All statuses</option>
-            {statuses.length > 1 && <option value="MULTIPLE">Keep multiple status filters</option>}
-            {imageStatusOptions.map((option) => <option key={option} value={option}>{imageStatusPresentation[option].label}</option>)}
-          </select>
-          <button type="submit" className="rounded-lg bg-zinc-900 px-3 text-xs font-semibold text-white hover:bg-zinc-800">Apply</button>
-        </div>
-      </form>
+      <AssetBrowserFilters datasetId={datasetId} search={search} statuses={statuses} filterModality={filters.filterModality} beforeNavigate={flushBeforeNavigation} />
       <div className="mt-3" aria-label="Dataset progress"><div className="flex justify-between text-[11px] text-zinc-500"><span>Dataset progress</span><span>{completedAssets} / {totalAssets}</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${totalAssets ? Math.round((completedAssets / totalAssets) * 100) : 0}%` }} /></div></div>
-      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} onNavigate={guardImageNavigation} />
+      <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} filters={filters} onNavigate={guardImageNavigation} />
+      <BulkActionBar datasetId={datasetId} labels={taxonomy} />
     </section>}
   </aside>;
 }

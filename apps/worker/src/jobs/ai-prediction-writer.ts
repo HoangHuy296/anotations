@@ -54,12 +54,31 @@ export async function handleAiTaskCompleted(
 
   await db.$transaction(async (tx) => {
     if (annotationType) {
+      const claimedAssets = new Set<string>();
       for (const prediction of inScope) {
         const label = await tx.label.findFirst({
           where: { datasetId: aiTask.datasetId, normalizedName: normalizeLabelName(prediction.labelKey) },
           select: { id: true },
         });
         if (!label) continue; // Unresolvable label: skip this prediction, do not fail the task.
+
+        // AI output changes reviewable content too. Claim each parent Asset
+        // once in this transaction; a review-frozen Asset is skipped rather
+        // than receiving late predictions, and no queue payload changes.
+        if (!claimedAssets.has(prediction.assetId)) {
+          const claimed = await tx.asset.updateMany({
+            where: {
+              id: prediction.assetId,
+              datasetId: aiTask.datasetId,
+              deletedAt: null,
+              archivedAt: null,
+              status: { notIn: ["NEEDS_REVIEW", "REVIEWED", "REJECTED"] },
+            },
+            data: { revision: { increment: 1 } },
+          });
+          if (claimed.count !== 1) continue;
+          claimedAssets.add(prediction.assetId);
+        }
 
         await tx.annotation.create({
           data: {

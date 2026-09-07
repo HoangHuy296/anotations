@@ -28,10 +28,24 @@ test("workspace browser contracts never use JWT or browser storage credentials",
 
 test("workspace list query accepts bounded repeated status values and rejects broadening input", () => {
   assert.deepEqual(workspaceListQuerySchema.parse({ page: "2", q: "  road  ", statuses: ["NEW", "IN_PROGRESS"] }), {
-    page: 2, q: "road", statuses: ["NEW", "IN_PROGRESS"],
+    page: 2, q: "road", statuses: ["NEW", "IN_PROGRESS"], labelId: [], order: "desc",
   });
   assert.equal(workspaceListQuerySchema.safeParse({ page: "0", q: "", statuses: [] }).success, false);
   assert.equal(workspaceListQuerySchema.safeParse({ page: "1", q: "x".repeat(101), statuses: [] }).success, false);
   assert.equal(workspaceListQuerySchema.safeParse({ page: "1", q: "", statuses: ["UNKNOWN"] }).success, false);
   assert.equal(workspaceListQuerySchema.safeParse({ page: "1", q: "", statuses: [], ownerId: "browser" }).success, false);
+});
+
+test("workspace list query accepts the new Asset Browser filter/sort params (022) and keeps them optional", () => {
+  const withFilters = workspaceListQuerySchema.parse({
+    page: "1", q: "", statuses: [],
+    filterModality: "IMAGE", labelId: ["cly0000000000000000000000"], assignedToId: "cly0000000000000000000001",
+    createdFrom: "2026-01-01T00:00:00.000Z", createdTo: "2026-12-31T23:59:59.000Z", sort: "createdAt", order: "asc",
+  });
+  assert.equal(withFilters.filterModality, "IMAGE");
+  assert.deepEqual(withFilters.labelId, ["cly0000000000000000000000"]);
+  assert.equal(withFilters.sort, "createdAt");
+  assert.equal(withFilters.order, "asc");
+  assert.equal(workspaceListQuerySchema.safeParse({ page: "1", q: "", statuses: [], sort: "annotationCount" }).success, false);
+  assert.equal(workspaceListQuerySchema.safeParse({ page: "1", q: "", statuses: [], filterModality: "NOT_A_MODALITY" }).success, false);
 });

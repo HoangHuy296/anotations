@@ -586,6 +586,7 @@ export type JobWhereInput = {
   sourceConnection?: Prisma.XOR<Prisma.SourceConnectionNullableScalarRelationFilter, Prisma.SourceConnectionWhereInput> | null
   events?: Prisma.JobEventListRelationFilter
   preparedImport?: Prisma.XOR<Prisma.PreparedImportNullableScalarRelationFilter, Prisma.PreparedImportWhereInput> | null
+  collaborationOutboxEvent?: Prisma.XOR<Prisma.CollaborationOutboxEventNullableScalarRelationFilter, Prisma.CollaborationOutboxEventWhereInput> | null
 }
 
 export type JobOrderByWithRelationInput = {
@@ -647,6 +648,7 @@ export type JobOrderByWithRelationInput = {
   sourceConnection?: Prisma.SourceConnectionOrderByWithRelationInput
   events?: Prisma.JobEventOrderByRelationAggregateInput
   preparedImport?: Prisma.PreparedImportOrderByWithRelationInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventOrderByWithRelationInput
 }
 
 export type JobWhereUniqueInput = Prisma.AtLeast<{
@@ -712,6 +714,7 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   sourceConnection?: Prisma.XOR<Prisma.SourceConnectionNullableScalarRelationFilter, Prisma.SourceConnectionWhereInput> | null
   events?: Prisma.JobEventListRelationFilter
   preparedImport?: Prisma.XOR<Prisma.PreparedImportNullableScalarRelationFilter, Prisma.PreparedImportWhereInput> | null
+  collaborationOutboxEvent?: Prisma.XOR<Prisma.CollaborationOutboxEventNullableScalarRelationFilter, Prisma.CollaborationOutboxEventWhereInput> | null
 }, "id" | "retryOfJobId" | "datasetId_idempotencyKey">
 
 export type JobOrderByWithAggregationInput = {
@@ -877,6 +880,7 @@ export type JobCreateInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateInput = {
@@ -932,6 +936,7 @@ export type JobUncheckedCreateInput = {
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobUpdateInput = {
@@ -987,6 +992,7 @@ export type JobUpdateInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateInput = {
@@ -1042,6 +1048,7 @@ export type JobUncheckedUpdateInput = {
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobCreateManyInput = {
@@ -1715,6 +1722,20 @@ export type JobUpdateOneRequiredWithoutPreparedImportNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.JobUpdateToOneWithWhereWithoutPreparedImportInput, Prisma.JobUpdateWithoutPreparedImportInput>, Prisma.JobUncheckedUpdateWithoutPreparedImportInput>
 }
 
+export type JobCreateNestedOneWithoutCollaborationOutboxEventInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutCollaborationOutboxEventInput, Prisma.JobUncheckedCreateWithoutCollaborationOutboxEventInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutCollaborationOutboxEventInput
+  connect?: Prisma.JobWhereUniqueInput
+}
+
+export type JobUpdateOneRequiredWithoutCollaborationOutboxEventNestedInput = {
+  create?: Prisma.XOR<Prisma.JobCreateWithoutCollaborationOutboxEventInput, Prisma.JobUncheckedCreateWithoutCollaborationOutboxEventInput>
+  connectOrCreate?: Prisma.JobCreateOrConnectWithoutCollaborationOutboxEventInput
+  upsert?: Prisma.JobUpsertWithoutCollaborationOutboxEventInput
+  connect?: Prisma.JobWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.JobUpdateToOneWithWhereWithoutCollaborationOutboxEventInput, Prisma.JobUpdateWithoutCollaborationOutboxEventInput>, Prisma.JobUncheckedUpdateWithoutCollaborationOutboxEventInput>
+}
+
 export type JobCreateNestedOneWithoutAiTasksInput = {
   create?: Prisma.XOR<Prisma.JobCreateWithoutAiTasksInput, Prisma.JobUncheckedCreateWithoutAiTasksInput>
   connectOrCreate?: Prisma.JobCreateOrConnectWithoutAiTasksInput
@@ -1781,6 +1802,7 @@ export type JobCreateWithoutCanceledByInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutCanceledByInput = {
@@ -1835,6 +1857,7 @@ export type JobUncheckedCreateWithoutCanceledByInput = {
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutCanceledByInput = {
@@ -1899,6 +1922,7 @@ export type JobCreateWithoutCreatedByInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutCreatedByInput = {
@@ -1953,6 +1977,7 @@ export type JobUncheckedCreateWithoutCreatedByInput = {
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutCreatedByInput = {
@@ -2103,6 +2128,7 @@ export type JobCreateWithoutRetrySuccessorInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutRetrySuccessorInput = {
@@ -2157,6 +2183,7 @@ export type JobUncheckedCreateWithoutRetrySuccessorInput = {
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutRetrySuccessorInput = {
@@ -2216,6 +2243,7 @@ export type JobCreateWithoutRetryOfJobInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutRetryOfJobInput = {
@@ -2270,6 +2298,7 @@ export type JobUncheckedCreateWithoutRetryOfJobInput = {
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutRetryOfJobInput = {
@@ -2340,6 +2369,7 @@ export type JobUpdateWithoutRetrySuccessorInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutRetrySuccessorInput = {
@@ -2394,6 +2424,7 @@ export type JobUncheckedUpdateWithoutRetrySuccessorInput = {
   aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUpsertWithoutRetryOfJobInput = {
@@ -2459,6 +2490,7 @@ export type JobUpdateWithoutRetryOfJobInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutRetryOfJobInput = {
@@ -2513,6 +2545,7 @@ export type JobUncheckedUpdateWithoutRetryOfJobInput = {
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobCreateWithoutEventsInput = {
@@ -2567,6 +2600,7 @@ export type JobCreateWithoutEventsInput = {
   retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutEventsInput = {
@@ -2621,6 +2655,7 @@ export type JobUncheckedCreateWithoutEventsInput = {
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutEventsInput = {
@@ -2691,6 +2726,7 @@ export type JobUpdateWithoutEventsInput = {
   retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutEventsInput = {
@@ -2745,6 +2781,7 @@ export type JobUncheckedUpdateWithoutEventsInput = {
   aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobCreateWithoutExternalRepositoryInput = {
@@ -2799,6 +2836,7 @@ export type JobCreateWithoutExternalRepositoryInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutExternalRepositoryInput = {
@@ -2853,6 +2891,7 @@ export type JobUncheckedCreateWithoutExternalRepositoryInput = {
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutExternalRepositoryInput = {
@@ -2933,6 +2972,7 @@ export type JobCreateWithoutSourceConnectionInput = {
   retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutSourceConnectionInput = {
@@ -2987,6 +3027,7 @@ export type JobUncheckedCreateWithoutSourceConnectionInput = {
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutSourceConnectionInput = {
@@ -3067,6 +3108,7 @@ export type JobCreateWithoutDatasetInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutDatasetInput = {
@@ -3121,6 +3163,7 @@ export type JobUncheckedCreateWithoutDatasetInput = {
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutDatasetInput = {
@@ -3201,6 +3244,7 @@ export type JobCreateWithoutPreparedImportInput = {
   retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutPreparedImportInput = {
@@ -3255,6 +3299,7 @@ export type JobUncheckedCreateWithoutPreparedImportInput = {
   aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutPreparedImportInput = {
@@ -3325,6 +3370,7 @@ export type JobUpdateWithoutPreparedImportInput = {
   retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutPreparedImportInput = {
@@ -3379,6 +3425,243 @@ export type JobUncheckedUpdateWithoutPreparedImportInput = {
   aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
+}
+
+export type JobCreateWithoutCollaborationOutboxEventInput = {
+  id?: string
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasks?: Prisma.AiTaskCreateNestedOneWithoutJobInput
+  canceledBy?: Prisma.UserCreateNestedOneWithoutJobsCanceledInput
+  createdBy: Prisma.UserCreateNestedOneWithoutJobsCreatedInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutJobsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutJobsInput
+  retryOfJob?: Prisma.JobCreateNestedOneWithoutRetrySuccessorInput
+  retrySuccessor?: Prisma.JobCreateNestedOneWithoutRetryOfJobInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
+  events?: Prisma.JobEventCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+}
+
+export type JobUncheckedCreateWithoutCollaborationOutboxEventInput = {
+  id?: string
+  datasetId: string
+  createdById: string
+  canceledById?: string | null
+  type: $Enums.JobType
+  modality?: $Enums.Modality | null
+  status?: $Enums.JobStatus
+  stage?: $Enums.JobStage
+  queueName?: string | null
+  queueJobId?: string | null
+  enqueuedAt?: Date | string | null
+  dequeuedAt?: Date | string | null
+  priority?: $Enums.JobPriority
+  priorityValue?: number
+  trigger?: $Enums.JobTrigger
+  provider?: $Enums.RepoProvider | null
+  sourceConnectionId?: string | null
+  externalRepositoryId?: string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: number
+  totalItems?: number | null
+  processedItems?: number
+  successItems?: number
+  failedItems?: number
+  skippedItems?: number
+  error?: string | null
+  errorCode?: string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: string | null
+  lockToken?: string | null
+  lockedAt?: Date | string | null
+  lockedUntil?: Date | string | null
+  heartbeatAt?: Date | string | null
+  startedAt?: Date | string | null
+  finishedAt?: Date | string | null
+  runAfter?: Date | string | null
+  attempts?: number
+  maxAttempts?: number
+  cancelRequestedAt?: Date | string | null
+  canceledAt?: Date | string | null
+  idempotencyKey?: string | null
+  resultStorageKey?: string | null
+  resultFilename?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  retryOfJobId?: string | null
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedOneWithoutJobInput
+  retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
+  events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
+  preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+}
+
+export type JobCreateOrConnectWithoutCollaborationOutboxEventInput = {
+  where: Prisma.JobWhereUniqueInput
+  create: Prisma.XOR<Prisma.JobCreateWithoutCollaborationOutboxEventInput, Prisma.JobUncheckedCreateWithoutCollaborationOutboxEventInput>
+}
+
+export type JobUpsertWithoutCollaborationOutboxEventInput = {
+  update: Prisma.XOR<Prisma.JobUpdateWithoutCollaborationOutboxEventInput, Prisma.JobUncheckedUpdateWithoutCollaborationOutboxEventInput>
+  create: Prisma.XOR<Prisma.JobCreateWithoutCollaborationOutboxEventInput, Prisma.JobUncheckedCreateWithoutCollaborationOutboxEventInput>
+  where?: Prisma.JobWhereInput
+}
+
+export type JobUpdateToOneWithWhereWithoutCollaborationOutboxEventInput = {
+  where?: Prisma.JobWhereInput
+  data: Prisma.XOR<Prisma.JobUpdateWithoutCollaborationOutboxEventInput, Prisma.JobUncheckedUpdateWithoutCollaborationOutboxEventInput>
+}
+
+export type JobUpdateWithoutCollaborationOutboxEventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasks?: Prisma.AiTaskUpdateOneWithoutJobNestedInput
+  canceledBy?: Prisma.UserUpdateOneWithoutJobsCanceledNestedInput
+  createdBy?: Prisma.UserUpdateOneRequiredWithoutJobsCreatedNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutJobsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutJobsNestedInput
+  retryOfJob?: Prisma.JobUpdateOneWithoutRetrySuccessorNestedInput
+  retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
+  events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+}
+
+export type JobUncheckedUpdateWithoutCollaborationOutboxEventInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  canceledById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumJobTypeFieldUpdateOperationsInput | $Enums.JobType
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  status?: Prisma.EnumJobStatusFieldUpdateOperationsInput | $Enums.JobStatus
+  stage?: Prisma.EnumJobStageFieldUpdateOperationsInput | $Enums.JobStage
+  queueName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  queueJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  enqueuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  dequeuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  priority?: Prisma.EnumJobPriorityFieldUpdateOperationsInput | $Enums.JobPriority
+  priorityValue?: Prisma.IntFieldUpdateOperationsInput | number
+  trigger?: Prisma.EnumJobTriggerFieldUpdateOperationsInput | $Enums.JobTrigger
+  provider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  input?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  state?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  summary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  progress?: Prisma.IntFieldUpdateOperationsInput | number
+  totalItems?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  processedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  successItems?: Prisma.IntFieldUpdateOperationsInput | number
+  failedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  skippedItems?: Prisma.IntFieldUpdateOperationsInput | number
+  error?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  errorDetails?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  lockedBy?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  heartbeatAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  finishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  runAfter?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  maxAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  cancelRequestedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  canceledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  idempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultStorageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resultFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  retryOfJobId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aiTasks?: Prisma.AiTaskUncheckedUpdateOneWithoutJobNestedInput
+  retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
+  events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
+  preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobCreateWithoutAiTasksInput = {
@@ -3433,6 +3716,7 @@ export type JobCreateWithoutAiTasksInput = {
   sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutJobsInput
   events?: Prisma.JobEventCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventCreateNestedOneWithoutJobInput
 }
 
 export type JobUncheckedCreateWithoutAiTasksInput = {
@@ -3487,6 +3771,7 @@ export type JobUncheckedCreateWithoutAiTasksInput = {
   retrySuccessor?: Prisma.JobUncheckedCreateNestedOneWithoutRetryOfJobInput
   events?: Prisma.JobEventUncheckedCreateNestedManyWithoutJobInput
   preparedImport?: Prisma.PreparedImportUncheckedCreateNestedOneWithoutJobInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedCreateNestedOneWithoutJobInput
 }
 
 export type JobCreateOrConnectWithoutAiTasksInput = {
@@ -3557,6 +3842,7 @@ export type JobUpdateWithoutAiTasksInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutAiTasksInput = {
@@ -3611,6 +3897,7 @@ export type JobUncheckedUpdateWithoutAiTasksInput = {
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobCreateManyCanceledByInput = {
@@ -3765,6 +4052,7 @@ export type JobUpdateWithoutCanceledByInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutCanceledByInput = {
@@ -3819,6 +4107,7 @@ export type JobUncheckedUpdateWithoutCanceledByInput = {
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutCanceledByInput = {
@@ -3923,6 +4212,7 @@ export type JobUpdateWithoutCreatedByInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutCreatedByInput = {
@@ -3977,6 +4267,7 @@ export type JobUncheckedUpdateWithoutCreatedByInput = {
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutCreatedByInput = {
@@ -4131,6 +4422,7 @@ export type JobUpdateWithoutExternalRepositoryInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutExternalRepositoryInput = {
@@ -4185,6 +4477,7 @@ export type JobUncheckedUpdateWithoutExternalRepositoryInput = {
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutExternalRepositoryInput = {
@@ -4339,6 +4632,7 @@ export type JobUpdateWithoutSourceConnectionInput = {
   retrySuccessor?: Prisma.JobUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutSourceConnectionInput = {
@@ -4393,6 +4687,7 @@ export type JobUncheckedUpdateWithoutSourceConnectionInput = {
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutSourceConnectionInput = {
@@ -4547,6 +4842,7 @@ export type JobUpdateWithoutDatasetInput = {
   sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutJobsNestedInput
   events?: Prisma.JobEventUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateWithoutDatasetInput = {
@@ -4601,6 +4897,7 @@ export type JobUncheckedUpdateWithoutDatasetInput = {
   retrySuccessor?: Prisma.JobUncheckedUpdateOneWithoutRetryOfJobNestedInput
   events?: Prisma.JobEventUncheckedUpdateManyWithoutJobNestedInput
   preparedImport?: Prisma.PreparedImportUncheckedUpdateOneWithoutJobNestedInput
+  collaborationOutboxEvent?: Prisma.CollaborationOutboxEventUncheckedUpdateOneWithoutJobNestedInput
 }
 
 export type JobUncheckedUpdateManyWithoutDatasetInput = {
@@ -4743,6 +5040,7 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
   events?: boolean | Prisma.Job$eventsArgs<ExtArgs>
   preparedImport?: boolean | Prisma.Job$preparedImportArgs<ExtArgs>
+  collaborationOutboxEvent?: boolean | Prisma.Job$collaborationOutboxEventArgs<ExtArgs>
   _count?: boolean | Prisma.JobCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["job"]>
 
@@ -4923,6 +5221,7 @@ export type JobInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   sourceConnection?: boolean | Prisma.Job$sourceConnectionArgs<ExtArgs>
   events?: boolean | Prisma.Job$eventsArgs<ExtArgs>
   preparedImport?: boolean | Prisma.Job$preparedImportArgs<ExtArgs>
+  collaborationOutboxEvent?: boolean | Prisma.Job$collaborationOutboxEventArgs<ExtArgs>
   _count?: boolean | Prisma.JobCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type JobIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4955,6 +5254,7 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     sourceConnection: Prisma.$SourceConnectionPayload<ExtArgs> | null
     events: Prisma.$JobEventPayload<ExtArgs>[]
     preparedImport: Prisma.$PreparedImportPayload<ExtArgs> | null
+    collaborationOutboxEvent: Prisma.$CollaborationOutboxEventPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -5440,6 +5740,7 @@ export interface Prisma__JobClient<T, Null = never, ExtArgs extends runtime.Type
   sourceConnection<T extends Prisma.Job$sourceConnectionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$sourceConnectionArgs<ExtArgs>>): Prisma.Prisma__SourceConnectionClient<runtime.Types.Result.GetResult<Prisma.$SourceConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   events<T extends Prisma.Job$eventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$eventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JobEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   preparedImport<T extends Prisma.Job$preparedImportArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$preparedImportArgs<ExtArgs>>): Prisma.Prisma__PreparedImportClient<runtime.Types.Result.GetResult<Prisma.$PreparedImportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  collaborationOutboxEvent<T extends Prisma.Job$collaborationOutboxEventArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Job$collaborationOutboxEventArgs<ExtArgs>>): Prisma.Prisma__CollaborationOutboxEventClient<runtime.Types.Result.GetResult<Prisma.$CollaborationOutboxEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6067,6 +6368,25 @@ export type Job$preparedImportArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   include?: Prisma.PreparedImportInclude<ExtArgs> | null
   where?: Prisma.PreparedImportWhereInput
+}
+
+/**
+ * Job.collaborationOutboxEvent
+ */
+export type Job$collaborationOutboxEventArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollaborationOutboxEvent
+   */
+  select?: Prisma.CollaborationOutboxEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CollaborationOutboxEvent
+   */
+  omit?: Prisma.CollaborationOutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollaborationOutboxEventInclude<ExtArgs> | null
+  where?: Prisma.CollaborationOutboxEventWhereInput
 }
 
 /**

@@ -2,7 +2,8 @@
 
 import { CheckCircle, CloudArrowUp, File, FolderOpen, SpinnerGap, WarningCircle } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 //only review need sha256HexAuto, so we can keep it in the browser bundle for review stack only. The production build uses a server-side hash for the same purpose.
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ type LocalFolderImportFormProps = {
 };
 
 export function LocalFolderImportForm({ datasetId, datasetName, onClose }: LocalFolderImportFormProps = {}) {
+  const router = useRouter();
   const folderInputRef = useRef<HTMLInputElement>(null);
   const filesInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<FileEntry[]>([]);
@@ -47,6 +49,12 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
   const [completed, setCompleted] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
+  // Creating a Dataset navigates away to the job page as soon as the job
+  // exists so progress is visible immediately; the upload loop below keeps
+  // running afterward, so further local state updates are guarded against
+  // the now-unmounted component.
+  const mountedRef = useRef(true);
+  useEffect(() => () => { mountedRef.current = false; }, []);
 
   const appendMode = Boolean(datasetId);
   const totalBytes = files.reduce((total, entry) => total + entry.file.size, 0);
@@ -83,6 +91,11 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
       const preparation = (startBody as { data: { preparation: Prepared } }).data.preparation;
       if (preparation.items.length !== files.length) throw new Error("The prepared file count did not match the browser scan.");
       setJobId(preparation.jobId); setStep("uploading");
+      // The Dataset and its durable Job already exist: hand the user off to
+      // the live job page now rather than making them wait through every
+      // upload here. The loop below keeps driving the browser-owned transfer
+      // in the background; the job page polls PostgreSQL for its progress.
+      if (!appendMode) router.push(`/jobs/${preparation.jobId}`);
 
       const capabilityResponse = await fetch(`/api/imports/${preparation.id}/upload-capabilities`, {
         method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin",
@@ -104,11 +117,20 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
           method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ fileId: capability.fileId }),
         });
         if (!completedResponse.ok) throw new Error("An uploaded file could not be verified. No dataset has been committed.");
-        setCompleted(index + 1);
+        if (mountedRef.current) setCompleted(index + 1);
       }
-      setStep("ready"); setMessage("Every file is verified. Review the durable job and commit the import when ready.");
+      // Every prepared item is durably accounted for: finalize the import
+      // immediately instead of waiting for a manual "Commit import" click.
+      // The job page (apps/web/src/components/jobs/job-detail-client.tsx)
+      // retries this same idempotent call on its own if it is ever lost.
+      const commitResponse = await fetch(`/api/jobs/${preparation.jobId}/commit-import`, { method: "POST", credentials: "same-origin" });
+      if (!commitResponse.ok) {
+        const commitBody = await commitResponse.json().catch(() => null);
+        throw new Error(safeMessage(commitBody, "Every file uploaded, but the import could not be finalized automatically. Open the job to finish it."));
+      }
+      if (mountedRef.current) { setStep("ready"); setMessage("Every file is verified and the import is complete."); }
     } catch (error) {
-      setStep("failed"); setMessage(error instanceof Error ? error.message : "The import could not be completed.");
+      if (mountedRef.current) { setStep("failed"); setMessage(error instanceof Error ? error.message : "The import could not be completed."); }
     }
   }
 
@@ -117,7 +139,7 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
       <section className="min-w-0">
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-sky-700">Direct local import</p>
         <h1 className="mt-3 max-w-2xl text-4xl font-bold tracking-[-0.05em] text-zinc-950 sm:text-5xl">{appendMode ? `Add files to ${datasetName ?? "this Dataset"}.` : "Bring files into a new Dataset."}</h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-500">Your browser scans files, uploads each binary through one scoped temporary form, and waits for your explicit commit before the import becomes terminal.</p>
+        <p className="mt-4 max-w-2xl text-base leading-7 text-zinc-500">Your browser scans files, uploads each binary through one scoped temporary form, and finalizes the import automatically once every file is verified.</p>
 
         {!appendMode && <div className="mt-9 border-y border-zinc-200 py-6">
           <label className="block text-sm font-semibold text-zinc-900">Dataset name<input value={name} onChange={(event) => setName(event.target.value)} disabled={busy} placeholder="e.g. North junction survey" className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 text-sm outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-zinc-50" /></label>
@@ -138,7 +160,7 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
 
         <div className="mt-7 flex flex-wrap gap-3"><Button type="button" disabled={busy || files.length === 0 || (!appendMode && !name.trim())} onClick={() => void submit()}>{busy ? <><SpinnerGap className="animate-spin" size={17} />{step === "scanning" ? "Scanning selection…" : step === "preparing" ? "Preparing import…" : "Uploading files…"}</> : <><CloudArrowUp size={18} weight="bold" />{appendMode ? "Add files" : "Upload files"}</>}</Button>{jobId && <Button asChild variant="secondary"><Link href={`/jobs/${jobId}`}>Open import job</Link></Button>}{onClose && <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>Close</Button>}</div>
       </section>
-      <aside className="h-fit border-t border-zinc-200 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0"><p className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-400">Import lifecycle</p><ol className="mt-5 space-y-5">{[["1", "Scan", "Browser prepares a relative-path manifest."], ["2", "Transfer", "Files go directly to private storage through scoped forms."], ["3", "Verify", "Server reconciles each upload into metadata."], ["4", "Commit", "You confirm completion from the durable Job screen."]].map(([number, title, description]) => <li key={number} className="grid grid-cols-[28px_1fr] gap-3"><span className="grid size-7 place-items-center rounded-full border border-zinc-200 font-mono text-[11px] text-zinc-500">{number}</span><div><p className="text-sm font-semibold text-zinc-900">{title}</p><p className="mt-1 text-xs leading-5 text-zinc-500">{description}</p></div></li>)}</ol></aside>
+      <aside className="h-fit border-t border-zinc-200 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0"><p className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-400">Import lifecycle</p><ol className="mt-5 space-y-5">{[["1", "Scan", "Browser prepares a relative-path manifest."], ["2", "Transfer", "Files go directly to private storage through scoped forms."], ["3", "Verify", "Server reconciles each upload into metadata."], ["4", "Finalize", "The import completes automatically once every file is verified."]].map(([number, title, description]) => <li key={number} className="grid grid-cols-[28px_1fr] gap-3"><span className="grid size-7 place-items-center rounded-full border border-zinc-200 font-mono text-[11px] text-zinc-500">{number}</span><div><p className="text-sm font-semibold text-zinc-900">{title}</p><p className="mt-1 text-xs leading-5 text-zinc-500">{description}</p></div></li>)}</ol></aside>
     </div>
   </div>;
 }

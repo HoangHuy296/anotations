@@ -38,6 +38,7 @@ export type VideoToolbarProps = {
   selectedTrackId: string | null;
   onSelectTrack: (trackId: string) => void;
   onCreateTrack: () => void;
+  canCreateTrack?: boolean;
   onAddKeyframeHere: () => void;
   onSaveTrack: () => void;
   onDeleteTrack: () => void;
@@ -86,6 +87,7 @@ export function VideoToolbar({
   selectedTrackId,
   onSelectTrack,
   onCreateTrack,
+  canCreateTrack = true,
   onAddKeyframeHere,
   onSaveTrack,
   onDeleteTrack,
@@ -111,7 +113,7 @@ export function VideoToolbar({
       </div>
       <TimelineTrack annotations={annotations} durationMs={durationMs} currentTimeMs={currentTimeMs} selectedKeyframeId={selectedKeyframeId} mutationState={mutationState} onSelectKeyframe={onSelectKeyframe} onSelectDerived={onSelectDerived} onSeek={onSeek} />
       <div className="-mx-3 -mb-2 mt-2 flex flex-wrap items-center gap-1.5 border-t border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[11px]" aria-label="Video track controls">
-        <IconButton label="Create track" onClick={onCreateTrack} tone="neutral"><PlusCircle size={16} /></IconButton>
+        <IconButton label="Create track" onClick={onCreateTrack} disabled={!canCreateTrack} tone="neutral"><PlusCircle size={16} /></IconButton>
         <label className="inline-flex items-center gap-1 text-zinc-400">
           <VideoCamera aria-hidden="true" size={14} />
           <span className="sr-only">Select track</span>

@@ -32,24 +32,30 @@ before(async () => {
 after(async () => { if (enabled) await cleanupAnnotationFixture([actor.id], [datasetId]); });
 
 test("keyframe lifecycle uses only Track revision and duplicate timestamps roll back", { skip: enabled ? false : "Set VIDEO_ANNOTATION_SERVICE_TESTS=1 with PostgreSQL." }, async () => {
+  const before = await db.asset.findUniqueOrThrow({ where: { id: assetId }, select: { revision: true } });
   const created = await createVideoKeyframe(actor, trackId, { expectedTrackRevision: 1, timestampMs: 1000, geometry });
   assert.equal(created.ok, true);
   if (!created.ok) return;
   assert.equal(created.value.track.revision, 2);
   assert.equal(created.value.keyframe.revision, 1);
+  assert.equal((await db.asset.findUniqueOrThrow({ where: { id: assetId }, select: { revision: true } })).revision, before.revision + 1);
   const moved = await updateVideoKeyframe(actor, created.value.keyframe.id, { expectedTrackRevision: 2, timestampMs: 2000, geometry: { ...geometry, x: 0.2 } });
   assert.equal(moved.ok, true);
   if (!moved.ok) return;
   assert.equal(moved.value.track.revision, 3);
   assert.equal(moved.value.keyframe.revision, 1, "keyframe Annotation revision is not the Track client lock");
+  const afterMove = await db.asset.findUniqueOrThrow({ where: { id: assetId }, select: { revision: true } });
+  assert.equal(afterMove.revision, before.revision + 2);
   const beforeDuplicate = await db.videoObjectTrack.findUniqueOrThrow({ where: { id: trackId }, select: { revision: true } });
   const duplicate = await createVideoKeyframe(actor, trackId, { expectedTrackRevision: 3, timestampMs: 2000, geometry });
   assert.deepEqual(duplicate, { ok: false, reason: "DUPLICATE_TIMESTAMP" });
   const afterDuplicate = await db.videoObjectTrack.findUniqueOrThrow({ where: { id: trackId }, select: { revision: true } });
   assert.deepEqual(afterDuplicate, beforeDuplicate, "partial-index failure rolls back Track revision");
+  assert.equal((await db.asset.findUniqueOrThrow({ where: { id: assetId }, select: { revision: true } })).revision, afterMove.revision, "duplicate keyframe rolls back the parent Asset claim");
   const invalid = await createVideoKeyframe(actor, trackId, { expectedTrackRevision: 3, timestampMs: -1, geometry });
   assert.deepEqual(invalid, { ok: false, reason: "INVALID_REQUEST" });
   const deleted = await deleteVideoKeyframe(actor, created.value.keyframe.id, 3);
   assert.equal(deleted.ok, true);
+  assert.equal((await db.asset.findUniqueOrThrow({ where: { id: assetId }, select: { revision: true } })).revision, before.revision + 3);
   assert.equal(await db.annotation.count({ where: { id: created.value.keyframe.id, type: AnnotationType.BOUNDING_BOX } }), 0);
 });

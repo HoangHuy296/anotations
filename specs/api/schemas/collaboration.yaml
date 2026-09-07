@@ -1,0 +1,153 @@
+DatasetInvitationStatus:
+  type: string
+  enum: [PENDING, ACCEPTED, DECLINED, REVOKED, EXPIRED]
+
+AssetAssignmentType:
+  type: string
+  enum: [ANNOTATION, REVIEW]
+
+NotificationType:
+  type: string
+  enum: [DATASET_INVITE, ASSET_ASSIGNED, REVIEW_ASSIGNED, MENTIONED, COMMENT_REPLY, REVIEW_SUBMITTED, REVIEW_APPROVED, REVIEW_REJECTED]
+
+DatasetInvitation:
+  type: object
+  required: [id, datasetId, inviteeUserId, role, status, expiresAt, createdAt]
+  properties:
+    id: { type: string }
+    datasetId: { type: string }
+    inviteeUserId: { type: string }
+    role: { type: string, enum: [MANAGER, LABELER, REVIEWER] }
+    status: { $ref: '#/DatasetInvitationStatus' }
+    expiresAt: { type: string, format: date-time }
+    createdAt: { type: string, format: date-time }
+
+DatasetInvitationCreateRequest:
+  type: object
+  additionalProperties: false
+  required: [inviteeUserId, role]
+  properties:
+    inviteeUserId: { $ref: './common.yaml#/Cuid' }
+    role: { type: string, enum: [MANAGER, LABELER, REVIEWER] }
+
+DatasetMemberRoleChangeRequest:
+  type: object
+  additionalProperties: false
+  required: [role]
+  properties:
+    role: { type: string, enum: [MANAGER, LABELER, REVIEWER] }
+
+AssetAssignment:
+  type: object
+  required: [assetId, type, userId, assignedAt]
+  properties:
+    assetId: { type: string }
+    type: { $ref: '#/AssetAssignmentType' }
+    userId: { type: string }
+    assignedAt: { type: string, format: date-time }
+
+AssetAssignmentWriteRequest:
+  type: object
+  additionalProperties: false
+  required: [userId]
+  properties:
+    userId: { $ref: './common.yaml#/Cuid' }
+
+AssetAssignmentEvent:
+  type: object
+  required: [id, action, createdAt]
+  properties:
+    id: { $ref: './common.yaml#/Cuid' }
+    action: { type: string, enum: [ASSIGNED, REASSIGNED, UNASSIGNED, REMOVED_FOR_ROLE_CHANGE] }
+    previousUserId: { type: [string, 'null'] }
+    nextUserId: { type: [string, 'null'] }
+    actorId: { type: [string, 'null'] }
+    createdAt: { type: string, format: date-time }
+
+AssetComment:
+  type: object
+  required: [id, datasetId, assetId, authorId, body, createdAt, updatedAt]
+  properties:
+    id: { type: string }
+    datasetId: { type: string }
+    assetId: { type: string }
+    authorId: { type: string }
+    parentId: { type: [string, 'null'] }
+    body: { type: string }
+    deletedAt: { type: [string, 'null'], format: date-time }
+    resolvedAt: { type: [string, 'null'], format: date-time }
+    createdAt: { type: string, format: date-time }
+    updatedAt: { type: string, format: date-time }
+
+AssetCommentCreateRequest:
+  type: object
+  additionalProperties: false
+  required: [body]
+  properties:
+    body: { type: string, minLength: 1, maxLength: 10000 }
+    parentId:
+      description: Optional root comment. A reply-to-reply is rejected.
+      $ref: './common.yaml#/Cuid'
+
+AssetCommentUpdateRequest:
+  type: object
+  additionalProperties: false
+  required: [body]
+  properties:
+    body: { type: string, minLength: 1, maxLength: 10000 }
+
+AssetCommentReply:
+  allOf:
+    - $ref: '#/AssetComment'
+
+AssetCommentThread:
+  allOf:
+    - $ref: '#/AssetComment'
+    - type: object
+      required: [replies]
+      properties:
+        replies:
+          type: array
+          items: { $ref: '#/AssetCommentReply' }
+
+Notification:
+  type: object
+  required: [id, type, title, body, createdAt, unavailable]
+  properties:
+    id: { type: string }
+    type: { $ref: '#/NotificationType' }
+    title: { type: string }
+    body: { type: string }
+    datasetId: { type: [string, 'null'] }
+    assetId: { type: [string, 'null'] }
+    commentId: { type: [string, 'null'] }
+    readAt: { type: [string, 'null'], format: date-time }
+    createdAt: { type: string, format: date-time }
+    unavailable: { type: boolean }
+
+NotificationPage:
+  type: object
+  required: [items, unreadCount]
+  properties:
+    items:
+      type: array
+      items: { $ref: '#/Notification' }
+    nextCursor: { type: [string, 'null'] }
+    unreadCount: { type: integer, minimum: 0 }
+
+RealtimeDeliveryEnvelope:
+  description: >-
+    Documentation-only delivery/invalidation envelope for the private gateway.
+    It is not a REST command and no WebSocket mutation is defined by this API.
+  type: object
+  required: [id, type, occurredAt, datasetId, payload]
+  properties:
+    id: { type: string }
+    type: { type: string }
+    occurredAt: { type: string, format: date-time }
+    datasetId: { type: string }
+    assetId: { type: string }
+    payload:
+      type: object
+      additionalProperties:
+        type: [string, number, boolean, 'null']

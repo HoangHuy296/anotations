@@ -14,6 +14,7 @@ import { VideoPropertiesTabs } from "@/components/workspace/video-properties-tab
 import { PlaceholderPropertiesTabs } from "@/components/workspace/placeholder-properties-tabs";
 import { ImageStatusFields } from "@/components/workspace/image-status-fields";
 import { PlaceholderStatusFields } from "@/components/workspace/placeholder-status-fields";
+import type { AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
 
@@ -34,6 +35,8 @@ export type PropertiesTabsProps = {
   selectedAssetId: string | null;
   tab: string;
   setTab: (tab: string) => void;
+  /** Active Asset Browser filters/sort (022). */
+  filters: AssetNavigatorFilters;
 };
 
 /**
@@ -54,14 +57,21 @@ export type WorkspaceEngineRegistryEntry = {
   StatusFields: ComponentType<Record<string, never>>;
 };
 
+function isWorkflowReadOnly(status: AssetStatus) {
+  // This registry is reachable from client components, so `AssetStatus` must
+  // stay type-only: importing Prisma's runtime enum here would bundle Prisma
+  // into the browser. These values are the persisted Asset.status contract.
+  return status === "NEEDS_REVIEW" || status === "REVIEWED" || status === "REJECTED";
+}
+
 function ImageEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
   if (selection.engine !== "IMAGE") return null;
-  return <ImageEngine image={selection.asset} annotations={selection.annotations} unsupportedAnnotations={selection.unsupportedAnnotations} labels={selection.labels} />;
+  return <ImageEngine image={selection.asset} annotations={selection.annotations} unsupportedAnnotations={selection.unsupportedAnnotations} labels={selection.labels} readOnly={isWorkflowReadOnly(selection.asset.status)} />;
 }
 
 function VideoEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
   if (selection.engine !== "VIDEO") return null;
-  return <VideoEngine key={selection.asset.id} video={selection.asset} readiness={selection.readiness} annotations={selection.annotations} />;
+  return <VideoEngine key={selection.asset.id} video={selection.asset} readiness={selection.readiness} annotations={selection.annotations} readOnly={isWorkflowReadOnly(selection.asset.status)} />;
 }
 
 function AudioEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
@@ -76,18 +86,18 @@ function TextEngineEntry({ selection }: { selection: WorkspaceSelection }): Reac
 
 function ImageTabsEntry(props: PropertiesTabsProps): ReactElement | null {
   if (props.selection.engine !== "IMAGE") return null;
-  return <ImagePropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} />;
+  return <ImagePropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} filters={props.filters} />;
 }
 
 function VideoTabsEntry(props: PropertiesTabsProps): ReactElement | null {
   if (props.selection.engine !== "VIDEO") return null;
-  return <VideoPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} />;
+  return <VideoPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} filters={props.filters} />;
 }
 
 function placeholderTabsEntry(engine: "AUDIO" | "TEXT") {
   return function PlaceholderTabsEntry(props: PropertiesTabsProps): ReactElement | null {
     if (props.selection.engine !== engine) return null;
-    return <PlaceholderPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} />;
+    return <PlaceholderPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} filters={props.filters} />;
   };
 }
 

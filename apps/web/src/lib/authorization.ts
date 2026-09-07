@@ -1,11 +1,11 @@
 import "server-only";
-import { DatasetMemberRole, UserRole } from "@internal/db";
+import { AssetAssignmentType, DatasetMemberRole, UserRole } from "@internal/db";
 import type { RequestActor } from "@/lib/auth";
 import { db } from "@/lib/db";
 
-export type DatasetPermission = "dataset.read" | "dataset.update" | "dataset.delete" | "member.manage" | "asset.upload" | "asset.delete" | "label.manage" | "annotation.create" | "annotation.updateOwn" | "annotation.updateAny" | "annotation.review" | "repository.sync" | "job.createExport" | "job.cancel" | "job.retry";
+export type DatasetPermission = "dataset.read" | "dataset.update" | "dataset.delete" | "member.manage" | "asset.upload" | "asset.delete" | "label.manage" | "annotation.create" | "annotation.updateOwn" | "annotation.updateAny" | "annotation.review" | "workflow.submit" | "workflow.review" | "repository.sync" | "job.createExport" | "job.cancel" | "job.retry";
 export const DATASET_ROLE_PERMISSIONS: Record<DatasetMemberRole, readonly (DatasetPermission | "*")[]> = {
-  OWNER: ["*"], MANAGER: ["dataset.read", "dataset.update", "member.manage", "asset.upload", "asset.delete", "label.manage", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "repository.sync", "job.createExport", "job.cancel", "job.retry"], REVIEWER: ["dataset.read", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "job.createExport"], LABELER: ["dataset.read", "annotation.create", "annotation.updateOwn"],
+  OWNER: ["*"], MANAGER: ["dataset.read", "dataset.update", "member.manage", "asset.upload", "asset.delete", "label.manage", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "workflow.submit", "workflow.review", "repository.sync", "job.createExport", "job.cancel", "job.retry"], REVIEWER: ["dataset.read", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "workflow.review", "job.createExport"], LABELER: ["dataset.read", "annotation.create", "annotation.updateOwn", "workflow.submit"],
 };
 export function canCreateDataset(actor: RequestActor) { return actor.role === UserRole.ADMIN || actor.role === UserRole.MANAGER; }
 export async function requireDatasetPermission(actor: RequestActor, datasetId: string, permission: DatasetPermission) {
@@ -19,6 +19,36 @@ export async function requireDatasetPermission(actor: RequestActor, datasetId: s
 }
 export async function assertAnnotationPermission(actor: RequestActor, datasetId: string, permission: "annotation.create" | "annotation.updateOwn" | "annotation.updateAny" | "annotation.review") {
   return requireDatasetPermission(actor, datasetId, permission);
+}
+
+/** Collaboration rules are additive helpers. They never relax the existing
+ * DatasetPermission check used by current routes. */
+export function isDatasetCollaborationManager(role: DatasetMemberRole) {
+  return role === DatasetMemberRole.OWNER || role === DatasetMemberRole.MANAGER;
+}
+
+export function canManageDatasetMemberRole(actorRole: DatasetMemberRole, targetRole: DatasetMemberRole) {
+  if (actorRole === DatasetMemberRole.OWNER) return targetRole !== DatasetMemberRole.OWNER;
+  return actorRole === DatasetMemberRole.MANAGER && (targetRole === DatasetMemberRole.LABELER || targetRole === DatasetMemberRole.REVIEWER);
+}
+
+export function isEligibleAssignmentTarget(role: DatasetMemberRole, type: AssetAssignmentType) {
+  return (type === AssetAssignmentType.ANNOTATION && role === DatasetMemberRole.LABELER)
+    || (type === AssetAssignmentType.REVIEW && role === DatasetMemberRole.REVIEWER);
+}
+
+export async function requireDatasetCollaborationManager(actor: RequestActor, datasetId: string) {
+  const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
+  if (!access || access.forbidden) return access;
+  return isDatasetCollaborationManager(access.role) ? access : { dataset: null, forbidden: true } as const;
+}
+
+export async function requireEligibleDatasetAssignmentTarget(datasetId: string, userId: string, type: AssetAssignmentType) {
+  const member = await db.datasetMember.findUnique({
+    where: { datasetId_userId: { datasetId, userId } },
+    select: { role: true },
+  });
+  return member && isEligibleAssignmentTarget(member.role, type) ? member : null;
 }
 
 export async function requireOwnedSourceConnection(actor: RequestActor, id: string) {

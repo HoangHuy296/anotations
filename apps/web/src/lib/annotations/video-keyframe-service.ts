@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireSameDatasetLabel, resolveVideoTrackAccess } from "@/lib/annotations/video-authorization";
 import { toSafeVideoKeyframe, toSafeVideoTrack } from "@/lib/annotations/video-projection";
 import { videoKeyframeCreateSchema, videoKeyframeUpdateSchema } from "@/lib/validation/video-annotation";
+import { AssetContentWriteConflict, isAssetContentWriteConflict, mutateEditableAssetContent } from "@/lib/workflow/asset-workflow-service";
 
 export type VideoKeyframeFailure = "NOT_FOUND" | "FORBIDDEN" | "INVALID_REQUEST" | "CONFLICT" | "DUPLICATE_TIMESTAMP";
 export type VideoKeyframeResult<T> = { ok: true; value: T } | { ok: false; reason: VideoKeyframeFailure };
@@ -31,16 +32,16 @@ export async function createVideoKeyframe(actor: RequestActor, trackId: string, 
   if (!permission || permission.forbidden) return { ok: false, reason: permission ? "FORBIDDEN" : "NOT_FOUND" };
   if (resolved.full.videoAsset.asset.durationMs !== null && parsed.data.timestampMs > resolved.full.videoAsset.asset.durationMs) return { ok: false, reason: "INVALID_REQUEST" };
   try {
-    const value = await db.$transaction(async (tx) => {
+    const value = await mutateEditableAssetContent(resolved.full.videoAsset.assetId, resolved.datasetId, async (tx) => {
       const claimed = await tx.videoObjectTrack.updateMany({ where: { id: trackId, revision: parsed.data.expectedTrackRevision }, data: { revision: { increment: 1 } } });
-      if (claimed.count !== 1) throw new Error("CONFLICT");
+      if (claimed.count !== 1) throw new AssetContentWriteConflict();
       const keyframe = await tx.annotation.create({ data: { datasetId: resolved.datasetId, assetId: resolved.full.videoAsset.assetId, trackId, labelId: resolved.full.labelId, createdById: actor.id, modality: Modality.VIDEO, type: AnnotationType.BOUNDING_BOX, source: AnnotationSource.MANUAL, geometry: parsed.data.geometry, properties: parsed.data.properties as Prisma.InputJsonValue, status: AnnotationStatus.DRAFT, isKeyframe: true, isInterpolated: false, timestampMs: parsed.data.timestampMs }, select: keyframeSelect });
       const updatedTrack = await tx.videoObjectTrack.findUniqueOrThrow({ where: { id: trackId }, select: trackSelect });
       return { keyframe, updatedTrack };
     });
     return { ok: true, value: { keyframe: toSafeVideoKeyframe({ ...value.keyframe, type: "BOUNDING_BOX", geometry: { kind: "BOUNDING_BOX", ...(value.keyframe.geometry as object) } as ReturnType<typeof toSafeVideoKeyframe>["geometry"], timestampMs: value.keyframe.timestampMs as number, trackId }), track: toSafeVideoTrack(value.updatedTrack) } };
   } catch (error) {
-    if (error instanceof Error && error.message === "CONFLICT") return { ok: false, reason: "CONFLICT" };
+    if (isAssetContentWriteConflict(error)) return { ok: false, reason: "CONFLICT" };
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return { ok: false, reason: "DUPLICATE_TIMESTAMP" };
     throw error;
   }
@@ -61,16 +62,16 @@ export async function updateVideoKeyframe(actor: RequestActor, annotationId: str
   if (nextTimestamp === null || (resolved.full.videoAsset.asset.durationMs !== null && nextTimestamp > resolved.full.videoAsset.asset.durationMs)) return { ok: false, reason: "INVALID_REQUEST" };
   if (parsed.data.labelId !== undefined && !(await requireSameDatasetLabel(parsed.data.labelId, resolved.datasetId))) return { ok: false, reason: "INVALID_REQUEST" };
   try {
-    const value = await db.$transaction(async (tx) => {
+    const value = await mutateEditableAssetContent(annotation.assetId, resolved.datasetId, async (tx) => {
       const claimed = await tx.videoObjectTrack.updateMany({ where: { id: trackId, revision: parsed.data.expectedTrackRevision }, data: { revision: { increment: 1 } } });
-      if (claimed.count !== 1) throw new Error("CONFLICT");
+      if (claimed.count !== 1) throw new AssetContentWriteConflict();
       const updated = await tx.annotation.update({ where: { id: annotationId }, data: { timestampMs: nextTimestamp, ...(parsed.data.geometry ? { geometry: parsed.data.geometry } : {}), ...(parsed.data.properties ? { properties: parsed.data.properties as Prisma.InputJsonValue } : {}), ...(parsed.data.labelId !== undefined ? { labelId: parsed.data.labelId } : {}), updatedById: actor.id }, select: keyframeSelect });
       const updatedTrack = await tx.videoObjectTrack.findUniqueOrThrow({ where: { id: trackId }, select: trackSelect });
       return { keyframe: updated, updatedTrack };
     });
     return { ok: true, value: { keyframe: toSafeVideoKeyframe({ ...value.keyframe, type: "BOUNDING_BOX", geometry: { kind: "BOUNDING_BOX", ...(value.keyframe.geometry as object) } as ReturnType<typeof toSafeVideoKeyframe>["geometry"], timestampMs: value.keyframe.timestampMs as number, trackId }), track: toSafeVideoTrack(value.updatedTrack) } };
   } catch (error) {
-    if (error instanceof Error && error.message === "CONFLICT") return { ok: false, reason: "CONFLICT" };
+    if (isAssetContentWriteConflict(error)) return { ok: false, reason: "CONFLICT" };
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return { ok: false, reason: "DUPLICATE_TIMESTAMP" };
     throw error;
   }
@@ -85,11 +86,16 @@ export async function deleteVideoKeyframe(actor: RequestActor, annotationId: str
   if (resolved.access.forbidden) return { ok: false, reason: "FORBIDDEN" };
   const permission = await assertAnnotationPermission(actor, resolved.datasetId, "annotation.updateAny");
   if (!permission || permission.forbidden) return { ok: false, reason: permission ? "FORBIDDEN" : "NOT_FOUND" };
-  const value = await db.$transaction(async (tx) => {
-    const claimed = await tx.videoObjectTrack.updateMany({ where: { id: trackId, revision: expectedTrackRevision }, data: { revision: { increment: 1 } } });
-    if (claimed.count !== 1) return null;
-    await tx.annotation.delete({ where: { id: annotationId } });
-    return tx.videoObjectTrack.findUniqueOrThrow({ where: { id: trackId }, select: trackSelect });
-  });
-  return value ? { ok: true, value: { track: toSafeVideoTrack(value) } } : { ok: false, reason: "CONFLICT" };
+  try {
+    const value = await mutateEditableAssetContent(annotation.assetId, resolved.datasetId, async (tx) => {
+      const claimed = await tx.videoObjectTrack.updateMany({ where: { id: trackId, revision: expectedTrackRevision }, data: { revision: { increment: 1 } } });
+      if (claimed.count !== 1) throw new AssetContentWriteConflict();
+      await tx.annotation.delete({ where: { id: annotationId } });
+      return tx.videoObjectTrack.findUniqueOrThrow({ where: { id: trackId }, select: trackSelect });
+    });
+    return { ok: true, value: { track: toSafeVideoTrack(value) } };
+  } catch (error) {
+    if (isAssetContentWriteConflict(error)) return { ok: false, reason: "CONFLICT" };
+    throw error;
+  }
 }

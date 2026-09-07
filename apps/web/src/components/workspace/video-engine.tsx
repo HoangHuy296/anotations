@@ -14,9 +14,10 @@ import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotati
 import { deriveInterpolationAt } from "@/lib/annotations/video-interpolation";
 
 type VideoEngineProps = {
-  video: { id: string; filename: string; description: string | null };
+  video: { id: string; filename: string; description: string | null; status: string };
   readiness: SafeMediaReadiness;
   annotations: SafeVideoAnnotations;
+  readOnly?: boolean;
 };
 type KeyframeChanges = { timestampMs?: number; geometry?: { kind: "BOUNDING_BOX"; x: number; y: number; width: number; height: number } };
 
@@ -58,7 +59,7 @@ async function getViewUrl(assetId: string): Promise<string> {
  * behind their dedicated revision-guarded contract; this component never
  * falls through to ImageCanvas or exposes a storage location.
  */
-export function VideoEngine({ video, readiness, annotations }: VideoEngineProps) {
+export function VideoEngine({ video, readiness, annotations, readOnly = false }: VideoEngineProps) {
   // The Video Asset's own fps, with the existing FR-016 fallback when it's
   // missing/unreliable -- computed once here instead of re-deriving the
   // same fallback inline at every call site (frame-index math, the
@@ -643,13 +644,14 @@ export function VideoEngine({ video, readiness, annotations }: VideoEngineProps)
       tracks={trackList}
       selectedTrackId={selectedTrackId}
       onSelectTrack={selectTrack}
-      onCreateTrack={beginCreateTrack}
-      onAddKeyframeHere={() => void addKeyframe()}
-      onSaveTrack={() => void updateTrack()}
-      onDeleteTrack={() => void removeTrack()}
-      canAddKeyframe={Boolean(selectedTrack)}
-      canSaveTrack={Boolean(selectedTrack)}
-      canDeleteTrack={Boolean(selectedTrack)}
+      onCreateTrack={readOnly ? () => undefined : beginCreateTrack}
+      canCreateTrack={!readOnly}
+      onAddKeyframeHere={() => { if (!readOnly) void addKeyframe(); }}
+      onSaveTrack={() => { if (!readOnly) void updateTrack(); }}
+      onDeleteTrack={() => { if (!readOnly) void removeTrack(); }}
+      canAddKeyframe={!readOnly && Boolean(selectedTrack)}
+      canSaveTrack={!readOnly && Boolean(selectedTrack)}
+      canDeleteTrack={!readOnly && Boolean(selectedTrack)}
       actionError={actionError}
     />
     {/* Collapsed by default so field editors, the summary panel, and

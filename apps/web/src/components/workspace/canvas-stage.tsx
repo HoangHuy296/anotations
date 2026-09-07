@@ -29,6 +29,7 @@ type CanvasStageProps = {
   labels: SafeWorkspaceLabel[];
   tool: AnnotationTool;
   onToolChange: (tool: AnnotationTool) => void;
+  readOnly?: boolean;
 };
 
 function colorFor(annotation: SafeImageAnnotation, labels: SafeWorkspaceLabel[]) {
@@ -70,7 +71,7 @@ function toCanvasAnnotation(annotation: import("@/lib/annotations/safe-annotatio
   return { ...annotation, modality: "IMAGE", type: annotation.type as SafeImageAnnotation["type"], geometry: annotation.geometry as SafeImageAnnotation["geometry"] };
 }
 
-export default function CanvasStage({ image: asset, annotations: initialAnnotations, unsupportedAnnotations, labels, tool, onToolChange }: CanvasStageProps) {
+export default function CanvasStage({ image: asset, annotations: initialAnnotations, unsupportedAnnotations, labels, tool, onToolChange, readOnly = false }: CanvasStageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -101,6 +102,8 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<"idle" | "pending" | "saving" | "saved" | "failed" | "conflict">("idle");
   const [conflictKey, setConflictKey] = useState<string | null>(null);
+
+  useEffect(() => () => { delete document.documentElement.dataset.annotationInteraction; }, []);
 
   const originalWidth = image?.naturalWidth || asset.width || 0;
   const originalHeight = image?.naturalHeight || asset.height || 0;
@@ -239,6 +242,8 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
   }
 
   function startCanvasInteraction(event: Konva.KonvaEventObject<MouseEvent>) {
+    if (readOnly) return;
+    document.documentElement.dataset.annotationInteraction = "active";
     const point = pointerInImage();
     if (!point) return;
     if (tool === "box" || tool === "circle") {
@@ -267,6 +272,7 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
   }
 
   function updateCanvasDraft() {
+    if (readOnly) return;
     if (!drawingStart || (tool !== "box" && tool !== "circle")) return;
     const point = pointerInImage();
     if (!point) return;
@@ -274,6 +280,8 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
   }
 
   function finishCanvasInteraction() {
+    delete document.documentElement.dataset.annotationInteraction;
+    if (readOnly) return;
     if (!draft || !drawingStart) { setDrawingStart(null); return; }
     if (tool === "box") {
       const geometry = normalizeBoundingBox(draft, originalWidth, originalHeight);
@@ -294,7 +302,7 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
 
   return <section className="flex min-h-[520px] min-w-0 flex-col bg-zinc-900 lg:min-h-0">
     <div ref={containerRef} className="canvas-grid relative min-h-0 flex-1 overflow-hidden">
-      {viewport.width > 0 && viewport.height > 0 && image && <Stage ref={stageRef} width={viewport.width} height={viewport.height} draggable={tool === "pan"} onMouseDown={startCanvasInteraction} onMouseMove={updateCanvasDraft} onMouseUp={finishCanvasInteraction} onWheel={(event) => { event.evt.preventDefault(); const stage = event.target.getStage(); const pointer = stage?.getPointerPosition(); if (!stage || !pointer) return; const oldScale = stage.scaleX(); const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, oldScale * (event.evt.deltaY > 0 ? 1 / 1.08 : 1.08))); const point = { x: (pointer.x - stage.x()) / oldScale, y: (pointer.y - stage.y()) / oldScale }; stage.scale({ x: nextScale, y: nextScale }); stage.position({ x: pointer.x - point.x * nextScale, y: pointer.y - point.y * nextScale }); stage.batchDraw(); setZoomPercent(Math.round(nextScale * 100)); }}>
+      {viewport.width > 0 && viewport.height > 0 && image && <Stage ref={stageRef} width={viewport.width} height={viewport.height} draggable={readOnly || tool === "pan"} onMouseDown={startCanvasInteraction} onMouseMove={updateCanvasDraft} onMouseUp={finishCanvasInteraction} onWheel={(event) => { event.evt.preventDefault(); const stage = event.target.getStage(); const pointer = stage?.getPointerPosition(); if (!stage || !pointer) return; const oldScale = stage.scaleX(); const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, oldScale * (event.evt.deltaY > 0 ? 1 / 1.08 : 1.08))); const point = { x: (pointer.x - stage.x()) / oldScale, y: (pointer.y - stage.y()) / oldScale }; stage.scale({ x: nextScale, y: nextScale }); stage.position({ x: pointer.x - point.x * nextScale, y: pointer.y - point.y * nextScale }); stage.batchDraw(); setZoomPercent(Math.round(nextScale * 100)); }}>
         <Layer><KonvaImage image={image} x={0} y={0} />
           {annotations.map((annotation) => {
             const selected = annotation.id === selectedId;
@@ -364,6 +372,6 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
       {unsupportedAnnotations.length > 0 && <p className="absolute left-4 top-4 max-w-sm rounded-lg bg-zinc-950/90 px-3 py-2 text-xs text-zinc-200">{unsupportedAnnotations.length} unsupported annotation{unsupportedAnnotations.length === 1 ? "" : "s"} retained as read-only: {unsupportedAnnotations.map((annotation) => annotation.type.replaceAll("_", " ")).join(", ")}.</p>}
       {conflictKey && <div className="absolute bottom-12 left-4 max-w-sm"><SaveConflictPanel message="The canvas kept your local geometry. Reload the durable version, discard the local draft, or keep it visible while you reconcile it manually." onReload={() => window.location.reload()} onDiscard={() => { clearConflictDraft(conflictKey); window.location.reload(); }} onReconcile={() => setConflictKey(null)} /></div>}
     </div>
-    <Toolbar zoomPercent={zoomPercent} onFit={fitImage} onZoomIn={() => zoomAtCenter(1.2)} onZoomOut={() => zoomAtCenter(1 / 1.2)} tool={tool} onToolChange={onToolChange} onDelete={removeSelected} canDelete={Boolean(selectedId)} labels={labels} activeLabelId={activeLabelId} onActiveLabelChange={setActiveLabelId} onFinishPath={finishPath} canFinishPath={pathPoints.length >= (tool === "polygon" ? 3 : 2)} />
+    <Toolbar zoomPercent={zoomPercent} onFit={fitImage} onZoomIn={() => zoomAtCenter(1.2)} onZoomOut={() => zoomAtCenter(1 / 1.2)} tool={readOnly ? "pan" : tool} onToolChange={readOnly ? () => undefined : onToolChange} onDelete={removeSelected} canDelete={!readOnly && Boolean(selectedId)} labels={labels} activeLabelId={activeLabelId} onActiveLabelChange={setActiveLabelId} onFinishPath={finishPath} canFinishPath={!readOnly && pathPoints.length >= (tool === "polygon" ? 3 : 2)} />
   </section>;
 }

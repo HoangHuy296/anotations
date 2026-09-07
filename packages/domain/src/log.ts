@@ -41,7 +41,7 @@ function assertSafe(fields: Record<string, unknown>): Record<string, unknown> {
   return safe;
 }
 
-function emit(level: LogLevel, category: "job" | "redis" | "storage" | "ai" | "maintenance", event: string, fields: Record<string, unknown>) {
+function emit(level: LogLevel, category: "job" | "redis" | "storage" | "ai" | "maintenance" | "bulkAsset" | "assetWorkflow", event: string, fields: Record<string, unknown>) {
   const safeFields = assertSafe(fields);
   const line = JSON.stringify({
     ts: new Date().toISOString(),
@@ -127,4 +127,45 @@ export type MaintenanceLogFields = {
  */
 export function logMaintenanceEvent(event: string, fields: MaintenanceLogFields = {}, level: LogLevel = "info") {
   emit(level, "maintenance", event, fields);
+}
+
+export type BulkAssetLogFields = {
+  userId: string;
+  datasetId: string;
+  action: string;
+  selectionMode: "EXPLICIT" | "FILTERED";
+  resolvedCount: number;
+  succeeded?: number;
+  failed?: number;
+  skipped?: number;
+  jobId?: string;
+  durationMs?: number;
+};
+
+/**
+ * Asset Browser bulk-operation lifecycle (022 FR-037): started/completed/
+ * partial_failure/failed, one line per bulk request. `resolvedCount` is the
+ * server-resolved match count (never the client's claimed count). Never
+ * pass the selection's free-text search term or any asset content —
+ * `resolvedCount`/`succeeded`/`failed`/`skipped` are enough to audit "who
+ * did what to how many assets" without carrying request-shaped content this
+ * logger has no allowlist for.
+ */
+export function logBulkAssetEvent(event: string, fields: BulkAssetLogFields, level: LogLevel = "info") {
+  emit(level, "bulkAsset", event, fields);
+}
+
+/** Workflow audit line: feedback and annotation content are intentionally excluded. */
+export type AssetWorkflowLogFields = {
+  actorId: string;
+  datasetId: string;
+  assetId: string;
+  action: string;
+  fromStatus: string | null;
+  toStatus: string | null;
+  assetRevision: number;
+};
+
+export function logAssetWorkflowEvent(event: string, fields: AssetWorkflowLogFields, level: LogLevel = "info") {
+  emit(level, "assetWorkflow", event, fields);
 }

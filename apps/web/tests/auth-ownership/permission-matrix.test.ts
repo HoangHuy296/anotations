@@ -4,7 +4,7 @@ import test from "node:test";
 
 import { UserRole } from "@internal/db";
 
-import { DATASET_ROLE_PERMISSIONS, type DatasetPermission, requireDatasetPermission } from "@/lib/authorization";
+import { canManageDatasetMemberRole, DATASET_ROLE_PERMISSIONS, isEligibleAssignmentTarget, type DatasetPermission, requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { createFixture, hasIntegrationDatabase } from "./helpers";
 
@@ -48,4 +48,17 @@ test("mandatory dataset role matrix resolves allow=200, member denial=403, outsi
     if (adminId) await db.user.delete({ where: { id: adminId } });
     await fixture.cleanup();
   }
+});
+
+test("Phase 024 collaboration role policy preserves OWNER protection and typed-assignment eligibility", () => {
+  assert.equal(canManageDatasetMemberRole("OWNER", "MANAGER"), true);
+  assert.equal(canManageDatasetMemberRole("OWNER", "OWNER"), false);
+  assert.equal(canManageDatasetMemberRole("MANAGER", "LABELER"), true);
+  assert.equal(canManageDatasetMemberRole("MANAGER", "REVIEWER"), true);
+  assert.equal(canManageDatasetMemberRole("MANAGER", "MANAGER"), false);
+  assert.equal(canManageDatasetMemberRole("LABELER", "LABELER"), false);
+  assert.equal(isEligibleAssignmentTarget("LABELER", "ANNOTATION"), true);
+  assert.equal(isEligibleAssignmentTarget("REVIEWER", "REVIEW"), true);
+  assert.equal(isEligibleAssignmentTarget("LABELER", "REVIEW"), false);
+  assert.equal(isEligibleAssignmentTarget("MANAGER", "ANNOTATION"), false);
 });

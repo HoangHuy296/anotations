@@ -34,8 +34,13 @@ export const startLocalFolderImportSchema = localFolderImportManifestSchema.exte
 /** A workspace append uses the Dataset selected by the route, never browser input. */
 export const appendLocalFolderImportSchema = localFolderImportManifestSchema.superRefine(manifestRefinement);
 
+// Must stay aligned with localFolderImportManifestSchema's item cap (1,000,
+// matching SC-007): the browser requests every prepared item's upload
+// capability in a single call, so a lower cap here silently stranded any
+// import past it at 0% with no visible error (worker-claimed, zero items
+// ever reconciled).
 export const uploadCapabilitiesSchema = z.object({
-  itemIds: z.array(z.string().min(1)).min(1).max(100),
+  itemIds: z.array(z.string().min(1)).min(1).max(1_000),
 }).strict();
 
 export const completeLocalFolderItemSchema = z.object({

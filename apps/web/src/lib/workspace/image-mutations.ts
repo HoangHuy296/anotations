@@ -5,6 +5,7 @@ import { AnnotationSource, AnnotationType, Modality } from "@internal/db";
 import type { RequestActor } from "@/lib/auth";
 import { assertAnnotationPermission, requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { AssetContentWriteConflict, isAssetContentWriteConflict, mutateEditableAssetContent } from "@/lib/workflow/asset-workflow-service";
 import type { NormalizedBoundingBox, SafeImageAnnotation } from "@/types/image-workspace";
 
 type MutationResult<T> = { ok: true; value: T } | { ok: false; status: 400 | 403 | 404 | 409 };
@@ -35,7 +36,13 @@ export async function createBoundingBox(actor: RequestActor, input: { datasetId:
     input.labelId ? db.label.findFirst({ where: { id: input.labelId, datasetId: input.datasetId, OR: [{ modality: null }, { modality: Modality.IMAGE }] }, select: { id: true } }) : Promise.resolve(null),
   ]);
   if (!asset || (input.labelId && !label)) return { ok: false, status: 404 };
-  const annotation = await db.annotation.create({ data: { datasetId: input.datasetId, assetId: input.assetId, labelId: input.labelId ?? null, createdById: actor.id, modality: Modality.IMAGE, type: AnnotationType.BOUNDING_BOX, source: AnnotationSource.MANUAL, geometry: input.geometry }, select: { id: true, assetId: true, labelId: true, type: true, geometry: true, status: true, revision: true, updatedAt: true } });
+  let annotation;
+  try {
+    annotation = await mutateEditableAssetContent(input.assetId, input.datasetId, (tx) => tx.annotation.create({ data: { datasetId: input.datasetId, assetId: input.assetId, labelId: input.labelId ?? null, createdById: actor.id, modality: Modality.IMAGE, type: AnnotationType.BOUNDING_BOX, source: AnnotationSource.MANUAL, geometry: input.geometry }, select: { id: true, assetId: true, labelId: true, type: true, geometry: true, status: true, revision: true, updatedAt: true } }));
+  } catch (error) {
+    if (isAssetContentWriteConflict(error)) return { ok: false, status: 409 };
+    throw error;
+  }
   const value = projectAnnotation(annotation);
   return value ? { ok: true, value } : { ok: false, status: 400 };
 }
@@ -43,8 +50,15 @@ export async function createBoundingBox(actor: RequestActor, input: { datasetId:
 export async function updateBoundingBoxGeometry(actor: RequestActor, input: { datasetId: string; assetId: string; annotationId: string; revision: number; geometry: NormalizedBoundingBox }): Promise<MutationResult<SafeImageAnnotation>> {
   const resolved = await resolveEditableAnnotation(actor, input.datasetId, input.assetId, input.annotationId);
   if ("status" in resolved) return { ok: false, status: resolved.status ?? 404 };
-  const result = await db.annotation.updateMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision }, data: { geometry: input.geometry, updatedById: actor.id, revision: { increment: 1 } } });
-  if (result.count !== 1) return { ok: false, status: 409 };
+  try {
+    await mutateEditableAssetContent(input.assetId, input.datasetId, async (tx) => {
+      const result = await tx.annotation.updateMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision }, data: { geometry: input.geometry, updatedById: actor.id, revision: { increment: 1 } } });
+      if (result.count !== 1) throw new AssetContentWriteConflict();
+    });
+  } catch (error) {
+    if (isAssetContentWriteConflict(error)) return { ok: false, status: 409 };
+    throw error;
+  }
   const annotation = await db.annotation.findUnique({ where: { id: input.annotationId }, select: { id: true, assetId: true, labelId: true, type: true, geometry: true, status: true, revision: true, updatedAt: true } });
   const value = annotation && projectAnnotation(annotation);
   return value ? { ok: true, value } : { ok: false, status: 404 };
@@ -57,8 +71,15 @@ export async function updateBoundingBoxLabel(actor: RequestActor, input: { datas
     const label = await db.label.findFirst({ where: { id: input.labelId, datasetId: input.datasetId, OR: [{ modality: null }, { modality: Modality.IMAGE }] }, select: { id: true } });
     if (!label) return { ok: false, status: 404 };
   }
-  const result = await db.annotation.updateMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision }, data: { labelId: input.labelId, updatedById: actor.id, revision: { increment: 1 } } });
-  if (result.count !== 1) return { ok: false, status: 409 };
+  try {
+    await mutateEditableAssetContent(input.assetId, input.datasetId, async (tx) => {
+      const result = await tx.annotation.updateMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision }, data: { labelId: input.labelId, updatedById: actor.id, revision: { increment: 1 } } });
+      if (result.count !== 1) throw new AssetContentWriteConflict();
+    });
+  } catch (error) {
+    if (isAssetContentWriteConflict(error)) return { ok: false, status: 409 };
+    throw error;
+  }
   const annotation = await db.annotation.findUnique({ where: { id: input.annotationId }, select: { id: true, assetId: true, labelId: true, type: true, geometry: true, status: true, revision: true, updatedAt: true } });
   const value = annotation && projectAnnotation(annotation);
   return value ? { ok: true, value } : { ok: false, status: 404 };
@@ -67,8 +88,16 @@ export async function updateBoundingBoxLabel(actor: RequestActor, input: { datas
 export async function deleteBoundingBox(actor: RequestActor, input: { datasetId: string; assetId: string; annotationId: string; revision: number }): Promise<MutationResult<null>> {
   const resolved = await resolveEditableAnnotation(actor, input.datasetId, input.assetId, input.annotationId);
   if ("status" in resolved) return { ok: false, status: resolved.status ?? 404 };
-  const result = await db.annotation.deleteMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision } });
-  return result.count === 1 ? { ok: true, value: null } : { ok: false, status: 409 };
+  try {
+    await mutateEditableAssetContent(input.assetId, input.datasetId, async (tx) => {
+      const result = await tx.annotation.deleteMany({ where: { id: input.annotationId, datasetId: input.datasetId, assetId: input.assetId, revision: input.revision } });
+      if (result.count !== 1) throw new AssetContentWriteConflict();
+    });
+    return { ok: true, value: null };
+  } catch (error) {
+    if (isAssetContentWriteConflict(error)) return { ok: false, status: 409 };
+    throw error;
+  }
 }
 
 export async function updateImageDescription(actor: RequestActor, input: { datasetId: string; assetId: string; version: number; description: string | null }): Promise<MutationResult<{ id: string; description: string | null; version: number }>> {

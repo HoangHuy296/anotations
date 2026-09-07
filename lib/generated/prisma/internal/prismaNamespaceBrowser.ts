@@ -59,7 +59,17 @@ export const ModelName = {
   PreparedImport: 'PreparedImport',
   PreparedImportItem: 'PreparedImportItem',
   DatasetMember: 'DatasetMember',
+  DatasetInvitation: 'DatasetInvitation',
   Asset: 'Asset',
+  AssetAssignment: 'AssetAssignment',
+  AssetAssignmentEvent: 'AssetAssignmentEvent',
+  AssetComment: 'AssetComment',
+  CommentMention: 'CommentMention',
+  Notification: 'Notification',
+  DatasetMembershipEvent: 'DatasetMembershipEvent',
+  CollaborationOutboxEvent: 'CollaborationOutboxEvent',
+  AssetWorkflowEvent: 'AssetWorkflowEvent',
+  AssetLabel: 'AssetLabel',
   AssetVersion: 'AssetVersion',
   Label: 'Label',
   Annotation: 'Annotation',
@@ -312,10 +322,29 @@ export const DatasetMemberScalarFieldEnum = {
 export type DatasetMemberScalarFieldEnum = (typeof DatasetMemberScalarFieldEnum)[keyof typeof DatasetMemberScalarFieldEnum]
 
 
+export const DatasetInvitationScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  inviteeUserId: 'inviteeUserId',
+  invitedById: 'invitedById',
+  role: 'role',
+  status: 'status',
+  activeKey: 'activeKey',
+  expiresAt: 'expiresAt',
+  respondedAt: 'respondedAt',
+  revokedAt: 'revokedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DatasetInvitationScalarFieldEnum = (typeof DatasetInvitationScalarFieldEnum)[keyof typeof DatasetInvitationScalarFieldEnum]
+
+
 export const AssetScalarFieldEnum = {
   id: 'id',
   datasetId: 'datasetId',
   uploadedById: 'uploadedById',
+  assignedToId: 'assignedToId',
   modality: 'modality',
   filename: 'filename',
   originalFilename: 'originalFilename',
@@ -366,6 +395,138 @@ export const AssetScalarFieldEnum = {
 } as const
 
 export type AssetScalarFieldEnum = (typeof AssetScalarFieldEnum)[keyof typeof AssetScalarFieldEnum]
+
+
+export const AssetAssignmentScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  assetId: 'assetId',
+  userId: 'userId',
+  type: 'type',
+  assignedById: 'assignedById',
+  assignedAt: 'assignedAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AssetAssignmentScalarFieldEnum = (typeof AssetAssignmentScalarFieldEnum)[keyof typeof AssetAssignmentScalarFieldEnum]
+
+
+export const AssetAssignmentEventScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  assetId: 'assetId',
+  assignmentId: 'assignmentId',
+  action: 'action',
+  previousUserId: 'previousUserId',
+  nextUserId: 'nextUserId',
+  actorId: 'actorId',
+  createdAt: 'createdAt'
+} as const
+
+export type AssetAssignmentEventScalarFieldEnum = (typeof AssetAssignmentEventScalarFieldEnum)[keyof typeof AssetAssignmentEventScalarFieldEnum]
+
+
+export const AssetCommentScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  assetId: 'assetId',
+  authorId: 'authorId',
+  parentId: 'parentId',
+  body: 'body',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
+  resolvedAt: 'resolvedAt',
+  resolvedById: 'resolvedById'
+} as const
+
+export type AssetCommentScalarFieldEnum = (typeof AssetCommentScalarFieldEnum)[keyof typeof AssetCommentScalarFieldEnum]
+
+
+export const CommentMentionScalarFieldEnum = {
+  id: 'id',
+  commentId: 'commentId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type CommentMentionScalarFieldEnum = (typeof CommentMentionScalarFieldEnum)[keyof typeof CommentMentionScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  datasetId: 'datasetId',
+  assetId: 'assetId',
+  commentId: 'commentId',
+  actorId: 'actorId',
+  title: 'title',
+  body: 'body',
+  dedupeKey: 'dedupeKey',
+  contextUnavailableAt: 'contextUnavailableAt',
+  readAt: 'readAt',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const DatasetMembershipEventScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  memberUserId: 'memberUserId',
+  actorId: 'actorId',
+  action: 'action',
+  previousRole: 'previousRole',
+  nextRole: 'nextRole',
+  createdAt: 'createdAt'
+} as const
+
+export type DatasetMembershipEventScalarFieldEnum = (typeof DatasetMembershipEventScalarFieldEnum)[keyof typeof DatasetMembershipEventScalarFieldEnum]
+
+
+export const CollaborationOutboxEventScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  assetId: 'assetId',
+  recipientUserId: 'recipientUserId',
+  actorId: 'actorId',
+  jobId: 'jobId',
+  type: 'type',
+  dedupeKey: 'dedupeKey',
+  payload: 'payload',
+  dispatchedAt: 'dispatchedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type CollaborationOutboxEventScalarFieldEnum = (typeof CollaborationOutboxEventScalarFieldEnum)[keyof typeof CollaborationOutboxEventScalarFieldEnum]
+
+
+export const AssetWorkflowEventScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  actorId: 'actorId',
+  action: 'action',
+  fromStatus: 'fromStatus',
+  toStatus: 'toStatus',
+  assetRevision: 'assetRevision',
+  feedback: 'feedback',
+  createdAt: 'createdAt'
+} as const
+
+export type AssetWorkflowEventScalarFieldEnum = (typeof AssetWorkflowEventScalarFieldEnum)[keyof typeof AssetWorkflowEventScalarFieldEnum]
+
+
+export const AssetLabelScalarFieldEnum = {
+  id: 'id',
+  assetId: 'assetId',
+  labelId: 'labelId',
+  createdAt: 'createdAt',
+  createdById: 'createdById'
+} as const
+
+export type AssetLabelScalarFieldEnum = (typeof AssetLabelScalarFieldEnum)[keyof typeof AssetLabelScalarFieldEnum]
 
 
 export const AssetVersionScalarFieldEnum = {

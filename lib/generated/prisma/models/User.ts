@@ -203,6 +203,8 @@ export type UserWhereInput = {
   annotationsReviewed?: Prisma.AnnotationListRelationFilter
   annotationsUpdated?: Prisma.AnnotationListRelationFilter
   uploadedAssets?: Prisma.AssetListRelationFilter
+  assignedAssets?: Prisma.AssetListRelationFilter
+  assetLabelsCreated?: Prisma.AssetLabelListRelationFilter
   sessions?: Prisma.AuthSessionListRelationFilter
   ownedDatasets?: Prisma.DatasetListRelationFilter
   memberships?: Prisma.DatasetMemberListRelationFilter
@@ -212,6 +214,21 @@ export type UserWhereInput = {
   preparedImports?: Prisma.PreparedImportListRelationFilter
   sourceConnections?: Prisma.SourceConnectionListRelationFilter
   tracksCreated?: Prisma.VideoObjectTrackListRelationFilter
+  workflowEvents?: Prisma.AssetWorkflowEventListRelationFilter
+  invitationsReceived?: Prisma.DatasetInvitationListRelationFilter
+  invitationsSent?: Prisma.DatasetInvitationListRelationFilter
+  assignmentSlots?: Prisma.AssetAssignmentListRelationFilter
+  assignmentsCreated?: Prisma.AssetAssignmentListRelationFilter
+  assignmentEvents?: Prisma.AssetAssignmentEventListRelationFilter
+  commentsAuthored?: Prisma.AssetCommentListRelationFilter
+  commentsResolved?: Prisma.AssetCommentListRelationFilter
+  commentMentions?: Prisma.CommentMentionListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  notificationsActed?: Prisma.NotificationListRelationFilter
+  membershipEventsFor?: Prisma.DatasetMembershipEventListRelationFilter
+  membershipEventsBy?: Prisma.DatasetMembershipEventListRelationFilter
+  outboxEventsActed?: Prisma.CollaborationOutboxEventListRelationFilter
+  outboxEventsFor?: Prisma.CollaborationOutboxEventListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -227,6 +244,8 @@ export type UserOrderByWithRelationInput = {
   annotationsReviewed?: Prisma.AnnotationOrderByRelationAggregateInput
   annotationsUpdated?: Prisma.AnnotationOrderByRelationAggregateInput
   uploadedAssets?: Prisma.AssetOrderByRelationAggregateInput
+  assignedAssets?: Prisma.AssetOrderByRelationAggregateInput
+  assetLabelsCreated?: Prisma.AssetLabelOrderByRelationAggregateInput
   sessions?: Prisma.AuthSessionOrderByRelationAggregateInput
   ownedDatasets?: Prisma.DatasetOrderByRelationAggregateInput
   memberships?: Prisma.DatasetMemberOrderByRelationAggregateInput
@@ -236,6 +255,21 @@ export type UserOrderByWithRelationInput = {
   preparedImports?: Prisma.PreparedImportOrderByRelationAggregateInput
   sourceConnections?: Prisma.SourceConnectionOrderByRelationAggregateInput
   tracksCreated?: Prisma.VideoObjectTrackOrderByRelationAggregateInput
+  workflowEvents?: Prisma.AssetWorkflowEventOrderByRelationAggregateInput
+  invitationsReceived?: Prisma.DatasetInvitationOrderByRelationAggregateInput
+  invitationsSent?: Prisma.DatasetInvitationOrderByRelationAggregateInput
+  assignmentSlots?: Prisma.AssetAssignmentOrderByRelationAggregateInput
+  assignmentsCreated?: Prisma.AssetAssignmentOrderByRelationAggregateInput
+  assignmentEvents?: Prisma.AssetAssignmentEventOrderByRelationAggregateInput
+  commentsAuthored?: Prisma.AssetCommentOrderByRelationAggregateInput
+  commentsResolved?: Prisma.AssetCommentOrderByRelationAggregateInput
+  commentMentions?: Prisma.CommentMentionOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  notificationsActed?: Prisma.NotificationOrderByRelationAggregateInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventOrderByRelationAggregateInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventOrderByRelationAggregateInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventOrderByRelationAggregateInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -254,6 +288,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   annotationsReviewed?: Prisma.AnnotationListRelationFilter
   annotationsUpdated?: Prisma.AnnotationListRelationFilter
   uploadedAssets?: Prisma.AssetListRelationFilter
+  assignedAssets?: Prisma.AssetListRelationFilter
+  assetLabelsCreated?: Prisma.AssetLabelListRelationFilter
   sessions?: Prisma.AuthSessionListRelationFilter
   ownedDatasets?: Prisma.DatasetListRelationFilter
   memberships?: Prisma.DatasetMemberListRelationFilter
@@ -263,6 +299,21 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   preparedImports?: Prisma.PreparedImportListRelationFilter
   sourceConnections?: Prisma.SourceConnectionListRelationFilter
   tracksCreated?: Prisma.VideoObjectTrackListRelationFilter
+  workflowEvents?: Prisma.AssetWorkflowEventListRelationFilter
+  invitationsReceived?: Prisma.DatasetInvitationListRelationFilter
+  invitationsSent?: Prisma.DatasetInvitationListRelationFilter
+  assignmentSlots?: Prisma.AssetAssignmentListRelationFilter
+  assignmentsCreated?: Prisma.AssetAssignmentListRelationFilter
+  assignmentEvents?: Prisma.AssetAssignmentEventListRelationFilter
+  commentsAuthored?: Prisma.AssetCommentListRelationFilter
+  commentsResolved?: Prisma.AssetCommentListRelationFilter
+  commentMentions?: Prisma.CommentMentionListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  notificationsActed?: Prisma.NotificationListRelationFilter
+  membershipEventsFor?: Prisma.DatasetMembershipEventListRelationFilter
+  membershipEventsBy?: Prisma.DatasetMembershipEventListRelationFilter
+  outboxEventsActed?: Prisma.CollaborationOutboxEventListRelationFilter
+  outboxEventsFor?: Prisma.CollaborationOutboxEventListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -304,6 +355,8 @@ export type UserCreateInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -313,6 +366,21 @@ export type UserCreateInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -328,6 +396,8 @@ export type UserUncheckedCreateInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -337,6 +407,21 @@ export type UserUncheckedCreateInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUpdateInput = {
@@ -352,6 +437,8 @@ export type UserUpdateInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -361,6 +448,21 @@ export type UserUpdateInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -376,6 +478,8 @@ export type UserUncheckedUpdateInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -385,6 +489,21 @@ export type UserUncheckedUpdateInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -589,9 +708,43 @@ export type UserUpdateOneRequiredWithoutMembershipsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMembershipsInput, Prisma.UserUpdateWithoutMembershipsInput>, Prisma.UserUncheckedUpdateWithoutMembershipsInput>
 }
 
+export type UserCreateNestedOneWithoutInvitationsReceivedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitationsReceivedInput, Prisma.UserUncheckedCreateWithoutInvitationsReceivedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitationsReceivedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutInvitationsSentInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitationsSentInput, Prisma.UserUncheckedCreateWithoutInvitationsSentInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitationsSentInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutInvitationsReceivedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitationsReceivedInput, Prisma.UserUncheckedCreateWithoutInvitationsReceivedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitationsReceivedInput
+  upsert?: Prisma.UserUpsertWithoutInvitationsReceivedInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvitationsReceivedInput, Prisma.UserUpdateWithoutInvitationsReceivedInput>, Prisma.UserUncheckedUpdateWithoutInvitationsReceivedInput>
+}
+
+export type UserUpdateOneRequiredWithoutInvitationsSentNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutInvitationsSentInput, Prisma.UserUncheckedCreateWithoutInvitationsSentInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutInvitationsSentInput
+  upsert?: Prisma.UserUpsertWithoutInvitationsSentInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInvitationsSentInput, Prisma.UserUpdateWithoutInvitationsSentInput>, Prisma.UserUncheckedUpdateWithoutInvitationsSentInput>
+}
+
 export type UserCreateNestedOneWithoutUploadedAssetsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutUploadedAssetsInput, Prisma.UserUncheckedCreateWithoutUploadedAssetsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutUploadedAssetsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutAssignedAssetsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedAssetsInput, Prisma.UserUncheckedCreateWithoutAssignedAssetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedAssetsInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
@@ -603,6 +756,228 @@ export type UserUpdateOneWithoutUploadedAssetsNestedInput = {
   delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutUploadedAssetsInput, Prisma.UserUpdateWithoutUploadedAssetsInput>, Prisma.UserUncheckedUpdateWithoutUploadedAssetsInput>
+}
+
+export type UserUpdateOneWithoutAssignedAssetsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignedAssetsInput, Prisma.UserUncheckedCreateWithoutAssignedAssetsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignedAssetsInput
+  upsert?: Prisma.UserUpsertWithoutAssignedAssetsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignedAssetsInput, Prisma.UserUpdateWithoutAssignedAssetsInput>, Prisma.UserUncheckedUpdateWithoutAssignedAssetsInput>
+}
+
+export type UserCreateNestedOneWithoutAssignmentSlotsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignmentSlotsInput, Prisma.UserUncheckedCreateWithoutAssignmentSlotsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignmentSlotsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutAssignmentsCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignmentsCreatedInput, Prisma.UserUncheckedCreateWithoutAssignmentsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignmentsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutAssignmentSlotsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignmentSlotsInput, Prisma.UserUncheckedCreateWithoutAssignmentSlotsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignmentSlotsInput
+  upsert?: Prisma.UserUpsertWithoutAssignmentSlotsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignmentSlotsInput, Prisma.UserUpdateWithoutAssignmentSlotsInput>, Prisma.UserUncheckedUpdateWithoutAssignmentSlotsInput>
+}
+
+export type UserUpdateOneWithoutAssignmentsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignmentsCreatedInput, Prisma.UserUncheckedCreateWithoutAssignmentsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignmentsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutAssignmentsCreatedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignmentsCreatedInput, Prisma.UserUpdateWithoutAssignmentsCreatedInput>, Prisma.UserUncheckedUpdateWithoutAssignmentsCreatedInput>
+}
+
+export type UserCreateNestedOneWithoutAssignmentEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignmentEventsInput, Prisma.UserUncheckedCreateWithoutAssignmentEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignmentEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutAssignmentEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssignmentEventsInput, Prisma.UserUncheckedCreateWithoutAssignmentEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssignmentEventsInput
+  upsert?: Prisma.UserUpsertWithoutAssignmentEventsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssignmentEventsInput, Prisma.UserUpdateWithoutAssignmentEventsInput>, Prisma.UserUncheckedUpdateWithoutAssignmentEventsInput>
+}
+
+export type UserCreateNestedOneWithoutCommentsAuthoredInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommentsAuthoredInput, Prisma.UserUncheckedCreateWithoutCommentsAuthoredInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommentsAuthoredInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutCommentsResolvedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommentsResolvedInput, Prisma.UserUncheckedCreateWithoutCommentsResolvedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommentsResolvedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCommentsAuthoredNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommentsAuthoredInput, Prisma.UserUncheckedCreateWithoutCommentsAuthoredInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommentsAuthoredInput
+  upsert?: Prisma.UserUpsertWithoutCommentsAuthoredInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCommentsAuthoredInput, Prisma.UserUpdateWithoutCommentsAuthoredInput>, Prisma.UserUncheckedUpdateWithoutCommentsAuthoredInput>
+}
+
+export type UserUpdateOneWithoutCommentsResolvedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommentsResolvedInput, Prisma.UserUncheckedCreateWithoutCommentsResolvedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommentsResolvedInput
+  upsert?: Prisma.UserUpsertWithoutCommentsResolvedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCommentsResolvedInput, Prisma.UserUpdateWithoutCommentsResolvedInput>, Prisma.UserUncheckedUpdateWithoutCommentsResolvedInput>
+}
+
+export type UserCreateNestedOneWithoutCommentMentionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommentMentionsInput, Prisma.UserUncheckedCreateWithoutCommentMentionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommentMentionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCommentMentionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCommentMentionsInput, Prisma.UserUncheckedCreateWithoutCommentMentionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCommentMentionsInput
+  upsert?: Prisma.UserUpsertWithoutCommentMentionsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCommentMentionsInput, Prisma.UserUpdateWithoutCommentMentionsInput>, Prisma.UserUncheckedUpdateWithoutCommentMentionsInput>
+}
+
+export type UserCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutNotificationsActedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsActedInput, Prisma.UserUncheckedCreateWithoutNotificationsActedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsActedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.UserUpsertWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserUpdateOneWithoutNotificationsActedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsActedInput, Prisma.UserUncheckedCreateWithoutNotificationsActedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsActedInput
+  upsert?: Prisma.UserUpsertWithoutNotificationsActedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsActedInput, Prisma.UserUpdateWithoutNotificationsActedInput>, Prisma.UserUncheckedUpdateWithoutNotificationsActedInput>
+}
+
+export type UserCreateNestedOneWithoutMembershipEventsForInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMembershipEventsForInput, Prisma.UserUncheckedCreateWithoutMembershipEventsForInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMembershipEventsForInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutMembershipEventsByInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMembershipEventsByInput, Prisma.UserUncheckedCreateWithoutMembershipEventsByInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMembershipEventsByInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutMembershipEventsForNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMembershipEventsForInput, Prisma.UserUncheckedCreateWithoutMembershipEventsForInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMembershipEventsForInput
+  upsert?: Prisma.UserUpsertWithoutMembershipEventsForInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMembershipEventsForInput, Prisma.UserUpdateWithoutMembershipEventsForInput>, Prisma.UserUncheckedUpdateWithoutMembershipEventsForInput>
+}
+
+export type UserUpdateOneWithoutMembershipEventsByNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutMembershipEventsByInput, Prisma.UserUncheckedCreateWithoutMembershipEventsByInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutMembershipEventsByInput
+  upsert?: Prisma.UserUpsertWithoutMembershipEventsByInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMembershipEventsByInput, Prisma.UserUpdateWithoutMembershipEventsByInput>, Prisma.UserUncheckedUpdateWithoutMembershipEventsByInput>
+}
+
+export type UserCreateNestedOneWithoutOutboxEventsForInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOutboxEventsForInput, Prisma.UserUncheckedCreateWithoutOutboxEventsForInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOutboxEventsForInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutOutboxEventsActedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOutboxEventsActedInput, Prisma.UserUncheckedCreateWithoutOutboxEventsActedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOutboxEventsActedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutOutboxEventsForNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOutboxEventsForInput, Prisma.UserUncheckedCreateWithoutOutboxEventsForInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOutboxEventsForInput
+  upsert?: Prisma.UserUpsertWithoutOutboxEventsForInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOutboxEventsForInput, Prisma.UserUpdateWithoutOutboxEventsForInput>, Prisma.UserUncheckedUpdateWithoutOutboxEventsForInput>
+}
+
+export type UserUpdateOneWithoutOutboxEventsActedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOutboxEventsActedInput, Prisma.UserUncheckedCreateWithoutOutboxEventsActedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOutboxEventsActedInput
+  upsert?: Prisma.UserUpsertWithoutOutboxEventsActedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOutboxEventsActedInput, Prisma.UserUpdateWithoutOutboxEventsActedInput>, Prisma.UserUncheckedUpdateWithoutOutboxEventsActedInput>
+}
+
+export type UserCreateNestedOneWithoutWorkflowEventsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWorkflowEventsInput, Prisma.UserUncheckedCreateWithoutWorkflowEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWorkflowEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutWorkflowEventsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWorkflowEventsInput, Prisma.UserUncheckedCreateWithoutWorkflowEventsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWorkflowEventsInput
+  upsert?: Prisma.UserUpsertWithoutWorkflowEventsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWorkflowEventsInput, Prisma.UserUpdateWithoutWorkflowEventsInput>, Prisma.UserUncheckedUpdateWithoutWorkflowEventsInput>
+}
+
+export type UserCreateNestedOneWithoutAssetLabelsCreatedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssetLabelsCreatedInput, Prisma.UserUncheckedCreateWithoutAssetLabelsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssetLabelsCreatedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutAssetLabelsCreatedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssetLabelsCreatedInput, Prisma.UserUncheckedCreateWithoutAssetLabelsCreatedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssetLabelsCreatedInput
+  upsert?: Prisma.UserUpsertWithoutAssetLabelsCreatedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssetLabelsCreatedInput, Prisma.UserUpdateWithoutAssetLabelsCreatedInput>, Prisma.UserUncheckedUpdateWithoutAssetLabelsCreatedInput>
 }
 
 export type UserCreateNestedOneWithoutAnnotationsCreatedInput = {
@@ -694,6 +1069,8 @@ export type UserCreateWithoutSessionsInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
@@ -702,6 +1079,21 @@ export type UserCreateWithoutSessionsInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -717,6 +1109,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
@@ -725,6 +1119,21 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -756,6 +1165,8 @@ export type UserUpdateWithoutSessionsInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
@@ -764,6 +1175,21 @@ export type UserUpdateWithoutSessionsInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -779,6 +1205,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -787,6 +1215,21 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutJobsCanceledInput = {
@@ -802,6 +1245,8 @@ export type UserCreateWithoutJobsCanceledInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -810,6 +1255,21 @@ export type UserCreateWithoutJobsCanceledInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutJobsCanceledInput = {
@@ -825,6 +1285,8 @@ export type UserUncheckedCreateWithoutJobsCanceledInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -833,6 +1295,21 @@ export type UserUncheckedCreateWithoutJobsCanceledInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutJobsCanceledInput = {
@@ -853,6 +1330,8 @@ export type UserCreateWithoutJobsCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -861,6 +1340,21 @@ export type UserCreateWithoutJobsCreatedInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutJobsCreatedInput = {
@@ -876,6 +1370,8 @@ export type UserUncheckedCreateWithoutJobsCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -884,6 +1380,21 @@ export type UserUncheckedCreateWithoutJobsCreatedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutJobsCreatedInput = {
@@ -915,6 +1426,8 @@ export type UserUpdateWithoutJobsCanceledInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -923,6 +1436,21 @@ export type UserUpdateWithoutJobsCanceledInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobsCanceledInput = {
@@ -938,6 +1466,8 @@ export type UserUncheckedUpdateWithoutJobsCanceledInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -946,6 +1476,21 @@ export type UserUncheckedUpdateWithoutJobsCanceledInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUpsertWithoutJobsCreatedInput = {
@@ -972,6 +1517,8 @@ export type UserUpdateWithoutJobsCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -980,6 +1527,21 @@ export type UserUpdateWithoutJobsCreatedInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobsCreatedInput = {
@@ -995,6 +1557,8 @@ export type UserUncheckedUpdateWithoutJobsCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1003,6 +1567,21 @@ export type UserUncheckedUpdateWithoutJobsCreatedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutExternalRepositoriesInput = {
@@ -1018,6 +1597,8 @@ export type UserCreateWithoutExternalRepositoriesInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -1026,6 +1607,21 @@ export type UserCreateWithoutExternalRepositoriesInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutExternalRepositoriesInput = {
@@ -1041,6 +1637,8 @@ export type UserUncheckedCreateWithoutExternalRepositoriesInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1049,6 +1647,21 @@ export type UserUncheckedCreateWithoutExternalRepositoriesInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutExternalRepositoriesInput = {
@@ -1080,6 +1693,8 @@ export type UserUpdateWithoutExternalRepositoriesInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -1088,6 +1703,21 @@ export type UserUpdateWithoutExternalRepositoriesInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExternalRepositoriesInput = {
@@ -1103,6 +1733,8 @@ export type UserUncheckedUpdateWithoutExternalRepositoriesInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1111,6 +1743,21 @@ export type UserUncheckedUpdateWithoutExternalRepositoriesInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutSourceConnectionsInput = {
@@ -1126,6 +1773,8 @@ export type UserCreateWithoutSourceConnectionsInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -1134,6 +1783,21 @@ export type UserCreateWithoutSourceConnectionsInput = {
   jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutSourceConnectionsInput = {
@@ -1149,6 +1813,8 @@ export type UserUncheckedCreateWithoutSourceConnectionsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1157,6 +1823,21 @@ export type UserUncheckedCreateWithoutSourceConnectionsInput = {
   jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutSourceConnectionsInput = {
@@ -1188,6 +1869,8 @@ export type UserUpdateWithoutSourceConnectionsInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -1196,6 +1879,21 @@ export type UserUpdateWithoutSourceConnectionsInput = {
   jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSourceConnectionsInput = {
@@ -1211,6 +1909,8 @@ export type UserUncheckedUpdateWithoutSourceConnectionsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1219,6 +1919,21 @@ export type UserUncheckedUpdateWithoutSourceConnectionsInput = {
   jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutOwnedDatasetsInput = {
@@ -1234,6 +1949,8 @@ export type UserCreateWithoutOwnedDatasetsInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
@@ -1242,6 +1959,21 @@ export type UserCreateWithoutOwnedDatasetsInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutOwnedDatasetsInput = {
@@ -1257,6 +1989,8 @@ export type UserUncheckedCreateWithoutOwnedDatasetsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1265,6 +1999,21 @@ export type UserUncheckedCreateWithoutOwnedDatasetsInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutOwnedDatasetsInput = {
@@ -1296,6 +2045,8 @@ export type UserUpdateWithoutOwnedDatasetsInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
@@ -1304,6 +2055,21 @@ export type UserUpdateWithoutOwnedDatasetsInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedDatasetsInput = {
@@ -1319,6 +2085,8 @@ export type UserUncheckedUpdateWithoutOwnedDatasetsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1327,6 +2095,21 @@ export type UserUncheckedUpdateWithoutOwnedDatasetsInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutPreparedImportsInput = {
@@ -1342,6 +2125,8 @@ export type UserCreateWithoutPreparedImportsInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -1350,6 +2135,21 @@ export type UserCreateWithoutPreparedImportsInput = {
   jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutPreparedImportsInput = {
@@ -1365,6 +2165,8 @@ export type UserUncheckedCreateWithoutPreparedImportsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1373,6 +2175,21 @@ export type UserUncheckedCreateWithoutPreparedImportsInput = {
   jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutPreparedImportsInput = {
@@ -1404,6 +2221,8 @@ export type UserUpdateWithoutPreparedImportsInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -1412,6 +2231,21 @@ export type UserUpdateWithoutPreparedImportsInput = {
   jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPreparedImportsInput = {
@@ -1427,6 +2261,8 @@ export type UserUncheckedUpdateWithoutPreparedImportsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1435,6 +2271,21 @@ export type UserUncheckedUpdateWithoutPreparedImportsInput = {
   jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -1450,6 +2301,8 @@ export type UserCreateWithoutMembershipsInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
@@ -1458,6 +2311,21 @@ export type UserCreateWithoutMembershipsInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -1473,6 +2341,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
@@ -1481,6 +2351,21 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -1512,6 +2397,8 @@ export type UserUpdateWithoutMembershipsInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
@@ -1520,6 +2407,21 @@ export type UserUpdateWithoutMembershipsInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -1535,6 +2437,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
@@ -1543,6 +2447,373 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutInvitationsReceivedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutInvitationsReceivedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutInvitationsReceivedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitationsReceivedInput, Prisma.UserUncheckedCreateWithoutInvitationsReceivedInput>
+}
+
+export type UserCreateWithoutInvitationsSentInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutInvitationsSentInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutInvitationsSentInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitationsSentInput, Prisma.UserUncheckedCreateWithoutInvitationsSentInput>
+}
+
+export type UserUpsertWithoutInvitationsReceivedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInvitationsReceivedInput, Prisma.UserUncheckedUpdateWithoutInvitationsReceivedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitationsReceivedInput, Prisma.UserUncheckedCreateWithoutInvitationsReceivedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInvitationsReceivedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInvitationsReceivedInput, Prisma.UserUncheckedUpdateWithoutInvitationsReceivedInput>
+}
+
+export type UserUpdateWithoutInvitationsReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInvitationsReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUpsertWithoutInvitationsSentInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutInvitationsSentInput, Prisma.UserUncheckedUpdateWithoutInvitationsSentInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutInvitationsSentInput, Prisma.UserUncheckedCreateWithoutInvitationsSentInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutInvitationsSentInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutInvitationsSentInput, Prisma.UserUncheckedUpdateWithoutInvitationsSentInput>
+}
+
+export type UserUpdateWithoutInvitationsSentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutInvitationsSentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutUploadedAssetsInput = {
@@ -1557,6 +2828,8 @@ export type UserCreateWithoutUploadedAssetsInput = {
   annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -1566,6 +2839,21 @@ export type UserCreateWithoutUploadedAssetsInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutUploadedAssetsInput = {
@@ -1580,6 +2868,8 @@ export type UserUncheckedCreateWithoutUploadedAssetsInput = {
   annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1589,11 +2879,111 @@ export type UserUncheckedCreateWithoutUploadedAssetsInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutUploadedAssetsInput = {
   where: Prisma.UserWhereUniqueInput
   create: Prisma.XOR<Prisma.UserCreateWithoutUploadedAssetsInput, Prisma.UserUncheckedCreateWithoutUploadedAssetsInput>
+}
+
+export type UserCreateWithoutAssignedAssetsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutAssignedAssetsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutAssignedAssetsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedAssetsInput, Prisma.UserUncheckedCreateWithoutAssignedAssetsInput>
 }
 
 export type UserUpsertWithoutUploadedAssetsInput = {
@@ -1619,6 +3009,8 @@ export type UserUpdateWithoutUploadedAssetsInput = {
   annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -1628,6 +3020,21 @@ export type UserUpdateWithoutUploadedAssetsInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedAssetsInput = {
@@ -1642,6 +3049,8 @@ export type UserUncheckedUpdateWithoutUploadedAssetsInput = {
   annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1651,6 +3060,2576 @@ export type UserUncheckedUpdateWithoutUploadedAssetsInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUpsertWithoutAssignedAssetsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssignedAssetsInput, Prisma.UserUncheckedUpdateWithoutAssignedAssetsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignedAssetsInput, Prisma.UserUncheckedCreateWithoutAssignedAssetsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssignedAssetsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssignedAssetsInput, Prisma.UserUncheckedUpdateWithoutAssignedAssetsInput>
+}
+
+export type UserUpdateWithoutAssignedAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssignedAssetsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutAssignmentSlotsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutAssignmentSlotsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutAssignmentSlotsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignmentSlotsInput, Prisma.UserUncheckedCreateWithoutAssignmentSlotsInput>
+}
+
+export type UserCreateWithoutAssignmentsCreatedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutAssignmentsCreatedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutAssignmentsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignmentsCreatedInput, Prisma.UserUncheckedCreateWithoutAssignmentsCreatedInput>
+}
+
+export type UserUpsertWithoutAssignmentSlotsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssignmentSlotsInput, Prisma.UserUncheckedUpdateWithoutAssignmentSlotsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignmentSlotsInput, Prisma.UserUncheckedCreateWithoutAssignmentSlotsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssignmentSlotsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssignmentSlotsInput, Prisma.UserUncheckedUpdateWithoutAssignmentSlotsInput>
+}
+
+export type UserUpdateWithoutAssignmentSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssignmentSlotsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUpsertWithoutAssignmentsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssignmentsCreatedInput, Prisma.UserUncheckedUpdateWithoutAssignmentsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignmentsCreatedInput, Prisma.UserUncheckedCreateWithoutAssignmentsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssignmentsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssignmentsCreatedInput, Prisma.UserUncheckedUpdateWithoutAssignmentsCreatedInput>
+}
+
+export type UserUpdateWithoutAssignmentsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssignmentsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutAssignmentEventsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutAssignmentEventsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutAssignmentEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignmentEventsInput, Prisma.UserUncheckedCreateWithoutAssignmentEventsInput>
+}
+
+export type UserUpsertWithoutAssignmentEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssignmentEventsInput, Prisma.UserUncheckedUpdateWithoutAssignmentEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssignmentEventsInput, Prisma.UserUncheckedCreateWithoutAssignmentEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssignmentEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssignmentEventsInput, Prisma.UserUncheckedUpdateWithoutAssignmentEventsInput>
+}
+
+export type UserUpdateWithoutAssignmentEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssignmentEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutCommentsAuthoredInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutCommentsAuthoredInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutCommentsAuthoredInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommentsAuthoredInput, Prisma.UserUncheckedCreateWithoutCommentsAuthoredInput>
+}
+
+export type UserCreateWithoutCommentsResolvedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutCommentsResolvedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutCommentsResolvedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommentsResolvedInput, Prisma.UserUncheckedCreateWithoutCommentsResolvedInput>
+}
+
+export type UserUpsertWithoutCommentsAuthoredInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCommentsAuthoredInput, Prisma.UserUncheckedUpdateWithoutCommentsAuthoredInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommentsAuthoredInput, Prisma.UserUncheckedCreateWithoutCommentsAuthoredInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCommentsAuthoredInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCommentsAuthoredInput, Prisma.UserUncheckedUpdateWithoutCommentsAuthoredInput>
+}
+
+export type UserUpdateWithoutCommentsAuthoredInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCommentsAuthoredInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUpsertWithoutCommentsResolvedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCommentsResolvedInput, Prisma.UserUncheckedUpdateWithoutCommentsResolvedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommentsResolvedInput, Prisma.UserUncheckedCreateWithoutCommentsResolvedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCommentsResolvedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCommentsResolvedInput, Prisma.UserUncheckedUpdateWithoutCommentsResolvedInput>
+}
+
+export type UserUpdateWithoutCommentsResolvedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCommentsResolvedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutCommentMentionsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutCommentMentionsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutCommentMentionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommentMentionsInput, Prisma.UserUncheckedCreateWithoutCommentMentionsInput>
+}
+
+export type UserUpsertWithoutCommentMentionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCommentMentionsInput, Prisma.UserUncheckedUpdateWithoutCommentMentionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCommentMentionsInput, Prisma.UserUncheckedCreateWithoutCommentMentionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCommentMentionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCommentMentionsInput, Prisma.UserUncheckedUpdateWithoutCommentMentionsInput>
+}
+
+export type UserUpdateWithoutCommentMentionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCommentMentionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+}
+
+export type UserCreateWithoutNotificationsActedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutNotificationsActedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutNotificationsActedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsActedInput, Prisma.UserUncheckedCreateWithoutNotificationsActedInput>
+}
+
+export type UserUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUpsertWithoutNotificationsActedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsActedInput, Prisma.UserUncheckedUpdateWithoutNotificationsActedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsActedInput, Prisma.UserUncheckedCreateWithoutNotificationsActedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationsActedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsActedInput, Prisma.UserUncheckedUpdateWithoutNotificationsActedInput>
+}
+
+export type UserUpdateWithoutNotificationsActedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationsActedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutMembershipEventsForInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutMembershipEventsForInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutMembershipEventsForInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMembershipEventsForInput, Prisma.UserUncheckedCreateWithoutMembershipEventsForInput>
+}
+
+export type UserCreateWithoutMembershipEventsByInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutMembershipEventsByInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutMembershipEventsByInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutMembershipEventsByInput, Prisma.UserUncheckedCreateWithoutMembershipEventsByInput>
+}
+
+export type UserUpsertWithoutMembershipEventsForInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMembershipEventsForInput, Prisma.UserUncheckedUpdateWithoutMembershipEventsForInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMembershipEventsForInput, Prisma.UserUncheckedCreateWithoutMembershipEventsForInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMembershipEventsForInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMembershipEventsForInput, Prisma.UserUncheckedUpdateWithoutMembershipEventsForInput>
+}
+
+export type UserUpdateWithoutMembershipEventsForInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMembershipEventsForInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUpsertWithoutMembershipEventsByInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutMembershipEventsByInput, Prisma.UserUncheckedUpdateWithoutMembershipEventsByInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutMembershipEventsByInput, Prisma.UserUncheckedCreateWithoutMembershipEventsByInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutMembershipEventsByInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutMembershipEventsByInput, Prisma.UserUncheckedUpdateWithoutMembershipEventsByInput>
+}
+
+export type UserUpdateWithoutMembershipEventsByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutMembershipEventsByInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutOutboxEventsForInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutOutboxEventsForInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutOutboxEventsForInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOutboxEventsForInput, Prisma.UserUncheckedCreateWithoutOutboxEventsForInput>
+}
+
+export type UserCreateWithoutOutboxEventsActedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutOutboxEventsActedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutOutboxEventsActedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOutboxEventsActedInput, Prisma.UserUncheckedCreateWithoutOutboxEventsActedInput>
+}
+
+export type UserUpsertWithoutOutboxEventsForInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOutboxEventsForInput, Prisma.UserUncheckedUpdateWithoutOutboxEventsForInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOutboxEventsForInput, Prisma.UserUncheckedCreateWithoutOutboxEventsForInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOutboxEventsForInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOutboxEventsForInput, Prisma.UserUncheckedUpdateWithoutOutboxEventsForInput>
+}
+
+export type UserUpdateWithoutOutboxEventsForInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOutboxEventsForInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+}
+
+export type UserUpsertWithoutOutboxEventsActedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOutboxEventsActedInput, Prisma.UserUncheckedUpdateWithoutOutboxEventsActedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOutboxEventsActedInput, Prisma.UserUncheckedCreateWithoutOutboxEventsActedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOutboxEventsActedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOutboxEventsActedInput, Prisma.UserUncheckedUpdateWithoutOutboxEventsActedInput>
+}
+
+export type UserUpdateWithoutOutboxEventsActedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOutboxEventsActedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutWorkflowEventsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutWorkflowEventsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutWorkflowEventsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutWorkflowEventsInput, Prisma.UserUncheckedCreateWithoutWorkflowEventsInput>
+}
+
+export type UserUpsertWithoutWorkflowEventsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWorkflowEventsInput, Prisma.UserUncheckedUpdateWithoutWorkflowEventsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWorkflowEventsInput, Prisma.UserUncheckedCreateWithoutWorkflowEventsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutWorkflowEventsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWorkflowEventsInput, Prisma.UserUncheckedUpdateWithoutWorkflowEventsInput>
+}
+
+export type UserUpdateWithoutWorkflowEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWorkflowEventsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserCreateWithoutAssetLabelsCreatedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+}
+
+export type UserUncheckedCreateWithoutAssetLabelsCreatedInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+}
+
+export type UserCreateOrConnectWithoutAssetLabelsCreatedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssetLabelsCreatedInput, Prisma.UserUncheckedCreateWithoutAssetLabelsCreatedInput>
+}
+
+export type UserUpsertWithoutAssetLabelsCreatedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssetLabelsCreatedInput, Prisma.UserUncheckedUpdateWithoutAssetLabelsCreatedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssetLabelsCreatedInput, Prisma.UserUncheckedCreateWithoutAssetLabelsCreatedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssetLabelsCreatedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssetLabelsCreatedInput, Prisma.UserUncheckedUpdateWithoutAssetLabelsCreatedInput>
+}
+
+export type UserUpdateWithoutAssetLabelsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssetLabelsCreatedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutAnnotationsCreatedInput = {
@@ -1665,6 +5644,8 @@ export type UserCreateWithoutAnnotationsCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -1674,6 +5655,21 @@ export type UserCreateWithoutAnnotationsCreatedInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsCreatedInput = {
@@ -1688,6 +5684,8 @@ export type UserUncheckedCreateWithoutAnnotationsCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1697,6 +5695,21 @@ export type UserUncheckedCreateWithoutAnnotationsCreatedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsCreatedInput = {
@@ -1716,6 +5729,8 @@ export type UserCreateWithoutAnnotationsReviewedInput = {
   annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -1725,6 +5740,21 @@ export type UserCreateWithoutAnnotationsReviewedInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsReviewedInput = {
@@ -1739,6 +5769,8 @@ export type UserUncheckedCreateWithoutAnnotationsReviewedInput = {
   annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1748,6 +5780,21 @@ export type UserUncheckedCreateWithoutAnnotationsReviewedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsReviewedInput = {
@@ -1767,6 +5814,8 @@ export type UserCreateWithoutAnnotationsUpdatedInput = {
   annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -1776,6 +5825,21 @@ export type UserCreateWithoutAnnotationsUpdatedInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsUpdatedInput = {
@@ -1790,6 +5854,8 @@ export type UserUncheckedCreateWithoutAnnotationsUpdatedInput = {
   annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -1799,6 +5865,21 @@ export type UserUncheckedCreateWithoutAnnotationsUpdatedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsUpdatedInput = {
@@ -1829,6 +5910,8 @@ export type UserUpdateWithoutAnnotationsCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -1838,6 +5921,21 @@ export type UserUpdateWithoutAnnotationsCreatedInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsCreatedInput = {
@@ -1852,6 +5950,8 @@ export type UserUncheckedUpdateWithoutAnnotationsCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1861,6 +5961,21 @@ export type UserUncheckedUpdateWithoutAnnotationsCreatedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUpsertWithoutAnnotationsReviewedInput = {
@@ -1886,6 +6001,8 @@ export type UserUpdateWithoutAnnotationsReviewedInput = {
   annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -1895,6 +6012,21 @@ export type UserUpdateWithoutAnnotationsReviewedInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsReviewedInput = {
@@ -1909,6 +6041,8 @@ export type UserUncheckedUpdateWithoutAnnotationsReviewedInput = {
   annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1918,6 +6052,21 @@ export type UserUncheckedUpdateWithoutAnnotationsReviewedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUpsertWithoutAnnotationsUpdatedInput = {
@@ -1943,6 +6092,8 @@ export type UserUpdateWithoutAnnotationsUpdatedInput = {
   annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -1952,6 +6103,21 @@ export type UserUpdateWithoutAnnotationsUpdatedInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsUpdatedInput = {
@@ -1966,6 +6132,8 @@ export type UserUncheckedUpdateWithoutAnnotationsUpdatedInput = {
   annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1975,6 +6143,21 @@ export type UserUncheckedUpdateWithoutAnnotationsUpdatedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutTracksCreatedInput = {
@@ -1990,6 +6173,8 @@ export type UserCreateWithoutTracksCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -1998,6 +6183,21 @@ export type UserCreateWithoutTracksCreatedInput = {
   jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutTracksCreatedInput = {
@@ -2013,6 +6213,8 @@ export type UserUncheckedCreateWithoutTracksCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -2021,6 +6223,21 @@ export type UserUncheckedCreateWithoutTracksCreatedInput = {
   jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutTracksCreatedInput = {
@@ -2052,6 +6269,8 @@ export type UserUpdateWithoutTracksCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -2060,6 +6279,21 @@ export type UserUpdateWithoutTracksCreatedInput = {
   jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTracksCreatedInput = {
@@ -2075,6 +6309,8 @@ export type UserUncheckedUpdateWithoutTracksCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -2083,6 +6319,21 @@ export type UserUncheckedUpdateWithoutTracksCreatedInput = {
   jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserCreateWithoutAiTasksCreatedInput = {
@@ -2097,6 +6348,8 @@ export type UserCreateWithoutAiTasksCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
@@ -2106,6 +6359,21 @@ export type UserCreateWithoutAiTasksCreatedInput = {
   preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
 }
 
 export type UserUncheckedCreateWithoutAiTasksCreatedInput = {
@@ -2120,6 +6388,8 @@ export type UserUncheckedCreateWithoutAiTasksCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
   annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
   uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
   sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
   ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
   memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
@@ -2129,6 +6399,21 @@ export type UserUncheckedCreateWithoutAiTasksCreatedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
   sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
 }
 
 export type UserCreateOrConnectWithoutAiTasksCreatedInput = {
@@ -2159,6 +6444,8 @@ export type UserUpdateWithoutAiTasksCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
@@ -2168,6 +6455,21 @@ export type UserUpdateWithoutAiTasksCreatedInput = {
   preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiTasksCreatedInput = {
@@ -2182,6 +6484,8 @@ export type UserUncheckedUpdateWithoutAiTasksCreatedInput = {
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
   uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
   sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
   ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
   memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -2191,6 +6495,21 @@ export type UserUncheckedUpdateWithoutAiTasksCreatedInput = {
   preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
   sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
   tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
 }
 
 
@@ -2204,6 +6523,8 @@ export type UserCountOutputType = {
   annotationsReviewed: number
   annotationsUpdated: number
   uploadedAssets: number
+  assignedAssets: number
+  assetLabelsCreated: number
   sessions: number
   ownedDatasets: number
   memberships: number
@@ -2213,6 +6534,21 @@ export type UserCountOutputType = {
   preparedImports: number
   sourceConnections: number
   tracksCreated: number
+  workflowEvents: number
+  invitationsReceived: number
+  invitationsSent: number
+  assignmentSlots: number
+  assignmentsCreated: number
+  assignmentEvents: number
+  commentsAuthored: number
+  commentsResolved: number
+  commentMentions: number
+  notifications: number
+  notificationsActed: number
+  membershipEventsFor: number
+  membershipEventsBy: number
+  outboxEventsActed: number
+  outboxEventsFor: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2221,6 +6557,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   annotationsReviewed?: boolean | UserCountOutputTypeCountAnnotationsReviewedArgs
   annotationsUpdated?: boolean | UserCountOutputTypeCountAnnotationsUpdatedArgs
   uploadedAssets?: boolean | UserCountOutputTypeCountUploadedAssetsArgs
+  assignedAssets?: boolean | UserCountOutputTypeCountAssignedAssetsArgs
+  assetLabelsCreated?: boolean | UserCountOutputTypeCountAssetLabelsCreatedArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
   ownedDatasets?: boolean | UserCountOutputTypeCountOwnedDatasetsArgs
   memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
@@ -2230,6 +6568,21 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   preparedImports?: boolean | UserCountOutputTypeCountPreparedImportsArgs
   sourceConnections?: boolean | UserCountOutputTypeCountSourceConnectionsArgs
   tracksCreated?: boolean | UserCountOutputTypeCountTracksCreatedArgs
+  workflowEvents?: boolean | UserCountOutputTypeCountWorkflowEventsArgs
+  invitationsReceived?: boolean | UserCountOutputTypeCountInvitationsReceivedArgs
+  invitationsSent?: boolean | UserCountOutputTypeCountInvitationsSentArgs
+  assignmentSlots?: boolean | UserCountOutputTypeCountAssignmentSlotsArgs
+  assignmentsCreated?: boolean | UserCountOutputTypeCountAssignmentsCreatedArgs
+  assignmentEvents?: boolean | UserCountOutputTypeCountAssignmentEventsArgs
+  commentsAuthored?: boolean | UserCountOutputTypeCountCommentsAuthoredArgs
+  commentsResolved?: boolean | UserCountOutputTypeCountCommentsResolvedArgs
+  commentMentions?: boolean | UserCountOutputTypeCountCommentMentionsArgs
+  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+  notificationsActed?: boolean | UserCountOutputTypeCountNotificationsActedArgs
+  membershipEventsFor?: boolean | UserCountOutputTypeCountMembershipEventsForArgs
+  membershipEventsBy?: boolean | UserCountOutputTypeCountMembershipEventsByArgs
+  outboxEventsActed?: boolean | UserCountOutputTypeCountOutboxEventsActedArgs
+  outboxEventsFor?: boolean | UserCountOutputTypeCountOutboxEventsForArgs
 }
 
 /**
@@ -2275,6 +6628,20 @@ export type UserCountOutputTypeCountAnnotationsUpdatedArgs<ExtArgs extends runti
  */
 export type UserCountOutputTypeCountUploadedAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AssetWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAssignedAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAssetLabelsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetLabelWhereInput
 }
 
 /**
@@ -2340,6 +6707,111 @@ export type UserCountOutputTypeCountTracksCreatedArgs<ExtArgs extends runtime.Ty
   where?: Prisma.VideoObjectTrackWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountWorkflowEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetWorkflowEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInvitationsReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DatasetInvitationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountInvitationsSentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DatasetInvitationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAssignmentSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetAssignmentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAssignmentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetAssignmentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountAssignmentEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetAssignmentEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCommentsAuthoredArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetCommentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCommentsResolvedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssetCommentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCommentMentionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CommentMentionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsActedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMembershipEventsForArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DatasetMembershipEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountMembershipEventsByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DatasetMembershipEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOutboxEventsActedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CollaborationOutboxEventWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOutboxEventsForArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CollaborationOutboxEventWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2354,6 +6826,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   annotationsReviewed?: boolean | Prisma.User$annotationsReviewedArgs<ExtArgs>
   annotationsUpdated?: boolean | Prisma.User$annotationsUpdatedArgs<ExtArgs>
   uploadedAssets?: boolean | Prisma.User$uploadedAssetsArgs<ExtArgs>
+  assignedAssets?: boolean | Prisma.User$assignedAssetsArgs<ExtArgs>
+  assetLabelsCreated?: boolean | Prisma.User$assetLabelsCreatedArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   ownedDatasets?: boolean | Prisma.User$ownedDatasetsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
@@ -2363,6 +6837,21 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   preparedImports?: boolean | Prisma.User$preparedImportsArgs<ExtArgs>
   sourceConnections?: boolean | Prisma.User$sourceConnectionsArgs<ExtArgs>
   tracksCreated?: boolean | Prisma.User$tracksCreatedArgs<ExtArgs>
+  workflowEvents?: boolean | Prisma.User$workflowEventsArgs<ExtArgs>
+  invitationsReceived?: boolean | Prisma.User$invitationsReceivedArgs<ExtArgs>
+  invitationsSent?: boolean | Prisma.User$invitationsSentArgs<ExtArgs>
+  assignmentSlots?: boolean | Prisma.User$assignmentSlotsArgs<ExtArgs>
+  assignmentsCreated?: boolean | Prisma.User$assignmentsCreatedArgs<ExtArgs>
+  assignmentEvents?: boolean | Prisma.User$assignmentEventsArgs<ExtArgs>
+  commentsAuthored?: boolean | Prisma.User$commentsAuthoredArgs<ExtArgs>
+  commentsResolved?: boolean | Prisma.User$commentsResolvedArgs<ExtArgs>
+  commentMentions?: boolean | Prisma.User$commentMentionsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  notificationsActed?: boolean | Prisma.User$notificationsActedArgs<ExtArgs>
+  membershipEventsFor?: boolean | Prisma.User$membershipEventsForArgs<ExtArgs>
+  membershipEventsBy?: boolean | Prisma.User$membershipEventsByArgs<ExtArgs>
+  outboxEventsActed?: boolean | Prisma.User$outboxEventsActedArgs<ExtArgs>
+  outboxEventsFor?: boolean | Prisma.User$outboxEventsForArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2403,6 +6892,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   annotationsReviewed?: boolean | Prisma.User$annotationsReviewedArgs<ExtArgs>
   annotationsUpdated?: boolean | Prisma.User$annotationsUpdatedArgs<ExtArgs>
   uploadedAssets?: boolean | Prisma.User$uploadedAssetsArgs<ExtArgs>
+  assignedAssets?: boolean | Prisma.User$assignedAssetsArgs<ExtArgs>
+  assetLabelsCreated?: boolean | Prisma.User$assetLabelsCreatedArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
   ownedDatasets?: boolean | Prisma.User$ownedDatasetsArgs<ExtArgs>
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
@@ -2412,6 +6903,21 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   preparedImports?: boolean | Prisma.User$preparedImportsArgs<ExtArgs>
   sourceConnections?: boolean | Prisma.User$sourceConnectionsArgs<ExtArgs>
   tracksCreated?: boolean | Prisma.User$tracksCreatedArgs<ExtArgs>
+  workflowEvents?: boolean | Prisma.User$workflowEventsArgs<ExtArgs>
+  invitationsReceived?: boolean | Prisma.User$invitationsReceivedArgs<ExtArgs>
+  invitationsSent?: boolean | Prisma.User$invitationsSentArgs<ExtArgs>
+  assignmentSlots?: boolean | Prisma.User$assignmentSlotsArgs<ExtArgs>
+  assignmentsCreated?: boolean | Prisma.User$assignmentsCreatedArgs<ExtArgs>
+  assignmentEvents?: boolean | Prisma.User$assignmentEventsArgs<ExtArgs>
+  commentsAuthored?: boolean | Prisma.User$commentsAuthoredArgs<ExtArgs>
+  commentsResolved?: boolean | Prisma.User$commentsResolvedArgs<ExtArgs>
+  commentMentions?: boolean | Prisma.User$commentMentionsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  notificationsActed?: boolean | Prisma.User$notificationsActedArgs<ExtArgs>
+  membershipEventsFor?: boolean | Prisma.User$membershipEventsForArgs<ExtArgs>
+  membershipEventsBy?: boolean | Prisma.User$membershipEventsByArgs<ExtArgs>
+  outboxEventsActed?: boolean | Prisma.User$outboxEventsActedArgs<ExtArgs>
+  outboxEventsFor?: boolean | Prisma.User$outboxEventsForArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2425,6 +6931,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     annotationsReviewed: Prisma.$AnnotationPayload<ExtArgs>[]
     annotationsUpdated: Prisma.$AnnotationPayload<ExtArgs>[]
     uploadedAssets: Prisma.$AssetPayload<ExtArgs>[]
+    assignedAssets: Prisma.$AssetPayload<ExtArgs>[]
+    assetLabelsCreated: Prisma.$AssetLabelPayload<ExtArgs>[]
     sessions: Prisma.$AuthSessionPayload<ExtArgs>[]
     ownedDatasets: Prisma.$DatasetPayload<ExtArgs>[]
     memberships: Prisma.$DatasetMemberPayload<ExtArgs>[]
@@ -2434,6 +6942,21 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     preparedImports: Prisma.$PreparedImportPayload<ExtArgs>[]
     sourceConnections: Prisma.$SourceConnectionPayload<ExtArgs>[]
     tracksCreated: Prisma.$VideoObjectTrackPayload<ExtArgs>[]
+    workflowEvents: Prisma.$AssetWorkflowEventPayload<ExtArgs>[]
+    invitationsReceived: Prisma.$DatasetInvitationPayload<ExtArgs>[]
+    invitationsSent: Prisma.$DatasetInvitationPayload<ExtArgs>[]
+    assignmentSlots: Prisma.$AssetAssignmentPayload<ExtArgs>[]
+    assignmentsCreated: Prisma.$AssetAssignmentPayload<ExtArgs>[]
+    assignmentEvents: Prisma.$AssetAssignmentEventPayload<ExtArgs>[]
+    commentsAuthored: Prisma.$AssetCommentPayload<ExtArgs>[]
+    commentsResolved: Prisma.$AssetCommentPayload<ExtArgs>[]
+    commentMentions: Prisma.$CommentMentionPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    notificationsActed: Prisma.$NotificationPayload<ExtArgs>[]
+    membershipEventsFor: Prisma.$DatasetMembershipEventPayload<ExtArgs>[]
+    membershipEventsBy: Prisma.$DatasetMembershipEventPayload<ExtArgs>[]
+    outboxEventsActed: Prisma.$CollaborationOutboxEventPayload<ExtArgs>[]
+    outboxEventsFor: Prisma.$CollaborationOutboxEventPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2842,6 +7365,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   annotationsReviewed<T extends Prisma.User$annotationsReviewedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationsReviewedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   annotationsUpdated<T extends Prisma.User$annotationsUpdatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationsUpdatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   uploadedAssets<T extends Prisma.User$uploadedAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$uploadedAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignedAssets<T extends Prisma.User$assignedAssetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedAssetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assetLabelsCreated<T extends Prisma.User$assetLabelsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assetLabelsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetLabelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuthSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   ownedDatasets<T extends Prisma.User$ownedDatasetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedDatasetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   memberships<T extends Prisma.User$membershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2851,6 +7376,21 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   preparedImports<T extends Prisma.User$preparedImportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$preparedImportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PreparedImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sourceConnections<T extends Prisma.User$sourceConnectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sourceConnectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SourceConnectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tracksCreated<T extends Prisma.User$tracksCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$tracksCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VideoObjectTrackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  workflowEvents<T extends Prisma.User$workflowEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$workflowEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetWorkflowEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invitationsReceived<T extends Prisma.User$invitationsReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitationsReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetInvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  invitationsSent<T extends Prisma.User$invitationsSentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitationsSentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetInvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignmentSlots<T extends Prisma.User$assignmentSlotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignmentSlotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignmentsCreated<T extends Prisma.User$assignmentsCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignmentsCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assignmentEvents<T extends Prisma.User$assignmentEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignmentEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetAssignmentEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  commentsAuthored<T extends Prisma.User$commentsAuthoredArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$commentsAuthoredArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  commentsResolved<T extends Prisma.User$commentsResolvedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$commentsResolvedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssetCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  commentMentions<T extends Prisma.User$commentMentionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$commentMentionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentMentionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notificationsActed<T extends Prisma.User$notificationsActedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsActedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  membershipEventsFor<T extends Prisma.User$membershipEventsForArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipEventsForArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetMembershipEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  membershipEventsBy<T extends Prisma.User$membershipEventsByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$membershipEventsByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetMembershipEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  outboxEventsActed<T extends Prisma.User$outboxEventsActedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$outboxEventsActedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollaborationOutboxEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  outboxEventsFor<T extends Prisma.User$outboxEventsForArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$outboxEventsForArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollaborationOutboxEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3395,6 +7935,54 @@ export type User$uploadedAssetsArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * User.assignedAssets
+ */
+export type User$assignedAssetsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Asset
+   */
+  select?: Prisma.AssetSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Asset
+   */
+  omit?: Prisma.AssetOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetInclude<ExtArgs> | null
+  where?: Prisma.AssetWhereInput
+  orderBy?: Prisma.AssetOrderByWithRelationInput | Prisma.AssetOrderByWithRelationInput[]
+  cursor?: Prisma.AssetWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetScalarFieldEnum | Prisma.AssetScalarFieldEnum[]
+}
+
+/**
+ * User.assetLabelsCreated
+ */
+export type User$assetLabelsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetLabel
+   */
+  select?: Prisma.AssetLabelSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetLabel
+   */
+  omit?: Prisma.AssetLabelOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetLabelInclude<ExtArgs> | null
+  where?: Prisma.AssetLabelWhereInput
+  orderBy?: Prisma.AssetLabelOrderByWithRelationInput | Prisma.AssetLabelOrderByWithRelationInput[]
+  cursor?: Prisma.AssetLabelWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetLabelScalarFieldEnum | Prisma.AssetLabelScalarFieldEnum[]
+}
+
+/**
  * User.sessions
  */
 export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3608,6 +8196,366 @@ export type User$tracksCreatedArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.VideoObjectTrackScalarFieldEnum | Prisma.VideoObjectTrackScalarFieldEnum[]
+}
+
+/**
+ * User.workflowEvents
+ */
+export type User$workflowEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetWorkflowEvent
+   */
+  select?: Prisma.AssetWorkflowEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetWorkflowEvent
+   */
+  omit?: Prisma.AssetWorkflowEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetWorkflowEventInclude<ExtArgs> | null
+  where?: Prisma.AssetWorkflowEventWhereInput
+  orderBy?: Prisma.AssetWorkflowEventOrderByWithRelationInput | Prisma.AssetWorkflowEventOrderByWithRelationInput[]
+  cursor?: Prisma.AssetWorkflowEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetWorkflowEventScalarFieldEnum | Prisma.AssetWorkflowEventScalarFieldEnum[]
+}
+
+/**
+ * User.invitationsReceived
+ */
+export type User$invitationsReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DatasetInvitation
+   */
+  select?: Prisma.DatasetInvitationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DatasetInvitation
+   */
+  omit?: Prisma.DatasetInvitationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatasetInvitationInclude<ExtArgs> | null
+  where?: Prisma.DatasetInvitationWhereInput
+  orderBy?: Prisma.DatasetInvitationOrderByWithRelationInput | Prisma.DatasetInvitationOrderByWithRelationInput[]
+  cursor?: Prisma.DatasetInvitationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DatasetInvitationScalarFieldEnum | Prisma.DatasetInvitationScalarFieldEnum[]
+}
+
+/**
+ * User.invitationsSent
+ */
+export type User$invitationsSentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DatasetInvitation
+   */
+  select?: Prisma.DatasetInvitationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DatasetInvitation
+   */
+  omit?: Prisma.DatasetInvitationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatasetInvitationInclude<ExtArgs> | null
+  where?: Prisma.DatasetInvitationWhereInput
+  orderBy?: Prisma.DatasetInvitationOrderByWithRelationInput | Prisma.DatasetInvitationOrderByWithRelationInput[]
+  cursor?: Prisma.DatasetInvitationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DatasetInvitationScalarFieldEnum | Prisma.DatasetInvitationScalarFieldEnum[]
+}
+
+/**
+ * User.assignmentSlots
+ */
+export type User$assignmentSlotsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetAssignment
+   */
+  select?: Prisma.AssetAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetAssignment
+   */
+  omit?: Prisma.AssetAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetAssignmentInclude<ExtArgs> | null
+  where?: Prisma.AssetAssignmentWhereInput
+  orderBy?: Prisma.AssetAssignmentOrderByWithRelationInput | Prisma.AssetAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.AssetAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetAssignmentScalarFieldEnum | Prisma.AssetAssignmentScalarFieldEnum[]
+}
+
+/**
+ * User.assignmentsCreated
+ */
+export type User$assignmentsCreatedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetAssignment
+   */
+  select?: Prisma.AssetAssignmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetAssignment
+   */
+  omit?: Prisma.AssetAssignmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetAssignmentInclude<ExtArgs> | null
+  where?: Prisma.AssetAssignmentWhereInput
+  orderBy?: Prisma.AssetAssignmentOrderByWithRelationInput | Prisma.AssetAssignmentOrderByWithRelationInput[]
+  cursor?: Prisma.AssetAssignmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetAssignmentScalarFieldEnum | Prisma.AssetAssignmentScalarFieldEnum[]
+}
+
+/**
+ * User.assignmentEvents
+ */
+export type User$assignmentEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetAssignmentEvent
+   */
+  select?: Prisma.AssetAssignmentEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetAssignmentEvent
+   */
+  omit?: Prisma.AssetAssignmentEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetAssignmentEventInclude<ExtArgs> | null
+  where?: Prisma.AssetAssignmentEventWhereInput
+  orderBy?: Prisma.AssetAssignmentEventOrderByWithRelationInput | Prisma.AssetAssignmentEventOrderByWithRelationInput[]
+  cursor?: Prisma.AssetAssignmentEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetAssignmentEventScalarFieldEnum | Prisma.AssetAssignmentEventScalarFieldEnum[]
+}
+
+/**
+ * User.commentsAuthored
+ */
+export type User$commentsAuthoredArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetComment
+   */
+  select?: Prisma.AssetCommentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetComment
+   */
+  omit?: Prisma.AssetCommentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetCommentInclude<ExtArgs> | null
+  where?: Prisma.AssetCommentWhereInput
+  orderBy?: Prisma.AssetCommentOrderByWithRelationInput | Prisma.AssetCommentOrderByWithRelationInput[]
+  cursor?: Prisma.AssetCommentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetCommentScalarFieldEnum | Prisma.AssetCommentScalarFieldEnum[]
+}
+
+/**
+ * User.commentsResolved
+ */
+export type User$commentsResolvedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssetComment
+   */
+  select?: Prisma.AssetCommentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssetComment
+   */
+  omit?: Prisma.AssetCommentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssetCommentInclude<ExtArgs> | null
+  where?: Prisma.AssetCommentWhereInput
+  orderBy?: Prisma.AssetCommentOrderByWithRelationInput | Prisma.AssetCommentOrderByWithRelationInput[]
+  cursor?: Prisma.AssetCommentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssetCommentScalarFieldEnum | Prisma.AssetCommentScalarFieldEnum[]
+}
+
+/**
+ * User.commentMentions
+ */
+export type User$commentMentionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CommentMention
+   */
+  select?: Prisma.CommentMentionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CommentMention
+   */
+  omit?: Prisma.CommentMentionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommentMentionInclude<ExtArgs> | null
+  where?: Prisma.CommentMentionWhereInput
+  orderBy?: Prisma.CommentMentionOrderByWithRelationInput | Prisma.CommentMentionOrderByWithRelationInput[]
+  cursor?: Prisma.CommentMentionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CommentMentionScalarFieldEnum | Prisma.CommentMentionScalarFieldEnum[]
+}
+
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * User.notificationsActed
+ */
+export type User$notificationsActedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * User.membershipEventsFor
+ */
+export type User$membershipEventsForArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DatasetMembershipEvent
+   */
+  select?: Prisma.DatasetMembershipEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DatasetMembershipEvent
+   */
+  omit?: Prisma.DatasetMembershipEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatasetMembershipEventInclude<ExtArgs> | null
+  where?: Prisma.DatasetMembershipEventWhereInput
+  orderBy?: Prisma.DatasetMembershipEventOrderByWithRelationInput | Prisma.DatasetMembershipEventOrderByWithRelationInput[]
+  cursor?: Prisma.DatasetMembershipEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DatasetMembershipEventScalarFieldEnum | Prisma.DatasetMembershipEventScalarFieldEnum[]
+}
+
+/**
+ * User.membershipEventsBy
+ */
+export type User$membershipEventsByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DatasetMembershipEvent
+   */
+  select?: Prisma.DatasetMembershipEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DatasetMembershipEvent
+   */
+  omit?: Prisma.DatasetMembershipEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DatasetMembershipEventInclude<ExtArgs> | null
+  where?: Prisma.DatasetMembershipEventWhereInput
+  orderBy?: Prisma.DatasetMembershipEventOrderByWithRelationInput | Prisma.DatasetMembershipEventOrderByWithRelationInput[]
+  cursor?: Prisma.DatasetMembershipEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DatasetMembershipEventScalarFieldEnum | Prisma.DatasetMembershipEventScalarFieldEnum[]
+}
+
+/**
+ * User.outboxEventsActed
+ */
+export type User$outboxEventsActedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollaborationOutboxEvent
+   */
+  select?: Prisma.CollaborationOutboxEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CollaborationOutboxEvent
+   */
+  omit?: Prisma.CollaborationOutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollaborationOutboxEventInclude<ExtArgs> | null
+  where?: Prisma.CollaborationOutboxEventWhereInput
+  orderBy?: Prisma.CollaborationOutboxEventOrderByWithRelationInput | Prisma.CollaborationOutboxEventOrderByWithRelationInput[]
+  cursor?: Prisma.CollaborationOutboxEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CollaborationOutboxEventScalarFieldEnum | Prisma.CollaborationOutboxEventScalarFieldEnum[]
+}
+
+/**
+ * User.outboxEventsFor
+ */
+export type User$outboxEventsForArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollaborationOutboxEvent
+   */
+  select?: Prisma.CollaborationOutboxEventSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CollaborationOutboxEvent
+   */
+  omit?: Prisma.CollaborationOutboxEventOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollaborationOutboxEventInclude<ExtArgs> | null
+  where?: Prisma.CollaborationOutboxEventWhereInput
+  orderBy?: Prisma.CollaborationOutboxEventOrderByWithRelationInput | Prisma.CollaborationOutboxEventOrderByWithRelationInput[]
+  cursor?: Prisma.CollaborationOutboxEventWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CollaborationOutboxEventScalarFieldEnum | Prisma.CollaborationOutboxEventScalarFieldEnum[]
 }
 
 /**

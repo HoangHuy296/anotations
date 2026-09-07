@@ -8,6 +8,7 @@ import { labelMetadataSelect } from "@/lib/dataset-metadata";
 import { parsePageRequest } from "@/lib/pagination";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 import { labelMutationSchema, normalizeLabelName } from "@/lib/validation/label";
+import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
 
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ datasetId: string }> };
@@ -28,11 +29,12 @@ async function accessFor(context: Context, permission: "dataset.read" | "label.m
   const access = await requireDatasetPermission(actor, id.data, permission);
   if (!access) return { response: apiError(404, "GITEA_NOT_FOUND", "The dataset was not found.") } as const;
   if (access.forbidden) return { response: apiError(403, "FORBIDDEN", "You do not have permission for this action.") } as const;
-  return { datasetId: id.data } as const;
+  return { actor, datasetId: id.data } as const;
 }
 
 export async function GET(request: Request, context: Context) {
   const result = await accessFor(context, "dataset.read"); if ("response" in result) return result.response;
+  await ensureDefaultImageLabels(result.actor, result.datasetId);
   const { page, pageSize, skip, take } = parsePageRequest(new URL(request.url).searchParams, DEFAULT_PAGE_SIZE);
   const where = { datasetId: result.datasetId };
   const [labels, total] = await Promise.all([

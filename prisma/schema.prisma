@@ -21,6 +21,8 @@ model User {
   annotationsReviewed  Annotation[]         @relation("AnnotationReviewedBy")
   annotationsUpdated   Annotation[]         @relation("AnnotationUpdatedBy")
   uploadedAssets       Asset[]              @relation("AssetUploadedBy")
+  assignedAssets       Asset[]              @relation("AssetAssignedTo")
+  assetLabelsCreated   AssetLabel[]         @relation("AssetLabelCreatedBy")
   sessions             AuthSession[]
   ownedDatasets        Dataset[]            @relation("DatasetOwner")
   memberships          DatasetMember[]
@@ -30,6 +32,21 @@ model User {
   preparedImports      PreparedImport[]     @relation("PreparedImportCreatedBy")
   sourceConnections    SourceConnection[]   @relation("SourceConnectionOwner")
   tracksCreated        VideoObjectTrack[]   @relation("TrackCreatedBy")
+  workflowEvents       AssetWorkflowEvent[] @relation("AssetWorkflowActor")
+  invitationsReceived  DatasetInvitation[]  @relation("DatasetInvitationInvitee")
+  invitationsSent      DatasetInvitation[]  @relation("DatasetInvitationInvitedBy")
+  assignmentSlots      AssetAssignment[]    @relation("AssetAssignmentUser")
+  assignmentsCreated   AssetAssignment[]    @relation("AssetAssignmentCreatedBy")
+  assignmentEvents     AssetAssignmentEvent[] @relation("AssetAssignmentEventActor")
+  commentsAuthored     AssetComment[]       @relation("AssetCommentAuthor")
+  commentsResolved     AssetComment[]       @relation("AssetCommentResolver")
+  commentMentions      CommentMention[]
+  notifications        Notification[]       @relation("NotificationRecipient")
+  notificationsActed   Notification[]       @relation("NotificationActor")
+  membershipEventsFor  DatasetMembershipEvent[] @relation("DatasetMembershipEventMember")
+  membershipEventsBy   DatasetMembershipEvent[] @relation("DatasetMembershipEventActor")
+  outboxEventsActed    CollaborationOutboxEvent[] @relation("CollaborationOutboxActor")
+  outboxEventsFor      CollaborationOutboxEvent[] @relation("CollaborationOutboxRecipient")
 }
 
 model AuthSession {
@@ -125,6 +142,7 @@ model Job {
   sourceConnection     SourceConnection?   @relation(fields: [sourceConnectionId], references: [id])
   events               JobEvent[]
   preparedImport       PreparedImport?
+  collaborationOutboxEvent CollaborationOutboxEvent?
 
   @@unique([datasetId, idempotencyKey])
   @@index([datasetId, status])
@@ -218,43 +236,51 @@ model SourceConnection {
 }
 
 model Dataset {
-  id                   String              @id @default(cuid())
-  ownerId              String
-  name                 String
-  description          String?
-  type                 DatasetType         @default(MULTI_MODAL)
-  primaryModality      Modality?
-  metadata             Json                @default("{}")
-  sourceMode           DatasetSourceMode   @default(UPLOAD)
-  externalRepositoryId String?
-  sourceConnectionId   String?
-  sourceRootPath       String?
-  sourceRef            String?
-  lockedRevision       String?
-  currentRevision      String?
+  id                     String              @id @default(cuid())
+  ownerId                String
+  name                   String
+  description            String?
+  type                   DatasetType         @default(MULTI_MODAL)
+  primaryModality        Modality?
+  metadata               Json                @default("{}")
+  sourceMode             DatasetSourceMode   @default(UPLOAD)
+  externalRepositoryId   String?
+  sourceConnectionId     String?
+  sourceRootPath         String?
+  sourceRef              String?
+  lockedRevision         String?
+  currentRevision        String?
   creationIdempotencyKey String?
-  creationRequestHash String?
-  includePatterns      Json                @default("[]")
-  excludePatterns      Json                @default("[]")
-  lastSyncedAt         DateTime?
-  syncStatus           AssetSyncStatus     @default(SYNCED)
-  syncSummary          Json                @default("{}")
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-  archivedAt           DateTime?
-  deletedAt            DateTime?
-  aiTasks              AiTask[]
-  annotations          Annotation[]
-  assets               Asset[]
-  assetVersions        AssetVersion[]
-  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
-  owner                User                @relation("DatasetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  sourceConnection     SourceConnection?   @relation(fields: [sourceConnectionId], references: [id])
-  members              DatasetMember[]
-  jobs                 Job[]               @relation("DatasetJobs")
-  labels               Label[]
-  preparedImports      PreparedImport[]
+  creationRequestHash    String?
+  includePatterns        Json                @default("[]")
+  excludePatterns        Json                @default("[]")
+  lastSyncedAt           DateTime?
+  syncStatus             AssetSyncStatus     @default(SYNCED)
+  syncSummary            Json                @default("{}")
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  archivedAt             DateTime?
+  deletedAt              DateTime?
+  aiTasks                AiTask[]
+  annotations            Annotation[]
+  assets                 Asset[]
+  assetVersions          AssetVersion[]
+  externalRepository     ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
+  owner                  User                @relation("DatasetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  sourceConnection       SourceConnection?   @relation(fields: [sourceConnectionId], references: [id])
+  members                DatasetMember[]
+  jobs                   Job[]               @relation("DatasetJobs")
+  labels                 Label[]
+  preparedImports        PreparedImport[]
+  invitations            DatasetInvitation[]
+  assignmentSlots        AssetAssignment[]
+  assignmentEvents       AssetAssignmentEvent[]
+  comments               AssetComment[]
+  membershipEvents       DatasetMembershipEvent[]
+  notifications          Notification[]
+  outboxEvents           CollaborationOutboxEvent[]
 
+  @@unique([ownerId, creationIdempotencyKey])
   @@index([ownerId])
   @@index([ownerId, primaryModality])
   @@index([type])
@@ -263,7 +289,6 @@ model Dataset {
   @@index([externalRepositoryId])
   @@index([sourceConnectionId])
   @@index([currentRevision])
-  @@unique([ownerId, creationIdempotencyKey])
 }
 
 /// *
@@ -334,10 +359,38 @@ model DatasetMember {
   @@index([datasetId, role])
 }
 
+/// Durable, existing-user invitation. A pending invitation is not a
+/// DatasetMember and therefore never grants access before acceptance.
+model DatasetInvitation {
+  id            String                  @id @default(cuid())
+  datasetId     String
+  inviteeUserId String
+  invitedById   String
+  role          DatasetMemberRole
+  status        DatasetInvitationStatus @default(PENDING)
+  /// `PENDING` while active and null after a terminal state. PostgreSQL allows
+  /// multiple nulls, making this portable Prisma uniqueness enforcement.
+  activeKey     String?
+  expiresAt     DateTime
+  respondedAt   DateTime?
+  revokedAt     DateTime?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  dataset       Dataset                 @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  invitee       User                    @relation("DatasetInvitationInvitee", fields: [inviteeUserId], references: [id], onDelete: Cascade)
+  invitedBy     User                    @relation("DatasetInvitationInvitedBy", fields: [invitedById], references: [id], onDelete: Restrict)
+
+  @@unique([datasetId, inviteeUserId, activeKey])
+  @@index([inviteeUserId, status, createdAt])
+  @@index([datasetId, status, createdAt])
+  @@index([expiresAt])
+}
+
 model Asset {
-  id                   String              @id @default(cuid())
+  id                   String               @id @default(cuid())
   datasetId            String
   uploadedById         String?
+  assignedToId         String?
   modality             Modality
   filename             String
   originalFilename     String?
@@ -347,7 +400,7 @@ model Asset {
   height               Int?
   durationMs           Int?
   textLength           Int?
-  sourceMode           DatasetSourceMode   @default(UPLOAD)
+  sourceMode           DatasetSourceMode    @default(UPLOAD)
   storageProvider      StorageProvider?
   storageBucket        String?
   storageKey           String?
@@ -363,7 +416,7 @@ model Asset {
   sourceEtag           String?
   sourceUrl            String?
   sourceFingerprint    String
-  cacheStatus          CacheStatus         @default(NOT_CACHED)
+  cacheStatus          CacheStatus          @default(NOT_CACHED)
   cacheProvider        StorageProvider?
   cacheBucket          String?
   cacheKey             String?
@@ -372,29 +425,37 @@ model Asset {
   cacheExpiresAt       DateTime?
   cacheError           String?
   currentVersionId     String?
-  syncStatus           AssetSyncStatus     @default(SYNCED)
+  syncStatus           AssetSyncStatus      @default(SYNCED)
   lastSyncedAt         DateTime?
-  syncSummary          Json                @default("{}")
-  status               AssetStatus         @default(NEW)
-  batchIndex           Int                 @default(0)
-  orderIndex           Int                 @default(0)
+  syncSummary          Json                 @default("{}")
+  status               AssetStatus          @default(NEW)
+  batchIndex           Int                  @default(0)
+  orderIndex           Int                  @default(0)
   description          String?
-  metadata             Json                @default("{}")
-  revision             Int                 @default(1)
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
+  metadata             Json                 @default("{}")
+  revision             Int                  @default(1)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
   archivedAt           DateTime?
   deletedAt            DateTime?
   annotations          Annotation[]
-  dataset              Dataset             @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
-  uploadedBy           User?               @relation("AssetUploadedBy", fields: [uploadedById], references: [id])
+  dataset              Dataset              @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  externalRepository   ExternalRepository?  @relation(fields: [externalRepositoryId], references: [id])
+  uploadedBy           User?                @relation("AssetUploadedBy", fields: [uploadedById], references: [id])
+  assignedTo           User?                @relation("AssetAssignedTo", fields: [assignedToId], references: [id])
   versions             AssetVersion[]
   audioAsset           AudioAsset?
   imageAsset           ImageAsset?
   preparedImportItem   PreparedImportItem?
   textAsset            TextAsset?
   videoAsset           VideoAsset?
+  assetLabels          AssetLabel[]
+  workflowEvents       AssetWorkflowEvent[]
+  assignmentSlots      AssetAssignment[]
+  assignmentEvents     AssetAssignmentEvent[]
+  comments             AssetComment[]
+  notifications        Notification[]
+  outboxEvents         CollaborationOutboxEvent[]
 
   @@unique([storageProvider, storageBucket, storageKey])
   @@unique([cacheProvider, cacheBucket, cacheKey])
@@ -408,6 +469,7 @@ model Asset {
   @@index([datasetId, syncStatus])
   @@index([datasetId, cacheStatus])
   @@index([uploadedById])
+  @@index([assignedToId])
   @@index([externalRepositoryId])
   @@index([sourceProvider])
   @@index([sourceRevision])
@@ -416,6 +478,193 @@ model Asset {
   @@index([sourceBlobSha])
   @@index([sourceLfsOid])
   @@index([currentVersionId])
+}
+
+/// The single current responsibility slot for each asset/type. Assignment
+/// history is append-only in AssetAssignmentEvent, so removing this slot does
+/// not erase attribution.
+model AssetAssignment {
+  id           String              @id @default(cuid())
+  datasetId    String
+  assetId      String
+  userId       String
+  type         AssetAssignmentType
+  assignedById String?
+  assignedAt   DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  dataset      Dataset             @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  asset        Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  user         User                @relation("AssetAssignmentUser", fields: [userId], references: [id], onDelete: Restrict)
+  assignedBy   User?               @relation("AssetAssignmentCreatedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@unique([assetId, type])
+  @@index([datasetId, type])
+  @@index([userId, type])
+}
+
+model AssetAssignmentEvent {
+  id             String                     @id @default(cuid())
+  datasetId      String
+  assetId        String
+  assignmentId   String?
+  action         AssetAssignmentEventAction
+  previousUserId String?
+  nextUserId     String?
+  actorId        String?
+  createdAt      DateTime                   @default(now())
+  dataset        Dataset                    @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  asset          Asset                      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  actor          User?                      @relation("AssetAssignmentEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([assetId, createdAt])
+  @@index([datasetId, createdAt])
+  @@index([assignmentId])
+}
+
+model AssetComment {
+  id           String         @id @default(cuid())
+  datasetId    String
+  assetId      String
+  authorId     String
+  parentId     String?
+  body         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+  resolvedAt   DateTime?
+  resolvedById String?
+  dataset      Dataset        @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  asset        Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  author       User           @relation("AssetCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  parent       AssetComment?  @relation("AssetCommentReplies", fields: [parentId], references: [id], onDelete: Restrict)
+  replies      AssetComment[] @relation("AssetCommentReplies")
+  resolvedBy   User?          @relation("AssetCommentResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  mentions     CommentMention[]
+  notifications Notification[]
+
+  @@index([assetId, parentId, createdAt])
+  @@index([datasetId, createdAt])
+  @@index([authorId, createdAt])
+}
+
+model CommentMention {
+  id        String       @id @default(cuid())
+  commentId String
+  userId    String
+  createdAt DateTime     @default(now())
+  comment   AssetComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([commentId, userId])
+  @@index([userId, createdAt])
+}
+
+model Notification {
+  id                   String           @id @default(cuid())
+  userId               String
+  type                 NotificationType
+  datasetId            String?
+  assetId              String?
+  commentId            String?
+  actorId              String?
+  title                String
+  body                 String
+  dedupeKey            String
+  contextUnavailableAt DateTime?
+  readAt               DateTime?
+  createdAt            DateTime         @default(now())
+  user                 User             @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor                User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  dataset              Dataset?         @relation(fields: [datasetId], references: [id], onDelete: SetNull)
+  asset                Asset?           @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  comment              AssetComment?    @relation(fields: [commentId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, readAt, createdAt])
+  @@index([datasetId, createdAt])
+  @@index([assetId, createdAt])
+}
+
+model DatasetMembershipEvent {
+  id           String                       @id @default(cuid())
+  datasetId    String
+  memberUserId String
+  actorId      String?
+  action       DatasetMembershipEventAction
+  previousRole DatasetMemberRole?
+  nextRole     DatasetMemberRole?
+  createdAt    DateTime                     @default(now())
+  dataset      Dataset                      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  member       User                         @relation("DatasetMembershipEventMember", fields: [memberUserId], references: [id], onDelete: Restrict)
+  actor        User?                        @relation("DatasetMembershipEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([datasetId, createdAt])
+  @@index([memberUserId, createdAt])
+}
+
+/// Durable delivery intent. It is not Activity and it is never consumed by a
+/// browser or gateway. The private worker resolves it through the linked Job.
+model CollaborationOutboxEvent {
+  id              String                       @id @default(cuid())
+  datasetId       String
+  assetId         String?
+  recipientUserId String?
+  actorId         String?
+  jobId           String                       @unique
+  type            CollaborationOutboxEventType
+  dedupeKey       String                       @unique
+  payload         Json                         @default("{}")
+  dispatchedAt    DateTime?
+  createdAt       DateTime                     @default(now())
+  dataset         Dataset                      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  asset           Asset?                       @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  recipient       User?                        @relation("CollaborationOutboxRecipient", fields: [recipientUserId], references: [id], onDelete: SetNull)
+  actor           User?                        @relation("CollaborationOutboxActor", fields: [actorId], references: [id], onDelete: SetNull)
+  job             Job                          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([datasetId, dispatchedAt, createdAt])
+  @@index([recipientUserId, createdAt])
+  @@index([assetId, createdAt])
+}
+
+/// Append-only audit trail for the Asset.status review workflow. This is
+/// history only; Asset.status remains the sole workflow-state authority.
+model AssetWorkflowEvent {
+  id            String              @id @default(cuid())
+  assetId       String
+  actorId       String
+  action        AssetWorkflowAction
+  fromStatus    AssetStatus?
+  toStatus      AssetStatus?
+  assetRevision Int
+  feedback      String?
+  createdAt     DateTime            @default(now())
+  asset         Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  actor         User                @relation("AssetWorkflowActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([assetId, createdAt])
+  @@index([actorId, createdAt])
+}
+
+/// *
+///  * Asset-level metadata label attachment (Phase 022). Fully independent of
+///  * `Annotation.labelId`: attaching/detaching an AssetLabel never creates,
+///  * modifies, or deletes an Annotation, even when an Annotation on the same
+///  * Asset happens to reference the same Label. See
+///  * specs/022-asset-browser-dataset-management-workspace/data-model.md.
+model AssetLabel {
+  id          String   @id @default(cuid())
+  assetId     String
+  labelId     String
+  createdAt   DateTime @default(now())
+  createdById String?
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  label       Label    @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  createdBy   User?    @relation("AssetLabelCreatedBy", fields: [createdById], references: [id])
+
+  @@unique([assetId, labelId])
+  @@index([labelId])
+  @@index([createdById])
 }
 
 model AssetVersion {
@@ -500,6 +749,7 @@ model Label {
   annotations    Annotation[]
   dataset        Dataset            @relation(fields: [datasetId], references: [id], onDelete: Cascade)
   videoTracks    VideoObjectTrack[] @relation("TrackLabel")
+  assetLabels    AssetLabel[]
 
   @@unique([datasetId, normalizedName])
   @@index([datasetId])
@@ -602,23 +852,23 @@ model VideoAsset {
 }
 
 model VideoObjectTrack {
-  id           String           @id @default(cuid())
-  videoAssetId String
-  labelId      String?
-  createdById  String?
-  name         String?
-  color        String?
-  properties   Json             @default("{}")
-  status       AnnotationStatus @default(DRAFT)
-  revision     Int              @default(1)
-  annotationType AnnotationType @default(BOUNDING_BOX)
+  id                String                 @id @default(cuid())
+  videoAssetId      String
+  labelId           String?
+  createdById       String?
+  name              String?
+  color             String?
+  properties        Json                   @default("{}")
+  status            AnnotationStatus       @default(DRAFT)
+  revision          Int                    @default(1)
+  annotationType    AnnotationType         @default(BOUNDING_BOX)
   interpolationMode VideoInterpolationMode @default(LINEAR)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  annotations  Annotation[]
-  createdBy    User?            @relation("TrackCreatedBy", fields: [createdById], references: [id])
-  label        Label?           @relation("TrackLabel", fields: [labelId], references: [id])
-  videoAsset   VideoAsset       @relation(fields: [videoAssetId], references: [id], onDelete: Cascade)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  annotations       Annotation[]
+  createdBy         User?                  @relation("TrackCreatedBy", fields: [createdById], references: [id])
+  label             Label?                 @relation("TrackLabel", fields: [labelId], references: [id])
+  videoAsset        VideoAsset             @relation(fields: [videoAssetId], references: [id], onDelete: Cascade)
 
   @@index([videoAssetId])
   @@index([labelId])
@@ -670,33 +920,33 @@ model AudioSpeaker {
 }
 
 model AiTask {
-  id               String       @id @default(cuid())
-  externalTaskId   String?      @unique
-  datasetId        String
-  jobId            String       @unique
-  createdById      String
-  type             AiTaskType
-  status           AiTaskStatus @default(QUEUED)
-  modality         Modality?
-  modelId          String
+  id                   String       @id @default(cuid())
+  externalTaskId       String?      @unique
+  datasetId            String
+  jobId                String       @unique
+  createdById          String
+  type                 AiTaskType
+  status               AiTaskStatus @default(QUEUED)
+  modality             Modality?
+  modelId              String
   modelNameSnapshot    String
   modelVersionSnapshot String?
-  modelKeySnapshot String
-  input            Json         @default("{}")
-  output           Json?
-  summary          Json         @default("{}")
-  error            String?
-  errorCode        String?
-  errorDetails     Json?
-  pollAttempts     Int          @default(0)
-  nextPollAt       DateTime?
-  resultStorageKey String?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  createdBy        User         @relation("AiTaskCreatedBy", fields: [createdById], references: [id])
-  dataset          Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  job              Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  model            AiModel      @relation(fields: [modelId], references: [id])
+  modelKeySnapshot     String
+  input                Json         @default("{}")
+  output               Json?
+  summary              Json         @default("{}")
+  error                String?
+  errorCode            String?
+  errorDetails         Json?
+  pollAttempts         Int          @default(0)
+  nextPollAt           DateTime?
+  resultStorageKey     String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  createdBy            User         @relation("AiTaskCreatedBy", fields: [createdById], references: [id])
+  dataset              Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  job                  Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  model                AiModel      @relation(fields: [modelId], references: [id])
 
   @@index([datasetId])
   @@index([createdById])
@@ -706,17 +956,17 @@ model AiTask {
 }
 
 model AiModel {
-  id           String       @id @default(cuid())
-  key          String       @unique   // định danh ổn định, dùng khi gọi API đồng nghiệp
-  displayName  String
-  provider     String                  // khớp AiProviderAdapter registry, VD: "colleague-api"
-  modality     Modality?               // null = hỗ trợ đa modality
-  taskType     AiTaskType
-  isActive     Boolean      @default(true)
-  metadata     Json         @default("{}")
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  aiTasks      AiTask[]
+  id          String     @id @default(cuid())
+  key         String     @unique // định danh ổn định, dùng khi gọi API đồng nghiệp
+  displayName String
+  provider    String // khớp AiProviderAdapter registry, VD: "colleague-api"
+  modality    Modality? // null = hỗ trợ đa modality
+  taskType    AiTaskType
+  isActive    Boolean    @default(true)
+  metadata    Json       @default("{}")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  aiTasks     AiTask[]
 
   @@index([provider])
   @@index([taskType])
@@ -735,6 +985,55 @@ enum DatasetMemberRole {
   MANAGER
   LABELER
   REVIEWER
+}
+
+enum DatasetInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  REVOKED
+  EXPIRED
+}
+
+enum AssetAssignmentType {
+  ANNOTATION
+  REVIEW
+}
+
+enum AssetAssignmentEventAction {
+  ASSIGNED
+  REASSIGNED
+  UNASSIGNED
+  REMOVED_FOR_ROLE_CHANGE
+}
+
+enum DatasetMembershipEventAction {
+  INVITED
+  ACCEPTED
+  DECLINED
+  REVOKED
+  ROLE_CHANGED
+  REMOVED
+}
+
+enum NotificationType {
+  DATASET_INVITE
+  ASSET_ASSIGNED
+  REVIEW_ASSIGNED
+  MENTIONED
+  COMMENT_REPLY
+  REVIEW_SUBMITTED
+  REVIEW_APPROVED
+  REVIEW_REJECTED
+}
+
+enum CollaborationOutboxEventType {
+  MEMBER_CHANGED
+  ASSIGNMENT_CHANGED
+  COMMENT_CHANGED
+  NOTIFICATION_CREATED
+  WORKFLOW_CHANGED
+  MEMBERSHIP_REVOKED
 }
 
 enum Modality {
@@ -798,6 +1097,16 @@ enum AssetStatus {
   SKIPPED
   ARCHIVED
   FAILED
+}
+
+enum AssetWorkflowAction {
+  START
+  SUBMIT
+  OPEN_REVIEW
+  APPROVE
+  REJECT
+  START_REWORK
+  RESUBMIT
 }
 
 enum AssetSyncStatus {
@@ -913,6 +1222,9 @@ enum JobType {
   AI_PREANNOTATE_ASSET
   AI_PREANNOTATE_DATASET
   AI_TASK_SYNC
+  BULK_DELETE_ASSETS
+  BULK_EXPORT_SELECTED
+  COLLABORATION_OUTBOX_DISPATCH
 }
 
 enum JobStatus {
@@ -953,6 +1265,9 @@ enum JobStage {
   WRITING_EXPORT_FILE
   CLEANING_UP
   FINISHED
+  RESOLVING_SELECTION
+  DELETING_ASSETS
+  EXPORTING_SELECTED_ASSETS
 }
 
 enum JobPriority {

@@ -32,6 +32,10 @@
     "./log": {
       "types": "./dist/log.d.ts",
       "default": "./dist/log.js"
+    },
+    "./bulk-asset-job": {
+      "types": "./dist/bulk-asset-job.d.ts",
+      "default": "./dist/bulk-asset-job.js"
     }
   },
   "scripts": {

@@ -17,7 +17,8 @@ export function sanitizeExportJson(value: unknown, depth = 0): unknown {
     .map(([key, entry]) => [key, sanitizeExportJson(entry, depth + 1)]));
 }
 
-function safeStorageProvider(provider: string | null) {
+/** Exported for reuse by `export-selected-manifest.ts` (022) -- both manifests must classify storage provider identically. */
+export function safeStorageProvider(provider: string | null) {
   if (provider === "MINIO" || provider === "LOCAL") return provider;
   return provider ? "EXTERNAL" : null;
 }

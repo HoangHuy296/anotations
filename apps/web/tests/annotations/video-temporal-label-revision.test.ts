@@ -67,6 +67,7 @@ after(async () => {
 });
 
 test("same temporal revision has one winner and preserves the local resource's Track isolation", { skip: enabled ? false : "Set VIDEO_ANNOTATION_RACE_TESTS=1 with PostgreSQL." }, async () => {
+  const before = await db.asset.findUniqueOrThrow({ where: { id: assetId }, select: { revision: true } });
   const label = await createTemporal(100, 900);
   const [first, second] = await Promise.all([
     updateVideoTemporalLabel(actor, label.id, { expectedRevision: 1, startMs: 200, endMs: 1_000 }),
@@ -78,6 +79,7 @@ test("same temporal revision has one winner and preserves the local resource's T
   assert.equal(persisted.revision, 2);
   assert.ok((persisted.startMs === 200 && persisted.endMs === 1_000) || (persisted.startMs === 300 && persisted.endMs === 1_100));
   assert.equal((await db.videoObjectTrack.findUniqueOrThrow({ where: { id: trackId }, select: { revision: true } })).revision, 1);
+  assert.equal((await db.asset.findUniqueOrThrow({ where: { id: assetId }, select: { revision: true } })).revision, before.revision + 2, "one create and one winning update advance Asset revision once each");
 });
 
 test("independent temporal labels advance independently; update versus delete has one terminal result", { skip: enabled ? false : "Set VIDEO_ANNOTATION_RACE_TESTS=1 with PostgreSQL." }, async () => {

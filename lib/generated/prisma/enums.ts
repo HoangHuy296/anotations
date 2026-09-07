@@ -29,6 +29,73 @@ export const DatasetMemberRole = {
 export type DatasetMemberRole = (typeof DatasetMemberRole)[keyof typeof DatasetMemberRole]
 
 
+export const DatasetInvitationStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  DECLINED: 'DECLINED',
+  REVOKED: 'REVOKED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type DatasetInvitationStatus = (typeof DatasetInvitationStatus)[keyof typeof DatasetInvitationStatus]
+
+
+export const AssetAssignmentType = {
+  ANNOTATION: 'ANNOTATION',
+  REVIEW: 'REVIEW'
+} as const
+
+export type AssetAssignmentType = (typeof AssetAssignmentType)[keyof typeof AssetAssignmentType]
+
+
+export const AssetAssignmentEventAction = {
+  ASSIGNED: 'ASSIGNED',
+  REASSIGNED: 'REASSIGNED',
+  UNASSIGNED: 'UNASSIGNED',
+  REMOVED_FOR_ROLE_CHANGE: 'REMOVED_FOR_ROLE_CHANGE'
+} as const
+
+export type AssetAssignmentEventAction = (typeof AssetAssignmentEventAction)[keyof typeof AssetAssignmentEventAction]
+
+
+export const DatasetMembershipEventAction = {
+  INVITED: 'INVITED',
+  ACCEPTED: 'ACCEPTED',
+  DECLINED: 'DECLINED',
+  REVOKED: 'REVOKED',
+  ROLE_CHANGED: 'ROLE_CHANGED',
+  REMOVED: 'REMOVED'
+} as const
+
+export type DatasetMembershipEventAction = (typeof DatasetMembershipEventAction)[keyof typeof DatasetMembershipEventAction]
+
+
+export const NotificationType = {
+  DATASET_INVITE: 'DATASET_INVITE',
+  ASSET_ASSIGNED: 'ASSET_ASSIGNED',
+  REVIEW_ASSIGNED: 'REVIEW_ASSIGNED',
+  MENTIONED: 'MENTIONED',
+  COMMENT_REPLY: 'COMMENT_REPLY',
+  REVIEW_SUBMITTED: 'REVIEW_SUBMITTED',
+  REVIEW_APPROVED: 'REVIEW_APPROVED',
+  REVIEW_REJECTED: 'REVIEW_REJECTED'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const CollaborationOutboxEventType = {
+  MEMBER_CHANGED: 'MEMBER_CHANGED',
+  ASSIGNMENT_CHANGED: 'ASSIGNMENT_CHANGED',
+  COMMENT_CHANGED: 'COMMENT_CHANGED',
+  NOTIFICATION_CREATED: 'NOTIFICATION_CREATED',
+  WORKFLOW_CHANGED: 'WORKFLOW_CHANGED',
+  MEMBERSHIP_REVOKED: 'MEMBERSHIP_REVOKED'
+} as const
+
+export type CollaborationOutboxEventType = (typeof CollaborationOutboxEventType)[keyof typeof CollaborationOutboxEventType]
+
+
 export const Modality = {
   IMAGE: 'IMAGE',
   VIDEO: 'VIDEO',
@@ -114,6 +181,19 @@ export const AssetStatus = {
 } as const
 
 export type AssetStatus = (typeof AssetStatus)[keyof typeof AssetStatus]
+
+
+export const AssetWorkflowAction = {
+  START: 'START',
+  SUBMIT: 'SUBMIT',
+  OPEN_REVIEW: 'OPEN_REVIEW',
+  APPROVE: 'APPROVE',
+  REJECT: 'REJECT',
+  START_REWORK: 'START_REWORK',
+  RESUBMIT: 'RESUBMIT'
+} as const
+
+export type AssetWorkflowAction = (typeof AssetWorkflowAction)[keyof typeof AssetWorkflowAction]
 
 
 export const AssetSyncStatus = {
@@ -252,7 +332,10 @@ export const JobType = {
   AUTO_LABEL_DATASET: 'AUTO_LABEL_DATASET',
   AI_PREANNOTATE_ASSET: 'AI_PREANNOTATE_ASSET',
   AI_PREANNOTATE_DATASET: 'AI_PREANNOTATE_DATASET',
-  AI_TASK_SYNC: 'AI_TASK_SYNC'
+  AI_TASK_SYNC: 'AI_TASK_SYNC',
+  BULK_DELETE_ASSETS: 'BULK_DELETE_ASSETS',
+  BULK_EXPORT_SELECTED: 'BULK_EXPORT_SELECTED',
+  COLLABORATION_OUTBOX_DISPATCH: 'COLLABORATION_OUTBOX_DISPATCH'
 } as const
 
 export type JobType = (typeof JobType)[keyof typeof JobType]
@@ -298,7 +381,10 @@ export const JobStage = {
   EXPORTING_DATASET: 'EXPORTING_DATASET',
   WRITING_EXPORT_FILE: 'WRITING_EXPORT_FILE',
   CLEANING_UP: 'CLEANING_UP',
-  FINISHED: 'FINISHED'
+  FINISHED: 'FINISHED',
+  RESOLVING_SELECTION: 'RESOLVING_SELECTION',
+  DELETING_ASSETS: 'DELETING_ASSETS',
+  EXPORTING_SELECTED_ASSETS: 'EXPORTING_SELECTED_ASSETS'
 } as const
 
 export type JobStage = (typeof JobStage)[keyof typeof JobStage]

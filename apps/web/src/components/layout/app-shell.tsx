@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 
 import { AppMark } from "@/components/layout/app-mark";
 import { DatasetNavigationGroup } from "@/components/layout/dataset-navigation-group";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { AvatarMenu } from "@/components/auth/avatar-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,7 @@ export async function AppShell({
                   <ArrowSquareOut aria-hidden="true" size={15} />
                 </Link>
               </Button>
+              {actor ? <NotificationBell /> : null}
               {actor ? <AvatarMenu actor={actor} /> : null}
             </div>
           </header>
