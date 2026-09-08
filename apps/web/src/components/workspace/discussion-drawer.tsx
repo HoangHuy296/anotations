@@ -26,7 +26,10 @@ type DiscussionDrawerProps = {
   assetId: string | null;
   open: boolean;
   onClose: () => void;
+  highlightCommentId?: string | null;
+  refreshKey?: number;
 };
+type ActivityItem = { id: string; kind: string; action: string; actor: string | null; createdAt: string };
 
 function commentBody(body: string, deletedAt: string | null) {
   return deletedAt ? "This comment was deleted." : body;
@@ -36,8 +39,10 @@ function commentBody(body: string, deletedAt: string | null) {
  * An overlay keeps discussion separate from workflow feedback and never adds a
  * permanent workspace column. The API remains the sole command/read boundary.
  */
-export function DiscussionDrawer({ datasetId, assetId, open, onClose }: DiscussionDrawerProps) {
+export function DiscussionDrawer({ datasetId, assetId, open, onClose, highlightCommentId, refreshKey = 0 }: DiscussionDrawerProps) {
   const [threads, setThreads] = useState<DiscussionThread[]>([]);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [tab, setTab] = useState<"discussion" | "activity">("discussion");
   const [body, setBody] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -65,9 +70,18 @@ export function DiscussionDrawer({ datasetId, assetId, open, onClose }: Discussi
     }
   }, [assetId, datasetId]);
 
+  const loadActivity = useCallback(async () => {
+    if (!assetId) return setActivity([]);
+    const response = await fetch(`/api/datasets/${datasetId}/assets/${assetId}/activity`, { credentials: "same-origin", cache: "no-store" });
+    const payload = await response.json().catch(() => null) as { data?: { items?: ActivityItem[] } } | null;
+    if (response.ok) setActivity(payload?.data?.items ?? []);
+  }, [assetId, datasetId]);
+
   useEffect(() => {
-    if (open) void Promise.resolve().then(load);
-  }, [load, open]);
+    if (open) void Promise.resolve().then(() => { void load(); if (highlightCommentId) setTab("discussion"); });
+  }, [highlightCommentId, load, open, refreshKey]);
+
+  useEffect(() => { if (open && tab === "activity") void Promise.resolve().then(() => void loadActivity()); }, [loadActivity, open, refreshKey, tab]);
 
   const submit = useCallback(async () => {
     if (!assetId || !body.trim()) return;
@@ -104,20 +118,21 @@ export function DiscussionDrawer({ datasetId, assetId, open, onClose }: Discussi
         <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
           <div>
             <h2 className="text-sm font-bold text-zinc-950">Discussion</h2>
-            <p className="text-xs text-zinc-500">Asset conversation, separate from review feedback.</p>
+            <p className="text-xs text-zinc-500">Conversation and read-only activity, separate from review feedback.</p>
           </div>
           <Button type="button" variant="icon" aria-label="Close discussion" onClick={onClose}>
             <X aria-hidden="true" size={18} />
           </Button>
         </div>
 
-        {!assetId ? <p className="p-4 text-sm text-zinc-500">Select an asset to start a discussion.</p> : (
+        <div className="flex gap-2 border-b border-zinc-200 px-4 pt-2"><button type="button" className={`border-b-2 px-2 py-2 text-xs font-semibold ${tab === "discussion" ? "border-sky-600 text-sky-700" : "border-transparent text-zinc-500"}`} onClick={() => setTab("discussion")}>Discussion</button><button type="button" className={`border-b-2 px-2 py-2 text-xs font-semibold ${tab === "activity" ? "border-sky-600 text-sky-700" : "border-transparent text-zinc-500"}`} onClick={() => { setTab("activity"); void loadActivity(); }}>Activity</button></div>
+        {!assetId ? <p className="p-4 text-sm text-zinc-500">Select an asset to start a discussion.</p> : tab === "activity" ? <div className="min-h-0 flex-1 overflow-y-auto p-4">{activity.length ? <ol className="space-y-3">{activity.map((item) => <li key={item.id} className="border-l-2 border-zinc-200 pl-3 text-xs text-zinc-600"><b className="text-zinc-900">{item.action.replaceAll("_", " ")}</b>{item.actor ? ` · ${item.actor}` : ""}<br /><time>{new Date(item.createdAt).toLocaleString()}</time></li>)}</ol> : <p className="text-sm text-zinc-500">No activity yet.</p>}</div> : (
           <>
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
               {loading && threads.length === 0 ? <p className="text-sm text-zinc-500">Loading discussion…</p> : null}
               {!loading && threads.length === 0 ? <p className="text-sm text-zinc-500">No discussion yet.</p> : null}
               {threads.map((thread) => (
-                <article key={thread.id} className="rounded-lg border border-zinc-200 p-3">
+                <article key={thread.id} className={`rounded-lg border p-3 ${highlightCommentId === thread.id || thread.replies.some((reply) => reply.id === highlightCommentId) ? "border-sky-500 ring-2 ring-sky-100" : "border-zinc-200"}`}>
                   <div className="flex items-center justify-between gap-2 text-xs text-zinc-500">
                     <span>{thread.author.name ?? thread.author.email}</span>
                     {thread.resolvedAt ? <span className="font-semibold text-emerald-700">Resolved</span> : null}

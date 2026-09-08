@@ -12,7 +12,7 @@ import { isDatabaseConfigured } from "@/lib/db";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 import { workspaceListQuerySchema } from "@/lib/validation/image-workspace";
 import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
-import { readWorkspacePage, readWorkspaceSelection, readWorkspaceWorkflow } from "@/lib/workspace/workspace-read";
+import { readSafeDiscussionCommentId, readWorkspacePage, readWorkspaceSelection, readWorkspaceWorkflow } from "@/lib/workspace/workspace-read";
 
 export const metadata: Metadata = { title: "Annotation Workspace" };
 
@@ -21,6 +21,7 @@ type SearchParams = {
   filterModality?: string | string[]; labelId?: string | string[]; assignedToId?: string | string[];
   createdFrom?: string | string[]; createdTo?: string | string[]; updatedFrom?: string | string[]; updatedTo?: string | string[];
   sort?: string | string[]; order?: string | string[];
+  discussion?: string | string[];
 };
 const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
 const values = (value: string | string[] | undefined) => Array.isArray(value) ? value : value ? [value] : [];
@@ -40,6 +41,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   const video = first(query.video)|| undefined;
   const audio = first(query.audio)|| undefined;
   const text = first(query.text)|| undefined;
+  const discussionCommentId = first(query.discussion) || undefined;
   const selection = image
     ? { asset: image, modality: "IMAGE" as const }
     : video
@@ -89,6 +91,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   });
   if (!workspace) notFound();
   const selectedAssetId = workspace.page.selectedAsset?.id ?? null;
+  const safeDiscussionCommentId = selectedAssetId ? await readSafeDiscussionCommentId(actor, datasetId, selectedAssetId, discussionCommentId) : null;
   const selected = selectedAssetId ? await readWorkspaceSelection(actor, datasetId, selectedAssetId) : null;
   const workflow = selectedAssetId ? await readWorkspaceWorkflow(actor, datasetId, selectedAssetId) : null;
   const filters = {
@@ -98,7 +101,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
     sort: listQuery.sort, order: listQuery.order,
   };
   return <div className="flex min-h-100dvh flex-col bg-zinc-100">
-    <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" engine={selected?.engine ?? null} actor={{ email: actor.email, name: actor.name }} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId }} />
+    <WorkspaceHeader datasetName={workspace.dataset.name} branch="image workspace" repositoryFullName="Dataset storage" rootPath="" engine={selected?.engine ?? null} actor={{ email: actor.email, name: actor.name }} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId, commentId: safeDiscussionCommentId }} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
       <DatasetSidebar datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={selected?.engine ?? null} filters={filters} />
       <WorkspaceEngine selection={selected} />

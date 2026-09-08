@@ -20,6 +20,16 @@ export async function readWorkspaceAssignmentProjection(actor: RequestActor, dat
   const asset = await db.asset.findFirst({ where: { id: assetId, datasetId, deletedAt: null, archivedAt: null }, select: { id: true } });
   return asset ? readSafeWorkspaceAssignments(datasetId, assetId) : null;
 }
+
+/** Resolves a discussion deep-link only when its comment belongs to the selected
+ * authorized asset. The query parameter is never trusted as cross-asset state. */
+export async function readSafeDiscussionCommentId(actor: RequestActor, datasetId: string, assetId: string, commentId?: string) {
+  if (!commentId) return null;
+  const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
+  if (!access || access.forbidden) return null;
+  const comment = await db.assetComment.findFirst({ where: { id: commentId, datasetId, assetId }, select: { id: true } });
+  return comment?.id ?? null;
+}
 import type { AssetListOrder, AssetListSort, SafeWorkspaceWorkflow, WorkspaceAssetPage, WorkspaceSelection } from "@/types/workspace";
 
 export type { WorkspaceSelection } from "@/types/workspace";
@@ -60,7 +70,7 @@ export async function readWorkspaceWorkflow(
     ...(submitAccess && !submitAccess.forbidden ? submitActionsByStatus[asset.status] ?? [] : []),
     ...(reviewAccess && !reviewAccess.forbidden ? reviewActionsByStatus[asset.status] ?? [] : []),
   ];
-  return { datasetId, assetId: asset.id, status: asset.status, revision: asset.revision, permittedActions };
+  return { datasetId, assetId: asset.id, status: asset.status, revision: asset.revision, permittedActions};
 }
 
 /**

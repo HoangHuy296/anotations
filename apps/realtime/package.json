@@ -1,0 +1,24 @@
+{
+  "name": "@annotationplatform/realtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node --import tsx src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "node --import tsx --test --test-concurrency=1 tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "ioredis": "5.10.1",
+    "ws": "^8.18.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/ws": "^8.5.14",
+    "tsx": "^4.22.4",
+    "typescript": "^5"
+  }
+}

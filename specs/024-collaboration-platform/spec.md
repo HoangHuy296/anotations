@@ -8,6 +8,12 @@
 
 **Input**: User description: "Extend the existing dataset workspace with governed membership, typed asset assignments, threaded discussion, durable notifications, realtime delivery, and lightweight presence, while retaining the Phase 023 annotation review workflow."
 
+## Baseline versus additive extension
+
+**Phase 024 baseline (already established)**: recipient-specific `DatasetInvitation`, `DatasetMember` role authorization, typed assignments, discussion, durable notifications/Bell, transactional outbox with private-worker relay, Redis fan-out, delivery-only realtime tickets/gateway, membership revocation/reconnect convergence, Presence, and the Discussion/Activity workspace integration.
+
+**Additive extension (planned, not implemented)**: shareable invitation links. It adds only `share-link -> authenticated explicit claim -> existing DatasetMember`; it does not replace the recipient-specific invitation flow or alter any established baseline authority, UI, gateway, or workflow behavior.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Manage Dataset Members and Roles (Priority: P1)
@@ -142,6 +148,25 @@ The platform keeps membership, assignments, comments, notifications, and audit r
 2. **Given** a member is removed or downgraded, **When** they hold an existing browser connection, **Then** later commands and protected reads are still rejected server-side.
 3. **Given** a workflow event from Phase 023, **When** it produces a collaboration notification or activity entry, **Then** it does not alter the workflow transition, feedback, annotation revision, or Asset.status semantics.
 
+---
+
+### User Story 9 - Claim a Shareable Dataset Invitation (Priority: P1)
+
+An Owner or eligible Manager can issue a single-use, expiring invitation link for a role they may grant. A person with an existing account can safely preview it, authenticate, explicitly join, and thereby become a normal `DatasetMember`.
+
+**Why this priority**: It is a second, controlled membership-entry path for collaborators whose recipient is not known at creation time. It must converge on existing membership rather than create a parallel authorization system.
+
+**Independent Test**: An Owner creates a Labeler link; a logged-out existing user previews it, signs in without changing membership, explicitly claims it, and subsequently accesses the dataset as a Labeler through normal authorization. A second claimant cannot use the consumed link.
+
+**Acceptance Scenarios**:
+
+1. **Given** an Owner or eligible Manager and a role they can grant, **When** they create a link, **Then** it is single-use, expiring, revocable while unused, immutable in role, and never grants Owner.
+2. **Given** a recipient who opens a valid link, **When** they preview it before authentication, **Then** they see only the dataset display name, proposed role, inviter display name, and a safe availability state; opening or signing in neither consumes the link nor grants access.
+3. **Given** an authenticated existing-account holder and a currently claimable link, **When** they explicitly choose Join dataset, **Then** one transaction rechecks current creator authority and claimability, creates exactly one normal `DatasetMember`, records safe durable audit/outbox intent, consumes the link, and presents an **Open workspace** CTA targeting `/workspace/{datasetId}`.
+4. **Given** a previously removed or downgraded creator, expired/revoked/consumed link, deleted dataset, or existing claimant membership, **When** a claim is attempted, **Then** no membership or role mutation is created and the public result is safe and deterministic.
+5. **Given** two users or two tabs claiming a link concurrently, **When** their requests race or a successful response is retried, **Then** at most one admission is caused by the link and a same-claimant retry converges without duplicate membership, notification, audit, or outbox state.
+6. **Given** claim and revoke race for the same unused link, **When** one durable lifecycle transition commits first, **Then** that first transition wins: a committed revoke prevents admission, while a committed claim prevents later revocation and no contradictory state or partial membership exists.
+
 ### Edge Cases
 
 - An invitee who is already an active dataset member MUST not receive a duplicate membership or duplicate invitation notification.
@@ -155,6 +180,8 @@ The platform keeps membership, assignments, comments, notifications, and audit r
 - A notification that points to deleted, removed, or no-longer-authorized context MUST show a safe unavailable outcome rather than leaking data.
 - Presence data may be stale briefly and MUST NOT be used to grant permission, make workflow decisions, or lock annotations.
 - This phase MUST NOT add realtime replication of annotation geometry, pointer positions, Canvas drafts, or other live annotation editing data.
+- A shareable invitation link is not dataset access, a workspace credential, or realtime authentication. It becomes irrelevant after its explicit claim creates `DatasetMember`.
+- A raw invitation-link secret MUST NOT appear in logs, audit/activity records, notifications, realtime envelopes, ordinary database display fields, or public errors.
 
 ## Requirements *(mandatory)*
 
@@ -204,12 +231,28 @@ The platform keeps membership, assignments, comments, notifications, and audit r
 - **FR-026**: Every accepted membership, assignment, comment, resolve/reopen, notification-read, and collaboration moderation action MUST have safe, attributable durable audit information; audit output MUST exclude comment bodies, review feedback, credentials, private URLs, and annotation geometry unless an authorized discussion read explicitly needs its own comment body.
 - **FR-027**: All collaboration APIs and realtime subscriptions MUST enforce dataset scope and actor authorization independently of UI visibility. UI permissions are not a security boundary.
 - **FR-028**: This phase MUST preserve the Phase 022 Asset Browser and the Phase 023 Start/Submit/Open Review/Approve/Reject/Rework workflow semantics. It adds participants and collaboration around them, not a new annotation workflow.
+- **FR-029**: The system MUST provide a second, additive shareable invitation-link path alongside recipient-specific `DatasetInvitation`. Both paths MUST create the existing `DatasetMember` relationship; neither link possession nor authentication alone grants dataset access.
+- **FR-030**: Only an Owner or eligible Manager MAY issue, list, or revoke a shareable invitation link, using the existing role-grant policy. A link MUST never grant Owner, and its role is immutable after issuance.
+- **FR-031**: A shareable invitation link MUST be single-use, expiring, revocable while unused, and consumed only by an explicit authenticated claim from an existing account. Claim-time checks MUST revalidate dataset existence, creator authority to grant the encoded role, link lifecycle state, and claimant membership.
+- **FR-032**: The durable representation MUST store only a non-reversible digest of a high-entropy raw link secret. Raw secrets MUST be returned only at issuance and carried only where necessary for preview/claim; they MUST be excluded from all logs, durable audit/activity, notifications, realtime, and error responses.
+- **FR-033**: If a claimant is already a member, the system MUST return a deterministic `ALREADY_MEMBER` result, MUST NOT consume the link, create a duplicate member, or change the claimant role. Role changes remain member-management operations.
+- **FR-034**: A successful link claim MUST create membership, membership/invitation audit evidence, required recipient-safe notification, and idempotent outbox intent in one `runCollaborationTransaction(...)`; job enqueue and Redis/WebSocket delivery occur only after commit.
+- **FR-034a**: A successful link claim MUST create exactly one durable notification only for the link creator when claimant and creator differ. It MUST create no notification for the claimant, unrelated dataset members, or other managers/owners; issuance, revoke, unavailable claim, and `ALREADY_MEMBER` create none. The notification uses an additive `DATASET_MEMBER_JOINED` semantic type and a stable creator/link dedupe key that contains no raw token or digest.
+- **FR-035**: Public preview MUST expose no more than dataset display name, proposed role, inviter display name, and `AVAILABLE` or generic `UNAVAILABLE` state. It MUST not disclose protected dataset content or differentiate terminal states in a way that forms a practical oracle.
+- **FR-035a**: Authorized manager history is a separate projection from public preview. It MAY expose safe lifecycle/operational metadata needed to manage a link—link ID, role, status, creation/expiry/revocation/claim timestamps, and identities only to the extent already permitted by the member-management directory—but MUST never expose raw token, digest, reusable URL, protected dataset content, or internal authorization diagnostics.
+- **FR-036**: Link preview and claim MUST use the established rate-limit/error-envelope conventions without making Redis a source of invitation or authorization truth. Rate-limit identity and thresholds require an explicit implementation approval gate.
+- **FR-037**: Link claim concurrency and replay MUST have database-enforced or transaction-guarded single-use behavior: at most one claimant may be admitted by one link, same-claimant retry is idempotent, and revoked/expired/creator-authority races leave no partial durable state.
+- **FR-038**: After a link claim, all dataset, workspace, assignment, notification, realtime-ticket, and presence authorization MUST use current `DatasetMember` authorization. Later removal must prevent an old link, old workspace URL, or old ticket from restoring access.
+- **FR-038a**: A successful claim response and landing UI MUST present an **Open workspace** CTA to `/workspace/{datasetId}`. Following that route MUST perform normal current `DatasetMember` authorization; the invitation secret, fragment, URL, or prior successful claim MUST NOT be accepted as a workspace credential or propagated to the workspace URL.
+- **FR-039**: Invitation-link operations MUST NOT mutate `Asset.status`, `Asset.revision`, `Annotation.revision`, annotation geometry, review feedback, `AssetWorkflowEvent`, assignment semantics, discussion semantics, or presence semantics.
+- **FR-040**: Invitation-link activity, if displayed, MUST be a safe projection of existing invitation/membership events and MUST NOT create an Activity table or a reusable-token audit trail.
 
 ### Key Entities
 
 - **Dataset Member**: An existing participant relationship between a user and a dataset. It remains the source of the user's dataset role and collaboration eligibility.
 - **Typed Asset Assignment**: A durable, asset-scoped responsibility that identifies the current annotation or review assignee, the assigning actor, and its active/inactive lifecycle. It is separate from workflow state.
 - **Dataset Invitation**: A durable pending/accepted/declined/revoked invitation for an existing user and proposed dataset role. It is not an active membership until accepted.
+- **Shareable Invitation Link**: A separate durable, single-use invitation record with a token digest, proposed eligible role, creator, lifecycle state, and optional claimant evidence. It is not a DatasetMember and never authorizes a workspace request.
 - **Asset Comment Thread**: A durable asset-scoped conversation consisting of one root comment and direct replies only, author, timestamps, deletion state, and resolution state. It is distinct from rejection feedback.
 - **Comment Mention**: A durable association between a comment and a valid mentioned dataset member, used to avoid repeatedly deriving recipients from comment text.
 - **Notification**: A durable recipient-specific record of a collaboration or workflow-related event, with read state and safe navigation context.
@@ -230,6 +273,9 @@ The platform keeps membership, assignments, comments, notifications, and audit r
 - **SC-006**: Presence disappears from other viewers within the configured expiry window after a browser stops reporting activity, while both users remain independently able to perform every action their server-side permission allows.
 - **SC-007**: 100% of tested cross-dataset, post-removal, invalid-role-assignment, other-user-comment-edit/delete, and unauthorized subscription attempts are rejected without disclosing protected collaboration data.
 - **SC-008**: Existing Phase 022 assignment/browser tests and Phase 023 workflow, annotation revision, autosave, review-concurrency, and history tests continue to pass without semantic regression.
+- **SC-009**: In 100% of real-PostgreSQL concurrent-claim tests, one link admits at most one claimant; retries by that claimant produce no duplicate `DatasetMember`, audit, notification, or outbox record.
+- **SC-010**: In 100% of tested logged-out previews, no protected dataset, asset, annotation, workflow, assignment, discussion, membership, presence, storage, or credential detail is returned.
+- **SC-011**: In 100% of create/list/history/preview/claim/realtime/activity/audit/notification retrieval tests after issuance, no raw invitation token or reusable share URL is retrievable. The one-time create response is the sole raw-secret disclosure.
 
 ## Assumptions
 
@@ -242,7 +288,9 @@ The platform keeps membership, assignments, comments, notifications, and audit r
 - Actors do not receive notifications for their own successful actions. Their own action remains visible through the relevant authoritative discussion, assignment, membership, workflow, or Activity projection.
 - The global and workspace Bell is immediately before Account. Its accessible name includes the unread count when non-zero; its visible unread badge is hidden at zero and capped as `99+`.
 - Activity is a UI projection of existing records, not a new activity table, event stream, source of truth, or audit model.
-- The exact realtime hosting topology and final durable collaboration schema are intentionally deferred until the required Phase 024 audit; the chosen design must preserve the source-of-truth boundaries in this specification.
+- The Phase 024 realtime topology is established: authenticated Next.js REST commands/reads, PostgreSQL durable authority, private-worker outbox relay, Redis delivery/ephemeral presence, a delivery-only `apps/realtime` gateway, fresh scoped tickets, revocation, and reconnect-to-authoritative-refresh. The share-link extension reuses this topology without changing it.
+- Share links target only existing authenticated accounts in v1. There is no email delivery, account provisioning, guest identity, multi-use link, role editing, or owner transfer.
+- The deterministic existing-member result is `ALREADY_MEMBER`; it leaves an unused link claimable by another eligible existing account. A claim replay after a successful same-user claim returns the original successful membership result without changing it.
 
 ## Out of Scope
 
@@ -254,3 +302,4 @@ The platform keeps membership, assignments, comments, notifications, and audit r
 - External/guest account invitations, account creation, owner transfer, organization/tenant management, workload balancing, or SLA scheduling.
 - Bulk assignment/reassignment, bulk workflow decisions, real-time co-editing of annotations, or CRDT/operational-transform collaboration.
 - Replacing, deleting, or repurposing `AssetWorkflowEvent`, rejection feedback, `Asset.status`, Annotation revisions, or existing workflow-history behavior.
+- Link-based workspace authorization, invitation-token WebSocket authentication, invitation-token presence, multi-use links, guest/external invitations, email delivery, token rotation in place, or role changes through a link claim.

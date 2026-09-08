@@ -130,18 +130,18 @@
 
 ### Tests for User Story 4
 
-- [ ] T049 [P] [US4] Add durable-notification transaction tests for dedupe, retry, self-suppression, reply/mention policy, edit behavior, and workflow post-transition production in `apps/web/tests/collaboration/notification-service.test.ts`.
-- [ ] T050 [P] [US4] Add notification list/read/deep-link authorization tests in `apps/web/tests/collaboration/notification-http.test.ts`.
-- [ ] T051 [P] [US4] Add Phase 023 workflow notification no-regression tests in `apps/web/tests/workflow/workflow-notification-integration.test.ts`.
+- [X] T049 [P] [US4] Add durable-notification transaction tests for dedupe, retry, self-suppression, reply/mention policy, edit behavior, and workflow post-transition production in `apps/web/tests/collaboration/notification-service.test.ts`.
+- [X] T050 [P] [US4] Add notification list/read/deep-link authorization tests in `apps/web/tests/collaboration/notification-http.test.ts`.
+- [X] T051 [P] [US4] Add Phase 023 workflow notification no-regression tests in `apps/web/tests/workflow/workflow-notification-integration.test.ts`.
 
 ### Implementation for User Story 4
 
-- [ ] T052 [US4] Add notification listing, single read, and mark-all-read routes in `apps/web/src/app/api/notifications/route.ts`, `apps/web/src/app/api/notifications/[notificationId]/read/route.ts`, and `apps/web/src/app/api/notifications/read-all/route.ts`.
-- [ ] T053 [US4] Integrate recipient-deduplicated workflow notification and safe outbox intent into the same durable transaction that commits a successful Phase 023 workflow transition; relay dispatch occurs later and must not alter transition, stale-review, rejection-feedback, or `AssetWorkflowEvent` semantics in `apps/web/src/lib/workflow/asset-workflow-service.ts`.
-- [ ] T054 [US4] Add a safe notification list/unread-count client data layer in `apps/web/src/lib/collaboration/notification-client.ts`.
-- [ ] T055 [US4] Add the global Bell immediately before Account in `apps/web/src/components/layout/app-shell.tsx` and `apps/web/src/components/notifications/notification-bell.tsx`, including accessible count, zero-hidden badge, and `99+` cap.
-- [ ] T056 [US4] Add the workspace Bell/deep-link behavior in `apps/web/src/components/workspace/workspace-header.tsx` and `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx`.
-- [ ] T057 [US4] Verify the US4 independent offline and deep-link acceptance flow and document the result in `specs/024-collaboration-platform/quickstart.md`.
+- [X] T052 [US4] Add notification listing, single read, and mark-all-read routes in `apps/web/src/app/api/notifications/route.ts`, `apps/web/src/app/api/notifications/[notificationId]/read/route.ts`, and `apps/web/src/app/api/notifications/read-all/route.ts`.
+- [X] T053 [US4] Integrate recipient-deduplicated workflow notification and safe outbox intent into the same durable transaction that commits a successful Phase 023 workflow transition; relay dispatch occurs later and must not alter transition, stale-review, rejection-feedback, or `AssetWorkflowEvent` semantics in `apps/web/src/lib/workflow/asset-workflow-service.ts`.
+- [X] T054 [US4] Add a safe notification list/unread-count client data layer in `apps/web/src/lib/collaboration/notification-client.ts`.
+- [X] T055 [US4] Add the global Bell immediately before Account in `apps/web/src/components/layout/app-shell.tsx` and `apps/web/src/components/notifications/notification-bell.tsx`, including accessible count, zero-hidden badge, and `99+` cap.
+- [X] T056 [US4] Add the workspace Bell/deep-link behavior in `apps/web/src/components/workspace/workspace-header.tsx` and `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx`.
+- [X] T057 [US4] Verify the US4 independent offline and deep-link acceptance flow and document the result in `specs/024-collaboration-platform/quickstart.md`.
 
 ---
 
@@ -153,19 +153,19 @@
 
 ### Tests for User Story 5
 
-- [ ] T058 [P] [US5] Add gateway integration tests for ticket expiry, dataset scope, revocation, duplicate/reordered events, reconnect invalidation, and command rejection in `apps/realtime/tests/gateway.integration.test.ts`.
-- [ ] T059 [P] [US5] Add HTTP ticket authorization and no-secret-response tests in `apps/web/tests/collaboration/realtime-ticket-http.test.ts`.
-- [ ] T060 [P] [US5] Add outbox relay retry/replay tests in `apps/web/tests/collaboration/collaboration-outbox.test.ts`.
+- [X] T058 [P] [US5] Add gateway integration tests for ticket expiry, dataset scope, revocation, duplicate/reordered events, reconnect invalidation, and command rejection in `apps/realtime/tests/gateway.integration.test.ts`.
+- [X] T059 [P] [US5] Add HTTP ticket authorization and no-secret-response tests in `apps/web/tests/collaboration/realtime-ticket-http.test.ts`.
+- [X] T060 [P] [US5] Add outbox relay retry/replay tests in `apps/web/tests/collaboration/collaboration-outbox.test.ts`.
 
 ### Implementation for User Story 5
 
-- [ ] T061 [US5] Add the approved delivery-only gateway package/runtime configuration in `apps/realtime/package.json`, `apps/realtime/tsconfig.json`, and `apps/realtime/src/index.ts` using the approved `ws` dependency only.
-- [ ] T062 [US5] Implement short-lived signed ticket issuance and server-side scope authorization in `apps/web/src/lib/realtime/ticket-service.ts` and `apps/web/src/app/api/realtime/ticket/route.ts`.
-- [ ] T063 [US5] Implement gateway ticket verification, connection/scope registry, safe envelope validation, and REST-only command rejection in `apps/realtime/src/gateway.ts`.
-- [ ] T064 [US5] Implement Redis fan-out consumption, membership-revocation handling, and per-scope connection closure in `apps/realtime/src/subscriptions.ts`; the gateway consumes only worker-published Redis envelopes and never reads, claims, or processes PostgreSQL outbox rows.
-- [ ] T065 [US5] Add browser reconnect/invalidation handling that refetches authoritative REST state in `apps/web/src/components/workspace/use-collaboration-realtime.ts`.
-- [ ] T066 [US5] Add normal/review Compose service, non-secret environment validation, health check, and websocket proxy forwarding in `docker-compose.yaml`, `docker-compose.review.yaml`, `docker/review-proxy.conf`, and `apps/realtime/src/env.ts`.
-- [ ] T067 [US5] Verify the US5 two-session/reconnect/revocation acceptance flow and document the result in `specs/024-collaboration-platform/quickstart.md`.
+- [X] T061 [US5] Add the approved delivery-only gateway package/runtime configuration in `apps/realtime/package.json`, `apps/realtime/tsconfig.json`, and `apps/realtime/src/index.ts` using the approved `ws` dependency only.
+- [X] T062 [US5] Implement short-lived signed ticket issuance and server-side scope authorization in `apps/web/src/lib/realtime/ticket-service.ts` and `apps/web/src/app/api/realtime/ticket/route.ts`.
+- [X] T063 [US5] Implement gateway ticket verification, connection/scope registry, safe envelope validation, and REST-only command rejection in `apps/realtime/src/gateway.ts`.
+- [X] T064 [US5] Implement Redis fan-out consumption, membership-revocation handling, and per-scope connection closure in `apps/realtime/src/subscriptions.ts`; the gateway consumes only worker-published Redis envelopes and never reads, claims, or processes PostgreSQL outbox rows.
+- [X] T065 [US5] Add browser reconnect/invalidation handling that refetches authoritative REST state in `apps/web/src/components/workspace/use-collaboration-realtime.ts`.
+- [X] T066 [US5] Add normal/review Compose service, non-secret environment validation, health check, and websocket proxy forwarding in `docker-compose.yaml`, `docker-compose.review.yaml`, `docker/review-proxy.conf`, and `apps/realtime/src/env.ts`.
+- [X] T067 [US5] Verify the US5 two-session/reconnect/revocation acceptance flow and document the result in `specs/024-collaboration-platform/quickstart.md`.
 
 ---
 
@@ -177,15 +177,15 @@
 
 ### Tests for User Story 6
 
-- [ ] T068 [P] [US6] Add Redis TTL, multi-tab aggregation, expiry, editing-precedence, and no-lock gateway tests in `apps/realtime/tests/presence.integration.test.ts`.
-- [ ] T069 [P] [US6] Add workspace presence-state behavior tests in `apps/web/tests/workspace/collaboration-presence.test.tsx`.
+- [X] T068 [P] [US6] Add Redis TTL, multi-tab aggregation, expiry, editing-precedence, and no-lock gateway tests in `apps/realtime/tests/presence.integration.test.ts`.
+- [X] T069 [P] [US6] Add workspace presence-state behavior tests in `apps/web/tests/workspace/collaboration-presence.vitest.spec.tsx`.
 
 ### Implementation for User Story 6
 
-- [ ] T070 [US6] Implement Redis connection/dataset/asset presence storage, heartbeat renewal, cleanup, and per-user aggregation in `apps/realtime/src/presence.ts`.
-- [ ] T071 [US6] Implement browser activity/heartbeat reporting with blur/inactivity downgrade and no geometry payload in `apps/web/src/components/workspace/use-workspace-presence.ts`.
-- [ ] T072 [US6] Add avatar stack and accessible presence details to `apps/web/src/components/workspace/collaboration-presence.tsx` and `apps/web/src/components/workspace/workspace-header.tsx`.
-- [ ] T073 [US6] Verify the US6 multi-tab expiry and **PRESENCE IS NOT A LOCK** acceptance flow in `specs/024-collaboration-platform/quickstart.md`.
+- [X] T070 [US6] Implement Redis connection/dataset/asset presence storage, heartbeat renewal, cleanup, and per-user aggregation in `apps/realtime/src/presence.ts`.
+- [X] T071 [US6] Implement browser activity/heartbeat reporting with blur/inactivity downgrade and no geometry payload in `apps/web/src/components/workspace/use-workspace-presence.ts`.
+- [X] T072 [US6] Add avatar stack and accessible presence details to `apps/web/src/components/workspace/collaboration-presence.tsx` and `apps/web/src/components/workspace/workspace-header.tsx`.
+- [X] T073 [US6] Verify the US6 multi-tab expiry and **PRESENCE IS NOT A LOCK** acceptance flow in `specs/024-collaboration-platform/quickstart.md`.
 
 ---
 
@@ -197,16 +197,16 @@
 
 ### Tests for User Story 7
 
-- [ ] T074 [P] [US7] Add workspace UI tests for Discussion drawer, Properties Panel preservation, Activity projection, Bell deep link, and image/video context in `apps/web/tests/workspace/collaboration-workspace-ui.test.tsx`.
-- [ ] T075 [P] [US7] Add Activity projection authorization/redaction tests in `apps/web/tests/collaboration/activity-projection.test.ts`.
+- [X] T074 [P] [US7] Complete workspace UI tests for Discussion drawer, Properties Panel preservation, Activity projection, Bell deep link, and image/video context in `apps/web/tests/workspace/collaboration-workspace-ui.vitest.spec.tsx`.
+- [X] T075 [P] [US7] Add Activity projection authorization/redaction tests in `apps/web/tests/collaboration/activity-projection.test.ts`.
 
 ### Implementation for User Story 7
 
-- [ ] T076 [US7] Implement a read-only projection over existing collaboration and Phase 023 records, with no new Activity persistence, in `apps/web/src/lib/collaboration/activity-projection-service.ts`.
-- [ ] T077 [US7] Implement Activity tab rendering and discussion-comment highlight/deep-link state in `apps/web/src/components/workspace/discussion-drawer.tsx`.
-- [ ] T078 [US7] Wire discussion query state, selected asset synchronization, and safe comment deep links into `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx` and `apps/web/src/components/workspace/workspace-header.tsx`.
-- [ ] T079 [US7] Verify no permanent fourth column or modality-specific workspace route is introduced in `apps/web/src/components/workspace/properties-panel.tsx` and `apps/web/src/lib/workspace/workspace-engine-registry.tsx`.
-- [ ] T080 [US7] Verify the US7 image/video context acceptance flow and document the result in `specs/024-collaboration-platform/quickstart.md`.
+- [X] T076 [US7] Implement a read-only projection over existing collaboration and Phase 023 records, with no new Activity persistence, in `apps/web/src/lib/collaboration/activity-projection-service.ts`.
+- [X] T077 [US7] Implement Activity tab rendering and discussion-comment highlight/deep-link state in `apps/web/src/components/workspace/discussion-drawer.tsx`.
+- [X] T078 [US7] Wire discussion query state, selected asset synchronization, and safe comment deep links into `apps/web/src/app/(app)/workspace/[datasetId]/page.tsx` and `apps/web/src/components/workspace/workspace-header.tsx`.
+- [X] T079 [US7] Verify no permanent fourth column or modality-specific workspace route is introduced in `apps/web/src/components/workspace/properties-panel.tsx` and `apps/web/src/lib/workspace/workspace-engine-registry.tsx`.
+- [X] T080 [US7] Verify the US7 image/video context acceptance flow and document the result in `specs/024-collaboration-platform/quickstart.md`.
 
 ---
 
@@ -218,15 +218,15 @@
 
 ### Tests for User Story 8
 
-- [ ] T081 [P] [US8] Add cross-dataset, post-removal, deleted-context, and comment ownership attack tests in `apps/web/tests/collaboration/collaboration-security.test.ts`.
-- [ ] T082 [P] [US8] Add concurrent invitation/assignment/comment/notification idempotency race tests in `apps/web/tests/collaboration/collaboration-concurrency.test.ts`.
-- [ ] T083 [P] [US8] Add gateway unauthorized-subscription and revocation-race tests in `apps/realtime/tests/security.integration.test.ts`.
+- [X] T081 [P] [US8] Add cross-dataset, post-removal, deleted-context, and comment ownership attack tests in `apps/web/tests/collaboration/collaboration-security.test.ts`.
+- [X] T082 [P] [US8] Add concurrent invitation/assignment/comment/notification idempotency race tests in `apps/web/tests/collaboration/collaboration-concurrency.test.ts`.
+- [X] T083 [P] [US8] Add gateway unauthorized-subscription and revocation-race tests in `apps/realtime/tests/security.integration.test.ts`.
 
 ### Implementation for User Story 8
 
-- [ ] T084 [US8] Apply and verify cross-story remediation discovered during US1–US4: preserve their existing authorization/transaction controls while closing identified FK-delete, error-concealment, and audit-redaction gaps in `apps/web/src/lib/collaboration/dataset-membership-service.ts`, `apps/web/src/lib/collaboration/asset-assignment-service.ts`, `apps/web/src/lib/collaboration/asset-comment-service.ts`, and `apps/web/src/lib/collaboration/notification-service.ts`; do not defer baseline security to this phase.
-- [ ] T085 [US8] Apply and verify cross-story gateway remediation discovered during US5–US6: preserve their baseline scope checks, ticket expiry, revocation ordering, and redacted logging while closing identified gaps in `apps/realtime/src/gateway.ts` and `apps/realtime/src/subscriptions.ts`; do not defer baseline security to this phase.
-- [ ] T086 [US8] Verify the US8 independent attack, concurrency, reconnect, and Phase 023 semantic-regression acceptance flow in `specs/024-collaboration-platform/quickstart.md`.
+- [X] T084 [US8] Apply and verify cross-story remediation discovered during US1–US4: preserve their existing authorization/transaction controls while closing identified FK-delete, error-concealment, and audit-redaction gaps in `apps/web/src/lib/collaboration/dataset-membership-service.ts`, `apps/web/src/lib/collaboration/asset-assignment-service.ts`, `apps/web/src/lib/collaboration/asset-comment-service.ts`, and `apps/web/src/lib/collaboration/notification-service.ts`; do not defer baseline security to this phase.
+- [X] T085 [US8] Apply and verify cross-story gateway remediation discovered during US5–US6: preserve their baseline scope checks, ticket expiry, revocation ordering, and redacted logging while closing identified gaps in `apps/realtime/src/gateway.ts` and `apps/realtime/src/subscriptions.ts`; do not defer baseline security to this phase.
+- [X] T086 [US8] Verify the US8 independent attack, concurrency, reconnect, and Phase 023 semantic-regression acceptance flow in `specs/024-collaboration-platform/quickstart.md`.
 
 ---
 
@@ -234,14 +234,14 @@
 
 **Purpose**: Complete cross-cutting documentation, operational validation, and closure without broad cleanup or semantic refactoring.
 
-- [ ] T087 [P] Update the approved ADR, delivery topology, non-secret configuration names, and operational runbook in `docs/architecture/adrs/024-collaboration-realtime.md` and `specs/024-collaboration-platform/quickstart.md`.
-- [ ] T088 [P] Complete OpenAPI operation/error coverage and bundle validation in `specs/api/openapi.yaml`, `specs/api/schemas/collaboration.yaml`, and `apps/web/tests/openapi-contract/collaboration.contract.test.ts`.
-- [ ] T089 Run the focused PostgreSQL collaboration transaction and HTTP contract suites recorded in `apps/web/tests/collaboration/` against Compose PostgreSQL/Redis and record results in `specs/024-collaboration-platform/quickstart.md`.
-- [ ] T090 Run `apps/realtime/tests/` against the Compose gateway/Redis topology and record ticket, revocation, retry, reconnect, and presence evidence in `specs/024-collaboration-platform/quickstart.md`.
-- [ ] T091 Run Phase 022 Asset Browser and Phase 023 workflow/revision/history regression suites in `apps/web/tests/workspace/` and `apps/web/tests/workflow/`, recording that `Asset.status` and annotation revision semantics remain unchanged in `specs/024-collaboration-platform/quickstart.md`.
-- [ ] T092 Run web typecheck, lint, OpenAPI validation/bundle, Docker Compose build, normal/review proxy smoke tests, and gateway health checks from `package.json`, `docker-compose.yaml`, `docker-compose.review.yaml`, and `docker/review-proxy.conf`.
-- [ ] T093 Perform the final authorization, credential-redaction, schema/FK, event-payload, and Activity-not-a-source-of-truth audit against `specs/024-collaboration-platform/spec.md`, `specs/024-collaboration-platform/plan.md`, and `docs/architecture/adrs/024-collaboration-realtime.md`.
-- [ ] T094 Mark validated tasks complete and document remaining manual acceptance evidence or approved deferrals in `specs/024-collaboration-platform/tasks.md`.
+- [X] T087 [P] Update the approved ADR, delivery topology, non-secret configuration names, and operational runbook in `docs/architecture/adrs/024-collaboration-realtime.md` and `specs/024-collaboration-platform/quickstart.md`.
+- [X] T088 [P] Complete OpenAPI operation/error coverage and bundle validation in `specs/api/openapi.yaml`, `specs/api/schemas/collaboration.yaml`, and `apps/web/tests/openapi-contract/collaboration.contract.test.ts`.
+- [X] T089 Run the focused PostgreSQL collaboration transaction and HTTP contract suites recorded in `apps/web/tests/collaboration/` against Compose PostgreSQL/Redis and record results in `specs/024-collaboration-platform/quickstart.md`.
+- [X] T090 Run `apps/realtime/tests/` against the Compose gateway/Redis topology and record ticket, revocation, retry, reconnect, and presence evidence in `specs/024-collaboration-platform/quickstart.md`.
+- [X] T091 Run Phase 022 Asset Browser and Phase 023 workflow/revision/history regression suites in `apps/web/tests/workspace/` and `apps/web/tests/workflow/`, recording that `Asset.status` and annotation revision semantics remain unchanged in `specs/024-collaboration-platform/quickstart.md`.
+- [X] T092 Run web typecheck, lint, OpenAPI validation/bundle, Docker Compose build, normal/review proxy smoke tests, and gateway health checks from `package.json`, `docker-compose.yaml`, `docker-compose.review.yaml`, and `docker/review-proxy.conf`.
+- [X] T093 Perform the final authorization, credential-redaction, schema/FK, event-payload, and Activity-not-a-source-of-truth audit against `specs/024-collaboration-platform/spec.md`, `specs/024-collaboration-platform/plan.md`, and `docs/architecture/adrs/024-collaboration-realtime.md`.
+- [X] T094 Mark validated tasks complete and document remaining manual acceptance evidence or approved deferrals in `specs/024-collaboration-platform/tasks.md`.
 
 ---
 
@@ -293,3 +293,63 @@
 - Do not remove or rename `Asset.status`, Phase 023 workflow transitions/events, rejection feedback, annotation geometry, or annotation revisions.
 - Do not add a WebSocket command API, realtime annotation synchronization, presence lock, permanent workspace column, or modality-specific workspace route.
 - A task touching `prisma/schema.prisma`, `docker-compose.yaml`, `docker-compose.review.yaml`, `docker/review-proxy.conf`, or package dependencies is blocked until the ADR/approval gate records the approved design.
+
+---
+
+## Additive extension: User Story 9 — Shareable Invitation Links (planned; do not implement before approval)
+
+**Goal**: Add `share-link -> authenticated explicit claim -> existing DatasetMember` beside recipient-specific invitations without creating a second authorization path.
+
+**Non-negotiable boundary**: No task may reinterpret `Asset.status`, `Asset.revision`, `Annotation.revision`, geometry/autosave, review feedback, `AssetWorkflowEvent`, assignment, discussion, presence, recipient-specific `DatasetInvitation`, or the Next.js/worker/gateway boundary.
+
+### Phase 12: Decision and repository-audit gate
+
+- [X] T095 Audit and record the current `DatasetInvitation`, `DatasetMember`, user relations, role grant helper, membership service/routes/validation, transaction/outbox relay, ticket/revocation, Activity, UI, OpenAPI, tests, rate limiter, ADR, and deletion behavior in `research.md`.
+- [ ] T096 Approve separate `DatasetInvitationLink` rather than overloading recipient-specific `DatasetInvitation`; approve the `ALREADY_MEMBER` non-consuming policy and same-claimant retry behavior in `research.md` and `data-model.md`.
+- [ ] T097 Approve token handling: 256-bit random secret, SHA-256 digest-only persistence, fragment share URL, JSON-body preview/claim, generic unavailable state, and no raw-token logging/audit/activity/notification/realtime exposure.
+- [ ] T098 Approve lifecycle/event/migration policy: `PENDING/CLAIMED/REVOKED/EXPIRED`, immutable non-Owner role, first-committed-transition-wins revoke/claim race, proposed safe membership-event actions, expiry duration, FK/deletion behavior, and no backfill.
+- [ ] T099 Approve public preview/claim rate-limit identity/category/threshold/failure behavior, distinct public-preview/authorized-management projections, and the final creator-only `DATASET_MEMBER_JOINED` notification policy; confirm no dependency, gateway, Compose, worker-runtime, or environment change is needed.
+
+**Checkpoint**: T095–T099 are explicit product/architecture approvals. Do not edit Prisma, API code, UI, worker, gateway, Compose, or dependencies before this checkpoint.
+
+### Phase 13: Model, safe primitives, and migration
+
+- [ ] T100 [US9] Add focused real-PostgreSQL tests for token digest uniqueness, lifecycle guards, normal member uniqueness, same-claimant replay, different-claimant race, first-committed revoke-vs-claim behavior, expiry-at-claim, creator-loss, and rollback/no partial durable state in `apps/web/tests/collaboration/invitation-link-service.test.ts`.
+- [ ] T101 [US9] Add only approved Prisma enums, `DatasetInvitationLink` relations/indexes, safe membership-event actions, and generated safe types to `prisma/schema.prisma`; do not alter `DatasetInvitation` or locked Phase 022/023 models.
+- [ ] T102 [US9] Create and review one additive Prisma migration; verify empty backfill, migration reversibility/operational safety, dataset/user deletion behavior, and no persisted raw secret.
+- [ ] T103 [US9] Extend collaboration Zod validation and safe DTO types for manager link actions, fragment-body preview, and authenticated claim in `apps/web/src/lib/validation/collaboration.ts` and `apps/web/src/types/collaboration.ts`.
+- [ ] T104 [US9] Implement server-only token generation/digest/redaction utilities and test that raw values never enter logs, audit, notification, Activity, realtime, DTOs, or errors.
+
+### Phase 14: Authoritative service and concurrency proof
+
+- [ ] T105 [US9] Implement `apps/web/src/lib/collaboration/invitation-link-service.ts` using `runCollaborationTransaction(...)` for issue/revoke/preview/claim and reusing existing role/membership authorization helpers.
+- [ ] T106 [US9] Implement claim-time revalidation of dataset, pending/unexpired/unrevoked/unconsumed state, effective creator authority, immutable role policy, and current claimant membership; return only approved safe terminal outcomes.
+- [ ] T107 [US9] Implement transactional `DatasetMember` creation, safe link/membership events, exactly-one creator-only `DATASET_MEMBER_JOINED` notification (no claimant/bystander recipient), stable outbox dedupe intent, and after-commit existing job enqueue; prohibit REST-to-Redis publication.
+- [ ] T108 [US9] Prove real-PostgreSQL concurrency: B/C one winner, B two tabs/replay no duplicate effects, revoke/claim and expiry/claim safe convergence, creator removal/downgrade rejection, and outbox-dispatch failure leaves durable membership correct.
+- [ ] T109 [US9] Add explicit regression assertions that all link operations leave `Asset.status`, `Asset.revision`, `Annotation.revision`, geometry, feedback, and `AssetWorkflowEvent` unchanged.
+
+### Phase 15: HTTP contracts and management/landing UI
+
+- [ ] T110 [US9] Add browser-facing manager routes for create/list/revoke in `apps/web/src/app/api/datasets/[datasetId]/invitation-links/...` with existing auth, error, concealment, pagination, and authorized-management DTO conventions.
+- [ ] T111 [US9] Add public rate-limited safe preview and authenticated explicit claim routes using token request bodies, never URL parameters, in `apps/web/src/app/api/invitation-links/...`.
+- [ ] T112 [US9] Add HTTP production/contract tests for distinct logged-out safe preview versus authorized management DTOs, authentication without claim, claim success/Open-workspace CTA, independent `/workspace/{datasetId}` authorization without token fragment/query, `ALREADY_MEMBER`, terminal-state concealment, actor/role authorization, invalid payloads, pagination, rate limiting, raw-token non-retrieval after issuance, and safe DTO redaction.
+- [ ] T113 [US9] Document every browser-facing endpoint and schema in `specs/api/openapi.yaml`, `specs/api/schemas/collaboration.yaml`, and `contracts/invitation-links-api.md`; validate and bundle OpenAPI.
+- [ ] T114 [US9] Add owner/manager link create/list/revoke/copy controls to the existing dataset membership-management surface; do not add administration to workspace or expose a reusable secret after initial creation.
+- [ ] T115 [US9] Add `/join` safe landing page: fragment handling, public preview, sign-in continuation, explicit Join confirmation, unavailable state, idempotent success, and an **Open workspace** CTA to `/workspace/{datasetId}`. Strip the fragment and never put tokens in workspace/server-rendered route/query/telemetry state.
+
+### Phase 16: Delivery, hardening, and closure
+
+- [ ] T116 [US9] Verify accepted claim reuses the existing membership-change outbox -> worker -> Redis -> gateway invalidation path and requires no new WebSocket command, token auth, gateway schema, or Redis authority.
+- [ ] T117 [US9] Add Activity projection/redaction coverage for approved safe link lifecycle/member events; prove no raw token/digest/URL enters Activity, notifications, audit, gateway envelopes, or logs.
+- [ ] T118 [US9] Add security tests for cross-dataset access, creator removal/downgrade, stale tickets after claimed-member removal, token leakage/non-retrieval, replay, first-wins revoke/claim race, and public enumeration/timing/rate abuse.
+- [ ] T119 [US9] Run recipient-specific invitation and membership/role/removal regressions; verify link work does not alter their service/API behavior.
+- [ ] T120 [US9] Run Phase 022 Asset Browser/assignment, Phase 023 workflow/revision/concurrency/stale-review, Phase 024 discussion/notification/realtime/presence/activity, and authorization regressions.
+- [ ] T121 [US9] Run PostgreSQL integration suites, OpenAPI validation/bundle, web/realtime typecheck, lint, production build, and Compose/proxy smoke only if implementation changed runtime-observed code.
+- [ ] T122 [US9] Complete manual acceptance: logged-out preview -> login -> explicit claim -> normal workspace; then member removal proves old link/workspace/ticket cannot restore access. Record safe evidence in `quickstart.md`.
+- [ ] T123 [US9] Perform final token-redaction, migration/FK, authorization, transaction/outbox/idempotency, rate-limit, and no-Phase-022/023-semantics-change audit; mark validated extension tasks complete only after evidence passes.
+
+### Extension dependency order
+
+`T095–T099 approval -> T100–T104 model/tests -> T105–T109 service/concurrency -> T110–T115 HTTP/UI -> T116–T123 hardening/closure`.
+
+T100 test design may proceed while approvals are being reviewed, but no schema or application write begins before T096–T099. T116 does not authorize modifying the gateway; it only verifies the existing membership path.

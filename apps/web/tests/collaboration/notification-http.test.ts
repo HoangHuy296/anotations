@@ -3,7 +3,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import test, { after, before } from "node:test";
 
-import { NotificationType, UserRole } from "@internal/db";
+import { DatasetMemberRole, NotificationType, UserRole } from "@internal/db";
 
 import { hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -20,7 +20,7 @@ let server: ChildProcess | undefined;
 let serverExited = false;
 let serverReportedReady = false;
 let serverDiagnostic = "";
-const ids = { owner: "", recipient: "", dataset: "", notification: "" };
+const ids = { owner: "", recipient: "", dataset: "", notification: "", ownerNotification: "" };
 const cookies = { owner: "", recipient: "" };
 
 function session(response: Response) {
@@ -54,7 +54,9 @@ before(async () => {
   const users = await Promise.all(["owner", "recipient"].map((name) => db.user.create({ data: { email: `${name}-${marker}@test.invalid`, passwordHash, role: UserRole.LABELER }, select: { id: true, email: true } })));
   [ids.owner, ids.recipient] = users.map((user) => user.id);
   ids.dataset = (await db.dataset.create({ data: { ownerId: ids.owner, name: `notification-${marker}` }, select: { id: true } })).id;
+  await db.datasetMember.create({ data: { datasetId: ids.dataset, userId: ids.recipient, role: DatasetMemberRole.LABELER } });
   ids.notification = (await db.notification.create({ data: { userId: ids.recipient, actorId: ids.owner, type: NotificationType.MENTIONED, datasetId: ids.dataset, title: "Mention", body: "Safe", dedupeKey: `http-${marker}` }, select: { id: true } })).id;
+  ids.ownerNotification = (await db.notification.create({ data: { userId: ids.owner, actorId: ids.recipient, type: NotificationType.COMMENT_REPLY, datasetId: ids.dataset, title: "Owner", body: "Safe", dedupeKey: `owner-http-${marker}` }, select: { id: true } })).id;
   const child = spawn("node_modules/.bin/next", ["start", "--port", String(port)], { cwd: process.cwd(), env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL, NODE_ENV: "production" }, stdio: ["ignore", "pipe", "pipe"] });
   server = child;
   const capture = (chunk: Buffer) => {
@@ -89,10 +91,24 @@ test("notification HTTP list/read routes are recipient-scoped, redacted, and ide
   const page = await list.json() as { data: { unreadCount: number; items: Array<{ id: string; datasetId?: string; outbox?: unknown }> } };
   assert.equal(page.data.unreadCount, 1);
   assert.equal(page.data.items[0]?.id, ids.notification);
+  assert.equal(page.data.items[0]?.datasetId, ids.dataset);
   assert.equal("outbox" in page.data.items[0]!, false, "safe DTO excludes internal delivery state");
   assert.equal((await fetch(`${base}/api/notifications?limit=999`, { headers: { Cookie: cookies.recipient } })).status, 400);
+  assert.equal((await fetch(`${base}/api/notifications?limit=0`, { headers: { Cookie: cookies.recipient } })).status, 400);
+  assert.equal((await fetch(`${base}/api/notifications?cursor=not-a-cuid`, { headers: { Cookie: cookies.recipient } })).status, 400);
   assert.equal((await fetch(`${base}/api/notifications/${ids.notification}/read`, { method: "POST", headers: { Cookie: cookies.owner } })).status, 404);
+  assert.equal((await fetch(`${base}/api/notifications/ckaaaaaaaaaaaaaaaaaaaaaaaa/read`, { method: "POST", headers: { Cookie: cookies.recipient } })).status, 404);
   assert.equal((await fetch(`${base}/api/notifications/${ids.notification}/read`, { method: "POST", headers: { Cookie: cookies.recipient } })).status, 200);
   assert.equal((await fetch(`${base}/api/notifications/${ids.notification}/read`, { method: "POST", headers: { Cookie: cookies.recipient } })).status, 200);
-  assert.equal((await fetch(`${base}/api/notifications/read-all`, { method: "POST", headers: { Cookie: cookies.recipient } })).status, 200);
+  const markAll = await fetch(`${base}/api/notifications/read-all`, { method: "POST", headers: { Cookie: cookies.recipient } });
+  assert.equal(markAll.status, 200);
+  assert.equal((await db.notification.findUnique({ where: { id: ids.ownerNotification }, select: { readAt: true } }))?.readAt, null, "mark-all affects only the authenticated recipient");
+
+  await db.datasetMember.delete({ where: { datasetId_userId: { datasetId: ids.dataset, userId: ids.recipient } } });
+  const redacted = await fetch(`${base}/api/notifications`, { headers: { Cookie: cookies.recipient } });
+  assert.equal(redacted.status, 200);
+  const redactedItem = (await redacted.json() as { data: { items: Array<{ unavailable: boolean; datasetId: string | null; title: string }> } }).data.items.find((item) => item.unavailable);
+  assert.equal(redactedItem?.unavailable, true);
+  assert.equal(redactedItem?.datasetId, null);
+  assert.equal(redactedItem?.title, "Notification unavailable");
 });

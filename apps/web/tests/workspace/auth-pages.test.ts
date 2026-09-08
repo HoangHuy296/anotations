@@ -46,7 +46,7 @@ function tokenFrom(response: Response) {
   return /^fieldframe_session=([^;]+)/.exec(response.headers.get("set-cookie") ?? "")?.[1] ?? null;
 }
 
-test("registration persists an explicitly selected permitted role with an opaque cookie session", { skip: !enabled }, async () => {
+test("registration persists an explicitly selected permitted role and login creates an opaque cookie session", { skip: !enabled }, async () => {
   const emails: string[] = [];
   try {
     for (const role of [UserRole.MANAGER, UserRole.LABELER, UserRole.REVIEWER]) {
@@ -63,12 +63,15 @@ test("registration persists an explicitly selected permitted role with an opaque
       assert.ok(stored?.passwordHash);
       assert.notEqual(stored.passwordHash, password);
       assert.equal(stored.role, role);
-      assert.equal(stored.sessions.length, 1);
+      // Signup is intentionally account-only. It must not authenticate the
+      // caller; the normal login boundary creates the opaque session instead.
+      assert.equal(stored.sessions.length, 0);
       const loginResponse = await login(new Request("http://fieldframe.test/api/auth/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, password }) }));
       assert.equal(loginResponse.status, 200);
       const token = tokenFrom(loginResponse);
       assert.ok(token);
       assert.match(loginResponse.headers.get("set-cookie") ?? "", /HttpOnly/i);
+      assert.equal(await db.authSession.count({ where: { user: { email } } }), 1);
       assert.equal((await getActorFromSessionToken(token))?.email, email);
       const duplicate = await signup(new Request("http://fieldframe.test/api/auth/signup", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, password, role }) }));
       assert.equal(duplicate.status, 409);
@@ -113,8 +116,11 @@ test("actual auth HTTP flow signs out and rejects expired or revoked opaque sess
     assert.match(unauthenticated.headers.get("location") ?? "", /\/login\?returnTo=%2Fdashboard/);
     const registered = await fetch(`${baseUrl}/api/auth/signup`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, password, role: UserRole.LABELER }) });
     assert.equal(registered.status, 201);
-    const initial = sessionCookie(registered);
-    assert.match(registered.headers.get("set-cookie") ?? "", /HttpOnly/i);
+    assert.equal(registered.headers.get("set-cookie"), null, "signup must not establish a session");
+    const initialLogin = await fetch(`${baseUrl}/api/auth/login`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, password }) });
+    assert.equal(initialLogin.status, 200);
+    const initial = sessionCookie(initialLogin);
+    assert.match(initialLogin.headers.get("set-cookie") ?? "", /HttpOnly/i);
     const protectedResponse = await fetch(`${baseUrl}/dashboard`, { headers: { Cookie: initial.header }, redirect: "manual" });
     assert.equal(protectedResponse.status, 200);
     const me = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: initial.header } });

@@ -63,6 +63,7 @@ services:
       SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-reviewer@example.com}
       SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-Review Operator}
       DATABASE_URL: ${DATABASE_URL_DOCKER}
+      REALTIME_TICKET_SECRET: ${REALTIME_TICKET_SECRET:-LsidzWlW6P4Ii5mRPVy2HB+54o+0XOIwyDxuTKxrtEN5RbZL+FKS8KbKeQ0ncxCj}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://10.0.0.123:9100}
       MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:-http://10.0.0.123:3001}
@@ -138,6 +139,30 @@ services:
     depends_on:
       web:
         condition: service_started
+      realtime:
+        condition: service_started
+
+  realtime:
+    build:
+      context: .
+      dockerfile: apps/realtime/Dockerfile
+    environment:
+      REALTIME_PORT: 3002
+      REALTIME_TICKET_SECRET: ${REALTIME_TICKET_SECRET:?REALTIME_TICKET_SECRET is required in .env.review}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required in .env.review}
+      REDIS_DB: ${REDIS_DB:-0}
+      BULLMQ_PREFIX: ${BULLMQ_PREFIX:-fieldframe-review}
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3002/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
 
   worker:
     build:

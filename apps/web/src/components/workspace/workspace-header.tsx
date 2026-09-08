@@ -24,7 +24,11 @@ import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { useWorkflowShortcuts } from "@/components/workspace/use-workflow-shortcuts";
+import { useCollaborationRealtime } from "@/components/workspace/use-collaboration-realtime";
+import { CollaborationPresence } from "@/components/workspace/collaboration-presence";
+import { useWorkspacePresence } from "@/components/workspace/use-workspace-presence";
 import type { SafeWorkspaceWorkflow } from "@/types/workspace";
+import { workflowAssetStateSchema } from "@/lib/validation/asset-workflow";
 
 type WorkspaceHeaderProps = {
   datasetName: string;
@@ -36,7 +40,7 @@ type WorkspaceHeaderProps = {
   /** Signed-in actor, used to populate the account dropdown. `null` renders the trigger disabled. */
   actor: { email: string; name: string } | null;
   workflow?: SafeWorkspaceWorkflow | null;
-  discussion?: { datasetId: string; assetId: string | null };
+  discussion?: { datasetId: string; assetId: string | null; commentId?: string | null };
 };
 
 /**
@@ -61,7 +65,11 @@ export function WorkspaceHeader({
   const conflict = currentSaveStates.includes("conflict") || currentSaveStates.includes("failed");
   const saving = currentSaveStates.includes("pending") || currentSaveStates.includes("saving");
   const saveLabel = conflict ? "Save needs attention" : saving ? "Saving changes" : "All changes saved";
-  const [discussionOpen, setDiscussionOpen] = useState(false);
+  const [discussionOpen, setDiscussionOpen] = useState(Boolean(discussion?.commentId));
+  const [collaborationRevision, setCollaborationRevision] = useState(0);
+  const router = useRouter();
+  useCollaborationRealtime({ datasetIds: discussion ? [discussion.datasetId] : [], onInvalidate: () => { setCollaborationRevision((value) => value + 1); router.refresh(); } });
+  const presence = useWorkspacePresence({ datasetId: discussion?.datasetId, assetId: discussion?.assetId });
 
   return (
     <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-zinc-200 bg-white px-3 py-3 sm:px-5">
@@ -90,6 +98,7 @@ export function WorkspaceHeader({
       <div className="flex items-center gap-2">
         {workflow ? <WorkflowControls key={`${workflow.assetId}:${workflow.revision}`} workflow={workflow} /> : null}
         {discussion ? <Button type="button" size="sm" variant="secondary" aria-label="Open asset discussion" onClick={() => setDiscussionOpen(true)}><ChatCircleText aria-hidden="true" size={17} />Discussion</Button> : null}
+        <CollaborationPresence members={presence} />
         <span className={`hidden items-center gap-2 text-xs sm:flex ${conflict ? "text-rose-700" : "text-zinc-500"}`}>
           {conflict ? <WarningCircle aria-hidden="true" className="text-rose-600" size={17} weight="fill" /> : <CloudCheck
             aria-hidden="true"
@@ -104,7 +113,7 @@ export function WorkspaceHeader({
         {actor ? <NotificationBell /> : null}
         <AccountMenu actor={actor} />
       </div>
-      {discussion ? <DiscussionDrawer datasetId={discussion.datasetId} assetId={discussion.assetId} open={discussionOpen} onClose={() => setDiscussionOpen(false)} /> : null}
+      {discussion ? <DiscussionDrawer datasetId={discussion.datasetId} assetId={discussion.assetId} highlightCommentId={discussion.commentId} refreshKey={collaborationRevision} open={discussionOpen} onClose={() => setDiscussionOpen(false)} /> : null}
     </header>
   );
 }
@@ -125,7 +134,9 @@ function WorkflowControls({ workflow }: { workflow: SafeWorkspaceWorkflow }) {
   const loadHistory = useCallback(async () => {
     const response = await fetch(`/api/datasets/${workflow.datasetId}/assets/${workflow.assetId}/workflow`, { credentials: "same-origin", cache: "no-store" });
     const payload = await response.json().catch(() => null) as { data?: { asset?: WorkflowAssetResponse; history?: WorkflowEvent[] } } | null;
-    if (response.ok && payload?.data?.asset) { setState(payload.data.asset); setHistory(payload.data.history ?? []); }
+    const parsed = workflowAssetStateSchema.safeParse(payload?.data?.asset);
+    if (response.ok && parsed.success) { setState(parsed.data); setHistory(payload?.data?.history ?? []); }
+    else { setError("Workflow data is unavailable. Reload the workspace."); }
   }, [workflow.assetId, workflow.datasetId]);
   const act = useCallback(async (action: SafeWorkspaceWorkflow["permittedActions"][number]) => {
     if (action === "SUBMIT" || action === "RESUBMIT") {
@@ -136,12 +147,15 @@ function WorkflowControls({ workflow }: { workflow: SafeWorkspaceWorkflow }) {
     const response = await fetch(`/api/datasets/${workflow.datasetId}/assets/${workflow.assetId}/workflow`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, expectedRevision: state.revision, ...(action === "REJECT" ? { feedback } : {}) }) });
     const payload = await response.json().catch(() => null) as { data?: { asset?: WorkflowAssetResponse }; error?: { code?: string; message?: string } } | null;
     setBusy(false);
-    if (!response.ok || !payload?.data?.asset) { setError(payload?.error?.code === "STALE_REVISION" ? "This asset changed. Reload before deciding." : payload?.error?.message ?? "Workflow action failed."); return; }
-    setState(payload.data.asset); setFeedback(""); await loadHistory(); router.refresh();
+    const parsed = workflowAssetStateSchema.safeParse(payload?.data?.asset);
+    if (!response.ok || !parsed.success) { setError(payload?.error?.code === "STALE_REVISION" ? "This asset changed. Reload before deciding." : payload?.error?.message ?? "Workflow action failed."); return; }
+    setState(parsed.data); setFeedback(""); await loadHistory(); router.refresh();
   }, [feedback, loadHistory, router, state.revision, workflow.assetId, workflow.datasetId]);
   const submitShortcut = useCallback(() => { void act("SUBMIT"); }, [act]);
   const approveShortcut = useCallback(() => { void act("APPROVE"); }, [act]);
-  useWorkflowShortcuts({ canSubmit: can("SUBMIT") && state.status === "IN_PROGRESS", canApprove: can("APPROVE") && state.status === "NEEDS_REVIEW", onSubmit: submitShortcut, onApprove: approveShortcut });
+  const validState = workflowAssetStateSchema.safeParse(state).success;
+  useWorkflowShortcuts({ canSubmit: validState && can("SUBMIT") && state.status === "IN_PROGRESS", canApprove: validState && can("APPROVE") && state.status === "NEEDS_REVIEW", onSubmit: submitShortcut, onApprove: approveShortcut });
+  if (!validState) return <div role="alert" className="flex items-center gap-2 text-xs text-rose-700">Workflow unavailable<Button size="sm" variant="secondary" onClick={() => { void loadHistory(); router.refresh(); }}>Reload</Button></div>;
   const submitAction = state.status === "NEW" || state.status === "READY" ? "START" : state.status === "IN_PROGRESS" ? "SUBMIT" : state.status === "REJECTED" ? "START_REWORK" : null;
   return <div className="flex items-center gap-1.5">
     <Badge variant={state.status === "REVIEWED" ? "success" : state.status === "REJECTED" ? "danger" : "info"}>{state.status.replaceAll("_", " ")}</Badge>

@@ -1,6 +1,6 @@
 # ADR 024: Collaboration Durability and Realtime Delivery
 
-**Status**: Approved on 2026-09-04 — Foundation implementation (T012–T022) is applied. Gateway package, process, Compose, and proxy work remain scheduled for T061–T066.
+**Status**: Approved on 2026-09-04 — Phase 024 foundation, membership, assignment, discussion, durable notification, delivery-only gateway, Compose/proxy routing, reconnect, and Presence implementation are applied. The gateway remains delivery-only and Phase 11 closure evidence is tracked in `specs/024-collaboration-platform/quickstart.md`.
 
 ## Context
 
@@ -24,8 +24,8 @@ Phase 024 adds governed membership, typed assignments, discussion, notifications
 - The private worker remains private and does not serve browser traffic; a transient Redis publish failure leaves the claimed dispatch Job for the existing lease-recovery/retry budget rather than terminally discarding durable delivery intent.
 - The gateway is a delivery transport only. It never processes a database outbox record and never authorizes a mutation.
 - Notification history is durable across deletion without retaining deleted protected context.
-- Prisma schema, migration, package dependencies, Compose/proxy topology, gateway code, and runtime environment variables remain out of scope until this ADR receives explicit approval.
+- The approved Prisma schema/migration, `ws` dependency, dedicated gateway process, Compose/proxy topology, and non-secret runtime variables are implemented. Subsequent collaboration work must reuse these boundaries and requires a new approved decision before changing them.
 
 ## Implementation boundary
 
-The approval authorizes the additive Foundation tasks through T022. It does not authorize User Story 1 membership/invitation routes or UI (T023–T031), nor does it authorize gateway package/process, Compose, or proxy changes before T061–T066.
+The implementation boundary is complete for baseline Phase 024 collaboration. Any shareable-invitation-link extension remains gated by T096–T099 and must not use invitation secrets as REST, workspace, realtime, or presence credentials.

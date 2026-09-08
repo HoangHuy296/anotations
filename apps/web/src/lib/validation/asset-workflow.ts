@@ -1,7 +1,12 @@
-import { AssetWorkflowAction } from "@internal/db";
+import { AssetStatus, AssetWorkflowAction } from "@internal/db/enums";
 import { z } from "zod";
 
 const expectedRevision = z.number().int().positive();
+
+export const workflowAssetStateSchema = z.object({
+  status: z.nativeEnum(AssetStatus),
+  revision: expectedRevision,
+});
 
 const baseAction = z.object({
   action: z.nativeEnum(AssetWorkflowAction),

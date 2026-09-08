@@ -61,6 +61,7 @@ services:
       SEED_ADMIN_EMAIL: operator@example.com
       SEED_ADMIN_NAME: Development Operator
       DATABASE_URL: ${DATABASE_URL_DOCKER}
+      REALTIME_TICKET_SECRET: ${REALTIME_TICKET_SECRET:-SId4Gb/du1hMGmYhFo/yY1jLVY7iHaqxWSpuWvnNBiLZfjlWjpWda7KyRknvjPJp}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       MINIO_CORS_ALLOWED_ORIGIN: ${MINIO_CORS_ALLOWED_ORIGIN:-http://localhost:3000}
@@ -103,6 +104,7 @@ services:
       RATE_LIMIT_IMPORT_PER_MINUTE: ${RATE_LIMIT_IMPORT_PER_MINUTE:-10}
       RATE_LIMIT_EXPORT_PER_MINUTE: ${RATE_LIMIT_EXPORT_PER_MINUTE:-10}
       PAGINATION_MAX_PAGE_SIZE: ${PAGINATION_MAX_PAGE_SIZE:-100}
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -173,6 +175,30 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+
+  realtime:
+    build:
+      context: .
+      dockerfile: apps/realtime/Dockerfile
+    environment:
+      REALTIME_PORT: 3002
+      REALTIME_TICKET_SECRET: ${REALTIME_TICKET_SECRET:?REALTIME_TICKET_SECRET is required}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      REDIS_DB: ${REDIS_DB:-0}
+      BULLMQ_PREFIX: ${BULLMQ_PREFIX:-annotation-platform}
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${REALTIME_HOST_PORT:-3004}:3002"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3002/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
   # Gitea PostgreSQL
   gitea-postgres:
     image: postgres:16-alpine

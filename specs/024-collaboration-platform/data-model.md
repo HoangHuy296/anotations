@@ -136,3 +136,60 @@ AssetWorkflowEvent (existing) --> Notification / Activity projection only
 3. Dual-write current annotation assignment and `assignedToId`; read new slot first with legacy fallback.
 4. Migrate Asset Browser and assignment consumers to typed assignment DTOs.
 5. Stop legacy writes only after regression evidence; retain the field until a later approved deprecation migration.
+
+---
+
+## Proposed additive shareable-invitation-link model
+
+This is a planning contract only. It requires the recorded approval gates before a Prisma schema or migration is changed.
+
+### DatasetInvitationLink
+
+| Field | Rules |
+| --- | --- |
+| `id` | Durable non-secret identifier; never used as a claim credential. |
+| `datasetId` | Required existing dataset; cascade on dataset deletion. |
+| `createdById` | Required issuing actor; claim-time effective Owner/Manager authority is rechecked. |
+| `role` | Immutable `DatasetMemberRole`, validated through current grant policy; never `OWNER`. |
+| `tokenHash` | Unique `SHA-256` digest of a random 256-bit URL-safe secret. Raw secret is never persisted. |
+| `status` | `PENDING`, `CLAIMED`, `REVOKED`, or `EXPIRED`; terminal state is never made claimable again. |
+| `expiresAt` | Required expiry; checked at preview and claim. |
+| `claimedById`, `claimedAt` | Set only by the winning claim; enable same-user lost-response retry without exposing the secret. |
+| `revokedAt`, `createdAt`, `updatedAt` | Safe lifecycle timestamps. |
+
+Recommended indexes: unique `tokenHash`; `(datasetId, status, createdAt)` for manager history; `(expiresAt, status)` for safe expiry processing; `(claimedById, createdAt)` only if a claimant history read is needed. `DatasetMember` keeps its existing unique `(datasetId, userId)` invariant.
+
+### Lifecycle and atomicity
+
+```text
+PENDING --claim (one serializable winner)--> CLAIMED
+PENDING --revoke--> REVOKED
+PENDING --time passes--> logically EXPIRED
+```
+
+- Claim must update/guard the same pending unexpired row inside `runCollaborationTransaction(...)`; an expired `PENDING` record is treated as `EXPIRED` for all reads and may be normalized to `EXPIRED` in a safe transaction.
+- The winning transaction inserts the normal `DatasetMember`, link/member event(s), optional creator notification, and normal membership-change outbox intent before committing the `CLAIMED` state.
+- A same-claimant retry reads `CLAIMED + claimedById` and returns the already-created membership projection. A different claimant gets generic unavailable.
+- Existing claimant membership is checked before consuming a pending link. It returns `ALREADY_MEMBER`, performs no role update, and leaves the link unconsumed.
+- Creator authority is evaluated as the effective current Owner/Manager role, not merely by a stale creator identifier. Removal, loss of dataset access, or downgrade that cannot grant the encoded role makes the link unavailable.
+- Revoke and claim race on the same guarded `PENDING` row. The first committed transition wins: `REVOKED` means no claim may insert membership; `CLAIMED` means revoke cannot change state. A serializable retry must re-read the durable terminal state, so no response path can report contradictory lifecycle or partial membership.
+
+### Auditing, notification, and deletion
+
+- Additive membership-event actions are proposed for `LINK_CREATED`, `LINK_REVOKED`, and `LINK_CLAIMED`; event rows contain dataset/member/actor/role/time only—never raw secret, digest, URL, or free text.
+- Link issuance, revocation, expiration, unavailable claim, and `ALREADY_MEMBER` create no notification. A successful first claim creates exactly one `DATASET_MEMBER_JOINED` notification for `createdById` only when claimant differs; no claimant or bystander notification exists. Its stable dedupe key is `invitation-link-claim:{linkId}:creator:{createdById}`, and it contains no raw secret or digest. Same-claimant retry does not create another notification.
+- Dataset deletion cascades link and undelivered outbox rows. User-deletion relation behavior must match existing user-retention policy and be approved in the migration review; it must never leave a claimable orphan or disclose a link secret.
+- Activity may project safe lifecycle/member events only. It is not a new table or an alternate invitation ledger.
+
+### Secret transport boundary
+
+The one-time raw secret is returned only in the create response and is represented in the browser share URL fragment (`/join#secret`). Fragments are not sent in normal navigation requests. The landing page sends it in redacted JSON request bodies for preview/claim; it must not put it in route path/query, telemetry, error messages, clipboard history beyond the user's deliberate copy action, or durable browser storage.
+
+### Read projections
+
+| Projection | Audience | Allowed fields | Never allowed |
+| --- | --- | --- | --- |
+| Public preview | Anyone holding a token before authentication | `AVAILABLE` plus dataset display name, encoded role, inviter display name; otherwise generic `UNAVAILABLE` | Link ID, lifecycle reason, asset/member/workflow data, raw secret, digest, reusable URL |
+| Manager history | Current Owner/eligible Manager under existing role policy | Link ID, role, lifecycle/timestamps, and safe creator/claimant identity already allowed by member management | Raw secret, digest, reusable URL, internal authorization diagnostics, protected dataset content |
+
+The issuance response is not a management projection: it is the only response that can contain the one-time share URL. Re-listing a link must never recreate or retrieve it.

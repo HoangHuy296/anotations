@@ -39,3 +39,41 @@ test("workflow uses the assigned reviewer before the eligible-reviewer fallback"
     assert.equal(await db.notification.count({ where: { assetId: fixture.asset.id, type: NotificationType.REVIEW_SUBMITTED, userId: fixture.reviewer.id } }), 1);
   } finally { await fixture.cleanup(); }
 });
+
+test("stale, invalid, unauthorized, and replayed workflow requests produce no duplicate notification or outbox intent", { skip: !enabled }, async () => {
+  const fixture = await createWorkflowFixture();
+  try {
+    const baseline = async () => ({
+      notifications: await db.notification.count({ where: { assetId: fixture.asset.id } }),
+      outbox: await db.collaborationOutboxEvent.count({ where: { assetId: fixture.asset.id } }),
+    });
+    const beforeInvalid = await baseline();
+    const invalid = await applyAssetWorkflowAction(fixture.labeler, fixture.dataset.id, fixture.asset.id, { action: AssetWorkflowAction.SUBMIT, expectedRevision: fixture.asset.revision });
+    assert.deepEqual(invalid, { ok: false, failure: { kind: "INVALID_TRANSITION" } });
+    assert.deepEqual(await baseline(), beforeInvalid);
+
+    const beforeUnauthorized = await baseline();
+    const unauthorized = await applyAssetWorkflowAction(fixture.reviewer, fixture.dataset.id, fixture.asset.id, { action: AssetWorkflowAction.START, expectedRevision: fixture.asset.revision });
+    assert.equal(unauthorized.ok, false);
+    if (!unauthorized.ok) assert.equal(unauthorized.failure.kind, "FORBIDDEN");
+    assert.deepEqual(await baseline(), beforeUnauthorized);
+
+    await db.asset.update({ where: { id: fixture.asset.id }, data: { status: AssetStatus.NEEDS_REVIEW, revision: { increment: 1 } } });
+    const current = await db.asset.findUniqueOrThrow({ where: { id: fixture.asset.id }, select: { revision: true } });
+    const beforeStale = await baseline();
+    const stale = await applyAssetWorkflowAction(fixture.reviewer, fixture.dataset.id, fixture.asset.id, { action: AssetWorkflowAction.APPROVE, expectedRevision: current.revision - 1 });
+    assert.equal(stale.ok, false);
+    if (!stale.ok) assert.equal(stale.failure.kind, "STALE_REVISION");
+    assert.deepEqual(await baseline(), beforeStale);
+
+    await db.asset.update({ where: { id: fixture.asset.id }, data: { status: AssetStatus.IN_PROGRESS } });
+    const started = await db.asset.findUniqueOrThrow({ where: { id: fixture.asset.id }, select: { revision: true } });
+    const [submit, replay] = await Promise.all([
+      applyAssetWorkflowAction(fixture.labeler, fixture.dataset.id, fixture.asset.id, { action: AssetWorkflowAction.SUBMIT, expectedRevision: started.revision }),
+      applyAssetWorkflowAction(fixture.labeler, fixture.dataset.id, fixture.asset.id, { action: AssetWorkflowAction.SUBMIT, expectedRevision: started.revision }),
+    ]);
+    assert.equal([submit, replay].filter((result) => result.ok).length, 1);
+    assert.equal(await db.notification.count({ where: { assetId: fixture.asset.id, type: NotificationType.REVIEW_SUBMITTED } }), 1);
+    assert.equal(await db.collaborationOutboxEvent.count({ where: { assetId: fixture.asset.id, type: "NOTIFICATION_CREATED" } }), 1);
+  } finally { await fixture.cleanup(); }
+});

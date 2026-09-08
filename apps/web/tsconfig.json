@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@internal/db": ["../../lib/generated/prisma/client.ts"]
+      "@internal/db": ["../../lib/generated/prisma/client.ts"],
+      "@internal/db/enums": ["../../lib/generated/prisma/enums.ts"]
     }
   },
   "include": [
