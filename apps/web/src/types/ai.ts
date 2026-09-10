@@ -18,6 +18,7 @@ export type AiModelDto = {
   displayName: string;
   modality: Modality | null;
   taskType: string;
+  availableForTasks?: boolean;
 };
 
 /** `AiTaskStatus` (`prisma/schema.prisma`), as it crosses the wire. */

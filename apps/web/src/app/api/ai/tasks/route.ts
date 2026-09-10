@@ -20,6 +20,8 @@ export async function POST(request: Request) {
   const result = await createAiTask(actor, await request.json().catch(() => null));
   if (!result.ok) {
     switch (result.code) {
+      case "AI_MODEL_LABELS_UNAVAILABLE":
+        return apiError(502, "AI_MODEL_LABELS_UNAVAILABLE", "Could not validate model classes. Try again.");
       case "INVALID_REQUEST":
         return apiError(400, "INVALID_REQUEST", "The AI pre-annotation request is invalid.");
       case "FORBIDDEN":

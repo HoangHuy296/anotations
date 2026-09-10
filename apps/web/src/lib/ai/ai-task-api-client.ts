@@ -36,22 +36,24 @@ function dedupeInFlight<T>(key: string, run: () => Promise<T>): Promise<T> {
   return promise;
 }
 
-export async function listActiveAiModelsClient(): Promise<ListAiModelsResult> {
-  return dedupeInFlight("GET /api/ai/models", async () => {
-    const response = await fetch("/api/ai/models", { credentials: "same-origin", cache: "no-store" });
+export async function listActiveAiModelsClient(modality?: AiModelDto["modality"]): Promise<ListAiModelsResult> {
+  const url = `/api/ai/models${modality ? `?modality=${encodeURIComponent(modality)}` : ""}`;
+  return dedupeInFlight<ListAiModelsResult>(`GET ${url}`, async () => {
+    const response = await fetch(url, { credentials: "same-origin", cache: "no-store" });
     const payload = await response.json().catch(() => null) as { data?: { models?: AiModelDto[] }; error?: { code?: string } } | null;
     if (!response.ok || !payload?.data?.models) return { ok: false, code: payload?.error?.code ?? "INVALID_REQUEST", status: response.status };
     return { ok: true, models: payload.data.models };
-  });
+  }).catch(() => ({ ok: false as const, code: "AI_MODEL_CATALOG_UNAVAILABLE", status: 0 }));
 }
 
-export type CreateAiTaskInput = { datasetId: string; modelId: string; assetIds: string[] };
+export type CreateAiTaskInput = { datasetId: string; modelId: string; assetIds: string[]; classes?: string[]; confidence_threshold?: number; iou_threshold?: number };
 export type CreateAiTaskResult = { ok: true; taskId: string; jobId: string } | AiApiFailure;
 
 export async function createAiTaskClient(input: CreateAiTaskInput): Promise<CreateAiTaskResult> {
   const response = await fetch("/api/ai/tasks", {
     method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
-  });
+  }).catch(() => null);
+  if (!response) return { ok: false, code: "INVALID_REQUEST", status: 0 };
   const payload = await response.json().catch(() => null) as { data?: { taskId?: string; jobId?: string }; error?: { code?: string } } | null;
   if (!response.ok || !payload?.data?.taskId || !payload.data.jobId) return { ok: false, code: payload?.error?.code ?? "INVALID_REQUEST", status: response.status };
   return { ok: true, taskId: payload.data.taskId, jobId: payload.data.jobId };
@@ -74,4 +76,16 @@ export async function cancelAiTaskClient(taskId: string): Promise<CancelAiTaskRe
   const payload = await response.json().catch(() => null) as { error?: { code?: string } } | null;
   if (!response.ok) return { ok: false, code: payload?.error?.code ?? "JOB_CONFLICT", status: response.status };
   return { ok: true };
+}
+
+export async function listModelClassesClient(modelId: string): Promise<{ ok: true; classes: string[] } | AiApiFailure> {
+  const url = `/api/ai/models/${encodeURIComponent(modelId)}/labels`;
+  return dedupeInFlight(`GET ${url}`, async () => {
+    const response = await fetch(url, { credentials: "same-origin", cache: "no-store" });
+    const payload = await response.json();
+    if (!response.ok || !Array.isArray(payload?.data?.classes) || !payload.data.classes.every((item: unknown) => typeof item === "string")) {
+      return { ok: false as const, code: "AI_MODEL_LABELS_UNAVAILABLE", status: response.status };
+    }
+    return { ok: true as const, classes: payload.data.classes as string[] };
+  }).catch(() => ({ ok: false as const, code: "AI_MODEL_LABELS_UNAVAILABLE", status: 0 }));
 }

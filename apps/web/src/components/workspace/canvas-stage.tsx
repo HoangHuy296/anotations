@@ -2,7 +2,7 @@
 
 import type Konva from "konva";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Circle, Group, Image as KonvaImage, Layer, Line, Rect, Stage, Transformer } from "react-konva";
+import { Circle, Group, Image as KonvaImage, Layer, Line, Rect, Stage, Text, Transformer } from "react-konva";
 
 import { Toolbar } from "@/components/workspace/toolbar";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
@@ -22,7 +22,10 @@ const VIEW_URL_CACHE_MS = 4 * 60 * 1000;
 const cachedViewUrls = new Map<string, { url: string; expiresAt: number }>();
 const inFlightViewUrls = new Map<string, Promise<string>>();
 
+import type { AiPredictionPreview } from "@/types/ai-prediction";
+
 type CanvasStageProps = {
+  aiPreviews?: AiPredictionPreview[];
   image: SafeImageWorkspaceAsset;
   annotations: SafeImageAnnotation[];
   unsupportedAnnotations: SafeReadOnlyImageAnnotation[];
@@ -71,7 +74,7 @@ function toCanvasAnnotation(annotation: import("@/lib/annotations/safe-annotatio
   return { ...annotation, modality: "IMAGE", type: annotation.type as SafeImageAnnotation["type"], geometry: annotation.geometry as SafeImageAnnotation["geometry"] };
 }
 
-export default function CanvasStage({ image: asset, annotations: initialAnnotations, unsupportedAnnotations, labels, tool, onToolChange, readOnly = false }: CanvasStageProps) {
+export default function CanvasStage({ image: asset, annotations: initialAnnotations, unsupportedAnnotations, labels, tool, onToolChange, readOnly = false, aiPreviews = [] }: CanvasStageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -359,6 +362,10 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
             if (annotation.type === "POINT" && typeof geometry.px === "number" && typeof geometry.py === "number") return <Circle key={annotation.id} x={geometry.px * originalWidth} y={geometry.py * originalHeight} radius={5} fill={colorFor(annotation, labels)} draggable={tool === "select" && interactive} {...common} onDragEnd={persistTranslation} />;
             return null;
           })}
+          {aiPreviews.map((p) => <Group key={`ai-preview-${p.index}`} listening={false}>
+            <Rect x={p.geometry.x * originalWidth} y={p.geometry.y * originalHeight} width={p.geometry.width * originalWidth} height={p.geometry.height * originalHeight} stroke="#fbbf24" strokeWidth={2} strokeScaleEnabled={false} dash={[8, 4]} />
+            <Text x={p.geometry.x * originalWidth} y={Math.max(0, p.geometry.y * originalHeight - 20)} text={`#${p.index + 1} ${p.labelKey} ${Math.round(p.confidence * 100)}%`} fontSize={16} fill="#fbbf24" />
+          </Group>)}
           {draft && tool === "box" && <Rect x={draft.x} y={draft.y} width={draft.width} height={draft.height} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}
           {draft && tool === "circle" && drawingStart && <Circle x={drawingStart.x} y={drawingStart.y} radius={Math.hypot(draft.width, draft.height)} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}
           {pathPoints.length > 0 && (tool === "polygon" || tool === "polyline") && <Line points={pathPoints.flatMap(([x, y]) => [x * originalWidth, y * originalHeight])} closed={tool === "polygon" && pathPoints.length > 2} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}

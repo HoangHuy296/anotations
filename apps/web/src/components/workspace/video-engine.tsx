@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointer
 
 import type { SafeMediaReadiness } from "@/types/media-processing";
 import type { SafeVideoAnnotations } from "@/types/video-annotation";
+import { AiDetectDialog } from "@/components/workspace/ai-detect-dialog";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
@@ -542,7 +543,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
 
   const timelineDurationMs = resolveVideoTimelineDurationMs(readiness.video) ?? nativeDurationMs;
   const saveStateLabel = selectedTrack ? (trackSaveStates[selectedTrack.id] ?? mutationState) : mutationState;
-  return <section className="canvas-grid flex h-full min-h-[520px] min-w-0 flex-col overflow-hidden bg-zinc-950 p-3 text-zinc-100 lg:min-h-0">
+  return <section className="canvas-grid relative flex h-full min-h-[520px] min-w-0 flex-col overflow-hidden bg-zinc-950 p-3 text-zinc-100 lg:min-h-0">
     <header className="flex items-center justify-between gap-3 pb-2 text-xs text-zinc-400">
       <span className="inline-flex items-center gap-2"><VideoCamera size={16} weight="duotone" /> VIDEO · {video.filename}</span>
       <span className="flex items-center gap-3">
@@ -680,5 +681,6 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
         </div> : null}
       </div>
     </details>
+    {!readOnly && tool === "aidetect" && <AiDetectDialog key={`ai-detect-${video.id}`} assetId={video.id} modality="VIDEO" onClose={() => useVideoAnnotationStore.getState().setTool("select")} />}
   </section>;
 }

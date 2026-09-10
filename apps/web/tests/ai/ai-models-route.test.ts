@@ -1,58 +1,27 @@
 import assert from "node:assert/strict";
-import { randomBytes } from "node:crypto";
-import test, { after } from "node:test";
-
-import { db } from "@/lib/db";
+import test from "node:test";
 import { aiHttpEnabled, aiHttpSkipReason, request, signupAndLogin } from "./helpers";
 
-const cleanupModelIds: string[] = [];
-after(async () => {
-  if (cleanupModelIds.length) await db.aiModel.deleteMany({ where: { id: { in: cleanupModelIds } } });
-});
-
-test("GET /api/ai/models returns only active models with the safe DTO shape", { skip: aiHttpEnabled ? false : aiHttpSkipReason }, async () => {
-  const suffix = `${Date.now()}-${randomBytes(4).toString("hex")}`;
-  const active = await db.aiModel.create({
-    data: { key: `ai-models-active-${suffix}`, displayName: "Active Fixture Model", provider: "aioz-company", modality: "IMAGE", taskType: "DETECT_OBJECTS", isActive: true },
-    select: { id: true },
-  });
-  const inactive = await db.aiModel.create({
-    data: { key: `ai-models-inactive-${suffix}`, displayName: "Inactive Fixture Model", provider: "aioz-company", modality: "IMAGE", taskType: "DETECT_OBJECTS", isActive: false },
-    select: { id: true },
-  });
-  cleanupModelIds.push(active.id, inactive.id);
-
+// Live catalog assertions are opt-in, since the web server must reach AIOZ.
+test("GET /api/ai/models filters the provider catalog by asset modality", {
+  skip: aiHttpEnabled && process.env.AIOZ_CATALOG_HTTP_TESTS === "1" ? false : "Requires AI HTTP tests and AIOZ_CATALOG_HTTP_TESTS=1",
+}, async () => {
   const owner = await signupAndLogin();
-  const response = await request("/api/ai/models", { headers: { Cookie: owner.cookie } });
+  const response = await request("/api/ai/models?modality=IMAGE", { headers: { Cookie: owner.cookie } });
   assert.equal(response.status, 200);
   const body = await response.json() as { data: { models: Array<Record<string, unknown>> } };
-
-  const ids = body.data.models.map((model) => model.id);
-  assert.ok(ids.includes(active.id), "active model must be listed");
-  assert.ok(!ids.includes(inactive.id), "inactive model must not be listed");
-
-  const returnedActive = body.data.models.find((model) => model.id === active.id)!;
-  assert.equal(returnedActive.key, `ai-models-active-${suffix}`);
-  assert.equal(returnedActive.displayName, "Active Fixture Model");
-  assert.equal(returnedActive.modality, "IMAGE");
-  assert.equal(returnedActive.taskType, "DETECT_OBJECTS");
-  assert.equal("provider" in returnedActive, false, "provider is an internal resolution detail and must never be returned");
+  for (const model of body.data.models) {
+    assert.equal(model.modality, "IMAGE");
+    assert.equal(typeof model.displayName, "string");
+    assert.equal(typeof model.availableForTasks, "boolean");
+    assert.equal("provider" in model, false);
+  }
 });
 
-test("GET /api/ai/models surfaces a null modality for a multi-modality model", { skip: aiHttpEnabled ? false : aiHttpSkipReason }, async () => {
-  const suffix = `${Date.now()}-${randomBytes(4).toString("hex")}`;
-  const model = await db.aiModel.create({
-    data: { key: `ai-models-multimodal-${suffix}`, displayName: "Multimodal Fixture Model", provider: "aioz-company", modality: null, taskType: "DETECT_OBJECTS", isActive: true },
-    select: { id: true },
-  });
-  cleanupModelIds.push(model.id);
-
+test("GET /api/ai/models rejects invalid modality", { skip: aiHttpEnabled ? false : aiHttpSkipReason }, async () => {
   const owner = await signupAndLogin();
-  const response = await request("/api/ai/models", { headers: { Cookie: owner.cookie } });
-  assert.equal(response.status, 200);
-  const body = await response.json() as { data: { models: Array<Record<string, unknown>> } };
-  const returned = body.data.models.find((row) => row.id === model.id)!;
-  assert.equal(returned.modality, null);
+  const response = await request("/api/ai/models?modality=INVALID", { headers: { Cookie: owner.cookie } });
+  assert.equal(response.status, 400);
 });
 
 test("GET /api/ai/models requires authentication", { skip: aiHttpEnabled ? false : aiHttpSkipReason }, async () => {

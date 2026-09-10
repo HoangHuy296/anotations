@@ -1,50 +1,75 @@
 import "server-only";
 
+import { z } from "zod";
 import { db } from "@/lib/db";
+import type { AiModelDto } from "@/types/ai";
 
-/**
- * Safe DTO shape from contracts/ai-api.md's GET /api/ai/models. `provider`
- * is never selected here — it is an internal resolution detail
- * (AiTask.modelId -> AiModel.provider), not something a browser client
- * selects.
- */
-export type AiModelDto = {
-  id: string;
-  key: string;
-  displayName: string;
-  modality: string | null;
-  taskType: string;
-};
+export type { AiModelDto } from "@/types/ai";
 
-/**
- * In-flight coalescing around the `AiModel` read only. `GET /api/ai/models`
- * still calls `getRequestActor()` on every request -- authentication is
- * never cached here, only this DB query, and it's the same result for every
- * caller (no actor-specific filtering exists). This intentionally has no
- * time-based cache beyond the query's own lifetime: a TTL would let a
- * request that lands just after an admin activates/deactivates a model
- * serve a stale list, and `ai-models-route.test.ts` asserts a freshly
- * created model is visible on the very next request. Overlapping callers
- * within the same brief window (React Strict Mode's double effect
- * invocation in development, multiple browser tabs, near-simultaneous
- * users) share one query instead of each issuing their own; once it
- * resolves, the next call always re-queries.
- */
+const catalogSchema = z.object({
+  success: z.literal(true),
+  data: z.array(z.object({
+    model_id: z.string().uuid(),
+    model_name: z.string().trim().min(1),
+    type: z.string().trim().transform((value) => value.toUpperCase()),
+  })),
+});
+
+export function parseModelCatalog(input: unknown) {
+  return catalogSchema.parse(input).data;
+}
+
 let inFlightQuery: Promise<AiModelDto[]> | null = null;
 
-/**
- * Lists AI models currently available for pre-annotation requests. Only
- * `isActive: true` rows are returned. `modality: null` on a row that
- * supports more than one modality is surfaced as-is — callers must not
- * assume every model is single-modality.
- */
-export async function listActiveAiModels(): Promise<AiModelDto[]> {
-  if (inFlightQuery) return inFlightQuery;
+async function loadModels(): Promise<AiModelDto[]> {
+  const baseUrl = process.env.AIOZ_ANNOTATION_SERVICES_BASE_URL ?? "http://10.0.0.186:7000";
+  const response = await fetch(new URL("/api/v1/models/list", baseUrl), {
+    cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new Error("AI_MODEL_CATALOG_UNAVAILABLE");
+  const catalog = parseModelCatalog(await response.json());
+  const configured = await db.aiModel.findMany({
+    where: { provider: "aioz-company", key: { in: catalog.map((model) => model.model_id) } },
+    select: { id: true, key: true, modality: true, taskType: true, isActive: true },
+  });
+  return catalog.flatMap((model): AiModelDto[] => {
+    const modality = z.enum(["IMAGE", "VIDEO", "AUDIO", "TEXT"]).safeParse(model.type);
+    if (!modality.success) return [];
+    const local = configured.find((entry) => entry.key === model.model_id);
+    if (local && !local.isActive) return [];
+    const availableForTasks = !!local && (local.modality === null || local.modality === modality.data);
+    return [{
+      id: local?.id ?? model.model_id, key: model.model_id, displayName: model.model_name,
+      modality: modality.data, taskType: local?.taskType ?? "", availableForTasks,
+    }];
+  });
+}
 
-  inFlightQuery = db.aiModel.findMany({
-    where: { isActive: true },
-    select: { id: true, key: true, displayName: true, modality: true, taskType: true },
-    orderBy: { displayName: "asc" },
-  }).finally(() => { inFlightQuery = null; });
-  return inFlightQuery;
+/** Share concurrent catalog reads only; subsequent loads always refresh upstream. */
+export async function listActiveAiModels(modality?: string): Promise<AiModelDto[]> {
+  if (!inFlightQuery) inFlightQuery = loadModels().finally(() => { inFlightQuery = null; });
+  const models = await inFlightQuery;
+  return modality ? models.filter((model) => model.modality === modality) : models;
+}
+
+const labelsSchema = z.object({
+  success: z.literal(true),
+  data: z.object({ model_id: z.string().uuid(), classes: z.array(z.string().min(1).max(256)).max(10000) }),
+});
+
+export function parseModelLabels(input: unknown, modelKey: string): string[] {
+  const { data } = labelsSchema.parse(input);
+  if (data.model_id !== modelKey) throw new Error("AI_MODEL_LABELS_UNAVAILABLE");
+  return [...new Set(data.classes)];
+}
+
+/** Provider access remains server-side; only validated class names leave this boundary. */
+export async function loadModelClasses(modelKey: string): Promise<string[]> {
+  z.string().uuid().parse(modelKey);
+  const baseUrl = process.env.AIOZ_ANNOTATION_SERVICES_BASE_URL ?? "http://10.0.0.186:7000";
+  const response = await fetch(new URL(`/api/v1/models/labels/${encodeURIComponent(modelKey)}`, baseUrl), {
+    cache: "no-store", redirect: "error", signal: AbortSignal.timeout(15_000),
+  });
+  if (!response.ok) throw new Error("AI_MODEL_LABELS_UNAVAILABLE");
+  return parseModelLabels(await response.json(), modelKey);
 }

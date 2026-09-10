@@ -9,6 +9,7 @@ import { cancelAuthorizedJob } from "@/lib/jobs/authorization";
 import { enqueueExistingJob } from "@/lib/queue/enqueue-job";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { AiTaskError } from "@/lib/ai/ai-task-errors";
+import { loadModelClasses } from "@/lib/ai/ai-model-service";
 import { createAiTaskSchema } from "@/lib/validation/ai-task";
 
 /**
@@ -23,6 +24,7 @@ export async function assertAssetsBelongToDataset(assetIds: string[], datasetId:
 }
 
 export type CreateAiTaskFailureCode =
+  | "AI_MODEL_LABELS_UNAVAILABLE"
   | "INVALID_REQUEST"
   | "FORBIDDEN"
   | "DATASET_NOT_FOUND"
@@ -33,7 +35,7 @@ export type CreateAiTaskFailureCode =
 
 export type CreateAiTaskResult =
   | { ok: true; status: 202; taskId: string; jobId: string }
-  | { ok: false; status: 400 | 403 | 404 | 409; code: CreateAiTaskFailureCode };
+  | { ok: false; status: 400 | 403 | 404 | 409 | 502; code: CreateAiTaskFailureCode };
 
 /**
  * Creates exactly one Job + one AiTask (AiTask.jobId @unique enforces the
@@ -63,6 +65,15 @@ export async function createAiTask(actor: RequestActor, input: unknown): Promise
     throw error;
   }
 
+  if (parsed.data.classes !== undefined) {
+    if (model.provider !== "aioz-company") return { ok: false, status: 400, code: "INVALID_REQUEST" };
+    let available: string[];
+    try { available = await loadModelClasses(model.key); }
+    catch { return { ok: false, status: 502, code: "AI_MODEL_LABELS_UNAVAILABLE" }; }
+    const allowed = new Set(available);
+    if (parsed.data.classes.some((label) => !allowed.has(label))) return { ok: false, status: 400, code: "INVALID_REQUEST" };
+  }
+
   const metadata = model.metadata as { version?: unknown } | null;
   const modelVersionSnapshot = typeof metadata?.version === "string" ? metadata.version : null;
 
@@ -89,7 +100,7 @@ export async function createAiTask(actor: RequestActor, input: unknown): Promise
         modelKeySnapshot: model.key,
         type: model.taskType,
         modality: model.modality,
-        input: { assetIds: parsed.data.assetIds },
+        input: { confidence_threshold: parsed.data.confidence_threshold, iou_threshold: parsed.data.iou_threshold, assetIds: parsed.data.assetIds, ...(parsed.data.classes ? { classes: parsed.data.classes } : {}) },
         status: AiTaskStatus.QUEUED,
       },
       select: { id: true },

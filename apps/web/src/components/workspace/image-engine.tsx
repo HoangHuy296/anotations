@@ -1,6 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useCallback, useState } from "react";
+import { AiPredictionReview } from "@/components/workspace/ai-prediction-review";
+import type { AiPredictionPreview } from "@/types/ai-prediction";
 
 import { AiDetectDialog } from "@/components/workspace/ai-detect-dialog";
 import { getAssetAnnotations } from "@/lib/annotations/annotation-api-client";
@@ -31,6 +34,12 @@ type ImageEngineProps = {
 };
 
 export function ImageEngine({ image, annotations, unsupportedAnnotations, labels, readOnly = false }: ImageEngineProps) {
+  const [previewState, setPreviewState] = useState<{ assetId: string; predictions: AiPredictionPreview[] } | null>(null);
+  const [completedRun, setCompletedRun] = useState<{ assetId: string; taskId: string } | null>(null);
+  const imageId = image?.id;
+  const updatePreviews = useCallback((predictions: AiPredictionPreview[]) => {
+    if (imageId) setPreviewState({ assetId: imageId, predictions });
+  }, [imageId]);
   const tool = useAnnotationStore((store) => store.tool);
   const setTool = useAnnotationStore((store) => store.setTool);
   const upsertSafeAnnotation = useAnnotationStore((store) => store.upsertSafeAnnotation);
@@ -48,15 +57,18 @@ export function ImageEngine({ image, annotations, unsupportedAnnotations, labels
   // manual edit already goes through. AiDetectDialog itself never touches
   // this store or knows what an annotation is.
   async function applyAiResults(taskId: string): Promise<number> {
+    setCompletedRun({ assetId: currentImage.id, taskId });
     const result = await getAssetAnnotations(currentImage.id);
-    if (!result.ok) return 0;
+    if (!result.ok) throw new Error("Could not load annotations");
     const applied = predictionsForTask(result.annotations.map(toImageAnnotation).filter((item): item is SafeImageAnnotation => item !== null), taskId);
     for (const annotation of applied) upsertSafeAnnotation(annotation);
     return applied.length;
   }
 
-  return <>
-    <CanvasStage key={`canvas-${currentImage.id}`} image={currentImage} annotations={annotations} unsupportedAnnotations={unsupportedAnnotations} labels={labels} tool={tool} onToolChange={setTool} readOnly={readOnly} />
-    {!readOnly && tool === "aidetect" && <AiDetectDialog key={`ai-detect-${currentImage.id}`} assetId={currentImage.id} modality={currentImage.modality} onClose={() => setTool("select")} onCompleted={applyAiResults} />}
-  </>;
+  return <div className={`relative grid min-h-0 min-w-0 ${!readOnly && tool === "aidetect" ? "md:pl-80" : ""}`}>
+    <CanvasStage key={`canvas-${currentImage.id}`} image={currentImage} annotations={annotations} unsupportedAnnotations={unsupportedAnnotations} labels={labels} aiPreviews={!readOnly && tool === "aidetect" && previewState?.assetId === currentImage.id ? previewState.predictions : []} tool={tool} onToolChange={setTool} readOnly={readOnly} />
+    {!readOnly && tool === "aidetect" && <AiDetectDialog key={`ai-detect-${currentImage.id}`} assetId={currentImage.id} modality={currentImage.modality} onClose={() => setTool("select")} onCompleted={applyAiResults}>
+      <AiPredictionReview key={`${currentImage.id}:${completedRun?.assetId === currentImage.id ? completedRun.taskId : "latest"}`} assetId={currentImage.id} taskId={completedRun?.assetId === currentImage.id ? completedRun.taskId : undefined} labels={labels} onPreviews={updatePreviews} onSaved={(annotation) => { const safe = toImageAnnotation(annotation); if (safe) upsertSafeAnnotation(safe); }} />
+    </AiDetectDialog>}
+  </div>;
 }
