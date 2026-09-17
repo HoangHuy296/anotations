@@ -12,11 +12,11 @@ const buttonVariants = cva(
         primary:
           "border-sky-600 bg-sky-600 px-4 text-white shadow-[0_8px_24px_-12px_rgba(2,132,199,0.65)] hover:border-sky-700 hover:bg-sky-700",
         secondary:
-          "border-zinc-200 bg-white px-4 text-zinc-800 hover:border-zinc-300 hover:bg-zinc-50",
+          "border-zinc-200 bg-white px-4 text-zinc-800 hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:border-zinc-600 dark:hover:bg-zinc-800",
         ghost:
-          "border-transparent bg-transparent px-3 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950",
+          "border-transparent bg-transparent px-3 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
         icon:
-          "size-10 min-h-10 border-zinc-200 bg-white p-0 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-950",
+          "size-10 min-h-10 border-zinc-200 bg-white p-0 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 hover:text-zinc-950 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
       },
       size: {
         default: "h-10",

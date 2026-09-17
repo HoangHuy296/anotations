@@ -8,7 +8,7 @@ import type { AiPredictionPreview } from "@/types/ai-prediction";
 import { AiDetectDialog } from "@/components/workspace/ai-detect-dialog";
 import { getAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import type { SafeAnnotation } from "@/lib/annotations/safe-annotation";
-import { predictionsForTask } from "@/lib/ai/ai-detect-view";
+import { isImageAiTool, predictionsForTask } from "@/lib/ai/ai-detect-view";
 import type { SafeImageAnnotation, SafeImageWorkspaceAsset, SafeReadOnlyImageAnnotation, SafeWorkspaceLabel } from "@/types/image-workspace";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 
@@ -41,6 +41,7 @@ export function ImageEngine({ image, annotations, unsupportedAnnotations, labels
     if (imageId) setPreviewState({ assetId: imageId, predictions });
   }, [imageId]);
   const tool = useAnnotationStore((store) => store.tool);
+  const aiTool = isImageAiTool(tool) ? tool : null;
   const setTool = useAnnotationStore((store) => store.setTool);
   const upsertSafeAnnotation = useAnnotationStore((store) => store.upsertSafeAnnotation);
   if (!image) return <section className="canvas-grid grid min-h-[520px] min-w-0 place-items-center bg-zinc-900 px-6 text-center lg:min-h-0"><div><p className="text-sm font-semibold text-zinc-300">No image selected</p><p className="mt-1 text-xs leading-5 text-zinc-500">Adjust the sidebar filters or import images into this dataset.</p></div></section>;
@@ -65,10 +66,10 @@ export function ImageEngine({ image, annotations, unsupportedAnnotations, labels
     return applied.length;
   }
 
-  return <div className={`relative grid min-h-0 min-w-0 ${!readOnly && tool === "aidetect" ? "md:pl-80" : ""}`}>
-    <CanvasStage key={`canvas-${currentImage.id}`} image={currentImage} annotations={annotations} unsupportedAnnotations={unsupportedAnnotations} labels={labels} aiPreviews={!readOnly && tool === "aidetect" && previewState?.assetId === currentImage.id ? previewState.predictions : []} tool={tool} onToolChange={setTool} readOnly={readOnly} />
-    {!readOnly && tool === "aidetect" && <AiDetectDialog key={`ai-detect-${currentImage.id}`} assetId={currentImage.id} modality={currentImage.modality} onClose={() => setTool("select")} onCompleted={applyAiResults}>
-      <AiPredictionReview key={`${currentImage.id}:${completedRun?.assetId === currentImage.id ? completedRun.taskId : "latest"}`} assetId={currentImage.id} taskId={completedRun?.assetId === currentImage.id ? completedRun.taskId : undefined} labels={labels} onPreviews={updatePreviews} onSaved={(annotation) => { const safe = toImageAnnotation(annotation); if (safe) upsertSafeAnnotation(safe); }} />
+  return <div className={`relative grid min-h-0 min-w-0 ${!readOnly && aiTool ? "md:pl-80" : ""}`}>
+    <CanvasStage key={`canvas-${currentImage.id}`} image={currentImage} annotations={annotations} unsupportedAnnotations={unsupportedAnnotations} labels={labels} aiPreviews={!readOnly && tool === "detection" && previewState?.assetId === currentImage.id ? previewState.predictions : []} tool={tool} onToolChange={setTool} readOnly={readOnly} />
+    {!readOnly && aiTool && <AiDetectDialog key={`ai-${aiTool}-${currentImage.id}`} problem={aiTool} assetId={currentImage.id} modality={currentImage.modality} onClose={() => setTool("select")} onCompleted={applyAiResults}>
+      {aiTool === "detection" && <AiPredictionReview key={`${currentImage.id}:${completedRun?.assetId === currentImage.id ? completedRun.taskId : "latest"}`} assetId={currentImage.id} taskId={completedRun?.assetId === currentImage.id ? completedRun.taskId : undefined} onPreviews={updatePreviews} onSaved={(annotation) => { const safe = toImageAnnotation(annotation); if (safe) upsertSafeAnnotation(safe); }} />}
     </AiDetectDialog>}
   </div>;
 }

@@ -1,8 +1,9 @@
 import { randomBytes } from "node:crypto";
+import { createPeriodicTask } from "./queue/periodic-task.js";
 
 import { probeProvider, type ProviderReadiness } from "@annotationplatform/domain";
 
-import { getProductionHardeningPolicy, getSafeStartupMessage, getWorkerConfig } from "./config.js";
+import { getProductionHardeningPolicy, getSafeStartupMessage, getTextSourceLimits, getWorkerConfig } from "./config.js";
 import {
   createWorkerDatabase,
   createWorkerMinio,
@@ -25,6 +26,9 @@ export async function startWorkerReadiness() {
   try {
     const config = getWorkerConfig();
     const hardening = getProductionHardeningPolicy();
+    // Malformed TEXT_WORKSPACE_MAX_* overrides must fail startup rather than
+    // surface as a confusing failure the first time TEXT_SOURCE_PREPARE runs.
+    getTextSourceLimits();
     const db = createWorkerDatabase(config);
     const minio = createWorkerMinio(config);
     const { connection, queue } = createWorkerQueue(config);
@@ -40,8 +44,8 @@ export async function startWorkerReadiness() {
         // bucket lifecycle policy. Idempotent, prefix-scoped only to the
         // two known temp/staging prefixes (see the function's own doc
         // comment) — never touches a permanent asset prefix.
-        await ensureTempUploadLifecyclePolicy(minio, config.MINIO_BUCKET, hardening.MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS).catch((error: unknown) => {
-          console.warn("MinIO temp-upload lifecycle policy could not be applied (non-fatal):", error instanceof Error ? error.message : error);
+        await ensureTempUploadLifecyclePolicy(minio, config.MINIO_BUCKET, hardening.MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS).catch(() => {
+          console.warn("MinIO temp-upload lifecycle policy could not be applied (non-fatal).");
         });
       }),
       await probeProvider("redis", async () => {
@@ -70,75 +74,35 @@ export async function startWorkerReadiness() {
       await Promise.allSettled([foundationWorker.close(), queue.close(), connection.quit(), db.$disconnect()]);
     };
     await foundationWorker.worker.waitUntilReady();
-    await failExpiredPreparedImports(db).catch(() => undefined);
-    const importTimeoutTimer = setInterval(() => { void failExpiredPreparedImports(db); }, 60_000);
-    importTimeoutTimer.unref();
-
-    // Scanner-driven AI poll loop — never re-delivered through BullMQ (see
-    // specs/020-ai-integration/research.md #1). A short interval keeps
-    // POLL_BASE_DELAY_MS (2s) honored promptly.
-    await pollDueAiTasks(db, workerId).catch(() => undefined);
-    const aiPollTimer = setInterval(() => { void pollDueAiTasks(db, workerId); }, 2_000);
-    aiPollTimer.unref();
-
-    // 021-production-hardening-garbage-collection, User Story 1/2.
-    //
-    // `queue`/`connection` (created above only for the one-shot Redis
-    // readiness probe) are kept open for the rest of the process's life
-    // instead of being closed here, so the recovery scanner has a live
-    // BullMQ client to redeliver a Job through — no second Redis connection
-    // is opened for this. They are closed only in `closeOnError`/`shutdown`
-    // below, alongside every other long-lived resource this process holds.
-    const redeliverExistingJob = createWorkerJobRedeliverer(db, queue);
-
-    // Recovery scanner: Jobs whose durable record exists but were never
-    // successfully delivered to BullMQ (a Redis outage at enqueue time, or a
-    // worker that crashed between creating the Job and confirming delivery).
-    // `runPendingJobRecovery` (recovery-scanner.ts) was implemented and
-    // tested in an earlier phase but never scheduled until now.
-    await runPendingJobRecovery({ db, redeliverExistingJob }).catch(() => undefined);
-    const recoveryTimer = setInterval(() => { void runPendingJobRecovery({ db, redeliverExistingJob }); }, 60_000);
-    recoveryTimer.unref();
-
-    // Stale-`RUNNING` detector: a worker that claimed a Job and then crashed
-    // or lost connectivity (lease expired) — retried in place under budget,
-    // dead-lettered once exhausted. Independent of, and complementary to,
-    // the lease-based detector: a Job that has simply run far too long,
-    // regardless of whether its lease is still being renewed.
-    const runStaleJobPass = () => {
-      void recoverExpiredLeaseJobs({ db, leaseGraceMs: hardening.JOB_RECOVERY_LEASE_GRACE_MS });
-      void failRunawayJobs({ db, maxRuntimeMs: hardening.JOB_MAX_RUNTIME_MS });
+    const maintenance: ReturnType<typeof createPeriodicTask>[] = [];
+    const schedule = (name: string, intervalMs: number, operation: () => Promise<unknown>) => {
+      // Only a fixed task name is logged; provider/database errors may contain secrets.
+      const task = createPeriodicTask(operation, () => console.warn(`Worker maintenance failed: ${name}.`));
+      maintenance.push(task);
+      task.start(intervalMs);
+      void task.run();
     };
-    runStaleJobPass();
-    const staleJobTimer = setInterval(runStaleJobPass, 60_000);
-    staleJobTimer.unref();
+    const closeResources = closeOnError;
+    closeOnError = async () => {
+      // Drain scanner work before closing its database and queue connections.
+      await Promise.all(maintenance.map((task) => task.stop()));
+      await closeResources();
+    };
 
-    // MinIO orphan scanner + temp-upload cleanup (User Story 4). Both are
-    // heavier, full-prefix-listing passes — scheduled far less frequently
-    // than the lightweight per-row scanners above — and both are
-    // cross-worker-replica-coordinated (gc-coordination.ts's advisory
-    // lock), so running several worker replicas never causes two of them
-    // to run the same pass at once. `MINIO_ORPHAN_SCAN_DRY_RUN` (T003,
-    // default true) governs whether the scheduled scan actually deletes
-    // anything — an operator must explicitly opt in to live deletion.
-    const runOrphanScanPass = () => { void runScheduledOrphanScan({ db, minio, bucket: config.MINIO_BUCKET, dryRun: hardening.MINIO_ORPHAN_SCAN_DRY_RUN, gracePeriodMs: hardening.MINIO_ORPHAN_GRACE_PERIOD_MS }); };
-    runOrphanScanPass();
-    const orphanScanTimer = setInterval(runOrphanScanPass, 60 * 60_000);
-    orphanScanTimer.unref();
+    schedule("import timeout", 60_000, () => failExpiredPreparedImports(db));
+    schedule("AI polling", 2_000, () => pollDueAiTasks(db, workerId));
 
-    const runTempUploadCleanupPass = () => { void runScheduledTempUploadCleanup({ db, minio, bucket: config.MINIO_BUCKET, dryRun: hardening.MINIO_ORPHAN_SCAN_DRY_RUN, gracePeriodMs: hardening.TEMP_UPLOAD_RETENTION_MS }); };
-    runTempUploadCleanupPass();
-    const tempUploadCleanupTimer = setInterval(runTempUploadCleanupPass, 30 * 60_000);
-    tempUploadCleanupTimer.unref();
+    // PostgreSQL owns recovery; BullMQ only redelivers the durable jobId.
+    const redeliverExistingJob = createWorkerJobRedeliverer(db, queue);
+    schedule("pending delivery recovery", 60_000, () => runPendingJobRecovery({ db, redeliverExistingJob }));
+    schedule("expired lease recovery", 60_000, () => recoverExpiredLeaseJobs({ db, leaseGraceMs: hardening.JOB_RECOVERY_LEASE_GRACE_MS }));
+    schedule("runaway job detection", 60_000, () => failRunawayJobs({ db, maxRuntimeMs: hardening.JOB_MAX_RUNTIME_MS }));
 
-    // JobEvent retention (User Story 5) — deletes only, never touches an
-    // active Job's events regardless of age (FR-036), coordinated the same
-    // way as the two passes above so multiple worker replicas never run
-    // overlapping batches against each other.
-    const runJobEventRetentionPass = () => { void runScheduledJobEventRetention({ db, retentionDays: hardening.JOB_EVENT_RETENTION_DAYS, batchSize: hardening.JOB_EVENT_CLEANUP_BATCH_SIZE }); };
-    runJobEventRetentionPass();
-    const jobEventRetentionTimer = setInterval(runJobEventRetentionPass, 60 * 60_000);
-    jobEventRetentionTimer.unref();
+    // Cross-replica GC coordination remains inside each scanner. The local
+    // scheduler prevents overlap and catches failures between interval ticks.
+    schedule("orphan scan", 60 * 60_000, () => runScheduledOrphanScan({ db, minio, bucket: config.MINIO_BUCKET, dryRun: hardening.MINIO_ORPHAN_SCAN_DRY_RUN, gracePeriodMs: hardening.MINIO_ORPHAN_GRACE_PERIOD_MS }));
+    schedule("temp upload cleanup", 30 * 60_000, () => runScheduledTempUploadCleanup({ db, minio, bucket: config.MINIO_BUCKET, dryRun: hardening.MINIO_ORPHAN_SCAN_DRY_RUN, gracePeriodMs: hardening.TEMP_UPLOAD_RETENTION_MS }));
+    schedule("job event retention", 60 * 60_000, () => runScheduledJobEventRetention({ db, retentionDays: hardening.JOB_EVENT_RETENTION_DAYS, batchSize: hardening.JOB_EVENT_CLEANUP_BATCH_SIZE }));
 
     const shutdown = async () => {
       await closeOnError?.();

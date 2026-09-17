@@ -64,6 +64,29 @@ type VideoAnnotationState = {
   playbackState: "paused" | "playing";
   fps: number | null;
   durationMs: number | null;
+  mergeAiResults: (tracks: SafeVideoTrack[], keyframes: SafeVideoKeyframe[]) => void;
+  /**
+   * Additive merge for a freshly-fetched read window (see
+   * `video-window-ranges.ts`/`video-engine.tsx`'s window-loading effect).
+   * Unlike `mergeAiResults` (which protects state a mutation already wrote
+   * this session), server data here always overwrites any existing entry
+   * with the same id -- this is a read cache being kept current, not a
+   * merge against unsaved local state, so a repeat fetch of an overlapping
+   * window should reflect whatever the server has now. Never removes
+   * entries outside the new window: those came from an earlier window and
+   * remain valid until the asset changes.
+   */
+  mergeWindow: (tracks: SafeVideoTrack[], keyframes: SafeVideoKeyframe[]) => void;
+  /**
+   * Removes exactly the given ids -- no inference, no "drop tracks with zero
+   * remaining keyframes" heuristic, because a freshly-created track
+   * legitimately has zero keyframes and must never be swept up by that.
+   * The caller (`video-engine.tsx`'s window-cache eviction) is responsible
+   * for deciding what's safe to remove: never the selected track, never a
+   * keyframe with an unsaved local edit pending, never a track still
+   * referenced by a keyframe that isn't also being removed in this call.
+   */
+  evictWindow: (keyframeIds: string[], trackIds: string[]) => void;
   setSnapshot: (tracks: SafeVideoTrack[], keyframes: SafeVideoKeyframe[]) => void;
   setTool: (tool: VideoAnnotationTool) => void;
   setSelectedKeyframeId: (id: string | null) => void;
@@ -101,6 +124,24 @@ export const useVideoAnnotationStore = create<VideoAnnotationState>((set) => ({
   playbackState: "paused",
   fps: null,
   durationMs: null,
+  mergeAiResults: (newTracks, newKeyframes) => set((state) => {
+    const tracks = { ...Object.fromEntries(newTracks.map((track) => [track.id, track])), ...state.tracks };
+    const keyframes = { ...Object.fromEntries(newKeyframes.map((frame) => [frame.id, frame])), ...state.keyframes };
+    return { tracks, keyframes, trackList: Object.values(tracks), keyframeList: Object.values(keyframes) };
+  }),
+  mergeWindow: (newTracks, newKeyframes) => set((state) => {
+    const tracks = { ...state.tracks, ...Object.fromEntries(newTracks.map((track) => [track.id, track])) };
+    const keyframes = { ...state.keyframes, ...Object.fromEntries(newKeyframes.map((frame) => [frame.id, frame])) };
+    return { tracks, keyframes, trackList: Object.values(tracks), keyframeList: Object.values(keyframes) };
+  }),
+  evictWindow: (keyframeIds, trackIds) => set((state) => {
+    if (!keyframeIds.length && !trackIds.length) return state;
+    const keyframes = { ...state.keyframes };
+    for (const id of keyframeIds) delete keyframes[id];
+    const tracks = { ...state.tracks };
+    for (const id of trackIds) delete tracks[id];
+    return { keyframes, keyframeList: Object.values(keyframes), tracks, trackList: Object.values(tracks) };
+  }),
   setSnapshot: (tracks, keyframes) => set({ tracks: Object.fromEntries(tracks.map((track) => [track.id, track])), keyframes: Object.fromEntries(keyframes.map((keyframe) => [keyframe.id, keyframe])), trackList: tracks, keyframeList: keyframes, mutationState: "idle" }),
   setTool: (tool) => set({ tool }),
   setSelectedKeyframeId: (selectedKeyframeId) => set({ selectedKeyframeId }),

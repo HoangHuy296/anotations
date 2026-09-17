@@ -1,13 +1,16 @@
 "use client";
 
-import { Atom, CheckCircle, SpinnerGap, StopCircle, WarningCircle, X } from "@phosphor-icons/react";
+import { Atom, BoundingBox, Selection, Tag, TextT, CheckCircle, SpinnerGap, StopCircle, WarningCircle, X } from "@phosphor-icons/react";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Modality } from "@internal/db";
 
 import { cancelAiTaskClient, createAiTaskClient, listActiveAiModelsClient, listModelClassesClient, readAiTaskClient } from "@/lib/ai/ai-task-api-client";
-import { aiTaskStatusMessage, modelSupportsModality, shouldPollAiTask } from "@/lib/ai/ai-detect-view";
-import type { AiModelDto, AiTaskStatusDto } from "@/types/ai";
+import { aiTaskStatusMessage, AI_TOOL_PROBLEMS, modelSupportsModality, modelSupportsProblem, shouldPollAiTask } from "@/lib/ai/ai-detect-view";
+import type { AiModelDto, AiTaskStatusDto, AiToolTaskName } from "@/types/ai";
+
+
+const PROBLEM_ICONS = { tracking: Atom, detection: Atom, segmentation: Selection, oriented_detection: BoundingBox, classification: Tag, ocr: TextT };
 
 const POLL_INTERVAL_MS = 2_500;
 
@@ -16,6 +19,7 @@ type Phase = "loading-models" | "models-error" | "no-models" | "select-model" | 
 export type AiDetectDialogProps = {
   /** The asset AI Detect runs against. Identity only -- this component never inspects geometry or existing annotations. */
   assetId: string;
+  problem: AiToolTaskName;
   children?: React.ReactNode;
   /**
    * The asset's own modality (`Asset.modality`) -- the workspace is
@@ -44,7 +48,10 @@ export type AiDetectDialogProps = {
  * this component is what an engine mounts in response to that, the same way
  * every other tool's UI lives outside the toolbox button itself.
  */
-export function AiDetectDialog({ assetId, modality, onClose, onCompleted, children }: AiDetectDialogProps) {
+export function AiDetectDialog({ assetId, modality, problem, onClose, onCompleted, children }: AiDetectDialogProps) {
+  const title = AI_TOOL_PROBLEMS[problem].label;
+  const ProblemIcon = PROBLEM_ICONS[problem];
+  const iconClassName = problem === "oriented_detection" ? "rotate-45 text-sky-600" : "text-sky-600";
   const { datasetId } = useParams<{ datasetId: string }>();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -66,7 +73,7 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
   const [classRetry, setClassRetry] = useState(0);
   const selectedModel = models.find((model) => model.id === selectedModelId);
   const classesReady = classResult?.modelId === selectedModelId && !classResult?.failed;
-  const canSubmit = thresholdsValid && selectedModel?.availableForTasks !== false && classesReady && selectedClasses.length > 0 && modality !== "VIDEO";
+  const canSubmit = thresholdsValid && selectedModel?.availableForTasks !== false && classesReady && selectedClasses.length > 0;
 
   useEffect(() => {
     if (!selectedModelId) return;
@@ -96,18 +103,18 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
   // never synchronously at the top of an effect body.
   const applyModelsResult = useCallback((result: Awaited<ReturnType<typeof listActiveAiModelsClient>>) => {
     if (!result.ok) { setErrorMessage("Could not load AI models. Try again."); setPhase("models-error"); return; }
-    const applicable = result.models.filter((model) => modelSupportsModality(model, modality));
+    const applicable = result.models.filter((model) => modelSupportsModality(model, modality) && modelSupportsProblem(model, problem));
     setModels(applicable);
     if (applicable.length === 0) { setPhase("no-models"); return; }
     setSelectedModelId(applicable.find((model) => model.availableForTasks !== false)?.id ?? applicable[0].id);
     setPhase("select-model");
-  }, [modality]);
+  }, [modality, problem]);
 
   useEffect(() => {
     let canceled = false;
-    void listActiveAiModelsClient(modality).then((result) => { if (!canceled) applyModelsResult(result); });
+    void listActiveAiModelsClient(modality, problem).then((result) => { if (!canceled) applyModelsResult(result); });
     return () => { canceled = true; };
-  }, [applyModelsResult, modality]);
+  }, [applyModelsResult, modality, problem]);
 
   const refreshTask = useCallback(async (taskId: string) => {
     const result = await readAiTaskClient(taskId);
@@ -121,7 +128,7 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
       try {
         const applied = await onCompleted?.(taskId);
         setAppliedCount(typeof applied === "number" ? applied : null);
-      } catch { setErrorMessage("Detection completed, but annotations could not be refreshed. Reload the workspace to view them."); }
+      } catch { setErrorMessage("Processing completed, but annotations could not be refreshed. Reload the workspace to view them."); }
     } else if (result.task.status === "FAILED") {
       setPhase("failed");
     } else if (result.task.status === "CANCELED") {
@@ -196,21 +203,21 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
     // A model-fetch failure retries the fetch itself; a task-level failure
     // (create/poll/cancel) already has a good model list and just goes back
     // to picking one.
-    if (phase === "models-error") { setPhase("loading-models"); void listActiveAiModelsClient(modality).then(applyModelsResult); return; }
+    if (phase === "models-error") { setPhase("loading-models"); void listActiveAiModelsClient(modality, problem).then(applyModelsResult); return; }
     setPhase(models.length > 0 ? "select-model" : "no-models");
   }
 
-  return <aside aria-label="AI Detect" onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onClose(); } }} className="absolute inset-y-0 left-0 z-30 w-80 max-w-full overflow-y-auto border-r border-zinc-200 bg-white text-zinc-900 shadow-xl">
+  return <aside aria-label={title} onKeyDown={(event) => { if (event.key === "Escape") { event.stopPropagation(); onClose(); } }} className="absolute inset-y-0 left-0 z-30 w-80 max-w-full overflow-y-auto border-r border-zinc-200 bg-white text-zinc-900 shadow-xl">
     <div className="p-5">
       <div className="flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-bold text-zinc-950"><Atom size={18} className="text-sky-600" weight="duotone" />AI Detect</h2>
+        <h2 className="flex items-center gap-2 text-sm font-bold text-zinc-950"><ProblemIcon size={18} className={iconClassName} weight="duotone" />{title}</h2>
         <button ref={closeButtonRef} type="button" aria-label="Close" onClick={onClose} className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"><X size={16} /></button>
       </div>
 
       <div className="mt-4" aria-live="polite">
         {phase === "loading-models" && <StatusLine icon={<SpinnerGap className="animate-spin" size={16} />} text="Loading available AI models…" />}
         {phase === "models-error" && <StatusLine icon={<WarningCircle size={16} />} text={errorMessage ?? "Could not load AI models."} tone="error" />}
-        {phase === "no-models" && <StatusLine icon={<WarningCircle size={16} />} text="No active AI models are available for this asset's modality yet." />}
+        {phase === "no-models" && <StatusLine icon={<WarningCircle size={16} />} text={problem ? `No active ${title.toLowerCase()} models are available for this asset yet.` : "No active AI models are available for this asset's modality yet."} />}
 
         {(phase === "select-model" || phase === "submitting" || phase === "create-error") && models.length > 0 && <div>
           <p className="text-xs font-semibold text-zinc-500">Choose a model</p>
@@ -218,12 +225,12 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
             {models.map((model) => <li key={model.id}>
               <label className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${selectedModelId === model.id ? "border-sky-500 bg-sky-50" : "border-zinc-200 hover:bg-zinc-50"}`}>
                 <input type="radio" disabled={phase === "submitting"} name="ai-model" className="accent-sky-600" checked={selectedModelId === model.id} onChange={() => { setClassResult(null); setSelectedClasses([]); setSelectedModelId(model.id); }} />
-                <span className="flex-1"><span className="block font-medium text-zinc-900">{model.displayName}</span><span className="block text-[11px] text-zinc-500">{model.availableForTasks === false ? "Not configured for AI tasks" : model.taskType.replaceAll("_", " ")}{model.modality === null ? " · multi-modal" : ""}</span></span>
+                <span className="flex-1"><span className="block font-medium text-zinc-900">{model.displayName}</span><span className="block text-[11px] text-zinc-500">{model.availableForTasks === false ? "Execution unavailable" : model.taskType.replaceAll("_", " ")}{model.modality === null ? " · multi-modal" : ""}</span></span>
               </label>
             </li>)}
           </ul>
           {selectedModelId && <fieldset disabled={phase === "submitting"} className="mt-4 border-t border-zinc-100 pt-4">
-            <legend className="text-xs font-semibold text-zinc-600">Classes to detect</legend>
+            <legend className="text-xs font-semibold text-zinc-600">Model classes</legend>
             {classResult?.modelId !== selectedModelId ? <StatusLine icon={<SpinnerGap className="animate-spin" size={16} />} text="Loading model classes…" /> : classResult.failed ? <div>
               <p className="text-xs text-rose-600">Could not load model classes.</p>
               <button type="button" onClick={() => { setClassResult(null); setClassRetry((value) => value + 1); }} className="mt-2 text-xs font-semibold text-sky-700">Retry classes</button>
@@ -237,7 +244,7 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
                   <input type="checkbox" className="accent-sky-600" checked={selectedClasses.includes(label)} onChange={(event) => setSelectedClasses((current) => event.target.checked ? [...current, label] : current.filter((item) => item !== label))} />{label}
                 </label>)}
               </div>
-              {selectedClasses.length === 0 && <p className="mt-2 text-xs text-zinc-500">Select at least one class to run detection.</p>}
+              {selectedClasses.length === 0 && <p className="mt-2 text-xs text-zinc-500">Select at least one class to run this model.</p>}
             </>}
           </fieldset>}
           <fieldset disabled={phase === "submitting"} className="mt-4 grid grid-cols-2 gap-3 border-t border-zinc-100 pt-4">
@@ -245,7 +252,7 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
             <ThresholdInput label="IoU threshold" value={iouThreshold} onChange={setIouThreshold} />
           </fieldset>
           {!thresholdsValid && <p className="mt-2 text-xs text-rose-600">Enter a value from 0 to 1 for both thresholds.</p>}
-          {modality === "VIDEO" && <p className="mt-3 text-xs text-amber-700">Video detection is not supported by the current processing service yet.</p>}
+
           {phase === "create-error" && <StatusLine icon={<WarningCircle size={16} />} text={errorMessage ?? "The AI task could not be created."} tone="error" />}
         </div>}
 
@@ -257,7 +264,7 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
             tone={phase === "succeeded" ? "success" : phase === "failed" ? "error" : "default"}
           />
           {phase === "polling" && errorMessage && <StatusLine icon={<WarningCircle size={16} />} text={errorMessage} tone="error" />}
-          {phase === "succeeded" && <p className="text-xs text-zinc-500">{appliedCount === null ? "Results are ready." : appliedCount === 0 ? "Detection results are shown as previews below. Choose an existing label only if you want to save a draft." : `${appliedCount} AI-suggested annotation${appliedCount === 1 ? "" : "s"} added as drafts for review.`}</p>}
+          {phase === "succeeded" && <p className="text-xs text-zinc-500">{appliedCount === null ? "Results are ready." : appliedCount === 0 ? (modality === "VIDEO" ? "No video keyframes were added." : "Results are shown as previews below. Choose an existing label only if you want to save a draft.") : `${appliedCount} AI-suggested annotation${appliedCount === 1 ? "" : "s"} added as drafts for review.`}</p>}
         </div>}
       </div>
 
@@ -267,7 +274,7 @@ export function AiDetectDialog({ assetId, modality, onClose, onCompleted, childr
       <div className="mt-5 flex justify-end gap-2">
         {phase === "polling" && <button type="button" disabled={canceling} onClick={() => void cancel()} className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"><StopCircle size={15} />{canceling ? "Canceling…" : "Cancel"}</button>}
         {(phase === "failed" || phase === "canceled" || phase === "create-error" || phase === "models-error") && <button type="button" onClick={retry} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50">Try again</button>}
-        {(phase === "select-model" || phase === "submitting") && <button type="button" disabled={!selectedModelId || !canSubmit || phase === "submitting"} onClick={() => void submit()} className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{phase === "submitting" ? <SpinnerGap className="animate-spin" size={14} /> : <Atom size={14} />}Run AI Detect</button>}
+        {(phase === "select-model" || phase === "submitting") && <button type="button" disabled={!selectedModelId || !canSubmit || phase === "submitting"} onClick={() => void submit()} className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{phase === "submitting" ? <SpinnerGap className="animate-spin" size={14} /> : <ProblemIcon size={14} className={problem === "oriented_detection" ? "rotate-45" : undefined} />}Run {title}</button>}
         <button type="button" onClick={onClose} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-500 hover:bg-zinc-100">{phase === "succeeded" || phase === "canceled" || phase === "failed" ? "Done" : "Close"}</button>
       </div>
     </div>

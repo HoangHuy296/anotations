@@ -63,3 +63,63 @@ test("private worker dispatches a claimed outbox Job through Redis without expos
     await fixture.cleanup();
   }
 });
+
+// 025-text-workspace-engine T032: the relay forwards every
+// CollaborationOutboxEventType generically -- there is no per-type allowlist
+// in this file to extend. This proves the newly added ANNOTATION_CHANGED
+// enum value actually flows end-to-end through the real Redis channel,
+// exactly like every other event type.
+test("private worker relays a real ANNOTATION_CHANGED event with only its allowlisted metadata payload", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createWorkerJobFixture();
+  const config = getWorkerConfig();
+  const subscriber = new Redis({
+    host: config.REDIS_HOST,
+    port: config.REDIS_PORT,
+    password: config.REDIS_PASSWORD,
+    db: config.REDIS_DB,
+    maxRetriesPerRequest: null,
+  });
+  try {
+    const job = await fixture.createJob({ type: "COLLABORATION_OUTBOX_DISPATCH", input: {} });
+    const asset = await fixture.db.asset.create({
+      data: { datasetId: fixture.datasetId, modality: "TEXT", filename: "relay-fixture.txt", mimeType: "text/plain", sourceFingerprint: `relay-${Date.now()}-${Math.random()}` },
+      select: { id: true },
+    });
+    const event = await fixture.db.collaborationOutboxEvent.create({
+      data: {
+        datasetId: fixture.datasetId,
+        assetId: asset.id,
+        jobId: job.id,
+        actorId: fixture.ownerId,
+        type: "ANNOTATION_CHANGED",
+        dedupeKey: `worker-outbox-annotation-${Date.now()}-${Math.random()}`,
+        payload: { datasetId: fixture.datasetId, assetId: asset.id, parentRevision: 5 },
+      },
+      select: { id: true },
+    });
+    await fixture.db.job.update({ where: { id: job.id }, data: { input: { outboxEventId: event.id } } });
+    await subscriber.subscribe(collaborationRedisChannel(config.BULLMQ_PREFIX));
+    let clearDeliveryTimeout = () => undefined;
+    const delivered = new Promise<Record<string, unknown>>((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error("Timed out waiting for collaboration Redis event.")), 5_000);
+      clearDeliveryTimeout = () => clearTimeout(timeout);
+      subscriber.once("message", (_channel, raw) => {
+        clearTimeout(timeout);
+        resolve(JSON.parse(raw) as Record<string, unknown>);
+      });
+    });
+
+    try {
+      assert.deepEqual(await routeQueueDelivery({ db: fixture.db, payload: { jobId: job.id }, workerId: "collaboration-outbox-test" }), { kind: "claimed", jobId: job.id });
+      const envelope = await delivered;
+      assert.equal(envelope.type, "ANNOTATION_CHANGED");
+      assert.equal(envelope.assetId, asset.id);
+      assert.deepEqual(envelope.payload, { datasetId: fixture.datasetId, assetId: asset.id, parentRevision: 5 });
+    } finally {
+      clearDeliveryTimeout();
+    }
+  } finally {
+    await subscriber.quit().catch(() => subscriber.disconnect());
+    await fixture.cleanup();
+  }
+});

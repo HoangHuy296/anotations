@@ -1,12 +1,11 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { changePasswordAndRotateSession, cookieOptions, getRequestActor, hashPassword, verifyPassword } from "@/lib/auth";
-import { authRequired } from "@/lib/authorization-response";
+import { authRequired, isCrossOriginRequest } from "@/lib/authorization-response";
 import { db } from "@/lib/db";
 import { passwordChangeSchema } from "@/lib/validation/auth";
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return authRequired();
+  if (isCrossOriginRequest(request)) return authRequired();
   const actor = await getRequestActor();
   if (!actor) return authRequired();
 

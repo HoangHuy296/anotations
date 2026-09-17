@@ -37,6 +37,9 @@ export type AiProviderPrediction = {
   labelKey: string;
   confidence: number;
   boundingBoxes: unknown;
+  /** Present for a video tracking observation; coordinates remain frame-relative. */
+  video?: { trackId: number; frameIndex: number; timestampMs: number; classId: number; fps: number; totalFrames: number };
+
 };
 
 /**

@@ -33,14 +33,27 @@ const safeErrorCodes = new Set([
   "SOURCE_ROOT_PATH_UNSAFE", "SOURCE_IMPORT_LIMIT_EXCEEDED", "SOURCE_PROVIDER_UNAVAILABLE",
   "SOURCE_DOWNLOAD_FAILED", "SOURCE_RECONCILIATION_CONFLICT", "MINIO_UPLOAD_FAILED", "MINIO_OBJECT_VERIFICATION_FAILED",
   "LOCK_LOST", "REPOSITORY_IMPORT_FAILED", "REPOSITORY_IMPORT_TEST_INJECTED_FAILURE",
+  // 025-text-workspace-engine TEXT_SOURCE_PREPARE (see
+  // packages/domain/src/text-source-prepare-job.ts's
+  // safeTextSourcePrepareErrorCodeSchema).
+  "TEXT_SOURCE_MISSING", "TEXT_SOURCE_STALE", "TEXT_SOURCE_OVERSIZED_BYTES",
+  "TEXT_SOURCE_OVERSIZED_CODE_UNITS", "TEXT_SOURCE_INVALID_ENCODING",
 ]);
+
+const textSourceErrorMessages: Record<string, string> = {
+  TEXT_SOURCE_MISSING: "The original source object could not be found.",
+  TEXT_SOURCE_STALE: "The source changed after preparation started; retry preparation.",
+  TEXT_SOURCE_OVERSIZED_BYTES: "This source is larger than the supported reader size.",
+  TEXT_SOURCE_OVERSIZED_CODE_UNITS: "This source has more characters than the supported reader size.",
+  TEXT_SOURCE_INVALID_ENCODING: "This source is not valid, complete UTF-8 text.",
+};
 
 function safeError(code: string | null) {
   if (!code || !safeErrorCodes.has(code)) return { errorCode: null, errorMessage: null };
   const message = code === "SOURCE_TOKEN_EXPIRED" || code === "SOURCE_TOKEN_INVALID"
     ? "The source connection is no longer usable."
     : code === "LOCK_LOST" ? "This job is being handled by another worker."
-      : "This job could not complete safely.";
+      : textSourceErrorMessages[code] ?? "This job could not complete safely.";
   return { errorCode: code, errorMessage: message };
 }
 

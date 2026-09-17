@@ -91,7 +91,28 @@ export type DerivedVideoInterpolation = SafeVideoKeyframe["geometry"] & {
   derived: true;
 };
 
-/** Full read model `VideoEngine` renders: persisted tracks/keyframes/labels plus their derived-only interpolation frames. */
+/**
+ * One page (or, once a client has followed every `nextCursor`, the fully
+ * assembled whole) of the read model `VideoEngine` renders, scoped to one
+ * requested `[effectiveFromMs, effectiveToMs]` window (see
+ * `video-read-service.ts`).
+ *
+ * `totalTracksInWindow`/`totalKeyframesInWindow` are the *authoritative*
+ * counts for the whole `[effectiveFromMs, effectiveToMs]` interval -- a
+ * `count()`/`groupBy` against the database, independent of pagination and
+ * excluding boundary-context rows/tracks (a track present only because it
+ * straddles the window, with no keyframe actually inside it, is not counted
+ * here even though it does appear in `tracks`/`keyframes`). They do not
+ * shrink or change as more pages arrive; they describe the requested
+ * interval itself, not "what this response happened to carry."
+ *
+ * `keyframes`/`tracks` on any single page are only that page's slice (plus
+ * boundary context, present on every page) -- a client must follow
+ * `nextCursor` until `hasMore` is false before treating its merged result as
+ * a complete window. `truncated` is `hasMore` OR'd with the rare case where
+ * a single page's own track set overflows `tracksPerWindowSafetyCap`; unlike
+ * `keyframesPerPage`, there is no continuation for that safety cap.
+ */
 export type SafeVideoAnnotations = {
   assetId: string;
   durationMs: number | null;
@@ -100,4 +121,13 @@ export type SafeVideoAnnotations = {
   keyframes: SafeVideoKeyframe[];
   temporalLabels: SafeVideoTemporalLabel[];
   interpolation: DerivedVideoInterpolation[];
+  totalTracksInWindow: number;
+  totalKeyframesInWindow: number;
+  truncated: boolean;
+  effectiveFromMs: number;
+  effectiveToMs: number;
+  /** Opaque cursor for the next page of in-window keyframes, or `null` when this is the last page. */
+  nextCursor: string | null;
+  /** `nextCursor !== null` -- kept as its own field so a consumer never has to infer completion from cursor nullability. */
+  hasMore: boolean;
 };

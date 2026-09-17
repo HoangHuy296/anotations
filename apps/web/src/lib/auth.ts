@@ -12,7 +12,13 @@ const scrypt = promisify(scryptCallback);
 const SESSION_COOKIE = "fieldframe_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 14;
 
-export type RequestActor = { id: string; email: string; name: string; role: UserRole };
+/**
+ * `preferences` is the raw, unvalidated JSON column -- callers read it
+ * through `readAccountPreferences` (src/lib/validation/account-preferences.ts)
+ * rather than trusting its shape directly. Optional so existing literals
+ * built without it (tests, integration helpers) stay valid.
+ */
+export type RequestActor = { id: string; email: string; name: string; role: UserRole; preferences?: unknown };
 export type SafeUser = RequestActor;
 
 export const sessionCookieName = SESSION_COOKIE;
@@ -80,7 +86,7 @@ export async function getRequestActor(): Promise<RequestActor | null> {
 export async function getActorFromSessionToken(token: string): Promise<RequestActor | null> {
   const session = await db.authSession.findFirst({
     where: { refreshTokenHash: digest(token), revokedAt: null, deletedAt: null, expiresAt: { gt: new Date() } },
-    select: { user: { select: { id: true, email: true, name: true, role: true } } },
+    select: { user: { select: { id: true, email: true, name: true, role: true, preferences: true } } },
   });
   return session ? { ...session.user, name: session.user.name ?? session.user.email } : null;
 }

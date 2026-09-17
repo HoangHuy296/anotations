@@ -10,7 +10,7 @@ import { db } from "@/lib/db";
 import { toSafeJobStatus } from "@/lib/jobs/safe-job-status";
 import { enqueueExistingJob } from "@/lib/queue/enqueue-job";
 import { exportRequestSchema } from "@/lib/validation/export";
-import type { SafeExportJob } from "@/lib/exports/types";
+import type { SafeExportJob, SafeExportJobWithDataset } from "@/lib/exports/types";
 
 const exportJobSelect = {
   id: true, datasetId: true, type: true, status: true, stage: true, progress: true,
@@ -122,4 +122,25 @@ export async function createAuthorizedExportJob(actor: RequestActor, input: unkn
 export async function readSafeExportJob(jobId: string) {
   const job = await db.job.findFirst({ where: { id: jobId, type: JobType.EXPORT_DATASET }, select: exportJobSelect });
   return job ? toSafeExportJob(job) : null;
+}
+
+/**
+ * The user's own export history -- scoped to Jobs *this actor created*, not
+ * every export on datasets they can access. This is the Job table's existing
+ * `createdById` ownership boundary, so it needs no extra per-dataset
+ * authorization check the way creating or reading a single export does.
+ */
+export async function listSafeExportJobsForActor(actor: RequestActor, input: { cursor?: string; limit: number }): Promise<{ items: SafeExportJobWithDataset[]; nextCursor: string | null }> {
+  const rows = await db.job.findMany({
+    where: { createdById: actor.id, type: JobType.EXPORT_DATASET },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: input.limit + 1,
+    ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+    select: { ...exportJobSelect, dataset: { select: { name: true } } },
+  });
+  const page = rows.slice(0, input.limit);
+  return {
+    items: page.map((row) => ({ ...toSafeExportJob(row), datasetName: row.dataset?.name ?? null })),
+    nextCursor: rows.length > input.limit ? page.at(-1)?.id ?? null : null,
+  };
 }

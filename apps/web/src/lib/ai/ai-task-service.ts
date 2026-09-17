@@ -65,6 +65,13 @@ export async function createAiTask(actor: RequestActor, input: unknown): Promise
     throw error;
   }
 
+  if (model.provider === "aioz-company") {
+    const supported = (model.modality === "IMAGE" && ["DETECTION", "DETECT_OBJECTS"].includes(model.taskType)) || (model.modality === "VIDEO" && ["TRACKING", "DETECT_OBJECTS"].includes(model.taskType));
+    if (!supported) return { ok: false, status: 400, code: "INVALID_REQUEST" };
+    const matchingAssets = await db.asset.count({ where: { id: { in: parsed.data.assetIds }, datasetId: parsed.data.datasetId, modality: model.modality!, deletedAt: null, archivedAt: null } });
+    if (matchingAssets !== parsed.data.assetIds.length) return { ok: false, status: 400, code: "INVALID_REQUEST" };
+  }
+
   if (parsed.data.classes !== undefined) {
     if (model.provider !== "aioz-company") return { ok: false, status: 400, code: "INVALID_REQUEST" };
     let available: string[];

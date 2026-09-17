@@ -21,5 +21,5 @@ export function SignOutButton({ className }: { className?: string }) {
     }
   }
 
-  return <button type="button" onClick={() => void signOut()} disabled={pending} className={cn("rounded-lg px-2 py-1 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 disabled:opacity-50", className)}>{pending ? "Signing out…" : "Sign out"}</button>;
+  return <button type="button" onClick={() => void signOut()} disabled={pending} className={cn("rounded-lg px-2 py-1 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 disabled:opacity-50 dark:text-zinc-300 dark:hover:bg-zinc-800", className)}>{pending ? "Signing out…" : "Sign out"}</button>;
 }

@@ -30,6 +30,7 @@ export const supportedQueueJobTypes = [
   "BULK_DELETE_ASSETS",
   "BULK_EXPORT_SELECTED",
   "COLLABORATION_OUTBOX_DISPATCH",
+  "TEXT_SOURCE_PREPARE",
 ] as const;
 export type SupportedQueueJobType = (typeof supportedQueueJobTypes)[number];
 

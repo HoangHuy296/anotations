@@ -44,8 +44,8 @@ export function hasExceededPollBudget(aiTask: Pick<AiTask, "pollAttempts" | "cre
  * cancelRequestedAt and mutating state.
  *
  * `providerRegistry`, when supplied, is forwarded to `resolveAiProviderForTask`
- * — used by tests to inject a fake `AiProviderAdapter` in place of the real
- * (currently unregistered — T006 is blocked) AIOZ-company adapter.
+ * — used by tests to inject HTTP-isolated adapters in place of the real
+ * AIOZ Annotation Services adapter.
  */
 export async function processAiPoll(
   db: PrismaClient,
@@ -96,6 +96,14 @@ export async function processAiPoll(
   // 4. Poll the provider.
   const adapter = await resolveAiProviderForTask(db, aiTask, providerRegistry);
   const result = await adapter.getTaskStatus(aiTask.externalTaskId);
+
+  // Cancellation may arrive while the bounded HTTP request is in flight.
+  const afterRequest = await db.job.findUnique({ where: { id: jobId }, select: { cancelRequestedAt: true, lockToken: true } });
+  if (!afterRequest || afterRequest.lockToken !== lockToken) return;
+  if (afterRequest.cancelRequestedAt) {
+    await finalizeCanceledAiTask(db, jobId, lockToken, workerId);
+    return;
+  }
 
   // 5-7. Update AiTask -> update Job -> schedule next poll.
   switch (result.status) {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
 import { db } from "@/lib/db";
-import { projectPredictionResults, readAiPredictionResults, saveAiPrediction, savePredictionSchema } from "@/lib/ai/ai-prediction-results";
+import { aiPredictionColor, projectPredictionResults, readAiPredictionResults, saveAiPrediction, savePredictionSchema } from "@/lib/ai/ai-prediction-results";
 import type { RequestActor } from "@/lib/auth";
 
 const geometry = { x: 0.1, y: 0.2, width: 0.3, height: 0.4 };
@@ -10,9 +10,14 @@ const p = { assetId: "asset", labelKey: "car", confidence: 0.9, boundingBoxes: g
 
 test("preview projection keeps safe normalized fields, preserves indices and enforces task asset scope", () => {
   const output = { predictions: [{ bad: true }, { ...p, privateUrl: "http://private.invalid" }, { ...p, assetId: "other" }, { ...p, boundingBoxes: { ...geometry, width: 10 } }] };
-  assert.deepEqual(projectPredictionResults(output, { assetIds: ["asset"] }, "asset"), [{ index: 1, assetId: "asset", labelKey: "car", confidence: 0.9, geometry, saved: false }]);
+  assert.deepEqual(projectPredictionResults(output, { assetIds: ["asset"] }, "asset"), [{ index: 1, assetId: "asset", labelKey: "car", confidence: 0.9, color: "#f59e0b", geometry, saved: false }]);
   assert.deepEqual(projectPredictionResults(output, { assetIds: ["other"] }, "asset"), []);
-  assert.equal(savePredictionSchema.safeParse({ assetId: "asset", index: 0, labelId: "label", geometry }).success, false);
+  assert.equal(savePredictionSchema.safeParse({ assetId: "asset", index: 0, labelId: "label" }).success, true);
+  assert.equal(savePredictionSchema.safeParse({ assetId: "asset", index: 0 }).success, false);
+  assert.notEqual(aiPredictionColor("task", 0, "car", ["#f59e0b"]), "#f59e0b");
+  assert.equal(aiPredictionColor("task", 0, "motorcycle", []), aiPredictionColor("task", 99, "MOTORCYCLE", []));
+  const fullPalette = ["#f59e0b", "#ec4899", "#8b5cf6", "#06b6d4", "#84cc16", "#f97316", "#14b8a6", "#a855f7"];
+  assert.equal(fullPalette.includes(aiPredictionColor("task", 0, "motorcycle", fullPalette)), false);
 });
 
 test("saved previews preserve AI provenance, authorize scope, serialize replay, and respect review locks", { skip: !process.env.DATABASE_URL }, async () => {
@@ -33,21 +38,25 @@ test("saved previews preserve AI provenance, authorize scope, serialize replay, 
     assert.equal(await readAiPredictionResults(unknownActor, asset.id), null);
     await assert.rejects(saveAiPrediction(unknownActor, task.id, { assetId: asset.id, index: 0, labelId: label.id }), /NOT_FOUND/);
     await assert.rejects(saveAiPrediction(actor, task.id, { assetId: "other", index: 0, labelId: label.id }), /NOT_FOUND/);
-    await assert.rejects(saveAiPrediction(actor, task.id, { assetId: asset.id, index: 0, labelId: "other-label" }), /NOT_FOUND/);
     const before = await readAiPredictionResults(actor, asset.id);
     assert.equal(await db.label.count({ where: { datasetId: dataset.id } }), 1);
     assert.equal(before?.predictions.length, 2);
     assert.equal(before?.predictions[0].saved, false);
-    const request = { assetId: asset.id, index: 0, labelId: label.id };
+    const predictionLabel = await db.label.create({ data: { datasetId: dataset.id, name: "car", normalizedName: "car", color: "#f59e0b" } });
+    const request = { assetId: asset.id, index: 0, labelId: predictionLabel.id };
+    await assert.rejects(saveAiPrediction(actor, task.id, { ...request, labelId: label.id }), /NOT_FOUND/);
     const [a, b] = await Promise.all([saveAiPrediction(actor, task.id, request), saveAiPrediction(actor, task.id, request)]);
     assert.equal(a.id, b.id);
     assert.equal(await db.annotation.count({ where: { assetId: asset.id } }), 1);
-    assert.equal(await db.label.count({ where: { datasetId: dataset.id } }), 1);
+    assert.equal(await db.label.count({ where: { datasetId: dataset.id } }), 2);
     const saved = await db.annotation.findUniqueOrThrow({ where: { id: a.id } });
     assert.equal(saved.source, "AI");
     assert.equal(saved.status, "DRAFT");
+    assert.equal(saved.labelId, predictionLabel.id);
     assert.deepEqual(saved.geometry, geometry);
     assert.equal((saved.properties as { predictedClass: string }).predictedClass, "car");
+    assert.equal((saved.properties as { aiDisplayLabel: string }).aiDisplayLabel, "#1 car");
+    assert.notEqual((saved.properties as { aiColor: string }).aiColor.toLowerCase(), label.color.toLowerCase());
     assert.equal((await readAiPredictionResults(actor, asset.id))?.predictions[0].saved, true);
     // A later user edit must not be overwritten by replaying the initial save.
     await db.annotation.update({ where: { id: a.id }, data: { geometry: { ...geometry, x: 0.4 }, revision: { increment: 1 } } });
@@ -75,7 +84,7 @@ test("saved previews preserve AI provenance, authorize scope, serialize replay, 
     await db.aiTask.deleteMany({ where: { datasetId: dataset.id } });
     await db.job.deleteMany({ where: { datasetId: dataset.id } });
     await db.asset.delete({ where: { id: asset.id } });
-    await db.label.delete({ where: { id: label.id } });
+    await db.label.deleteMany({ where: { datasetId: dataset.id } });
     await db.dataset.delete({ where: { id: dataset.id } });
     await db.aiModel.delete({ where: { id: model.id } });
     await db.user.delete({ where: { id: owner.id } });

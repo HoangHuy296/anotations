@@ -12,3 +12,8 @@ export const exportRequestSchema = z.object({
 export const exportJobInputSchema = exportRequestSchema.omit({ datasetId: true });
 
 export type ExportRequest = z.infer<typeof exportRequestSchema>;
+
+export const exportListQuerySchema = z.object({
+  cursor: z.string().cuid().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+}).strict();

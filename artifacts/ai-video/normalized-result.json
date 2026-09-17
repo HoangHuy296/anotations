@@ -1,0 +1,775 @@
+{
+  "taskId": "7632d9ff-dc0a-43ac-9bc3-eb291f28c70b",
+  "status": "success",
+  "importedIntoPlatform": false,
+  "video": {
+    "fps": 29.907,
+    "width": 1280,
+    "height": 720,
+    "totalFrames": 850
+  },
+  "trackCount": 10,
+  "keyframeCount": 38,
+  "predictions": [
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.6021,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.5690625,
+        "y": 0.6578194444444444,
+        "width": 0.24439843750000004,
+        "height": 0.34147222222222223
+      },
+      "video": {
+        "trackId": 1,
+        "frameIndex": 54,
+        "timestampMs": 1806,
+        "classId": 56,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5217,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.5689453125,
+        "y": 0.6591944444444444,
+        "width": 0.24771093749999995,
+        "height": 0.33672222222222215
+      },
+      "video": {
+        "trackId": 1,
+        "frameIndex": 56,
+        "timestampMs": 1872,
+        "classId": 56,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5366,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.366703125,
+        "y": 0.6480555555555556,
+        "width": 0.12016406250000004,
+        "height": 0.19356944444444446
+      },
+      "video": {
+        "trackId": 2,
+        "frameIndex": 134,
+        "timestampMs": 4481,
+        "classId": 29,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5387,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.3667109375,
+        "y": 0.6480277777777778,
+        "width": 0.12016406250000004,
+        "height": 0.19361111111111115
+      },
+      "video": {
+        "trackId": 2,
+        "frameIndex": 135,
+        "timestampMs": 4514,
+        "classId": 29,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5401,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.3667109375,
+        "y": 0.6480416666666666,
+        "width": 0.12016406250000004,
+        "height": 0.19359722222222228
+      },
+      "video": {
+        "trackId": 2,
+        "frameIndex": 136,
+        "timestampMs": 4547,
+        "classId": 29,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5472,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.6847109375,
+        "y": 0.5555972222222222,
+        "width": 0.12961718749999998,
+        "height": 0.3354861111111112
+      },
+      "video": {
+        "trackId": 3,
+        "frameIndex": 137,
+        "timestampMs": 4581,
+        "classId": 77,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5825,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.3668984375,
+        "y": 0.6487222222222222,
+        "width": 0.11984374999999999,
+        "height": 0.19266666666666662
+      },
+      "video": {
+        "trackId": 2,
+        "frameIndex": 141,
+        "timestampMs": 4715,
+        "classId": 29,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5057,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.366734375,
+        "y": 0.6491388888888889,
+        "width": 0.12057031249999998,
+        "height": 0.19244444444444453
+      },
+      "video": {
+        "trackId": 2,
+        "frameIndex": 152,
+        "timestampMs": 5082,
+        "classId": 29,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.6045,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0174375,
+        "y": 0,
+        "width": 0.932421875,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 304,
+        "timestampMs": 10165,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5683,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0013515625,
+        "y": 0,
+        "width": 0.9533125,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 313,
+        "timestampMs": 10466,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5666,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.00146875,
+        "y": 0,
+        "width": 0.9533437499999999,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 314,
+        "timestampMs": 10499,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5817,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0083515625,
+        "y": 0,
+        "width": 0.9325234374999999,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 316,
+        "timestampMs": 10566,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5828,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.008359374999999999,
+        "y": 0,
+        "width": 0.932140625,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 317,
+        "timestampMs": 10600,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5818,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0084140625,
+        "y": 0,
+        "width": 0.9319765625,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 318,
+        "timestampMs": 10633,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5313,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.00590625,
+        "y": 0,
+        "width": 0.9397265625000001,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 319,
+        "timestampMs": 10666,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5345,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.004,
+        "y": 0,
+        "width": 0.9379765625,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 320,
+        "timestampMs": 10700,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5397,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.00415625,
+        "y": 0,
+        "width": 0.9371562500000001,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 321,
+        "timestampMs": 10733,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5386,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.004203125,
+        "y": 0,
+        "width": 0.9371015624999999,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 322,
+        "timestampMs": 10767,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5523,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0,
+        "y": 0,
+        "width": 0.9630546875,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 323,
+        "timestampMs": 10800,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5009,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0,
+        "y": 0,
+        "width": 0.9734999999999999,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 325,
+        "timestampMs": 10867,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5384,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0,
+        "y": 0,
+        "width": 0.9752109375,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 327,
+        "timestampMs": 10934,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5416,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0,
+        "y": 0.0021666666666666666,
+        "width": 0.9712890625,
+        "height": 0.9978333333333333
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 330,
+        "timestampMs": 11034,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5033,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.009296875,
+        "y": 0,
+        "width": 0.9501171874999998,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 332,
+        "timestampMs": 11101,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5133,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.009203125,
+        "y": 0,
+        "width": 0.951234375,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 333,
+        "timestampMs": 11135,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5026,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.010257812500000001,
+        "y": 0,
+        "width": 0.9475546874999999,
+        "height": 1
+      },
+      "video": {
+        "trackId": 4,
+        "frameIndex": 334,
+        "timestampMs": 11168,
+        "classId": 55,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5322,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0712890625,
+        "y": 0.5331111111111111,
+        "width": 0.2314921875,
+        "height": 0.44223611111111116
+      },
+      "video": {
+        "trackId": 5,
+        "frameIndex": 352,
+        "timestampMs": 11770,
+        "classId": 61,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5746,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.09181249999999999,
+        "y": 0,
+        "width": 0.8926640625000001,
+        "height": 0.9981805555555556
+      },
+      "video": {
+        "trackId": 6,
+        "frameIndex": 380,
+        "timestampMs": 12706,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.6176,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.08121874999999999,
+        "y": 0.010750000000000001,
+        "width": 0.8618359374999999,
+        "height": 0.98925
+      },
+      "video": {
+        "trackId": 6,
+        "frameIndex": 384,
+        "timestampMs": 12840,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.6501,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0648515625,
+        "y": 0,
+        "width": 0.9119999999999999,
+        "height": 1
+      },
+      "video": {
+        "trackId": 6,
+        "frameIndex": 388,
+        "timestampMs": 12974,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5817,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.019648437499999998,
+        "y": 0.27181944444444445,
+        "width": 0.8794453124999999,
+        "height": 0.7281805555555555
+      },
+      "video": {
+        "trackId": 7,
+        "frameIndex": 399,
+        "timestampMs": 13341,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.716,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.7736562499999999,
+        "y": 0.49361111111111106,
+        "width": 0.2256796875000001,
+        "height": 0.49944444444444447
+      },
+      "video": {
+        "trackId": 8,
+        "frameIndex": 406,
+        "timestampMs": 13575,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.7157,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.057203125,
+        "y": 0.373,
+        "width": 0.7934140624999999,
+        "height": 0.6252638888888888
+      },
+      "video": {
+        "trackId": 9,
+        "frameIndex": 410,
+        "timestampMs": 13709,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5123,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0484375,
+        "y": 0.41459722222222223,
+        "width": 0.879328125,
+        "height": 0.5854027777777777
+      },
+      "video": {
+        "trackId": 9,
+        "frameIndex": 418,
+        "timestampMs": 13977,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.7201,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.094578125,
+        "y": 0.3611666666666667,
+        "width": 0.8053593750000001,
+        "height": 0.4119999999999999
+      },
+      "video": {
+        "trackId": 10,
+        "frameIndex": 430,
+        "timestampMs": 14378,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5151,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0907578125,
+        "y": 0.36047222222222225,
+        "width": 0.79871875,
+        "height": 0.411375
+      },
+      "video": {
+        "trackId": 10,
+        "frameIndex": 431,
+        "timestampMs": 14411,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.6322,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.09684374999999999,
+        "y": 0.3820833333333334,
+        "width": 0.8210703125000001,
+        "height": 0.41331944444444446
+      },
+      "video": {
+        "trackId": 10,
+        "frameIndex": 432,
+        "timestampMs": 14445,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.5814,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.09539062499999999,
+        "y": 0.39075,
+        "width": 0.8227265625000001,
+        "height": 0.4007638888888889
+      },
+      "video": {
+        "trackId": 10,
+        "frameIndex": 433,
+        "timestampMs": 14478,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    },
+    {
+      "assetId": "cmtwm1vpn00c01045ukxmtcji",
+      "labelKey": "unknown",
+      "confidence": 0.6672,
+      "boundingBoxes": {
+        "kind": "BOUNDING_BOX",
+        "x": 0.0998828125,
+        "y": 0.3950694444444444,
+        "width": 0.7973515625,
+        "height": 0.3757222222222223
+      },
+      "video": {
+        "trackId": 10,
+        "frameIndex": 434,
+        "timestampMs": 14512,
+        "classId": 33,
+        "fps": 29.907,
+        "totalFrames": 850
+      }
+    }
+  ]
+}

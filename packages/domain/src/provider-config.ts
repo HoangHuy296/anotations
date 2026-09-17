@@ -1,5 +1,22 @@
 import { z } from "zod";
 
+const aiProviderEndpointSchema = z.string().url().refine((value) => {
+  const url = new URL(value);
+  return ["http:", "https:"].includes(url.protocol)
+    && !url.username && !url.password && !url.search && !url.hash;
+});
+
+/** Shared server configuration contract; never fall back to a developer's host. */
+export function readAiProviderBaseUrl(environment: NodeJS.ProcessEnv = process.env): string {
+  const parsed = aiProviderEndpointSchema.safeParse(
+    environment.AIOZ_ANNOTATION_SERVICES_URL?.trim()
+      || environment.AIOZ_ANNOTATION_SERVICES_BASE_URL?.trim()
+      || environment.AIOZ_COMPANY_API_BASE_URL?.trim(),
+  );
+  if (!parsed.success) throw new ProviderConfigError(["AIOZ_ANNOTATION_SERVICES_URL"]);
+  return parsed.data;
+}
+
 const providerConfigSchema = z.object({
   DATABASE_URL: z.string().url(),
   MINIO_ENDPOINT: z.string().url(),

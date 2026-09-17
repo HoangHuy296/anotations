@@ -3,6 +3,7 @@ export type AiPredictionPreview = {
   assetId: string;
   labelKey: string;
   confidence: number;
+  color: string;
   geometry: { x: number; y: number; width: number; height: number };
   saved: boolean;
 };

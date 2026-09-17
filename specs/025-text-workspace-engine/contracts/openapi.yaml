@@ -1,0 +1,1130 @@
+openapi: 3.1.0
+info:
+  title: Phase 025 TEXT workspace proposed API
+  version: 0.1.0
+  description: Design contract only. Not implemented. Uses existing authenticated application session
+    and same-origin mutation protection; see workspace.md for semantic constraints.
+security:
+- sessionCookie: []
+paths:
+  /api/assets/{assetId}/text:
+    parameters:
+    - name: assetId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    get:
+      operationId: readTextSource
+      summary: Read exact source or safe readiness
+      responses:
+        '200':
+          description: Source readiness; private, no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SourceRead'
+          headers:
+            Cache-Control:
+              schema:
+                const: private, no-store
+              description: Protected source and annotation state is not stored in shared/browser caches.
+        '400':
+          $ref: '#/components/responses/SafeError'
+        '401':
+          $ref: '#/components/responses/SafeError'
+        '403':
+          $ref: '#/components/responses/SafeError'
+        '404':
+          $ref: '#/components/responses/SafeError'
+        '409':
+          $ref: '#/components/responses/SafeError'
+        '413':
+          $ref: '#/components/responses/SafeError'
+        '422':
+          $ref: '#/components/responses/SafeError'
+        '503':
+          $ref: '#/components/responses/SafeError'
+  /api/assets/{assetId}/text/prepare:
+    parameters:
+    - name: assetId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    post:
+      operationId: prepareTextSource
+      summary: Create/reuse common preparation Job
+      responses:
+        '200':
+          description: Already ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrepareResult'
+        '202':
+          description: Preparation accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrepareResult'
+        '400':
+          $ref: '#/components/responses/SafeError'
+        '401':
+          $ref: '#/components/responses/SafeError'
+        '403':
+          $ref: '#/components/responses/SafeError'
+        '404':
+          $ref: '#/components/responses/SafeError'
+        '409':
+          $ref: '#/components/responses/SafeError'
+        '413':
+          $ref: '#/components/responses/SafeError'
+        '422':
+          $ref: '#/components/responses/SafeError'
+        '503':
+          $ref: '#/components/responses/SafeError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prepare'
+      description: Requires dataset.read independent of annotation.create and review freeze; idempotent
+        source-derived common Job. Nonmember/cross-dataset resources remain concealed. Generic Job retry/cancel
+        policies are unchanged.
+  /api/assets/{assetId}/text/annotations:
+    parameters:
+    - name: assetId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    get:
+      operationId: readTextAnnotations
+      summary: Read complete authorized snapshot
+      responses:
+        '200':
+          description: Current snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Snapshot'
+          headers:
+            Cache-Control:
+              schema:
+                const: private, no-store
+              description: Protected source and annotation state is not stored in shared/browser caches.
+        '400':
+          $ref: '#/components/responses/SafeError'
+        '401':
+          $ref: '#/components/responses/SafeError'
+        '403':
+          $ref: '#/components/responses/SafeError'
+        '404':
+          $ref: '#/components/responses/SafeError'
+        '409':
+          $ref: '#/components/responses/SafeError'
+        '413':
+          $ref: '#/components/responses/SafeError'
+        '422':
+          $ref: '#/components/responses/SafeError'
+        '503':
+          $ref: '#/components/responses/SafeError'
+      parameters: &id001
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 500
+      - name: cursor
+        in: query
+        schema:
+          type: string
+          maxLength: 2048
+      - name: expectedAssetRevision
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+        description: Required on continuation; cursor snapshot mismatch returns 409.
+    post:
+      operationId: mutateTextAnnotations
+      summary: Execute one atomic revision-checked command
+      responses:
+        '200':
+          description: Committed acknowledgment or authorized replay
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutationResult'
+        '400':
+          $ref: '#/components/responses/SafeError'
+        '401':
+          $ref: '#/components/responses/SafeError'
+        '403':
+          $ref: '#/components/responses/SafeError'
+        '404':
+          $ref: '#/components/responses/SafeError'
+        '409':
+          $ref: '#/components/responses/SafeError'
+        '413':
+          $ref: '#/components/responses/SafeError'
+        '422':
+          $ref: '#/components/responses/SafeError'
+        '503':
+          $ref: '#/components/responses/SafeError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Mutation'
+  /api/datasets/{datasetId}/text-policy:
+    parameters:
+    - name: datasetId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    get:
+      operationId: readTextPolicy
+      summary: Read policy and eligible labels
+      responses:
+        '200':
+          description: Policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyRead'
+          headers:
+            Cache-Control:
+              schema:
+                const: private, no-store
+              description: Protected source and annotation state is not stored in shared/browser caches.
+        '400':
+          $ref: '#/components/responses/SafeError'
+        '401':
+          $ref: '#/components/responses/SafeError'
+        '403':
+          $ref: '#/components/responses/SafeError'
+        '404':
+          $ref: '#/components/responses/SafeError'
+        '409':
+          $ref: '#/components/responses/SafeError'
+        '413':
+          $ref: '#/components/responses/SafeError'
+        '422':
+          $ref: '#/components/responses/SafeError'
+        '503':
+          $ref: '#/components/responses/SafeError'
+      description: Requires dataset.read; returns authorized policy, revision and eligible labels.
+    put:
+      operationId: updateTextPolicy
+      summary: Validate and replace policy atomically
+      responses:
+        '200':
+          description: Current policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyRead'
+        '400':
+          $ref: '#/components/responses/SafeError'
+        '401':
+          $ref: '#/components/responses/SafeError'
+        '403':
+          $ref: '#/components/responses/SafeError'
+        '404':
+          $ref: '#/components/responses/SafeError'
+        '409':
+          $ref: '#/components/responses/SafeError'
+        '413':
+          $ref: '#/components/responses/SafeError'
+        '422':
+          $ref: '#/components/responses/SafeError'
+        '503':
+          $ref: '#/components/responses/SafeError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyWrite'
+      description: Requires label.manage and expected revision; dataset-only guard validates existing
+        references and commits policy revision plus TEXT_POLICY_CHANGED atomically.
+  /api/assets/{assetId}/annotations:
+    parameters:
+    - name: assetId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    get:
+      operationId: readGenericTextAnnotations
+      description: 'Existing generic route: this proposal specifies TEXT responses only. Existing IMAGE/VIDEO
+        public schemas/behavior remain authoritative and unchanged. Requires dataset.read.'
+      parameters: *id001
+      responses:
+        '200':
+          description: Safe paged TEXT annotations, including legacy over admission limit.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  annotations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Annotation'
+                  textPage:
+                    $ref: '#/components/schemas/TextPage'
+                required:
+                - annotations
+                - textPage
+        '409':
+          $ref: '#/components/responses/SafeError'
+        '401':
+          $ref: '#/components/responses/SafeError'
+        '404':
+          $ref: '#/components/responses/SafeError'
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: fieldframe_session
+      description: Existing opaque httpOnly application session; no new authentication cookie.
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+          required:
+          - code
+          - message
+      required:
+      - error
+    Prepare:
+      type: object
+      additionalProperties: false
+      properties:
+        operationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+      required:
+      - operationId
+    PrepareResult:
+      type: object
+      additionalProperties: false
+      properties:
+        state:
+          enum:
+          - READY
+          - PREPARING
+        jobId:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 128
+          - type: 'null'
+      required:
+      - state
+      - jobId
+    TextPolicy:
+      type: object
+      additionalProperties: false
+      properties:
+        schemaVersion:
+          const: 1
+        classificationGroups:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 128
+              name:
+                type: string
+                minLength: 1
+                maxLength: 128
+              cardinality:
+                enum:
+                - SINGLE
+                - MULTI
+              labelIds:
+                type: array
+                uniqueItems: true
+                items:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+            required:
+            - id
+            - name
+            - cardinality
+            - labelIds
+        relationTypes:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              labelId:
+                type: string
+                minLength: 1
+                maxLength: 128
+              sourceLabelIds:
+                type: array
+                uniqueItems: true
+                items:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+              targetLabelIds:
+                type: array
+                uniqueItems: true
+                items:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+              allowUnlabeledSource:
+                type: boolean
+              allowUnlabeledTarget:
+                type: boolean
+            required:
+            - labelId
+            - sourceLabelIds
+            - targetLabelIds
+            - allowUnlabeledSource
+            - allowUnlabeledTarget
+      required:
+      - schemaVersion
+      - classificationGroups
+      - relationTypes
+    PolicyWrite:
+      type: object
+      additionalProperties: false
+      properties:
+        expectedRevision:
+          type: integer
+          minimum: 1
+        policy:
+          $ref: '#/components/schemas/TextPolicy'
+      required:
+      - expectedRevision
+      - policy
+    PolicyRead:
+      type: object
+      additionalProperties: false
+      properties:
+        revision:
+          type: integer
+          minimum: 1
+        policy:
+          $ref: '#/components/schemas/TextPolicy'
+        eligibleLabels:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 128
+              name:
+                type: string
+              scope:
+                enum:
+                - ENTITY
+                - CLASSIFICATION
+                - SENTIMENT
+                - INTENT
+                - RELATION
+              color:
+                type: string
+            required:
+            - id
+            - name
+            - scope
+            - color
+      required:
+      - revision
+      - policy
+      - eligibleLabels
+    SourceIdentity:
+      type: string
+      pattern: ^sha256:[a-f0-9]{64}$
+    SourceRead:
+      oneOf:
+      - $ref: '#/components/schemas/ReadySource'
+      - $ref: '#/components/schemas/UnavailableSource'
+    ReadySource:
+      type: object
+      additionalProperties: false
+      properties:
+        state:
+          const: READY
+        sourceIdentity:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        sourceEncoding:
+          const: UTF8
+        offsetUnit:
+          const: UTF16_CODE_UNIT
+        sourceByteLength:
+          type: integer
+          minimum: 0
+        sourceCodeUnitLength:
+          type: integer
+          minimum: 0
+        text:
+          type: string
+        boundaries:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+          description: Sorted unique grapheme endpoints, including 0 and source length; validated against
+            source.
+        boundaryProfile:
+          type: object
+          additionalProperties: false
+          properties:
+            schemaVersion:
+              const: 1
+            algorithm:
+              const: extended-grapheme
+            node:
+              type: string
+            icu:
+              type: string
+            unicode:
+              type: string
+          required:
+          - schemaVersion
+          - algorithm
+          - node
+          - icu
+          - unicode
+        language:
+          type:
+          - string
+          - 'null'
+        limits:
+          type: object
+          additionalProperties: false
+          properties:
+            maxSourceBytes:
+              type: integer
+              minimum: 1
+            maxCodeUnits:
+              type: integer
+              minimum: 1
+            maxAnnotations:
+              type: integer
+              minimum: 1
+          required:
+          - maxSourceBytes
+          - maxCodeUnits
+          - maxAnnotations
+      required:
+      - state
+      - sourceIdentity
+      - sourceEncoding
+      - offsetUnit
+      - sourceByteLength
+      - sourceCodeUnitLength
+      - text
+      - boundaries
+      - boundaryProfile
+      - language
+      - limits
+    UnavailableSource:
+      type: object
+      additionalProperties: false
+      properties:
+        state:
+          enum:
+          - UNPREPARED
+          - PREPARING
+          - UNAVAILABLE
+          - INVALID_ENCODING
+          - SOURCE_MISMATCH
+          - UNSUPPORTED_SIZE
+          - LEGACY_RECONCILIATION_REQUIRED
+        code:
+          type: string
+        canPrepare:
+          type: boolean
+      required:
+      - state
+      - code
+      - canPrepare
+    SpanGeometry:
+      type: object
+      additionalProperties: false
+      properties:
+        schemaVersion:
+          const: 1
+        kind:
+          const: text-span
+        sourceIdentity:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        offsetUnit:
+          const: UTF16_CODE_UNIT
+        startOffset:
+          type: integer
+          minimum: 0
+        endOffset:
+          type: integer
+          minimum: 0
+      required:
+      - schemaVersion
+      - kind
+      - sourceIdentity
+      - offsetUnit
+      - startOffset
+      - endOffset
+    DocumentGeometry:
+      type: object
+      additionalProperties: false
+      properties:
+        schemaVersion:
+          const: 1
+        kind:
+          const: text-document
+        sourceIdentity:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+      required:
+      - schemaVersion
+      - kind
+      - sourceIdentity
+    RelationGeometry:
+      type: object
+      additionalProperties: false
+      properties:
+        schemaVersion:
+          const: 1
+        kind:
+          const: text-relation
+        sourceIdentity:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+      required:
+      - schemaVersion
+      - kind
+      - sourceIdentity
+    Geometry:
+      oneOf:
+      - $ref: '#/components/schemas/SpanGeometry'
+      - $ref: '#/components/schemas/DocumentGeometry'
+      - $ref: '#/components/schemas/RelationGeometry'
+    Annotation:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        revision:
+          type: integer
+          minimum: 1
+        labelId:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 128
+          - type: 'null'
+        type:
+          enum:
+          - NAMED_ENTITY_RECOGNITION
+          - TEXT_CLASSIFICATION
+          - TEXT_RELATION
+        geometry:
+          $ref: '#/components/schemas/Geometry'
+        properties:
+          $ref: '#/components/schemas/TextProperties'
+        createdById:
+          type: string
+          minLength: 1
+          maxLength: 128
+        fromAnnotationId:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 128
+          - type: 'null'
+        toAnnotationId:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 128
+          - type: 'null'
+        status:
+          enum:
+          - DRAFT
+          - IN_PROGRESS
+          - COMPLETED
+          - SUBMITTED
+          - REVIEWED
+          - ACCEPTED
+          - REJECTED
+        source:
+          enum:
+          - MANUAL
+          - IMPORTED
+          - AI
+          - SYSTEM
+        updatedById:
+          type:
+          - string
+          - 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+      - id
+      - revision
+      - labelId
+      - type
+      - geometry
+      - properties
+      - createdById
+      - fromAnnotationId
+      - toAnnotationId
+      - status
+      - source
+      - updatedById
+      - createdAt
+      - updatedAt
+    Snapshot:
+      type: object
+      additionalProperties: false
+      properties:
+        assetRevision:
+          type: integer
+          minimum: 1
+        sourceIdentity:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        policyRevision:
+          type: integer
+          minimum: 1
+        canEdit:
+          type: boolean
+        annotations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Annotation'
+        textPage:
+          $ref: '#/components/schemas/TextPage'
+      required:
+      - assetRevision
+      - sourceIdentity
+      - policyRevision
+      - canEdit
+      - annotations
+      - textPage
+    Mutation:
+      type: object
+      additionalProperties: false
+      properties:
+        operationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        sourceIdentity:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        expectedPolicyRevision:
+          type: integer
+          minimum: 1
+        command:
+          oneOf:
+          - $ref: '#/components/schemas/CreateSpan'
+          - $ref: '#/components/schemas/UpdateSpan'
+          - $ref: '#/components/schemas/DeleteAnnotation'
+          - $ref: '#/components/schemas/ReplaceClassification'
+          - $ref: '#/components/schemas/CreateRelation'
+          - $ref: '#/components/schemas/UpdateRelation'
+          - $ref: '#/components/schemas/UpdateClassification'
+          discriminator:
+            propertyName: kind
+      required:
+      - operationId
+      - sourceIdentity
+      - expectedPolicyRevision
+      - command
+    CreateSpan:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          const: createSpan
+        startOffset:
+          type: integer
+          minimum: 0
+        endOffset:
+          type: integer
+          minimum: 0
+        labelId:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 128
+          - type: 'null'
+        properties:
+          $ref: '#/components/schemas/TextProperties'
+      required:
+      - kind
+      - startOffset
+      - endOffset
+      - labelId
+    UpdateSpan:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          const: updateSpan
+        annotationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        expectedRevision:
+          type: integer
+          minimum: 1
+        patch:
+          type: object
+          additionalProperties: false
+          properties:
+            startOffset:
+              type: integer
+              minimum: 0
+            endOffset:
+              type: integer
+              minimum: 0
+            labelId:
+              anyOf:
+              - type: string
+                minLength: 1
+                maxLength: 128
+              - type: 'null'
+            propertyPatch:
+              $ref: '#/components/schemas/TextPropertyPatch'
+          required: []
+          minProperties: 1
+      required:
+      - kind
+      - annotationId
+      - expectedRevision
+      - patch
+    DeleteAnnotation:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          const: deleteAnnotation
+        annotationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        expectedRevision:
+          type: integer
+          minimum: 1
+      required:
+      - kind
+      - annotationId
+      - expectedRevision
+    ReplaceClassification:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          const: replaceClassification
+        groupId:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 128
+          - type: 'null'
+        expectedMembers:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 128
+              revision:
+                type: integer
+                minimum: 1
+            required:
+            - id
+            - revision
+        labelIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
+      required:
+      - kind
+      - groupId
+      - expectedMembers
+      - labelIds
+    CreateRelation:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          const: createRelation
+        fromAnnotationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        toAnnotationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        expectedFromRevision:
+          type: integer
+          minimum: 1
+        expectedToRevision:
+          type: integer
+          minimum: 1
+        labelId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        properties:
+          $ref: '#/components/schemas/TextProperties'
+      required:
+      - kind
+      - fromAnnotationId
+      - toAnnotationId
+      - expectedFromRevision
+      - expectedToRevision
+      - labelId
+    UpdateRelation:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          const: updateRelation
+        annotationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        expectedRevision:
+          type: integer
+          minimum: 1
+        fromAnnotationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        toAnnotationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        expectedFromRevision:
+          type: integer
+          minimum: 1
+        expectedToRevision:
+          type: integer
+          minimum: 1
+        labelId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        propertyPatch:
+          $ref: '#/components/schemas/TextPropertyPatch'
+      required:
+      - kind
+      - annotationId
+      - expectedRevision
+      - fromAnnotationId
+      - toAnnotationId
+      - expectedFromRevision
+      - expectedToRevision
+      - labelId
+    UpdateClassification:
+      type: object
+      additionalProperties: false
+      properties:
+        kind:
+          const: updateClassification
+        annotationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        expectedRevision:
+          type: integer
+          minimum: 1
+        propertyPatch:
+          $ref: '#/components/schemas/TextPropertyPatch'
+      required:
+      - kind
+      - annotationId
+      - expectedRevision
+      - propertyPatch
+    MutationResult:
+      type: object
+      additionalProperties: false
+      properties:
+        operationId:
+          type: string
+          minLength: 1
+          maxLength: 128
+        replayed:
+          type: boolean
+        assetRevision:
+          type: integer
+          minimum: 1
+        upserted:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: string
+                minLength: 1
+                maxLength: 128
+              revision:
+                type: integer
+                minimum: 1
+            required:
+            - id
+            - revision
+        deletedIds:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
+      required:
+      - operationId
+      - replayed
+      - assetRevision
+      - upserted
+      - deletedIds
+    TextCustomMap:
+      type: object
+      maxProperties: 32
+      propertyNames: &id002
+        type: string
+        pattern: ^[A-Za-z][A-Za-z0-9_]{0,63}$
+        not:
+          enum:
+          - __proto__
+          - prototype
+          - constructor
+          - geometry
+          - sourceIdentity
+          - revision
+          - labelId
+          - fromAnnotationId
+          - toAnnotationId
+      additionalProperties:
+        oneOf:
+        - type: 'null'
+        - type: boolean
+        - type: number
+          minimum: -1000000000000000.0
+          maximum: 1000000000000000.0
+        - type: string
+          maxLength: 2048
+          description: Additionally limited to 2048 UTF-16 units by shared validator.
+      description: Compact UTF-8 JSON <=16384 bytes; no nested containers. Shared validator enforces aggregate
+        encoded size.
+    TextProperties:
+      type: object
+      additionalProperties: false
+      properties:
+        custom:
+          $ref: '#/components/schemas/TextCustomMap'
+      required:
+      - custom
+    TextPropertyPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        set:
+          $ref: '#/components/schemas/TextCustomMap'
+        unset:
+          type: array
+          maxItems: 32
+          uniqueItems: true
+          items: *id002
+      required:
+      - set
+      - unset
+      description: At least one set/unset entry; sets disjoint from unsets; shared validator checks post-merge
+        bounds.
+    TextPage:
+      type: object
+      additionalProperties: false
+      properties:
+        nextCursor:
+          type:
+          - string
+          - 'null'
+        totalCount:
+          type: integer
+          minimum: 0
+        assetRevision:
+          type: integer
+          minimum: 1
+        annotationLimit:
+          type: integer
+          minimum: 1
+        canCreate:
+          type: boolean
+      required:
+      - nextCursor
+      - totalCount
+      - assetRevision
+      - annotationLimit
+      - canCreate
+  responses:
+    SafeError:
+      description: Allowlisted error envelope; see workspace.md for status/code semantics.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

@@ -34,8 +34,7 @@ export type DraftAnnotation = {
 // ---------------------------------------------------------------------------
 
 /** IMAGE tool set, read/written through `useAnnotationStore` and rendered by `image-toolbox.tsx`. */
-export type ImageAnnotationTool = "select" | "box" | "pan" | "polygon" | "circle" | "point" | "polyline" | "mask" | "aidetect";
-
+export type ImageAnnotationTool = "select" | "box" | "pan" | "polygon" | "circle" | "point" | "polyline" | "mask" | "detection" | "segmentation" | "oriented_detection" | "classification" | "ocr";
 /**
  * VIDEO tool set, read/written through `useVideoAnnotationStore` and
  * rendered by `video-toolbox.tsx`. "select" edits an existing keyframe on
@@ -77,3 +76,6 @@ export type TextAnnotationTool = "select" | "box" | "pan" | "highlightspan" | "r
  * changes when a whole new engine joins `workspaceEngineRegistry`.
  */
 export type AnnotationTool = ImageAnnotationTool | VideoAnnotationTool | AudioAnnotationTool | TextAnnotationTool;
+
+/** AI problem selected by the image toolbox. */
+export type ImageAiTool = Extract<ImageAnnotationTool, "detection" | "segmentation" | "oriented_detection" | "classification" | "ocr">;

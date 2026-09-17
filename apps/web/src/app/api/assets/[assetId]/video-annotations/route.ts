@@ -9,9 +9,12 @@ export async function GET(request: Request, context: { params: Promise<{ assetId
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
   const url = new URL(request.url);
   const query = Object.fromEntries(url.searchParams.entries());
-  if (query.limit) query.limit = Number(query.limit) as unknown as string;
   if (query.fromMs) query.fromMs = Number(query.fromMs) as unknown as string;
   if (query.toMs) query.toMs = Number(query.toMs) as unknown as string;
-  const result = await readVideoAnnotations(actor, (await context.params).assetId, query);
-  return result ? apiSuccess(result) : apiError(404, "ANNOTATION_NOT_FOUND", "The annotation resource was not found.");
+  const outcome = await readVideoAnnotations(actor, (await context.params).assetId, query);
+  if (!outcome.ok) {
+    if (outcome.reason === "INVALID_WINDOW") return apiError(400, "INVALID_REQUEST", outcome.message);
+    return apiError(404, "ANNOTATION_NOT_FOUND", "The annotation resource was not found.");
+  }
+  return apiSuccess(outcome.data);
 }

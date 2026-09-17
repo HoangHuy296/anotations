@@ -43,7 +43,7 @@ export async function GET() {
 
   try {
     const [postgresCheck, minioCheck, redisCheck] = await Promise.all([
-      probeProvider("postgres", async () => { await db.$queryRaw`SELECT 1`; }),
+      probeProvider("postgres", async () => { await db.job.findFirst({ select: { id: true } }); }),
       probeProvider("minio", async () => { await minio.bucketExists(config.MINIO_BUCKET); }),
       probeProvider("redis", async () => { await webQueue.queue.waitUntilReady(); }),
     ]);
@@ -54,10 +54,7 @@ export async function GET() {
       db.job.count({ where: { status: "FAILED" } }),
       db.job.count({ where: { status: "RETRYING" } }),
       db.job.count({ where: { status: "RUNNING", lockedUntil: { not: null, lt: now } } }),
-      // attempts >= maxAttempts is a column-to-column comparison Prisma's
-      // query builder can't express — raw SQL is the established exception
-      // this codebase already uses for exactly this class of query.
-      db.$queryRaw<Array<{ count: bigint }>>`SELECT COUNT(*) AS count FROM "Job" WHERE status = 'FAILED' AND attempts >= "maxAttempts"`,
+      db.job.count({ where: { status: "FAILED", attempts: { gte: db.job.fields.maxAttempts } } }),
       webQueue.queue.getJobCounts().catch(() => null),
     ]);
 
@@ -75,7 +72,7 @@ export async function GET() {
         failed,
         stale,
         retrying,
-        deadLettered: Number(deadLettered[0]?.count ?? 0),
+        deadLettered,
       },
     }, { status: overallReady ? 200 : 503 });
   } finally {

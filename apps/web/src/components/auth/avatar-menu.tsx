@@ -47,21 +47,21 @@ export function AvatarMenu({ actor }: AvatarMenuProps) {
         <CaretDown aria-hidden="true" size={11} weight="bold" />
       </button>
       {open ? (
-        <div role="menu" aria-label="Account menu" className="absolute right-0 z-30 mt-2 w-60 overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-xl shadow-zinc-900/10">
-          <div className="border-b border-zinc-100 px-3 py-2.5">
-            <p className="truncate text-sm font-semibold text-zinc-900">{actor.name}</p>
-            <p className="mt-0.5 truncate text-xs text-zinc-500">{actor.email}</p>
+        <div role="menu" aria-label="Account menu" className="absolute right-0 z-30 mt-2 w-60 overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-xl shadow-zinc-900/10 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/30">
+          <div className="border-b border-zinc-100 px-3 py-2.5 dark:border-zinc-800">
+            <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{actor.name}</p>
+            <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">{actor.email}</p>
           </div>
-          <Link role="menuitem" href="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none">
+          <Link role="menuitem" href="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none dark:text-zinc-300 dark:hover:bg-zinc-800 dark:focus:bg-zinc-800">
             <UserCircle aria-hidden="true" size={17} /> Personal information
           </Link>
-          <Link role="menuitem" href="/account/password" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none">
+          <Link role="menuitem" href="/account/password" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none dark:text-zinc-300 dark:hover:bg-zinc-800 dark:focus:bg-zinc-800">
             <LockKey aria-hidden="true" size={17} /> Change password
           </Link>
-          <Link role="menuitem" href="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none">
+          <Link role="menuitem" href="/account" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm text-zinc-700 hover:bg-zinc-50 focus:bg-zinc-50 focus:outline-none dark:text-zinc-300 dark:hover:bg-zinc-800 dark:focus:bg-zinc-800">
             <Gear aria-hidden="true" size={17} /> Account settings
           </Link>
-          <div className="mt-1 border-t border-zinc-100 px-1 pt-1"><SignOutButton className="w-full justify-start px-2 py-2 text-sm" /></div>
+          <div className="mt-1 border-t border-zinc-100 px-1 pt-1 dark:border-zinc-800"><SignOutButton className="w-full justify-start px-2 py-2 text-sm" /></div>
         </div>
       ) : null}
     </div>

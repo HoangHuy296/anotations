@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "benchmarkId": "text-workspace-sc005-v1",
+  "server": {
+    "os": "Ubuntu 24.04 LTS x86_64",
+    "cpu": "AMD Ryzen 5 3400G",
+    "physicalCores": 4,
+    "logicalCpus": 8,
+    "ramGiB": 16,
+    "storage": "local SSD",
+    "deployment": "Docker Compose production builds",
+    "services": {
+      "web": {
+        "cpus": 2,
+        "memoryMiB": 2048
+      },
+      "worker": {
+        "cpus": 1,
+        "memoryMiB": 1024
+      },
+      "realtime": {
+        "cpus": 0.5,
+        "memoryMiB": 512
+      },
+      "postgresql": {
+        "cpus": 1,
+        "memoryMiB": 2048
+      },
+      "redis": {
+        "cpus": 0.5,
+        "memoryMiB": 512
+      },
+      "minio": {
+        "cpus": 1,
+        "memoryMiB": 1024
+      }
+    }
+  },
+  "browserHost": {
+    "os": "Ubuntu 24.04 LTS x86_64",
+    "cpu": "AMD Ryzen 5 3400G",
+    "physicalCores": 4,
+    "logicalCpus": 8,
+    "ramGiB": 16,
+    "browser": "Google Chrome",
+    "version": "151.0.7922.137",
+    "mode": "headed, clean profile, extensions disabled, no CPU throttling",
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "deviceScaleFactor": 1
+    }
+  },
+  "network": {
+    "topology": "dedicated second browser host → HTTPS reverse proxy on server → web; private Docker bridge for PostgreSQL/Redis/MinIO/realtime; no WAN/CDN",
+    "browserRttMs": 50,
+    "downloadMbps": 20,
+    "uploadMbps": 20,
+    "packetLossPercent": 0
+  },
+  "runtime": {
+    "node": "22.23.1",
+    "icu": "78.2",
+    "unicode": "17.0",
+    "segmenter": "Intl.Segmenter(und, grapheme)"
+  },
+  "corpus": {
+    "seed": 250025,
+    "prng": "xorshift32",
+    "encoding": "UTF8",
+    "offsetUnit": "UTF16_CODE_UNIT",
+    "prefix": "﻿",
+    "repeatUnit": "A😀B é 中文 👩‍💻\r\n",
+    "pad": "x",
+    "codeUnitLength": 100000,
+    "sourceByteLength": 172217,
+    "sourceIdentity": "sha256:7e972d5773981fac94bbbba7bf721bd439cee2dbdfbe9cf39cd3ca6a12c59a28",
+    "spans": 1000,
+    "nestedPairs": 500,
+    "spanStartBoundaryIndex": "20 * floor(i / 2)",
+    "spanEndBoundaryIndex": "start + (i % 2 == 0 ? 3 : 9)",
+    "relations": 100,
+    "relationEndpoints": "shuffledSpanIndices[2*j] -> shuffledSpanIndices[2*j+1]",
+    "entityLabels": 1,
+    "relationTypes": 1,
+    "documentClassifications": 0
+  },
+  "procedure": {
+    "warmupOpensPerCohort": 10,
+    "coldOpens": 50,
+    "warmOpens": 50,
+    "coldCache": "fresh authenticated browser context and restarted web process per trial; prepared source retained; OS/DB/MinIO caches uncontrolled and recorded",
+    "warmCache": "same authenticated context and web process, navigate away and clear TEXT client store per trial; boundary map cache retained; protected HTTP responses no-store",
+    "interactionWarmup": 10,
+    "selectionTrials": 34,
+    "focusTrials": 33,
+    "searchNextTrials": 33,
+    "timeoutMs": 10000,
+    "percentile": "nearest rank: sorted sample at ceil(0.95*N), 1-indexed; N=100 => index95",
+    "openThresholdMs": 3000,
+    "interactionThresholdMs": 200,
+    "minimumPassingTrials": 95
+  },
+  "evidence": {
+    "required": [
+      "config SHA256",
+      "source SHA256",
+      "boundary digest/profile",
+      "resolved Docker image digests",
+      "git revision and lockfile SHA256",
+      "Chrome full version",
+      "host CPU/RAM/OS/kernel",
+      "resource limits and measured RTT/bandwidth",
+      "raw 100 open samples",
+      "raw 100 interaction samples",
+      "separate correctness and performance verdicts"
+    ],
+    "sameManifestRequiredFor": [
+      "performance story task",
+      "final closure task"
+    ]
+  }
+}

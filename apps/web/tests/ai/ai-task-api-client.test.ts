@@ -11,9 +11,9 @@ function withFetch<T>(handler: typeof fetch, run: () => Promise<T>): Promise<T> 
 
 test("listActiveAiModelsClient -- surfaces the models array on success", async () => {
   const result = await withFetch(async (input) => {
-    assert.equal(String(input), "/api/ai/models");
+    assert.equal(String(input), "/api/ai/models?modality=IMAGE&task_name=detection");
     return new Response(JSON.stringify({ data: { models: [{ id: "m1", key: "k1", displayName: "Model 1", modality: "IMAGE", taskType: "DETECT_OBJECTS" }] } }), { status: 200, headers: { "Content-Type": "application/json" } });
-  }, () => listActiveAiModelsClient());
+  }, () => listActiveAiModelsClient("IMAGE", "detection"));
   assert.deepEqual(result, { ok: true, models: [{ id: "m1", key: "k1", displayName: "Model 1", modality: "IMAGE", taskType: "DETECT_OBJECTS" }] });
 });
 
@@ -22,13 +22,13 @@ test("listActiveAiModelsClient -- two concurrent callers share one in-flight fet
   let resolveFetch!: (response: Response) => void;
   const fetchStarted = await withFetch(async (input) => {
     fetchCount += 1;
-    assert.equal(String(input), "/api/ai/models");
+    assert.equal(String(input), "/api/ai/models?modality=IMAGE&task_name=detection");
     return new Promise<Response>((resolve) => { resolveFetch = resolve; });
   }, async () => {
     // Mirrors React Strict Mode's double effect invocation: two callers
     // firing before either request settles must produce exactly one fetch.
-    const first = listActiveAiModelsClient();
-    const second = listActiveAiModelsClient();
+    const first = listActiveAiModelsClient("IMAGE", "detection");
+    const second = listActiveAiModelsClient("IMAGE", "detection");
     resolveFetch(new Response(JSON.stringify({ data: { models: [{ id: "m1", key: "k1", displayName: "Model 1", modality: "IMAGE", taskType: "DETECT_OBJECTS" }] } }), { status: 200, headers: { "Content-Type": "application/json" } }));
     const [firstResult, secondResult] = await Promise.all([first, second]);
     assert.deepEqual(firstResult, secondResult);
@@ -40,13 +40,13 @@ test("listActiveAiModelsClient -- two concurrent callers share one in-flight fet
   const later = await withFetch(async () => {
     fetchCount += 1;
     return new Response(JSON.stringify({ data: { models: [] } }), { status: 200, headers: { "Content-Type": "application/json" } });
-  }, () => listActiveAiModelsClient());
+  }, () => listActiveAiModelsClient("IMAGE", "detection"));
   assert.deepEqual(later, { ok: true, models: [] });
   assert.equal(fetchCount, 2, "a call after the in-flight request settled must re-fetch");
 });
 
 test("listActiveAiModelsClient -- surfaces the error code on failure", async () => {
-  const result = await withFetch(async () => new Response(JSON.stringify({ error: { code: "AUTH_REQUIRED" } }), { status: 401, headers: { "Content-Type": "application/json" } }), () => listActiveAiModelsClient());
+  const result = await withFetch(async () => new Response(JSON.stringify({ error: { code: "AUTH_REQUIRED" } }), { status: 401, headers: { "Content-Type": "application/json" } }), () => listActiveAiModelsClient("IMAGE", "detection"));
   assert.deepEqual(result, { ok: false, code: "AUTH_REQUIRED", status: 401 });
 });
 
@@ -95,4 +95,21 @@ test("cancelAiTaskClient -- posts to the task-scoped cancel route, not the gener
 test("cancelAiTaskClient -- a task that cannot be canceled surfaces JOB_CONFLICT", async () => {
   const result = await withFetch(async () => new Response(JSON.stringify({ error: { code: "JOB_CONFLICT" } }), { status: 409, headers: { "Content-Type": "application/json" } }), () => cancelAiTaskClient("t1"));
   assert.deepEqual(result, { ok: false, code: "JOB_CONFLICT", status: 409 });
+});
+
+
+test("Toolbox discovery sends modality and task and isolates concurrent tool selections", async (t) => {
+  const urls: string[] = [];
+  t.mock.method(globalThis, "fetch", async (url: string) => {
+    urls.push(url);
+    return Response.json({ data: { models: [] } });
+  });
+  await Promise.all([
+    listActiveAiModelsClient("IMAGE", "detection"), listActiveAiModelsClient("IMAGE", "detection"),
+    listActiveAiModelsClient("IMAGE", "segmentation"), listActiveAiModelsClient("VIDEO", "tracking"),
+  ]);
+  assert.deepEqual(urls, [
+    "/api/ai/models?modality=IMAGE&task_name=detection", "/api/ai/models?modality=IMAGE&task_name=segmentation",
+    "/api/ai/models?modality=VIDEO&task_name=tracking",
+  ]);
 });

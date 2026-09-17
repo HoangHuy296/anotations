@@ -39,3 +39,11 @@ export type AiTaskStatusDto = {
   error: string | null;
   errorCode: string | null;
 };
+
+/** Provider task names used by workspace Toolbox model discovery. */
+export const AI_TOOL_TASK_NAMES_IMAGE = ["detection", "segmentation", "oriented_detection", "classification", "ocr"] as const;
+export type AiToolTaskNameImage = typeof AI_TOOL_TASK_NAMES_IMAGE[number];
+export const AI_TOOL_TASK_NAMES_VIDEO = ["tracking"] as const;
+export type AiToolTaskNameVideo = typeof AI_TOOL_TASK_NAMES_VIDEO[number];
+export const AI_TOOL_TASK_NAMES = [...AI_TOOL_TASK_NAMES_IMAGE, ...AI_TOOL_TASK_NAMES_VIDEO] as const;
+export type AiToolTaskName = typeof AI_TOOL_TASK_NAMES[number];

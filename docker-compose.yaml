@@ -51,6 +51,8 @@ services:
       start_period: 10s
     ports:
       - "${MINIO_PUBLIC_PORT:-9000}:9000"
+      # Approved dev console LAN interface; separate from the S3 API port.
+      - "${MINIO_CONSOLE_BIND_ADDRESS:-127.0.0.1}:${MINIO_CONSOLE_PORT:-9001}:9001"
 
   web:
     build:
@@ -58,6 +60,9 @@ services:
       dockerfile: apps/web/Dockerfile
     environment:
       DEV_AUTH_EMAIL: operator@example.com
+      # This development stack is served over HTTP, including from LAN hosts.
+      # Allow browsers to retain its session cookie; use true behind HTTPS.
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
       SEED_ADMIN_EMAIL: operator@example.com
       SEED_ADMIN_NAME: Development Operator
       DATABASE_URL: ${DATABASE_URL_DOCKER}
@@ -78,6 +83,7 @@ services:
       SOURCE_CONNECTION_ENCRYPTION_KEY: ${SOURCE_CONNECTION_ENCRYPTION_KEY:-wSA2xXBH4KiKxAjt9b38M8bqk6QbYzbs0p9AZkUp+4I=}
       GITEA_PUBLIC_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}
       GITEA_INTERNAL_URL: ${GITEA_INTERNAL_URL:-http://gitea:3000}
+      AIOZ_ANNOTATION_SERVICES_URL: ${AIOZ_ANNOTATION_SERVICES_URL:-${AIOZ_ANNOTATION_SERVICES_BASE_URL:-${AIOZ_COMPANY_API_BASE_URL:-}}}
       ANNOTATIONPLATFORM_RUNTIME: compose
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: ${REPOSITORY_PREFLIGHT_INTEGRATION_TESTS:-0}
       # Public GitHub is the normal deployment endpoint. The controlled
@@ -104,6 +110,12 @@ services:
       RATE_LIMIT_IMPORT_PER_MINUTE: ${RATE_LIMIT_IMPORT_PER_MINUTE:-10}
       RATE_LIMIT_EXPORT_PER_MINUTE: ${RATE_LIMIT_EXPORT_PER_MINUTE:-10}
       PAGINATION_MAX_PAGE_SIZE: ${PAGINATION_MAX_PAGE_SIZE:-100}
+      # 025-text-workspace-engine -- shared with apps/worker below. See
+      # packages/domain/src/text-source-limits.ts for the authoritative
+      # defaults/bounds this mirrors.
+      TEXT_WORKSPACE_MAX_SOURCE_BYTES: ${TEXT_WORKSPACE_MAX_SOURCE_BYTES:-1048576}
+      TEXT_WORKSPACE_MAX_CODE_UNITS: ${TEXT_WORKSPACE_MAX_CODE_UNITS:-100000}
+      TEXT_WORKSPACE_MAX_ANNOTATIONS: ${TEXT_WORKSPACE_MAX_ANNOTATIONS:-5000}
 
     depends_on:
       postgres:
@@ -115,7 +127,7 @@ services:
     ports:
       # Bound to loopback only, so this dev stack answers at
       # http://localhost:3000 while docker-compose.review.yaml's web answers
-      # at http://10.0.0.123:3001 on its own port/LAN IP, without a
+      # at http://localhost:3001 on its own port/LAN IP, without a
       # conflict. See docker-compose.review.yaml.
       - "3000:3000"
 
@@ -124,6 +136,10 @@ services:
       context: .
       dockerfile: apps/worker/Dockerfile
     environment:
+      AIOZ_ANNOTATION_SERVICES_URL: ${AIOZ_ANNOTATION_SERVICES_URL:-${AIOZ_ANNOTATION_SERVICES_BASE_URL:-${AIOZ_COMPANY_API_BASE_URL:-}}}
+      AIOZ_COMPANY_API_KEY: ${AIOZ_COMPANY_API_KEY:-}
+      AIOZ_ANNOTATION_SERVICES_TIMEOUT_MS: ${AIOZ_ANNOTATION_SERVICES_TIMEOUT_MS:-15000}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
       DATABASE_URL: ${DATABASE_URL_DOCKER}
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin_dev_user}
@@ -168,6 +184,12 @@ services:
       MINIO_ORPHAN_SCAN_DRY_RUN: ${MINIO_ORPHAN_SCAN_DRY_RUN:-true}
       TEMP_UPLOAD_RETENTION_MS: ${TEMP_UPLOAD_RETENTION_MS:-86400000}
       MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS: ${MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS:-7}
+      # 025-text-workspace-engine -- shared with the web service above. See
+      # packages/domain/src/text-source-limits.ts for the authoritative
+      # defaults/bounds this mirrors.
+      TEXT_WORKSPACE_MAX_SOURCE_BYTES: ${TEXT_WORKSPACE_MAX_SOURCE_BYTES:-1048576}
+      TEXT_WORKSPACE_MAX_CODE_UNITS: ${TEXT_WORKSPACE_MAX_CODE_UNITS:-100000}
+      TEXT_WORKSPACE_MAX_ANNOTATIONS: ${TEXT_WORKSPACE_MAX_ANNOTATIONS:-5000}
     depends_on:
       postgres:
         condition: service_healthy
@@ -241,7 +263,7 @@ services:
 
       # HTTP server
       GITEA__server__PROTOCOL: http
-      GITEA__server__DOMAIN: localhost
+      GITEA__server__DOMAIN: ${GITEA_DOMAIN:-localhost}
       GITEA__server__HTTP_ADDR: 0.0.0.0
       GITEA__server__HTTP_PORT: 3000
       GITEA__server__ROOT_URL: ${GITEA_PUBLIC_URL:-http://localhost:3100/}

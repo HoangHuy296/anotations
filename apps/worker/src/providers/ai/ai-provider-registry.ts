@@ -1,6 +1,9 @@
 import type { AiProviderAdapter } from "@annotationplatform/domain/ai-provider";
 
 import { AIOZ_TEST_RESULT_PROVIDER_KEY, AiozTestResultProvider } from "./aioz-test-result-provider.js";
+import { AIOZ_ANNOTATION_SERVICES_PROVIDER_KEY, AiozAnnotationServicesProvider } from "./aioz-annotation-services-provider.js";
+import { createAiozTaskResources } from "./aioz-task-resources.js";
+import { getAiozAnnotationServicesConfig } from "../../config.js";
 import type { AiTask, PrismaClient } from "../../../../../lib/generated/prisma/client.js";
 
 export type AiProviderResolutionReason = "AI_MODEL_INACTIVE" | "AI_MODEL_NOT_FOUND" | "AI_PROVIDER_NOT_REGISTERED";
@@ -18,17 +21,13 @@ export class AiProviderResolutionError extends Error {
  * never by Job.provider, which is an unrelated RepoProvider enum used only
  * by the repository-import flow.
  *
- * TODO(T006): once apps/worker/src/providers/ai/aioz-company.provider.ts
- * exists (blocked on the real AIOZ-company API contract — see
- * specs/020-ai-integration/research.md "Open dependency"), register it here:
- *   import { AIOZCompanyProvider } from "./aioz-company.provider.js";
- *   ...
- *   "aioz-company": new AIOZCompanyProvider(getAiozCompanyProviderConfig()),
+ * The real aioz-company entry is constructed lazily with worker resources
+ * below, so missing optional AI credentials never break other Job types.
  *
  * `AIOZ_TEST_RESULT_PROVIDER_KEY` is a distinct, test-only entry
  * (aioz-test-result-provider.ts) that lets an integration test exercise this
  * entire resolution/submit/poll pipeline against a real queue/worker without
- * the real (still-blocked) adapter above — no production `AiModel` row
+ * the real adapter above — no production `AiModel` row
  * should ever carry that provider value. Excluded outright when
  * NODE_ENV=production, so a real deployment can never resolve it even if one
  * did.
@@ -45,7 +44,7 @@ const providers: Record<string, AiProviderAdapter> = {
 export async function resolveAiProviderForTask(
   db: PrismaClient,
   aiTask: Pick<AiTask, "modelId">,
-  registry: Record<string, AiProviderAdapter> = providers,
+  registry?: Record<string, AiProviderAdapter>,
 ): Promise<AiProviderAdapter> {
   const model = await db.aiModel.findUnique({
     where: { id: aiTask.modelId },
@@ -53,7 +52,10 @@ export async function resolveAiProviderForTask(
   });
   if (!model) throw new AiProviderResolutionError("AI_MODEL_NOT_FOUND");
   if (!model.isActive) throw new AiProviderResolutionError("AI_MODEL_INACTIVE");
-  const adapter = registry[model.provider];
+  if (!registry && model.provider === AIOZ_ANNOTATION_SERVICES_PROVIDER_KEY) {
+    return new AiozAnnotationServicesProvider(getAiozAnnotationServicesConfig(), createAiozTaskResources(db));
+  }
+  const adapter = (registry ?? providers)[model.provider];
   if (!adapter) throw new AiProviderResolutionError("AI_PROVIDER_NOT_REGISTERED");
   return adapter;
 }

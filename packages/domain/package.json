@@ -36,6 +36,30 @@
     "./bulk-asset-job": {
       "types": "./dist/bulk-asset-job.d.ts",
       "default": "./dist/bulk-asset-job.js"
+    },
+    "./text-properties-contract": {
+      "types": "./dist/text-properties-contract.d.ts",
+      "default": "./dist/text-properties-contract.js"
+    },
+    "./text-annotation-contract": {
+      "types": "./dist/text-annotation-contract.d.ts",
+      "default": "./dist/text-annotation-contract.js"
+    },
+    "./text-boundary-contract": {
+      "types": "./dist/text-boundary-contract.d.ts",
+      "default": "./dist/text-boundary-contract.js"
+    },
+    "./text-source-decode": {
+      "types": "./dist/text-source-decode.d.ts",
+      "default": "./dist/text-source-decode.js"
+    },
+    "./text-source-limits": {
+      "types": "./dist/text-source-limits.d.ts",
+      "default": "./dist/text-source-limits.js"
+    },
+    "./text-source-prepare-job": {
+      "types": "./dist/text-source-prepare-job.d.ts",
+      "default": "./dist/text-source-prepare-job.js"
     }
   },
   "scripts": {

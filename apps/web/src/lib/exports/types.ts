@@ -22,6 +22,9 @@ export type SafeExportJob = {
   updatedAt: string;
 };
 
+/** A row in the signed-in user's own export history (account settings). */
+export type SafeExportJobWithDataset = SafeExportJob & { datasetName: string | null };
+
 export type SafeExportDownload = {
   /** Authorized, short-lived, object-scoped capability; never persist or log it. */
   url: string;

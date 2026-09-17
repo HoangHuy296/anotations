@@ -60,6 +60,7 @@ export async function createAiPollFixture(options: { assetCount?: number } = {})
     aiTaskId: aiTask.id,
     cleanup: async () => {
       await db.dataset.delete({ where: { id: dataset.id } }).catch(() => undefined);
+      await db.aiModel.delete({ where: { id: model.id } }).catch(() => undefined);
       await db.user.delete({ where: { id: owner.id } }).catch(() => undefined);
       await db.$disconnect();
     },

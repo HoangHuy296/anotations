@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Explicit, persisted light/dark toggle (Account > the header theme button) --
+   not OS `prefers-color-scheme`. `dark:` utilities apply under a
+   `data-theme="dark"` ancestor or self, set server-side on AppShell's root
+   wrapper from the signed-in user's stored preference. */
+@custom-variant dark (&:is([data-theme="dark"], [data-theme="dark"] *));
+
 @font-face {
   font-family: "Geist";
   font-style: normal;
@@ -21,6 +27,11 @@
   --foreground: #18181b;
   --font-geist-sans: "Geist";
   --font-geist-mono: "Geist Mono";
+}
+
+[data-theme="dark"] {
+  --background: #09090b;
+  --foreground: #fafafa;
 }
 
 @theme inline {
@@ -78,4 +89,34 @@ a {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Account > Accessibility. Applied via a `data-*` attribute on AppShell's
+   root wrapper (from the signed-in user's stored preferences), independent
+   of the OS-level `prefers-reduced-motion` media query above. */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+[data-large-text="true"] {
+  font-size: 112.5%;
+}
+
+[data-high-contrast="true"] {
+  --tw-text-opacity: 1;
+}
+
+[data-high-contrast="true"] .text-zinc-400,
+[data-high-contrast="true"] .text-zinc-500 {
+  color: #18181b;
+}
+
+[data-high-contrast="true"] .border-zinc-100,
+[data-high-contrast="true"] .border-zinc-200 {
+  border-color: #71717a;
 }

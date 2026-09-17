@@ -40,15 +40,15 @@ export function AccountProfileForm({ initialName, email }: AccountProfileFormPro
   }
 
   return <form className="mt-7 space-y-5" onSubmit={submit}>
-    <label className="block text-sm font-semibold text-zinc-800">Display name
-      <input className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 text-zinc-950 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} required minLength={1} maxLength={100} />
+    <label className="block text-sm font-semibold text-zinc-800 dark:text-zinc-200">Display name
+      <input className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 text-zinc-950 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50 dark:focus:ring-sky-900" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} required minLength={1} maxLength={100} />
     </label>
-    <label className="block text-sm font-semibold text-zinc-800">Email
-      <input className="mt-2 h-11 w-full cursor-not-allowed rounded-xl border border-zinc-200 bg-zinc-50 px-3 text-zinc-500" type="email" value={email} readOnly aria-readonly="true" />
-      <span className="mt-1 block text-xs font-normal text-zinc-500">Email addresses are managed by an administrator.</span>
+    <label className="block text-sm font-semibold text-zinc-800 dark:text-zinc-200">Email
+      <input className="mt-2 h-11 w-full cursor-not-allowed rounded-xl border border-zinc-200 bg-zinc-50 px-3 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400" type="email" value={email} readOnly aria-readonly="true" />
+      <span className="mt-1 block text-xs font-normal text-zinc-500 dark:text-zinc-400">Email addresses are managed by an administrator.</span>
     </label>
-    {error ? <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">{error}</p> : null}
-    {message ? <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{message}</p> : null}
+    {error ? <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950 dark:text-rose-300">{error}</p> : null}
+    {message ? <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">{message}</p> : null}
     <button type="submit" disabled={pending} className="h-11 rounded-xl bg-sky-600 px-4 text-sm font-semibold text-white hover:bg-sky-700 disabled:opacity-50">{pending ? "Saving…" : "Save changes"}</button>
   </form>;
 }

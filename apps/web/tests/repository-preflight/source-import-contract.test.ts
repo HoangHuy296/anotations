@@ -16,7 +16,7 @@ test("source import contract permits transient one-time PAT preflight but requir
     datasetName: "fixture import",
     credentialMode: "ONE_TIME_PAT",
     serverUrl: "https://gitea.example.test",
-    token: "test-token",
+    personalAccessToken: "test-token",
     saveAsSourceConnection: false,
     repository,
   });
@@ -27,7 +27,7 @@ test("source import contract permits transient one-time PAT preflight but requir
     datasetName: "fixture import",
     credentialMode: "ONE_TIME_PAT",
     serverUrl: "https://gitea.example.test",
-    token: "test-token",
+    personalAccessToken: "test-token",
     saveAsSourceConnection: true,
     repository,
   });

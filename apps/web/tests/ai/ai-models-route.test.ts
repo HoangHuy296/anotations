@@ -7,7 +7,7 @@ test("GET /api/ai/models filters the provider catalog by asset modality", {
   skip: aiHttpEnabled && process.env.AIOZ_CATALOG_HTTP_TESTS === "1" ? false : "Requires AI HTTP tests and AIOZ_CATALOG_HTTP_TESTS=1",
 }, async () => {
   const owner = await signupAndLogin();
-  const response = await request("/api/ai/models?modality=IMAGE", { headers: { Cookie: owner.cookie } });
+  const response = await request("/api/ai/models?modality=IMAGE&task_name=detection", { headers: { Cookie: owner.cookie } });
   assert.equal(response.status, 200);
   const body = await response.json() as { data: { models: Array<Record<string, unknown>> } };
   for (const model of body.data.models) {
@@ -27,4 +27,12 @@ test("GET /api/ai/models rejects invalid modality", { skip: aiHttpEnabled ? fals
 test("GET /api/ai/models requires authentication", { skip: aiHttpEnabled ? false : aiHttpSkipReason }, async () => {
   const response = await request("/api/ai/models");
   assert.equal(response.status, 401);
+});
+
+test("GET /api/ai/models requires a toolbox task", { skip: aiHttpEnabled ? false : aiHttpSkipReason }, async () => {
+  const owner = await signupAndLogin();
+  for (const task of ["", "&task_name=", "&task_name=null", "&task_name=unknown"]) {
+    const response = await request(`/api/ai/models?modality=IMAGE${task}`, { headers: { Cookie: owner.cookie } });
+    assert.equal(response.status, 400);
+  }
 });

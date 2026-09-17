@@ -36,7 +36,17 @@ type CanvasStageProps = {
 };
 
 function colorFor(annotation: SafeImageAnnotation, labels: SafeWorkspaceLabel[]) {
+  const aiColor = annotation.properties && typeof annotation.properties === "object" && !Array.isArray(annotation.properties)
+    ? (annotation.properties as { aiColor?: unknown }).aiColor
+    : null;
+  if (typeof aiColor === "string" && /^#[0-9a-f]{6}$/i.test(aiColor)) return aiColor;
   return labels.find((label) => label.id === annotation.labelId)?.color ?? "#38bdf8";
+}
+
+function aiDisplayLabel(annotation: SafeImageAnnotation): string | null {
+  if (!isAiPredictionAnnotation(annotation) || !annotation.properties || typeof annotation.properties !== "object" || Array.isArray(annotation.properties)) return null;
+  const label = (annotation.properties as { aiDisplayLabel?: unknown }).aiDisplayLabel;
+  return typeof label === "string" && label.length > 0 ? label : null;
 }
 
 function isBox(annotation: SafeImageAnnotation): annotation is SafeImageAnnotation & { geometry: NormalizedBoundingBox } {
@@ -320,7 +330,10 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
             // without a second annotation representation or a `source`
             // field round-tripping through `SafeImageAnnotation`.
             const common = { stroke: colorFor(annotation, labels), strokeWidth: selected ? 3 : 2, dash: isAiPredictionAnnotation(annotation) ? [6, 4] : undefined, onClick: (event: { cancelBubble: boolean }) => { event.cancelBubble = true; setSelectedId(annotation.id); }, onTap: (event: { cancelBubble: boolean }) => { event.cancelBubble = true; setSelectedId(annotation.id); } };
-            if (isBox(annotation)) { const box = annotation.geometry; return <Rect key={annotation.id} ref={(node) => { if (interactive) selectedNodeRef.current = node; }} x={box.x * originalWidth} y={box.y * originalHeight} width={box.width * originalWidth} height={box.height * originalHeight} fill={`${colorFor(annotation, labels)}22`} draggable={tool === "select" && interactive} {...common} onDragEnd={(event) => { const next = { x: event.target.x(), y: event.target.y(), width: event.target.width(), height: event.target.height() }; const geometry = normalizeBoundingBox(next, originalWidth, originalHeight); if (!geometry) return; upsertSafeAnnotation({ ...annotation, geometry }); setSaveState("pending"); scheduleAutosave(`annotation:${annotation.id}`, () => persistGeometry(annotation, geometry)); }} onTransformEnd={(event) => { const node = event.target; const scaleX = node.scaleX(); const scaleY = node.scaleY(); node.scale({ x: 1, y: 1 }); const next = { x: node.x(), y: node.y(), width: Math.max(1, node.width() * scaleX), height: Math.max(1, node.height() * scaleY) }; const geometry = normalizeBoundingBox(next, originalWidth, originalHeight); if (!geometry) return; upsertSafeAnnotation({ ...annotation, geometry }); setSaveState("pending"); scheduleAutosave(`annotation:${annotation.id}`, () => persistGeometry(annotation, geometry)); }} />; }
+            if (isBox(annotation)) { const box = annotation.geometry; const displayLabel = aiDisplayLabel(annotation); const color = colorFor(annotation, labels); return <Group key={annotation.id}>
+              <Rect ref={(node) => { if (interactive) selectedNodeRef.current = node; }} x={box.x * originalWidth} y={box.y * originalHeight} width={box.width * originalWidth} height={box.height * originalHeight} fill={`${color}22`} draggable={tool === "select" && interactive} {...common} onDragEnd={(event) => { const next = { x: event.target.x(), y: event.target.y(), width: event.target.width(), height: event.target.height() }; const geometry = normalizeBoundingBox(next, originalWidth, originalHeight); if (!geometry) return; upsertSafeAnnotation({ ...annotation, geometry }); setSaveState("pending"); scheduleAutosave(`annotation:${annotation.id}`, () => persistGeometry(annotation, geometry)); }} onTransformEnd={(event) => { const node = event.target; const scaleX = node.scaleX(); const scaleY = node.scaleY(); node.scale({ x: 1, y: 1 }); const next = { x: node.x(), y: node.y(), width: Math.max(1, node.width() * scaleX), height: Math.max(1, node.height() * scaleY) }; const geometry = normalizeBoundingBox(next, originalWidth, originalHeight); if (!geometry) return; upsertSafeAnnotation({ ...annotation, geometry }); setSaveState("pending"); scheduleAutosave(`annotation:${annotation.id}`, () => persistGeometry(annotation, geometry)); }} />
+              {displayLabel ? <Text listening={false} x={box.x * originalWidth} y={Math.max(0, box.y * originalHeight - 20)} text={displayLabel} fontSize={16} fill={color} /> : null}
+            </Group>; }
             const geometry = annotation.geometry as Record<string, unknown>;
             const persistTranslation = (event: Konva.KonvaEventObject<DragEvent>) => {
               if (!isImageGeometry(annotation.geometry)) return;
@@ -363,8 +376,8 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
             return null;
           })}
           {aiPreviews.map((p) => <Group key={`ai-preview-${p.index}`} listening={false}>
-            <Rect x={p.geometry.x * originalWidth} y={p.geometry.y * originalHeight} width={p.geometry.width * originalWidth} height={p.geometry.height * originalHeight} stroke="#fbbf24" strokeWidth={2} strokeScaleEnabled={false} dash={[8, 4]} />
-            <Text x={p.geometry.x * originalWidth} y={Math.max(0, p.geometry.y * originalHeight - 20)} text={`#${p.index + 1} ${p.labelKey} ${Math.round(p.confidence * 100)}%`} fontSize={16} fill="#fbbf24" />
+            <Rect x={p.geometry.x * originalWidth} y={p.geometry.y * originalHeight} width={p.geometry.width * originalWidth} height={p.geometry.height * originalHeight} stroke={p.color} strokeWidth={2} strokeScaleEnabled={false} dash={[8, 4]} />
+            <Text x={p.geometry.x * originalWidth} y={Math.max(0, p.geometry.y * originalHeight - 20)} text={`#${p.index + 1} ${p.labelKey} ${Math.round(p.confidence * 100)}%`} fontSize={16} fill={p.color} />
           </Group>)}
           {draft && tool === "box" && <Rect x={draft.x} y={draft.y} width={draft.width} height={draft.height} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}
           {draft && tool === "circle" && drawingStart && <Circle x={drawingStart.x} y={drawingStart.y} radius={Math.hypot(draft.width, draft.height)} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}

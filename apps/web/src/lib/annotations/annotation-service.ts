@@ -75,7 +75,7 @@ export async function mutateImageAnnotations(actor: RequestActor, assetId: strin
   if (resolved.asset.modality !== Modality.IMAGE) return { ok: false, reason: "WRITE_UNSUPPORTED" };
 
   const createAccess = changeSet.creates.length ? await assertAnnotationPermission(actor, resolved.asset.datasetId, "annotation.create") : null;
-  if (createAccess && !createAccess) return { ok: false, reason: "NOT_FOUND" };
+  if (changeSet.creates.length && !createAccess) return { ok: false, reason: "NOT_FOUND" };
   if (createAccess?.forbidden) return { ok: false, reason: "FORBIDDEN" };
   try {
     await verifyWritePermissions(actor, resolved.asset.datasetId, changeSet.updates, changeSet.deletes);

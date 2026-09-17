@@ -16,8 +16,8 @@ export function DatasetNavigationGroup({ activePath }: DatasetNavigationGroupPro
     cn(
       "flex min-h-9 items-center gap-2 rounded-lg px-3 text-xs font-semibold outline-none transition focus-visible:ring-2 focus-visible:ring-sky-400",
       active
-        ? "bg-zinc-950 text-white"
-        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950",
+        ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950"
+        : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
     );
 
   return (
@@ -26,7 +26,7 @@ export function DatasetNavigationGroup({ activePath }: DatasetNavigationGroupPro
         aria-controls="dataset-navigation-actions"
         aria-expanded={expanded}
         className={cn(
-          "flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400",
+          "flex min-h-10 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50",
         )}
         onClick={() => setExpanded((value) => !value)}
         type="button"

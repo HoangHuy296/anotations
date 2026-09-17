@@ -80,11 +80,26 @@ export const videoTemporalLabelDeleteSchema = z.object({
   expectedRevision: z.number().int().positive(),
 }).strict();
 
+/**
+ * The read-window contract for `readVideoAnnotations`. `fromMs`/`toMs` are
+ * the caller's *requested* window -- optional (the service defaults and
+ * bounds them, see `VIDEO_ANNOTATION_LIMITS`), but if both are present they
+ * must describe a real, positive span. Window-size limits are enforced by
+ * the service against the *effective* window (after defaulting), not here,
+ * since a single-sided request (`fromMs` only) can't be size-checked until
+ * the other side is resolved.
+ *
+ * `cursor` opaquely encodes the last in-window keyframe's `(timestampMs,
+ * id)` from a previous page (see `encodeVideoReadCursor` in
+ * `video-read-service.ts`) -- keyset, not offset, pagination. It is only
+ * ever produced by the service itself; the format check here is just
+ * defense against a malformed/tampered value, not a contract a caller is
+ * meant to construct by hand.
+ */
 export const videoReadQuerySchema = z.object({
   fromMs: timestamp.optional(),
   toMs: timestamp.optional(),
-  cursor: id.optional(),
-  limit: z.number().int().min(1).max(500).default(100),
+  cursor: z.string().regex(/^\d+:.+$/, "Malformed cursor.").max(200).optional(),
 }).strict().superRefine((value, ctx) => {
   if (value.fromMs !== undefined && value.toMs !== undefined && value.fromMs >= value.toMs) ctx.addIssue({ code: "custom", path: ["toMs"], message: "Read window must be positive." });
 });

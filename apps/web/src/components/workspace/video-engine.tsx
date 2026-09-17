@@ -1,7 +1,7 @@
 "use client";
 
 import { SpinnerGap, VideoCamera } from "@phosphor-icons/react";
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 import type { SafeMediaReadiness } from "@/types/media-processing";
 import type { SafeVideoAnnotations } from "@/types/video-annotation";
@@ -9,10 +9,12 @@ import { AiDetectDialog } from "@/components/workspace/ai-detect-dialog";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
-import { addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoKeyframe, deleteVideoTrack, updateVideoKeyframe } from "@/lib/workspace/video-annotation-client";
+import { readVideoAnnotationsClient, readVideoAnnotationsAcrossDurationClient, addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoTrack, updateVideoKeyframe } from "@/lib/workspace/video-annotation-client";
 import { createVideoPlaybackController, type VideoPlaybackController } from "@/lib/workspace/video-playback-controller";
 import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotations/video-time";
 import { deriveInterpolationAt } from "@/lib/annotations/video-interpolation";
+import { VIDEO_ANNOTATION_LIMITS } from "@/lib/annotations/video-limits";
+import { distanceFromRange, isCovered, mergeRange, windowAround, type TimeRange } from "@/lib/annotations/video-window-ranges";
 
 type VideoEngineProps = {
   video: { id: string; filename: string; description: string | null; status: string };
@@ -81,13 +83,119 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // for as long as playback runs, even though the video is actually
   // advancing normally.
   const [nativeDurationMs, setNativeDurationMs] = useState<number | null>(null);
+  const timelineDurationMs = resolveVideoTimelineDurationMs(readiness.video) ?? nativeDurationMs;
+  // Windowed-annotation-read bookkeeping (video-read-service.ts's
+  // corresponding fix). The server-rendered `annotations` prop already
+  // covers exactly `[effectiveFromMs, effectiveToMs]` -- seed coverage from
+  // that instead of assuming the whole asset loaded. Pure bookkeeping, not
+  // render state: nothing here is read during render, only by
+  // `ensureWindowLoaded`/`evictFarWindows` below, so refs are enough.
+  const loadedRangesRef = useRef<TimeRange[]>([{ fromMs: annotations.effectiveFromMs, toMs: annotations.effectiveToMs }]);
+  const fetchingWindowsRef = useRef(new Set<string>());
+  // One entry per completed `mergeWindow` fetch, recording exactly which ids
+  // it contributed -- eviction needs to remove *those specific* ids, never a
+  // heuristic guess (e.g. "tracks with zero keyframes", which would delete a
+  // legitimately-empty freshly-created track). Deliberately NOT written to by
+  // `applyAiResults`'s `mergeAiResults` merge below -- AI-detect results are
+  // new content the user just added this session, not passive read-ahead
+  // cache, and are therefore never eviction candidates.
+  const windowLedgerRef = useRef<Array<{ range: TimeRange; keyframeIds: string[]; trackIds: string[] }>>([
+    { range: { fromMs: annotations.effectiveFromMs, toMs: annotations.effectiveToMs }, keyframeIds: annotations.keyframes.map((k) => k.id), trackIds: annotations.tracks.map((t) => t.id) },
+  ]);
+  // Mirrors `selectedTrackId` (declared below) for `evictFarWindows`, which
+  // is a stable `useCallback` and must not go stale by closing over state
+  // directly.
+  const selectedTrackIdRef = useRef<string | null>(annotations.tracks[0]?.id ?? null);
+  /**
+   * A conservative, rare-case safety net -- not a general memory optimizer.
+   * This platform bounds a single video's *file size* (100MB, see
+   * `MAX_DIRECT_UPLOAD_BYTES`) but not the *annotation volume* accumulated
+   * on it over repeated AI reprocessing, which is exactly what the shared
+   * dev asset this fix was written against demonstrates (70,000+ rows on a
+   * ~79s video). Indefinite additive accumulation is therefore not provably
+   * safe, so once the store holds an unusually large number of keyframes,
+   * this drops the ledger entry farthest from the current playhead --
+   * skipping the current window and its immediate preload neighbors, the
+   * selected track's own keyframes, anything with an autosave in flight or
+   * queued (`trackCoordinators`/`keyframeDraftChanges`), and a preserved
+   * conflict draft -- so a later scrub back there just re-fetches instead of
+   * ever discarding work in progress. Evicted ranges are dropped from
+   * `loadedRangesRef` too, so revisiting them is treated as unloaded again.
+   */
+  const evictFarWindows = useCallback((currentMs: number) => {
+    const store = useVideoAnnotationStore.getState();
+    if (store.keyframeList.length <= VIDEO_ANNOTATION_LIMITS.clientCacheKeyframeCeiling) return;
+    const protectedTrackIds = new Set<string>();
+    if (selectedTrackIdRef.current) protectedTrackIds.add(selectedTrackIdRef.current);
+    if (store.localDraft) protectedTrackIds.add(store.localDraft.trackId);
+    for (const [trackId, coordinator] of trackCoordinators.current) if (coordinator.getState() !== "clean" && coordinator.getState() !== "saved") protectedTrackIds.add(trackId);
+    const protectedKeyframeIds = new Set<string>(keyframeDraftChanges.current.keys());
+    if (store.localDraft) protectedKeyframeIds.add(store.localDraft.id);
+    for (const keyframe of store.keyframeList) if (protectedTrackIds.has(keyframe.trackId)) protectedKeyframeIds.add(keyframe.id);
+
+    const margin = VIDEO_ANNOTATION_LIMITS.clientPreloadMarginMs;
+    const isNearPlayhead = (range: TimeRange) => distanceFromRange(currentMs, range) <= margin;
+    // Farthest from the playhead first; re-checks the ceiling after each
+    // removal so this stops as soon as it's back under the threshold instead
+    // of always clearing everything evictable.
+    const candidates = [...windowLedgerRef.current].filter((entry) => !isNearPlayhead(entry.range)).sort((a, b) => distanceFromRange(currentMs, b.range) - distanceFromRange(currentMs, a.range));
+    for (const entry of candidates) {
+      if (useVideoAnnotationStore.getState().keyframeList.length <= VIDEO_ANNOTATION_LIMITS.clientCacheKeyframeCeiling) break;
+      const otherEntries = windowLedgerRef.current.filter((other) => other !== entry);
+      const trackIdsKeptElsewhere = new Set(otherEntries.flatMap((other) => other.trackIds));
+      const removableKeyframeIds = entry.keyframeIds.filter((id) => !protectedKeyframeIds.has(id));
+      const removableTrackIds = entry.trackIds.filter((id) => !protectedTrackIds.has(id) && !trackIdsKeptElsewhere.has(id));
+      if (!removableKeyframeIds.length && !removableTrackIds.length) continue;
+      useVideoAnnotationStore.getState().evictWindow(removableKeyframeIds, removableTrackIds);
+      windowLedgerRef.current = otherEntries;
+      loadedRangesRef.current = loadedRangesRef.current.flatMap((range) => range.fromMs === entry.range.fromMs && range.toMs === entry.range.toMs ? [] : [range]);
+    }
+  }, []);
+  /**
+   * Fetches whatever window of annotations covers `targetMs` (with a
+   * preload margin) if it isn't already loaded, and merges the result into
+   * the store additively -- never replaces `trackList`/`keyframeList`
+   * wholesale, so a selected track/keyframe from an earlier window stays
+   * selected across this refetch. A no-op when `targetMs` is already
+   * covered, and deduped per in-flight window so scrubbing rapidly across
+   * the same edge doesn't fire duplicate requests. `readVideoAnnotationsClient`
+   * itself follows every page of the window before this resolves, so the
+   * window is only ever marked loaded once it's genuinely complete -- never
+   * on a partial page.
+   */
+  const ensureWindowLoaded = useCallback((targetMs: number, durationMs: number | null) => {
+    if (!Number.isFinite(targetMs) || targetMs < 0) return;
+    if (isCovered(loadedRangesRef.current, targetMs, VIDEO_ANNOTATION_LIMITS.clientPreloadMarginMs, durationMs)) return;
+    const next = windowAround(targetMs, VIDEO_ANNOTATION_LIMITS.defaultWindowMs, VIDEO_ANNOTATION_LIMITS.clientPreloadMarginMs, durationMs);
+    const key = `${Math.round(next.fromMs)}-${Math.round(next.toMs)}`;
+    if (fetchingWindowsRef.current.has(key)) return;
+    fetchingWindowsRef.current.add(key);
+    void readVideoAnnotationsClient(video.id, next)
+      .then((result) => {
+        useVideoAnnotationStore.getState().mergeWindow(result.tracks, result.keyframes);
+        loadedRangesRef.current = mergeRange(loadedRangesRef.current, { fromMs: result.effectiveFromMs, toMs: result.effectiveToMs });
+        windowLedgerRef.current = [...windowLedgerRef.current, { range: { fromMs: result.effectiveFromMs, toMs: result.effectiveToMs }, keyframeIds: result.keyframes.map((k) => k.id), trackIds: result.tracks.map((t) => t.id) }];
+        evictFarWindows(targetMs);
+      })
+      // Best-effort background preload -- a transient failure just means the
+      // next tick (still inside the margin) retries; nothing to surface to
+      // the user for a read that hasn't reached its own edge yet.
+      .catch(() => {})
+      .finally(() => { fetchingWindowsRef.current.delete(key); });
+  }, [video.id, evictFarWindows]);
+  // Re-checks coverage on every playhead change (scrub, playback tick, frame
+  // step, keyframe jump) -- cheap when already covered, so this can safely
+  // run at rAF frequency during playback.
+  useEffect(() => {
+    ensureWindowLoaded(currentTime * 1000, timelineDurationMs);
+  }, [currentTime, timelineDurationMs, ensureWindowLoaded]);
   const [selectedTrackId, setSelectedTrackId] = useState<string | null>(annotations.tracks[0]?.id ?? null);
+  useEffect(() => { selectedTrackIdRef.current = selectedTrackId; }, [selectedTrackId]);
   const [draftName, setDraftName] = useState("");
   const [draftLabelId, setDraftLabelId] = useState<string>("");
   const [draftMode, setDraftMode] = useState<"LINEAR" | "NONE">("LINEAR");
   const [draftProperties, setDraftProperties] = useState("{}");
   const [draftGeometry, setDraftGeometry] = useState<{ kind: "BOUNDING_BOX"; x: number; y: number; width: number; height: number } | null>(null);
-  const [draftTimestampMs, setDraftTimestampMs] = useState<number | null>(null);
   const dragGeometryRef = useRef<{ kind: "BOUNDING_BOX"; x: number; y: number; width: number; height: number } | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [trackSaveStates, setTrackSaveStates] = useState<Record<string, VideoSaveState>>({});
@@ -111,9 +219,25 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackCoordinators = useRef(new Map<string, TrackAutosaveCoordinator>());
   const keyframeDraftChanges = useRef(new Map<string, KeyframeChanges>());
+  async function applyAiResults(taskId: string) {
+    // A completed AI task's tracks can land anywhere on the timeline, not
+    // just the currently-loaded window, so this pages through the whole
+    // duration in bounded windows (never an unbounded read) rather than
+    // relying on whatever happens to already be loaded.
+    const durationBound = timelineDurationMs && timelineDurationMs > 0 ? timelineDurationMs : VIDEO_ANNOTATION_LIMITS.maxWindowMs;
+    const result = await readVideoAnnotationsAcrossDurationClient(video.id, durationBound);
+    loadedRangesRef.current = mergeRange(loadedRangesRef.current, { fromMs: 0, toMs: durationBound });
+    // Merge only this task's newly appended rows. Do not replace unsaved manual edits.
+    const tracks = result.tracks.filter((track) => track.properties.aiTaskId === taskId);
+    const keyframes = result.keyframes.filter((frame) => frame.properties.aiTaskId === taskId);
+    useVideoAnnotationStore.getState().mergeAiResults(tracks, keyframes);
+    useVideoAnnotationStore.getState().setRequestedTab("tracks");
+    if (tracks[0]) setSelectedTrackId(tracks[0].id);
+    if (keyframes[0]) useVideoAnnotationStore.getState().setSelectedKeyframeId(keyframes[0].id);
+    return keyframes.length;
+  }
   const setSnapshot = useVideoAnnotationStore((state) => state.setSnapshot);
   const mutationState = useVideoAnnotationStore((state) => state.mutationState);
-  const localDraft = useVideoAnnotationStore((state) => state.localDraft);
   const tool = useVideoAnnotationStore((state) => state.tool);
   const setTool = useVideoAnnotationStore((state) => state.setTool);
   // Shared with `video-properties-tabs.tsx`'s Shapes tab, not local state --
@@ -223,10 +347,10 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
     return useVideoAnnotationStore.subscribe((state, previous) => {
       const id = state.selectedKeyframeId;
       if (!id || id === previous.selectedKeyframeId) return;
-      const keyframe = keyframeList.find((item) => item.id === id);
+      const keyframe = state.keyframes[id];
       if (!keyframe) return;
       if (keyframe.trackId !== selectedTrackId) {
-        const nextTrack = trackList.find((item) => item.id === keyframe.trackId) ?? null;
+        const nextTrack = state.tracks[keyframe.trackId] ?? null;
         setSelectedTrackId(keyframe.trackId);
         setDraftName(nextTrack?.name ?? "");
         setDraftLabelId(nextTrack?.labelId ?? "");
@@ -234,7 +358,6 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
         setDraftProperties(JSON.stringify(nextTrack?.properties ?? {}));
       }
       setDraftGeometry(keyframe.geometry);
-      setDraftTimestampMs(keyframe.timestampMs);
       playbackController.pause();
       playbackController.seekToTime(keyframe.timestampMs);
       setCurrentTime(Math.max(0, keyframe.timestampMs / 1000));
@@ -251,13 +374,14 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // keyframe's exact timestamp).
   const currentFrameIndex = deriveFrameIndex(currentTime * 1000, fps);
   const exactKeyframeAtTime = trackKeyframes.find((keyframe) => deriveFrameIndex(keyframe.timestampMs, fps) === currentFrameIndex);
-  const selectedKeyframe = trackKeyframes.find((keyframe) => keyframe.id === selectedKeyframeId) ?? exactKeyframeAtTime ?? trackKeyframes.at(-1) ?? null;
+  const selectedKeyframe = (playbackState === "paused" ? trackKeyframes.find((keyframe) => keyframe.id === selectedKeyframeId) : null) ?? exactKeyframeAtTime ?? trackKeyframes.at(-1) ?? null;
   // A persisted overlay (editable, draggable/resizable) only draws when the
   // user explicitly selected a keyframe or the playhead sits exactly on one;
   // the `.at(-1)` fallback above exists only to keep the keyframe editor form
   // populated with something, and must never masquerade as "this is the
   // current frame's geometry" in the video overlay itself.
-  const showsPersistedOverlay = Boolean(selectedKeyframeId && trackKeyframes.some((keyframe) => keyframe.id === selectedKeyframeId)) || Boolean(exactKeyframeAtTime);
+  const showsPersistedOverlay = Boolean(selectedKeyframe && deriveFrameIndex(selectedKeyframe.timestampMs, fps) === currentFrameIndex);
+  const aiFramesAtTime = keyframeList.filter((frame) => typeof frame.properties.aiTaskId === "string" && deriveFrameIndex(frame.timestampMs, fps) === currentFrameIndex && !(showsPersistedOverlay && frame.id === selectedKeyframe?.id));
   // A derived preview -- never persisted, never draggable -- fills the gap
   // when the playhead sits between two keyframes on the selected track.
   // Computed live from the selected track's own persisted keyframes at the
@@ -278,7 +402,6 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
     const keyframe = trackKeyframes.find((item) => item.id === id);
     setSelectedKeyframeId(id);
     setDraftGeometry(keyframe?.geometry ?? null);
-    setDraftTimestampMs(keyframe?.timestampMs ?? null);
   };
   const selectTrack = (trackId: string) => {
     const next = trackList.find((track) => track.id === trackId) ?? null;
@@ -382,24 +505,10 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   const updateKeyframe = async (changes: KeyframeChanges) => {
     if (!selectedKeyframe || !selectedTrack) return;
     if (changes.geometry) setDraftGeometry(changes.geometry);
-    if (changes.timestampMs !== undefined) setDraftTimestampMs(changes.timestampMs);
     const mergedChanges = { ...keyframeDraftChanges.current.get(selectedKeyframe.id), ...changes };
     keyframeDraftChanges.current.set(selectedKeyframe.id, mergedChanges);
     const coordinator = coordinatorFor(selectedTrack);
     coordinator.schedule((revision) => updateVideoKeyframe(selectedKeyframe.id, { expectedTrackRevision: revision, ...keyframeDraftChanges.current.get(selectedKeyframe.id) }).then((result) => { useVideoAnnotationStore.getState().markSaved(result.track, result.keyframe); return result.track; }));
-  };
-  const saveKeyframe = async () => {
-    if (!selectedTrack) return;
-    try { await coordinatorFor(selectedTrack).flush(); } catch (error) { if (error instanceof Error && (error as Error & { code?: string }).code === "VIDEO_TRACK_REVISION_CONFLICT") useVideoAnnotationStore.getState().preserveConflict(selectedKeyframe); setActionError("Keyframe conflict. Your local draft was retained."); }
-  };
-  const removeKeyframe = async () => {
-    if (!selectedKeyframe || !selectedTrack) return;
-    try {
-      const coordinator = coordinatorFor(selectedTrack);
-      coordinator.schedule((revision) => deleteVideoKeyframe(selectedKeyframe.id, revision).then((result) => { useVideoAnnotationStore.getState().markSaved(result.track); return result.track; }));
-      await coordinator.flush();
-      setSelectedKeyframeId(null);
-    } catch { setActionError("Keyframe could not be deleted."); }
   };
   const beginGeometryDrag = (event: ReactPointerEvent<HTMLDivElement>, mode: "move" | "nw" | "ne" | "sw" | "se") => {
     if (!selectedKeyframe) return;
@@ -541,7 +650,6 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
     if (next) { setSelectedKeyframeId(next.id); playbackController.seekToTime(next.timestampMs); setCurrentTime(next.timestampMs / 1000); }
   };
 
-  const timelineDurationMs = resolveVideoTimelineDurationMs(readiness.video) ?? nativeDurationMs;
   const saveStateLabel = selectedTrack ? (trackSaveStates[selectedTrack.id] ?? mutationState) : mutationState;
   return <section className="canvas-grid relative flex h-full min-h-[520px] min-w-0 flex-col overflow-hidden bg-zinc-950 p-3 text-zinc-100 lg:min-h-0">
     <header className="flex items-center justify-between gap-3 pb-2 text-xs text-zinc-400">
@@ -566,8 +674,15 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
         <video ref={videoRef} className="max-h-full max-w-full" preload="metadata" src={viewUrl} onTimeUpdate={(event) => { const seconds = event.currentTarget.currentTime; setCurrentTime(seconds); setPlaybackSnapshot({ currentTimeMs: seconds * 1000, currentFrame: Math.round((seconds * 1000) / (1000 / fps)) }); }} onDurationChange={(event) => { const duration = event.currentTarget.duration; setNativeDurationMs(Number.isFinite(duration) && duration > 0 ? duration * 1000 : null); }} onPlay={() => setPlaybackSnapshot({ playbackState: "playing" })} onPause={() => setPlaybackSnapshot({ playbackState: "paused" })} />
         {drawDraft ? <div aria-label="Drawing new keyframe" className="pointer-events-none absolute border-2 border-dashed border-sky-400" style={{ left: `${drawDraft.x * 100}%`, top: `${drawDraft.y * 100}%`, width: `${drawDraft.width * 100}%`, height: `${drawDraft.height * 100}%` }} /> : null}
         {pendingBox ? <div aria-label="Unsaved drawn box, pending the create-annotation dialog" className="pointer-events-none absolute border-2 border-dashed border-amber-400" style={{ left: `${pendingBox.geometry.x * 100}%`, top: `${pendingBox.geometry.y * 100}%`, width: `${pendingBox.geometry.width * 100}%`, height: `${pendingBox.geometry.height * 100}%` }} /> : null}
+        {aiFramesAtTime.map((frame) => {
+          const track = trackList.find((item) => item.id === frame.trackId);
+          const color = track?.label?.color ?? "#38bdf8";
+          return <div key={frame.id} aria-label={`AI track ${frame.properties.providerTrackId ?? ""}`} className="pointer-events-none absolute border-2" style={{ left: `${frame.geometry.x * 100}%`, top: `${frame.geometry.y * 100}%`, width: `${frame.geometry.width * 100}%`, height: `${frame.geometry.height * 100}%`, borderColor: color }}>
+            <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: color }}>{track?.name ?? "AI track"}{track?.label ? ` · ${track.label.name}` : " · unlabeled"}</span>
+          </div>;
+        })}
         {selectedKeyframe && showsPersistedOverlay ? (() => {
-          const geometry = draftGeometry ?? selectedKeyframe.geometry;
+          const geometry = playbackState === "paused" ? draftGeometry ?? selectedKeyframe.geometry : selectedKeyframe.geometry;
           const resizeCursor: Record<"nw" | "ne" | "sw" | "se", string> = { nw: "cursor-nw-resize", ne: "cursor-ne-resize", sw: "cursor-sw-resize", se: "cursor-se-resize" };
           // Preserves the objectId a user typed into the create-annotation
           // dialog (stored on the Track's own `properties.objectId`, see
@@ -622,9 +737,8 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
     {/* The transport/timeline zone: scrub + frame/keyframe stepping,
        annotation ticks, and track lifecycle actions all live in one
        `VideoToolbar` call -- it owns no state itself, only what's handed
-       down here. Everything else (track/keyframe field editors, details,
-       temporal labels) lives in the collapsed drawer below so it never
-       competes with the frame for height. */}
+       down here. Track/keyframe field editing lives in the Tracks/Shapes
+       properties tab instead of duplicating it here. */}
     <VideoToolbar
       playbackState={playbackState}
       playbackDisabled={loadState !== "ready"}
@@ -655,32 +769,6 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
       canDeleteTrack={!readOnly && Boolean(selectedTrack)}
       actionError={actionError}
     />
-    {/* Collapsed by default so field editors, the summary panel, and
-       temporal labels never shrink the frame; opening it doesn't remount
-       anything, so in-flight drafts/autosave state are untouched. */}
-    <details className="mt-2 flex-none rounded-lg border border-zinc-800 bg-zinc-900/60 text-xs text-zinc-300">
-      <summary className="cursor-pointer select-none px-3 py-2 font-semibold text-zinc-300 hover:text-white">
-        Track, keyframe &amp; label details
-        <span className="ml-2 font-normal text-zinc-500">{trackList.length} tracks · {keyframeList.length} keyframes · {annotations.temporalLabels.length} labels</span>
-      </summary>
-      <div className="max-h-64 overflow-y-auto px-3 pb-3">
-        {localDraft ? <div className="flex items-center gap-2 pb-2 text-[11px]"><span className="text-amber-300">Unsaved local draft preserved after a conflict.</span><button type="button" onClick={() => useVideoAnnotationStore.getState().clearDraft()} className="rounded border border-amber-800 px-2 py-1 text-amber-200">Discard local draft</button></div> : null}
-        {selectedTrack ? <div className="grid gap-2 rounded border border-zinc-800 p-2 text-[11px] sm:grid-cols-4" aria-label="Track properties">
-          <label>Name<input value={draftName} onChange={(event) => { const name = event.target.value; setDraftName(name); coordinatorFor(selectedTrack).scheduleTrackUpdate({ name: name || undefined, labelId: draftLabelId || null, interpolationMode: draftMode }); }} className="mt-1 w-full rounded bg-zinc-800 px-2 py-1" /></label>
-          <label>Label ID<input value={draftLabelId} onChange={(event) => { const labelId = event.target.value; setDraftLabelId(labelId); coordinatorFor(selectedTrack).scheduleTrackUpdate({ name: draftName || undefined, labelId: labelId || null, interpolationMode: draftMode }); }} placeholder="optional" className="mt-1 w-full rounded bg-zinc-800 px-2 py-1" /></label>
-          <label>Interpolation<select value={draftMode} onChange={(event) => { const interpolationMode = event.target.value as "LINEAR" | "NONE"; setDraftMode(interpolationMode); coordinatorFor(selectedTrack).scheduleTrackUpdate({ name: draftName || undefined, labelId: draftLabelId || null, interpolationMode }); }} className="mt-1 w-full rounded bg-zinc-800 px-2 py-1"><option value="LINEAR">Linear</option><option value="NONE">None</option></select></label>
-          <label>Safe properties JSON<textarea value={draftProperties} onChange={(event) => setDraftProperties(event.target.value)} onBlur={() => { try { const properties = JSON.parse(draftProperties) as Record<string, unknown>; if (!properties || Array.isArray(properties)) throw new Error("Invalid"); coordinatorFor(selectedTrack).scheduleTrackUpdate({ name: draftName || undefined, labelId: draftLabelId || null, interpolationMode: draftMode, properties }); setActionError(null); } catch { setActionError("Track properties must be a JSON object."); } }} className="mt-1 h-8 w-full rounded bg-zinc-800 px-2 py-1 font-mono text-[10px]" /></label>
-        </div> : null}
-        {selectedKeyframe && selectedTrack ? <div className="mt-2 grid gap-2 rounded border border-zinc-800 p-2 text-[11px] sm:grid-cols-5" aria-label="Keyframe editor">
-          <label>Time (ms)<input type="number" min={0} value={draftTimestampMs ?? selectedKeyframe.timestampMs} onChange={(event) => void updateKeyframe({ timestampMs: Number(event.target.value) })} className="mt-1 w-full rounded bg-zinc-800 px-2 py-1" /></label>
-          <label>X<input type="number" min={0} max={1} step="0.01" value={(draftGeometry ?? selectedKeyframe.geometry).x} onChange={(event) => void updateKeyframe({ geometry: { ...(draftGeometry ?? selectedKeyframe.geometry), x: Number(event.target.value) } })} className="mt-1 w-full rounded bg-zinc-800 px-2 py-1" /></label>
-          <label>Y<input type="number" min={0} max={1} step="0.01" value={(draftGeometry ?? selectedKeyframe.geometry).y} onChange={(event) => void updateKeyframe({ geometry: { ...(draftGeometry ?? selectedKeyframe.geometry), y: Number(event.target.value) } })} className="mt-1 w-full rounded bg-zinc-800 px-2 py-1" /></label>
-          <label>Width<input type="number" min={0.01} max={1} step="0.01" value={(draftGeometry ?? selectedKeyframe.geometry).width} onChange={(event) => void updateKeyframe({ geometry: { ...(draftGeometry ?? selectedKeyframe.geometry), width: Number(event.target.value) } })} className="mt-1 w-full rounded bg-zinc-800 px-2 py-1" /></label>
-          <label>Height<input type="number" min={0.01} max={1} step="0.01" value={(draftGeometry ?? selectedKeyframe.geometry).height} onChange={(event) => void updateKeyframe({ geometry: { ...(draftGeometry ?? selectedKeyframe.geometry), height: Number(event.target.value) } })} className="mt-1 w-full rounded bg-zinc-800 px-2 py-1" /></label>
-          <button type="button" onClick={() => void saveKeyframe()} className="rounded border border-emerald-800 px-2 py-1 text-emerald-300">Save keyframe</button><button type="button" onClick={() => void removeKeyframe()} className="rounded border border-rose-900 px-2 py-1 text-rose-300">Delete keyframe</button>
-        </div> : null}
-      </div>
-    </details>
-    {!readOnly && tool === "aidetect" && <AiDetectDialog key={`ai-detect-${video.id}`} assetId={video.id} modality="VIDEO" onClose={() => useVideoAnnotationStore.getState().setTool("select")} />}
+    {!readOnly && tool === "aidetect" && <AiDetectDialog key={`ai-detect-${video.id}`} assetId={video.id} modality="VIDEO" problem="tracking" onCompleted={applyAiResults} onClose={() => useVideoAnnotationStore.getState().setTool("select")} />}
   </section>;
 }

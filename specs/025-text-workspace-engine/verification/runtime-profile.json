@@ -1,0 +1,24 @@
+{
+  "phase": "setup",
+  "branch": "025-text-workspace-engine",
+  "gitBase": "184ddd070f6fb52cdb831183c551305180590a0a",
+  "runtime": {
+    "node": "22.23.1",
+    "icu": "78.2",
+    "unicode": "17.0"
+  },
+  "browser": "Google Chrome 151.0.7922.137",
+  "benchmarkConfigSha256": "76c573cab1e10d3105c0d7eb6a24a95f981ddc1d18a23034283034e5f8d0ad91",
+  "lockfileSha256": "7dc74cc948dc2faa0cc4013200e5f7d4681cd6d5a0e7c80201ba8cd856e03fb8",
+  "sourceIdentity": "sha256:7e972d5773981fac94bbbba7bf721bd439cee2dbdfbe9cf39cd3ca6a12c59a28",
+  "imageIds": {
+    "web": "sha256:505abc8beda6d209ee1e24026f8c9fa02c101f1d1ed82e0bf756ad292ad709c2",
+    "worker": "sha256:184ccf8868ab85f0022cc996061ae34d5ffc5658855df793f7a3fe23b15a65b3",
+    "realtime": "sha256:21ed701ddf8e39978c4dcc8ed25742bcbfddefa7c97324880189d9d7b675861d",
+    "postgres": "sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777",
+    "minio": "sha256:a1ea29fa28355559ef137d71fc570e508a214ec84ff8083e39bc5428980b015e",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99"
+  },
+  "boundaryArtifactDigest": null,
+  "performanceAcceptance": "not run; two-host benchmark infrastructure not certified"
+}

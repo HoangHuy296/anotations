@@ -4,6 +4,24 @@ import test from "node:test";
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
 import { buildExportManifest, exportManifestSchema } from "../../src/jobs/export-manifest.js";
+import { createAiPollFixture, hasIntegrationDatabase } from "../jobs/ai-fixtures.js";
+
+test("export excludes annotations whose assets are archived or deleted", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createAiPollFixture({ assetCount: 3 });
+  try {
+    await fixture.db.annotation.createMany({ data: fixture.assetIds.map((assetId) => ({
+      datasetId: fixture.datasetId, assetId, createdById: fixture.ownerId,
+      modality: "IMAGE", type: "BOUNDING_BOX", source: "MANUAL",
+      geometry: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 },
+    })) });
+    await fixture.db.asset.update({ where: { id: fixture.assetIds[1] }, data: { archivedAt: new Date() } });
+    await fixture.db.asset.update({ where: { id: fixture.assetIds[2] }, data: { deletedAt: new Date() } });
+    const manifest = await buildExportManifest(fixture.db, fixture.datasetId, new Date());
+    assert.ok(manifest);
+    assert.deepEqual(manifest.assets.map((asset) => asset.id), [fixture.assetIds[0]]);
+    assert.deepEqual(manifest.annotations.map((annotation) => annotation.assetId), [fixture.assetIds[0]]);
+  } finally { await fixture.cleanup(); }
+});
 
 test("export manifest is metadata-only, stable, and strips unsafe arbitrary JSON", async () => {
   const calls: unknown[] = [];

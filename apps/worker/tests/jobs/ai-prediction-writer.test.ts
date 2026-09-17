@@ -7,6 +7,7 @@ import { createAiPollFixture, hasIntegrationDatabase } from "./ai-fixtures.js";
 test("valid prediction becomes a DRAFT/AI annotation; out-of-scope asset and unresolvable label are skipped; manual annotations are untouched", { skip: !hasIntegrationDatabase }, async () => {
   const fixture = await createAiPollFixture({ assetCount: 1 });
   try {
+    await fixture.db.job.update({ where: { id: fixture.jobId }, data: { lockToken: "test-lock-token", lockedBy: "test-worker" } });
     const manual = await fixture.db.annotation.create({
       data: {
         datasetId: fixture.datasetId,
@@ -58,3 +59,21 @@ test("valid prediction becomes a DRAFT/AI annotation; out-of-scope asset and unr
     assert.equal(storedJob.stage, "FINISHED");
   } finally { await fixture.cleanup(); }
 });
+
+for (const [lockToken, workerId] of [["stale-token", "test-worker"], ["current-token", "other-worker"]]) {
+  test(`image completion refuses lost ownership: ${lockToken}/${workerId}`, { skip: !hasIntegrationDatabase }, async () => {
+    const fixture = await createAiPollFixture();
+    try {
+      await fixture.db.job.update({ where: { id: fixture.jobId }, data: { lockToken: "current-token", lockedBy: "test-worker" } });
+      const task = await fixture.db.aiTask.findUniqueOrThrow({ where: { id: fixture.aiTaskId } });
+      await handleAiTaskCompleted(fixture.db, fixture.jobId, task, [
+        { assetId: fixture.assetIds[0], labelKey: "person", confidence: 0.9, boundingBoxes: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 } },
+      ], lockToken, workerId);
+      assert.equal(await fixture.db.annotation.count({ where: { datasetId: fixture.datasetId } }), 0);
+      assert.equal((await fixture.db.aiTask.findUniqueOrThrow({ where: { id: fixture.aiTaskId } })).status, "RUNNING");
+      const job = await fixture.db.job.findUniqueOrThrow({ where: { id: fixture.jobId } });
+      assert.equal(job.status, "RUNNING");
+      assert.equal(job.lockToken, "current-token");
+    } finally { await fixture.cleanup(); }
+  });
+}

@@ -83,6 +83,7 @@ export async function buildExportManifest(db: PrismaClient, datasetId: string, e
         },
       },
       annotations: {
+        where: { asset: { archivedAt: null, deletedAt: null } },
         orderBy: [{ asset: { batchIndex: "asc" } }, { asset: { orderIndex: "asc" } }, { createdAt: "asc" }, { id: "asc" }],
         select: {
           id: true, datasetId: true, assetId: true, labelId: true, modality: true, type: true, source: true, status: true,

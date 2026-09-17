@@ -1,12 +1,19 @@
 import {
   ProviderConfigError,
   readProviderConfig,
+  readAiProviderBaseUrl,
   type ProviderConfig,
 } from "@annotationplatform/domain";
+import { readTextSourceLimits, type TextSourceLimits } from "@annotationplatform/domain/text-source-limits";
 import { z } from "zod";
 
 export function getWorkerConfig(): ProviderConfig {
   return readProviderConfig();
+}
+
+/** Server-only bounds shared with apps/web via packages/domain; a deployment needs no new variable to run correctly. */
+export function getTextSourceLimits(environment: NodeJS.ProcessEnv = process.env): TextSourceLimits {
+  return readTextSourceLimits(environment);
 }
 
 export function getSafeStartupMessage(error: unknown) {
@@ -46,7 +53,7 @@ const productionHardeningPolicySchema = z.object({
   JOB_EVENT_CLEANUP_BATCH_SIZE: z.coerce.number().int().min(50).max(5_000).default(500),
   // MinIO orphan scanning / temp-upload cleanup (US4, decision 5).
   MINIO_ORPHAN_GRACE_PERIOD_MS: z.coerce.number().int().min(60_000).max(30 * 24 * 60 * 60_000).default(24 * 60 * 60_000),
-  MINIO_ORPHAN_SCAN_DRY_RUN: z.coerce.boolean().default(true),
+  MINIO_ORPHAN_SCAN_DRY_RUN: z.enum(["true", "false"]).default("true").transform((value) => value === "true"),
   TEMP_UPLOAD_RETENTION_MS: z.coerce.number().int().min(60_000).max(30 * 24 * 60 * 60_000).default(24 * 60 * 60_000),
   // MinIO lifecycle policy (secondary safety net — see providers/minio.ts's
   // ensureTempUploadLifecyclePolicy doc comment). Day-granularity only;
@@ -75,4 +82,33 @@ export type AiozCompanyProviderConfig = z.infer<typeof aiozCompanyProviderConfig
  */
 export function getAiozCompanyProviderConfig(environment: NodeJS.ProcessEnv = process.env): AiozCompanyProviderConfig {
   return aiozCompanyProviderConfigSchema.parse(environment);
+}
+
+const aiozAnnotationServicesConfigSchema = z.object({
+  baseUrl: z.string().url().refine((value) => {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) && !url.username && !url.password && !url.search && !url.hash;
+  }),
+  apiKey: z.string().min(1).refine((value) => !/[\r\n]/.test(value)),
+  timeoutMs: z.coerce.number().int().min(1).max(60_000).default(15_000),
+});
+
+export type AiozAnnotationServicesConfig = z.infer<typeof aiozAnnotationServicesConfigSchema>;
+
+export class AiozConfigurationError extends Error {
+  constructor() { super("AIOZ_CONFIG_INVALID"); this.name = "AiozConfigurationError"; }
+}
+
+/** Lazy, worker-only configuration. Retains the existing API-key convention. */
+export function getAiozAnnotationServicesConfig(environment: NodeJS.ProcessEnv = process.env): AiozAnnotationServicesConfig {
+  let baseUrl: string;
+  try { baseUrl = readAiProviderBaseUrl(environment); }
+  catch { throw new AiozConfigurationError(); }
+  const result = aiozAnnotationServicesConfigSchema.safeParse({
+    baseUrl,
+    apiKey: environment.AIOZ_COMPANY_API_KEY,
+    timeoutMs: environment.AIOZ_ANNOTATION_SERVICES_TIMEOUT_MS,
+  });
+  if (!result.success) throw new AiozConfigurationError();
+  return result.data;
 }

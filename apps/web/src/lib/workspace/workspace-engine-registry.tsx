@@ -11,6 +11,7 @@ import { AudioToolbox } from "@/components/workspace/audio-toolbox";
 import { TextToolbox } from "@/components/workspace/text-toolbox";
 import { ImagePropertiesTabs } from "@/components/workspace/image-properties-tabs";
 import { VideoPropertiesTabs } from "@/components/workspace/video-properties-tabs";
+import { AudioPropertiesTabs } from "@/components/workspace/audio-properties-tabs";
 import { PlaceholderPropertiesTabs } from "@/components/workspace/placeholder-properties-tabs";
 import { ImageStatusFields } from "@/components/workspace/image-status-fields";
 import { PlaceholderStatusFields } from "@/components/workspace/placeholder-status-fields";
@@ -94,6 +95,11 @@ function VideoTabsEntry(props: PropertiesTabsProps): ReactElement | null {
   return <VideoPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} filters={props.filters} />;
 }
 
+function AudioTabsEntry(props: PropertiesTabsProps): ReactElement | null {
+  if (props.selection.engine !== "AUDIO") return null;
+  return <AudioPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} filters={props.filters} />;
+}
+
 function placeholderTabsEntry(engine: "AUDIO" | "TEXT") {
   return function PlaceholderTabsEntry(props: PropertiesTabsProps): ReactElement | null {
     if (props.selection.engine !== engine) return null;
@@ -123,7 +129,7 @@ export const workspaceEngineRegistry: Record<Engine, WorkspaceEngineRegistryEntr
   AUDIO: {
     Component: AudioEngineEntry,
     Toolbox: AudioToolbox,
-    Tabs: placeholderTabsEntry("AUDIO"),
+    Tabs: AudioTabsEntry,
     StatusFields: placeholderStatusFields("AUDIO"),
   },
   TEXT: {

@@ -95,6 +95,47 @@ export async function enqueueCollaborationOutboxDispatch(jobId: string) {
   return enqueueExistingJob(jobId, undefined, undefined);
 }
 
+/**
+ * TEXT content invalidation (data-model.md "Atomic command algorithm" step
+ * 5). Metadata-only: dataset/asset IDs and an optional parent-revision hint —
+ * never geometry, labels, properties or source excerpts. Every TEXT command
+ * service (span/classification/relation) calls this exactly once per commit,
+ * inside its own already-open transaction, so realtime consumers refetch
+ * authoritative state instead of receiving content over the wire.
+ */
+export async function dispatchAnnotationChangedOutboxEvent(tx: TransactionClient, input: {
+  datasetId: string; assetId: string; actorId: string; operationId: string; parentRevision?: number | null;
+}) {
+  return createOrReuseCollaborationOutboxEvent(tx, {
+    datasetId: input.datasetId,
+    assetId: input.assetId,
+    actorId: input.actorId,
+    type: CollaborationOutboxEventType.ANNOTATION_CHANGED,
+    dedupeKey: `annotation-changed:${input.assetId}:${input.operationId}`,
+    payload: { datasetId: input.datasetId, assetId: input.assetId, parentRevision: input.parentRevision ?? null },
+  });
+}
+
+/**
+ * TEXT taxonomy-policy invalidation. Dataset-scoped only (no assetId): a
+ * policy write is a dataset-level configuration change, not an editable-asset
+ * claim. Payload carries only the dataset id and the resulting policy
+ * revision — never label names, group membership, or relation-type
+ * configuration.
+ */
+export async function dispatchTextPolicyChangedOutboxEvent(tx: TransactionClient, input: {
+  datasetId: string; actorId: string; policyRevision: number;
+}) {
+  return createOrReuseCollaborationOutboxEvent(tx, {
+    datasetId: input.datasetId,
+    actorId: input.actorId,
+    assetId: null,
+    type: CollaborationOutboxEventType.TEXT_POLICY_CHANGED,
+    dedupeKey: `text-policy-changed:${input.datasetId}:${input.policyRevision}`,
+    payload: { datasetId: input.datasetId, policyRevision: input.policyRevision },
+  });
+}
+
 /** Test/maintenance helper: never expose raw outbox payloads to browser code. */
 export async function readOutboxDispatchState(jobId: string) {
   return db.collaborationOutboxEvent.findUnique({

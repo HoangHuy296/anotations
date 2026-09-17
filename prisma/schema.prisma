@@ -14,6 +14,10 @@ model User {
   passwordHash         String?
   name                 String?
   role                 UserRole
+  /// Safe, non-authoritative self-service preferences (notifications,
+  /// language, accessibility). Never credentials/tokens; validated by Zod at
+  /// every write. See src/lib/validation/account-preferences.ts.
+  preferences          Json?
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
   aiTasksCreated       AiTask[]             @relation("AiTaskCreatedBy")
@@ -47,6 +51,7 @@ model User {
   membershipEventsBy   DatasetMembershipEvent[] @relation("DatasetMembershipEventActor")
   outboxEventsActed    CollaborationOutboxEvent[] @relation("CollaborationOutboxActor")
   outboxEventsFor      CollaborationOutboxEvent[] @relation("CollaborationOutboxRecipient")
+  annotationMutationReceipts AnnotationMutationReceipt[] @relation("AnnotationMutationReceiptActor")
 }
 
 model AuthSession {
@@ -257,6 +262,12 @@ model Dataset {
   lastSyncedAt           DateTime?
   syncStatus             AssetSyncStatus     @default(SYNCED)
   syncSummary            Json                @default("{}")
+  /// * Versioned TEXT taxonomy policy: schemaVersion, classificationGroups, relationTypes. Empty means one implicit SINGLE document group.
+  textPolicy             Json                @default("{}")
+  /// * Increments on every relevant TEXT policy/label-eligibility change.
+  textPolicyRevision     Int                 @default(1)
+  /// * Guarded increment serializing TEXT writes and taxonomy-sensitive operations for this dataset. Not user-visible content revision.
+  textMutationRevision   Int                 @default(0)
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
   archivedAt             DateTime?
@@ -456,6 +467,7 @@ model Asset {
   comments             AssetComment[]
   notifications        Notification[]
   outboxEvents         CollaborationOutboxEvent[]
+  mutationReceipts     AnnotationMutationReceipt[]
 
   @@unique([storageProvider, storageBucket, storageKey])
   @@unique([cacheProvider, cacheBucket, cacheKey])
@@ -801,12 +813,12 @@ model Annotation {
   assetVersion          AssetVersion?     @relation(fields: [assetVersionId], references: [id])
   createdBy             User              @relation("AnnotationCreatedBy", fields: [createdById], references: [id])
   dataset               Dataset           @relation(fields: [datasetId], references: [id], onDelete: Cascade)
-  fromAnnotation        Annotation?       @relation("TextRelationFrom", fields: [fromAnnotationId], references: [id])
+  fromAnnotation        Annotation?       @relation("TextRelationFrom", fields: [fromAnnotationId], references: [id], onDelete: Restrict)
   outgoingTextRelations Annotation[]      @relation("TextRelationFrom")
   label                 Label?            @relation(fields: [labelId], references: [id])
   reviewedBy            User?             @relation("AnnotationReviewedBy", fields: [reviewedById], references: [id])
   audioSpeaker          AudioSpeaker?     @relation(fields: [speakerId], references: [id])
-  toAnnotation          Annotation?       @relation("TextRelationTo", fields: [toAnnotationId], references: [id])
+  toAnnotation          Annotation?       @relation("TextRelationTo", fields: [toAnnotationId], references: [id], onDelete: Restrict)
   incomingTextRelations Annotation[]      @relation("TextRelationTo")
   track                 VideoObjectTrack? @relation(fields: [trackId], references: [id])
   updatedBy             User?             @relation("AnnotationUpdatedBy", fields: [updatedById], references: [id])
@@ -825,7 +837,28 @@ model Annotation {
   @@index([assetId, startChar, endChar])
   @@index([assetId, tokenIndex])
   @@index([fromAnnotationId, toAnnotationId])
+  @@index([fromAnnotationId])
+  @@index([toAnnotationId])
   @@index([speakerId])
+}
+
+/// *
+///  * Idempotent replay record for a TEXT mutation command. Keyed by actor/asset/
+///  * operation, not by a live annotation, so replay history survives deletion.
+model AnnotationMutationReceipt {
+  id          String   @id @default(cuid())
+  assetId     String
+  actorId     String
+  operationId String
+  requestHash String
+  /// * Bounded safe result only: IDs, revisions, outcome. Never source content or private locators.
+  result      Json
+  createdAt   DateTime @default(now())
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  actor       User     @relation("AnnotationMutationReceiptActor", fields: [actorId], references: [id])
+
+  @@unique([assetId, actorId, operationId])
+  @@index([assetId])
 }
 
 model ImageAsset {
@@ -876,13 +909,28 @@ model VideoObjectTrack {
 }
 
 model TextAsset {
-  id           String  @id @default(cuid())
-  assetId      String  @unique
-  content      String?
-  language     String?
-  tokenization Json    @default("{}")
-  metadata     Json    @default("{}")
-  asset        Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  id                       String    @id @default(cuid())
+  assetId                  String    @unique
+  content                  String?
+  language                 String?
+  tokenization             Json      @default("{}")
+  metadata                 Json      @default("{}")
+  /// * Raw-byte SHA-256 identity of the verified source, scoped to this asset: "sha256:<hex>".
+  sourceIdentity           String?
+  /// * Always "UTF8" once verified by full fatal decode.
+  sourceEncoding           String?
+  /// * Durable offset unit for all TEXT geometry: "UTF16_CODE_UNIT".
+  offsetUnit               String?
+  sourceByteLength         Int?
+  sourceCodeUnitLength     Int?
+  /// * Private MinIO pointer to the versioned grapheme-boundary derivative. Never returned to the browser.
+  boundaryArtifactKey      String?
+  boundaryArtifactDigest   String?
+  /// * Validated JSON: artifact schema version, algorithm, actual Node/ICU/Unicode profile.
+  boundaryProfile          Json?
+  preparedSourceFingerprint String?
+  preparedAt               DateTime?
+  asset                    Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
 
   @@index([assetId])
 }
@@ -1034,6 +1082,8 @@ enum CollaborationOutboxEventType {
   NOTIFICATION_CREATED
   WORKFLOW_CHANGED
   MEMBERSHIP_REVOKED
+  ANNOTATION_CHANGED
+  TEXT_POLICY_CHANGED
 }
 
 enum Modality {
@@ -1225,6 +1275,7 @@ enum JobType {
   BULK_DELETE_ASSETS
   BULK_EXPORT_SELECTED
   COLLABORATION_OUTBOX_DISPATCH
+  TEXT_SOURCE_PREPARE
 }
 
 enum JobStatus {
@@ -1307,6 +1358,16 @@ enum AiTaskStatus {
 }
 
 enum AiTaskType {
+  DETECTION
+  TRACKING
+  SEGMENTATION
+  ORIENTED_DETECTION
+  CLASSIFICATION
+  OCR
+  TRANSCRIBE
+
+  // Legacy values remain valid for historical AiTask snapshots and existing
+  // model registrations. Provider adapters map them at their boundary.
   PREANNOTATE_ASSET
   PREANNOTATE_DATASET
   TRANSCRIBE_AUDIO

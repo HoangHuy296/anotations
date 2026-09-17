@@ -1,6 +1,6 @@
 "use client";
 
-import type { AiModelDto, AiTaskStatusDto } from "@/types/ai";
+import type { AiModelDto, AiTaskStatusDto, AiToolTaskName } from "@/types/ai";
 
 /**
  * Thin `fetch` wrappers around the AI routes (`contracts/ai-api.md`) -- same
@@ -36,8 +36,11 @@ function dedupeInFlight<T>(key: string, run: () => Promise<T>): Promise<T> {
   return promise;
 }
 
-export async function listActiveAiModelsClient(modality?: AiModelDto["modality"]): Promise<ListAiModelsResult> {
-  const url = `/api/ai/models${modality ? `?modality=${encodeURIComponent(modality)}` : ""}`;
+export async function listActiveAiModelsClient(modality: NonNullable<AiModelDto["modality"]>, taskName: AiToolTaskName): Promise<ListAiModelsResult> {
+  const params = new URLSearchParams();
+  if (modality) params.set("modality", modality);
+  params.set("task_name", taskName);
+  const url = `/api/ai/models${params.size ? `?${params}` : ""}`;
   return dedupeInFlight<ListAiModelsResult>(`GET ${url}`, async () => {
     const response = await fetch(url, { credentials: "same-origin", cache: "no-store" });
     const payload = await response.json().catch(() => null) as { data?: { models?: AiModelDto[] }; error?: { code?: string } } | null;

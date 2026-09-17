@@ -197,13 +197,16 @@ export async function readWorkspaceSelection(
     const readiness = await readSafeMediaReadiness(actor, datasetId, assetId);
     if (!readiness) return null;
     if (asset.modality === Modality.VIDEO) {
-      const annotations = await readVideoAnnotations(actor, assetId);
-      if (!annotations) return null;
+      // Initial page load requests only the first window (the timeline
+      // always opens at t=0) -- `VideoEngine` fetches subsequent windows
+      // itself as the playhead moves, it never receives the whole asset here.
+      const outcome = await readVideoAnnotations(actor, assetId);
+      if (!outcome.ok) return null;
       return {
         engine: "VIDEO",
         asset: { id: asset.id, modality: "VIDEO", filename: asset.filename, description: asset.description, version: asset.revision, status: asset.status },
         readiness,
-        annotations,
+        annotations: outcome.data,
       };
     }
     return {

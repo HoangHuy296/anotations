@@ -97,7 +97,7 @@ account is required for this to work.
 | | |
 |---|---|
 | Email | `reviewer@example.com` |
-| Password | `review-demo-8e2a7f186fd3` |
+| Password | Set privately through `SEED_ADMIN_PASSWORD`. |
 | Dataset | "Review Demo Dataset", pre-loaded with 4 labels (Pedestrian, Vehicle, Bicycle, Traffic sign) |
 
 Seeded automatically by `prisma/review.seed.ts` (defined in `.env.review` as

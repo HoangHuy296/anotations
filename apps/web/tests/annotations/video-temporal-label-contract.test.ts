@@ -116,7 +116,7 @@ test("temporal labels use Annotation revision independently from Track revision"
   });
   assert.equal(persistedTrack.revision, 1, "standalone temporal labels must not mutate Track revision");
 
-  const deleted = await deleteVideoTemporalLabel(actor, created.value.id, 2);
+  const deleted = await deleteVideoTemporalLabel(actor, created.value.id, { expectedRevision: 2 });
   assert.deepEqual(deleted, { ok: true, value: null });
   assert.equal(await db.annotation.count({ where: { id: created.value.id } }), 0);
 });

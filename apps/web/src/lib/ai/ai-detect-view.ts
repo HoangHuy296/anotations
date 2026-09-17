@@ -1,6 +1,7 @@
+import type { ImageAiTool } from "@/types/annotation";
 import type { Modality } from "@internal/db";
 
-import type { AiModelDto, AiTaskStatusDto, AiTaskStatusValue } from "@/types/ai";
+import type { AiModelDto, AiTaskStatusDto, AiTaskStatusValue, AiToolTaskName } from "@/types/ai";
 
 /**
  * Framework-free view logic for the AI Detect flow -- no React, no engine
@@ -25,11 +26,11 @@ export function aiTaskStatusMessage(task: Pick<AiTaskStatusDto, "status" | "erro
   switch (task.status) {
     case "QUEUED": return "Waiting for a worker to pick up this request…";
     case "RUNNING": return "The AI provider is processing this request…";
-    case "SUCCEEDED": return "AI detection completed.";
-    case "CANCELED": return "This AI detection was canceled.";
+    case "SUCCEEDED": return "AI processing completed.";
+    case "CANCELED": return "This AI task was canceled.";
     case "FAILED":
       if (task.errorCode === "AI_TASK_TIMEOUT") return "The AI provider did not respond in time. Try again later.";
-      return task.error ?? "This AI detection failed.";
+      return task.error ?? "This AI task failed.";
     default: return "";
   }
 }
@@ -69,4 +70,23 @@ export function isAiPredictionAnnotation(annotation: PropertiesBearing): boolean
  */
 export function predictionsForTask<T extends PropertiesBearing>(annotations: T[], taskId: string): T[] {
   return annotations.filter((annotation) => annotationAiTaskId(annotation) === taskId);
+}
+
+export const IMAGE_AI_PROBLEMS: Record<ImageAiTool, { label: string; taskTypes: readonly string[] }> = {
+  detection: { label: "AI Detection", taskTypes: ["DETECT_OBJECTS", "DETECTION"] },
+  segmentation: { label: "Segmentation", taskTypes: ["SEGMENTATION"] },
+  oriented_detection: { label: "Oriented detection", taskTypes: ["ORIENTED_DETECTION"] },
+  classification: { label: "Classification", taskTypes: ["CLASSIFICATION"] },
+  ocr: { label: "OCR", taskTypes: ["OCR"] },
+};
+
+export const AI_TOOL_PROBLEMS = { ...IMAGE_AI_PROBLEMS, tracking: { label: "AI Tracking", taskTypes: ["TRACKING"] } };
+
+export function isImageAiTool(tool: string): tool is ImageAiTool {
+  return Object.hasOwn(IMAGE_AI_PROBLEMS, tool);
+}
+
+/** Use declared capabilities only; model names are not capability metadata. */
+export function modelSupportsProblem(model: Pick<AiModelDto, "taskType">, problem: AiToolTaskName): boolean {
+  return AI_TOOL_PROBLEMS[problem].taskTypes.includes(model.taskType.trim().toUpperCase());
 }

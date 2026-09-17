@@ -23,7 +23,8 @@
     "test:rate-limit": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/rate-limit/**/*.test.ts",
     "test:pagination": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/pagination/**/*.test.ts",
     "test:health": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/health/**/*.test.ts",
-    "test:openapi-contract": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/openapi-contract/**/*.test.ts"
+    "test:openapi-contract": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/openapi-contract/**/*.test.ts",
+    "test:text-source": "node --env-file-if-exists=../../.env --require ./tests/auth-ownership/register-server-only.cjs --import tsx --test --test-concurrency=1 tests/text-source/**/*.test.ts"
   },
   "dependencies": {
     "@annotationplatform/domain": "workspace:*",

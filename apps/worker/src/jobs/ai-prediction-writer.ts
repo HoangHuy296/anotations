@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { handleVideoAiTaskCompleted } from "./ai-video-prediction-writer.js";
 
 import type { AiProviderPrediction } from "@annotationplatform/domain/ai-provider";
 
@@ -24,6 +25,7 @@ function normalizeLabelName(name: string) {
  */
 const annotationTypeByAiTaskType: Partial<Record<string, "BOUNDING_BOX">> = {
   DETECT_OBJECTS: "BOUNDING_BOX",
+  DETECTION: "BOUNDING_BOX",
 };
 
 /**
@@ -45,6 +47,9 @@ export async function handleAiTaskCompleted(
   lockToken: string,
   workerId: string,
 ): Promise<void> {
+  if (aiTask.modality === "VIDEO" && ["TRACKING", "DETECT_OBJECTS"].includes(aiTask.type)) {
+    return handleVideoAiTaskCompleted(db, jobId, aiTask, rawPredictions, lockToken, workerId);
+  }
   const submittedAssetIds = new Set(((aiTask.input as { assetIds?: unknown } | null)?.assetIds ?? []) as string[]);
   const parsed = z.array(predictionSchema).safeParse(rawPredictions);
   const candidates: AiProviderPrediction[] = parsed.success ? parsed.data : [];
@@ -53,11 +58,19 @@ export async function handleAiTaskCompleted(
   const annotationType = aiTask.type ? annotationTypeByAiTaskType[aiTask.type] : undefined;
 
   await db.$transaction(async (tx) => {
+    // Claim completion in the same transaction as Annotation writes. A replay
+    // or a cancellation that already won cannot append a second result batch.
+    // The terminal state is visible only when all writes below commit.
+    const completed = await tx.job.updateMany({
+      where: { id: jobId, status: "RUNNING", cancelRequestedAt: null, lockToken, lockedBy: workerId },
+      data: { status: "COMPLETED", stage: "FINISHED", finishedAt: new Date() },
+    });
+    if (completed.count !== 1) return;
     if (annotationType) {
       const claimedAssets = new Set<string>();
-      for (const prediction of inScope) {
+      for (const [predictionIndex, prediction] of inScope.entries()) {
         const label = await tx.label.findFirst({
-          where: { datasetId: aiTask.datasetId, normalizedName: normalizeLabelName(prediction.labelKey) },
+          where: { datasetId: aiTask.datasetId, normalizedName: normalizeLabelName(prediction.labelKey), OR: [{ modality: null }, { modality: "IMAGE" }] },
           select: { id: true },
         });
         if (!label) continue; // Unresolvable label: skip this prediction, do not fail the task.
@@ -70,6 +83,7 @@ export async function handleAiTaskCompleted(
             where: {
               id: prediction.assetId,
               datasetId: aiTask.datasetId,
+              modality: "IMAGE",
               deletedAt: null,
               archivedAt: null,
               status: { notIn: ["NEEDS_REVIEW", "REVIEWED", "REJECTED"] },
@@ -90,11 +104,10 @@ export async function handleAiTaskCompleted(
             type: annotationType,
             source: "AI",
             status: "DRAFT",
-            // TODO: once the real AIOZ-company contract (T006) defines its
-            // bounding-box coordinate format, normalize prediction.boundingBoxes
-            // into the platform's canonical geometry shape here.
+            // Providers normalize into the existing geometry schema before
+            // this writer is called; AIOZ pixel xyxy conversion stays there.
             geometry: (prediction.boundingBoxes ?? {}) as object,
-            properties: { confidence: prediction.confidence, aiTaskId: aiTask.id, modelKey: aiTask.modelKeySnapshot },
+            properties: { confidence: prediction.confidence, aiTaskId: aiTask.id, modelKey: aiTask.modelKeySnapshot, aiPredictionIndex: predictionIndex },
             // reviewedById intentionally left unset — only a human review action
             // (existing Phase 017/019 review UI) ever sets it.
           },
@@ -107,10 +120,6 @@ export async function handleAiTaskCompleted(
       data: { status: "SUCCEEDED", output: JSON.parse(JSON.stringify({ predictions: inScope })) },
     });
 
-    await tx.job.update({
-      where: { id: jobId },
-      data: { status: "COMPLETED", stage: "FINISHED", finishedAt: new Date() },
-    });
   });
 
   await releaseLock(db, jobId, lockToken, workerId);

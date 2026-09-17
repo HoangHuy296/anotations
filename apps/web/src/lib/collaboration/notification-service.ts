@@ -5,6 +5,7 @@ import { NotificationType, Prisma } from "@internal/db";
 import type { SafeNotificationContext } from "@/types/collaboration";
 import type { RequestActor } from "@/lib/auth";
 import { runCollaborationTransaction } from "@/lib/collaboration/collaboration-outbox-service";
+import { readAccountPreferences } from "@/lib/validation/account-preferences";
 
 type TransactionClient = Prisma.TransactionClient;
 
@@ -24,6 +25,11 @@ export type CreateNotificationInput = SafeNotificationContext & {
  */
 export async function createDurableNotification(tx: TransactionClient, input: CreateNotificationInput) {
   if (input.actorId && input.actorId === input.userId) return { kind: "suppressed" as const };
+  // The recipient's own ON/OFF preference is the single choke point for every
+  // notification-worthy event in the app -- checked here, once, rather than
+  // at each of this function's call sites.
+  const recipient = await tx.user.findUnique({ where: { id: input.userId }, select: { preferences: true } });
+  if (recipient && !readAccountPreferences(recipient.preferences).notificationsEnabled) return { kind: "suppressed" as const };
   const notification = await tx.notification.upsert({
     where: { userId_dedupeKey: { userId: input.userId, dedupeKey: input.dedupeKey } },
     create: {

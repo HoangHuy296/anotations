@@ -41,27 +41,27 @@ export function DatasetActionMenu() {
       </Button>
       {open ? (
         <div
-          className="absolute right-0 z-20 mt-2 w-64 rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_20px_45px_-24px_rgba(24,24,27,0.35)]"
+          className="absolute right-0 z-20 mt-2 w-64 rounded-2xl border border-zinc-200 bg-white p-2 shadow-[0_20px_45px_-24px_rgba(24,24,27,0.35)] dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/40"
           id="dashboard-dataset-actions"
           role="menu"
         >
           <Link
-            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-800 outline-none transition hover:bg-sky-50 hover:text-sky-800 focus-visible:ring-2 focus-visible:ring-sky-400"
+            className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-800 outline-none transition hover:bg-sky-50 hover:text-sky-800 focus-visible:ring-2 focus-visible:ring-sky-400 dark:text-zinc-200 dark:hover:bg-sky-950 dark:hover:text-sky-300"
             href="/datasets/imports"
             onClick={() => setOpen(false)}
             role="menuitem"
           >
-            <span className="grid size-9 place-items-center rounded-lg bg-sky-50 text-sky-700"><TrayArrowDown aria-hidden="true" size={17} /></span>
-            <span><span className="block">Import</span><span className="mt-0.5 block text-xs font-normal text-zinc-500">Repository-backed dataset</span></span>
+            <span className="grid size-9 place-items-center rounded-lg bg-sky-50 text-sky-700 dark:bg-sky-950 dark:text-sky-400"><TrayArrowDown aria-hidden="true" size={17} /></span>
+            <span><span className="block">Import</span><span className="mt-0.5 block text-xs font-normal text-zinc-500 dark:text-zinc-400">Repository-backed dataset</span></span>
           </Link>
           <Link
-            className="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-800 outline-none transition hover:bg-sky-50 hover:text-sky-800 focus-visible:ring-2 focus-visible:ring-sky-400"
+            className="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-zinc-800 outline-none transition hover:bg-sky-50 hover:text-sky-800 focus-visible:ring-2 focus-visible:ring-sky-400 dark:text-zinc-200 dark:hover:bg-sky-950 dark:hover:text-sky-300"
             href="/datasets/local-folder"
             onClick={() => setOpen(false)}
             role="menuitem"
           >
-            <span className="grid size-9 place-items-center rounded-lg bg-emerald-50 text-emerald-700"><UploadSimple aria-hidden="true" size={17} /></span>
-            <span><span className="block">Upload</span><span className="mt-0.5 block text-xs font-normal text-zinc-500">Local folder dataset</span></span>
+            <span className="grid size-9 place-items-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"><UploadSimple aria-hidden="true" size={17} /></span>
+            <span><span className="block">Upload</span><span className="mt-0.5 block text-xs font-normal text-zinc-500 dark:text-zinc-400">Local folder dataset</span></span>
           </Link>
         </div>
       ) : null}

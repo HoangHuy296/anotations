@@ -12,6 +12,7 @@ import {
   buildSafeRepositoryImportJobInput,
   isSafeRepositoryImportJobInput,
 } from "@/lib/repository-import/types";
+import { textSourcePrepareJobInputSchema, type TextSourcePrepareJobInput } from "@annotationplatform/domain/text-source-prepare-job";
 
 type RetryContext = {
   datasetId: string;
@@ -27,11 +28,24 @@ type RetryContext = {
  * errors, provider connections and storage references never cross retries.
  */
 function extractRetryContext(job: RetryContext): {
-  input: { format: "JSON"; manifestSchemaVersion: "1" } | ReturnType<typeof buildSafeRepositoryImportJobInput>;
+  input: { format: "JSON"; manifestSchemaVersion: "1" } | ReturnType<typeof buildSafeRepositoryImportJobInput> | TextSourcePrepareJobInput;
   modality: RetryContext["modality"];
   sourceConnectionId: string | null;
 } | null {
   switch (job.type) {
+    case "TEXT_SOURCE_PREPARE": {
+      // The failed attempt's own recorded identity is reused verbatim (a
+      // retry re-attempts the same intent after a transient failure like a
+      // MinIO hiccup; it does not re-resolve "what's current" -- a fresh
+      // prepare request from text-source-prepare-service.ts does that,
+      // idempotently reusing this same Job while it is outstanding). The
+      // successor processor still rechecks this identity against the
+      // live Asset row at commit, so a source that genuinely changed since
+      // is still caught, never silently bound to stale offsets.
+      const parsed = textSourcePrepareJobInputSchema.safeParse(job.input);
+      if (!parsed.success) return null;
+      return { input: parsed.data, modality: job.modality, sourceConnectionId: null };
+    }
     case "EXPORT_DATASET": {
       const parsed = exportJobInputSchema.safeParse(job.input);
       // Historical failed export Jobs predate the explicit contract. Their

@@ -31,7 +31,7 @@ export function VideoToolbox() {
       <ToolButton active={tool === "point"} label="Point" onClick={() => setTool("point")}><MapPin size={15} /></ToolButton>
       <ToolButton active={tool === "polyline"} label="Polyline" onClick={() => setTool("polyline")}><LineSegment size={15} /></ToolButton>
       <ToolButton active={tool === "track"} label="Video" onClick={() => setTool("track")}><VideoConferenceIcon size={15} /></ToolButton>
-      <ToolButton active={tool === "aidetect"} label="AI Detection" onClick={() => setTool("aidetect")}><Atom size={15} /></ToolButton>
+      <ToolButton active={tool === "aidetect"} label="AI Tracking" onClick={() => setTool("aidetect")}><Atom size={15} /></ToolButton>
     </div>
   </>;
 }

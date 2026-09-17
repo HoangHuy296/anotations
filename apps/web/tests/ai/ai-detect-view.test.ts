@@ -7,6 +7,8 @@ import {
   isAiPredictionAnnotation,
   isTerminalAiTaskStatus,
   modelSupportsModality,
+  modelSupportsProblem,
+  isImageAiTool,
   predictionsForTask,
   shouldPollAiTask,
 } from "@/lib/ai/ai-detect-view";
@@ -71,4 +73,26 @@ test("predictionsForTask -- keeps only this task's predictions, is idempotent ac
   assert.deepEqual(second.map((item) => item.id), ["a", "d"]);
   assert.deepEqual(predictionsForTask(annotations, "task-2").map((item) => item.id), ["b"]);
   assert.deepEqual(predictionsForTask(annotations, "task-3"), []);
+});
+
+test("image AI problems filter declared capabilities without leaking other models", () => {
+  const cases = [
+    ["detection", "DETECT_OBJECTS"],
+    ["segmentation", "SEGMENTATION"],
+    ["oriented_detection", "ORIENTED_DETECTION"],
+    ["classification", "CLASSIFICATION"],
+    ["ocr", "OCR"],
+  ] as const;
+  for (const [problem, taskType] of cases) {
+    assert.equal(isImageAiTool(problem), true);
+    assert.equal(modelSupportsProblem({ taskType: taskType.toLowerCase() }, problem), true);
+    assert.equal(modelSupportsProblem({ taskType: "" }, problem), false);
+    for (const [otherProblem] of cases) {
+      assert.equal(modelSupportsProblem({ taskType }, otherProblem), problem === otherProblem);
+    }
+  }
+  assert.equal(modelSupportsProblem({ taskType: "DETECTION" }, "detection"), true);
+  for (const tool of ["select", "box", "pan", "mask", "toString", "__proto__"]) {
+    assert.equal(isImageAiTool(tool), false);
+  }
 });

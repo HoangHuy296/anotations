@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import test, { beforeEach, afterEach } from "node:test";
 import { loadModelClasses, parseModelLabels } from "@/lib/ai/ai-model-service";
 import { createAiTaskSchema } from "@/lib/validation/ai-task";
 import { listModelClassesClient, createAiTaskClient } from "@/lib/ai/ai-task-api-client";
@@ -71,4 +71,11 @@ test("thresholds default to 0.5 and accept arbitrary decimals within inclusive b
     for (const value of [0, 0.55, 0.65, 1]) assert.ok(createAiTaskSchema.safeParse({ ...input, [field]: value }).success);
     for (const value of [-0.1, 1.1, "0.5", null, NaN, Infinity]) assert.equal(createAiTaskSchema.safeParse({ ...input, [field]: value }).success, false);
   }
+});
+
+const originalProviderUrl = process.env.AIOZ_ANNOTATION_SERVICES_URL;
+beforeEach(() => { process.env.AIOZ_ANNOTATION_SERVICES_URL = "https://ai.example.test"; });
+afterEach(() => {
+  if (originalProviderUrl === undefined) delete process.env.AIOZ_ANNOTATION_SERVICES_URL;
+  else process.env.AIOZ_ANNOTATION_SERVICES_URL = originalProviderUrl;
 });
