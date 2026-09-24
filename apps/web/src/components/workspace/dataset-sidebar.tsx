@@ -6,8 +6,6 @@ import { useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 import { useState } from "react";
 
-import { useAnnotationStore } from "@/stores/image-annotation-store";
-import { flushVideoAutosaves, hasVideoAutosaveConflict } from "@/lib/workspace/video-autosave";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import { WorkspaceAppendFolderDialog } from "@/components/imports/local-folder-import-form";
 import type { AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
@@ -37,9 +35,8 @@ const engineLabel: Record<Modality, string> = { IMAGE: "Image", VIDEO: "Video", 
  * (spec FR-035, FR-041–FR-044) — this component does not branch on modality
  * beyond that one lookup.
  */
-export function DatasetSidebar({ datasetId, datasetName, search, statuses, previous, next, engine, filters }: DatasetSidebarProps) {
+export function DatasetSidebar({ datasetId, datasetName, selectedAssetId, search, statuses, previous, next, engine, filters }: DatasetSidebarProps) {
   const router = useRouter();
-  const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const [appendOpen, setAppendOpen] = useState(false);
   const activeEngine = engine ?? "IMAGE";
   const { Toolbox } = workspaceEngineRegistry[activeEngine];
@@ -59,11 +56,10 @@ export function DatasetSidebar({ datasetId, datasetName, search, statuses, previ
   };
   const guardNavigation = async (event: MouseEvent<HTMLAnchorElement>, href: string) => {
     event.preventDefault();
-    await flushAllAutosaves();
-    await flushVideoAutosaves();
-    const states = Object.values(useAnnotationStore.getState().saveStates);
-    const needsResolution = states.some((state) => state === "failed" || state === "conflict") || hasVideoAutosaveConflict();
-    if (needsResolution && !window.confirm("An image edit could not be saved or has a conflict. Discard the local draft and leave this asset?")) return;
+    if (selectedAssetId) {
+      const flushed = await workspaceEngineRegistry[activeEngine].flush(datasetId, selectedAssetId);
+      if (!flushed.ok && !window.confirm("An edit could not be saved or has a conflict. Discard the local draft and leave this asset?")) return;
+    }
     router.push(href);
   };
 

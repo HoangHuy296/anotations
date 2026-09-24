@@ -38,6 +38,19 @@ export async function handleVideoAiTaskCompleted(
         where: { assetId }, update: {},
         create: { assetId, fps: observations[0].video.fps, totalFrames: observations[0].video.totalFrames }, select: { id: true },
       });
+      // A pre-existing VideoAsset row (created by the normal import/probe
+      // pipeline before this AI task ran) can still be missing fps/totalFrames
+      // if that pipeline step never completed for it. The AI provider's own
+      // report is an authoritative source for both, so backfill only the
+      // still-null columns -- never overwrite a value ffprobe already set.
+      await tx.videoAsset.updateMany({
+        where: { assetId, OR: [{ fps: null }, { totalFrames: null }] },
+        data: { fps: observations[0].video.fps, totalFrames: observations[0].video.totalFrames },
+      });
+      const durationMs = Math.round((observations[0].video.totalFrames / observations[0].video.fps) * 1000);
+      if (Number.isFinite(durationMs) && durationMs > 0) {
+        await tx.asset.updateMany({ where: { id: assetId, durationMs: null }, data: { durationMs } });
+      }
       const tracks = new Map<number, typeof observations>();
       for (const observation of observations) {
         const items = tracks.get(observation.video.trackId) ?? [];

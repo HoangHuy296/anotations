@@ -8,9 +8,9 @@ export const DATASET_ROLE_PERMISSIONS: Record<DatasetMemberRole, readonly (Datas
   OWNER: ["*"], MANAGER: ["dataset.read", "dataset.update", "member.manage", "asset.upload", "asset.delete", "label.manage", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "workflow.submit", "workflow.review", "repository.sync", "job.createExport", "job.cancel", "job.retry"], REVIEWER: ["dataset.read", "annotation.create", "annotation.updateOwn", "annotation.updateAny", "annotation.review", "workflow.review", "job.createExport"], LABELER: ["dataset.read", "annotation.create", "annotation.updateOwn", "workflow.submit"],
 };
 export function canCreateDataset(actor: RequestActor) { return actor.role === UserRole.ADMIN || actor.role === UserRole.MANAGER; }
-export async function requireDatasetPermission(actor: RequestActor, datasetId: string, permission: DatasetPermission) {
+export async function requireDatasetPermission(actor: RequestActor, datasetId: string, permission: DatasetPermission, client: Pick<typeof db, "dataset"> = db) {
   const isSystemAdmin = actor.role === UserRole.ADMIN;
-  const dataset = await db.dataset.findFirst({ where: { id: datasetId, deletedAt: null, archivedAt: null, ...(isSystemAdmin ? {} : { OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] }) }, select: { id: true, ownerId: true, members: { where: { userId: actor.id }, select: { role: true } } } });
+  const dataset = await client.dataset.findFirst({ where: { id: datasetId, deletedAt: null, archivedAt: null, ...(isSystemAdmin ? {} : { OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] }) }, select: { id: true, ownerId: true, members: { where: { userId: actor.id }, select: { role: true } } } });
   if (!dataset) return null;
   if (isSystemAdmin) return { dataset, role: DatasetMemberRole.OWNER, isSystemAdmin: true, forbidden: false } as const;
   const role = dataset.ownerId === actor.id ? DatasetMemberRole.OWNER : dataset.members[0]?.role;

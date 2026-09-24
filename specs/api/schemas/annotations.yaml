@@ -34,12 +34,21 @@
 AnnotationType:
   type: string
   description: >-
-    Full Prisma AnnotationType enum. GET returns whatever type an annotation was
-    persisted with, including types created outside this write endpoint (for example
-    by an AI prediction pipeline). PUT (see AnnotationChangeSet) only accepts the five
-    geometry-backed types below -- BOUNDING_BOX, POLYGON, CIRCLE, POINT, POLYLINE --
-    because imageAnnotationGeometrySchema is a closed discriminated union over just
-    those five. Read is intentionally broader than write; this is not a contract bug.
+    GET returns whatever type an annotation was persisted with, including types
+    created outside this write endpoint (for example by an AI prediction
+    pipeline, or a TEXT-workspace-engine command). PUT (see AnnotationChangeSet)
+    only accepts the five geometry-backed types below -- BOUNDING_BOX, POLYGON,
+    CIRCLE, POINT, POLYLINE -- because imageAnnotationGeometrySchema is a closed
+    discriminated union over just those five. Read is intentionally broader than
+    write; this is not a contract bug. Known pre-existing documentation gap (not
+    introduced or fixed by the 025 TEXT feature, out of that feature's scope):
+    this enum lists the IMAGE write-path values plus the TEXT values the generic
+    reader can now return (NAMED_ENTITY_RECOGNITION, TEXT_CLASSIFICATION,
+    TEXT_RELATION); the full Prisma AnnotationType enum (prisma/schema.prisma)
+    also has further VIDEO/AUDIO-only values (SEGMENTATION_MASK, KEYPOINT,
+    IMAGE_CLASSIFICATION, VIDEO_CLASSIFICATION, OBJECT_TRACK, ACTION, EVENT,
+    SCENE, SHOT_BOUNDARY, POS_TAG, SENTIMENT, INTENT, TRANSCRIPT, and others)
+    not yet added here.
   enum:
     - BOUNDING_BOX
     - ROTATED_BOUNDING_BOX
@@ -47,6 +56,9 @@ AnnotationType:
     - CIRCLE
     - POINT
     - POLYLINE
+    - NAMED_ENTITY_RECOGNITION
+    - TEXT_CLASSIFICATION
+    - TEXT_RELATION
     - SEGMENTATION_MASK
     - KEYPOINT
     - IMAGE_CLASSIFICATION
@@ -188,9 +200,12 @@ AnnotationLabel:
 Annotation:
   type: object
   description: >-
-    Safe annotation projection (SafeAnnotation). Returned by both GET and PUT. Never
-    includes createdById/updatedById/reviewedById or any other internal actor
-    reference.
+    Safe annotation projection (SafeAnnotation, apps/web/src/lib/annotations/safe-annotation.ts).
+    Returned by both GET and PUT, for every modality (this generic route is not
+    IMAGE-only for reads -- see /api/assets/{assetId}/text/annotations in the Text
+    tag for the TEXT-specific richer read used by the TEXT workspace engine
+    itself). Never includes createdById/updatedById/reviewedById or any other
+    internal actor reference.
   required:
     - id
     - assetId
@@ -204,6 +219,8 @@ Annotation:
     - revision
     - createdAt
     - updatedAt
+    - fromAnnotationId
+    - toAnnotationId
   properties:
     id:
       $ref: './common.yaml#/Cuid'
@@ -223,7 +240,10 @@ Annotation:
       description: >-
         Shape matches the geometry variant for `type`. Typed as an open schema here
         because GET does not re-validate persisted geometry against the write-time
-        union.
+        union. For a TEXT_RELATION annotation returned by this generic route,
+        geometry is a TextRelationGeometry (see the Text tag's schemas) and the
+        endpoint identities live on fromAnnotationId/toAnnotationId below, never
+        inside geometry.
       type: object
     status:
       $ref: '#/AnnotationStatus'
@@ -238,6 +258,16 @@ Annotation:
       $ref: './common.yaml#/Timestamp'
     updatedAt:
       $ref: './common.yaml#/Timestamp'
+    fromAnnotationId:
+      description: Relation source endpoint annotation id. Always null except for a TEXT_RELATION annotation.
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
+    toAnnotationId:
+      description: Relation target endpoint annotation id. Always null except for a TEXT_RELATION annotation.
+      oneOf:
+        - $ref: './common.yaml#/Cuid'
+        - type: "null"
   additionalProperties: false
 
 AnnotationListResponse:

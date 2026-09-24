@@ -26,7 +26,14 @@ export function useWorkspacePresence(input: { datasetId?: string; assetId?: stri
     const viewing = () => { activity.current = "VIEWING"; send(); };
     const editingInteraction = (event: Event) => {
       const target = event.target instanceof Element ? event.target : null;
-      if (target?.closest("textarea,input,[contenteditable='true'],canvas")) editing();
+      // The DOM-element check covers IMAGE's canvas and ordinary form
+      // fields; TEXT's own interactive surface is a plain `<pre>` (never
+      // input/textarea/contenteditable/canvas), so it instead relies on the
+      // same `document.documentElement.dataset.annotationInteraction`
+      // gesture flag `use-workflow-shortcuts.ts` already reads --
+      // `text-engine.tsx` sets it exactly while a highlight-span drag or a
+      // relation click-sequence is in progress, never while merely reading.
+      if (target?.closest("textarea,input,[contenteditable='true'],canvas") || document.documentElement.dataset.annotationInteraction === "active") editing();
     };
     const connect = async () => {
       try {

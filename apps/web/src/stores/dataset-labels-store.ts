@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import type { Modality } from "@internal/db";
+import type { Modality, LabelScope } from "@internal/db";
 
 /**
  * Dataset labels as every workspace engine's Properties panel consumes them
@@ -19,7 +19,7 @@ import type { Modality } from "@internal/db";
  * include them (`labelMetadataSelect`), so `label-edit-dialog.tsx` treats a
  * missing value the same as `null`.
  */
-export type DatasetLabel = { id: string; name: string; color: string; modality: Modality | null; description?: string | null; hotkey?: string | null };
+export type DatasetLabel = { id: string; name: string; color: string; scope?: LabelScope; modality: Modality | null; description?: string | null; hotkey?: string | null };
 
 type LoadStatus = "idle" | "loading" | "loaded" | "error";
 type DatasetLabelsEntry = { labels: DatasetLabel[]; status: LoadStatus; pending: Promise<void> | null };

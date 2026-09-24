@@ -262,3 +262,40 @@ export async function readVideoAnnotations(actor: RequestActor, assetId: string,
     },
   };
 }
+
+// Defensive only, mirroring `readVideoAnnotationsClient`'s own cap
+// (apps/web/src/lib/workspace/video-annotation-client.ts) -- a real window's
+// page count is bounded by its span and realistic keyframe density, nowhere
+// near this.
+const MAX_PAGES_PER_WINDOW = 500;
+
+/**
+ * Server-side counterpart to `readVideoAnnotationsClient`: fetches every
+ * page of one `[fromMs, toMs]` window and merges them (deduped by id) so a
+ * caller that needs a *complete* window server-side (currently just
+ * `workspace-read.ts`'s initial-load path for a short-enough video) never
+ * has to settle for `readVideoAnnotations`'s single, `keyframesPerPage`-
+ * bounded page. Every underlying call stays a bounded, validated read; this
+ * never asks the database for an unbounded result set in one query.
+ */
+export async function readVideoAnnotationsFullyPaged(actor: RequestActor, assetId: string, window: { fromMs: number; toMs: number }): Promise<VideoReadOutcome> {
+  const tracks = new Map<string, SafeVideoAnnotations["tracks"][number]>();
+  const keyframes = new Map<string, SafeVideoAnnotations["keyframes"][number]>();
+  let cursor: string | undefined;
+  let firstPage: SafeVideoAnnotations | null = null;
+  let page: SafeVideoAnnotations | null = null;
+  let pageCount = 0;
+  for (;;) {
+    if (pageCount >= MAX_PAGES_PER_WINDOW) throw new Error("Video annotation window exceeded the page-count safety limit -- this indicates a server-side pagination bug, not a real window size.");
+    const outcome = await readVideoAnnotations(actor, assetId, { ...window, cursor });
+    if (!outcome.ok) return outcome;
+    page = outcome.data;
+    firstPage ??= page;
+    for (const track of page.tracks) tracks.set(track.id, track);
+    for (const keyframe of page.keyframes) keyframes.set(keyframe.id, keyframe);
+    cursor = page.nextCursor ?? undefined;
+    pageCount++;
+    if (!page.hasMore) break;
+  }
+  return { ok: true, data: { ...page, tracks: [...tracks.values()], keyframes: [...keyframes.values()], interpolation: firstPage.interpolation, nextCursor: null, hasMore: false } };
+}

@@ -40,6 +40,7 @@ test("safe projection excludes creator, source, review, storage, and session fie
   const dto = toSafeAnnotation({
     id: "annotation", assetId: "asset", labelId: null, modality: "IMAGE", type: "POINT", geometry: { px: 0.5, py: 0.5 },
     status: "DRAFT", properties: {}, revision: 1, createdAt: new Date("2026-01-01T00:00:00Z"), updatedAt: new Date("2026-01-01T00:00:00Z"), label: null,
+    fromAnnotationId: null, toAnnotationId: null,
   });
   const encoded = JSON.stringify(dto);
   for (const forbidden of ["createdById", "updatedById", "reviewedById", "source", "storage", "session", "token"]) assert.equal(encoded.includes(forbidden), false);

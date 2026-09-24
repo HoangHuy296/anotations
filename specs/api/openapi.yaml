@@ -67,6 +67,14 @@ tags:
       Phase 024 collaboration schemas. REST commands are added only with their
       implemented Route Handlers; realtime delivery is documented separately
       and never accepts commands.
+  - name: Text
+    description: >-
+      Phase 025 TEXT workspace engine: source read/prepare, the TEXT annotation
+      (span/relation/classification) command endpoint, and the dataset-scoped
+      TEXT taxonomy policy. Documented from the implemented routes/services, not
+      from the pre-implementation design proposal in
+      specs/025-text-workspace-engine/contracts/openapi.yaml (several field
+      names differ; see schemas/text-annotations.yaml's header comment).
 
 security:
   - sessionCookie: []
@@ -344,6 +352,58 @@ components:
       $ref: './schemas/media.yaml#/SetImageDimensionsRequest'
     SetImageDimensionsResponse:
       $ref: './schemas/media.yaml#/SetImageDimensionsResponse'
+
+    # --- Text workspace engine (025) ---------------------------------------
+    TextSourceReadiness:
+      $ref: './schemas/text-annotations.yaml#/TextSourceReadiness'
+    TextSourceRead:
+      $ref: './schemas/text-annotations.yaml#/TextSourceRead'
+    PrepareTextSourceResponse:
+      $ref: './schemas/text-annotations.yaml#/PrepareTextSourceResponse'
+    TextGeometry:
+      $ref: './schemas/text-annotations.yaml#/TextGeometry'
+    TextSpanGeometry:
+      $ref: './schemas/text-annotations.yaml#/TextSpanGeometry'
+    TextDocumentGeometry:
+      $ref: './schemas/text-annotations.yaml#/TextDocumentGeometry'
+    TextRelationGeometry:
+      $ref: './schemas/text-annotations.yaml#/TextRelationGeometry'
+    TextCustomMap:
+      $ref: './schemas/text-annotations.yaml#/TextCustomMap'
+    TextProperties:
+      $ref: './schemas/text-annotations.yaml#/TextProperties'
+    TextPropertyPatch:
+      $ref: './schemas/text-annotations.yaml#/TextPropertyPatch'
+    TextAnnotation:
+      $ref: './schemas/text-annotations.yaml#/TextAnnotation'
+    TextAnnotationPage:
+      $ref: './schemas/text-annotations.yaml#/TextAnnotationPage'
+    TextMutationCommandEnvelope:
+      $ref: './schemas/text-annotations.yaml#/TextMutationCommandEnvelope'
+    CreateSpanCommand:
+      $ref: './schemas/text-annotations.yaml#/CreateSpanCommand'
+    UpdateSpanCommand:
+      $ref: './schemas/text-annotations.yaml#/UpdateSpanCommand'
+    DeleteAnnotationCommand:
+      $ref: './schemas/text-annotations.yaml#/DeleteAnnotationCommand'
+    CreateRelationCommand:
+      $ref: './schemas/text-annotations.yaml#/CreateRelationCommand'
+    UpdateRelationCommand:
+      $ref: './schemas/text-annotations.yaml#/UpdateRelationCommand'
+    ReplaceClassificationCommand:
+      $ref: './schemas/text-annotations.yaml#/ReplaceClassificationCommand'
+    TextMutationResult:
+      $ref: './schemas/text-annotations.yaml#/TextMutationResult'
+    TextClassificationGroup:
+      $ref: './schemas/text-annotations.yaml#/TextClassificationGroup'
+    TextRelationType:
+      $ref: './schemas/text-annotations.yaml#/TextRelationType'
+    TextPolicy:
+      $ref: './schemas/text-annotations.yaml#/TextPolicy'
+    TextPolicyRead:
+      $ref: './schemas/text-annotations.yaml#/TextPolicyRead'
+    TextPolicyWriteRequest:
+      $ref: './schemas/text-annotations.yaml#/TextPolicyWriteRequest'
 
   responses:
     Unauthorized:
@@ -3311,6 +3371,323 @@ paths:
               schema: { $ref: '#/components/schemas/ApiError' }
         '503':
           description: INTERNAL_ERROR -- database access is not configured.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  # ===================== Text (025 TEXT workspace engine) =====================
+  /api/assets/{assetId}/text:
+    get:
+      tags: [Text]
+      operationId: readTextSource
+      summary: Read a TEXT Asset's source readiness (and exact source text once READY)
+      description: >-
+        Requires "dataset.read". Every readiness state, including a not-yet-READY
+        one, is a normal 200 -- only a concealed/nonexistent/non-TEXT asset is 404
+        (indistinguishable from a scope mismatch, same convention as the generic
+        annotation routes). Re-verifies the stored object against the previously
+        verified sourceIdentity on every call, so a READY asset can report a
+        different readiness for one specific request without a second writable
+        lifecycle. Response always carries `Cache-Control: private, no-store`.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: Asset id (CUID-formatted in practice; not pattern-validated by this route).
+      responses:
+        '200':
+          description: Source readiness (see TextSourceRead's discriminated union).
+          headers:
+            Cache-Control:
+              schema: { const: 'private, no-store' }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TextSourceRead' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: GITEA_NOT_FOUND -- the asset does not exist, is not modality TEXT, or is outside the actor's dataset scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/assets/{assetId}/text/prepare:
+    post:
+      tags: [Text]
+      operationId: prepareTextSource
+      summary: Create or reuse the common preparation Job for a TEXT Asset's source
+      description: >-
+        Requires "dataset.read", independent of "annotation.create" and any
+        review-freeze workflow state -- a reviewer inspecting a frozen asset can
+        still trigger preparation. Idempotent: an existing in-flight/completed
+        preparation Job is reused (`created: false`) rather than duplicated. 200
+        when the reused/created Job is already COMPLETED, 202 otherwise.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: Asset id (CUID-formatted in practice; not pattern-validated by this route).
+      responses:
+        '200':
+          description: Preparation already complete.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/PrepareTextSourceResponse' }
+        '202':
+          description: Preparation accepted (created or reused, not yet complete).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/PrepareTextSourceResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: GITEA_NOT_FOUND -- the asset does not exist, is not modality TEXT, or is outside the actor's dataset scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: MEDIA_SOURCE_MISSING -- the asset has no source object to prepare.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/assets/{assetId}/text/annotations:
+    get:
+      tags: [Text]
+      operationId: readTextAnnotations
+      summary: Read a cursor-paged, revision-scoped snapshot of a TEXT Asset's annotations
+      description: >-
+        Requires "dataset.read". Not the generic `/api/assets/{assetId}/annotations`
+        route (which serves every modality) -- this route additionally returns
+        assetRevision/policyRevision/canCreate/entityLabels needed to build and
+        submit a TEXT mutation command. A `cursor` from a previous page must be
+        used against the same `assetRevision`; a stale cursor after a concurrent
+        write returns 409. Response always carries `Cache-Control: private, no-store`.
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: Asset id (CUID-formatted in practice; not pattern-validated by this route).
+        - name: cursor
+          in: query
+          required: false
+          schema: { type: string, maxLength: 1024 }
+      responses:
+        '200':
+          description: Current page of the annotation snapshot.
+          headers:
+            Cache-Control:
+              schema: { const: 'private, no-store' }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TextAnnotationPage' }
+        '400':
+          description: INVALID_REQUEST -- the cursor exceeds 1024 characters or fails to decode.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: ANNOTATION_NOT_FOUND -- the asset does not exist, is not modality TEXT, or is outside the actor's dataset scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: ANNOTATION_REVISION_CONFLICT -- the supplied cursor's revision no longer matches the asset's current revision.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+    post:
+      tags: [Text]
+      operationId: mutateTextAnnotations
+      summary: Execute one atomic, revision-checked TEXT annotation command
+      description: >-
+        Cross-origin requests are rejected as 403. Requires authentication; the
+        specific dataset/annotation permission and workflow-freeze checks are
+        enforced per command inside the guarded transaction (text-command-service.ts).
+        Every command carries its own `operationId` for idempotent replay -- a
+        duplicate submission returns the original committed result with
+        `replayed: true` rather than re-executing. 201 on a genuinely new
+        createSpan/createRelation, 200 otherwise (including a replay).
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: Asset id (CUID-formatted in practice; not pattern-validated by this route).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TextMutationCommandEnvelope' }
+      responses:
+        '200':
+          description: Committed acknowledgment or authorized replay.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TextMutationResult' }
+        '201':
+          description: A new span or relation was created (not a replay).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TextMutationResult' }
+        '400':
+          description: INVALID_REQUEST -- request body failed the command's Zod schema.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: FORBIDDEN -- cross-origin request, or authenticated but lacking the required permission for this command.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '404':
+          description: ANNOTATION_NOT_FOUND -- the asset does not exist/is out of scope, or a command references an annotation/label id that does not exist.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: >-
+            ANNOTATION_REVISION_CONFLICT -- covers every TextCommandFailure conflict
+            reason: a stale expectedRevision/expectedPolicyRevision/expectedMembers,
+            a workflow-frozen asset, a dataset-mutation-guard contention, or a
+            mutation-receipt conflict (see the `reason` field in the error body for
+            the specific TextCommandFailure code).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: INVALID_REQUEST -- covers INVALID_RANGE and LIMIT_EXCEEDED TextCommandFailure reasons (see the `reason` field in the error body).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  # --------------- Text: dataset taxonomy policy ---------------
+  /api/datasets/{datasetId}/text-policy:
+    get:
+      tags: [Text]
+      operationId: readTextPolicy
+      summary: Read a Dataset's TEXT taxonomy policy and its resolved eligible labels
+      description: 'Requires "dataset.read". Response always carries `Cache-Control: private, no-store`.'
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Current policy and resolved eligible labels.
+          headers:
+            Cache-Control:
+              schema: { const: 'private, no-store' }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TextPolicyRead' }
+        '400':
+          description: INVALID_REQUEST -- the datasetId path parameter fails validation.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: GITEA_NOT_FOUND -- the dataset does not exist or is outside the actor's scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+    put:
+      tags: [Text]
+      operationId: updateTextPolicy
+      summary: Validate and atomically replace a Dataset's TEXT taxonomy policy
+      description: >-
+        Requires "label.manage". Cross-origin requests are rejected as 401
+        AUTH_REQUIRED (this route's own convention, unlike the 403 used by the
+        annotation-mutation route). Every label id referenced anywhere in the
+        submitted policy must belong to this dataset with a matching eligible
+        scope, or the write is rejected as INVALID_REQUEST; a stale
+        `expectedRevision` (or another guarded-command conflict reason) is a 409.
+        Known gap: there is no dedicated policy-configuration UI yet -- this is
+        the only way to write a policy today (see
+        specs/025-text-workspace-engine/tasks.md "Known gaps").
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TextPolicyWriteRequest' }
+      responses:
+        '200':
+          description: Policy replaced; current policy and resolved eligible labels.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/TextPolicyRead' }
+        '400':
+          description: INVALID_REQUEST -- request body failed policyWriteSchema validation, or a referenced label id/scope was invalid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '401':
+          description: AUTH_REQUIRED -- missing/invalid session, or a cross-origin request.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '403':
+          description: >-
+            Authenticated, but lacking "label.manage" for this dataset. The
+            response body's `error.code` is literally "INVALID_REQUEST" for
+            every non-2xx status this route returns (writeFailureStatus only
+            selects the HTTP status, not the error code) -- this is the real,
+            as-implemented behavior, not a documentation simplification.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '404':
+          description: GITEA_NOT_FOUND -- the dataset does not exist or is outside the actor's scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: Conflict -- a stale expectedRevision or another guarded-command conflict reason (DATASET_LOCKED, RECEIPT_CONFLICT, CONFLICT, REVISION_STALE).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ApiError' }

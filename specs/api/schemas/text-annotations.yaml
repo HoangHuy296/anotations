@@ -1,0 +1,427 @@
+# TEXT workspace engine (Phase 025) domain schemas.
+#
+# This file documents the TEXT-specific routes as actually implemented, not the
+# original design proposal in specs/025-text-workspace-engine/contracts/openapi.yaml
+# (which predates implementation and differs in several field names -- e.g. the
+# design's `labelIds`/`sourceLabelIds`/nullable `groupId` became the implemented
+# `memberLabelIds`/`allowedSourceLabelIds`/required `groupId`; the design's
+# `UpdateClassification` command was never built, see text-workspace-engine's
+# tasks.md "Known gaps"). Every shape below is derived from the route handlers and
+# the services/validators they call, the same convention as every other file here.
+#
+# Source of truth:
+#   apps/web/src/app/api/assets/[assetId]/text/route.ts                  (GET source)
+#   apps/web/src/app/api/assets/[assetId]/text/prepare/route.ts          (POST prepare)
+#   apps/web/src/app/api/assets/[assetId]/text/annotations/route.ts      (GET/POST annotations)
+#   apps/web/src/app/api/datasets/[datasetId]/text-policy/route.ts       (GET/PUT policy)
+#   apps/web/src/lib/annotations/text-source-read-service.ts             (T028 SourceReadOutcome)
+#   apps/web/src/lib/annotations/text-source-readiness.ts                (readiness state union)
+#   apps/web/src/lib/annotations/text-source-prepare-service.ts          (T038)
+#   apps/web/src/lib/annotations/text-annotation-read-service.ts         (annotation page)
+#   apps/web/src/lib/annotations/text-span-service.ts                    (span/relation/classification commands)
+#   apps/web/src/lib/annotations/text-command-service.ts                 (TextCommandFailure reasons)
+#   apps/web/src/lib/validation/text-span.ts                             (createSpan/updateSpan/deleteAnnotation)
+#   apps/web/src/lib/validation/text-relation.ts                         (createRelation/updateRelation)
+#   apps/web/src/lib/validation/text-classification.ts                   (replaceClassification)
+#   apps/web/src/lib/annotations/text-policy-service.ts                  (TextPolicy, resolveTextPolicy)
+#   apps/web/src/lib/annotations/text-policy-write-service.ts            (policyWriteSchema)
+#   packages/domain/src/text-annotation-contract.ts                      (TextGeometry union, SafeTextAnnotation)
+#   packages/domain/src/text-properties-contract.ts                      (TextProperties, TextPropertyPatch)
+
+TextSourceReadiness:
+  type: string
+  enum: [UNPREPARED, PREPARING, READY, UNAVAILABLE, INVALID_ENCODING, SOURCE_MISMATCH, UNSUPPORTED_SIZE, LEGACY_RECONCILIATION_REQUIRED]
+  description: >-
+    Derived, never independently writable (text-source-readiness.ts). A live GET
+    re-verifies the stored object against the previously verified `sourceIdentity`
+    on every call, so a nominally-READY asset can degrade to SOURCE_MISMATCH/
+    UNAVAILABLE/INVALID_ENCODING/UNSUPPORTED_SIZE for one specific request without
+    a second writable lifecycle.
+
+ReadyTextSource:
+  type: object
+  additionalProperties: false
+  required: [readiness, assetId, datasetId, sourceIdentity, offsetUnit, sourceByteLength, sourceCodeUnitLength, text, boundaryOffsets]
+  properties:
+    readiness: { const: READY }
+    assetId: { type: string }
+    datasetId: { type: string }
+    sourceIdentity:
+      type: string
+      pattern: ^sha256:[a-f0-9]{64}$
+    offsetUnit: { const: UTF16_CODE_UNIT }
+    sourceByteLength: { type: integer, minimum: 0 }
+    sourceCodeUnitLength: { type: integer, minimum: 0 }
+    text:
+      type: string
+      description: Full decoded UTF-8 source text.
+    boundaryOffsets:
+      type: array
+      items: { type: integer, minimum: 0 }
+      description: Sorted extended-grapheme-cluster boundary offsets in UTF-16 code units, verified against `text`.
+
+UnreadyTextSource:
+  type: object
+  additionalProperties: false
+  required: [readiness, assetId, datasetId]
+  properties:
+    readiness: { $ref: '#/TextSourceReadiness' }
+    assetId: { type: string }
+    datasetId: { type: string }
+  description: Any readiness state other than READY. Never carries `text`/`boundaryOffsets`/storage locators.
+
+TextSourceRead:
+  oneOf:
+    - $ref: '#/ReadyTextSource'
+    - $ref: '#/UnreadyTextSource'
+  discriminator:
+    propertyName: readiness
+
+PrepareTextSourceResponse:
+  type: object
+  additionalProperties: false
+  required: [jobId, status, created, ready]
+  properties:
+    jobId: { type: string }
+    status:
+      type: string
+      description: Persisted Job.status (JobStatus enum) of the created/reused TEXT_SOURCE_PREPARE Job.
+    created:
+      type: boolean
+      description: false when an existing in-flight/completed preparation Job was reused instead of creating a new one (idempotent).
+    ready:
+      type: boolean
+      description: true when the reused/created Job's status is already COMPLETED (response is 200, not 202).
+
+TextGeometry:
+  oneOf:
+    - $ref: '#/TextSpanGeometry'
+    - $ref: '#/TextDocumentGeometry'
+    - $ref: '#/TextRelationGeometry'
+  discriminator:
+    propertyName: kind
+  description: Canonical closed union (packages/domain/src/text-annotation-contract.ts). Every TEXT Annotation.geometry is exactly one of these.
+
+TextSpanGeometry:
+  type: object
+  additionalProperties: false
+  required: [schemaVersion, kind, sourceIdentity, offsetUnit, startOffset, endOffset]
+  properties:
+    schemaVersion: { const: 1 }
+    kind: { const: text-span }
+    sourceIdentity: { type: string, pattern: '^sha256:[a-f0-9]{64}$' }
+    offsetUnit: { const: UTF16_CODE_UNIT }
+    startOffset: { type: integer, minimum: 0 }
+    endOffset: { type: integer, minimum: 0, description: Must be strictly greater than startOffset. }
+
+TextDocumentGeometry:
+  type: object
+  additionalProperties: false
+  required: [schemaVersion, kind, sourceIdentity]
+  properties:
+    schemaVersion: { const: 1 }
+    kind: { const: text-document }
+    sourceIdentity: { type: string, pattern: '^sha256:[a-f0-9]{64}$' }
+  description: Used for document-level classification annotations (no offsets).
+
+TextRelationGeometry:
+  type: object
+  additionalProperties: false
+  required: [schemaVersion, kind, sourceIdentity]
+  properties:
+    schemaVersion: { const: 1 }
+    kind: { const: text-relation }
+    sourceIdentity: { type: string, pattern: '^sha256:[a-f0-9]{64}$' }
+  description: Relation endpoints live on the Annotation row itself (fromAnnotationId/toAnnotationId), never in geometry.
+
+TextCustomMap:
+  type: object
+  maxProperties: 32
+  description: >-
+    Compact JSON map, <=16384 encoded UTF-8 bytes, <=32 keys. Keys match
+    ^[A-Za-z][A-Za-z0-9_]*$ (max 64 chars) and exclude a reserved-name set
+    (__proto__, prototype, constructor, geometry, sourceIdentity, revision,
+    labelId, fromAnnotationId, toAnnotationId). Values are null, boolean, a
+    finite number within +-1e15, or a string up to 2048 UTF-16 code units.
+  additionalProperties:
+    oneOf:
+      - type: 'null'
+      - type: boolean
+      - type: number
+      - type: string
+
+TextProperties:
+  type: object
+  additionalProperties: false
+  required: [custom]
+  properties:
+    custom: { $ref: '#/TextCustomMap' }
+
+TextPropertyPatch:
+  type: object
+  additionalProperties: false
+  required: [set, unset]
+  properties:
+    set: { $ref: '#/TextCustomMap' }
+    unset:
+      type: array
+      maxItems: 32
+      items: { type: string }
+  description: At least one of set/unset must be nonempty; a key cannot appear in both.
+
+TextAnnotation:
+  type: object
+  additionalProperties: false
+  required: [id, assetId, datasetId, labelId, status, revision, geometry, properties, fromAnnotationId, toAnnotationId, createdById, updatedById, createdAt, updatedAt]
+  properties:
+    id: { type: string }
+    assetId: { type: string }
+    datasetId: { type: string }
+    labelId: { type: [string, 'null'] }
+    status: { type: string, description: Generic AnnotationStatus enum value (see the shared Annotations schemas). }
+    revision: { type: integer, minimum: 1 }
+    geometry: { $ref: '#/TextGeometry' }
+    properties: { $ref: '#/TextProperties' }
+    fromAnnotationId:
+      type: [string, 'null']
+      description: Non-null only when geometry.kind is text-relation.
+    toAnnotationId:
+      type: [string, 'null']
+      description: Non-null only when geometry.kind is text-relation.
+    createdById: { type: string }
+    updatedById: { type: [string, 'null'] }
+    createdAt: { type: string, format: date-time }
+    updatedAt: { type: string, format: date-time }
+  description: >-
+    The only TEXT annotation shape ever returned to a browser, realtime payload
+    or export (serializeSafeTextAnnotation). Never includes source excerpts or
+    storage locators.
+
+TextAnnotationPage:
+  type: object
+  additionalProperties: false
+  required: [assetRevision, sourceIdentity, policyRevision, canCreate, entityLabels, annotations, nextCursor, total]
+  properties:
+    assetRevision: { type: integer, minimum: 1 }
+    sourceIdentity: { type: [string, 'null'] }
+    policyRevision: { type: integer, minimum: 1 }
+    canCreate: { type: boolean, description: false when the actor lacks annotation.create, the asset is workflow-frozen (NEEDS_REVIEW/REVIEWED/REJECTED), or the annotation limit is reached. }
+    entityLabels:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required: [id, name, color]
+        properties:
+          id: { type: string }
+          name: { type: string }
+          color: { type: [string, 'null'] }
+    annotations:
+      type: array
+      items: { $ref: '#/TextAnnotation' }
+    nextCursor: { type: [string, 'null'] }
+    total: { type: integer, minimum: 0 }
+
+TextMutationCommandEnvelope:
+  type: object
+  additionalProperties: false
+  required: [operationId, sourceIdentity, expectedPolicyRevision, command]
+  properties:
+    operationId:
+      type: string
+      minLength: 1
+      maxLength: 128
+      description: Client-chosen idempotency key; a replayed identical command returns the original result with replayed=true rather than re-executing.
+    sourceIdentity: { type: string, pattern: '^sha256:[a-f0-9]{64}$' }
+    expectedPolicyRevision: { type: integer, minimum: 1 }
+    command:
+      oneOf:
+        - $ref: '#/CreateSpanCommand'
+        - $ref: '#/UpdateSpanCommand'
+        - $ref: '#/DeleteAnnotationCommand'
+        - $ref: '#/CreateRelationCommand'
+        - $ref: '#/UpdateRelationCommand'
+        - $ref: '#/ReplaceClassificationCommand'
+      discriminator:
+        propertyName: kind
+  description: >-
+    Known gap: there is no UpdateClassification command -- replaceClassification
+    (full-membership replacement) is the only classification write, used for both
+    SINGLE and MULTI cardinality groups (see text-classification.ts).
+
+CreateSpanCommand:
+  type: object
+  additionalProperties: false
+  required: [kind, startOffset, endOffset, labelId]
+  properties:
+    kind: { const: createSpan }
+    startOffset: { type: integer, minimum: 0 }
+    endOffset: { type: integer, minimum: 0 }
+    labelId: { type: [string, 'null'] }
+    properties: { $ref: '#/TextProperties' }
+
+UpdateSpanCommand:
+  type: object
+  additionalProperties: false
+  required: [kind, annotationId, expectedRevision]
+  properties:
+    kind: { const: updateSpan }
+    annotationId: { type: string }
+    expectedRevision: { type: integer, minimum: 1 }
+    startOffset: { type: integer, minimum: 0 }
+    endOffset: { type: integer, minimum: 0 }
+    labelId: { type: [string, 'null'] }
+    propertyPatch: { $ref: '#/TextPropertyPatch' }
+  description: At least one of startOffset/endOffset/labelId/propertyPatch is required.
+
+DeleteAnnotationCommand:
+  type: object
+  additionalProperties: false
+  required: [kind, annotationId, expectedRevision]
+  properties:
+    kind: { const: deleteAnnotation }
+    annotationId: { type: string }
+    expectedRevision: { type: integer, minimum: 1 }
+  description: Deletes any TEXT annotation kind (span, relation, or document/classification row) by id.
+
+CreateRelationCommand:
+  type: object
+  additionalProperties: false
+  required: [kind, relationLabelId, fromAnnotationId, toAnnotationId]
+  properties:
+    kind: { const: createRelation }
+    relationLabelId: { type: string }
+    fromAnnotationId: { type: string }
+    toAnnotationId: { type: string, description: Must differ from fromAnnotationId. }
+
+UpdateRelationCommand:
+  type: object
+  additionalProperties: false
+  required: [kind, annotationId, expectedRevision]
+  properties:
+    kind: { const: updateRelation }
+    annotationId: { type: string }
+    expectedRevision: { type: integer, minimum: 1 }
+    relationLabelId: { type: string }
+    fromAnnotationId: { type: string }
+    toAnnotationId: { type: string }
+  description: >-
+    At least one of relationLabelId/fromAnnotationId/toAnnotationId is required.
+    Known gap: no Undo/Redo support exists for this command client-side yet (see
+    text-workspace-engine's tasks.md "Known gaps"); the endpoint itself is unaffected.
+
+ReplaceClassificationCommand:
+  type: object
+  additionalProperties: false
+  required: [kind, groupId, memberLabelIds, expectedMembers]
+  properties:
+    kind: { const: replaceClassification }
+    groupId: { type: string, maxLength: 64 }
+    memberLabelIds:
+      type: array
+      maxItems: 64
+      items: { type: string }
+      description: The complete desired membership of the group after this command.
+    expectedMembers:
+      type: array
+      maxItems: 64
+      items:
+        type: object
+        additionalProperties: false
+        required: [id, revision]
+        properties:
+          id: { type: string }
+          revision: { type: integer, minimum: 1 }
+      description: The group's complete current membership as the client last observed it; a mismatch is rejected as REVISION_STALE rather than partially applied.
+
+TextMutationResult:
+  type: object
+  additionalProperties: false
+  required: [replayed, result]
+  properties:
+    replayed:
+      type: boolean
+      description: true when this operationId was already committed previously; `result` is the original committed result, not a re-execution.
+    result:
+      description: A TextAnnotation, an array of TextAnnotation (createRelation's endpoints), or `{deletedId}` for deleteAnnotation. Untyped here because its shape depends on which command was submitted.
+
+TextClassificationGroup:
+  type: object
+  additionalProperties: false
+  required: [id, name, cardinality, memberLabelIds]
+  properties:
+    id: { type: string, maxLength: 64 }
+    name: { type: string, maxLength: 120 }
+    cardinality: { type: string, enum: [SINGLE, MULTI] }
+    memberLabelIds:
+      type: array
+      items: { type: string }
+
+TextRelationType:
+  type: object
+  additionalProperties: false
+  required: [relationLabelId, allowedSourceLabelIds, allowedTargetLabelIds]
+  properties:
+    relationLabelId: { type: string }
+    allowedSourceLabelIds:
+      type: array
+      items: { type: string }
+    allowedTargetLabelIds:
+      type: array
+      items: { type: string }
+    allowUnlabeledSource: { type: boolean, default: false }
+    allowUnlabeledTarget: { type: boolean, default: false }
+
+TextPolicy:
+  type: object
+  additionalProperties: false
+  required: [schemaVersion, classificationGroups, relationTypes]
+  properties:
+    schemaVersion: { const: 1 }
+    classificationGroups:
+      type: array
+      items: { $ref: '#/TextClassificationGroup' }
+    relationTypes:
+      type: array
+      items: { $ref: '#/TextRelationType' }
+  description: >-
+    Persisted as Dataset.textPolicy (versioned JSON); absent/invalid stored data
+    falls back to the implicit empty policy rather than a read-time error. Known
+    gap: there is no dedicated policy-configuration UI yet -- only the read/write
+    API and generic-label-management surfaces exist (see tasks.md "Known gaps").
+
+TextPolicyRead:
+  type: object
+  additionalProperties: false
+  required: [revision, policy, eligible]
+  properties:
+    revision: { type: integer, minimum: 0 }
+    policy: { $ref: '#/TextPolicy' }
+    eligible:
+      type: object
+      additionalProperties: false
+      required: [entityLabelIds, classificationGroups, relationTypes]
+      properties:
+        entityLabelIds:
+          type: array
+          items: { type: string }
+        classificationGroups:
+          type: array
+          items: { $ref: '#/TextClassificationGroup' }
+        relationTypes:
+          type: array
+          items: { $ref: '#/TextRelationType' }
+      description: >-
+        Policy resolved against the dataset's current labels -- e.g. an empty
+        classificationGroups falls back to one implicit SINGLE group over every
+        eligible document-scoped label; relationTypes are filtered to those whose
+        relationLabelId still resolves to an eligible RELATION-scope label.
+
+TextPolicyWriteRequest:
+  type: object
+  additionalProperties: false
+  required: [expectedRevision, policy]
+  properties:
+    expectedRevision: { type: integer, minimum: 0 }
+    policy: { $ref: '#/TextPolicy' }
+  description: Requires label.manage. Every label id referenced anywhere in the policy must belong to the dataset with a matching eligible scope, or the write is rejected as INVALID_REQUEST.

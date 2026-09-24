@@ -1,5 +1,3 @@
-import { Prisma } from "@internal/db";
-
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
@@ -7,8 +5,8 @@ import { db } from "@/lib/db";
 import { labelMetadataSelect } from "@/lib/dataset-metadata";
 import { parsePageRequest } from "@/lib/pagination";
 import { datasetIdSchema } from "@/lib/validation/dataset";
-import { labelMutationSchema, normalizeLabelName } from "@/lib/validation/label";
-import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
+import { labelMutationSchema } from "@/lib/validation/label";
+import { createLabelWithTextEligibility, ensureDefaultImageLabels } from "@/lib/workspace/label-management";
 
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ datasetId: string }> };
@@ -48,11 +46,16 @@ export async function POST(request: Request, context: Context) {
   const result = await accessFor(context, "label.manage"); if ("response" in result) return result.response;
   const parsed = labelMutationSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return apiError(400, "INVALID_REQUEST", "Label input is invalid.", parsed.error.flatten().fieldErrors);
-  try {
-    const label = await db.label.create({ data: { ...parsed.data, datasetId: result.datasetId, normalizedName: normalizeLabelName(parsed.data.name), description: parsed.data.description || null, hotkey: parsed.data.hotkey || null }, select: labelMetadataSelect });
-    return apiSuccess(label, { status: 201 });
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return apiError(409, "INVALID_REQUEST", "A label with this name already exists.");
-    throw error;
+  const created = await createLabelWithTextEligibility(result.actor, {
+    datasetId: result.datasetId, name: parsed.data.name, color: parsed.data.color,
+    description: parsed.data.description || null, hotkey: parsed.data.hotkey || null,
+    textEligibility: parsed.data.textEligibility,
+  });
+  if (!created.ok) {
+    if (created.reason === "NOT_FOUND") return apiError(404, "GITEA_NOT_FOUND", "The dataset was not found.");
+    if (created.reason === "FORBIDDEN") return apiError(403, "FORBIDDEN", "You do not have permission for this action.");
+    if (created.reason === "DUPLICATE_NAME") return apiError(409, "INVALID_REQUEST", "A label with this name already exists.");
+    return apiError(409, "INVALID_REQUEST", "The label could not be created.");
   }
+  return apiSuccess(created.label, { status: 201 });
 }

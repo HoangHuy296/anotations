@@ -13,7 +13,7 @@ import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
 import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import { Badge } from "@/components/ui/badge";
 import { deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
-import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
+import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { useDatasetLabels, useDatasetLabelsStore, type DatasetLabel } from "@/stores/dataset-labels-store";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
@@ -88,7 +88,6 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
   const [savingTrackId, setSavingTrackId] = useState<string | null>(null);
   const lastAttemptedDescriptionRef = useRef<string | null>(null);
   const scheduleAutosave = useAnnotationStore((store) => store.scheduleAutosave);
-  const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const setConflictDraftInStore = useAnnotationStore((store) => store.setConflictDraft);
   const tracks = useVideoAnnotationStore((store) => store.tracks);
   const keyframes = useVideoAnnotationStore((store) => store.keyframes);
@@ -316,9 +315,8 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
   }
 
   async function flushBeforeNavigation() {
-    await flushAllAutosaves();
-    await flushVideoAutosaves();
-    return true;
+    const flushed = await workspaceEngineRegistry.VIDEO.flush(datasetId, asset.id);
+    return flushed.ok || window.confirm("A video edit could not be saved or has a conflict. Discard the local draft and leave this video?");
   }
 
   const activeTab = (["description", "labels", "tracks", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";

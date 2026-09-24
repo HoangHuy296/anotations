@@ -17,7 +17,7 @@ export function DatasetDescriptionEditor({ datasetId, description }: { datasetId
       <button type="button" onClick={() => { setDraft(description ?? ""); setEditing(true); }} className="mt-1 text-xs font-semibold text-sky-700 hover:text-sky-800">Edit description</button>
     </div>;
   }
-
+    
   async function save() {
     setBusy(true); setError(null);
     try {

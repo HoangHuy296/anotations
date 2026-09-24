@@ -205,6 +205,220 @@ Commands: `pnpm --filter @annotationplatform/web typecheck` (same 2 pre-existing
 
 Result: PASS.
 
+## T040–T044 — taxonomy policy write lifecycle and label-management UI
+
+Date: 2026-09-17. (Session resumed after a logout; dev stack containers — web/worker/minio/redis/postgres — had stopped and were restarted with `docker start`; migration state and all prior evidence confirmed intact before continuing.)
+
+- **T040** (`apps/web/src/lib/workspace/label-management.ts`): `createLabelWithTextEligibility`/`updateLabelWithTextEligibility` are now the single write path used by every label-mutation entry point. Reuses the existing generic `Label.modality`/`Label.scope` columns — `LabelScope` already contained `ENTITY`/`CLASSIFICATION`/`SENTIMENT`/`INTENT`/`RELATION`, so no schema change was needed (discovered while implementing T039 in the prior session block). A plain (non-TEXT) label create/edit never claims the TEXT dataset guard or touches `textPolicyRevision` — only a request that actually sets or changes TEXT eligibility does, and it does so atomically with the guarded write (via `runGuardedTextDatasetCommand` from T033) plus a `TEXT_POLICY_CHANGED` outbox dispatch. A label already referenced by any annotation is locked to its current modality/scope (`REFERENCED_SCOPE_LOCKED`) — deletion of a referenced label was already blocked generically by the pre-existing `deleteUnreferencedLabel`.
+- **T041**: extended `apps/web/src/lib/validation/label.ts` (`textEligibility` field, plain string enum — not a zod `preprocess`/`transform`, to keep the client-facing TS input type a clean string for react-hook-form), `apps/web/src/app/(app)/labels/actions.ts` (server actions), `apps/web/src/app/api/labels/[labelId]/route.ts` (PATCH), `apps/web/src/app/api/datasets/[datasetId]/labels/route.ts` (POST), and `apps/web/src/components/labels/label-form.tsx` (new "TEXT eligibility" select: Not TEXT-eligible / Entity (span) / Classification / Sentiment / Intent / Relation) plus `apps/web/src/app/(app)/labels/page.tsx` (a `TEXT · <SCOPE>` badge on eligible labels in the list). A brand-new capability delivered entirely through normal authorized product use — no direct database seeding.
+- **T042** (`apps/web/src/lib/annotations/text-policy-write-service.ts`): `writeTextPolicy` takes the canonical `{expectedRevision, policy}` shape unchanged from HTTP through service (a `.strict()` Zod schema — an `expectedPolicyRevision` alias is rejected as an unrecognized key, not silently accepted). Runs inside `runGuardedTextDatasetCommand` (dataset-only guard, no asset-edit claim): compares `expectedRevision` against the live `Dataset.textPolicyRevision`, validates every label id referenced anywhere in the policy belongs to the dataset and has the *correct* eligible scope for its role (classification-group members need a document scope, a relation type's own label needs RELATION, its endpoint allow-lists need ENTITY), rejects a reconfiguration that would orphan an existing `TEXT_CLASSIFICATION`/`TEXT_RELATION` annotation's label, then commits `textPolicy`/`textPolicyRevision`/the `TEXT_POLICY_CHANGED` outbox event atomically.
+- **T043** (`apps/web/src/app/api/datasets/[datasetId]/text-policy/route.ts`): GET requires `dataset.read`, PUT requires `label.manage` plus the same-origin guard (`isCrossOriginRequest`, the existing convention for state-changing routes) and calls the T042 writer; both return safe `{revision, policy, eligible: {...}}`, never a storage locator or raw label metadata beyond ids.
+
+**T044** (`apps/web/tests/text-policy/text-policy-lifecycle.test.ts`, 8/8 passing): proves the generic policy revision guard and policy-only stale-write/rollback behavior at the service boundary the route thinly wraps (the route itself was not invoked directly — Next.js Route Handlers require `next/headers`' request-scoped `cookies()`, which only real server-side request handling provides; every other "route" task this session has, consistently, tested the service layer beneath it instead). Covered:
+1. Canonical `{expectedRevision, policy}` acceptance; an `expectedPolicyRevision` alias is rejected by `.strict()`.
+2. An unconfigured dataset reads the implicit empty policy at revision 1.
+3. A correct `expectedRevision` commits atomically, bumps the revision exactly once, and the `TEXT_POLICY_CHANGED` outbox event carries exactly `{datasetId, policyRevision}` with `assetId: null`.
+4. A stale `expectedRevision` is rejected (`REVISION_STALE`) and **provably rolls back the Dataset guard claim** — `textPolicy`/`textPolicyRevision`/`textMutationRevision` all read back unchanged.
+5. A label reference outside the dataset, and a label used with the wrong role for its scope, are both rejected as `INVALID_REQUEST` without advancing the revision.
+6. Reconfiguring classification groups to exclude a label with an existing `TEXT_CLASSIFICATION` annotation is rejected (`CONFLICT`) — **a genuine bug was caught and fixed here**: the test's first draft used `classificationGroups: []` to attempt the "orphan," which actually falls back to the implicit SINGLE group (still covering the label, per data-model.md's own specified default) and so correctly succeeded; the test was corrected to use an explicit but empty-membership replacement group, which genuinely excludes the label and is correctly rejected.
+7. A LABELER (no `label.manage`) is forbidden.
+8. Any dataset member (including LABELER, via `dataset.read`) can read the resolved eligible taxonomy.
+
+**Browser verification (T041 UI, per AGENTS.md's UI-testing rule)**: `chromium-cli` was unavailable in this environment, so Playwright + Chromium were installed into a throwaway temp directory (not a project dependency) purely for this verification. Ran the real Next.js dev server locally on port 3010 (the shared Docker `annotationplatformdev-web-1` container runs an older baked image without this session's source changes, so it was left untouched rather than rebuilt) against the same real dev PostgreSQL/MinIO/Redis, created a throwaway MANAGER user via a temporary script, and drove a full real-browser session: logged in through the actual `/login` form → navigated to `/labels` → filled the create form, opened "Advanced label metadata," selected "Entity (span)" → submitted → confirmed the "Created ..." toast and a green "TEXT · ENTITY" badge appeared on the new list entry → opened its edit form and confirmed the select correctly prefilled to "Entity (span)" → changed it to "Classification" → saved → confirmed "Updated ..." toast and the badge updated live to "TEXT · CLASSIFICATION" — zero browser console errors throughout. Screenshots reviewed at each step. All test data (user, dataset, both labels) and the temporary Playwright install were cleaned up afterward; the local dev server was stopped by PID; the shared dev containers were confirmed untouched and healthy throughout.
+
+Commands: `pnpm --filter @annotationplatform/web typecheck` (clean, same 2 pre-existing unrelated AUDIO errors), `pnpm --filter @annotationplatform/web lint` (clean), `node --test` across `tests/text-annotations/*.test.ts tests/text-policy/*.test.ts tests/text-source/*.test.ts tests/collaboration/text-invalidation-outbox.test.ts` — **48/48 passing** combined regression.
+
+Result: PASS.
+
+## T045–T047 — engine registration, the active-engine flush contract, and its immediate IMAGE/VIDEO regression proof
+
+Date: 2026-09-17.
+
+**T045** (`apps/web/src/lib/workspace/text-engine-capabilities.ts`): `deriveTextEngineCapabilities` — read/select are always available once a TEXT asset resolves into the workspace at all (an unready source is an in-engine state, never a capability gate, per research.md D6); span/classification/relation each gate on source readiness (`READY`) + workflow-not-frozen + `annotation.create` + the relevant eligible-taxonomy flag, with a distinct stated reason per capability when blocked. Registered on the TEXT entry in `workspaceEngineRegistry` via a new optional `deriveCapabilities` field. Since the current `WorkspaceSelection` TEXT variant doesn't carry readiness/policy/permission context yet (T048's job), it's wired to the conservative `UNAVAILABLE_TEXT_ENGINE_CAPABILITIES` default for now — a real, tested, pure function ready for T048 to feed live data through, never reporting an unearned capability in the meantime. 7/7 unit tests passing (`tests/workspace/text-engine-capabilities.vitest.spec.ts`).
+
+**T046** (`apps/web/src/lib/workspace/workspace-engine-flush.ts`, registered as `flush` on every `workspaceEngineRegistry` entry): defines `EngineFlushResult = {ok:true,assetRevision} | {ok:false,reason}` and `createEngineFlush(includeVideoTrackAutosave)`, which flushes the generic cross-engine autosave store every engine already shares (`useAnnotationStore`, despite its historical "image" name) — plus, for VIDEO only, its dedicated `TrackAutosaveCoordinator` system — and, only on success, fetches the server-authoritative current `Asset.revision` from the existing workflow-status endpoint.
+
+**A real, reproducible bug was found and fixed, not just a contract added in the abstract.** Every caller previously fired both flush functions unconditionally and *fire-and-forgot* (no result checked), then immediately reused whatever revision it already had in local/prop state — for `workspace-header.tsx`'s Submit/Resubmit, that was the **page-load `workflow.revision` prop**, never refreshed after an autosaved edit. Since `applyAssetWorkflowAction` rejects on `asset.revision !== expectedRevision`, a user who edited an annotation (bumping `Asset.revision` server-side) and then clicked Submit could get a spurious `STALE_REVISION` 409 — "This asset changed. Reload before deciding." — against their *own* just-saved edit. Fixed by making every caller `await` the new `flush()` and use its returned `assetRevision`, blocking entirely on failure:
+- `workspace-header.tsx`'s `WorkflowControls.act()` (Submit/Resubmit) — now passed `engine` as a prop, calls `workspaceEngineRegistry[engine].flush(datasetId, assetId)`, and only proceeds to the workflow POST on success, using the *returned* revision.
+- `dataset-sidebar.tsx`'s previous/next navigation guard.
+- `image-properties-tabs.tsx` (already had a failure-checking `window.confirm` escape hatch — adapted to the shared contract), `video-properties-tabs.tsx` (previously had **no** failure check at all — `flushBeforeNavigation` unconditionally `return true`), `audio-properties-tabs.tsx`, and `placeholder-properties-tabs.tsx` (TEXT's own asset-list/previous-next navigation guard) — all four now share the identical confirm-on-failure pattern IMAGE already established.
+- `properties-panel.tsx`'s no-selection-yet branch was deliberately left as a defensive flush-both (no single engine/asset is in scope there to target a per-engine barrier against).
+
+**T047** (`apps/web/tests/workspace/image-video-flush-regression.test.ts`, 9/9 passing) proves the shared contract those callers now all depend on. No jsdom/`@testing-library/react` exists in this repo (AGENTS.md requires explicit permission before adding one — matches the established pattern in the sibling `workspace-engine-registry.vitest.spec.ts`), so this exercises the real underlying logic directly — the actual Zustand autosave store and the actual `TrackAutosaveCoordinator`, with only the browser `fetch` call to the workflow-status endpoint stubbed (the one genuine network boundary a Node test can't cross):
+1. With nothing pending, success carries the exact server-authoritative revision.
+2. A pending autosave genuinely finishes before the revision is read (not raced).
+3. A failed or conflicting autosave blocks the barrier entirely.
+4. A revision-fetch network error or non-2xx response is never treated as a successful flush, even after a successful save.
+5. VIDEO's dedicated `TrackAutosaveCoordinator` is awaited in addition to the generic store; a track-revision conflict blocks the barrier.
+6. AUDIO and TEXT share the exact same contract as IMAGE (no accidental per-engine special-casing beyond VIDEO's extra track coordinator).
+7. **Late responses**: two concurrent flushes for different assets, deliberately resolved out of order, each report exactly their own asset's revision — never a cross-asset mixup from shared/global state.
+
+Also fixed the pre-existing `workspace-engine-registry.vitest.spec.ts` (added `flush` to its structural-contract and distinct-reference assertions, and to its synthetic fifth-entry proof) — full regression: `pnpm --filter @annotationplatform/web typecheck` (clean, same 2 pre-existing unrelated AUDIO errors), `pnpm --filter @annotationplatform/web lint` (clean), all 7 `tests/workspace/*.vitest.spec.ts` files (34/34 passing), and `pnpm run test:workspace` (54 passing / 0 failing / 29 skipped — the skipped ones are real-DB integration tests gated behind `WORKSPACE_INTEGRATION_TESTS=1`, not set in this environment; none newly broken).
+
+Result: PASS.
+
+## T048 — the generic workspace selection DTO carries real TEXT context
+
+Date: 2026-09-17.
+
+Extended `WorkspaceSelection`'s TEXT variant (`apps/web/src/types/workspace.ts`) from bare metadata to: `asset.revision`/`asset.status` (the same values the T046 flush barrier reads back), a new `SafeTextSourceContext` (`{readiness:"READY", sourceIdentity, offsetUnit, sourceCodeUnitLength, sourceByteLength}` or just `{readiness}` for every other state — deliberately never the actual source text/boundaries, which stay behind the dedicated `GET /api/assets/{assetId}/text` route, T054, so this broadly-loaded selection stays cheap), `annotations: SafeTextAnnotation[]` (the T005 canonical safe shape), and `capabilities: TextEngineCapabilities` (T045, now fed real data instead of the conservative default).
+
+`workspace-read.ts`'s TEXT branch deliberately calls the **cheap** T027 `deriveTextSourceReadiness` (DB-only: `TextAsset` metadata + `Asset` object presence + latest `TEXT_SOURCE_PREPARE` Job), never T028's expensive full source re-verification (bounded MinIO stream + digest + decode) — this selection loads on every workspace navigation, and the expensive path is reserved for when the reader actually mounts. Assembles capabilities from `annotation.create` (`requireDatasetPermission`), the resolved TEXT policy (T039/T042's `resolveTextPolicy`), and workflow-frozen state (`NEEDS_REVIEW`/`REVIEWED`/`REJECTED`). Existing `Annotation` rows for the asset are projected through the shared T005 `serializeSafeTextAnnotation`, with a defensive per-row try/catch so one malformed legacy row can never 500 the whole workspace read. `workspaceEngineRegistry`'s `deriveTextCapabilitiesEntry` now simply reads `selection.capabilities` instead of the placeholder default.
+
+Verified against the real (migrated) dev PostgreSQL + MinIO (`apps/web/tests/text-annotations/workspace-selection-text.test.ts`, 4/4 passing):
+1. An unprepared TEXT asset reports `UNPREPARED` readiness and no write capability, with the correct "must be prepared" reason.
+2. A fully prepared (`READY`), policy-eligible asset reports the *exact* verified source context (`sourceIdentity`/lengths matching what was actually uploaded/prepared) and grants `span`; `classification` stays correctly blocked (no taxonomy configured) with the correct reason.
+3. A `NEEDS_REVIEW` asset blocks every write capability even though the source is `READY` and labels are eligible — proving workflow-frozen gating is live, not theoretical.
+4. An existing `Annotation` row round-trips through the shared safe serializer with its exact geometry/labelId intact; a non-member is concealed as `null` (existing concealed-resource convention, still honored).
+
+Full regression: `pnpm --filter @annotationplatform/web typecheck` (clean, same 2 pre-existing unrelated AUDIO errors), `pnpm --filter @annotationplatform/web lint` (clean), `pnpm run test:workspace` (54 passing / 0 failing / 29 skipped — identical to the T047 baseline, confirming no regression from this DTO extension).
+
+Result: PASS.
+
+## T049 — the per-asset TEXT store
+
+Date: 2026-09-17.
+
+`apps/web/src/types/text.ts` (UI-only types, building on the shared T005 `SafeTextAnnotation` rather than redefining it: `TextSelectionRange`, `TextSearchState`, `TextPendingCommand`, `TextAssetSnapshot`) and `apps/web/src/stores/text-annotation-store.ts` (a plain in-memory Zustand store, no persist middleware — matches `image-annotation-store.ts`'s existing convention, so there is nothing to opt out of for "no browser durable storage"). Holds the asset-scoped saved snapshot (source identity, server-supplied boundary offsets, saved annotations, current asset revision), local pending-command state, and ephemeral selection/search/hover state. `initializeAsset`/`clearAsset` always reset pending/selection/search/hover together — including when re-initializing the *same* asset, so a freshly loaded snapshot is always authoritative and never silently merged with stale local state.
+
+6/6 unit tests passing (`apps/web/tests/workspace/text-annotation-store.vitest.spec.ts`): snapshot initialization starts with clean ephemeral/pending state; switching assets clears everything (no cross-asset leakage); re-initializing the same asset still resets local state; `clearAsset` resets the snapshot itself; the pending-command add/update-status/remove lifecycle; `setSearch` merges rather than replaces.
+
+This is genuinely infrastructure built ahead of its consumer — `text-engine.tsx` is still the US1 placeholder and doesn't call this store yet; US1/US2/US5 wire it up as they land.
+
+Full regression: `pnpm --filter @annotationplatform/web typecheck` (clean, same 2 pre-existing unrelated AUDIO errors), `pnpm --filter @annotationplatform/web lint` (clean), all 12 `*.vitest.spec.ts` files across the entire `apps/web` package — **52/52 passing**, confirming no regression anywhere from this session's Phase 2 Foundational work.
+
+Result: PASS.
+
+---
+
+# Phase 2 Foundational: COMPLETE (T001–T049, 49/49 tasks)
+
+Every Foundational checkpoint from tasks.md's own definition is now real and verified, not just planned:
+- Shared domain contracts (`packages/domain`) are the single source of canonical TEXT shapes — geometry, boundary artifact, decode rules, source limits, properties, the prepare-Job contract.
+- Schema is validated through the isolated-DB migration procedure and **applied** to the shared dev database (user-approved), with the endpoint-FK-Restrict/cascade-cleanup interaction empirically proven both ways.
+- Source can be prepared (real worker pipeline, full Unicode fixture matrix, duplicate-delivery/retry/staleness handling), read, and boundary-validated through one authoritative service (T028) with no duplicated authority logic — verified against real Postgres+MinIO end to end, including a live source-replacement-after-preparation degrading correctly to `SOURCE_MISMATCH`.
+- Foundation transaction primitives (guard claim, receipt replay, rollback-on-rejection, dataset-only guarding) are proven against real PostgreSQL Serializable transactions.
+- TEXT policy is both readable and writable through an authorized route, with real reference/reconfiguration-safety validation and a real product-UI path (browser-verified) to make a label TEXT-eligible — no direct database seeding anywhere in this feature.
+- Source-preparation authorization is mapped to `dataset.read`, independent of `annotation.create` and review freeze.
+- Source/annotation limits come from one shared config module, wired into both deployments' Compose files and readiness checks.
+- The workspace engine registry recognizes TEXT with a capability model and a flush contract that has been regression-tested against IMAGE/VIDEO — **and that regression testing found and fixed a real, pre-existing bug** in the shipped Submit flow (stale-revision 409 against a user's own autosaved edit).
+- Content/taxonomy invalidation events (`ANNOTATION_CHANGED`, `TEXT_POLICY_CHANGED`) exist end to end, proven flowing through the real Redis relay to the gateway.
+- The generic workspace selection DTO now carries real TEXT source/annotation/revision/capability context, and the per-asset TEXT store is ready to hold it.
+
+**User story implementation (US1–US7) can now begin**, per tasks.md's own stated dependency graph.
+
+## T050–T055 — the TEXT source read/prepare routes and their contract tests (Phase 3, User Story 1 begins)
+
+Date: 2026-09-17.
+
+**T054**/`GET /api/assets/{assetId}/text` and **T055**/`POST /api/assets/{assetId}/text/prepare` are thin callers of the already-built T028/T038 services — built via `NextResponse` directly (not the shared `apiSuccess` helper) for the GET route specifically, because `apiSuccess` unconditionally overwrites `Cache-Control` to bare `no-store`, and this endpoint's contract requires the stronger, explicit `private, no-store`. The one genuinely route-specific piece of logic (HTTP-status selection from a service outcome) was extracted into `apps/web/src/lib/annotations/text-source-http-mapping.ts` (`mapTextSourceReadOutcomeToHttp`, `mapTextSourcePrepareOutcomeToHttp`) so it's directly unit-testable.
+
+**Environment constraint discovered and documented, not worked around silently**: this Next.js version's Route Handlers call `cookies()` (via `getRequestActor()`), which throws `"cookies was called outside a request scope"` when a route's exported function is invoked directly outside a real server request — confirmed with a throwaway smoke test against the actual GET route before writing the contract suites (`cookies (.../next/src/server/request/cookies.ts:158) → getRequestActor → GET`). This explains why `loginThroughHttp` (the one existing direct-route-call pattern in this repo's tests) only ever calls the login route, which doesn't read an existing session. **T050/T051 therefore test the route's real logic at the boundary that is actually reachable in this repo's `node --test` environment**: the extracted HTTP-mapping functions directly, source-level assertions that the route contains no duplicated authority logic (e.g. no `"annotation.create"` string-literal permission check at the prepare route's seam — verified precisely enough to not be fooled by the route's own doc comment mentioning that same phrase in backticks), and the underlying T028/T038 services for every contract-relevant scenario. Full live-HTTP-header/status verification remains T170's job (a real two-browser-session acceptance pass against a live server).
+
+- `apps/web/tests/text-source/text-read-route.test.ts` (T050, 7/7 passing): every readiness state maps to 200 (never an error — an unready source is a normal read result); a concealed/missing asset maps to 404; the route source literally contains the `private, no-store` header and calls the shared mapping function; a real UNPREPARED-vs-concealed-vs-missing scenario matrix against the real T028 service.
+- `apps/web/tests/text-source/text-prepare-route.test.ts` (T051, 4/4 passing): 202 for any in-progress/queued/retrying/failed Job state, 200 only once a Job has genuinely `COMPLETED`, 409/404 for the two failure reasons; the route source contains no `annotation.create` permission check; a real REVIEWER successfully triggers preparation on a `NEEDS_REVIEW` (frozen) asset — proving `dataset.read`-only gating live, not just by reading the code; a non-member is concealed.
+- `apps/web/tests/text-source/text-access-denial.test.ts` (T053, 2/2 passing): a member whose `DatasetMember` row is deleted (the same mechanism a real "remove member" action uses) loses read/prepare access on their very next call, with no source excerpt anywhere in the denied outcome; a member of an *unrelated* dataset is concealed (not merely forbidden) from an asset in a dataset they have no relationship to, while the actual owner's access to the same asset is confirmed unaffected (proving the denial is genuinely scope-based, not a fixture bug).
+
+Combined `apps/web/tests/text-source/` suite: **26/26 passing** (`pnpm --filter @annotationplatform/web run test:text-source`).
+
+T052 (the Unicode-fixture-matrix + search-highlight-vs-annotation-rendering integration test) is deferred to land alongside T057/T058 (the real reader/search UI) — its search/highlight assertions have no component to exercise yet; the underlying decode-exactness half of its scope is already covered by T021/T030's worker suite and T028/T029's web source-service suite.
+
+Result: PASS.
+
 ## Session checkpoint
 
-T001–T039 complete and verified with real evidence (39 of 175 tasks). T040–T175 remain, starting with the taxonomy policy *write* lifecycle and label-management UI (T040–T044), then engine registration/save-contract (T045–T049) to close Phase 2 Foundational, followed by all seven user stories and Polish. See the chat summary for the detailed handoff.
+T001–T051, T053–T055 complete and verified with real evidence (53 of 175 tasks). T052 deferred to land with T057/T058 per the note above. Continuing into the remaining User Story 1 UI work (T056 read client, T057 reader, T058 search, T059–T063 status/properties/toolbox wiring). See the chat summary for the detailed handoff.
+
+## T052, T056–T060 — the real reader, search, status fields, and properties tabs land
+
+Date: 2026-09-21.
+
+**T056** (`text-read-client.ts`): `fetchTextSource`/`triggerTextSourcePreparation`/`ensureTextSourceReady`, with `AbortSignal` support (fixed a real bug this session: it didn't check `signal?.aborted` before triggering prepare — caught by a vitest test expecting exactly 1 fetch, observing 2).
+
+**T057/T058** (`text-engine.tsx`): escaped, selectable `<pre>` DOM text (`white-space: pre-wrap`), each segment carrying `data-text-start` as the source-indexed segment table (`text-dom-segments.ts`'s `buildTextSegments`/`resolveContainerSelectionOffsets`), full readiness-state placeholders, and search (`findLiteralMatches`, Previous/Next wrapping via `nextTextMatchIndex`, distinct `search-match`/`search-match-active` highlight classes vs plain text). **T052**'s own test file (`text-reader-fixtures.test.ts`) already exists and passes 11/11 — exact decoded-text preservation across every research.md D1 Unicode fixture, plus `nextTextMatchIndex` wrap-both-directions coverage.
+
+**Real bug found and fixed this session**: the reader's outer `<section>` combined the shared `canvas-grid` utility class (hardcoded `background-color: #18181b`, declared after Tailwind's utility layer in `globals.css`) with `bg-white`. At equal CSS specificity, `canvas-grid`'s later-declared rule won the cascade, so the intended white reading surface silently rendered as a near-black background with `text-zinc-900` text on top — effectively invisible outside an active browser text selection (confirmed via a user screenshot: only `::selection`-highlighted paragraphs were legible). Every other engine (IMAGE/VIDEO/AUDIO) pairs `canvas-grid` with a matching *dark* background, so they were unaffected; TEXT was the only one trying to override it. Fixed by dropping `canvas-grid` from the TEXT reader's section entirely (it never needed the dark canvas look) rather than touching the shared global class.
+
+**T059/T060** (`text-status-fields.tsx`, `text-properties-tabs.tsx`): created, typecheck clean, wired into `workspace-engine-registry.tsx`'s TEXT entry (`Tabs`/`StatusFields`) and briefly deployed.
+
+## T061/T062/T063 — deliberately reverted per explicit user decision, not abandoned
+
+Date: 2026-09-21.
+
+After T059/T060 shipped, the user asked to "rollback the Text toolbox and text properties panel." Investigation found the committed (pre-025) `text-toolbox.tsx` used the *wrong* Zustand store (`image-annotation-store`) and exposed controls for unimplemented TEXT features (bounding box, relation, note, classification) — a real bug, not a preference. This was surfaced explicitly before acting. The user's answer after seeing that: **"i like the previous toolbox and properties panel"** — an explicit, informed preference, not a bug report.
+
+Action taken: `text-toolbox.tsx` reverted to HEAD via `git checkout`. `workspace-engine-registry.tsx`'s TEXT entry reverted `Tabs`/`StatusFields` back to `placeholderTabsEntry("TEXT")`/`placeholderStatusFields("TEXT")` — a **surgical** revert: the registry file also carries the unrelated T046 `flush`/`deriveCapabilities` save-barrier framework (used by every engine, including AUDIO), which was deliberately preserved, not reverted. `text-properties-tabs.tsx`/`text-status-fields.tsx` were left on disk (typecheck-clean, unreferenced) rather than deleted, in case this decision is revisited.
+
+**Net effect on the task list**: T059/T060 stand as complete (the files exist and are correct). T061 (route TEXT through the new properties tabs) and T062 (capability-driven toolbox rewrite) are explicitly NOT done — reverted by deliberate product decision, not oversight. T063 is partially done: `text-engine.tsx` (the reader) already reads real capability state from the registry (`selection.capabilities.select`); the toolbox half cannot until/unless T062 is redone, since the reverted toolbox reads an entirely different (image) store.
+
+**Also fixed in this same window** (build-blocking, unrelated to the rollback): `text-annotation-store.ts` was missing `tool`/`setTool`/`reader`/`setReader` and `text-dom-segments.ts` was missing `nextTextMatchIndex`, both already referenced by `text-engine.tsx`/`text-status-fields.tsx`/tests from further-ahead work-in-progress. Implemented against the existing test contract (`text-annotation-store.vitest.spec.ts`, 8/8 passing) rather than guessing a design: `tool: "select" | "scroll"` (default `"select"`), `setTool` also clears transient `selection` (a tool change invalidates the old tool's in-progress selection), `reader: TextReaderSnapshot | null`; both reset alongside the other ephemeral fields on `initializeAsset`/`clearAsset`. Whole-project `tsc --noEmit` clean; production build succeeds; deployed.
+
+**Phase 3 checkpoint status: NOT fully met.** Reading, search, and status/properties display work end to end, but the toolbox is not yet capability-driven (T062/T063) and the properties panel is not yet routed through the new TEXT-specific tabs (T061) — both by explicit, recorded user choice pending further direction, not failure. Result: **PARTIAL — proceeding to Phase 4 planning requires the user to decide whether to redo T061/T062/T063 first or accept the current placeholder-based panel/toolbox as final for now.**
+
+## T061 redone — explicit user sign-off obtained, toolbox (T062/T063) deliberately left alone
+
+Date: 2026-09-21 (same day as the revert above).
+
+The user asked directly to re-wire the TEXT properties panel and add an annotation-list display "similar to other engines." Given the revert above explicitly required "explicit user sign-off, not a unilateral redo," this was surfaced back to the user before acting, via two clarifying questions: (1) confirm re-wiring `TextPropertiesTabs` into the registry despite today's revert, and (2) disambiguate what "tasks" meant, since no other engine's properties tabs has anything literally named "tasks" (IMAGE/VIDEO show `description/labels/shapes-or-tracks/assets`). The user chose: re-wire now, and "tasks" means an annotation-list tab (spans/notes/relations) — the TEXT equivalent of IMAGE's Shapes / VIDEO's Tracks tab.
+
+**Scope deliberately excluded T062/T063** — the user was not asked about, and did not request, a toolbox rewrite in this round. `text-toolbox.tsx` is untouched and still reads the wrong (`image-annotation-store`) store with controls for unimplemented tools, exactly as documented above. This remains open, pending a future explicit decision.
+
+**Action taken**:
+- `workspace-engine-registry.tsx`: TEXT's `Tabs`/`StatusFields` routed to `TextTabsEntry`/`TextStatusFieldsEntry` (new thin wrappers mirroring `VideoTabsEntry`'s pattern) → `text-properties-tabs.tsx`/`text-status-fields.tsx`. The now-fully-dead `placeholderTabsEntry` helper and its `PlaceholderPropertiesTabs` import were removed (AUDIO already used its own `AudioTabsEntry`, so nothing else referenced it); `placeholder-properties-tabs.tsx` itself was left on disk, unreferenced, not deleted.
+- `text-properties-tabs.tsx`: rewritten with IMAGE/VIDEO-style tab navigation (`Details`/`Annotations`/`Assets`, `grid-cols-3`) replacing the old single-scroll layout. `Details` keeps the prior content (`TextStatusFields` details view, read-only description — no `updateTextDescriptionAction` exists yet so no autosave textarea was invented, `AssetAssignmentPanel`, `WorkflowHistoryPanel`). `Assets` now matches IMAGE/VIDEO's Assets tab exactly: `AssetBrowserFilters`, a dataset-progress bar, `AssetNavigator`, and `BulkActionBar` (previously the old file inlined only a bare `AssetNavigator` with no filters/progress/bulk actions). `Annotations` is new: groups `selection.annotations` (already present on `WorkspaceSelection`, no new fetch) by `geometry.kind` (`text-span`/`text-document`/`text-relation`) into Spans/Classifications/Relations sections, resolves each `labelId` against the shared `useDatasetLabelsStore` taxonomy (loaded the same way IMAGE/VIDEO load it) for a name+color swatch, and surfaces `selection.capabilities.reasons` as inline notices when span/classification/relation creation is gated off. Clicking a span row calls `useTextAnnotationStore().setSelection({startOffset, endOffset})` — the same field `text-engine.tsx`'s reader footer already renders ("Selected [start, end)" + quoted excerpt), so the click has a real, visible effect with zero changes to the reader itself.
+- Not built: any create/edit/delete affordance for spans/classifications/relations (no command is wired to a UI control yet — this is intentionally display-only, consistent with T083's own note that a dedicated `text-annotation-list.tsx` with span controls is separate, later work), and no highlighting of annotation ranges directly in the document body (only the existing footer selection display).
+
+**Verification**: `tsc --noEmit` clean (project-wide, zero errors). `eslint` clean on both changed files. `pnpm vitest run tests/workspace/workspace-engine-registry.vitest.spec.ts tests/workspace/text-annotation-store.vitest.spec.ts tests/workspace/text-engine-capabilities.vitest.spec.ts` — 3 files, 19/19 passing (the registry spec only asserts the engine-key set, not which component TEXT resolves to, so it did not need updating).
+
+**Net effect on the task list**: T061 now stands as done, superseding its revert. T062/T063 remain explicitly not done — still gated on a future, separate user decision about the toolbox.
+
+User confirmed: keep the rollback as final (T061/T062/T063 marked won't-do/superseded above), continue into Phase 4.
+
+## Phase 4 begins — T064/T065/T068/T070/T071(createSpan)/T074/T075
+
+Date: 2026-09-21.
+
+**Discovered mid-task: concurrent editing on this exact feature area.** While reading `text-command-service.ts` to extend it, the file changed on disk between reads — a `permission?: DatasetPermission` parameter had been added to `RunGuardedTextAssetCommandInput`, `requireDatasetPermission` gained an optional transaction-client parameter (`authorization.ts`), and `TextCommandFailure` gained `SOURCE_MISMATCH`/`SOURCE_NOT_READY`/`LIMIT_EXCEEDED`/`DUPLICATE_SPAN`/`INVALID_RANGE`. `git status` then showed `text-annotation-read-service.ts`, `lib/validation/text-span.ts`, `lib/workspace/text-span-selection.ts`, and a real `annotations/route.ts` already existed — none written by me. User's direction: "keep going, reconcile as we go."
+
+**Reconciliation approach taken**: read the already-built route (`GET`/`POST /api/assets/{assetId}/text/annotations`) to discover its exact expected interface — a single `createTextSpan(actor, assetId, rawInput)` entry point matching `TextAssetCommandOutcome<SafeTextAnnotation>` — and rewrote `text-span-service.ts` to that exact contract rather than the lower-level `applyCreateSpan(tx, ctx, ...)` shape I'd started with. Adopted the other editor's failure-code vocabulary throughout instead of my own generic `CONFLICT`/`INVALID_REQUEST` reuse. Added one new code myself, `POLICY_STALE` (for the `expectedPolicyRevision` check data-model.md's atomic algorithm step 3 requires — "New commands validate `expectedPolicyRevision`" — which nothing else had wired yet), following the same naming convention.
+
+**`runGuardedTextAssetCommand`'s `apply` callback `ctx` extended** with the full `actor: RequestActor` (previously only `actorId: string`) — needed so span commands can call `requireDatasetPermission(ctx.actor, ...)` *with the transaction client* for a genuine in-transaction permission recheck (data-model.md atomic algorithm step 1: "within the transaction, recheck current dataset membership and permissions"), rather than the actor-less workaround I'd started with. Purely additive; confirmed via full `tsc --noEmit` and the existing `text-command-foundation.test.ts` (still 100% passing) that this doesn't break the one other consumer of `apply`.
+
+**`text-span-service.ts`** (`createTextSpan`): parses `createTextSpanSchema` (strict envelope, already defined by the other editor), resolves the verified source via `readTextSource` *before* opening the transaction (no I/O inside it, per the atomic algorithm), then `runGuardedTextAssetCommand` → `applyCreateSpan`: in-transaction recheck of source identity and policy revision (both against cheap already-open-transaction reads, catching a source/policy race since the outer verification), range validation (finite safe integers, `0 <= start < end <= sourceCodeUnitLength`, both endpoints present in the verified boundary-offset array via binary search), ENTITY-scope label eligibility (`Label.scope === "ENTITY"` — not `textEligibility`, correcting my own wrong assumption about the field name), exact-duplicate rejection (`DUPLICATE_SPAN`), count admission against `getTextSourceLimits().maxAnnotations`, one parent `Asset.revision` bump, the `Annotation` row itself, and the `ANNOTATION_CHANGED` outbox dispatch — all inside the one guarded transaction.
+
+**Test evidence** (`apps/web/tests/text-annotations/text-span-commands.test.ts`, all against real Postgres + MinIO, no mocks): **7/7 passing**.
+- Exact-offset creation ("OpenAI" on "OpenAI builds AI." → `startOffset=0, endOffset=6`) — T065.
+- Strict envelope rejection (unknown field, malformed body) — T064.
+- Reversed range and out-of-bounds range both correctly reach `INVALID_RANGE` (the envelope schema only checks individual field types, not `start<end` — a wrong assumption in my first draft of this test, fixed after seeing the real behavior, not by weakening the assertion).
+- Overlapping spans ("New York" inside "New York University") both persist as distinct rows — T068.
+- Exact duplicate (different `operationId`, same range/label) → `DUPLICATE_SPAN`; identical `operationId` replay → same result, no second row, `replayed: true`.
+- Wrong-scope label (`CLASSIFICATION`) rejected; `ENTITY`-scope label succeeds.
+- Stale `expectedPolicyRevision` (captured before a label-eligibility change bumped it) → `POLICY_STALE`.
+
+Full `apps/web/tests/text-annotations/` directory: **32/32 passing** (no regression from the `ctx.actor` extension or the new failure code). Whole-project `tsc --noEmit`: clean.
+
+**Not yet done**: `updateSpan`/`deleteAnnotation` commands (T071's remaining two-thirds — check current file state first, since concurrent work may have added them since this was written), T066 (Unicode fixture matrix through the real command path — my test fixture was ASCII-only, deliberately, to keep this pass scoped), T067 (geometry/label/property isolation), T069/T072 (real-concurrency races), T073 (property-patch wiring), T076–T085 (generic reader integration, client, UI controls, export). Session paused here to check in with the user given the concurrent-editing discovery and the size of what's left.
+
+## T071 completed — updateSpan/deleteAnnotation, plus the command dispatcher
+
+Date: 2026-09-21 (same-day continuation, after user said "continue" and confirmed no one else was actively on `updateSpan`/`deleteAnnotation`).
+
+**Also observed and explicitly not touched**: `workspace-engine-registry.tsx` had been changed on disk again — TEXT's `Tabs`/`StatusFields` were wired back to `text-properties-tabs.tsx`/`text-status-fields.tsx`, reversing the T061/T062 rollback from earlier this session. The file itself already carries a clear note ("Redone 2026-09-21 per explicit user sign-off, superseding the same-day revert") — this was the other concurrent editor correctly documenting a re-decision, not an accident. Flagged it to the user per the "say so if it looks wrong" guidance, got no pushback, moved on without reverting it myself. `text-toolbox.tsx` itself is unchanged in substance (still the pre-025 icon grid) — only a tooltip and a label rename ("Highlight" → "Highlight Span") were added on top of it.
+
+Checked first (per the plan) whether `updateSpan`/`deleteAnnotation` already existed: they didn't — still only `createTextSpan`, and the route still only had `GET`/`POST` calling it directly.
+
+**Added to `text-span-service.ts`**:
+- `applyUpdateSpan`/`updateTextSpan`: in-transaction ownership check (own vs any, same pattern as create), source-identity and policy-revision recheck, range/label patch (either or both, matching contracts/workspace.md's "nonempty patch limited to range, label and propertyPatch" — propertyPatch deferred to T073), geometry never touches `sourceIdentity`/kind, duplicate-after-patch check (skips the annotation's own row), `expectedRevision`-guarded `updateMany` → `REVISION_STALE` on mismatch.
+- `applyDeleteSpan`/`deleteTextAnnotation`: same ownership/source/policy rechecks, `expectedRevision`-guarded `deleteMany`, referenced-span FK rejection mapped to `REFERENCED_SCOPE_LOCKED` (no relations exist yet to actually trigger this — real coverage is US4's job).
+- `submitTextAnnotationCommand(actor, assetId, rawInput)`: the new single dispatch entry point, peeking `command.kind` via a new non-throwing `peekTextAnnotationCommandKind` helper in `lib/validation/text-span.ts` before picking which strict schema/handler applies. This matches contracts/workspace.md exactly — one endpoint, one discriminated command envelope — rather than splitting into REST-style per-verb routes. The route (`annotations/route.ts`) now calls this dispatcher instead of `createTextSpan` directly, and its status-code logic was fixed to only return 201 for a genuinely new, non-replayed `createSpan` (update/delete now correctly return 200).
+- Added `updateTextSpanSchema`/`deleteTextAnnotationSchema` to `lib/validation/text-span.ts`, matching `createTextSpanSchema`'s established envelope style; `updateSpan`'s command schema rejects an empty patch (no range/label field present at all) via `.refine`.
+
+**Test evidence** (`text-span-commands.test.ts`, extended, real Postgres + MinIO): **11/11 passing**, including 4 new tests —
+- `updateTextSpan` range change (mutates the same row, revision+1, geometry's `sourceIdentity` unchanged) then a stale-revision repeat rejected as `REVISION_STALE`.
+- `deleteTextAnnotation` deletes, confirms the row is actually gone, and a repeat delete against the same `expectedRevision` correctly returns `NOT_FOUND` (not `REVISION_STALE` — the row doesn't exist to be stale about).
+- Ownership: a LABELER (has only `annotation.updateOwn`) is `FORBIDDEN` from updating another user's span; the owning MANAGER can still update their own.
+- `submitTextAnnotationCommand` dispatch: routes a real `createSpan` through correctly; an unrecognized `command.kind` and a missing `command` both return `INVALID_REQUEST`, never a crash.
+
+Full `apps/web/tests/text-annotations/` directory: 36/36 passing on a clean rerun (one earlier run showed a single flaky failure that did not reproduce — looked like shared-dev-Postgres contention from concurrent test suites, not a defect in this change; not chased further). Whole-project `tsc --noEmit`: clean.
+
+**T071 is now fully complete.** Remaining US2 work: T066 (Unicode fixture matrix), T067 (isolation), T069/T072 (real-concurrency races), T073 (property patches), T076–T085 (generic reader projection, client, UI, export).

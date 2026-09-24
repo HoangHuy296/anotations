@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { imageStatusPresentation } from "@/lib/image-status";
 import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
+import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import { useDatasetLabels, useDatasetLabelsStore, type DatasetLabel } from "@/stores/dataset-labels-store";
 import type { SafeImageAnnotation, SafeImageWorkspaceAsset } from "@/types/image-workspace";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
@@ -72,7 +73,6 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
   const upsertSafeAnnotation = useAnnotationStore((store) => store.upsertSafeAnnotation);
   const removeSafeAnnotation = useAnnotationStore((store) => store.removeSafeAnnotation);
   const scheduleAutosave = useAnnotationStore((store) => store.scheduleAutosave);
-  const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const setConflictDraftInStore = useAnnotationStore((store) => store.setConflictDraft);
 
   // `selection.labels` (SSR-projected, still used as-is by `image-engine.tsx`
@@ -263,10 +263,8 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
   }
 
   async function flushBeforeNavigation() {
-    await flushAllAutosaves();
-    const latestStates = Object.values(useAnnotationStore.getState().saveStates);
-    const needsResolution = latestStates.some((state) => state === "failed" || state === "conflict");
-    return !needsResolution || window.confirm("An image edit could not be saved or has a conflict. Discard the local draft and leave this image?");
+    const flushed = await workspaceEngineRegistry.IMAGE.flush(datasetId, image.id);
+    return flushed.ok || window.confirm("An image edit could not be saved or has a conflict. Discard the local draft and leave this image?");
   }
 
   const activeTab = (["description", "labels", "shapes", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";

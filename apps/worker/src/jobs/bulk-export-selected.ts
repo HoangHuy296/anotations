@@ -67,6 +67,10 @@ export async function processBulkExportSelected(db: PrismaClient, jobId: string,
     if (await cancellationRequested(db, jobId)) return (await cancelJob(db, { jobId, lockToken })).kind === "updated" ? "canceled" : "refused";
 
     const manifest = await buildExportSelectedManifest(db, job.datasetId, assetIds, new Date());
+    if (!manifest) {
+      await failJob(db, { jobId, lockToken });
+      return "failed";
+    }
     const totalItems = manifest.assets.length + manifest.labels.length + manifest.annotations.length;
     if ((await updateJobProgress(db, { jobId, lockToken, progress: 40, totalItems, processedItems: 0, successItems: 0, failedItems: 0, skippedItems: 0 })).kind !== "updated") return "refused";
     if (!(await setStage(db, jobId, lockToken, "EXPORTING_SELECTED_ASSETS"))) return "refused";

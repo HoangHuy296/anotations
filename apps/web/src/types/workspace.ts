@@ -3,6 +3,9 @@ import type { AssetStatus, AssetWorkflowAction, Modality } from "@internal/db";
 import type { SafeMediaReadiness } from "@/types/media-processing";
 import type { SafeVideoAnnotations } from "@/types/video-annotation";
 import type { SafeImageAnnotation, SafeImageWorkspaceAsset, SafeReadOnlyImageAnnotation, SafeWorkspaceLabel } from "@/types/image-workspace";
+import type { TextSourceReadiness } from "@/lib/annotations/text-source-readiness";
+import type { TextEngineCapabilities } from "@/lib/workspace/text-engine-capabilities";
+import type { SafeTextAnnotation } from "@annotationplatform/domain/text-annotation-contract";
 
 /** Lightweight, modality-neutral record used by the shared Assets navigator. */
 export type SafeWorkspaceAsset = {
@@ -44,13 +47,26 @@ export type SafeReadOnlyWorkspaceAsset = {
   language: string | null;
   createdAt: string;
   updatedAt: string;
+  /** The current Asset revision -- the same value the active-engine flush contract reads back after a save. */
+  revision: number;
+  status: AssetStatus;
 };
+
+/**
+ * Cheap readiness-only projection (T027's `deriveTextSourceReadiness`) --
+ * never the full verified source text/boundaries. Those come from the
+ * dedicated `GET /api/assets/{assetId}/text` route (T054) once the reader
+ * mounts, not the broad workspace-selection DTO every navigation loads.
+ */
+export type SafeTextSourceContext =
+  | { readiness: "READY"; sourceIdentity: string; offsetUnit: "UTF16_CODE_UNIT"; sourceCodeUnitLength: number; sourceByteLength: number }
+  | { readiness: Exclude<TextSourceReadiness, "READY"> };
 
 export type WorkspaceSelection =
   | { engine: "IMAGE"; asset: SafeImageWorkspaceAsset; annotations: SafeImageAnnotation[]; unsupportedAnnotations: SafeReadOnlyImageAnnotation[]; labels: SafeWorkspaceLabel[] }
   | { engine: "VIDEO"; asset: { id: string; modality: "VIDEO"; filename: string; description: string | null; version: number; status: AssetStatus }; readiness: SafeMediaReadiness; annotations: SafeVideoAnnotations }
-  | { engine: "AUDIO"; asset: { id: string; modality: "AUDIO"; filename: string; description: string | null }; readiness: SafeMediaReadiness }
-  | { engine: "TEXT"; asset: SafeReadOnlyWorkspaceAsset };
+  | { engine: "AUDIO"; asset: { id: string; modality: "AUDIO"; filename: string; description: string | null; version: number; status: AssetStatus }; readiness:SafeMediaReadiness }
+  | { engine: "TEXT"; asset: SafeReadOnlyWorkspaceAsset; source: SafeTextSourceContext; annotations: SafeTextAnnotation[]; capabilities: TextEngineCapabilities };
 
 /**
  * Asset Browser query shape (022). Deliberately excludes `sort`/`order` and

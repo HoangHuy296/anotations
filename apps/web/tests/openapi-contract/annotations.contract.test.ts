@@ -28,7 +28,7 @@ import {
 } from "./helpers";
 
 const skip = enabled ? false : "Set OPENAPI_CONTRACT_TESTS=1 against a running web service (see tests/openapi-contract/helpers.ts).";
-const ANNOTATION_KEYS = ["id", "assetId", "labelId", "label", "modality", "type", "geometry", "status", "properties", "revision", "createdAt", "updatedAt"] as const;
+const ANNOTATION_KEYS = ["id", "assetId", "labelId", "label", "modality", "type", "geometry", "status", "properties", "revision", "createdAt", "updatedAt", "fromAnnotationId", "toAnnotationId"] as const;
 
 const userIds: string[] = [];
 const datasetIds: string[] = [];

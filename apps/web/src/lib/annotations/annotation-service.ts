@@ -27,6 +27,7 @@ const ANNOTATIONS_PER_ASSET_READ_LIMIT = 5_000;
 const annotationSelect = {
   id: true, assetId: true, labelId: true, modality: true, type: true, geometry: true,
   status: true, properties: true, revision: true, createdAt: true, updatedAt: true,
+  fromAnnotationId: true, toAnnotationId: true,
   label: { select: { id: true, name: true, color: true } },
 } satisfies Prisma.AnnotationSelect;
 

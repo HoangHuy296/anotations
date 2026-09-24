@@ -17,8 +17,16 @@ type LabelSummary = {
   color: string;
   description: string | null;
   hotkey: string | null;
+  modality: "IMAGE" | "VIDEO" | "TEXT" | "AUDIO" | null;
+  scope: string;
   _count: { annotations: number };
 };
+
+const TEXT_ELIGIBLE_SCOPES = new Set(["ENTITY", "CLASSIFICATION", "SENTIMENT", "INTENT", "RELATION"]);
+function textEligibilityBadge(label: Pick<LabelSummary, "modality" | "scope">) {
+  if ((label.modality !== null && label.modality !== "TEXT") || !TEXT_ELIGIBLE_SCOPES.has(label.scope)) return null;
+  return label.scope;
+}
 
 export default async function LabelsPage() {
   await connection();
@@ -162,6 +170,11 @@ export default async function LabelsPage() {
                           </p>
                         </div>
                       </div>
+                      {textEligibilityBadge(label) && (
+                        <Badge variant="success" className="shrink-0">
+                          TEXT · {textEligibilityBadge(label)}
+                        </Badge>
+                      )}
                       {label.hotkey && (
                         <Badge variant="neutral" className="shrink-0">
                           <span className="font-mono">{label.hotkey}</span>

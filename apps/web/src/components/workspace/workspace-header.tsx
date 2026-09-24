@@ -22,7 +22,6 @@ import { DiscussionDrawer } from "@/components/workspace/discussion-drawer";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
-import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
 import { useWorkflowShortcuts } from "@/components/workspace/use-workflow-shortcuts";
 import { useCollaborationRealtime } from "@/components/workspace/use-collaboration-realtime";
 import { CollaborationPresence } from "@/components/workspace/collaboration-presence";
@@ -96,7 +95,7 @@ export function WorkspaceHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        {workflow ? <WorkflowControls key={`${workflow.assetId}:${workflow.revision}`} workflow={workflow} /> : null}
+        {workflow ? <WorkflowControls key={`${workflow.assetId}:${workflow.revision}`} workflow={workflow} engine={engine ?? "IMAGE"} /> : null}
         {discussion ? <Button type="button" size="sm" variant="secondary" aria-label="Open asset discussion" onClick={() => setDiscussionOpen(true)}><ChatCircleText aria-hidden="true" size={17} />Discussion</Button> : null}
         <CollaborationPresence members={presence} />
         <span className={`hidden items-center gap-2 text-xs sm:flex ${conflict ? "text-rose-700" : "text-zinc-500"}`}>
@@ -121,7 +120,7 @@ export function WorkspaceHeader({
 type WorkflowEvent = { id: string; action: string; fromStatus: string | null; toStatus: string | null; feedback: string | null; createdAt: string; actor: { name: string | null; email: string } };
 type WorkflowAssetResponse = { status: SafeWorkspaceWorkflow["status"]; revision: number };
 
-function WorkflowControls({ workflow }: { workflow: SafeWorkspaceWorkflow }) {
+function WorkflowControls({ workflow, engine }: { workflow: SafeWorkspaceWorkflow; engine: Modality }) {
   const router = useRouter();
   const [state, setState] = useState({ status: workflow.status, revision: workflow.revision });
   const [history, setHistory] = useState<WorkflowEvent[] | null>(null);
@@ -139,18 +138,27 @@ function WorkflowControls({ workflow }: { workflow: SafeWorkspaceWorkflow }) {
     else { setError("Workflow data is unavailable. Reload the workspace."); }
   }, [workflow.assetId, workflow.datasetId]);
   const act = useCallback(async (action: SafeWorkspaceWorkflow["permittedActions"][number]) => {
+    // Dirty work must finish, and the caller must read the resulting current
+    // asset revision, before Submit/Resubmit use it -- a failed flush blocks
+    // the action entirely rather than proceeding with stale state (a prior
+    // gap: firing both flushes and immediately reusing the page-load
+    // revision prop could spuriously 409 "this asset changed" against the
+    // user's own just-saved edit).
+    let expectedRevision = state.revision;
     if (action === "SUBMIT" || action === "RESUBMIT") {
-      await useAnnotationStore.getState().flushAllAutosaves();
-      await flushVideoAutosaves();
+      setBusy(true); setError(null);
+      const flushed = await workspaceEngineRegistry[engine].flush(workflow.datasetId, workflow.assetId);
+      if (!flushed.ok) { setBusy(false); setError("Your changes could not be saved. Try again before submitting."); return; }
+      expectedRevision = flushed.assetRevision;
     }
     setBusy(true); setError(null);
-    const response = await fetch(`/api/datasets/${workflow.datasetId}/assets/${workflow.assetId}/workflow`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, expectedRevision: state.revision, ...(action === "REJECT" ? { feedback } : {}) }) });
+    const response = await fetch(`/api/datasets/${workflow.datasetId}/assets/${workflow.assetId}/workflow`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, expectedRevision, ...(action === "REJECT" ? { feedback } : {}) }) });
     const payload = await response.json().catch(() => null) as { data?: { asset?: WorkflowAssetResponse }; error?: { code?: string; message?: string } } | null;
     setBusy(false);
     const parsed = workflowAssetStateSchema.safeParse(payload?.data?.asset);
     if (!response.ok || !parsed.success) { setError(payload?.error?.code === "STALE_REVISION" ? "This asset changed. Reload before deciding." : payload?.error?.message ?? "Workflow action failed."); return; }
     setState(parsed.data); setFeedback(""); await loadHistory(); router.refresh();
-  }, [feedback, loadHistory, router, state.revision, workflow.assetId, workflow.datasetId]);
+  }, [engine, feedback, loadHistory, router, state.revision, workflow.assetId, workflow.datasetId]);
   const submitShortcut = useCallback(() => { void act("SUBMIT"); }, [act]);
   const approveShortcut = useCallback(() => { void act("APPROVE"); }, [act]);
   const validState = workflowAssetStateSchema.safeParse(state).success;

@@ -8,7 +8,7 @@ import { workspaceEngineRegistry, type WorkspaceEngineRegistryEntry } from "@/li
 // established by the sibling `*.vitest.spec.ts` files in this directory.
 
 describe("workspaceEngineRegistry", () => {
-  it("has exactly one entry per WorkspaceSelection engine, each with Component/Toolbox/Tabs/StatusFields", () => {
+  it("has exactly one entry per WorkspaceSelection engine, each with Component/Toolbox/Tabs/StatusFields/flush", () => {
     const keys = Object.keys(workspaceEngineRegistry).sort();
     expect(keys).toEqual(["AUDIO", "IMAGE", "TEXT", "VIDEO"]);
     for (const engine of keys as Array<keyof typeof workspaceEngineRegistry>) {
@@ -17,12 +17,13 @@ describe("workspaceEngineRegistry", () => {
       expect(typeof entry.Toolbox).toBe("function");
       expect(typeof entry.Tabs).toBe("function");
       expect(typeof entry.StatusFields).toBe("function");
+      expect(typeof entry.flush).toBe("function");
     }
   });
 
   it("gives every engine a distinct Component/Toolbox/Tabs/StatusFields reference (no accidental sharing across modalities)", () => {
     const entries = Object.values(workspaceEngineRegistry);
-    for (const field of ["Component", "Toolbox", "Tabs", "StatusFields"] as const) {
+    for (const field of ["Component", "Toolbox", "Tabs", "StatusFields", "flush"] as const) {
       const refs = entries.map((entry) => entry[field]);
       expect(new Set(refs).size).toBe(refs.length);
     }
@@ -35,6 +36,7 @@ describe("workspaceEngineRegistry", () => {
       Toolbox: () => null,
       Tabs: () => null,
       StatusFields: () => null,
+      flush: async () => ({ ok: false, reason: "SYNTHETIC" }),
     };
     // A future modality only needs a new key in this map (spec FR-040,
     // FR-044) -- simulated here with a plain object spread since the real

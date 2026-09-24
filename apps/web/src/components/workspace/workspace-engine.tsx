@@ -1,3 +1,5 @@
+"use client";
+
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import type { WorkspaceSelection } from "@/types/workspace";
 

@@ -1,3 +1,5 @@
+"use client";
+
 import type { ComponentType, ReactElement } from "react";
 import type { AssetStatus, Modality } from "@internal/db";
 
@@ -12,12 +14,18 @@ import { TextToolbox } from "@/components/workspace/text-toolbox";
 import { ImagePropertiesTabs } from "@/components/workspace/image-properties-tabs";
 import { VideoPropertiesTabs } from "@/components/workspace/video-properties-tabs";
 import { AudioPropertiesTabs } from "@/components/workspace/audio-properties-tabs";
-import { PlaceholderPropertiesTabs } from "@/components/workspace/placeholder-properties-tabs";
+import { TextPropertiesTabs } from "@/components/workspace/text-properties-tabs";
+import { TextStatusFields } from "@/components/workspace/text-status-fields";
 import { ImageStatusFields } from "@/components/workspace/image-status-fields";
 import { PlaceholderStatusFields } from "@/components/workspace/placeholder-status-fields";
 import type { AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
+import { createEngineFlush, type EngineFlushResult } from "@/lib/workspace/workspace-engine-flush";
+import { UNAVAILABLE_TEXT_ENGINE_CAPABILITIES, type TextEngineCapabilities } from "@/lib/workspace/text-engine-capabilities";
+
+export type { EngineFlushResult } from "@/lib/workspace/workspace-engine-flush";
+export type { TextEngineCapabilities } from "@/lib/workspace/text-engine-capabilities";
 
 type Engine = WorkspaceSelection["engine"];
 
@@ -56,6 +64,15 @@ export type WorkspaceEngineRegistryEntry = {
   Tabs: ComponentType<PropertiesTabsProps>;
   /** Rendered by the shared status surface (`workspace-header.tsx`). */
   StatusFields: ComponentType<Record<string, never>>;
+  /**
+   * The active-engine save barrier (data-model.md "Workflow and client
+   * state"): every navigation/workflow caller awaits this before reading
+   * the current asset revision. Success carries that revision; failure
+   * blocks Submit/navigation instead of proceeding with stale state.
+   */
+  flush: (datasetId: string, assetId: string) => Promise<EngineFlushResult>;
+  /** TEXT-only for now (T045); other engines are always fully capable once an asset is selected. */
+  deriveCapabilities?: (selection: WorkspaceSelection) => TextEngineCapabilities;
 };
 
 function isWorkflowReadOnly(status: AssetStatus) {
@@ -82,7 +99,7 @@ function AudioEngineEntry({ selection }: { selection: WorkspaceSelection }): Rea
 
 function TextEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
   if (selection.engine !== "TEXT") return null;
-  return <TextEngine key={selection.asset.id} document={selection.asset} />;
+  return <TextEngine key={selection.asset.id} selection={selection} />;
 }
 
 function ImageTabsEntry(props: PropertiesTabsProps): ReactElement | null {
@@ -100,11 +117,13 @@ function AudioTabsEntry(props: PropertiesTabsProps): ReactElement | null {
   return <AudioPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} filters={props.filters} />;
 }
 
-function placeholderTabsEntry(engine: "AUDIO" | "TEXT") {
-  return function PlaceholderTabsEntry(props: PropertiesTabsProps): ReactElement | null {
-    if (props.selection.engine !== engine) return null;
-    return <PlaceholderPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} filters={props.filters} />;
-  };
+function TextTabsEntry(props: PropertiesTabsProps): ReactElement | null {
+  if (props.selection.engine !== "TEXT") return null;
+  return <TextPropertiesTabs datasetId={props.datasetId} selection={props.selection} assets={props.assets} page={props.page} pageSize={props.pageSize} totalAssets={props.totalAssets} completedAssets={props.completedAssets} search={props.search} statuses={props.statuses} selectedAssetId={props.selectedAssetId} tab={props.tab} setTab={props.setTab} filters={props.filters} />;
+}
+
+function TextStatusFieldsEntry() {
+  return <TextStatusFields />;
 }
 
 function placeholderStatusFields(engine: Exclude<Modality, "IMAGE">) {
@@ -113,29 +132,41 @@ function placeholderStatusFields(engine: Exclude<Modality, "IMAGE">) {
   };
 }
 
+function deriveTextCapabilitiesEntry(selection: WorkspaceSelection): TextEngineCapabilities {
+  // workspace-read.ts (T048) computes the real capabilities server-side
+  // (readiness + policy + permissions + workflow state) and carries them on
+  // the selection itself; this is just the registry's typed accessor.
+  return selection.engine === "TEXT" ? selection.capabilities : UNAVAILABLE_TEXT_ENGINE_CAPABILITIES;
+}
+
 export const workspaceEngineRegistry: Record<Engine, WorkspaceEngineRegistryEntry> = {
   IMAGE: {
     Component: ImageEngineEntry,
     Toolbox: ImageToolbox,
     Tabs: ImageTabsEntry,
     StatusFields: ImageStatusFields,
+    flush: createEngineFlush(false),
   },
   VIDEO: {
     Component: VideoEngineEntry,
     Toolbox: VideoToolbox,
     Tabs: VideoTabsEntry,
     StatusFields: placeholderStatusFields("VIDEO"),
+    flush: createEngineFlush(true),
   },
   AUDIO: {
     Component: AudioEngineEntry,
     Toolbox: AudioToolbox,
     Tabs: AudioTabsEntry,
     StatusFields: placeholderStatusFields("AUDIO"),
+    flush: createEngineFlush(false),
   },
   TEXT: {
     Component: TextEngineEntry,
     Toolbox: TextToolbox,
-    Tabs: placeholderTabsEntry("TEXT"),
-    StatusFields: placeholderStatusFields("TEXT"),
+    Tabs: TextTabsEntry,
+    StatusFields: TextStatusFieldsEntry,
+    flush: createEngineFlush(false, true),
+    deriveCapabilities: deriveTextCapabilitiesEntry,
   },
 };

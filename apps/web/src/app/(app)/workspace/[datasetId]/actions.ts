@@ -16,6 +16,7 @@ import {
   updateImageDescription,
 } from "@/lib/workspace/image-mutations";
 import { updateVideoDescription } from "@/lib/workspace/video-mutations";
+import { updateTextDescription } from "@/lib/workspace/text-mutations";
 import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
 
 type ActionFailure = { ok: false; status: 400 | 401 | 403 | 404 | 409; error: "INVALID_REQUEST" | "AUTH_REQUIRED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" };
@@ -88,6 +89,15 @@ export async function updateVideoDescriptionAction(input: unknown) {
   const actor = await getRequestActor();
   if (!actor) return unauthenticated();
   const result = await updateVideoDescription(actor, parsed.data);
+  return result.ok ? { ok: true as const, status: 200 as const, asset: result.value } : fromStatus(result.status);
+}
+
+export async function updateTextDescriptionAction(input: unknown) {
+  const parsed = updateAssetDescriptionInputSchema.safeParse(input);
+  if (!parsed.success) return invalid();
+  const actor = await getRequestActor();
+  if (!actor) return unauthenticated();
+  const result = await updateTextDescription(actor, parsed.data);
   return result.ok ? { ok: true as const, status: 200 as const, asset: result.value } : fromStatus(result.status);
 }
 

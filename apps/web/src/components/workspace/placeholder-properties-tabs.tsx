@@ -5,8 +5,7 @@ import type { MouseEvent } from "react";
 import type { AssetStatus } from "@internal/db";
 
 import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
-import { useAnnotationStore } from "@/stores/image-annotation-store";
-import { flushVideoAutosaves } from "@/lib/workspace/video-autosave";
+import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
@@ -56,13 +55,12 @@ const tabLabelsByEngine: Record< "AUDIO" | "TEXT", string[]> = {
  */
 export function PlaceholderPropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, filters }: PlaceholderPropertiesTabsProps) {
   const router = useRouter();
-  const flushAllAutosaves = useAnnotationStore((store) => store.flushAllAutosaves);
   const tabLabels = tabLabelsByEngine[selection.engine];
 
   async function guardNavigation(event: MouseEvent<HTMLAnchorElement>, href: string) {
     event.preventDefault();
-    await flushAllAutosaves();
-    await flushVideoAutosaves();
+    const flushed = await workspaceEngineRegistry[selection.engine].flush(datasetId, selection.asset.id);
+    if (!flushed.ok && !window.confirm("An edit could not be saved or has a conflict. Discard the local draft and leave this asset?")) return;
     router.push(href);
   }
 

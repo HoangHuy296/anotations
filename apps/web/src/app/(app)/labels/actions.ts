@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
-import { deleteUnreferencedLabel } from "@/lib/workspace/label-management";
+import { createLabelWithTextEligibility, deleteUnreferencedLabel, updateLabelWithTextEligibility } from "@/lib/workspace/label-management";
 import {
   labelIdSchema,
   labelSchema,
@@ -59,6 +59,7 @@ function readLabelInput(formData: FormData) {
     color: formData.get("color"),
     description: formData.get("description"),
     hotkey: formData.get("hotkey"),
+    textEligibility: formData.get("textEligibility"),
   });
 }
 
@@ -110,16 +111,19 @@ export async function createLabelAction(
       });
     }
 
-    await db.label.create({
-      data: {
-        datasetId: parsed.data.datasetId,
-        normalizedName: parsed.data.name.toLocaleLowerCase(),
-        name: parsed.data.name,
-        color: parsed.data.color,
-        description: parsed.data.description || null,
-        hotkey: parsed.data.hotkey || null,
-      },
+    const created = await createLabelWithTextEligibility(actor, {
+      datasetId: parsed.data.datasetId,
+      name: parsed.data.name,
+      color: parsed.data.color,
+      description: parsed.data.description || null,
+      hotkey: parsed.data.hotkey || null,
+      textEligibility: parsed.data.textEligibility,
     });
+    if (!created.ok) {
+      if (created.reason === "DUPLICATE_NAME") return invalidInputResult({ name: ["A label with this name already exists."] });
+      if (created.reason === "FORBIDDEN") return unauthorizedResult();
+      return { success: false, message: "The label could not be saved. Try again." };
+    }
 
     revalidatePath("/labels");
     return {
@@ -176,22 +180,23 @@ export async function updateLabelAction(
       });
     }
 
-    const updated = await db.label.updateMany({
-      where: { id: parsedId.data, datasetId: parsed.data.datasetId },
-      data: {
-        normalizedName: parsed.data.name.toLocaleLowerCase(),
-        name: parsed.data.name,
-        color: parsed.data.color,
-        description: parsed.data.description || null,
-        hotkey: parsed.data.hotkey || null,
-      },
+    const updated = await updateLabelWithTextEligibility(actor, {
+      labelId: parsedId.data,
+      datasetId: parsed.data.datasetId,
+      name: parsed.data.name,
+      color: parsed.data.color,
+      description: parsed.data.description || null,
+      hotkey: parsed.data.hotkey || null,
+      textEligibility: parsed.data.textEligibility,
     });
 
-    if (updated.count === 0) {
-      return {
-        success: false,
-        message: "This label no longer exists.",
-      };
+    if (!updated.ok) {
+      if (updated.reason === "DUPLICATE_NAME") return invalidInputResult({ name: ["A label with this name already exists."] });
+      if (updated.reason === "FORBIDDEN") return unauthorizedResult();
+      if (updated.reason === "REFERENCED_SCOPE_LOCKED") {
+        return { success: false, message: "This label is assigned to annotations, so its TEXT eligibility cannot change." };
+      }
+      return { success: false, message: "This label no longer exists." };
     }
 
     revalidatePath("/labels");

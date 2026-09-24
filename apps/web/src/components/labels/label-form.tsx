@@ -12,7 +12,16 @@ import {
   type LabelActionResult,
 } from "@/app/(app)/labels/actions";
 import { Button } from "@/components/ui/button";
-import { labelSchema, type LabelInput } from "@/lib/validation/label";
+import { labelSchema, textEligibilityScopeValues, type LabelInput } from "@/lib/validation/label";
+
+const TEXT_ELIGIBILITY_OPTIONS = [
+  { value: "", label: "Not TEXT-eligible" },
+  { value: "ENTITY", label: "Entity (span)" },
+  { value: "CLASSIFICATION", label: "Classification" },
+  { value: "SENTIMENT", label: "Sentiment" },
+  { value: "INTENT", label: "Intent" },
+  { value: "RELATION", label: "Relation" },
+] as const;
 
 type LabelFormProps = {
   mode: "create" | "edit";
@@ -24,8 +33,18 @@ type LabelFormProps = {
     color: string;
     description: string | null;
     hotkey: string | null;
+    modality?: "IMAGE" | "VIDEO" | "TEXT" | "AUDIO" | null;
+    scope?: string;
   };
 };
+
+/** The select's own "no change" value is empty string; a previously-TEXT-eligible label being edited back to that value sends the explicit "NONE" clear, everything else sends undefined (leave modality/scope untouched). */
+function currentTextEligibility(label: LabelFormProps["label"]): LabelInput["textEligibility"] {
+  if (label?.modality === "TEXT" && label.scope && (textEligibilityScopeValues as readonly string[]).includes(label.scope)) {
+    return label.scope as (typeof textEligibilityScopeValues)[number];
+  }
+  return "";
+}
 
 const inputClassName =
   "mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500";
@@ -50,6 +69,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
       color: label?.color ?? "#0EA5E9",
       description: label?.description ?? "",
       hotkey: label?.hotkey ?? "",
+      textEligibility: currentTextEligibility(label),
     },
   });
   const color = useWatch({ control, name: "color" });
@@ -63,6 +83,10 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
     formData.set("color", values.color);
     formData.set("description", values.description);
     formData.set("hotkey", values.hotkey);
+    // The select always expresses the full desired end state: "Not
+    // TEXT-eligible" is the explicit "NONE" clear, never a silent no-op --
+    // this is a full-form submit, not a partial patch.
+    formData.set("textEligibility", values.textEligibility || "NONE");
 
     startTransition(() => {
       const action =
@@ -95,6 +119,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
               color: "#0EA5E9",
               description: "",
               hotkey: "",
+              textEligibility: "",
             });
           } else {
             reset(values);
@@ -176,7 +201,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
         </Field>
       </div>
 
-      <details className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2" open={Boolean(label?.description || label?.hotkey)}>
+      <details className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2" open={Boolean(label?.description || label?.hotkey || currentTextEligibility(label))}>
         <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold text-zinc-600">
           <Palette aria-hidden="true" size={14} />
           Advanced label metadata
@@ -200,6 +225,22 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
               autoComplete="off"
             />
           </Field>
+        </div>
+        <div className="mt-3">
+          <Field label="TEXT eligibility" error={errors.textEligibility?.message}>
+            <select
+              {...register("textEligibility")}
+              className={inputClassName}
+              disabled={!canManage || isPending}
+            >
+              {TEXT_ELIGIBILITY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </Field>
+          <p className="mt-1.5 text-[11px] leading-4 text-zinc-500">
+            Controls whether this label can be used for TEXT spans, document classification, sentiment, intent, or relations. A label already assigned to an annotation cannot change eligibility.
+          </p>
         </div>
       </details>
 

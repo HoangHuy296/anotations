@@ -6,8 +6,13 @@ import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { readSafeMediaReadiness } from "@/lib/media-processing/safe-media-readiness";
-import { readVideoAnnotations } from "@/lib/annotations/video-read-service";
+import { readVideoAnnotations, readVideoAnnotationsFullyPaged } from "@/lib/annotations/video-read-service";
+import { VIDEO_ANNOTATION_LIMITS } from "@/lib/annotations/video-limits";
 import { readImageWorkspaceAsset } from "@/lib/workspace/image-workspace";
+import { deriveTextSourceReadiness } from "@/lib/annotations/text-source-readiness";
+import { deriveTextEngineCapabilities } from "@/lib/workspace/text-engine-capabilities";
+import { parseTextPolicy, resolveTextPolicy } from "@/lib/annotations/text-policy-service";
+import { serializeSafeTextAnnotation } from "@annotationplatform/domain/text-annotation-contract";
 import { buildAssetListOrderBy, buildAssetListWhere, buildBeforeSelectionWhere, readSafeWorkspaceAssignments, toSafeWorkspaceAsset, WORKSPACE_ASSET_PAGE_SIZE } from "@/lib/workspace/workspace-assets";
 import type { SafeAssetAssignment } from "@/types/collaboration";
 
@@ -30,7 +35,7 @@ export async function readSafeDiscussionCommentId(actor: RequestActor, datasetId
   const comment = await db.assetComment.findFirst({ where: { id: commentId, datasetId, assetId }, select: { id: true } });
   return comment?.id ?? null;
 }
-import type { AssetListOrder, AssetListSort, SafeWorkspaceWorkflow, WorkspaceAssetPage, WorkspaceSelection } from "@/types/workspace";
+import type { AssetListOrder, AssetListSort, SafeTextSourceContext, SafeWorkspaceWorkflow, WorkspaceAssetPage, WorkspaceSelection } from "@/types/workspace";
 
 export type { WorkspaceSelection } from "@/types/workspace";
 
@@ -182,10 +187,16 @@ export async function readWorkspaceSelection(
     select: {
       id: true, modality: true, filename: true, description: true, revision: true, status: true,
       // Only consumed by the TEXT branch below (real Details metadata, 022
-      // FR-031) -- cheap enough to select unconditionally alongside the
-      // fields every branch already needs, rather than a second query.
+      // FR-031, and T048's readiness/capability context) -- cheap enough to
+      // select unconditionally alongside the fields every branch already
+      // needs, rather than a second query.
       mimeType: true, sizeBytes: true, textLength: true, createdAt: true, updatedAt: true,
-      textAsset: { select: { language: true } },
+      storageBucket: true, storageKey: true,
+      // Only consumed by the VIDEO branch below, to decide whether the
+      // initial annotation read can safely cover the whole known duration
+      // instead of just the default first window.
+      durationMs: true,
+      textAsset: { select: { language: true, sourceIdentity: true, content: true, offsetUnit: true, sourceCodeUnitLength: true, sourceByteLength: true } },
     },
   });
   if (!asset) return null;
@@ -197,10 +208,25 @@ export async function readWorkspaceSelection(
     const readiness = await readSafeMediaReadiness(actor, datasetId, assetId);
     if (!readiness) return null;
     if (asset.modality === Modality.VIDEO) {
-      // Initial page load requests only the first window (the timeline
-      // always opens at t=0) -- `VideoEngine` fetches subsequent windows
-      // itself as the playhead moves, it never receives the whole asset here.
-      const outcome = await readVideoAnnotations(actor, assetId);
+      // Initial page load always opens the timeline at t=0. When the video's
+      // full duration is known and short enough to stay within one bounded
+      // window (`maxWindowMs`), probe that window first -- a cheap single
+      // page, whose `totalKeyframesInWindow` is an authoritative count, not
+      // an estimate. Only commit to eagerly fetching every page of it when
+      // that count is still sane: a short video that's been AI-detected
+      // repeatedly (a reused test/fixture asset, say) can accumulate far
+      // more keyframes in one short span than any single real run would, and
+      // an SSR response is the wrong place to find that out by fetching it
+      // all anyway. Outside either condition, fall back to the original
+      // default-window behavior; `VideoEngine` fetches subsequent windows
+      // itself as the playhead moves, exactly as before this fix.
+      const shortWindow = asset.durationMs !== null && asset.durationMs > 0 && asset.durationMs <= VIDEO_ANNOTATION_LIMITS.maxWindowMs
+        ? { fromMs: 0, toMs: asset.durationMs }
+        : null;
+      const probe = shortWindow ? await readVideoAnnotations(actor, assetId, shortWindow) : null;
+      const outcome = probe && probe.ok && probe.data.totalKeyframesInWindow <= VIDEO_ANNOTATION_LIMITS.clientCacheKeyframeCeiling
+        ? (probe.data.hasMore ? await readVideoAnnotationsFullyPaged(actor, assetId, shortWindow!) : probe)
+        : await readVideoAnnotations(actor, assetId);
       if (!outcome.ok) return null;
       return {
         engine: "VIDEO",
@@ -211,16 +237,63 @@ export async function readWorkspaceSelection(
     }
     return {
       engine: "AUDIO",
-      asset: { id: asset.id, modality: asset.modality, filename: asset.filename, description: asset.description },
+      asset: { id: asset.id, modality: asset.modality, filename: asset.filename, description: asset.description, version: asset.revision, status: asset.status },
       readiness,
     };
   }
+  // T048: cheap readiness (T027) -- never the expensive full source
+  // re-verification (T028), which is reserved for the dedicated text/route.
+  const latestPrepareJob = await db.job.findFirst({
+    where: { datasetId, type: "TEXT_SOURCE_PREPARE", input: { path: ["assetId"], equals: assetId } },
+    orderBy: { createdAt: "desc" },
+    select: { status: true, errorCode: true },
+  });
+  const readiness = deriveTextSourceReadiness({
+    asset: { storageBucket: asset.storageBucket, storageKey: asset.storageKey },
+    textAsset: asset.textAsset ? { sourceIdentity: asset.textAsset.sourceIdentity, content: asset.textAsset.content } : null,
+    latestPrepareJob,
+  });
+  const source: SafeTextSourceContext =
+    readiness === "READY" && asset.textAsset?.sourceIdentity && asset.textAsset.offsetUnit === "UTF16_CODE_UNIT" && asset.textAsset.sourceCodeUnitLength !== null && asset.textAsset.sourceByteLength !== null
+      ? { readiness: "READY", sourceIdentity: asset.textAsset.sourceIdentity, offsetUnit: "UTF16_CODE_UNIT", sourceCodeUnitLength: asset.textAsset.sourceCodeUnitLength, sourceByteLength: asset.textAsset.sourceByteLength }
+      : { readiness: readiness === "READY" ? "UNAVAILABLE" : readiness };
+
+  const [createAccess, policyRow, policyLabels, annotationRows] = await Promise.all([
+    requireDatasetPermission(actor, datasetId, "annotation.create"),
+    db.dataset.findFirst({ where: { id: datasetId }, select: { textPolicy: true } }),
+    db.label.findMany({ where: { datasetId }, select: { id: true, modality: true, scope: true } }),
+    db.annotation.findMany({ where: { assetId, datasetId, modality: "TEXT" }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] }),
+  ]);
+  const resolvedPolicy = resolveTextPolicy({ policy: parseTextPolicy(policyRow?.textPolicy), labels: policyLabels });
+  const workflowFrozen = asset.status === "NEEDS_REVIEW" || asset.status === "REVIEWED" || asset.status === "REJECTED";
+  const capabilities = deriveTextEngineCapabilities({
+    readiness,
+    workflowFrozen,
+    canCreateAnnotation: Boolean(createAccess && !createAccess.forbidden),
+    hasEligibleEntityLabels: resolvedPolicy.entityLabelIds.length > 0,
+    hasEligibleClassificationGroups: resolvedPolicy.classificationGroups.length > 0,
+    hasEligibleRelationTypes: resolvedPolicy.relationTypes.length > 0,
+  });
+  // Defensive: a malformed legacy row must never 500 the whole workspace
+  // read -- skip it rather than let one bad row block every other one.
+  const annotations = annotationRows.flatMap((row) => {
+    try {
+      return [serializeSafeTextAnnotation(row)];
+    } catch {
+      return [];
+    }
+  });
+
   return {
     engine: "TEXT",
     asset: {
       id: asset.id, modality: "TEXT", filename: asset.filename, description: asset.description,
       mimeType: asset.mimeType, sizeBytes: asset.sizeBytes?.toString() ?? null, textLength: asset.textLength,
       language: asset.textAsset?.language ?? null, createdAt: asset.createdAt.toISOString(), updatedAt: asset.updatedAt.toISOString(),
+      revision: asset.revision, status: asset.status,
     },
+    source,
+    annotations,
+    capabilities,
   };
 }

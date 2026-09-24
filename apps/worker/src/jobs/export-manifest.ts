@@ -1,5 +1,8 @@
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { z } from "zod";
+import { textGeometrySchema } from "@annotationplatform/domain/text-annotation-contract";
+import { textPropertiesSchema } from "@annotationplatform/domain/text-properties-contract";
+import { projectTextAnnotationForExport, projectTextAssetSourceForExport, textRelationsResolveWithinExportSet } from "./text-export-serializer.js";
 
 const prohibitedKey = /(password|secret|token|credential|access.?key|private.?url|storage.?key|storage.?bucket|cookie|session)/i;
 const urlValue = /^https?:\/\//i;
@@ -23,6 +26,19 @@ export function safeStorageProvider(provider: string | null) {
   return provider ? "EXTERNAL" : null;
 }
 
+/** research.md D6: the optional TEXT projection added to annotation/asset export records within this manifest version -- never a second manifest schema. */
+const textAnnotationExportSchema = z.object({
+  geometry: textGeometrySchema,
+  properties: textPropertiesSchema,
+  fromAnnotationId: z.string().nullable(),
+  toAnnotationId: z.string().nullable(),
+}).strict();
+
+const textAssetSourceExportSchema = z.object({
+  sourceIdentity: z.string(), sourceEncoding: z.string(), offsetUnit: z.string(),
+  sourceByteLength: z.number().int(), sourceCodeUnitLength: z.number().int(),
+}).strict();
+
 export const exportManifestSchema = z.object({
   schemaVersion: z.literal("1"),
   exportedAt: z.string().datetime(),
@@ -41,6 +57,8 @@ export const exportManifestSchema = z.object({
       assetId: z.string(), provider: z.enum(["MINIO", "EXTERNAL", "LOCAL"]).nullable(),
       contentType: z.string().nullable(), sizeBytes: z.string().nullable(), checksum: z.string().nullable(),
     }).strict(),
+    /** TEXT-only safe source metadata (research.md D6); null for every other modality and for an unverified/unprepared TEXT source. */
+    text: textAssetSourceExportSchema.nullable(),
   }).strict()),
   labels: z.array(z.object({
     id: z.string(), datasetId: z.string(), name: z.string(), normalizedName: z.string(), color: z.string(),
@@ -51,6 +69,10 @@ export const exportManifestSchema = z.object({
     id: z.string(), datasetId: z.string(), assetId: z.string(), labelId: z.string().nullable(), modality: z.string(),
     type: z.string(), source: z.string(), status: z.string(), geometry: z.unknown(), properties: z.unknown(),
     revision: z.number().int(), createdAt: z.string().datetime(), updatedAt: z.string().datetime(),
+    /** Relation endpoint identities -- always present (additive), always null for IMAGE/VIDEO/AUDIO and for a TEXT span. */
+    fromAnnotationId: z.string().nullable(), toAnnotationId: z.string().nullable(),
+    /** TEXT-only safe projection (research.md D6); null for every other modality. */
+    text: textAnnotationExportSchema.nullable(),
   }).strict()),
 }).strict();
 
@@ -73,6 +95,7 @@ export async function buildExportManifest(db: PrismaClient, datasetId: string, e
           id: true, datasetId: true, filename: true, originalFilename: true, modality: true, mimeType: true, status: true,
           sizeBytes: true, width: true, height: true, durationMs: true, textLength: true, batchIndex: true, orderIndex: true,
           description: true, checksum: true, revision: true, storageProvider: true, createdAt: true, updatedAt: true,
+          textAsset: { select: { sourceIdentity: true, sourceEncoding: true, offsetUnit: true, sourceByteLength: true, sourceCodeUnitLength: true } },
         },
       },
       labels: {
@@ -88,11 +111,19 @@ export async function buildExportManifest(db: PrismaClient, datasetId: string, e
         select: {
           id: true, datasetId: true, assetId: true, labelId: true, modality: true, type: true, source: true, status: true,
           geometry: true, properties: true, revision: true, createdAt: true, updatedAt: true,
+          fromAnnotationId: true, toAnnotationId: true,
         },
       },
     },
   });
   if (!dataset) return null;
+  // research.md D6: a relation that does not fully resolve within this
+  // export's own annotation set must fail the whole export, never emit a
+  // dangling reference. Dataset Export includes every non-archived/deleted
+  // asset's annotations, so this should only ever trip on a genuine data
+  // inconsistency -- unlike Export Selected, where a partial asset
+  // selection can legitimately break closure.
+  if (!textRelationsResolveWithinExportSet(dataset.annotations)) return null;
 
   return exportManifestSchema.parse({
     schemaVersion: "1",
@@ -112,6 +143,7 @@ export async function buildExportManifest(db: PrismaClient, datasetId: string, e
         assetId: asset.id, provider: safeStorageProvider(asset.storageProvider), contentType: asset.mimeType,
         sizeBytes: asset.sizeBytes?.toString() ?? null, checksum: asset.checksum,
       },
+      text: asset.modality === "TEXT" ? projectTextAssetSourceForExport(asset.textAsset) : null,
     })),
     labels: dataset.labels.map((label) => ({
       ...label, modality: label.modality, scope: label.scope, properties: sanitizeExportJson(label.properties),
@@ -121,6 +153,8 @@ export async function buildExportManifest(db: PrismaClient, datasetId: string, e
       ...annotation, modality: annotation.modality, type: annotation.type, source: annotation.source, status: annotation.status,
       geometry: sanitizeExportJson(annotation.geometry), properties: sanitizeExportJson(annotation.properties),
       createdAt: annotation.createdAt.toISOString(), updatedAt: annotation.updatedAt.toISOString(),
+      fromAnnotationId: annotation.fromAnnotationId ?? null, toAnnotationId: annotation.toAnnotationId ?? null,
+      text: annotation.modality === "TEXT" ? projectTextAnnotationForExport(annotation) : null,
     })),
   });
 }

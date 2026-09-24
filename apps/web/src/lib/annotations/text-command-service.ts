@@ -26,7 +26,7 @@ import { computeTextCommandRequestHash, recordTextMutationReceipt, resolveTextRe
  * rejection so the parent guard claim rolls back with it.
  */
 
-export type TextCommandFailure = "NOT_FOUND" | "FORBIDDEN" | "WORKFLOW_LOCKED" | "DATASET_LOCKED" | "RECEIPT_CONFLICT" | "CONFLICT" | "INVALID_REQUEST";
+export type TextCommandFailure = "NOT_FOUND" | "FORBIDDEN" | "WORKFLOW_LOCKED" | "DATASET_LOCKED" | "RECEIPT_CONFLICT" | "CONFLICT" | "INVALID_REQUEST" | "DUPLICATE_NAME" | "REFERENCED_SCOPE_LOCKED" | "REVISION_STALE" | "SOURCE_MISMATCH" | "SOURCE_NOT_READY" | "LIMIT_EXCEEDED" | "DUPLICATE_SPAN" | "DUPLICATE_RELATION" | "INVALID_RANGE" | "POLICY_STALE";
 
 export class TextCommandError extends Error {
   constructor(readonly reason: TextCommandFailure) {
@@ -73,6 +73,7 @@ export type TextAssetCommandOutcome<T> =
   | { ok: false; reason: TextCommandFailure };
 
 export interface RunGuardedTextAssetCommandInput {
+  permission?: DatasetPermission;
   datasetId: string;
   assetId: string;
   operationId: string;
@@ -82,7 +83,7 @@ export interface RunGuardedTextAssetCommandInput {
 export async function runGuardedTextAssetCommand<T>(
   actor: RequestActor,
   input: RunGuardedTextAssetCommandInput,
-  apply: (tx: Prisma.TransactionClient, ctx: { assetId: string; datasetId: string; actorId: string }) => Promise<T>,
+  apply: (tx: Prisma.TransactionClient, ctx: { assetId: string; datasetId: string; actorId: string; actor: RequestActor }) => Promise<T>,
 ): Promise<TextAssetCommandOutcome<T>> {
   // Step 1: authenticate/authorize before opening the transaction; rechecked
   // again inside it against current membership/scope.
@@ -100,6 +101,10 @@ export async function runGuardedTextAssetCommand<T>(
       // *before* claiming the editable-asset guard or advancing any revision.
       if (!(await claimDatasetTextMutationGuard(tx, input.datasetId))) rejectTextCommand("DATASET_LOCKED");
 
+      const currentAccess = await requireDatasetPermission(actor, input.datasetId, input.permission ?? "dataset.read", tx);
+      if (!currentAccess) rejectTextCommand("NOT_FOUND");
+      if (currentAccess.forbidden) rejectTextCommand("FORBIDDEN");
+
       const replay = await resolveTextReceiptReplay(tx, { assetId: input.assetId, actorId: actor.id, operationId: input.operationId, requestHash });
       if (replay.kind === "conflict") rejectTextCommand("RECEIPT_CONFLICT");
       if (replay.kind === "hit") return { ok: true as const, replayed: true as const, result: replay.result };
@@ -108,7 +113,7 @@ export async function runGuardedTextAssetCommand<T>(
       if (!(await claimEditableAssetContent(tx, input.assetId, input.datasetId))) rejectTextCommand("WORKFLOW_LOCKED");
 
       // Steps 3-4: command-specific validation/writes.
-      const result = await apply(tx, { assetId: input.assetId, datasetId: input.datasetId, actorId: actor.id });
+      const result = await apply(tx, { assetId: input.assetId, datasetId: input.datasetId, actorId: actor.id, actor });
 
       // Step 5: receipt commit. The ANNOTATION_CHANGED outbox dispatch is the
       // command's own responsibility (it knows the parent revision), called

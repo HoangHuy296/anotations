@@ -2,6 +2,7 @@ import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { z } from "zod";
 
 import { exportManifestSchema, safeStorageProvider, sanitizeExportJson } from "./export-manifest.js";
+import { projectTextAnnotationForExport, projectTextAssetSourceForExport, textRelationsResolveWithinExportSet } from "./text-export-serializer.js";
 
 // Reuses the exact per-asset/label/annotation shapes `export-manifest.ts`
 // already validated for Dataset Export -- one allowlist, not a second one
@@ -36,7 +37,7 @@ export type ExportSelectedManifest = z.infer<typeof exportSelectedManifestSchema
  * reflects the selection's *current* server-side match, never a stale
  * client-provided list.
  */
-export async function buildExportSelectedManifest(db: PrismaClient, datasetId: string, assetIds: string[], exportedAt: Date): Promise<ExportSelectedManifest> {
+export async function buildExportSelectedManifest(db: PrismaClient, datasetId: string, assetIds: string[], exportedAt: Date): Promise<ExportSelectedManifest | null> {
   if (assetIds.length === 0) {
     return exportSelectedManifestSchema.parse({ schemaVersion: "1", exportedAt: exportedAt.toISOString(), datasetId, selectedAssetCount: 0, assets: [], assetLabels: [], labels: [], annotations: [] });
   }
@@ -47,6 +48,7 @@ export async function buildExportSelectedManifest(db: PrismaClient, datasetId: s
       id: true, datasetId: true, filename: true, originalFilename: true, modality: true, mimeType: true, status: true,
       sizeBytes: true, width: true, height: true, durationMs: true, textLength: true, batchIndex: true, orderIndex: true,
       description: true, checksum: true, revision: true, storageProvider: true, createdAt: true, updatedAt: true,
+      textAsset: { select: { sourceIdentity: true, sourceEncoding: true, offsetUnit: true, sourceByteLength: true, sourceCodeUnitLength: true } },
     },
   });
   const resolvedIds = assets.map((asset) => asset.id);
@@ -58,9 +60,14 @@ export async function buildExportSelectedManifest(db: PrismaClient, datasetId: s
       select: {
         id: true, datasetId: true, assetId: true, labelId: true, modality: true, type: true, source: true, status: true,
         geometry: true, properties: true, revision: true, createdAt: true, updatedAt: true,
+        fromAnnotationId: true, toAnnotationId: true,
       },
     }),
   ]);
+  // research.md D6: unlike Dataset Export, a partial asset selection can
+  // legitimately exclude one endpoint of an otherwise-valid relation --
+  // that must fail the whole export, never emit a dangling reference.
+  if (!textRelationsResolveWithinExportSet(annotationRows)) return null;
   const referencedLabelIds = new Set<string>([
     ...assetLabelRows.map((row) => row.labelId),
     ...annotationRows.map((row) => row.labelId).filter((id): id is string => Boolean(id)),
@@ -83,6 +90,7 @@ export async function buildExportSelectedManifest(db: PrismaClient, datasetId: s
       batchIndex: asset.batchIndex, orderIndex: asset.orderIndex, description: asset.description, checksum: asset.checksum,
       revision: asset.revision, createdAt: asset.createdAt.toISOString(), updatedAt: asset.updatedAt.toISOString(),
       storage: { assetId: asset.id, provider: safeStorageProvider(asset.storageProvider), contentType: asset.mimeType, sizeBytes: asset.sizeBytes?.toString() ?? null, checksum: asset.checksum },
+      text: asset.modality === "TEXT" ? projectTextAssetSourceForExport(asset.textAsset) : null,
     })),
     assetLabels: assetLabelRows,
     labels: labelRows.map((label) => ({
@@ -93,6 +101,8 @@ export async function buildExportSelectedManifest(db: PrismaClient, datasetId: s
       ...annotation, modality: annotation.modality, type: annotation.type, source: annotation.source, status: annotation.status,
       geometry: sanitizeExportJson(annotation.geometry), properties: sanitizeExportJson(annotation.properties),
       createdAt: annotation.createdAt.toISOString(), updatedAt: annotation.updatedAt.toISOString(),
+      fromAnnotationId: annotation.fromAnnotationId ?? null, toAnnotationId: annotation.toAnnotationId ?? null,
+      text: annotation.modality === "TEXT" ? projectTextAnnotationForExport(annotation) : null,
     })),
   });
 }

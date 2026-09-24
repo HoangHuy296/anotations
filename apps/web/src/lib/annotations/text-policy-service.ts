@@ -52,7 +52,15 @@ export function parseTextPolicy(raw: unknown): TextPolicy {
   return parsed.success ? parsed.data : EMPTY_TEXT_POLICY;
 }
 
-export const TEXT_ENTITY_LABEL_SCOPES = [LabelScope.ENTITY] as const;
+// OBJECT is the default scope every label gets unless a TEXT-specific
+// eligibility is chosen at creation (`resolveTextEligibilityTarget("NONE")`
+// in label-management.ts) -- i.e. it is the scope of every pre-existing,
+// dataset-wide label (bounding-box classes and otherwise). TEXT spans reuse
+// that same dataset label set rather than requiring a second, TEXT-only
+// opt-in subset: a label is entity-eligible if it is either OBJECT (the
+// ordinary dataset-wide case) or explicitly ENTITY (created via the Labels
+// tab with TEXT eligibility set to Entity).
+export const TEXT_ENTITY_LABEL_SCOPES = [LabelScope.ENTITY, LabelScope.OBJECT] as const;
 export const TEXT_DOCUMENT_LABEL_SCOPES = [LabelScope.CLASSIFICATION, LabelScope.SENTIMENT, LabelScope.INTENT] as const;
 export const TEXT_RELATION_LABEL_SCOPES = [LabelScope.RELATION] as const;
 
