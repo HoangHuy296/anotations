@@ -81,11 +81,8 @@ const sourceImportBaseSchema = z.object({
   connectionName: z.string().trim().min(1).max(80).optional(),
 }).strict();
 
-/**
- * Browser DTO for read-only source import preflight. Credentials are accepted
- * only for the duration of this HTTP request and are never returned.
- */
-export const sourceImportPreflightSchema = sourceImportBaseSchema.superRefine((value, context) => {
+/** Credential-mode rules shared by the preview and start DTOs. Credentials are accepted only for the duration of one HTTP request and are never returned. */
+function refineSourceImport(value: z.infer<typeof sourceImportBaseSchema>, context: z.RefinementCtx) {
   if (value.credentialMode === "PUBLIC") {
     if (!value.serverUrl) context.addIssue({ code: "custom", path: ["serverUrl"], message: "A Gitea server URL is required for public import." });
     if (value.sourceConnectionId || value.personalAccessToken || value.saveAsSourceConnection || value.connectionName) context.addIssue({ code: "custom", path: ["credentialMode"], message: "Public import cannot include credentials." });
@@ -100,8 +97,23 @@ export const sourceImportPreflightSchema = sourceImportBaseSchema.superRefine((v
     if (value.sourceConnectionId) context.addIssue({ code: "custom", path: ["sourceConnectionId"], message: "Choose one credential mode." });
     if (value.saveAsSourceConnection && !value.connectionName) context.addIssue({ code: "custom", path: ["connectionName"], message: "Name the source connection before saving it." });
   }
-});
+}
 
-/** Start Import deliberately uses the same strict DTO and re-validates it. */
-export const sourceImportStartSchema = sourceImportPreflightSchema;
-export type SourceImportRequest = z.infer<typeof sourceImportPreflightSchema>;
+/** Start Import (deprecated route) keeps the original strict DTO; it never carried a modality. */
+const sourceImportStartRefined = sourceImportBaseSchema.superRefine(refineSourceImport);
+
+/**
+ * Read-only preview DTO. The creation form submits the chosen Dataset modality
+ * with every preview (the durable `/api/datasets/from-repository` request
+ * requires it), so it must be accepted here. The preview does not use it and
+ * never infers it: omitted is allowed, anything but the four modalities is not,
+ * and every other unknown key is still rejected.
+ */
+export const sourceImportPreflightSchema = sourceImportBaseSchema
+  .extend({ modality: z.enum(["IMAGE", "VIDEO", "AUDIO", "TEXT"]).optional() })
+  .strict()
+  .superRefine(refineSourceImport);
+
+/** Start Import re-validates with the original strict DTO. */
+export const sourceImportStartSchema = sourceImportStartRefined;
+export type SourceImportRequest = z.infer<typeof sourceImportStartSchema>;
