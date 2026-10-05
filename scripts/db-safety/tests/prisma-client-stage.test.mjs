@@ -79,7 +79,7 @@ function fixture(mode = {}) {
   put(SCHEMA_PATH, SCHEMA);
   put('prisma/migrations/20260101000_a/migration.sql', 'SELECT 1;\n');
   put('prisma/migrations/migration_lock.toml', 'provider = "postgresql"\n');
-  put('specs/proposals/phase029-modality/migrations/20260930030000_dataset_modality_g2/migration.sql', 'SELECT 24;\n');
+  put('prisma/migrations/20260930030000_dataset_modality_g2/migration.sql', 'SELECT 24;\n');
   mkdirSync(join(root, dirname(MIGRATION_25.path)), { recursive: true });
   writeFileSync(join(root, MIGRATION_25.path), M25_BYTES);
   put('.env', 'DATABASE_URL=postgresql://app:secret@10.9.9.9:5432/appdb\n');
@@ -454,7 +454,7 @@ test('promotion fails closed on source drift, tracked-client drift, watched-tree
     'tracked client gains a file': [root => writeFileSync(join(root, CLIENT_DIR, 'models/New.ts'), 'x'), /TRACKED_CLIENT_DRIFT/],
     'active migration chain changed': [root => writeFileSync(join(root, 'prisma/migrations/20260101000_a/migration.sql'), 'SELECT 2;\n'), /WATCHED_TREE_DRIFT/],
     'proposal migration changed': [root => writeFileSync(join(root, MIGRATION_25.path), 'SELECT 3;\n'), /WATCHED_TREE_DRIFT/],
-    'migration 25 moved into the active chain': [root => { mkdirSync(join(root, 'prisma/migrations/20261006000000_x')); writeFileSync(join(root, 'prisma/migrations/20261006000000_x/migration.sql'), M25_BYTES); }, /WATCHED_TREE_DRIFT/],
+    'an extra migration added to the active chain': [root => { mkdirSync(join(root, 'prisma/migrations/20261006000000_x')); writeFileSync(join(root, 'prisma/migrations/20261006000000_x/migration.sql'), M25_BYTES); }, /WATCHED_TREE_DRIFT/],
   };
   for (const [label, [mutate, expected]] of Object.entries(drifts)) {
     const root = fixture(); let stage;
@@ -525,8 +525,8 @@ test('real repository facts: allowlist files exist in the tracked client, before
   assert.equal(treeHash(tracked), 'a750e6b900e00991e818b660f7af67866d1c8ea2ec7774ff2f92f0b40fb54a52'); // post-promotion (pre-promotion: edadf77b...)
   assert.equal(sha(readFileSync(join(ROOT, SCHEMA_PATH))), '4fe3d96a334e18e504ea14fd5519a1a363fae5ea6d9845355c9d548698eed174'); // post-promotion (pre-promotion: a013d71a...)
   assert.equal(sha(M25_BYTES), 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859');
-  assert.equal(sha(readFileSync(join(ROOT, 'specs/proposals/phase029-modality/migrations/20260930030000_dataset_modality_g2/migration.sql'))), '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7');
-  assert.equal(readdirSync(join(ROOT, 'prisma/migrations')).filter(name => name.startsWith('2026')).length, 23);
+  assert.equal(sha(readFileSync(join(ROOT, 'prisma/migrations/20260930030000_dataset_modality_g2/migration.sql'))), '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7');
+  assert.equal(readdirSync(join(ROOT, 'prisma/migrations')).filter(name => name.startsWith('2026')).length, 25);
   assert.deepEqual(compareTrees(tracked, tracked), { added: [], deleted: [], changed: [] });
 });
 

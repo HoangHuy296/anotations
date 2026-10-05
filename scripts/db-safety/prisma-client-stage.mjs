@@ -1,5 +1,5 @@
 // DB-free Prisma client staging and (separately gated) promotion for ONE approved schema change:
-//   model PreparedImport { ... creationRequestHash String? ... }   (frozen migration 25, proposal only)
+//   model PreparedImport { ... creationRequestHash String? ... }   (frozen migration 25, promoted to the active chain)
 //
 // Phase A (`stage`): generate entirely inside a private staging tree, never into the repository.
 //   1. generate from the CURRENT canonical schema (raw Prisma output), canonicalize ONLY the two known absolute paths in
@@ -34,11 +34,11 @@ export const PROMOTION_ALLOWLIST = Object.freeze([SCHEMA_PATH, ...CHANGED_ALLOWL
 export const DUMMY_DATABASE_URL = 'postgresql://stage:unused@127.0.0.1:9/unused';
 export const CONFIRM = 'promote-prepared-import-creation-request-hash';
 export const STAGE_PREFIX = '/tmp/phase029-prisma-stage-';
-export const MIGRATION_25 = Object.freeze({ path: 'specs/proposals/phase029-modality/migrations/20261006000000_prepared_import_creation_request_hash/migration.sql', sha256: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' });
+export const MIGRATION_25 = Object.freeze({ path: 'prisma/migrations/20261006000000_prepared_import_creation_request_hash/migration.sql', sha256: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' });
 export const CLASS_FILE = 'internal/class.ts';
 /** Audited occurrence counts of the two Prisma-generated absolute paths in the raw class.ts (output directory, schema source). */
 export const EXPECTED_PATH_OCCURRENCES = Object.freeze({ output: 1, schema: 1 });
-const WATCHED_TREES = ['prisma/migrations', 'specs/proposals/phase029-modality/migrations'];
+const WATCHED_TREES = ['prisma/migrations'];
 const ALLOWED_ENV_KEYS = ['PATH', 'HOME', 'TMPDIR', 'LANG', 'DATABASE_URL', 'CHECKPOINT_DISABLE', 'PRISMA_HIDE_UPDATE_MESSAGE', 'NO_COLOR'];
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');

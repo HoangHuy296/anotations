@@ -129,7 +129,7 @@ try:
     save('disposable-identities.json',PINS)
     save('owned-volumes.json',[{'containerId':p['id'],'name':m['Name']} for p in PINS for m in pincheck(p)['Mounts'] if m['Type']=='volume'])
     save('host-environment.json',{'uname':run(['uname','-a']).stdout.strip(),'cpu':run(['lscpu']).stdout,'docker':[{key:c[key] for key in ['Id','Image','Platform']} for c in [pincheck(PG)]],'postgresVersion':run(['docker','exec',PG['id'],'postgres','--version']).stdout.strip()})
-    shutil.copytree(ROOT/'prisma/migrations',WORK/'migrations');shutil.copyfile(ROOT/'prisma/schema.prisma',WORK/'schema.prisma')
+    shutil.copytree(ROOT/'prisma/migrations',WORK/'migrations',ignore=shutil.ignore_patterns('20260930030000_dataset_modality_g2','20261006000000_prepared_import_creation_request_hash'));shutil.copyfile(ROOT/'prisma/schema.prisma',WORK/'schema.prisma')
     URL='postgresql://postgres:'+PASSWORD+'@127.0.0.1:55460/fieldframe'
     CONFIG=config(URL)
     providers={'MINIO_ENDPOINT':'http://127.0.0.1:55462','MINIO_ACCESS_KEY':ENV['MINIO_ROOT_USER'],'MINIO_SECRET_KEY':PASSWORD,'MINIO_BUCKET':'g1-'+TOKEN,'REDIS_HOST':'127.0.0.1','REDIS_PORT':'55461','REDIS_PASSWORD':PASSWORD,'REDIS_DB':'0','BULLMQ_PREFIX':'g1-'+TOKEN}
@@ -153,7 +153,7 @@ try:
         bench=issue('baseline-benchmark',request(op='test',command='g3:benchmark:baseline'))
         launch('baseline-benchmark',bench,op='test',command='g3:benchmark:baseline')
     before=capture();save('before-candidate.json',before)
-    candidate=ROOT/'specs/proposals/phase029-modality/migrations/20260930030000_dataset_modality_g2'
+    candidate=ROOT/'prisma/migrations/20260930030000_dataset_modality_g2'
     shutil.copytree(candidate,WORK/'migrations'/candidate.name)
     migration=issue('candidate-deploy',request())
     launch('new-additive-candidate',migration)

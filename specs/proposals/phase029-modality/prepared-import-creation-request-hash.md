@@ -1,13 +1,13 @@
-# Phase 029 / T015 — proposal migration 25: `PreparedImport.creationRequestHash`
+# Phase 029 / T015 — migration 25: `PreparedImport.creationRequestHash`
 
-**Status: PROPOSAL ONLY.** Not in `prisma/migrations`, not applied anywhere, `prisma/schema.prisma` and the generated client are not changed, and no runner pin references it. Applying it, regenerating Prisma and updating the focused runner each require a separate approval.
+**Status: PROMOTED to the canonical active chain (release-chain commit, 2026-10-05); NOT applied to the shared dev database.** The migration now lives at `prisma/migrations/20261006000000_prepared_import_creation_request_hash/migration.sql` (byte-identical to the frozen proposal, SHA-256 `a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859`, 68 bytes). Canonical `prisma/schema.prisma` and the tracked generated client already contain the field (accepted earlier; schema SHA-256 `4fe3d96a…`). The runner bindings were updated for the 25-migration chain. This promotion is not an authorization to apply it anywhere: shared-dev application remains a separate gated step (see `specs/029-modality-specific-datasets/release/README.md`). Disposable proof: `release:phase029-chain` PASS, history 25, schema entries 1829 → 1841 → 1842.
 
 ## Migration
-- Path: `migrations/20261006000000_prepared_import_creation_request_hash/migration.sql` (sorts after migration 24).
+- Path: `prisma/migrations/20261006000000_prepared_import_creation_request_hash/migration.sql` (sorts after migration 24; moved from `specs/proposals/phase029-modality/migrations/` unchanged).
 - SQL (the whole file): `ALTER TABLE "PreparedImport" ADD COLUMN "creationRequestHash" TEXT;`
 - Nullable, no default, no backfill, no index, no uniqueness, no trigger, nothing else.
 - Migration 24 (`20260930030000_dataset_modality_g2`) is untouched: SHA-256 `13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7`.
-- Proposed Prisma diff (NOT applied): add `creationRequestHash String?` to `model PreparedImport`, no attributes.
+- Prisma diff (now in the canonical schema and tracked client): `creationRequestHash String?` in `model PreparedImport`, no attributes. `prisma migrate diff` between the 25-migration database and the canonical schema reports no difference.
 
 ## Meaning of the column
 `NULL` = the preparation carried no confirmed taxonomy (every historical row and every no-class request), so existing no-class replay behavior is unchanged.
@@ -54,5 +54,5 @@ No unbounded loop is possible. Colors are uppercase `#RRGGBB`, independent of re
 ## Rollback
 `ALTER TABLE "PreparedImport" DROP COLUMN "creationRequestHash";` (separately reviewed, never automatic). Dropping the column loses only the stored `PreparedImport.creationRequestHash` values (replay comparison of confirmed classes would then be unavailable). It does **not** delete persisted Labels or any Dataset, Job or Asset data.
 
-## Not authorized by staging this proposal
-Changing `prisma/schema.prisma`, regenerating Prisma or the generated client, updating the focused-runner pin (candidate + migration 25, expected history 25), `commands.json`, moving the migration into `prisma/migrations`, issuing receipts, any container/DB access, or implementing T015 production code.
+## What the promotion did not authorize
+Applying migration 24 or 25 to the shared dev database, taking the rollout backup, stopping or replacing any service, building or deploying release images, backfilling or resolving any historical Dataset, and pushing `main`. Each remains a separate explicit authorization.

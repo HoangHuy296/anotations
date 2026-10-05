@@ -120,7 +120,7 @@ try:
     PG['systemIdentifier']=re.search(r'Database system identifier:\s+(\d+)',run(['docker','exec',PG['id'],'sh','-c','LC_ALL=C pg_controldata "$PGDATA"']).stdout)[1]
     for p in PINS:pincheck(p)
     save('disposable-identities.json',PINS)
-    shutil.copytree(ROOT/'prisma/migrations',WORK/'migrations');shutil.copyfile(ROOT/'prisma/schema.prisma',WORK/'schema.prisma')
+    shutil.copytree(ROOT/'prisma/migrations',WORK/'migrations',ignore=shutil.ignore_patterns('20260930030000_dataset_modality_g2','20261006000000_prepared_import_creation_request_hash'));shutil.copyfile(ROOT/'prisma/schema.prisma',WORK/'schema.prisma')
     URL='postgresql://postgres:'+PASSWORD+'@127.0.0.1:55460/fieldframe'
     CONFIG=config(URL)
     providers={'MINIO_ENDPOINT':'http://127.0.0.1:55462','MINIO_ACCESS_KEY':ENV['MINIO_ROOT_USER'],'MINIO_SECRET_KEY':PASSWORD,'MINIO_BUCKET':'g1-'+TOKEN,'REDIS_HOST':'127.0.0.1','REDIS_PORT':'55461','REDIS_PASSWORD':PASSWORD,'REDIS_DB':'0','BULLMQ_PREFIX':'g1-'+TOKEN}
@@ -138,7 +138,7 @@ try:
     baseline_fixture=issue('baseline-fixture',request(op='test',command='g2:baseline'))
     launch('seed-synthetic-history',baseline_fixture,op='test',command='g2:baseline')
     before=capture();save('before-candidate.json',before)
-    candidate=ROOT/'specs/proposals/phase029-modality/migrations/20260930030000_dataset_modality_g2'
+    candidate=ROOT/'prisma/migrations/20260930030000_dataset_modality_g2'
     shutil.copytree(candidate,WORK/'migrations'/candidate.name)
     migration=issue('candidate-deploy',request())
     launch('new-additive-candidate',migration)

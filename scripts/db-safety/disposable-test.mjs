@@ -2,7 +2,7 @@
 //
 // Runs ONE named, allowlisted DB-backed test command against fresh disposable
 // PostgreSQL/Redis/MinIO containers that have the 23 historical migrations and the
-// reviewed Phase029 candidate migration applied, then removes exactly the
+// promoted Phase029 migrations 24 and 25 (the canonical 25-migration active chain) applied, then removes exactly the
 // resources it created and runs the independent cleanup verifier.
 //
 // CLI: node scripts/db-safety/disposable-test.mjs <name>
@@ -29,15 +29,17 @@ import * as guard from './guard.mjs';
 import { readTree as readClientTree, treeHash as clientTreeHash } from './prisma-client-stage.mjs';
 
 export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'];
-const PROPOSALS = 'specs/proposals/phase029-modality/migrations';
+const PROMOTED = 'prisma/migrations';
 /**
- * Ordered, frozen proposal chain applied AFTER the 23 historical migrations (which are the active chain in prisma/migrations).
+ * Ordered, frozen Phase029 chain applied AFTER the 23 historical migrations. Since the release-chain promotion these two
+ * migrations live in the canonical active chain (prisma/migrations, 25 in total); the runner stages the 23 historical ones
+ * first and applies these in order so the fixture can run between 24 and 25.
  * Every entry binds identity, source path, exact bytes and order; nothing outside this list is ever staged.
- * Migration 24's checksum is accepted for verification continuity (provenance gap recorded in verification/mvp-modality-card-status-20261005.md).
+ * Migration 24's checksum is accepted for verification continuity (provenance exception recorded in verification/t008-provenance-exception.md).
  */
 export const PROPOSAL_CHAIN = [
-  { order: 1, name: '20260930030000_dataset_modality_g2', path: `${PROPOSALS}/20260930030000_dataset_modality_g2`, sha256: '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7' },
-  { order: 2, name: '20261006000000_prepared_import_creation_request_hash', path: `${PROPOSALS}/20261006000000_prepared_import_creation_request_hash`, sha256: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' },
+  { order: 1, name: '20260930030000_dataset_modality_g2', path: `${PROMOTED}/20260930030000_dataset_modality_g2`, sha256: '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7' },
+  { order: 2, name: '20261006000000_prepared_import_creation_request_hash', path: `${PROMOTED}/20261006000000_prepared_import_creation_request_hash`, sha256: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' },
 ];
 export const BASELINE_MIGRATIONS = 23;
 export const REHEARSAL_ID = 'rehearse:prepared-import-creation-request-hash';
@@ -68,7 +70,7 @@ export const COMPAT_BINDINGS = Object.freeze({
     'lib/generated/prisma/models/PreparedImport.ts': 'd48ac861e7e8d6020d614a6faf706f9f4a146447c0599faabe798a02251af45d',
     'lib/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node': 'a2924eab1c78a0a7bb67edac5738939fa10589ef073af5542f53812a22e4a7d8',
   }),
-  activeChainTreeSha256: '8514e9192c56d7ce451066fe4ceb761c025b26ff4ad7f3730f5573b3f4d9e6fb',
+  activeChainTreeSha256: 'f0da8710b3c874f842de6b686ae5b025dffd59f8acdab74a6e1c00faadb54ca8',
 });
 export const T015_ID = 'verify:confirmed-taxonomy-creation';
 export const T015_COMMAND = 'verify-test:confirmed-taxonomy-creation';
@@ -98,6 +100,27 @@ export const COMPATIBILITY = Object.freeze({
 export const REHEARSALS = Object.freeze({
   [REHEARSAL_ID]: Object.freeze({ through: 2, fixtureAfter: 1, fixtureCommand: FIXTURE_COMMAND, fixtureRows: FIXTURE_ROWS, newColumn: ['PreparedImport', 'creationRequestHash'], scope: 'proposal-migration-25' }),
 });
+// ---- Release-chain proof: the canonical 25-migration repository, from scratch, in one receipt-bound run ----
+export const RELEASE_ID = 'release:phase029-chain';
+/** Entry counts of the reviewed schema manifest (specs/proposals/phase029-modality/recovery.v2.review.sql) after the 23 historical migrations, migration 24 and migration 25. */
+export const RELEASE_COUNTS = Object.freeze({ baseline: 1829, m24: 1841, m25: 1842 });
+/** The reviewed read-only manifest CTE is the definition of "schema entry"; its bytes are pinned so the counts cannot drift with the definition. */
+export const RECOVERY_REVIEW = Object.freeze({ path: 'specs/proposals/phase029-modality/recovery.v2.review.sql', sha256: '3bb6389f380ffaa5c3be88d26d56782065a00b3844f0326ccba1c05ee4b5a1db' });
+export const G2_ARGS = ['--require', './tests/auth-ownership/register-server-only.cjs', '--import', 'tsx', '--test', '--test-concurrency=1'];
+/** Existing, already reviewed G2 catalog commands reused as release-chain steps. Each must be structurally identical to its pinned spec (no substituted path or added argument). */
+export const RELEASE_SPECS = Object.freeze({
+  'g2:generate': Object.freeze({ kind: 'test', cwd: '.', args: ['scripts/db-safety/g2-generate.mjs'] }),
+  'g2:baseline': Object.freeze({ kind: 'test', cwd: 'apps/web', args: [...G2_ARGS, 'tests/dataset-modality/g2-baseline.test.ts'] }),
+  'g2:compatibility': Object.freeze({ kind: 'test', cwd: '.', args: ['scripts/db-safety/g2-compatibility.mjs'] }),
+  'g2:candidate': Object.freeze({ kind: 'test', cwd: 'apps/web', args: [...G2_ARGS, 'tests/dataset-modality/g2-candidate.test.ts'] }),
+});
+export const RELEASES = Object.freeze({
+  [RELEASE_ID]: Object.freeze({ through: 2, fixtureAfter: 1, fixtureCommand: FIXTURE_COMMAND, fixtureRows: FIXTURE_ROWS, newColumn: NEW_COLUMN, scope: 'release-chain-25', compatCommand: COMPAT_COMMAND, compatFile: COMPAT_FILE, compatSpec: COMPAT_SPEC }),
+});
+export const RELEASE_TOPOLOGY = Object.freeze([
+  ['baseline-deploy', 'deploy', null], ['generate', 'test', 'g2:generate'], ['baseline-seed', 'test', 'g2:baseline'], ['proposal-1-deploy', 'deploy', null],
+  ['fixture', 'test', FIXTURE_COMMAND], ['proposal-2-deploy', 'deploy', null], ['schema-compat', 'test', 'g2:compatibility'], ['client-compat', 'test', COMPAT_COMMAND], ['candidate-contracts', 'test', 'g2:candidate'],
+]);
 export const PORT_RANGE = [55460, 55479];
 const COMMAND_SHAPE = /^[a-z0-9]+(?::[a-z0-9-]+)+$/;
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -111,7 +134,7 @@ const safe = error => (/^[A-Z][A-Z0-9_]+$/.test(error?.message ?? '') ? error.me
 /** Pure, runs before anything is created. */
 export function validateCommand(name, catalog) {
   must(typeof name === 'string' && name.length <= 80 && COMMAND_SHAPE.test(name), 'COMMAND_NAME_INVALID');
-  if (Object.hasOwn(REHEARSALS, name) || Object.hasOwn(COMPATIBILITY, name)) return name; // fixed plans; their child commands are bound in preflight, never selectable here
+  if (Object.hasOwn(REHEARSALS, name) || Object.hasOwn(COMPATIBILITY, name) || Object.hasOwn(RELEASES, name)) return name; // fixed plans; their child commands are bound in preflight, never selectable here
   must(SUPPORTED_COMMANDS.includes(name), 'COMMAND_NOT_SUPPORTED');
   must(catalog?.[name]?.kind === 'test', 'COMMAND_NOT_ALLOWLISTED');
   return name;
@@ -128,17 +151,20 @@ function treeHash(root, rel) {
 export function resolvePlan(name) {
   if (Object.hasOwn(REHEARSALS, name)) return { kind: 'rehearsal', id: name, ...REHEARSALS[name] };
   if (Object.hasOwn(COMPATIBILITY, name)) return { kind: 'compat', id: name, ...COMPATIBILITY[name] };
+  if (Object.hasOwn(RELEASES, name)) return { kind: 'release', id: name, ...RELEASES[name] };
   return { kind: 'test', id: name, through: 1 };
 }
 
-const sortedBaseline = root => readdirSync(join(root, 'prisma/migrations'), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();
-export const baselineRows = root => sortedBaseline(root).map(name => ({ name, sha256: sha(readFileSync(join(root, 'prisma/migrations', name, 'migration.sql'))) }));
+const activeNames = root => readdirSync(join(root, 'prisma/migrations'), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();
+/** The 23 historical migrations: the active chain without the frozen Phase029 chain entries. */
+const sortedBaseline = (root, chain = PROPOSAL_CHAIN) => activeNames(root).filter(name => !chain.some(entry => entry.name === name));
+export const baselineRows = (root, chain = PROPOSAL_CHAIN) => sortedBaseline(root, chain).map(name => ({ name, sha256: sha(readFileSync(join(root, 'prisma/migrations', name, 'migration.sql'))) }));
 
 /** Fails closed on a missing, renamed, reordered, extra-file or byte-modified proposal migration (only the slice a plan applies). */
 export function validateChain(deps, through) {
   const chain = deps.pinned.chain;
   must(Array.isArray(chain) && Number.isInteger(through) && through >= 1 && through <= chain.length, 'PROPOSAL_MANIFEST_INVALID');
-  const baseline = sortedBaseline(deps.root);
+  const baseline = sortedBaseline(deps.root, chain);
   must(baseline.length === deps.pinned.baseline, 'BASELINE_MIGRATION_COUNT_MISMATCH');
   let previous = baseline.at(-1);
   for (let index = 0; index < through; index += 1) {
@@ -183,11 +209,37 @@ export const tableFingerprintSql = table => {
   return `SELECT jsonb_build_array(count(*), md5(coalesce(string_agg(h,'' ORDER BY h),''))) FROM (SELECT md5(to_jsonb(x)::text) AS h FROM public."${table}" x) t;`;
 };
 /** One read-only transaction; every statement yields exactly one single-line jsonb value. */
-export function captureScript(tables) {
+export function captureScript(tables, extra = {}) {
   const fingerprinted = tables.filter(table => !NOT_FINGERPRINTED.includes(table));
-  const keys = Object.keys(MANIFEST_SQL);
-  return { keys, fingerprinted, statements: [...keys.map(key => MANIFEST_SQL[key]), ...fingerprinted.map(tableFingerprintSql)] };
+  const all = { ...MANIFEST_SQL, ...extra };
+  const keys = Object.keys(all);
+  return { keys, fingerprinted, statements: [...keys.map(key => all[key]), ...fingerprinted.map(tableFingerprintSql)] };
 }
+
+// ---- Release-chain captures: the reviewed schema manifest and the Dataset modality state (read-only) ----
+const MODALITY_KEYS = ['modality', 'modalityContentRevision', 'modalityResolvedAt', 'modalityResolverSubject'];
+/** Extracts the reviewed read-only manifest CTE (the same extraction the G2/G3 rehearsals use) as one single-line statement. Fails closed on any structural change. */
+export function extractManifestSql(text) {
+  const start = text.indexOf('WITH objects AS (');
+  const end = text.indexOf('IF EXISTS (\n  SELECT 1 FROM jsonb_array_elements(manifest)');
+  must(start >= 0 && end > start, 'RECOVERY_REVIEW_MANIFEST_NOT_FOUND');
+  const body = text.slice(start, end);
+  must(body.split('expected_after').length > 1 && body.includes(' INTO manifest FROM objects;'), 'RECOVERY_REVIEW_MANIFEST_NOT_FOUND');
+  const statement = body.replaceAll('expected_after', 'false').replace(' INTO manifest FROM objects;', ' FROM objects;').replace(/\s+/g, ' ').trim();
+  must(!/--|\/\*/.test(statement), 'RECOVERY_REVIEW_MANIFEST_NOT_FOUND');
+  return statement;
+}
+export const releaseManifestSqlFrom = file => {
+  const bytes = readFileSync(file);
+  must(sha(bytes) === RECOVERY_REVIEW.sha256, 'RECOVERY_REVIEW_DRIFT');
+  return extractManifestSql(bytes.toString('utf8'));
+};
+export const releaseExtraSql = manifestSql => Object.freeze({
+  schemaManifest: manifestSql,
+  // Dataset rows without the Phase029 columns: identical before and after migration 24 unless a historical row changed.
+  datasetLegacy: `SELECT jsonb_build_array(count(*), md5(coalesce(string_agg(h,'' ORDER BY h),''))) FROM (SELECT md5((to_jsonb(x) - ARRAY[${MODALITY_KEYS.map(key => `'${key}'`).join(',')}])::text) AS h FROM public."Dataset" x) t;`,
+  datasetModality: `SELECT coalesce(jsonb_agg(jsonb_build_object('id',x.id,'m',to_jsonb(x)->'modality','r',to_jsonb(x)->'modalityContentRevision','t',to_jsonb(x)->'modalityResolvedAt','s',to_jsonb(x)->'modalityResolverSubject') ORDER BY x.id),'[]'::jsonb) FROM public."Dataset" x;`,
+});
 export function parseCapture(lines, script) {
   must(Array.isArray(lines) && lines.length === script.statements.length, 'CAPTURE_INCOMPLETE');
   const values = lines.map(line => { try { return JSON.parse(line); } catch { return fail('CAPTURE_UNPARSEABLE'); } });
@@ -242,6 +294,73 @@ export function assertMigration25(pre, post, ctx) {
   // every other table (including migration-24 data) unchanged
   must(isDeepStrictEqual(Object.keys(pre.tables), Object.keys(post.tables)) && isDeepStrictEqual(pre.tables, post.tables), 'M25_UNRELATED_DATA_CHANGED');
   pass('unrelated-tables', { tables: Object.keys(pre.tables).length });
+  return evidence;
+}
+
+// ---- Release-chain assertions (pure; run on captures taken by the receipt-bound runner) ----
+const manifestKey = row => `${row[0]}\u0000${row[1]}`;
+/** Exact schema-entry diff between two manifest captures: added, removed and changed (same identity, different shape) entries. */
+export function manifestDiff(pre, post) {
+  must(Array.isArray(pre) && Array.isArray(post), 'RELEASE_MANIFEST_MISSING');
+  const before = new Map(pre.map(row => [manifestKey(row), row])), after = new Map(post.map(row => [manifestKey(row), row]));
+  must(before.size === pre.length && after.size === post.length, 'RELEASE_MANIFEST_DUPLICATE_IDENTITY');
+  return {
+    added: post.filter(row => !before.has(manifestKey(row))),
+    removed: pre.filter(row => !after.has(manifestKey(row))),
+    changed: post.filter(row => before.has(manifestKey(row)) && !isDeepStrictEqual(before.get(manifestKey(row))[2], row[2])),
+  };
+}
+const PHASE029_COLUMNS = ['modality', 'modalityContentRevision', 'modalityResolvedAt', 'modalityResolverSubject'];
+const PHASE029_CONSTRAINTS = ['dataset_modality_resolution_shape', 'dataset_modality_revision_nonnegative'];
+const PHASE029_TRIGGERS = ['asset_modality_write_guard', 'dataset_modality_assignment_guard', 'dataset_modality_insert_guard'];
+const PHASE029_ROUTINES = ['phase029_guard_asset_write()', 'phase029_guard_dataset_assignment()', 'phase029_guard_dataset_insert()'];
+const unresolved = row => row.m === null && row.r === 0 && row.t === null && row.s === null;
+/**
+ * Migration 24 on the historical baseline: exactly 12 added schema entries (4 columns, 2 constraints, 3 triggers, 3 functions), nothing removed or changed,
+ * no data change anywhere (Dataset compared without its new columns), one new finished history row with the frozen checksum, and every pre-existing Dataset unresolved.
+ */
+export function assertRelease24(pre, post, ctx) {
+  const evidence = [];
+  const pass = (name, detail = {}) => evidence.push({ name, pass: true, ...detail });
+  must(pre.schemaManifest.length === RELEASE_COUNTS.baseline && post.schemaManifest.length === RELEASE_COUNTS.m24, 'RELEASE_M24_SCHEMA_COUNT_UNEXPECTED');
+  const diff = manifestDiff(pre.schemaManifest, post.schemaManifest);
+  must(diff.removed.length === 0 && diff.changed.length === 0 && diff.added.length === 12, 'RELEASE_M24_SCHEMA_DELTA_UNEXPECTED');
+  const names = kind => diff.added.filter(row => row[0] === kind).map(row => JSON.parse(row[1]));
+  const last = list => list.map(parts => parts.at(-1)).sort();
+  const columns = names('column'), constraints = names('constraint'), triggers = names('trigger'), routines = names('routine');
+  must(columns.length === 4 && columns.every(parts => parts[1] === 'Dataset') && isDeepStrictEqual(last(columns), [...PHASE029_COLUMNS].sort()), 'RELEASE_M24_COLUMNS_UNEXPECTED');
+  must(constraints.length === 2 && isDeepStrictEqual(last(constraints), [...PHASE029_CONSTRAINTS].sort()), 'RELEASE_M24_CONSTRAINTS_UNEXPECTED');
+  must(triggers.length === 3 && isDeepStrictEqual(last(triggers), [...PHASE029_TRIGGERS].sort()), 'RELEASE_M24_TRIGGERS_UNEXPECTED');
+  must(routines.length === 3 && isDeepStrictEqual(routines.map(parts => parts[1].replace(/^public\./, '')).sort(), [...PHASE029_ROUTINES].sort()), 'RELEASE_M24_ROUTINES_UNEXPECTED');
+  must(diff.added.length === columns.length + constraints.length + triggers.length + routines.length, 'RELEASE_M24_SCHEMA_DELTA_UNEXPECTED');
+  pass('schema-delta', { from: pre.schemaManifest.length, to: post.schemaManifest.length, columns: 4, constraints: 2, triggers: 3, functions: 3, removed: 0, changed: 0 });
+
+  must(Array.isArray(pre.migrations) && post.migrations.length === pre.migrations.length + 1 && isDeepStrictEqual(post.migrations.slice(0, pre.migrations.length), pre.migrations), 'RELEASE_M24_HISTORY_UNEXPECTED');
+  const added = post.migrations.at(-1);
+  must(added.migration_name === ctx.proposal.name && added.checksum === ctx.proposal.sha256 && added.finished_at && !added.rolled_back_at, 'RELEASE_M24_HISTORY_UNEXPECTED');
+  pass('migration-history', { priorRows: pre.migrations.length, newMigration: added.migration_name });
+
+  const others = Object.keys(pre.tables).filter(table => table !== 'Dataset');
+  must(isDeepStrictEqual(Object.keys(pre.tables), Object.keys(post.tables)) && others.every(table => isDeepStrictEqual(pre.tables[table], post.tables[table])), 'RELEASE_M24_DATA_CHANGED');
+  must(isDeepStrictEqual(pre.datasetLegacy, post.datasetLegacy) && pre.datasetLegacy[0] > 0, 'RELEASE_M24_DATASET_CHANGED');
+  must(isDeepStrictEqual(pre.preparedImport, post.preparedImport), 'RELEASE_M24_DATA_CHANGED');
+  pass('no-data-change', { tables: others.length, datasetRows: pre.datasetLegacy[0] });
+
+  must(post.datasetModality.length === pre.datasetLegacy[0] && post.datasetModality.every(unresolved), 'RELEASE_M24_DATASET_NOT_UNRESOLVED');
+  pass('historical-datasets-unresolved', { rows: post.datasetModality.length });
+  return evidence;
+}
+/** Migration 25 on top: exactly one added schema entry (the nullable column), nothing else; every Dataset row identical before and after. */
+export function assertRelease25(pre, post, ctx) {
+  const evidence = [];
+  const pass = (name, detail = {}) => evidence.push({ name, pass: true, ...detail });
+  must(pre.schemaManifest.length === RELEASE_COUNTS.m24 && post.schemaManifest.length === RELEASE_COUNTS.m25, 'RELEASE_M25_SCHEMA_COUNT_UNEXPECTED');
+  const diff = manifestDiff(pre.schemaManifest, post.schemaManifest);
+  const [table, column] = ctx.newColumn;
+  must(diff.removed.length === 0 && diff.changed.length === 0 && diff.added.length === 1 && diff.added[0][0] === 'column' && isDeepStrictEqual(JSON.parse(diff.added[0][1]), ['public', table, column]), 'RELEASE_M25_SCHEMA_DELTA_UNEXPECTED');
+  pass('schema-delta', { from: pre.schemaManifest.length, to: post.schemaManifest.length, added: JSON.parse(diff.added[0][1]) });
+  must(isDeepStrictEqual(pre.datasetModality.map(row => row.id), post.datasetModality.map(row => row.id)) && isDeepStrictEqual(pre.datasetModality, post.datasetModality), 'RELEASE_M25_DATASETS_CHANGED'); // rows created by the fixture after migration 24 may be resolved; the historical ones are pinned separately by the runner
+  pass('datasets-unchanged', { rows: post.datasetModality.length });
   return evidence;
 }
 
@@ -360,6 +479,7 @@ export function realDeps() {
       return { status: p.status ?? 1, output: (p.stdout ?? '') + (p.stderr ?? '') };
     },
     pinned: { baseline: BASELINE_MIGRATIONS, chain: PROPOSAL_CHAIN, compat: COMPAT_BINDINGS },
+    releaseManifestSql: () => releaseManifestSqlFrom(join(root, RECOVERY_REVIEW.path)),
   };
 }
 
@@ -371,7 +491,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
 
   // ---- Local preflight (still before provisioning) ----
   const chain = validateChain(deps, plan.through); // frozen proposal manifest: identity, order, exact bytes, no extra files
-  const baseline = baselineRows(deps.root);
+  const baseline = baselineRows(deps.root, deps.pinned.chain);
   let compatBindings = null;
   if (plan.kind === 'compat') {
     // Frozen schema / complete generated client / active chain are verified BEFORE any directory, process or resource is created.
@@ -386,6 +506,18 @@ export async function runFocusedTest(command, deps = realDeps()) {
     must(isDeepStrictEqual(catalog[plan.fixtureCommand], FIXTURE_SPEC), 'FIXTURE_COMMAND_TAMPERED');
     const fixturePath = join(deps.root, FIXTURE_FILE);
     must(existsSync(fixturePath) && /import .*db-safety\/test-entry.cjs/.test(readFileSync(fixturePath, 'utf8').split('\n')[0]), 'FIXTURE_FILE_MISSING_OR_UNGATED');
+  }
+  let releaseManifest = null;
+  if (plan.kind === 'release') {
+    // The release proof composes only reviewed, pinned pieces: frozen schema/client/chain, the pinned G2 catalog steps, the fixture, the compat test and the pinned manifest definition.
+    compatBindings = verifyCompatBindings(deps);
+    for (const [name, spec] of Object.entries(RELEASE_SPECS)) must(isDeepStrictEqual(catalog[name], spec), 'RELEASE_COMMAND_TAMPERED');
+    must(isDeepStrictEqual(catalog[plan.fixtureCommand], FIXTURE_SPEC), 'FIXTURE_COMMAND_TAMPERED');
+    must(isDeepStrictEqual(catalog[plan.compatCommand], plan.compatSpec), 'COMPAT_COMMAND_TAMPERED');
+    for (const file of ['scripts/db-safety/g2-generate.mjs', 'scripts/db-safety/g2-compatibility.mjs', 'apps/web/tests/dataset-modality/g2-baseline.test.ts', 'apps/web/tests/dataset-modality/g2-candidate.test.ts', FIXTURE_FILE, plan.compatFile]) must(existsSync(join(deps.root, file)), 'RELEASE_STEP_FILE_MISSING');
+    must(/import .*db-safety\/test-entry.cjs/.test(readFileSync(join(deps.root, FIXTURE_FILE), 'utf8').split('\n')[0]), 'FIXTURE_FILE_MISSING_OR_UNGATED');
+    assertCompatTestSource(readFileSync(join(deps.root, plan.compatFile), 'utf8'), 'compat');
+    releaseManifest = deps.releaseManifestSql();
   }
   const generatedModel = join(deps.root, 'lib/generated/prisma/models/Dataset.ts');
   must(existsSync(generatedModel) && readFileSync(generatedModel, 'utf8').includes('modalityContentRevision'), 'GENERATED_CLIENT_NOT_PHASE029'); // never regenerated here
@@ -406,7 +538,9 @@ export async function runFocusedTest(command, deps = realDeps()) {
   };
   // Explicit evidence classification: a focused run is never G3/G5 closure evidence and writes only below outBase.
   const migrationChain = { active: baseline.map(row => row.name), proposals: chain.map(({ order, name, sha256, path }) => ({ order, name, sha256, path })) };
-  const classification = plan.kind === 'compat'
+  const classification = plan.kind === 'release'
+    ? { kind: 'release-chain-proof', scope: plan.scope, countsAsG3Evidence: false, countsAsG5Evidence: false, notAuthorizationToApplyMigration: true, releaseChainProven: false, expectedSchemaEntries: RELEASE_COUNTS, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain, sourceBindings: compatBindings }
+    : plan.kind === 'compat'
     ? { kind: plan.evidenceKind, scope: plan.scope, countsAsG3Evidence: false, countsAsG5Evidence: false, migrationBehaviorAlreadyProvenSeparately: true, notAuthorizationToApplyMigration: true, [plan.provenFlag]: false, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain, sourceBindings: compatBindings }
     : plan.kind === 'rehearsal'
     ? { kind: 'migration-rehearsal', countsAsG3Evidence: false, countsAsG5Evidence: false, scope: plan.scope, activeChainUnchanged: true, notAuthorizationToApplyMigration: true, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain }
@@ -443,6 +577,11 @@ export async function runFocusedTest(command, deps = realDeps()) {
     return p.status;
   };
   const pg = () => state.pins.find(pin => pin.role === 'postgres');
+  // One guarded test child under its own receipt, scoped to exactly this catalog command.
+  const testStep = (name, cmd, code) => {
+    const receipt = issue(name, { ...deployRequest(), operation: 'test', command: cmd, providerFile: join(stage, 'providers.json'), providers: state.pins.filter(pin => pin.role !== 'postgres') }, cmd);
+    must(launch(name, receipt, 'test', cmd) === 0, code);
+  };
   // Read-only evidence only: identity re-proved first, session and transaction both read-only, one single-line jsonb value per statement.
   const psqlMany = statements => {
     deps.identity.control(pg());
@@ -457,7 +596,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
   const verifyHistory = (stageLabel, entries) => checkHistory(readHistory(), [...baseline, ...entries], stageLabel);
   const capture = () => {
     const tables = JSON.parse(psqlMany([TABLES_SQL])[0]);
-    const script = captureScript(tables);
+    const script = captureScript(tables, plan.kind === 'release' ? releaseExtraSql(releaseManifest) : {});
     return parseCapture(psqlMany(script.statements), script);
   };
   const deployRequest = () => ({
@@ -503,7 +642,9 @@ export async function runFocusedTest(command, deps = realDeps()) {
     save('owned-volumes.json', volumes);
 
     // ---- Stage: reviewed baseline bytes only ----
-    cpSync(join(deps.root, 'prisma/migrations'), join(stage, 'migrations'), { recursive: true });
+    // The staged baseline is the 23 historical migrations only; the promoted chain entries are staged one at a time below.
+    const promotedNames = new Set(deps.pinned.chain.map(entry => entry.name));
+    cpSync(join(deps.root, 'prisma/migrations'), join(stage, 'migrations'), { recursive: true, filter: source => !promotedNames.has(basename(source)) });
     cpSync(join(deps.root, 'prisma/schema.prisma'), join(stage, 'schema.prisma'));
     symlinkSync(join(deps.root, 'node_modules'), join(stage, 'node_modules'), 'dir');
     const url = `postgresql://postgres:${password}@127.0.0.1:${pgPort}/fieldframe`;
@@ -514,17 +655,35 @@ export async function runFocusedTest(command, deps = realDeps()) {
       REDIS_HOST: '127.0.0.1', REDIS_PORT: String(redisPort), REDIS_PASSWORD: password, REDIS_DB: '0', BULLMQ_PREFIX: `g1-${token}`,
     }), { mode: 0o600 });
 
-    // ---- Baseline (the 23 active-chain migrations), then the frozen proposal chain in order (disposable instance only) ----
+    // ---- Baseline (the 23 historical migrations), then the promoted Phase029 chain in order (disposable instance only) ----
     must(launch('baseline-deploy', issue('baseline-deploy', deployRequest(), null), 'deploy') === 0, 'BASELINE_DEPLOY_FAILED');
     verifyHistory('BASELINE', []);
     let pre = null;
+    const releaseCaptures = {};
+    if (plan.kind === 'release') {
+      // Historical state: the baseline client is generated by the pinned G2 step and seeds synthetic unresolved history (EMPTY, SINGLE, MIXED, deleted, archived) on the 23-migration database only.
+      releaseCaptures.baseline = capture();
+      save('release-baseline-schema-count.json', { entries: releaseCaptures.baseline.schemaManifest.length });
+      must(releaseCaptures.baseline.schemaManifest.length === RELEASE_COUNTS.baseline, 'RELEASE_BASELINE_SCHEMA_COUNT_UNEXPECTED');
+      testStep('generate', 'g2:generate', 'RELEASE_GENERATE_FAILED');
+      testStep('baseline-seed', 'g2:baseline', 'RELEASE_BASELINE_SEED_FAILED');
+      releaseCaptures.seeded = capture();
+      must(isDeepStrictEqual(releaseCaptures.seeded.schemaManifest, releaseCaptures.baseline.schemaManifest) && releaseCaptures.seeded.datasetLegacy[0] > 0, 'RELEASE_BASELINE_SEED_UNEXPECTED');
+      save('release-seeded-datasets.json', releaseCaptures.seeded.datasetModality);
+    }
     for (const entry of chain) {
       const staged = join(stage, 'migrations', entry.name);
       cpSync(join(deps.root, entry.path), staged, { recursive: true });
       must(sha(readFileSync(join(staged, 'migration.sql'))) === entry.sha256, 'PROPOSAL_CHECKSUM_MISMATCH');
       must(launch(`proposal-${entry.order}-deploy`, issue(`proposal-${entry.order}-deploy`, deployRequest(), null), 'deploy') === 0, 'PROPOSAL_DEPLOY_FAILED');
       verifyHistory('PROPOSAL', chain.slice(0, entry.order));
-      if (plan.kind === 'rehearsal' && entry.order === plan.fixtureAfter) {
+      if (plan.kind === 'release' && entry.order === 1) {
+        releaseCaptures.m24 = capture();
+        const m24Assertions = assertRelease24(releaseCaptures.seeded, releaseCaptures.m24, { proposal: entry });
+        save('release-m24-assertions.json', m24Assertions);
+        save('release-m24-datasets.json', releaseCaptures.m24.datasetModality);
+      }
+      if ((plan.kind === 'rehearsal' || plan.kind === 'release') && entry.order === plan.fixtureAfter) {
         // The fixture is the one fixed internal child step; its receipt is scoped to FIXTURE_COMMAND (the catalog entry was bound in preflight).
         const fixtureReceipt = issue('fixture', { ...deployRequest(), operation: 'test', command: plan.fixtureCommand, providerFile: join(stage, 'providers.json'), providers: state.pins.filter(pin => pin.role !== 'postgres') }, plan.fixtureCommand);
         must(launch('fixture', fixtureReceipt, 'test', plan.fixtureCommand) === 0, 'FIXTURE_FAILED');
@@ -533,7 +692,27 @@ export async function runFocusedTest(command, deps = realDeps()) {
       }
     }
 
-    if (plan.kind === 'compat') {
+    if (plan.kind === 'release') {
+      must(pre !== null, 'REHEARSAL_PRECAPTURE_MISSING');
+      const post = capture();
+      save('m25-pre-fingerprint.json', pre); save('m25-post-fingerprint.json', post);
+      const m25 = assertMigration25(pre, post, { newColumn: plan.newColumn, fixtureRows: plan.fixtureRows, proposal: chain.at(-1) });
+      const schema25 = assertRelease25(pre, post, { newColumn: plan.newColumn });
+      // Historical Datasets (present before migration 25) must be exactly as migration 24 left them.
+      must(isDeepStrictEqual(post.datasetModality.filter(row => releaseCaptures.m24.datasetModality.some(old => old.id === row.id)), releaseCaptures.m24.datasetModality), 'RELEASE_HISTORICAL_DATASETS_CHANGED');
+      save('release-m25-assertions.json', [...m25, ...schema25]);
+      // Drift, history/status and client compatibility on the final 25-migration database, then the runtime contracts of the historical states.
+      testStep('schema-compat', 'g2:compatibility', 'RELEASE_SCHEMA_COMPAT_FAILED');
+      testStep('client-compat', plan.compatCommand, 'COMPAT_TEST_FAILED');
+      verifyCompatBindings(deps);
+      testStep('candidate-contracts', 'g2:candidate', 'RELEASE_CANDIDATE_CONTRACTS_FAILED');
+      const final = capture();
+      save('release-final-fingerprint.json', { schemaEntries: final.schemaManifest.length, migrations: final.migrations.length });
+      must(isDeepStrictEqual(final.schemaManifest, post.schemaManifest) && isDeepStrictEqual(final.migrations, post.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
+      verifyHistory('FINAL', chain);
+      must(isDeepStrictEqual(state.topology.map(({ step, operation, command: receiptCommand }) => [step, operation, receiptCommand]), RELEASE_TOPOLOGY.map(row => [...row])), 'RECEIPT_TOPOLOGY_UNEXPECTED');
+      save('release-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, post.schemaManifest.length], migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })) });
+    } else if (plan.kind === 'compat') {
       // Read-only structural check, then the one guarded child: the compatibility test (normal application-client operations only).
       assertCompatColumn(JSON.parse(psqlMany([MANIFEST_SQL.columns])[0]));
       const compatReceipt = issue(plan.stepName, { ...deployRequest(), operation: 'test', command: plan.testCommand, providerFile: join(stage, 'providers.json'), providers: state.pins.filter(pin => pin.role !== 'postgres') }, plan.testCommand);
@@ -571,7 +750,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
     if (remaining.length) state.failures.push('RECEIPT_REGISTRATION_REMAINS');
   }
   const result = state.failures.length === 0 ? 'PASS' : 'FAIL';
-  const finalClassification = plan.kind === 'compat' ? { ...classification, [plan.provenFlag]: result === 'PASS' } : classification;
+  const finalClassification = plan.kind === 'compat' ? { ...classification, [plan.provenFlag]: result === 'PASS' } : plan.kind === 'release' ? { ...classification, releaseChainProven: result === 'PASS' } : classification;
   save('results.json', { ...finalClassification, result, command, runToken: token, testExit: state.testExit, failures: state.failures, receiptTopology: state.topology, cleanup: state.cleanup, independentCleanupExit: state.independent.status });
   return { result, runDir, failures: state.failures, testExit: state.testExit };
 }
