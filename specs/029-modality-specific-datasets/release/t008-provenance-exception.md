@@ -1,6 +1,6 @@
 # T008 — migration 24 provenance: release exception for acceptance
 
-**Status: PREPARED, NOT ACCEPTED.** The G-MIG provenance item stays open until a human signs the acceptance at the end. Nothing here rewrites history, fabricates a missing record, or changes any SQL byte.
+**Status: ACCEPTED 2026-10-05** by the project owner as exception RPE-029-M24. The acceptance **accepts** the missing provenance between `abf72fd2…` and the final `13f0e977…`; it does not reconstruct or erase it, and it does not claim recovery of the unavailable old migration bytes. Nothing here rewrites history, fabricates a missing record, or changes any SQL byte.
 
 ## Recorded facts
 1. **Early evidence used a different SHA-256.** The G2 and early G3 runs recorded the candidate checksum `abf72fd238a8caec79c6c018662debadb7d01a7fbcf5dee8f3337d95dbe55bc9` (`abf72fd2…`). Runs: `g2/20260930T143753Z`, `g2/20260930T145123Z`, `g3/runs/20260930T150233Z`, `g3/runs/20260930T150534Z`, `g3-retry/runs/20261001T031440Z`, `g3-retry/runs/20261001T031819Z`, `g3-contention/runs/20261001T033314Z`, `…034355Z`, `…035416Z`.
@@ -35,8 +35,8 @@ No new risk was found. The delta narrows the set of Asset UPDATEs that serialize
 
 | Acceptance | |
 | --- | --- |
-| Accepted by | |
-| Date | |
-| Conditions (if any) | |
+| Accepted by | Project owner (instruction given in the session of 2026-10-05) |
+| Date | 2026-10-05 |
+| Conditions | The reconstructed installed definitions (`phase029_guard_asset_write()` is the only differing object) are supporting evidence only. The old migration bytes, the contemporaneous diff and any approval of the change remain unavailable and are not claimed to be recovered. The acceptance covers migration 24 only, does not waive the T007 approval (separately granted for the exact bytes), and does not authorize applying the migration anywhere |
 
-Until signed, T008 is open and no shared-dev migration is authorized.
+T008 (G-MIG provenance item) is closed by this acceptance. Applying any migration to the shared dev database remains a separate, ungranted gate.
