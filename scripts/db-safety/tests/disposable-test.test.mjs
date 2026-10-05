@@ -9,6 +9,7 @@ import { loadExpectations } from '../cleanup-verify.mjs';
 import { isDeepStrictEqual } from 'node:util';
 import {
   SUPPORTED_COMMANDS, PROPOSAL_CHAIN, REHEARSALS, REHEARSAL_ID, FIXTURE_COMMAND, FIXTURE_FILE, FIXTURE_SPEC, FIXTURE_ROWS, HISTORY_SQL,
+  RELEASE_ID, RELEASE_COUNTS, RELEASE_SPECS, RELEASE_TOPOLOGY, RECOVERY_REVIEW, assertRelease24, assertRelease25, manifestDiff, extractManifestSql, releaseManifestSqlFrom, releaseExtraSql, captureScript,
   realDeps, runFocusedTest, validateCommand, validateChain, checkHistory, assertMigration25, primaryCleanup, resolvePlan,
   COMPAT_ID, COMPAT_COMMAND, COMPAT_FILE, COMPAT_SPEC, COMPAT_BINDINGS, COMPATIBILITY, T015_ID, T015_COMMAND, T015_FILE, T015_SPEC, T015_ALLOWED_IMPORTS, INGEST_ID, INGEST_COMMAND, INGEST_FILE, INGEST_SPEC, INGEST_ALLOWED_IMPORTS, INGEST_ALLOWED_REQUIRES, verifyCompatBindings, scanCompatTestSource, assertCompatTestSource, assertCompatColumn,
 } from '../disposable-test.mjs';
@@ -22,7 +23,7 @@ const PROPOSAL1_SQL = '-- fake migration 24 bytes\n';
 const PROPOSAL2_SQL = '-- fake migration 25 bytes\n';
 const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1];
 const FAKE_CHAIN = [{ ...P1, sha256: sha(PROPOSAL1_SQL) }, { ...P2, sha256: sha(PROPOSAL2_SQL) }];
-const CATALOG = { [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, 'g2:baseline': { kind: 'seed' }, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
+const CATALOG = { [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'dt-root-'));
@@ -33,6 +34,7 @@ function fixture() {
   put('prisma/schema.prisma', 'datasource db { url = env("DATABASE_URL") }\n');
   put(`${P1.path}/migration.sql`, PROPOSAL1_SQL);
   put(`${P2.path}/migration.sql`, PROPOSAL2_SQL);
+  for (const file of ['scripts/db-safety/g2-generate.mjs', 'scripts/db-safety/g2-compatibility.mjs', 'apps/web/tests/dataset-modality/g2-baseline.test.ts', 'apps/web/tests/dataset-modality/g2-candidate.test.ts']) put(file, '// release step stub\n');
   put(FIXTURE_FILE, 'import "../../../../scripts/db-safety/test-entry.cjs"; // gate\n// fixture body\n');
   put('lib/generated/prisma/models/Dataset.ts', 'export type X = { modalityContentRevision: bigint }\n');
   for (const rel of ['internal/class.ts', 'internal/prismaNamespace.ts', 'internal/prismaNamespaceBrowser.ts', 'models/PreparedImport.ts']) put(`${CLIENT_DIR}/${rel}`, `generated ${rel}\n`);
@@ -74,6 +76,7 @@ function world(overrides = {}) {
     routines: [['dataset_guard_fn', 'abc123']],
     enums: [['PreparedImportStatus', 'PREPARING'], ['PreparedImportStatus', 'COMMITTED'], ['PreparedImportStatus', 'EXPIRED']],
     tables: { Dataset: [0, 'empty'], PreparedImportItem: [0, 'empty'], User: [0, 'empty'] },
+    manifest: Array.from({ length: RELEASE_COUNTS.baseline }, (_, index) => ['relation', JSON.stringify(['public', `t${index}`]), [index]]), datasets: [],
     preparedImport: [], migrations: [], tableList: ['Dataset', 'PreparedImport', 'PreparedImportItem', 'User', '_prisma_migrations'],
   };
   const deployFrom = receiptFile => {
@@ -82,7 +85,15 @@ function world(overrides = {}) {
       const name = file.split('/').at(-2);
       if (w.db.migrations.some(row => row.migration_name === name)) continue;
       w.db.migrations.push({ id: `id-${w.db.migrations.length}`, checksum: sha(readFileSync(file)), finished_at: '2026-10-05T00:00:00.000Z', migration_name: name, logs: null, rolled_back_at: null, started_at: `2026-10-05T00:00:${String(w.db.migrations.length).padStart(2, '0')}.000Z`, applied_steps_count: 1 });
+      if (name === P1.name) {
+        w.db.manifest.push(...[['column', 'modality'], ['column', 'modalityContentRevision'], ['column', 'modalityResolvedAt'], ['column', 'modalityResolverSubject']].map(([kind, n]) => [kind, JSON.stringify(['public', 'Dataset', n]), ['x']]),
+          ...['dataset_modality_resolution_shape', 'dataset_modality_revision_nonnegative'].map(n => ['constraint', JSON.stringify(['public', 'relation', '"Dataset"', n]), ['y']]),
+          ...['asset_modality_write_guard', 'dataset_modality_assignment_guard', 'dataset_modality_insert_guard'].map(n => ['trigger', JSON.stringify(['public', 'Dataset', n]), ['z']]),
+          ...['phase029_guard_asset_write()', 'phase029_guard_dataset_assignment()', 'phase029_guard_dataset_insert()'].map(n => ['routine', JSON.stringify(['public', n]), ['f']]));
+        w.m24Mutation?.(w.db);
+      }
       if (name === P2.name) {
+        w.db.manifest.push(['column', JSON.stringify(['public', 'PreparedImport', 'creationRequestHash']), ['text']]);
         const max = Math.max(...w.db.columns.filter(row => row[0] === 'PreparedImport').map(row => row[5]));
         w.db.columns.push(['PreparedImport', 'creationRequestHash', 'text', 'YES', null, max + 1]);
         w.db.preparedImport = w.db.preparedImport.map(row => ({ ...row, creationRequestHash: null }));
@@ -99,6 +110,9 @@ function world(overrides = {}) {
       const rows = w.db.migrations.map(row => ({ n: row.migration_name, c: row.checksum, f: Boolean(row.finished_at), r: Boolean(row.rolled_back_at) }));
       return JSON.stringify(w.historyMutate ? w.historyMutate(rows) : rows);
     }
+    if (statement.includes('FAKE_SCHEMA_MANIFEST')) return JSON.stringify(w.db.manifest);
+    if (statement.includes('jsonb_build_object(\'id\',x.id')) return JSON.stringify(w.db.datasets.map(row => ({ id: row.id, ...(w.db.manifest.some(entry => entry[1].includes('modalityResolverSubject')) ? { m: row.m, r: 0, t: null, s: null } : { m: null, r: null, t: null, s: null }) })));
+    if (statement.includes('to_jsonb(x) - ARRAY[')) return JSON.stringify([w.db.datasets.length, 'legacy-md5']);
     if (statement.includes('pg_tables')) return JSON.stringify(w.db.tableList);
     if (statement.includes('md5(to_jsonb(x)::text)')) return JSON.stringify(w.db.tables[statement.match(/public\."([^"]+)"/)[1]]);
     if (statement.includes('information_schema.columns')) return JSON.stringify(w.db.columns);
@@ -159,6 +173,9 @@ function world(overrides = {}) {
       if (script === 'cli.mjs') {
         if (args[1] === 'deploy') { w.deployCalls += 1; if (w.failDeployAt === w.deployCalls) return { status: 1, stdout: '', stderr: '' }; if (!w.deployExit) deployFrom(env.DB_SAFETY_RECEIPT); return { status: w.deployExit, stdout: '', stderr: '' }; }
         if (args[1] === 'test' && (args[2] === COMPAT_COMMAND || args[2] === T015_COMMAND || args[2] === INGEST_COMMAND)) { w.onCompatTest?.(w.root); return { status: w.compatExit, stdout: 'compat ran', stderr: '' }; }
+        if (args[1] === 'test' && args[2] === 'g2:baseline') { if (!w.baselineSeedExit) { w.db.datasets = ['g2-empty', 'g2-single', 'g2-mixed'].map(id => ({ id, m: null })); w.db.tables.Dataset = [3, 'g2-ds-md5']; } return { status: w.baselineSeedExit ?? 0, stdout: 'seeded', stderr: '' }; }
+        if (args[1] === 'test' && args[2] === 'g2:compatibility' && w.schemaCompatExit) return { status: w.schemaCompatExit, stdout: '', stderr: '' };
+        if (args[1] === 'test' && args[2] === 'g2:candidate' && w.candidateExit) return { status: w.candidateExit, stdout: '', stderr: '' };
         if (args[1] === 'test' && args[2] === FIXTURE_COMMAND) { if (!w.fixtureExit) seedFixture(); return { status: w.fixtureExit, stdout: 'fixture ran', stderr: '' }; }
         if (args[1] === 'test') return { status: w.testExit, stdout: 'tests ran', stderr: '' };
       }
@@ -178,6 +195,7 @@ function world(overrides = {}) {
     pickPorts: async () => [55460, 55461, 55462],
     verifyCleanup: runDir => { w.verifiedRunDir = runDir; return { status: w.cleanupVerifyStatus, output: '' }; },
     pinned: { baseline: 23, chain: FAKE_CHAIN, compat: compatBindingsFor(root) },
+    releaseManifestSql: () => "SELECT 'FAKE_SCHEMA_MANIFEST';",
     ...(overrides.deps ?? {}),
   };
   w.deps = deps; w.approveCalls = approveCalls;
@@ -529,15 +547,19 @@ const expectCleanedAndVerified = (w, out, containers = 3) => {
 
 test('frozen proposal chain is exactly the two approved migrations, in order, with the approved bytes', () => {
   assert.deepEqual(PROPOSAL_CHAIN, [
-    { order: 1, name: '20260930030000_dataset_modality_g2', path: 'specs/proposals/phase029-modality/migrations/20260930030000_dataset_modality_g2', sha256: '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7' },
-    { order: 2, name: '20261006000000_prepared_import_creation_request_hash', path: 'specs/proposals/phase029-modality/migrations/20261006000000_prepared_import_creation_request_hash', sha256: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' },
+    { order: 1, name: '20260930030000_dataset_modality_g2', path: 'prisma/migrations/20260930030000_dataset_modality_g2', sha256: '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7' },
+    { order: 2, name: '20261006000000_prepared_import_creation_request_hash', path: 'prisma/migrations/20261006000000_prepared_import_creation_request_hash', sha256: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' },
   ]);
   // The real bytes on disk still match the frozen manifest, and the real migration 25 is the single approved statement.
   for (const entry of PROPOSAL_CHAIN) assert.equal(sha(readFileSync(join(guard.root, entry.path, 'migration.sql'))), entry.sha256, entry.name);
   assert.equal(readFileSync(join(guard.root, P2.path, 'migration.sql'), 'utf8'), 'ALTER TABLE "PreparedImport" ADD COLUMN "creationRequestHash" TEXT;\n');
   assert.deepEqual(readdirSync(join(guard.root, P2.path)), ['migration.sql']);
-  assert.equal(readdirSync(join(guard.root, 'prisma/migrations'), { withFileTypes: true }).filter(entry => entry.isDirectory()).length, 23, 'active chain untouched');
-  assert.ok(!readdirSync(join(guard.root, 'prisma/migrations')).includes(P2.name), 'migration 25 is not in the active chain');
+  // Release-chain promotion: the canonical active chain is the 23 historical migrations followed by exactly these two, in order.
+  const active = readdirSync(join(guard.root, 'prisma/migrations'), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();
+  assert.equal(active.length, 25, 'active chain is 25 migrations');
+  assert.deepEqual(active.slice(23), [P1.name, P2.name], 'migrations 24 and 25 are the last two, in order');
+  assert.equal(active.at(-3), '20260930020000_revert_dataset_modality');
+  assert.ok(!existsSync(join(guard.root, 'specs/proposals/phase029-modality/migrations')), 'promoted migrations are not duplicated under proposals');
 });
 
 test('validateChain fails closed on missing, renamed, reordered, extra-file and byte-modified proposals (and only checks the applied slice)', () => {
@@ -548,8 +570,8 @@ test('validateChain fails closed on missing, renamed, reordered, extra-file and 
     const withDeps = chain => ({ ...w.deps, pinned: { ...w.deps.pinned, chain } });
     assert.throws(() => validateChain(withDeps([FAKE_CHAIN[1], FAKE_CHAIN[0]]), 2), /PROPOSAL_ORDER_MISMATCH/, 'reordered');
     assert.throws(() => validateChain(withDeps([FAKE_CHAIN[0], { ...FAKE_CHAIN[1], order: 3 }]), 2), /PROPOSAL_ORDER_MISMATCH/, 'bad order number');
-    assert.throws(() => validateChain(withDeps([FAKE_CHAIN[0], { ...FAKE_CHAIN[1], name: '20261006000000_renamed_migration' }]), 2), /PROPOSAL_NAME_MISMATCH/, 'renamed vs path');
-    assert.throws(() => validateChain(withDeps([FAKE_CHAIN[0], { ...FAKE_CHAIN[1], name: '20260101000_m' }]), 2), /PROPOSAL_(NAME_MISMATCH|NOT_AFTER_PREVIOUS)/, 'not after the historical chain');
+    assert.throws(() => validateChain(withDeps([FAKE_CHAIN[0], { ...FAKE_CHAIN[1], name: '20261006000000_renamed_migration' }]), 2), /PROPOSAL_NAME_MISMATCH|BASELINE_MIGRATION_COUNT_MISMATCH/, 'renamed vs path');
+    assert.throws(() => validateChain(withDeps([FAKE_CHAIN[0], { ...FAKE_CHAIN[1], name: '20260101000_m' }]), 2), /PROPOSAL_(NAME_MISMATCH|NOT_AFTER_PREVIOUS)|BASELINE_MIGRATION_COUNT_MISMATCH/, 'not after the historical chain');
     assert.throws(() => validateChain(withDeps([FAKE_CHAIN[0], { ...FAKE_CHAIN[1], sha256: 'b'.repeat(64) }]), 2), /PROPOSAL_CHECKSUM_MISMATCH/, 'pinned hash differs');
     assert.throws(() => validateChain(withDeps([FAKE_CHAIN[0]]), 2), /PROPOSAL_MANIFEST_INVALID/, 'manifest shorter than the plan');
     assert.throws(() => validateChain(w.deps, 0), /PROPOSAL_MANIFEST_INVALID/);
@@ -571,7 +593,7 @@ test('rehearsal: tampered, missing, reordered or renamed proposal migrations are
     ['missing m25', w => rmSync(join(w.root, P2.path), { recursive: true, force: true }), /PROPOSAL_MISSING_OR_UNEXPECTED_FILES/],
     ['extra file', w => writeFileSync(join(w.root, P2.path, 'x.sql'), 'x'), /PROPOSAL_MISSING_OR_UNEXPECTED_FILES/],
     ['reordered manifest', w => { w.deps.pinned.chain = [FAKE_CHAIN[1], FAKE_CHAIN[0]]; }, /PROPOSAL_ORDER_MISMATCH/],
-    ['renamed manifest entry', w => { w.deps.pinned.chain = [FAKE_CHAIN[0], { ...FAKE_CHAIN[1], name: '20261006000000_other_name' }]; }, /PROPOSAL_NAME_MISMATCH/],
+    ['renamed manifest entry', w => { w.deps.pinned.chain = [FAKE_CHAIN[0], { ...FAKE_CHAIN[1], name: '20261006000000_other_name' }]; }, /PROPOSAL_NAME_MISMATCH|BASELINE_MIGRATION_COUNT_MISMATCH/],
   ];
   for (const [label, mutate, expected] of setups) {
     const w = world();
@@ -629,8 +651,9 @@ test('rehearsal lifecycle: 23 -> migration 24 -> fixture + pre-fingerprint -> mi
     expectCleanedAndVerified(w, out);
     const { expect, missing } = loadExpectations(out.runDir);
     assert.deepEqual(missing, []); assert.equal(expect.containers.length, 3);
-    // the active chain and the generated client are untouched (the runner checks this itself; the fixture repo proves it here)
-    assert.ok(!existsSync(join(w.root, 'prisma/migrations', P2.name)));
+    // the active chain (all 25 migrations) and the generated client are untouched (the runner checks this itself; the fixture repo proves it here)
+    assert.ok(existsSync(join(w.root, 'prisma/migrations', P1.name)) && existsSync(join(w.root, 'prisma/migrations', P2.name)));
+    assert.equal(readFileSync(join(w.root, P2.path, 'migration.sql'), 'utf8'), PROPOSAL2_SQL);
   } finally { cleanup(w); }
 });
 
@@ -900,7 +923,7 @@ test('compat plan: every frozen source binding aborts before provisioning (schem
     'active chain: historical migration edited': [root => writeFileSync(join(root, 'prisma/migrations/202601000_m/migration.sql'), 'SELECT 99;\n'), /FROZEN_ACTIVE_CHAIN_DRIFT/],
     'active chain: lock file edited': [root => writeFileSync(join(root, 'prisma/migrations/migration_lock.toml'), 'provider = "other"\n'), /FROZEN_ACTIVE_CHAIN_DRIFT/],
     'active chain: extra file': [root => writeFileSync(join(root, 'prisma/migrations/202601000_m/extra.sql'), 'x'), /FROZEN_ACTIVE_CHAIN_DRIFT|PROPOSAL|BASELINE/],
-    'active chain: migration 25 promoted': [root => { mkdirSync(join(root, 'prisma/migrations', P2.name)); writeFileSync(join(root, 'prisma/migrations', P2.name, 'migration.sql'), PROPOSAL2_SQL); }, /BASELINE_MIGRATION_COUNT_MISMATCH/],
+    'active chain: unlisted 26th migration added': [root => { mkdirSync(join(root, 'prisma/migrations/20261007000000_extra')); writeFileSync(join(root, 'prisma/migrations/20261007000000_extra/migration.sql'), 'SELECT 1;\n'); }, /BASELINE_MIGRATION_COUNT_MISMATCH/],
     'migration 24 bytes': [root => writeFileSync(join(root, P1.path, 'migration.sql'), PROPOSAL1_SQL + '-- x\n'), /PROPOSAL_CHECKSUM_MISMATCH/],
     'migration 25 bytes': [root => writeFileSync(join(root, P2.path, 'migration.sql'), PROPOSAL2_SQL + '-- x\n'), /PROPOSAL_CHECKSUM_MISMATCH/],
     'migration 25 missing': [root => rmSync(join(root, P2.path), { recursive: true, force: true }), /PROPOSAL_MISSING_OR_UNEXPECTED_FILES/],
@@ -917,7 +940,7 @@ function SCHEMA_TEXT_DRIFT() { return 'datasource db { url = env("DATABASE_URL")
 test('compat plan: migration chain ordering, naming and checksum pins fail closed', async () => {
   const setups = [
     ['reordered manifest', w => { w.deps.pinned.chain = [FAKE_CHAIN[1], FAKE_CHAIN[0]]; }, /PROPOSAL_ORDER_MISMATCH/],
-    ['renamed manifest entry', w => { w.deps.pinned.chain = [FAKE_CHAIN[0], { ...FAKE_CHAIN[1], name: '20261006000000_other_name' }]; }, /PROPOSAL_NAME_MISMATCH/],
+    ['renamed manifest entry', w => { w.deps.pinned.chain = [FAKE_CHAIN[0], { ...FAKE_CHAIN[1], name: '20261006000000_other_name' }]; }, /PROPOSAL_NAME_MISMATCH|BASELINE_MIGRATION_COUNT_MISMATCH/],
     ['pinned checksum differs', w => { w.deps.pinned.chain = [FAKE_CHAIN[0], { ...FAKE_CHAIN[1], sha256: 'b'.repeat(64) }]; }, /PROPOSAL_CHECKSUM_MISMATCH/],
     ['manifest too short', w => { w.deps.pinned.chain = [FAKE_CHAIN[0]]; }, /PROPOSAL_MANIFEST_INVALID/],
   ];
@@ -1384,4 +1407,174 @@ test('ingestion test file is covered by the protected-source set and the frozen 
   assert.ok(guard.protectedSources().includes(join(guard.root, INGEST_FILE)));
   assert.equal(guard.read(join(guard.root, 'scripts/db-safety/commands.json'))[INGEST_COMMAND].verifyOnly, INGEST_ID);
   assert.doesNotThrow(() => verifyCompatBindings(realDeps()));
+});
+
+// =====================================================================================================================
+// Release-chain proof (release:phase029-chain): 23 historical -> synthetic history -> migration 24 -> fixture -> migration 25 -> drift/compat/contracts
+// =====================================================================================================================
+const baseManifest = () => Array.from({ length: RELEASE_COUNTS.baseline }, (_, index) => ['relation', JSON.stringify(['public', `t${index}`]), [index]]);
+const m24Added = () => [
+  ...['modality', 'modalityContentRevision', 'modalityResolvedAt', 'modalityResolverSubject'].map(n => ['column', JSON.stringify(['public', 'Dataset', n]), ['x']]),
+  ...['dataset_modality_resolution_shape', 'dataset_modality_revision_nonnegative'].map(n => ['constraint', JSON.stringify(['public', 'relation', '"Dataset"', n]), ['y']]),
+  ...['asset_modality_write_guard', 'dataset_modality_assignment_guard', 'dataset_modality_insert_guard'].map(n => ['trigger', JSON.stringify(['public', 'Dataset', n]), ['z']]),
+  ...['phase029_guard_asset_write()', 'phase029_guard_dataset_assignment()', 'phase029_guard_dataset_insert()'].map(n => ['routine', JSON.stringify(['public', n]), ['f']]),
+];
+const m25Added = () => [['column', JSON.stringify(['public', 'PreparedImport', 'creationRequestHash']), ['text']]];
+const historyRows = count => Array.from({ length: count }, (_, index) => ({ migration_name: `m${index}`, checksum: 'c'.repeat(64), finished_at: 't', rolled_back_at: null }));
+const captureOf = (overrides = {}) => ({
+  schemaManifest: baseManifest(), migrations: historyRows(23), tables: { Asset: [1, 'a'], Dataset: [3, 'd'], User: [1, 'u'] }, preparedImport: [],
+  datasetLegacy: [3, 'legacy'], datasetModality: ['a', 'b', 'c'].map(id => ({ id, m: null, r: null, t: null, s: null })), ...overrides,
+});
+const p1Ctx = { proposal: { name: PROPOSAL_CHAIN[0].name, sha256: PROPOSAL_CHAIN[0].sha256 } };
+const after24 = (mutate = x => x) => {
+  const pre = captureOf();
+  const post = captureOf({ schemaManifest: [...baseManifest(), ...m24Added()], migrations: [...historyRows(23), { migration_name: PROPOSAL_CHAIN[0].name, checksum: PROPOSAL_CHAIN[0].sha256, finished_at: 't', rolled_back_at: null }], datasetModality: ['a', 'b', 'c'].map(id => ({ id, m: null, r: 0, t: null, s: null })) });
+  mutate(post);
+  return [pre, post];
+};
+
+test('release counts and the manifest definition are pinned: 1829 -> 1841 -> 1842, reviewed CTE bytes, single-line extraction', () => {
+  assert.deepEqual(RELEASE_COUNTS, { baseline: 1829, m24: 1841, m25: 1842 });
+  assert.equal(RELEASE_COUNTS.m24 - RELEASE_COUNTS.baseline, 12); assert.equal(RELEASE_COUNTS.m25 - RELEASE_COUNTS.m24, 1);
+  const sql = releaseManifestSqlFrom(join(guard.root, RECOVERY_REVIEW.path));
+  assert.ok(!sql.includes('\n') && !sql.includes('expected_after') && sql.startsWith('WITH objects AS (') && sql.endsWith('FROM objects;'));
+  assert.throws(() => extractManifestSql('nothing here'), /RECOVERY_REVIEW_MANIFEST_NOT_FOUND/);
+  assert.throws(() => extractManifestSql('WITH objects AS ( SELECT 1 )'), /RECOVERY_REVIEW_MANIFEST_NOT_FOUND/);
+  const dir = mkdtempSync(join(tmpdir(), 'rv-'));
+  try { writeFileSync(join(dir, 'x.sql'), readFileSync(join(guard.root, RECOVERY_REVIEW.path), 'utf8') + '-- edited\n'); assert.throws(() => releaseManifestSqlFrom(join(dir, 'x.sql')), /RECOVERY_REVIEW_DRIFT/); } finally { rmSync(dir, { recursive: true, force: true }); }
+  const extra = releaseExtraSql('SELECT 1;');
+  assert.deepEqual(Object.keys(extra), ['schemaManifest', 'datasetLegacy', 'datasetModality']);
+  const script = captureScript(['Dataset', 'User'], extra);
+  assert.equal(script.keys.length, 8 + 3); assert.equal(script.statements.length, 8 + 3 + 2);
+  assert.ok(Object.values(extra).every(statement => !statement.includes('\n') && !/INSERT|UPDATE|DELETE|DROP|ALTER|CREATE/i.test(statement.replace('SELECT 1;', ''))), 'extra captures are read-only single-line selects');
+});
+
+test('assertRelease24: accepts exactly the 12 expected additions and an unchanged, unresolved historical state', () => {
+  const [pre, post] = after24();
+  const evidence = assertRelease24(pre, post, p1Ctx);
+  assert.deepEqual(evidence.map(item => item.name), ['schema-delta', 'migration-history', 'no-data-change', 'historical-datasets-unresolved']);
+  assert.deepEqual(evidence[0], { name: 'schema-delta', pass: true, from: 1829, to: 1841, columns: 4, constraints: 2, triggers: 3, functions: 3, removed: 0, changed: 0 });
+});
+test('assertRelease24 fails closed on every deviation', () => {
+  const cases = {
+    'wrong baseline count': [pre => { pre.schemaManifest.pop(); }, 'RELEASE_M24_SCHEMA_COUNT_UNEXPECTED'],
+    'extra added entry': [(pre, post) => { post.schemaManifest.push(['index', '["public","x"]', 'i']); }, 'RELEASE_M24_SCHEMA_COUNT_UNEXPECTED'],
+    'changed existing entry': [(pre, post) => { post.schemaManifest[5] = [...post.schemaManifest[5].slice(0, 2), ['changed']]; }, 'RELEASE_M24_SCHEMA_DELTA_UNEXPECTED'],
+    'removed existing entry': [(pre, post) => { post.schemaManifest.splice(5, 1, ['relation', '["public","other"]', [1]]); }, 'RELEASE_M24_SCHEMA_DELTA_UNEXPECTED'],
+    'wrong column name': [(pre, post) => { post.schemaManifest[post.schemaManifest.length - 12] = ['column', '["public","Dataset","modalityX"]', ['x']]; }, 'RELEASE_M24_COLUMNS_UNEXPECTED'],
+    'wrong table for a column': [(pre, post) => { post.schemaManifest[post.schemaManifest.length - 12] = ['column', '["public","Asset","modality"]', ['x']]; }, 'RELEASE_M24_COLUMNS_UNEXPECTED'],
+    'wrong constraint': [(pre, post) => { post.schemaManifest[post.schemaManifest.length - 8] = ['constraint', '["public","relation","\\"Dataset\\"","other"]', ['y']]; }, 'RELEASE_M24_CONSTRAINTS_UNEXPECTED'],
+    'wrong trigger': [(pre, post) => { post.schemaManifest[post.schemaManifest.length - 6] = ['trigger', '["public","Dataset","other"]', ['z']]; }, 'RELEASE_M24_TRIGGERS_UNEXPECTED'],
+    'wrong function': [(pre, post) => { post.schemaManifest[post.schemaManifest.length - 1] = ['routine', '["public","other()"]', ['f']]; }, 'RELEASE_M24_ROUTINES_UNEXPECTED'],
+    'history: extra row': [(pre, post) => { post.migrations.push(historyRows(1)[0]); }, 'RELEASE_M24_HISTORY_UNEXPECTED'],
+    'history: earlier record changed': [(pre, post) => { post.migrations[3] = { ...post.migrations[3], checksum: 'd'.repeat(64) }; }, 'RELEASE_M24_HISTORY_UNEXPECTED'],
+    'history: wrong checksum': [(pre, post) => { post.migrations.at(-1).checksum = 'e'.repeat(64); }, 'RELEASE_M24_HISTORY_UNEXPECTED'],
+    'history: unfinished': [(pre, post) => { post.migrations.at(-1).finished_at = null; }, 'RELEASE_M24_HISTORY_UNEXPECTED'],
+    'other table changed': [(pre, post) => { post.tables.Asset = [2, 'a2']; }, 'RELEASE_M24_DATA_CHANGED'],
+    'table set changed': [(pre, post) => { post.tables.Extra = [0, 'e']; }, 'RELEASE_M24_DATA_CHANGED'],
+    'dataset legacy changed': [(pre, post) => { post.datasetLegacy = [3, 'different']; }, 'RELEASE_M24_DATASET_CHANGED'],
+    'no historical datasets seeded': [(pre, post) => { pre.datasetLegacy = [0, 'x']; post.datasetLegacy = [0, 'x']; post.datasetModality = []; }, 'RELEASE_M24_DATASET_CHANGED'],
+    'dataset resolved by the migration': [(pre, post) => { post.datasetModality[1].m = 'IMAGE'; }, 'RELEASE_M24_DATASET_NOT_UNRESOLVED'],
+    'dataset revision not zero': [(pre, post) => { post.datasetModality[0].r = 1; }, 'RELEASE_M24_DATASET_NOT_UNRESOLVED'],
+    'dataset resolver subject set': [(pre, post) => { post.datasetModality[2].s = 'u'; }, 'RELEASE_M24_DATASET_NOT_UNRESOLVED'],
+    'prepared imports changed': [(pre, post) => { post.preparedImport = [{ id: 'x' }]; }, 'RELEASE_M24_DATA_CHANGED'],
+  };
+  for (const [label, [mutate, code]] of Object.entries(cases)) {
+    const [pre, post] = after24();
+    mutate(pre, post);
+    assert.throws(() => assertRelease24(pre, post, p1Ctx), new RegExp(code), label);
+  }
+  assert.throws(() => manifestDiff(null, []), /RELEASE_MANIFEST_MISSING/);
+  assert.throws(() => manifestDiff([['a', 'b', 1], ['a', 'b', 2]], []), /RELEASE_MANIFEST_DUPLICATE_IDENTITY/);
+});
+test('assertRelease25: exactly one added column, nothing changed, historical datasets untouched', () => {
+  const pre = captureOf({ schemaManifest: [...baseManifest(), ...m24Added()], datasetModality: [{ id: 'a', m: null, r: 0, t: null, s: null }, { id: 'b', m: 'IMAGE', r: 0, t: '2026-10-05T00:00:00', s: 'u1' }] });
+  const post = captureOf({ schemaManifest: [...baseManifest(), ...m24Added(), ...m25Added()], datasetModality: pre.datasetModality });
+  const ctx = { newColumn: ['PreparedImport', 'creationRequestHash'] };
+  assert.deepEqual(assertRelease25(pre, post, ctx).map(item => item.name), ['schema-delta', 'datasets-unchanged']);
+  const cases = {
+    'wrong count': post => { post.schemaManifest.push(['index', '["public","y"]', 'i']); },
+    'wrong column': post => { post.schemaManifest[post.schemaManifest.length - 1] = ['column', '["public","PreparedImport","other"]', ['text']]; },
+    'existing entry changed': post => { post.schemaManifest[3] = [...post.schemaManifest[3].slice(0, 2), ['changed']]; },
+    'dataset modified': post => { post.datasetModality = [{ ...post.datasetModality[0], m: 'IMAGE' }, post.datasetModality[1]]; },
+    'dataset removed': post => { post.datasetModality = post.datasetModality.slice(0, 1); },
+  };
+  for (const [label, mutate] of Object.entries(cases)) {
+    const copy = captureOf({ schemaManifest: [...post.schemaManifest], datasetModality: post.datasetModality.map(row => ({ ...row })) });
+    mutate(copy);
+    assert.throws(() => assertRelease25(pre, copy, ctx), /RELEASE_M25_/, label);
+  }
+});
+
+test('release plan is a fixed plan resolved by name; catalog specs and topology are pinned', () => {
+  assert.equal(validateCommand(RELEASE_ID, CATALOG), RELEASE_ID);
+  assert.equal(resolvePlan(RELEASE_ID).kind, 'release'); assert.equal(resolvePlan(RELEASE_ID).through, 2);
+  assert.deepEqual(Object.keys(RELEASE_SPECS), ['g2:generate', 'g2:baseline', 'g2:compatibility', 'g2:candidate']);
+  const catalog = JSON.parse(readFileSync(join(guard.root, 'scripts/db-safety/commands.json'), 'utf8'));
+  for (const [name, spec] of Object.entries(RELEASE_SPECS)) assert.deepEqual(catalog[name], spec, `${name} in the real catalog equals its pinned spec`);
+  assert.equal(RELEASE_TOPOLOGY.length, 9);
+  assert.ok(!SUPPORTED_COMMANDS.includes(RELEASE_ID), 'not selectable as a plain command');
+});
+test('release lifecycle: 23 -> seed -> 24 -> fixture -> 25 -> drift/compat/contracts -> cleanup -> independent verification', async () => {
+  const w = world();
+  try {
+    const out = await failuresOf(w, RELEASE_ID);
+    assert.equal(out.result, 'PASS', JSON.stringify(out.failures));
+    assert.equal(dockerRuns(w).length, 3);
+    assert.equal(deployCalls(w).length, 3, 'baseline, migration 24, migration 25');
+    assert.deepEqual(testCalls(w), ['g2:generate', 'g2:baseline', FIXTURE_COMMAND, 'g2:compatibility', COMPAT_COMMAND, 'g2:candidate']);
+    const order = w.calls.filter(c => c.args[1] === 'deploy' || c.args[1] === 'test').map(c => c.args[1] === 'deploy' ? 'deploy' : c.args[2]);
+    assert.deepEqual(order, ['deploy', 'g2:generate', 'g2:baseline', 'deploy', FIXTURE_COMMAND, 'deploy', 'g2:compatibility', COMPAT_COMMAND, 'g2:candidate']);
+    assert.equal(w.db.migrations.length, 25);
+    const results = JSON.parse(readFileSync(join(out.runDir, 'results.json'), 'utf8'));
+    assert.equal(results.kind, 'release-chain-proof'); assert.equal(results.scope, 'release-chain-25'); assert.equal(results.releaseChainProven, true);
+    assert.equal(results.countsAsG3Evidence, false); assert.equal(results.countsAsG5Evidence, false); assert.equal(results.notAuthorizationToApplyMigration, true);
+    assert.deepEqual(results.receiptTopology.map(({ step, operation, command }) => [step, operation, command]), RELEASE_TOPOLOGY.map(row => [...row]));
+    assert.equal(new Set(results.receiptTopology.map(entry => entry.receiptId)).size, 9);
+    const summary = JSON.parse(readFileSync(join(out.runDir, 'release-summary.json'), 'utf8'));
+    assert.deepEqual(summary.schemaEntries, [1829, 1841, 1842]); assert.equal(summary.historicalMigrations, 23); assert.equal(summary.activeChainMigrations, 25); assert.equal(summary.migrationChecksums.length, 25);
+    assert.deepEqual(summary.migrationChecksums.slice(23).map(row => [row.name, row.checksum]), PROPOSAL_CHAIN.map((entry, index) => [entry.name, FAKE_CHAIN[index].sha256]));
+    for (const name of ['release-m24-assertions.json', 'release-m25-assertions.json', 'release-seeded-datasets.json', 'release-m24-datasets.json', 'release-baseline-schema-count.json']) assert.ok(existsSync(join(out.runDir, name)), name);
+    expectCleanedAndVerified(w, out);
+    assert.ok(existsSync(join(w.root, 'prisma/migrations', P1.name)) && existsSync(join(w.root, 'prisma/migrations', P2.name)), 'canonical chain untouched');
+  } finally { cleanup(w); }
+});
+test('release plan: every preflight tamper aborts before anything is provisioned', async () => {
+  const setups = {
+    'tampered g2:baseline spec': w => { const catalog = JSON.parse(readFileSync(join(w.root, 'scripts/db-safety/commands.json'), 'utf8')); catalog['g2:baseline'].args.push('x'); writeFileSync(join(w.root, 'scripts/db-safety/commands.json'), JSON.stringify(catalog)); },
+    'tampered g2:generate spec': w => { const catalog = JSON.parse(readFileSync(join(w.root, 'scripts/db-safety/commands.json'), 'utf8')); catalog['g2:generate'].cwd = 'apps/web'; writeFileSync(join(w.root, 'scripts/db-safety/commands.json'), JSON.stringify(catalog)); },
+    'tampered fixture spec': w => { const catalog = JSON.parse(readFileSync(join(w.root, 'scripts/db-safety/commands.json'), 'utf8')); catalog[FIXTURE_COMMAND].args.push('x'); writeFileSync(join(w.root, 'scripts/db-safety/commands.json'), JSON.stringify(catalog)); },
+    'missing step file': w => rmSync(join(w.root, 'apps/web/tests/dataset-modality/g2-candidate.test.ts')),
+    'frozen schema drift': w => writeFileSync(join(w.root, 'prisma/schema.prisma'), 'drift\n'),
+    'frozen client drift': w => writeFileSync(join(w.root, CLIENT_DIR, 'models/Dataset.ts'), 'export type X = { modalityContentRevision: bigint, extra: 1 }\n'),
+    'migration 25 bytes': w => writeFileSync(join(w.root, P2.path, 'migration.sql'), PROPOSAL2_SQL + '-- x\n'),
+    'manifest definition drift': w => { w.deps.releaseManifestSql = () => { throw Error('RECOVERY_REVIEW_DRIFT'); }; },
+  };
+  for (const [label, setup] of Object.entries(setups)) {
+    const w = world();
+    try { setup(w); await assert.rejects(() => failuresOf(w, RELEASE_ID), /./, label); assert.equal(w.calls.length, 0, label + ': no process'); assert.equal(w.stages.length, 0, label); assert.equal(readdirSync(w.outBase).length, 0, label); } finally { cleanup(w); }
+  }
+});
+test('release plan: failures at each stage fail the run, still clean up and are independently verified', async () => {
+  const scenarios = {
+    'baseline seed fails': [{ baselineSeedExit: 1 }, 'RELEASE_BASELINE_SEED_FAILED'],
+    'schema compatibility step fails': [{ schemaCompatExit: 1 }, 'RELEASE_SCHEMA_COMPAT_FAILED'],
+    'contract tests fail': [{ candidateExit: 1 }, 'RELEASE_CANDIDATE_CONTRACTS_FAILED'],
+    'compat test fails': [{ compatExit: 1 }, 'COMPAT_TEST_FAILED'],
+    'fixture fails': [{ fixtureExit: 1 }, 'FIXTURE_FAILED'],
+    'migration 24 adds an unexpected entry': [{ m24Mutation: db => db.manifest.push(['index', '["public","x"]', 'i']) }, 'RELEASE_M24_SCHEMA_COUNT_UNEXPECTED'],
+    'migration 24 resolves a historical dataset': [{ m24Mutation: db => { db.datasets[0].m = 'IMAGE'; } }, 'RELEASE_M24_DATASET_NOT_UNRESOLVED'],
+    'migration 25 modifies a historical dataset': [{ m25Mutation: db => { db.datasets[0].m = 'IMAGE'; } }, 'RELEASE_M25_DATASETS_CHANGED'],
+    'migration 25 adds a second entry': [{ m25Mutation: db => db.manifest.push(['index', '["public","y"]', 'i']) }, 'RELEASE_M25_SCHEMA_COUNT_UNEXPECTED'],
+    'history checksum differs': [{ historyMutate: rows => (rows.length === 25 ? rows.map((row, index) => (index === 24 ? { ...row, c: 'a'.repeat(64) } : row)) : rows) }, 'PROPOSAL_HISTORY_CHECKSUM_MISMATCH'],
+  };
+  for (const [label, [overrides, code]] of Object.entries(scenarios)) {
+    const w = world();
+    try {
+      Object.assign(w, overrides);
+      const out = await failuresOf(w, RELEASE_ID);
+      assert.equal(out.result, 'FAIL', label); assert.ok(out.failures.includes(code), `${label}: ${JSON.stringify(out.failures)}`);
+      expectCleanedAndVerified(w, out);
+    } finally { cleanup(w); }
+  }
 });

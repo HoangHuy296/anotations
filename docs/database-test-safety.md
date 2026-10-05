@@ -171,3 +171,20 @@ process identity fails cleanup; it does not authorize killing another process.
 Safety-negative runs must preserve schema, history and all 35 table fingerprints.
 Keep success/failure logs and cleanup receipts; a safety-suite pass alone is not
 G4 E2E success, G4 closure, G5 approval, or migration-24 deployment permission.
+
+## Phase 029 release-chain proof (`release:phase029-chain`)
+
+Since the release-chain promotion, the canonical `prisma/migrations` holds 25
+migrations (the 23 historical ones, then `20260930030000_dataset_modality_g2`
+and `20261006000000_prepared_import_creation_request_hash`, both pinned by
+SHA-256 in `scripts/db-safety/disposable-test.mjs`).
+`node scripts/db-safety/disposable-test.mjs release:phase029-chain` is a fixed,
+receipt-bound plan on fresh disposable PostgreSQL/Redis/MinIO: baseline of the 23
+historical migrations, synthetic unresolved history, migration 24, a prepared-import
+fixture, migration 25, then drift/status, client compatibility and contract
+checks, followed by primary and independent cleanup. It asserts the reviewed
+schema-manifest counts 1829 → 1841 → 1842, exact history checksums, unchanged
+data and unresolved historical Datasets. It is not G3/G5 evidence and does not
+authorize applying any migration to a shared database. The G2/G3 Python
+rehearsal scripts remain migration-24-only rehearsals (they stage the 23
+historical migrations and take migration 24 from the active chain).
