@@ -1,10 +1,15 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { ImportForm } from "@/components/imports/import-form";
+import { LocalFolderImportForm } from "@/components/imports/local-folder-import-form";
 import { ClassEntry, ClassEntryView, ModalityCard } from "@/components/imports/modality-class-card";
 import { buildClassOptions, type ComboboxState } from "@/lib/imports/class-combobox-state";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: () => undefined, replace: () => undefined, refresh: () => undefined, back: () => undefined, prefetch: () => undefined }) }));
 
 const noop = () => undefined;
 const inputs = (html: string) => [...html.matchAll(/<input[^>]*>/g)].map(match => match[0]);
@@ -111,23 +116,51 @@ describe("ClassEntry badges, removal and empty recommendations", () => {
   });
 });
 
-describe("form integration", () => {
+describe("form integration (STRUCTURE only: static markup and wiring; interactive behavior is verified on the pure model in creation-form-model.vitest.spec.ts)", () => {
   const read = (file: string) => readFileSync(path.resolve(process.cwd(), "src/components/imports", file), "utf8");
-  it("both creation forms use the modality card instead of a select, and the repository payload still reads the native modality field", () => {
-    const repo = read("import-form.tsx"); const local = read("local-folder-import-form.tsx");
+  const classEntryMarkers = (html: string) => ({ combobox: /role="combobox"/.test(html), addLabel: html.includes(">Add a class<"), confirmedList: html.includes('aria-label="Confirmed classes"') });
+
+  it("ClassEntry is mounted in the repository creation form, next to the intact modality card (four radios named modality, no select)", () => {
+    const html = renderToStaticMarkup(<ImportForm connections={[]} />);
+    expect(classEntryMarkers(html)).toEqual({ combobox: true, addLabel: true, confirmedList: true });
+    const radios = inputs(html).filter(tag => attr(tag, "name") === "modality");
+    expect(radios.map(tag => attr(tag, "value"))).toEqual(["IMAGE", "VIDEO", "AUDIO", "TEXT"]);
+    expect(radios.every(tag => attr(tag, "checked") === null)).toBe(true);
+    expect(html).not.toContain('<select name="modality"');
+  });
+  it("ClassEntry is mounted in the local-folder creation form (new Dataset), next to the intact modality card", () => {
+    const html = renderToStaticMarkup(<LocalFolderImportForm />);
+    expect(classEntryMarkers(html)).toEqual({ combobox: true, addLabel: true, confirmedList: true });
+    expect(inputs(html).filter(tag => attr(tag, "name") === "modality").map(tag => attr(tag, "value"))).toEqual(["IMAGE", "VIDEO", "AUDIO", "TEXT"]);
+  });
+  it("append mode renders no ClassEntry and shows the parent's modality as fixed and read-only (no radios)", () => {
+    const html = renderToStaticMarkup(<LocalFolderImportForm datasetId="d1" datasetName="Existing" datasetModality="VIDEO" />);
+    expect(classEntryMarkers(html)).toEqual({ combobox: false, addLabel: false, confirmedList: false });
+    expect(html).toContain('data-modality-fixed="VIDEO"');
+    expect(inputs(html).filter(tag => attr(tag, "name") === "modality")).toEqual([]); // no radios: the parent's modality is read-only
+  });
+  it("both forms still use the modality card instead of a select, and the repository payload still reads the native modality field", () => {
+    const repo = read("import-form.tsx"), local = read("local-folder-import-form.tsx");
     for (const source of [repo, local]) { expect(source).toContain("<ModalityCard"); expect(source).not.toMatch(/name="modality"[^>]*<option|<select[^>]*name="modality"/); }
     expect(repo).toContain('modality: value(form, "modality")');
-    expect(local).toContain("{ name: name.trim(), modality }");
-  });
-  it("changing the draft modality resets the repository preview and idempotency key", () => {
-    expect(read("import-form.tsx")).toMatch(/onChange=\{\(next\) => \{ setModality\(next\); setPreview\(null\); importIdempotencyKeyRef\.current = null; \}\}/);
-  });
-  it("append mode shows the parent's modality as fixed and does not send a modality", () => {
-    const local = read("local-folder-import-form.tsx");
     expect(local).toContain("fixed={datasetModality}");
-    expect(local).toContain("...(appendMode ? {} : { name: name.trim(), modality })");
   });
-  it("confirmed classes are not mounted in either form or sent in any request until the server contract is approved", () => {
-    for (const file of ["import-form.tsx", "local-folder-import-form.tsx"]) { const source = read(file); expect(source).not.toContain("<ClassEntry"); expect(source).not.toMatch(/confirmedClasses|classes:/); }
+  it("WIRING: both forms consume the production model instead of re-implementing it", () => {
+    const repo = read("import-form.tsx"), local = read("local-folder-import-form.tsx");
+    for (const source of [repo, local]) { expect(source).toContain('from "@/lib/imports/creation-form-model"'); expect(source).not.toMatch(/analyzeConfirmedClasses|normalizeLabelName|toLocaleLowerCase/); }
+    expect(repo).toContain("buildRepositoryStartPayload(");
+    expect(repo.match(/buildPreviewPayload\(/g)?.length).toBe(3);
+    expect(repo).toContain("changeModality(formState(), next)");
+    expect(repo).toContain("changeConfirmedClasses(formState(), next)");
+    expect(repo).toContain("ensureIdempotencyKey(formState(), randomUUIDAuto)");
+    expect(local).toContain("buildFolderStartBody({ appendMode,");
+    expect(local).toContain("changeModality(");
+    expect(local).toContain("randomUUIDAuto() + randomUUIDAuto()");
+  });
+  it("WIRING: the repository form's other legitimate key resets are kept, now clearing the key and its taxonomy identity together", () => {
+    const repo = read("import-form.tsx");
+    expect(repo).toContain("const resetImportKey = () => { importIdempotencyKeyRef.current = null; importKeyIdentityRef.current = null; };");
+    expect(repo.match(/resetImportKey\(\);/g)?.length).toBe(3);
+    expect(repo).not.toMatch(/importIdempotencyKeyRef\.current = null;\n/);
   });
 });

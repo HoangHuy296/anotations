@@ -93,6 +93,10 @@
     "./export-format-capability": {
       "types": "./dist/export-format-capability.d.ts",
       "default": "./dist/export-format-capability.js"
+    },
+    "./confirmed-classes": {
+      "types": "./dist/confirmed-classes.d.ts",
+      "default": "./dist/confirmed-classes.js"
     }
   },
   "scripts": {

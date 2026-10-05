@@ -330,6 +330,7 @@ model PreparedImport {
   deadlineAt        DateTime
   committedAt       DateTime?
   idempotencyKey    String
+  creationRequestHash String?
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   createdBy         User                 @relation("PreparedImportCreatedBy", fields: [createdById], references: [id])

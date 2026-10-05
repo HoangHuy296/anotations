@@ -23,6 +23,90 @@
       "tests/dataset-metadata/**/*.test.ts"
     ]
   },
+  "web:test:dataset-patch-route": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-metadata/dataset-patch-route.test.ts"
+    ]
+  },
+  "web:test:local-folder-modality-idempotency": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/local-folder-import/prepare-modality-idempotency.test.ts"
+    ]
+  },
+  "web:test:imports-ui:vitest": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "tests/imports/class-combobox-state.vitest.spec.ts",
+      "tests/imports/confirmed-classes.vitest.spec.ts",
+      "tests/imports/creation-form-model.vitest.spec.ts",
+      "tests/imports/modality-class-card.vitest.spec.tsx",
+      "tests/imports/source-import-preflight-schema.vitest.spec.ts",
+      "--pool=threads",
+      "--environment",
+      "node"
+    ]
+  },
+  "rehearsal-fixture:prepared-import-creation-request-hash": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/prepared-import-rehearsal/seed-prepared-imports.test.ts"
+    ],
+    "rehearsalOnly": "rehearse:prepared-import-creation-request-hash"
+  },
+  "compat-test:prepared-import-creation-request-hash": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/prepared-import-compat/client-compat.test.ts"
+    ],
+    "compatOnly": "compat:prepared-import-creation-request-hash"
+  },
+  "verify-test:confirmed-taxonomy-creation": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/confirmed-taxonomy/creation-paths.test.ts"
+    ],
+    "verifyOnly": "verify:confirmed-taxonomy-creation"
+  },
   "web:test:direct-upload": {
     "kind": "test",
     "cwd": "apps/web",
@@ -576,5 +660,30 @@
       "tests/assets-bulk/delete-sync.test.ts",
       "tests/workspace/workspace-shell-boundary.test.ts"
     ]
+  },
+  "worker:test:ingestion-replay-reuse": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import/ingestion-replay-reuse.test.ts"
+    ]
+  },
+  "verify-test:ingestion-replay-summary": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/ingestion-replay-summary.test.ts"
+    ],
+    "verifyOnly": "verify:ingestion-replay-summary"
   }
 }

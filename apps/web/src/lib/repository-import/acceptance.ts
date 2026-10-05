@@ -140,6 +140,7 @@ export async function acceptRepositoryImportRequest(
       visibility: preflight.result.visibility,
     },
     manifest: safePreviewAggregates(preflight.result),
+    confirmedClasses: request.confirmedClasses,
   });
 
   if (!accepted.ok) {

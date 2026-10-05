@@ -12,6 +12,7 @@ import {
   type LabelActionResult,
 } from "@/app/(app)/labels/actions";
 import { Button } from "@/components/ui/button";
+import { LABEL_COLOR_PRESETS as LABEL_COLORS } from "@/lib/labels/label-color-presets";
 import { labelSchema, textEligibilityScopeValues, type LabelInput } from "@/lib/validation/label";
 
 const TEXT_ELIGIBILITY_OPTIONS = [
@@ -277,13 +278,6 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
     </form>
   );
 }
-
-const LABEL_COLORS = [
-  "#0EA5E9", "#2563EB", "#4F46E5", "#7C3AED", "#9333EA", "#C026D3",
-  "#DB2777", "#E11D48", "#EA580C", "#F97316", "#CA8A04", "#EAB308",
-  "#65A30D", "#16A34A", "#059669", "#0F766E", "#0891B2", "#475569",
-  "#334155", "#78350F", "#BE123C", "#A21CAF", "#1D4ED8", "#047857",
-] as const;
 
 function Field({
   label,

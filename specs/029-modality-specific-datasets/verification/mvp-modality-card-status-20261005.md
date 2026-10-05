@@ -27,3 +27,10 @@ The Phase 029 contract says only that fingerprints include "normalized confirmed
 6. whether replay with a different class list is an `IDEMPOTENCY_KEY_CONFLICT` for `/api/datasets` (the contract lists only repository and folder fingerprints).
 
 Existing rules that are determined and were reused: name 2–50 trimmed (`labelSchema`), identity `normalizeLabelName` (trim + `en-US` lowercase), per-Dataset uniqueness (`@@unique([datasetId, normalizedName])`), single-label duplicate → `DUPLICATE_NAME`.
+
+## Verification-infrastructure defects recorded for later correction (2026-10-05)
+
+Neither is fixed by the hostname/source-state control experiment; both must be resolved before G5 closure.
+
+1. **Process-monitor `pgrep` self-match.** Wait/monitor loops of the form `until ! pgrep -f "<command line>"; do sleep; done` match their own shell, because the shell's command line contains the pattern. The loop therefore never observes the target exiting, and status reports based on it ("RUNNING") are invalid. Observed on runs `20261005T042640Z` (monitor expired with no event) and `20261005T060400Z` (reported RUNNING for ~8 minutes after the run had written its cleanup record). Such monitors are not evidence. Use the launched PID (`kill -0`, `wait`, or `tail --pid`) instead.
+2. **No independent-cleanup receipt generator or verifier.** `cleanup-independent.json` appears in some earlier run directories, but no harness code, command-catalog entry or test produces or verifies it; the harness writes only the in-run `cleanup.json`. Final G5 closure requires a receipt-owned independent cleanup proof, so a generator that inspects exactly the receipt-owned container, volume, process and private-stage identifiers, plus a verifier that fails closed, must be implemented and tested. Manual exact-ID inspection remains supplementary evidence only.

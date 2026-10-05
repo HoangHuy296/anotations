@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { datasetIdSchema } from "@/lib/validation/dataset";
+import { labelNameSchema, normalizeLabelName } from "@/lib/validation/label-name";
 
 /**
  * TEXT eligibility scope (025-text-workspace-engine): reuses the existing
@@ -23,11 +24,7 @@ export type TextEligibilityField = z.infer<typeof textEligibilityFieldSchema>;
 
 export const labelSchema = z.object({
   datasetId: datasetIdSchema,
-  name: z
-    .string()
-    .trim()
-    .min(2, "Name must contain at least 2 characters.")
-    .max(50, "Name must contain at most 50 characters."),
+  name: labelNameSchema,
   color: z
     .string()
     .trim()
@@ -56,6 +53,6 @@ export const labelMutationSchema = z.object({
   hotkey: labelSchema.shape.hotkey.default(""),
   textEligibility: textEligibilityFieldSchema,
 });
-export function normalizeLabelName(name: string) { return name.trim().toLocaleLowerCase("en-US"); }
+export { normalizeLabelName };
 
 export type LabelInput = z.input<typeof labelSchema>;

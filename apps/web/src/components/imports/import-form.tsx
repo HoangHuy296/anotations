@@ -4,7 +4,9 @@ import { ArrowRight, CheckCircle, Eye, SpinnerGap, WarningCircle } from "@phosph
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 
-import { ModalityCard } from "@/components/imports/modality-class-card";
+import { ClassEntry, ModalityCard } from "@/components/imports/modality-class-card";
+import type { ConfirmedClassDraft } from "@/lib/imports/confirmed-classes";
+import { buildPreviewPayload, buildRepositoryStartPayload, changeConfirmedClasses, changeModality, confirmedClassesMessage, ensureIdempotencyKey, type CreationFormState } from "@/lib/imports/creation-form-model";
 import { Button } from "@/components/ui/button";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 import type { CreationModality } from "@/lib/imports/recommended-classes";
@@ -60,8 +62,14 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const importIdempotencyKeyRef = useRef<string | null>(null);
+  // The normalized taxonomy identity the retained key was minted for (see creation-form-model.ts).
+  const importKeyIdentityRef = useRef<string | null>(null);
+  const resetImportKey = () => { importIdempotencyKeyRef.current = null; importKeyIdentityRef.current = null; };
   // No default and no inference from the preview: the user must choose.
   const [modality, setModality] = useState<CreationModality | "">("");
+  // User-confirmed class names (display names). Sent only when non-empty; a change of modality or classes starts a new idempotency identity.
+  const [confirmedClasses, setConfirmedClasses] = useState<ConfirmedClassDraft>([]);
+  const formState = (): CreationFormState => ({ modality, confirmedClasses, idempotencyKey: importIdempotencyKeyRef.current, keyIdentity: importKeyIdentityRef.current });
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<"settings" | "preview">("settings");
   const [mode, setMode] = useState<CredentialMode>(connections.length ? "EXISTING_SOURCE_CONNECTION" : "PUBLIC");
@@ -97,10 +105,10 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
     setPreview(null);
     const payload = requestFromForm(new FormData(event.currentTarget), mode);
     startTransition(() => {
-      void request("/api/source-import-preflight", payload)
+      void request("/api/source-import-preflight", buildPreviewPayload(payload))
         .then((data) => {
           const next = data as ImportPreview;
-          importIdempotencyKeyRef.current = null;
+          resetImportKey();
           setPreview(next);
           setActiveTab("preview");
           setMessage(next.readyForImport ? "Repository access verified. Start Import will validate it again before creating work." : "Repository visibility does not match the selected expectation.");
@@ -126,12 +134,12 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
     setMessage(null);
     setSelectedCommit("");
     startTransition(() => {
-      void request("/api/source-import-preflight", requestFromForm(form, mode))
+      void request("/api/source-import-preflight", buildPreviewPayload(requestFromForm(form, mode)))
         .then((data) => {
           const next = data as ImportPreview;
           setPreview(next);
           setSelectedRef(next.repository.ref);
-          importIdempotencyKeyRef.current = null;
+          resetImportKey();
           setMessage(next.readyForImport ? "The selected ref is available and the repository preview has been refreshed." : "Repository visibility does not match the selected expectation.");
         })
         .catch((error: unknown) => setMessage(error instanceof Error ? error.message : "The selected ref could not be previewed."));
@@ -152,12 +160,12 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
     form.set("commit", commit);
     setMessage(null);
     startTransition(() => {
-      void request("/api/source-import-preflight", requestFromForm(form, mode))
+      void request("/api/source-import-preflight", buildPreviewPayload(requestFromForm(form, mode)))
         .then((data) => {
           const next = data as ImportPreview;
           setPreview(next);
           setSelectedCommit(commit);
-          importIdempotencyKeyRef.current = null;
+          resetImportKey();
           setMessage(next.readyForImport ? "The selected commit is available and the repository preview has been refreshed." : "Repository visibility does not match the selected expectation.");
         })
         .catch((error: unknown) => setMessage(error instanceof Error ? error.message : "The selected commit could not be previewed."));
@@ -172,7 +180,7 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
     const requestPayload = requestFromForm(new FormData(formRef.current), mode);
     const previewRepository = requestPayload.repository as { repo: string; ref: string; commit?: string; [key: string]: unknown };
     const { repo, commit, ref, ...repository } = previewRepository;
-    const payload = {
+    const translated = {
       ...requestPayload,
       // The Phase-014 preview contract names the repository segment `repo`
       // and carries `ref`/`commit` as two fields. The sole Phase-015 durable
@@ -181,14 +189,22 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
       // A pinned commit takes the exact commit Preview most recently
       // verified; otherwise the branch tip is imported.
       repository: { ...repository, name: repo, ref: commit || ref },
-      // Retain this key for a failed-network retry of the same preview. The
-      // server computes its request hash and remains the idempotency authority.
-      idempotencyKey: importIdempotencyKeyRef.current ??= randomUUIDAuto(),
     };
     if (mode === "ONE_TIME_PAT" && requestPayload.saveAsSourceConnection !== true) {
       setMessage("Save the one-time PAT as a source connection before starting an asynchronous import.");
       return;
     }
+    // Retain this key for a failed-network retry of the same preview. It rotates only when the creation identity (including the
+    // NORMALIZED confirmed taxonomy) changes; the server computes its request hash and remains the idempotency authority.
+    const keyed = ensureIdempotencyKey(formState(), randomUUIDAuto);
+    const built = buildRepositoryStartPayload(translated, keyed.state, keyed.key);
+    if (!built.ok) {
+      setMessage(confirmedClassesMessage(built.issue)); // invalid state never becomes a request
+      return;
+    }
+    importIdempotencyKeyRef.current = keyed.key;
+    importKeyIdentityRef.current = keyed.state.keyIdentity;
+    const payload = built.body;
     setMessage(null);
     startTransition(() => {
       void request("/api/datasets/from-repository", payload)
@@ -226,7 +242,7 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
           <Field label="Owner"><input className={inputClassName} disabled={isPending} name="owner" placeholder="annotation-admin" required /></Field><Field label="Repository"><input className={inputClassName} disabled={isPending} name="repo" placeholder="ImageDataset" required /></Field>
         </div>
         {mode === "ONE_TIME_PAT" && <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-4 dark:border-sky-900 dark:bg-sky-950/40"><label className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200"><input checked={saveOneTimeConnection} name="saveAsSourceConnection" onChange={(event) => { setSaveOneTimeConnection(event.currentTarget.checked); setPreview(null); importIdempotencyKeyRef.current = null; }} type="checkbox" /> Save this PAT as a reusable source connection</label><p className="mt-1 text-xs leading-5 text-zinc-600 dark:text-zinc-400">Asynchronous private imports require this choice. The PAT is encrypted server-side only when Start Import succeeds.</p><Field label="Connection name"><input className={inputClassName} disabled={isPending} name="connectionName" placeholder="Work Gitea" required={saveOneTimeConnection} /></Field></div>}
-        <div className="mt-4 grid max-w-3xl gap-4 sm:grid-cols-2"><Field label="Dataset name"><input className={inputClassName} disabled={isPending} name="datasetName" placeholder="street-scenes-q2" required /></Field><div className="sm:col-span-2"><ModalityCard value={modality} disabled={isPending} onChange={(next) => { setModality(next); setPreview(null); importIdempotencyKeyRef.current = null; }} /></div></div>
+        <div className="mt-4 grid max-w-3xl gap-4 sm:grid-cols-2"><Field label="Dataset name"><input className={inputClassName} disabled={isPending} name="datasetName" placeholder="street-scenes-q2" required /></Field><div className="sm:col-span-2"><ModalityCard value={modality} disabled={isPending} onChange={(next) => { const changed = changeModality(formState(), next); setModality(changed.modality); setConfirmedClasses(changed.confirmedClasses); setPreview(null); importIdempotencyKeyRef.current = changed.idempotencyKey; importKeyIdentityRef.current = changed.keyIdentity; }} /><div className="mt-4"><ClassEntry modality={modality} classes={confirmedClasses} disabled={isPending} onChange={(next) => setConfirmedClasses(changeConfirmedClasses(formState(), next).confirmedClasses)} /></div></div></div>
         <Button className="mt-6" disabled={isPending || (mode === "EXISTING_SOURCE_CONNECTION" && connections.length === 0)} type="submit">{isPending ? <SpinnerGap className="animate-spin" aria-hidden="true" size={17} /> : <Eye aria-hidden="true" size={17} />}{isPending ? "Checking repository..." : "Preview import"}</Button>
       </form>
 
