@@ -7,6 +7,7 @@ import { DatasetSourceMode, JobStatus, JobType, Modality } from "@internal/db";
 import type { RequestActor } from "@/lib/auth";
 import type { LocalFolderPreparationDto } from "@/types/local-folder-preparation";
 import { db } from "@/lib/db";
+import { folderCreationRequestHash, prepareConfirmedClasses } from "@/lib/imports/confirmed-classes-server";
 import { enqueueExistingJob } from "@/lib/queue/enqueue-job";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { canStartLocalFolderImport } from "@/lib/imports/authorization";
@@ -16,7 +17,7 @@ import type { z } from "zod";
 
 const IMPORT_DEADLINE_MS = 30 * 60 * 1000;
 type StartInput = z.infer<typeof startLocalFolderImportSchema>;
-type AppendInput = Omit<StartInput, "name" | "description" | "modality">;
+type AppendInput = Omit<StartInput, "name" | "description" | "modality" | "confirmedClasses">;
 
 function publicPreparation(preparation: {
   id: string; datasetId: string; jobId: string; expectedItemCount: number;
@@ -44,20 +45,24 @@ function filenameFromPath(path: string) {
 }
 
 async function createPreparation(actor: RequestActor, input: StartInput | AppendInput, existingDatasetId: string | null) {
+  // Taxonomy exists only for a NEW Dataset (start). Validation happens here, before any lookup or write. Append carries none.
+  const confirmed = !existingDatasetId && "modality" in input ? prepareConfirmedClasses(input.confirmedClasses, input.modality) : null;
+  const requestHash = confirmed && "modality" in input ? folderCreationRequestHash(input.modality, confirmed.sortedNormalized) : null;
+  const sameCreation = (existing: { creationRequestHash: string | null }) => (existing.creationRequestHash ?? null) === requestHash;
   const sameManifest = (existing: { expectedItemCount: number; items: Array<{ normalizedPath: string; fingerprint: string; sizeBytes: bigint; mimeType: string }> }) =>
     existing.expectedItemCount === input.items.length && existing.items.every((stored, index) => {
       const requested = input.items[index];
       return Boolean(requested) && stored.normalizedPath === requested!.logicalPath.normalize("NFKC").replace(/\\/g, "/").toLowerCase()
         && stored.fingerprint === requested!.fingerprint && stored.sizeBytes === BigInt(requested!.sizeBytes) && stored.mimeType === requested!.contentType;
     });
-  const selectPreparation = { id: true, datasetId: true, jobId: true, expectedItemCount: true, deadlineAt: true, items: { select: { id: true, normalizedPath: true, fingerprint: true, sizeBytes: true, mimeType: true }, orderBy: { position: "asc" as const } } };
+  const selectPreparation = { id: true, datasetId: true, jobId: true, expectedItemCount: true, deadlineAt: true, creationRequestHash: true, items: { select: { id: true, normalizedPath: true, fingerprint: true, sizeBytes: true, mimeType: true }, orderBy: { position: "asc" as const } } };
   const existing = await db.preparedImport.findUnique({
     where: { createdById_idempotencyKey: { createdById: actor.id, idempotencyKey: input.idempotencyKey } },
     select: { ...selectPreparation, dataset: { select: { modality: true } } },
   });
   if (existing) {
     const modalityMatches = existingDatasetId ? existing.datasetId === existingDatasetId : "modality" in input && existing.dataset.modality === input.modality;
-    if (!modalityMatches || !sameManifest(existing)) return { ok: false as const, status: 409 as const, code: "IDEMPOTENCY_KEY_CONFLICT" as const };
+    if (!modalityMatches || !sameManifest(existing) || !sameCreation(existing)) return { ok: false as const, status: 409 as const, code: "IDEMPOTENCY_KEY_CONFLICT" as const };
     return { ok: true as const, status: 200 as const, preparation: publicPreparation(existing), replayed: true };
   }
 
@@ -69,19 +74,21 @@ async function createPreparation(actor: RequestActor, input: StartInput | Append
     const duplicate = await tx.preparedImport.findUnique({ where: { createdById_idempotencyKey: { createdById: actor.id, idempotencyKey: input.idempotencyKey } }, select: { ...selectPreparation, dataset: { select: { modality: true } } } });
     if (duplicate) {
       const modalityMatches = existingDatasetId ? duplicate.datasetId === existingDatasetId : "modality" in input && duplicate.dataset.modality === input.modality;
-      if (!modalityMatches || !sameManifest(duplicate)) return { rejected: "IDEMPOTENCY_KEY_CONFLICT" as const };
+      if (!modalityMatches || !sameManifest(duplicate) || !sameCreation(duplicate)) return { rejected: "IDEMPOTENCY_KEY_CONFLICT" as const };
       return { preparation: duplicate, replayed: true };
     }
     if (!existingDatasetId) {
       if (!("name" in input) || !("modality" in input)) throw new Error("A new Dataset import requires an explicit name and modality.");
       await tx.dataset.create({ data: { id: datasetId, ownerId: actor.id, name: input.name, description: input.description, sourceMode: DatasetSourceMode.UPLOAD, modality: input.modality, primaryModality: input.modality, modalityResolverSubject: actor.id } });
+      // Same transaction as the Dataset, Job and PreparedImport: any failure rolls all of them back; a replay never reaches this code.
+      if (confirmed && confirmed.labels.length > 0) await tx.label.createMany({ data: confirmed.labels.map((label) => ({ ...label, datasetId })) });
     } else {
       const dataset = await tx.dataset.findFirst({ where: { id: existingDatasetId, deletedAt: null, archivedAt: null }, select: { modality: true } });
       if (!dataset || dataset.modality === null) return { rejected: "DATASET_MODALITY_UNRESOLVED" as const };
     }
     await tx.job.create({ data: { id: jobId, datasetId, createdById: actor.id, type: JobType.IMPORT_DATASET, status: JobStatus.QUEUED, totalItems: input.items.length, input: { preparedImportId } } });
     const preparation = await tx.preparedImport.create({ data: {
-      id: preparedImportId, datasetId, jobId, createdById: actor.id, expectedItemCount: input.items.length, deadlineAt, idempotencyKey: input.idempotencyKey,
+      id: preparedImportId, datasetId, jobId, createdById: actor.id, expectedItemCount: input.items.length, deadlineAt, idempotencyKey: input.idempotencyKey, creationRequestHash: requestHash,
       items: { create: input.items.map((item, index) => {
         const normalizedPath = item.logicalPath.normalize("NFKC").replace(/\\/g, "/").toLowerCase();
         const itemId = randomUUID();

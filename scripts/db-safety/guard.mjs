@@ -22,7 +22,7 @@ export function migrationFiles(path) {
   return readdirSync(path, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => join(path,d.name,'migration.sql')).sort();
 }
 export function protectedSources() {
-  return [...walk(join(root,'scripts/db-safety')).filter(p => /\.(mjs|cjs|json|ts)$/.test(p)), ...['web','worker','realtime'].flatMap(a => walk(join(root,'apps',a,'tests')).filter(p => /\.[cm]?[jt]sx?$/.test(p))), ...['apps/web/package.json','apps/worker/package.json','apps/realtime/package.json','package.json','prisma.config.ts','prisma/seed.ts','prisma/review.seed.ts'].map(p=>join(root,p))];
+  return [...walk(join(root,'scripts/db-safety')).filter(p => /\.(mjs|cjs|json|ts)$/.test(p)), ...['web','worker','realtime'].flatMap(a => walk(join(root,'apps',a,'tests')).filter(p => /\.[cm]?[jt]sx?$/.test(p))), ...['apps/web/package.json','apps/worker/package.json','apps/realtime/package.json','package.json','prisma.config.ts','prisma/seed.ts','prisma/review.seed.ts','apps/web/vitest.config.ts'].map(p=>join(root,p))];
 }
 function privateFile(path) {
   must(!statSync(path).isDirectory() && (statSync(path).mode & 0o077) === 0 && statSync(path).uid === process.getuid(), 'PRIVATE_FILE_REQUIRED');

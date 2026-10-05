@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-const metadataSchema = z.record(z.string(), z.json()).default({});
+import { confirmedClassesSchema } from "@/lib/validation/confirmed-classes";
+
+const metadataObject = z.record(z.string(), z.json());
+// Creation stores {} when metadata is omitted. Updates must NOT inherit that default: an omitted key means "leave unchanged".
+const metadataSchema = metadataObject.default({});
 const optionalText = z.string().trim().max(2_000).optional();
 // Keep browser-importable validation independent from Prisma's server runtime.
 const datasetTypes = ["IMAGE_LABELING", "VIDEO_LABELING", "TEXT_LABELING", "AUDIO_LABELING", "MULTI_MODAL"] as const;
@@ -16,12 +20,13 @@ export const createDatasetSchema = z.object({
   modality: z.enum(modalities),
   type: z.enum(datasetTypes).default("MULTI_MODAL"),
   metadata: metadataSchema,
+  confirmedClasses: confirmedClassesSchema,
 }).strict();
 export const updateDatasetSchema = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   description: optionalText,
   type: z.enum(datasetTypes).optional(),
   primaryModality: z.enum(modalities).nullable().optional(),
-  metadata: metadataSchema.optional(),
+  metadata: metadataObject.optional(),
   workflowStatus: z.enum(datasetWorkflowStatuses).optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, "Provide at least one dataset field.");

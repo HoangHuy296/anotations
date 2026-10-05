@@ -296,6 +296,7 @@ export const PreparedImportScalarFieldEnum = {
   deadlineAt: 'deadlineAt',
   committedAt: 'committedAt',
   idempotencyKey: 'idempotencyKey',
+  creationRequestHash: 'creationRequestHash',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

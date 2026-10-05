@@ -11,6 +11,7 @@ import type { RequestActor } from "@/lib/auth";
 import { authorizeFoundationJobSubmission } from "@/lib/jobs/authorization";
 import { requireDatasetPermission, type DatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { prepareConfirmedClasses } from "@/lib/imports/confirmed-classes-server";
 import { createWebQueue } from "@/lib/queue/bullmq-client";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { validateSourceImportLimits } from "@/lib/source-access-policy";
@@ -64,6 +65,8 @@ export type NewDatasetSourceImportInput = {
     visibility: "PUBLIC" | "PRIVATE";
   };
   manifest: { itemCount: number; declaredBytes: number; durationMs?: number };
+  /** Validated confirmed class display names; Labels are created in the same transaction as the Dataset and Job. */
+  confirmedClasses?: readonly string[];
 };
 
 type NewDatasetImportJob = {
@@ -157,6 +160,7 @@ export async function createAndEnqueueNewDatasetSourceImportJob(
   if (input.repository.visibility === "PRIVATE" && !input.sourceConnection && !input.createSourceConnection) {
     return { ok: false as const, status: 409 as const };
   }
+  const confirmed = prepareConfirmedClasses(input.confirmedClasses, input.modality); // throws before any side effect
 
   const resolveIdempotentResult = async (client: typeof db): Promise<NewDatasetCreation> => {
     if (!input.creationIdempotency) return null;
@@ -248,6 +252,8 @@ export async function createAndEnqueueNewDatasetSourceImportJob(
       },
       select: { id: true },
     });
+    // Same transaction as the Dataset and the Job: a failure here rolls everything back; a replay never reaches this code.
+    if (confirmed.labels.length > 0) await tx.label.createMany({ data: confirmed.labels.map((label) => ({ ...label, datasetId: dataset.id })) });
 
     const job = await tx.job.create({
       data: {

@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 //only review need sha256HexAuto, so we can keep it in the browser bundle for review stack only. The production build uses a server-side hash for the same purpose.
-import { ModalityCard } from "@/components/imports/modality-class-card";
+import { ClassEntry, ModalityCard } from "@/components/imports/modality-class-card";
+import type { ConfirmedClassDraft } from "@/lib/imports/confirmed-classes";
+import { buildFolderStartBody, changeModality, confirmedClassesMessage, initialCreationFormState } from "@/lib/imports/creation-form-model";
 import { Button } from "@/components/ui/button";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 import { sha256HexAuto } from "@/lib/browser-sha256";
@@ -49,6 +51,8 @@ export function LocalFolderImportForm({ datasetId, datasetName, datasetModality,
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [name, setName] = useState("");
   const [modality, setModality] = useState<"IMAGE" | "VIDEO" | "AUDIO" | "TEXT" | "">("");
+  // New Dataset only: user-confirmed class names, sent when non-empty. Append never carries classes.
+  const [confirmedClasses, setConfirmedClasses] = useState<ConfirmedClassDraft>([]);
   const [step, setStep] = useState<ImportStep>("idle");
   const [completed, setCompleted] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
@@ -84,12 +88,15 @@ export function LocalFolderImportForm({ datasetId, datasetName, datasetModality,
 
   async function submit() {
     if ((!appendMode && (!name.trim() || !modality)) || !files.length) return;
+    // A key is minted per submit (this flow retains none). Invalid confirmed classes never become a request.
+    const built = buildFolderStartBody({ appendMode, name, modality, classes: confirmedClasses, idempotencyKey: randomUUIDAuto() + randomUUIDAuto(), items: files.map(({ file, logicalPath, fingerprint }) => ({ logicalPath, contentType: file.type || "text/plain", sizeBytes: file.size, fingerprint })) });
+    if (!built.ok) { setMessage(confirmedClassesMessage(built.issue)); return; }
     setStep("preparing"); setMessage(null); setCompleted(0); setJobId(null);
     let accepted = 0; let unchanged = 0; let rejected = 0; let retryable = 0;
     try {
       const started = await fetch(appendMode ? `/api/datasets/${datasetId}/imports/local-folder` : "/api/imports/local-folder", {
         method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin",
-        body: JSON.stringify({ ...(appendMode ? {} : { name: name.trim(), modality }), idempotencyKey: randomUUIDAuto() + randomUUIDAuto(), items: files.map(({ file, logicalPath, fingerprint }) => ({ logicalPath, contentType: file.type || "text/plain", sizeBytes: file.size, fingerprint })) }),
+        body: JSON.stringify(built.body),
       });
       const startBody = await started.json().catch(() => null);
       if (!started.ok) throw new Error(safeMessage(startBody, "Could not prepare this import."));
@@ -161,7 +168,8 @@ export function LocalFolderImportForm({ datasetId, datasetName, datasetModality,
 
         {!appendMode && <div className="mt-9 border-y border-zinc-200 py-6 dark:border-zinc-800">
           <label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">Dataset name<input value={name} onChange={(event) => setName(event.target.value)} disabled={busy} placeholder="e.g. North junction survey" className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 text-sm outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:ring-sky-900 dark:disabled:bg-zinc-900" /></label>
-          <div className="mt-4"><ModalityCard value={modality} disabled={busy} onChange={setModality} /></div>
+          <div className="mt-4"><ModalityCard value={modality} disabled={busy} onChange={(next) => { const changed = changeModality({ ...initialCreationFormState, modality, confirmedClasses }, next); setModality(changed.modality); setConfirmedClasses(changed.confirmedClasses); }} /></div>
+          <div className="mt-4"><ClassEntry modality={modality} classes={confirmedClasses} disabled={busy} onChange={setConfirmedClasses} /></div>
         </div>}
 
         {appendMode && datasetModality && <div className="mt-6"><ModalityCard value={datasetModality} fixed={datasetModality} onChange={() => undefined} /></div>}

@@ -123,6 +123,20 @@ RepositoryImportRequest:
       minLength: 16
       maxLength: 160
       description: Caller-generated key. A replayed key returns the already-accepted result rather than creating a second Dataset/Job.
+    confirmedClasses:
+      type: array
+      minItems: 0
+      maxItems: 100
+      description: |
+        Optional user-confirmed class names for the new Dataset (repository import; included in the request identity only when non-empty). Absent and [] both mean no confirmed classes. Each name follows the Label
+        name rule (trimmed, 2-50 characters); two names equal after trim + en-US lowercase reject the whole request (400 INVALID_REQUEST), as
+        does more than 100 entries, before any side effect. Labels are created in the same transaction as the Dataset with modality =
+        Dataset modality, scope OBJECT and a server-derived color; the first successful creation owns the trimmed spelling and a replay never
+        rewrites it. Identity (replay/conflict) uses the sorted normalized names only; order, casing and color are not part of it.
+      items:
+        type: string
+        minLength: 2
+        maxLength: 50
   additionalProperties: false
 
 RepositoryImportAcceptance:
@@ -519,6 +533,20 @@ StartLocalFolderImportRequest:
     modality:
       $ref: './assets.yaml#/Modality'
       description: Required at Dataset creation; content is verified again before each Asset is published.
+    confirmedClasses:
+      type: array
+      minItems: 0
+      maxItems: 100
+      description: |
+        Optional user-confirmed class names for the new Dataset (local-folder start; stored as PreparedImport.creationRequestHash, NULL when empty). Absent and [] both mean no confirmed classes. Each name follows the Label
+        name rule (trimmed, 2-50 characters); two names equal after trim + en-US lowercase reject the whole request (400 INVALID_REQUEST), as
+        does more than 100 entries, before any side effect. Labels are created in the same transaction as the Dataset with modality =
+        Dataset modality, scope OBJECT and a server-derived color; the first successful creation owns the trimmed spelling and a replay never
+        rewrites it. Identity (replay/conflict) uses the sorted normalized names only; order, casing and color are not part of it.
+      items:
+        type: string
+        minLength: 2
+        maxLength: 50
   additionalProperties: false
 
 AppendLocalFolderImportRequest:

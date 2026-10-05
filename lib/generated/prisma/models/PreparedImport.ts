@@ -47,6 +47,7 @@ export type PreparedImportMinAggregateOutputType = {
   deadlineAt: Date | null
   committedAt: Date | null
   idempotencyKey: string | null
+  creationRequestHash: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -61,6 +62,7 @@ export type PreparedImportMaxAggregateOutputType = {
   deadlineAt: Date | null
   committedAt: Date | null
   idempotencyKey: string | null
+  creationRequestHash: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -75,6 +77,7 @@ export type PreparedImportCountAggregateOutputType = {
   deadlineAt: number
   committedAt: number
   idempotencyKey: number
+  creationRequestHash: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -99,6 +102,7 @@ export type PreparedImportMinAggregateInputType = {
   deadlineAt?: true
   committedAt?: true
   idempotencyKey?: true
+  creationRequestHash?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -113,6 +117,7 @@ export type PreparedImportMaxAggregateInputType = {
   deadlineAt?: true
   committedAt?: true
   idempotencyKey?: true
+  creationRequestHash?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -127,6 +132,7 @@ export type PreparedImportCountAggregateInputType = {
   deadlineAt?: true
   committedAt?: true
   idempotencyKey?: true
+  creationRequestHash?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -228,6 +234,7 @@ export type PreparedImportGroupByOutputType = {
   deadlineAt: Date
   committedAt: Date | null
   idempotencyKey: string
+  creationRequestHash: string | null
   createdAt: Date
   updatedAt: Date
   _count: PreparedImportCountAggregateOutputType | null
@@ -265,6 +272,7 @@ export type PreparedImportWhereInput = {
   deadlineAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
   committedAt?: Prisma.DateTimeNullableFilter<"PreparedImport"> | Date | string | null
   idempotencyKey?: Prisma.StringFilter<"PreparedImport"> | string
+  creationRequestHash?: Prisma.StringNullableFilter<"PreparedImport"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -283,6 +291,7 @@ export type PreparedImportOrderByWithRelationInput = {
   deadlineAt?: Prisma.SortOrder
   committedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   createdBy?: Prisma.UserOrderByWithRelationInput
@@ -305,6 +314,7 @@ export type PreparedImportWhereUniqueInput = Prisma.AtLeast<{
   deadlineAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
   committedAt?: Prisma.DateTimeNullableFilter<"PreparedImport"> | Date | string | null
   idempotencyKey?: Prisma.StringFilter<"PreparedImport"> | string
+  creationRequestHash?: Prisma.StringNullableFilter<"PreparedImport"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
   createdBy?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -323,6 +333,7 @@ export type PreparedImportOrderByWithAggregationInput = {
   deadlineAt?: Prisma.SortOrder
   committedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PreparedImportCountOrderByAggregateInput
@@ -345,6 +356,7 @@ export type PreparedImportScalarWhereWithAggregatesInput = {
   deadlineAt?: Prisma.DateTimeWithAggregatesFilter<"PreparedImport"> | Date | string
   committedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PreparedImport"> | Date | string | null
   idempotencyKey?: Prisma.StringWithAggregatesFilter<"PreparedImport"> | string
+  creationRequestHash?: Prisma.StringNullableWithAggregatesFilter<"PreparedImport"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PreparedImport"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PreparedImport"> | Date | string
 }
@@ -356,6 +368,7 @@ export type PreparedImportCreateInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy: Prisma.UserCreateNestedOneWithoutPreparedImportsInput
@@ -374,6 +387,7 @@ export type PreparedImportUncheckedCreateInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.PreparedImportItemUncheckedCreateNestedManyWithoutPreparedImportInput
@@ -386,6 +400,7 @@ export type PreparedImportUpdateInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneRequiredWithoutPreparedImportsNestedInput
@@ -404,6 +419,7 @@ export type PreparedImportUncheckedUpdateInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.PreparedImportItemUncheckedUpdateManyWithoutPreparedImportNestedInput
@@ -419,6 +435,7 @@ export type PreparedImportCreateManyInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -430,6 +447,7 @@ export type PreparedImportUpdateManyMutationInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -444,6 +462,7 @@ export type PreparedImportUncheckedUpdateManyInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -478,6 +497,7 @@ export type PreparedImportCountOrderByAggregateInput = {
   deadlineAt?: Prisma.SortOrder
   committedAt?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -496,6 +516,7 @@ export type PreparedImportMaxOrderByAggregateInput = {
   deadlineAt?: Prisma.SortOrder
   committedAt?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -510,6 +531,7 @@ export type PreparedImportMinOrderByAggregateInput = {
   deadlineAt?: Prisma.SortOrder
   committedAt?: Prisma.SortOrder
   idempotencyKey?: Prisma.SortOrder
+  creationRequestHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -664,6 +686,7 @@ export type PreparedImportCreateWithoutCreatedByInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   dataset: Prisma.DatasetCreateNestedOneWithoutPreparedImportsInput
@@ -680,6 +703,7 @@ export type PreparedImportUncheckedCreateWithoutCreatedByInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.PreparedImportItemUncheckedCreateNestedManyWithoutPreparedImportInput
@@ -724,6 +748,7 @@ export type PreparedImportScalarWhereInput = {
   deadlineAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
   committedAt?: Prisma.DateTimeNullableFilter<"PreparedImport"> | Date | string | null
   idempotencyKey?: Prisma.StringFilter<"PreparedImport"> | string
+  creationRequestHash?: Prisma.StringNullableFilter<"PreparedImport"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PreparedImport"> | Date | string
 }
@@ -735,6 +760,7 @@ export type PreparedImportCreateWithoutJobInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy: Prisma.UserCreateNestedOneWithoutPreparedImportsInput
@@ -751,6 +777,7 @@ export type PreparedImportUncheckedCreateWithoutJobInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.PreparedImportItemUncheckedCreateNestedManyWithoutPreparedImportInput
@@ -779,6 +806,7 @@ export type PreparedImportUpdateWithoutJobInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneRequiredWithoutPreparedImportsNestedInput
@@ -795,6 +823,7 @@ export type PreparedImportUncheckedUpdateWithoutJobInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.PreparedImportItemUncheckedUpdateManyWithoutPreparedImportNestedInput
@@ -807,6 +836,7 @@ export type PreparedImportCreateWithoutDatasetInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy: Prisma.UserCreateNestedOneWithoutPreparedImportsInput
@@ -823,6 +853,7 @@ export type PreparedImportUncheckedCreateWithoutDatasetInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.PreparedImportItemUncheckedCreateNestedManyWithoutPreparedImportInput
@@ -861,6 +892,7 @@ export type PreparedImportCreateWithoutItemsInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   createdBy: Prisma.UserCreateNestedOneWithoutPreparedImportsInput
@@ -878,6 +910,7 @@ export type PreparedImportUncheckedCreateWithoutItemsInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -905,6 +938,7 @@ export type PreparedImportUpdateWithoutItemsInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneRequiredWithoutPreparedImportsNestedInput
@@ -922,6 +956,7 @@ export type PreparedImportUncheckedUpdateWithoutItemsInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -935,6 +970,7 @@ export type PreparedImportCreateManyCreatedByInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -946,6 +982,7 @@ export type PreparedImportUpdateWithoutCreatedByInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dataset?: Prisma.DatasetUpdateOneRequiredWithoutPreparedImportsNestedInput
@@ -962,6 +999,7 @@ export type PreparedImportUncheckedUpdateWithoutCreatedByInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.PreparedImportItemUncheckedUpdateManyWithoutPreparedImportNestedInput
@@ -976,6 +1014,7 @@ export type PreparedImportUncheckedUpdateManyWithoutCreatedByInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -989,6 +1028,7 @@ export type PreparedImportCreateManyDatasetInput = {
   deadlineAt: Date | string
   committedAt?: Date | string | null
   idempotencyKey: string
+  creationRequestHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1000,6 +1040,7 @@ export type PreparedImportUpdateWithoutDatasetInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdBy?: Prisma.UserUpdateOneRequiredWithoutPreparedImportsNestedInput
@@ -1016,6 +1057,7 @@ export type PreparedImportUncheckedUpdateWithoutDatasetInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.PreparedImportItemUncheckedUpdateManyWithoutPreparedImportNestedInput
@@ -1030,6 +1072,7 @@ export type PreparedImportUncheckedUpdateManyWithoutDatasetInput = {
   deadlineAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   committedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   idempotencyKey?: Prisma.StringFieldUpdateOperationsInput | string
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1075,6 +1118,7 @@ export type PreparedImportSelect<ExtArgs extends runtime.Types.Extensions.Intern
   deadlineAt?: boolean
   committedAt?: boolean
   idempotencyKey?: boolean
+  creationRequestHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1094,6 +1138,7 @@ export type PreparedImportSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   deadlineAt?: boolean
   committedAt?: boolean
   idempotencyKey?: boolean
+  creationRequestHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1111,6 +1156,7 @@ export type PreparedImportSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   deadlineAt?: boolean
   committedAt?: boolean
   idempotencyKey?: boolean
+  creationRequestHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1128,11 +1174,12 @@ export type PreparedImportSelectScalar = {
   deadlineAt?: boolean
   committedAt?: boolean
   idempotencyKey?: boolean
+  creationRequestHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PreparedImportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "jobId" | "createdById" | "status" | "expectedItemCount" | "deadlineAt" | "committedAt" | "idempotencyKey" | "createdAt" | "updatedAt", ExtArgs["result"]["preparedImport"]>
+export type PreparedImportOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "datasetId" | "jobId" | "createdById" | "status" | "expectedItemCount" | "deadlineAt" | "committedAt" | "idempotencyKey" | "creationRequestHash" | "createdAt" | "updatedAt", ExtArgs["result"]["preparedImport"]>
 export type PreparedImportInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   dataset?: boolean | Prisma.DatasetDefaultArgs<ExtArgs>
@@ -1169,6 +1216,7 @@ export type $PreparedImportPayload<ExtArgs extends runtime.Types.Extensions.Inte
     deadlineAt: Date
     committedAt: Date | null
     idempotencyKey: string
+    creationRequestHash: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["preparedImport"]>
@@ -1607,6 +1655,7 @@ export interface PreparedImportFieldRefs {
   readonly deadlineAt: Prisma.FieldRef<"PreparedImport", 'DateTime'>
   readonly committedAt: Prisma.FieldRef<"PreparedImport", 'DateTime'>
   readonly idempotencyKey: Prisma.FieldRef<"PreparedImport", 'String'>
+  readonly creationRequestHash: Prisma.FieldRef<"PreparedImport", 'String'>
   readonly createdAt: Prisma.FieldRef<"PreparedImport", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"PreparedImport", 'DateTime'>
 }
