@@ -9,9 +9,9 @@ M24/M25 promotion → disposable 25-chain proof → T007 → T008 exception acce
 | --- | --- | --- |
 | Promote frozen M24 and M25 into `prisma/migrations` (byte-for-byte; active chain = 25) | **DONE** in the release-chain commit | `release-chain-proof.md` |
 | Disposable 23 → 24 → 25 proof | **PASS** (`focused-runs/20261005T160813Z-2c4c4b77`) | `release-chain-proof.md` |
-| T007 final SQL review (SHA-256 `13f0e977…`) | **prepared, awaiting human approval** | `t007-m24-sql-review.md` |
-| T008 provenance exception | **prepared, awaiting human acceptance** | `t008-provenance-exception.md` |
-| T018 writer audit | **complete; no unresolved writer** | `../writer-inventory.md` (+ pinned by two offline tests) |
+| T007 final SQL review (SHA-256 `13f0e977…`) | **APPROVED 2026-10-05** (exact bytes; opaque resolver subject accepted; performance regression accepted as a known capacity risk, not a PASS) | `t007-m24-sql-review.md` |
+| T008 provenance exception RPE-029-M24 | **ACCEPTED 2026-10-05** (missing provenance accepted, not reconstructed; reconstruction is supporting evidence only) | `t008-provenance-exception.md` |
+| T018 writer audit | **CLOSED 2026-10-05; no unresolved writer** | `../writer-inventory.md` (+ pinned by two offline tests) |
 | Historical Dataset plan (67 single-modality; EMPTY and MIXED separate; 3 disagreements) | **proposal; G-DATA open; no tool exists yet** | `historical-data-release-plan.md` |
 | In-flight work disposition (19 import Jobs, 11 PREPARING imports, 8 stale AI Jobs) | **proposal; nothing mutated** | `in-flight-work-plan.md` |
 | Final rollout authorization, build, backup, drain, apply, cutover, G5 | **not started, not authorized** | — |
@@ -37,7 +37,7 @@ The rollout plan's default of combining physical base backups with a logical dum
 Creating application test data after cutover is **not** authorized now. It needs: a self-contained release chain (done), T007/T008/T018 resolved, and a clear historical-data policy first.
 
 ## Still open before any shared-dev rollout
-1. T007 approval and T008 exception acceptance (human decisions).
+1. ~~T007 approval and T008 exception acceptance~~ — granted 2026-10-05; production capacity acceptance remains open.
 2. Historical-data decisions D-1 … D-8 and the missing T029/T031 tooling if backfill is to share the maintenance window.
 3. In-flight decisions F-1 … F-5.
 4. Backup policy; rollout window; permission to build release images; permission to run the read-only pre-window checks (fresh inventory, Redis queue).

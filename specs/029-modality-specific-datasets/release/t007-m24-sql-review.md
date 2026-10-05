@@ -1,6 +1,6 @@
 # T007 — final release review of the frozen migration 24 SQL
 
-**Status: PREPARED FOR HUMAN APPROVAL. Not approved.** The G-SQL gate stays open until a human records the decision in the last section. This document changes no SQL.
+**Status: APPROVED 2026-10-05** by the project owner for the exact frozen SQL (SHA-256 `13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7`); decision recorded in the last section. The approval covers those bytes only and is **not** an authorization to apply the migration anywhere. This document changes no SQL.
 
 ## Binding
 | Item | Value |
@@ -65,9 +65,9 @@ Exactly 4 columns, 2 constraints, 3 triggers and 3 functions; no index, no forei
 ## Decision record (to be completed by a human)
 | Decision | Value |
 | --- | --- |
-| Approve the trigger, counter and receipt SQL with SHA-256 `13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7` for shared dev | ☐ approved ☐ changes requested |
-| Accept the opaque `modalityResolverSubject` (no `User` FK) in place of the FK-`Restrict` option | ☐ accepted ☐ rejected |
-| Performance position | ☐ accept as measured ☐ require thresholds first (state them) |
-| Approver / date | |
+| Approve the trigger, counter and receipt SQL with SHA-256 `13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7` for shared dev | **APPROVED** for exactly these bytes |
+| Accept the opaque `modalityResolverSubject` (no `User` FK) in place of the FK-`Restrict` option | **ACCEPTED**; the opaque resolver actor-subject design replaces the earlier User-FK concept |
+| Performance position | **The observed performance regression is accepted as a known shared-dev/release capacity risk. This is NOT a performance PASS.** Production capacity acceptance remains OPEN. Correctness fencing must not be weakened for performance |
+| Approver / date | Project owner (instruction given in the session of 2026-10-05) / 2026-10-05 |
 
-Until this table is filled in, T007 is open and no shared-dev migration is authorized.
+**Scope of the approval:** it closes the G-SQL review of the frozen bytes. It does not authorize shared-dev migration, backup, drain, deployment, backfill, service replacement or any application-data mutation; those remain separate gates. The previously proposed performance criteria (≤1 % exhausted, p95/p99 ≤ 2× baseline, throughput ≥ 70 %) remain unapproved and are the open production-capacity item.
