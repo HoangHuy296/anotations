@@ -222,8 +222,8 @@ try {
         throw error;
       }
       evidence.browserVersion=browser.version;
-      try { evidence.browserIsolation=await rehearseBrowserIsolation(browser,runtime,environment); }
-      catch(error) { evidence.browserIsolationDiagnostics=error.browserProbeDiagnostics; throw error; }
+      try { evidence.browserIsolation=await rehearseBrowserIsolation(browser,runtime,environment); evidence.browserTrace=browser.trace.snapshot(); }
+      catch(error) { evidence.browserIsolationDiagnostics=error.browserProbeDiagnostics; evidence.browserTrace=browser.trace.snapshot(); throw error; }
       Object.assign(process.env,environment);
     }
     const {runE2E}=await import('./runtime-e2e.mjs');
