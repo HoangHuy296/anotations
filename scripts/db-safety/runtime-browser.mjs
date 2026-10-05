@@ -8,6 +8,7 @@ import { join, dirname } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
 import { isDeepStrictEqual } from 'node:util';
 import { verify, cleanEnv, sha, must, containerIdentity } from './guard.mjs';
+import { createBrowserTrace, summarizeFrameTree, summarizeHistory, TRACED_COMMAND_METHODS } from './browser-trace.mjs';
 
 const require = createRequire(import.meta.url);
 const authority = require('./runtime-authority.cjs');
@@ -57,15 +58,15 @@ export function matchesPlannedBrowserHostShape(plan, hostConfig) {
 }
 
 /** Attributable record for a request the broker refuses. Never infers a URL: an unparsable/missing URL stays null so it cannot satisfy any probe. */
-export function describeDeniedRequest(event) {
+export function describeDeniedRequest(event, probeFor) {
   let url = null, origin = null;
   try { const parsed = new URL(event?.request?.url); url = parsed.href; origin = parsed.origin; } catch { /* leave null */ }
-  return { allowed: false, error: 'BROWSER_RESOURCE_TARGET_DENIED', url, origin, resourceType: event?.resourceType ?? null, frameId: event?.frameId ?? null };
+  return { allowed: false, error: 'BROWSER_RESOURCE_TARGET_DENIED', url, origin, resourceType: event?.resourceType ?? null, frameId: event?.frameId ?? null, ...(typeof probeFor === 'function' ? { probe: url ? probeFor(url) : null } : {}) };
 }
 
 /** Records the denial first, then fails the paused request. The record is the only proof of denial. */
-export async function denyPausedRequest(requests, event, send, sessionId) {
-  requests.push(describeDeniedRequest(event));
+export async function denyPausedRequest(requests, event, send, sessionId, probeFor) {
+  requests.push(describeDeniedRequest(event, probeFor));
   await send('Fetch.failRequest', { requestId: event.requestId, errorReason: 'BlockedByClient' }, sessionId);
 }
 
@@ -217,7 +218,8 @@ export async function connectBrowser({ runtime, environment }) {
   const child = spawn('docker', ['start', '--attach', '--interactive', plan.id], { env: cleanEnv(), stdio: ['pipe', 'pipe', 'pipe'] });
   const attachIdentity = authority.identity(child.pid);
   let diagnostic = '', buffer = Buffer.alloc(0), sequence = 0, sessionId, closed = false, containerProcess;
-  const pending = new Map(), listeners = new Map(), requests = [], network = [];
+  const pending = new Map(), listeners = new Map(), requests = [];
+  const trace = createBrowserTrace();
   const exited = new Promise(resolve => child.once('exit', (code, signal) => resolve({ code, signal })));
   child.once('exit', () => { for (const entry of pending.values()) { clearTimeout(entry.timer); entry.reject(Error('BROWSER_NATIVE_EXITED')); } pending.clear(); });
   child.stderr.on('data', bytes => { diagnostic = (diagnostic + bytes.toString()).slice(-16000); });
@@ -232,7 +234,16 @@ export async function connectBrowser({ runtime, environment }) {
     }
     return actual;
   }
+  // Evidence only: records selected commands and their sanitized results; never changes what is sent or returned.
   function send(method, params = {}, session = sessionId) {
+    if (!TRACED_COMMAND_METHODS.includes(method)) return rawSend(method, params, session);
+    trace.recordCommand(method, params);
+    return rawSend(method, params, session).then(
+      result => { trace.recordResult(method, params, result); return result; },
+      error => { trace.recordResult(method, params, null, error); throw error; },
+    );
+  }
+  function rawSend(method, params = {}, session = sessionId) {
     must(!closed, 'BROWSER_PIPE_CLOSED'); assertContainer();
     const id = ++sequence;
     return new Promise((resolve, reject) => {
@@ -247,7 +258,7 @@ export async function connectBrowser({ runtime, environment }) {
     let target;
     try { target = allowedBrowserUrl(runtime, environment, event.request.url); }
     catch {
-      await denyPausedRequest(requests, event, send, message.sessionId);
+      await denyPausedRequest(requests, event, send, message.sessionId, url => trace.probeFor(url));
       return;
     }
     try {
@@ -277,16 +288,10 @@ export async function connectBrowser({ runtime, environment }) {
       if (!raw) continue;
       let message;
       try { message = JSON.parse(raw); } catch { brokerErrors.push({ error: 'BROWSER_PIPE_PROTOCOL_INVALID' }); continue; }
+      if (!message.id && message.method) trace.recordEvent(message.method, message.params);
       if (message.id) { const entry = pending.get(message.id); if (entry) { clearTimeout(entry.timer); pending.delete(message.id); message.error ? entry.reject(Error('BROWSER_CDP_COMMAND_FAILED')) : entry.resolve(message.result); } }
       else if (message.method === 'Fetch.requestPaused') void broker(message);
-      else {
-        // Evidence only: never consulted by any pass/fail decision.
-        if ((message.method === 'Network.requestWillBeSent' || message.method === 'Network.loadingFailed') && network.length < 500) {
-          const p = message.params || {};
-          network.push({ method: message.method, url: p.request?.url ?? null, requestId: p.requestId ?? null, frameId: p.frameId ?? null, resourceType: p.type ?? null, errorText: p.errorText ?? null, blockedReason: p.blockedReason ?? null });
-        }
-        for (const callback of listeners.get(message.method) || []) callback(message.params);
-      }
+      else for (const callback of listeners.get(message.method) || []) callback(message.params);
     }
   });
   async function close() {
@@ -318,7 +323,15 @@ export async function connectBrowser({ runtime, environment }) {
     await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
     const evaluate = async expression => { const result = await send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }); must(!result.exceptionDetails, 'BROWSER_EVALUATION_FAILED'); return result.result.value; };
     const navigate = async url => { allowedBrowserUrl(runtime, environment, url); assert.equal(brokerErrors.length, 0, 'browser broker failed'); return send('Page.navigate', { url }); };
-    return { send, evaluate, navigate, close, version, requests, network, brokerErrors, attachIdentity, on: (method, callback) => { listeners.set(method, [...(listeners.get(method) || []), callback]); } };
+    // Page-level state read through CDP commands that open no network request. Failures are recorded, never thrown.
+    const captureNavigationState = async () => {
+      const eventDerived = trace.state();
+      const state = { eventDerived, frame: null, history: null, errors: [] };
+      try { state.frame = summarizeFrameTree(await send('Page.getFrameTree')); } catch (error) { state.errors.push({ command: 'Page.getFrameTree', error: /^[A-Z][A-Z0-9_]+$/.test(error?.message) ? error.message : 'CDP_COMMAND_ERROR' }); }
+      try { state.history = summarizeHistory(await send('Page.getNavigationHistory')); } catch (error) { state.errors.push({ command: 'Page.getNavigationHistory', error: /^[A-Z][A-Z0-9_]+$/.test(error?.message) ? error.message : 'CDP_COMMAND_ERROR' }); }
+      return state;
+    };
+    return { send, evaluate, navigate, close, version, requests, trace, captureNavigationState, brokerErrors, attachIdentity, on: (method, callback) => { listeners.set(method, [...(listeners.get(method) || []), callback]); } };
   } catch (error) {
     const code = /^[A-Z][A-Z0-9_]+$/.test(error.message) ? error.message : 'BROWSER_STARTUP_FAILED';
     error.browserStartup = { error: code, diagnosticsHash: sha(diagnostic), containerState: inspect(plan.id).State.Status, ...(error.browserShapeDelta ? { shapeDelta: error.browserShapeDelta } : {}) };
@@ -331,15 +344,24 @@ export async function connectBrowser({ runtime, environment }) {
 export async function rehearseBrowserIsolation(browser, runtime, environment) {
   const before = browser.requests.length;
   const results = [];
-  const diagnose = (probe, url, navigate, evaluation) => ({
-    probe, url: new URL(url).href, origin: new URL(url).origin, protocol: new URL(url).protocol,
-    navigate, verdict: evaluation.verdict, pass: evaluation.pass,
-    intercepted: [...evaluation.own, ...evaluation.foreign, ...evaluation.unattributed].map(({ allowed, error, url: u, origin, resourceType, frameId }) => ({ allowed, error: error ?? null, url: u ?? null, origin: origin ?? null, resourceType: resourceType ?? null, frameId: frameId ?? null })),
-    networkObserved: (browser.network || []).filter(event => event.url === new URL(url).href).slice(0, 20),
-  });
+  const trace = browser.trace;
+  const diagnose = (probe, url, navigate, evaluation, preState, window) => {
+    const correlation = trace ? trace.correlate(url) : null;
+    return {
+      probe, url: new URL(url).href, origin: new URL(url).origin, protocol: new URL(url).protocol,
+      navigate, verdict: evaluation.verdict, pass: evaluation.pass,
+      intercepted: [...evaluation.own, ...evaluation.foreign, ...evaluation.unattributed].map(({ allowed, error, url: u, origin, resourceType, frameId, probe: p }) => ({ allowed, error: error ?? null, url: u ?? null, origin: origin ?? null, resourceType: resourceType ?? null, frameId: frameId ?? null, probe: p ?? null })),
+      // Evidence only. Correlated by requestId (Network.*) / networkId (Fetch.requestPaused); a Chrome cancellation is never a denial.
+      ...(trace ? { preState, window, correlation: { networkRequestIds: correlation.networkRequestIds, fetchRequestIds: correlation.fetchRequestIds, events: correlation.events }, orderedEvents: trace.slice(window.startSeq, window.endSeq) } : {}),
+    };
+  };
   const probes = ['http://127.0.0.1:3000/', 'http://localhost:9000/', 'http://127.0.0.1:5433/'];
   for (const [probe, url] of probes.entries()) {
     assert.throws(() => allowedBrowserUrl(runtime, environment, url), error => error.message === 'BROWSER_RESOURCE_TARGET_DENIED');
+    // Document state immediately before this probe, plus the event-derived loading state, so a still-active previous navigation is visible.
+    const startSeq = trace ? trace.state().nextSeq : 0;
+    const preState = typeof browser.captureNavigationState === 'function' ? await browser.captureNavigationState() : null;
+    trace?.mark('probe-start', { probe, url });
     const start = browser.requests.length;
     let navigate;
     try {
@@ -349,7 +371,8 @@ export async function rehearseBrowserIsolation(browser, runtime, environment) {
     // Wait only for an attributable request for THIS probe; a late event from another probe cannot end or satisfy the wait. Timeout unchanged: 100 x 20 ms.
     for (let attempt = 0; attempt < 100 && !evaluateAmbientProbe(browser.requests, start, url).own.length; attempt++) await delay(20);
     const evaluation = evaluateAmbientProbe(browser.requests, start, url);
-    const diagnostic = diagnose(probe, url, navigate, evaluation);
+    const endMark = trace?.mark('probe-end', { probe, url, verdict: evaluation.verdict });
+    const diagnostic = diagnose(probe, url, navigate, evaluation, preState, { startSeq, endSeq: endMark ? endMark.seq : 0 });
     results.push(diagnostic);
     if (!evaluation.pass) {
       const error = Error('BROWSER_AMBIENT_REQUEST_NOT_REJECTED');
