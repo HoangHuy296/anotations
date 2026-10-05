@@ -16,8 +16,8 @@ export async function createWorkspaceUser(role: UserRole = UserRole.LABELER) {
   return { ...user, name: user.name ?? user.email, password };
 }
 
-export async function createWorkspaceDataset(ownerId: string) {
-  return db.dataset.create({ data: { ownerId, name: workspaceUnique("workspace-dataset") }, select: { id: true, name: true } });
+export async function createWorkspaceDataset(ownerId: string, modality: Modality = Modality.IMAGE) {
+  return db.dataset.create({ data: { ownerId, name: workspaceUnique("workspace-dataset"), modality, modalityResolverSubject: ownerId }, select: { id: true, name: true } });
 }
 
 export async function addWorkspaceMember(datasetId: string, userId: string, role: DatasetMemberRole) {

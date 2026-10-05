@@ -10,3 +10,6 @@ export * from "./text-boundary-contract.js";
 export * from "./text-source-decode.js";
 export * from "./text-source-limits.js";
 export * from "./text-source-prepare-job.js";
+export * from "./ai-batch.js";
+
+export * from "./dataset-modality.js";

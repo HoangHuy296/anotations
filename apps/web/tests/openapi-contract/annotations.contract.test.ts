@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 /**
  * OpenAPI contract check for the Annotations tag (specs/api/openapi.yaml,
  * schemas/annotations.yaml), IMAGE batch endpoint only. Runs against an

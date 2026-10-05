@@ -1,3 +1,4 @@
+# G1: historical live-HTTP fixture runtime is disabled pending an isolated runtime receipt.
 # Controlled local-only runtime for Phase 014 HTTP evidence. This override is
 # deliberately opt-in: production Compose continues to run `next start` and
 # rejects plaintext/private fixture destinations.
@@ -6,7 +7,7 @@ services:
     command:
       - sh
       - -c
-      - cd /workspace && exec pnpm --filter @annotationplatform/web exec next dev
+      - cd /workspace && exec node scripts/db-safety/deny.mjs
     environment:
       NODE_ENV: development
       REPOSITORY_PREFLIGHT_INTEGRATION_TESTS: "1"

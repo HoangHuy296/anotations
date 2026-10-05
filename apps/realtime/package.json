@@ -8,7 +8,7 @@
     "start": "node --import tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "node --import tsx --test --test-concurrency=1 tests/**/*.test.ts"
+    "test": "node ../../scripts/db-safety/cli.mjs test realtime:test"
   },
   "dependencies": {
     "ioredis": "5.10.1",

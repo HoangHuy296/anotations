@@ -1,3 +1,4 @@
+import "../../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
@@ -21,6 +22,13 @@ test("supplied 850-frame output becomes 10 tracks and 38 frame-accurate observat
   });
   assert.ok(predictions.every((p) => p.labelKey === "unknown"));
   assert.equal(JSON.stringify(predictions).includes("https://"), false);
+});
+
+test("video class_name maps to the Annotation Platform label key", () => {
+  const output = clone();
+  output[0].frames[54].tracks[0].class_name = "dog";
+  const predictions = normalizeAiozVideoOutput(output, files);
+  assert.equal(predictions[0].labelKey, "dog");
 });
 
 test("empty frames create nothing and reordered videos retain scoped track IDs", () => {

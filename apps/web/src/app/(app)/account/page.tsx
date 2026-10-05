@@ -14,21 +14,13 @@ import { ExportsHistoryPanel } from "@/components/account/exports-history-panel"
 import { LanguageSelect } from "@/components/account/language-select";
 import { NotificationsToggle } from "@/components/account/notifications-toggle";
 import { AccountProfileForm } from "@/components/auth/account-profile-form";
+import { AccountSectionNav } from "@/components/account/account-section-nav";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { getRequestActor } from "@/lib/auth";
 import { isDatabaseConfigured } from "@/lib/db";
 import { listSafeExportJobsForActor } from "@/lib/exports/export-service";
 import { readAccountPreferences } from "@/lib/validation/account-preferences";
-
-const sections = [
-  { id: "account", label: "Account & subscription", icon: UserCircle },
-  { id: "notifications", label: "Notifications", icon: BellSimple },
-  { id: "exports", label: "Exports & downloads", icon: Export },
-  { id: "language", label: "Language", icon: Translate },
-  { id: "accessibility", label: "Accessibility", icon: Eye },
-  { id: "support", label: "Support", icon: Lifebuoy },
-] as const;
 
 const roleLabels: Record<string, string> = {
   ADMIN: "Administrator", MANAGER: "Manager", LABELER: "Labeler", REVIEWER: "Reviewer",
@@ -52,17 +44,7 @@ export default async function AccountPage() {
         </header>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[200px_minmax(0,1fr)] lg:items-start">
-          <nav aria-label="Settings sections" className="hidden lg:sticky lg:top-8 lg:block lg:space-y-1">
-            {sections.map((section) => {
-              const Icon = section.icon;
-              return (
-                <a key={section.id} href={`#${section.id}`} className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-950 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50">
-                  <Icon aria-hidden="true" size={17} />
-                  {section.label}
-                </a>
-              );
-            })}
-          </nav>
+          <AccountSectionNav />
 
           <div className="min-w-0 space-y-8">
             <section id="account" className="scroll-mt-8 rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900">

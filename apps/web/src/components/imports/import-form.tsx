@@ -4,8 +4,10 @@ import { ArrowRight, CheckCircle, Eye, SpinnerGap, WarningCircle } from "@phosph
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition, type FormEvent } from "react";
 
+import { ModalityCard } from "@/components/imports/modality-class-card";
 import { Button } from "@/components/ui/button";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
+import type { CreationModality } from "@/lib/imports/recommended-classes";
 
 type Visibility = "PUBLIC" | "PRIVATE";
 type CredentialMode = "PUBLIC" | "EXISTING_SOURCE_CONNECTION" | "ONE_TIME_PAT";
@@ -31,6 +33,7 @@ function value(form: FormData, name: string) {
 function requestFromForm(form: FormData, credentialMode: CredentialMode) {
   const request: Record<string, unknown> = {
     provider: "GITEA",
+    modality: value(form, "modality"),
     datasetName: value(form, "datasetName"),
     credentialMode,
     repository: {
@@ -57,6 +60,8 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const importIdempotencyKeyRef = useRef<string | null>(null);
+  // No default and no inference from the preview: the user must choose.
+  const [modality, setModality] = useState<CreationModality | "">("");
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<"settings" | "preview">("settings");
   const [mode, setMode] = useState<CredentialMode>(connections.length ? "EXISTING_SOURCE_CONNECTION" : "PUBLIC");
@@ -217,11 +222,11 @@ export function ImportForm({ connections, giteaServerUrl }: { connections: Array
           {mode === "EXISTING_SOURCE_CONNECTION" && <Field label="Source connection"><select className={inputClassName} disabled={isPending} name="sourceConnectionId" required><option value="">Select your active Gitea connection</option>{connections.map((connection) => <option key={connection.id} value={connection.id}>{connection.name ?? "Gitea connection"}</option>)}</select></Field>}
           {(mode === "PUBLIC" || mode === "ONE_TIME_PAT") && <Field label="Gitea server URL"><input className={inputClassName} disabled={isPending} name="serverUrl" placeholder={giteaServerUrl ?? "https://gitea.example.com"} required type="url" /><span className="mt-1 block text-[11px] leading-4 text-zinc-500 dark:text-zinc-400">Use the Gitea server root, not a clone URL such as <code>/owner/repository.git</code>{giteaServerUrl ? <> — for this deployment, that&rsquo;s exactly <code>{giteaServerUrl}</code>, nothing else</> : null}.</span></Field>}
           {mode === "ONE_TIME_PAT" && <Field label="Personal access token"><input autoComplete="off" className={inputClassName} disabled={isPending} name="personalAccessToken" required type="password" /></Field>}
-          <fieldset><legend className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Expected repository visibility</legend><div className="mt-2 grid h-10 grid-cols-2 rounded-xl border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-800">{(["PUBLIC", "PRIVATE"] as const).map((visibility) => <label key={visibility} className="grid cursor-pointer place-items-center rounded-lg has-[:checked]:bg-zinc-950 has-[:checked]:text-white dark:has-[:checked]:bg-white dark:has-[:checked]:text-zinc-950"><input className="sr-only" defaultChecked={visibility === "PUBLIC"} disabled={isPending} name="expectedVisibility" type="radio" value={visibility} /><span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{visibility === "PUBLIC" ? "Public" : "Private"}</span></label>)}</div></fieldset>
+          <fieldset><legend className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Expected repository visibility</legend><div className="mt-2 grid h-10 grid-cols-2 rounded-xl border border-zinc-200 bg-white p-1 dark:border-zinc-700 dark:bg-zinc-800">{(["PUBLIC", "PRIVATE"] as const).map((visibility) => <label key={visibility} className="grid cursor-pointer place-items-center rounded-lg text-zinc-700 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-sky-500 dark:text-zinc-300 has-[:checked]:bg-zinc-950 has-[:checked]:text-white dark:has-[:checked]:bg-white dark:has-[:checked]:text-zinc-950"><input className="sr-only" defaultChecked={visibility === "PUBLIC"} disabled={isPending} name="expectedVisibility" type="radio" value={visibility} /><span className="text-xs font-semibold">{visibility === "PUBLIC" ? "Public" : "Private"}</span></label>)}</div></fieldset>
           <Field label="Owner"><input className={inputClassName} disabled={isPending} name="owner" placeholder="annotation-admin" required /></Field><Field label="Repository"><input className={inputClassName} disabled={isPending} name="repo" placeholder="ImageDataset" required /></Field>
         </div>
         {mode === "ONE_TIME_PAT" && <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-4 dark:border-sky-900 dark:bg-sky-950/40"><label className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200"><input checked={saveOneTimeConnection} name="saveAsSourceConnection" onChange={(event) => { setSaveOneTimeConnection(event.currentTarget.checked); setPreview(null); importIdempotencyKeyRef.current = null; }} type="checkbox" /> Save this PAT as a reusable source connection</label><p className="mt-1 text-xs leading-5 text-zinc-600 dark:text-zinc-400">Asynchronous private imports require this choice. The PAT is encrypted server-side only when Start Import succeeds.</p><Field label="Connection name"><input className={inputClassName} disabled={isPending} name="connectionName" placeholder="Work Gitea" required={saveOneTimeConnection} /></Field></div>}
-        <div className="mt-4 max-w-xl"><Field label="Dataset name"><input className={inputClassName} disabled={isPending} name="datasetName" placeholder="street-scenes-q2" required /></Field></div>
+        <div className="mt-4 grid max-w-3xl gap-4 sm:grid-cols-2"><Field label="Dataset name"><input className={inputClassName} disabled={isPending} name="datasetName" placeholder="street-scenes-q2" required /></Field><div className="sm:col-span-2"><ModalityCard value={modality} disabled={isPending} onChange={(next) => { setModality(next); setPreview(null); importIdempotencyKeyRef.current = null; }} /></div></div>
         <Button className="mt-6" disabled={isPending || (mode === "EXISTING_SOURCE_CONNECTION" && connections.length === 0)} type="submit">{isPending ? <SpinnerGap className="animate-spin" aria-hidden="true" size={17} /> : <Eye aria-hidden="true" size={17} />}{isPending ? "Checking repository..." : "Preview import"}</Button>
       </form>
 

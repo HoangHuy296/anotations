@@ -46,8 +46,8 @@ export async function createFixture(): Promise<AuthOwnershipFixture> {
   const labeler = await createActor("labeler");
   const outsider = await createActor("outsider");
   const actors = { owner, manager, reviewer, labeler, outsider };
-  const dataset = await db.dataset.create({ data: { ownerId: owner.id, name: unique("dataset") }, select: { id: true } });
-  const otherDataset = await db.dataset.create({ data: { ownerId: outsider.id, name: unique("other-dataset") }, select: { id: true } });
+  const dataset = await db.dataset.create({ data: { ownerId: owner.id, name: unique("dataset"), modality: Modality.IMAGE, modalityResolverSubject: owner.id }, select: { id: true } });
+  const otherDataset = await db.dataset.create({ data: { ownerId: outsider.id, name: unique("other-dataset"), modality: Modality.IMAGE, modalityResolverSubject: outsider.id }, select: { id: true } });
   await db.datasetMember.createMany({ data: [
     { datasetId: dataset.id, userId: manager.id, role: DatasetMemberRole.MANAGER },
     { datasetId: dataset.id, userId: reviewer.id, role: DatasetMemberRole.REVIEWER },

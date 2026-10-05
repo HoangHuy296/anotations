@@ -28,7 +28,8 @@ export type RepositoryCandidate = {
   path: string;
   filename: string;
   mimeType: string;
-  modality: "IMAGE" | "VIDEO" | "TEXT" | "AUDIO";
+  /** Extension-derived discovery hint only; null means classify downloaded bytes. */
+  modality: "IMAGE" | "VIDEO" | "TEXT" | "AUDIO" | null;
   sizeBytes: number;
   revision: string;
   providerFileIdentity: string;
@@ -38,8 +39,9 @@ export type RepositoryCandidate = {
 export type RepositoryAccess = { baseUrl: string; token: string | null };
 
 /**
- * The provider tree is ephemeral worker input.  Unsupported files are counted
- * as a safe aggregate skip, never persisted with a path or provider detail.
+ * The provider tree is ephemeral worker input. Unknown extensions remain
+ * candidates for byte classification; only unsafe or over-limit entries are
+ * counted as bounded skips, never persisted with a path or provider detail.
  */
 export type RepositoryCandidateListing = {
   candidates: RepositoryCandidate[];
@@ -72,7 +74,9 @@ export function detectRepositoryFile(path: string, sizeBytes: number, revision: 
     mp3: { mimeType: "audio/mpeg", modality: "AUDIO" }, ogg: { mimeType: "audio/ogg", modality: "AUDIO" }, wav: { mimeType: "audio/wav", modality: "AUDIO" },
   };
   const detected = mapping[extension];
-  return detected ? { path: normalized, filename: normalized.split("/").at(-1)!, sizeBytes, revision, providerFileIdentity, downloadUrl, ...detected } : null;
+  // Unknown extensions are candidates too: their bytes are inspected by the
+  // worker before publication. Extensions provide a hint, never a filter.
+  return { path: normalized, filename: normalized.split("/").at(-1)!, sizeBytes, revision, providerFileIdentity, downloadUrl, ...(detected ?? { mimeType: "application/octet-stream", modality: null }) };
 }
 
 /**

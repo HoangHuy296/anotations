@@ -244,6 +244,16 @@ components:
       $ref: './schemas/ai.yaml#/CreateAiTaskRequest'
     CreateAiTaskResponse:
       $ref: './schemas/ai.yaml#/CreateAiTaskResponse'
+    AiSelectionQuery:
+      $ref: './schemas/ai.yaml#/AiSelectionQuery'
+    AiDetectionTarget:
+      $ref: './schemas/ai.yaml#/AiDetectionTarget'
+    AiAcceptedTargetSummary:
+      $ref: './schemas/ai.yaml#/AiAcceptedTargetSummary'
+    PreviewAiTargetRequest:
+      $ref: './schemas/ai.yaml#/PreviewAiTargetRequest'
+    AiTargetPreview:
+      $ref: './schemas/ai.yaml#/AiTargetPreview'
     AiTaskStatus:
       $ref: './schemas/ai.yaml#/AiTaskStatus'
     CancelAiTaskResponse:
@@ -288,6 +298,15 @@ components:
       $ref: './schemas/dataset.yaml#/CreateDatasetRequest'
     UpdateDatasetRequest:
       $ref: './schemas/dataset.yaml#/UpdateDatasetRequest'
+
+    WorkspaceDataset:
+      $ref: './schemas/dataset.yaml#/WorkspaceDataset'
+    DatasetModalityReceipt:
+      $ref: './schemas/dataset.yaml#/DatasetModalityReceipt'
+    ResolveEmptyDatasetRequest:
+      $ref: './schemas/dataset.yaml#/ResolveEmptyDatasetRequest'
+    UnresolvedWorkspaceResponse:
+      $ref: './schemas/dataset.yaml#/UnresolvedWorkspaceResponse'
 
     # --- Labels -----------------------------------------------------------------
     LabelScope:
@@ -444,6 +463,967 @@ components:
               value: { error: { code: INTERNAL_ERROR, message: The request could not be completed. } }
 
 paths:
+  /api/datasets/{datasetId}/visualization:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationDataset
+      summary: Read visualization dataset
+      description: Requires existing dataset.read permission and exact metadata.workflowStatus
+        COMPLETED on every request. No mutations. Asset counts exclude deleted/archived
+        assets; annotations are persisted records only. Activity lists durable Jobs,
+        not a reconstructed audit history.
+      security:
+      - sessionCookie: []
+      parameters:
+      - &id001
+        name: datasetId
+        in: path
+        required: true
+        schema: &id002
+          type: string
+        description: Existing Dataset CUID or UUID.
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/Dataset
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/assets:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationAssets
+      summary: Read visualization assets
+      description: Requires existing dataset.read permission and exact metadata.workflowStatus
+        COMPLETED on every request. No mutations. Asset counts exclude deleted/archived
+        assets; annotations are persisted records only. Activity lists durable Jobs,
+        not a reconstructed audit history.
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id001
+      - &id003
+        name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          default: 1
+      - &id004
+        name: pageSize
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 18
+      - name: sort
+        in: query
+        schema:
+          type: string
+          enum:
+          - filename
+          - createdAt
+          default: filename
+      - name: order
+        in: query
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      - name: q
+        in: query
+        schema:
+          type: string
+          maxLength: 100
+          default: ''
+      - name: modality
+        in: query
+        schema:
+          type: string
+          enum:
+          - ALL
+          - IMAGE
+          - VIDEO
+          - AUDIO
+          - TEXT
+          default: ALL
+      - name: labelId
+        in: query
+        schema: *id002
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/Assets
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/assets/{assetId}:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationAssetDetail
+      summary: Read visualization assetdetail
+      description: Requires existing dataset.read permission and exact metadata.workflowStatus
+        COMPLETED on every request. No mutations. Asset counts exclude deleted/archived
+        assets; annotations are persisted records only. Activity lists durable Jobs,
+        not a reconstructed audit history.
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id001
+      - name: assetId
+        in: path
+        required: true
+        schema: *id002
+        description: Existing Asset CUID or UUID, scoped to this dataset.
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/AssetDetail
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/assets/{assetId}/media:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationMedia
+      summary: Read visualization media
+      description: Requires existing dataset.read permission and exact metadata.workflowStatus
+        COMPLETED on every request. No mutations. Asset counts exclude deleted/archived
+        assets; annotations are persisted records only. Activity lists durable Jobs,
+        not a reconstructed audit history.
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id001
+      - name: assetId
+        in: path
+        required: true
+        schema: *id002
+        description: Existing Asset CUID or UUID, scoped to this dataset.
+      - in: query
+        name: variant
+        schema: { type: string, enum: [THUMBNAIL, PREVIEW], default: PREVIEW }
+      responses:
+        '200':
+          description: 'Authenticated image stream, maximum 25 MiB. No storage location
+            or capability is returned. Cache-Control: private, no-store.'
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+            image/avif:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '415':
+          description: 'UNSUPPORTED_MEDIA: non-image or unsupported image MIME type.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/insights:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationInsights
+      summary: Read visualization insights
+      description: Requires existing dataset.read permission and exact metadata.workflowStatus
+        COMPLETED on every request. No mutations. Asset counts exclude deleted/archived
+        assets; annotations are persisted records only. Activity lists durable Jobs,
+        not a reconstructed audit history.
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id001
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/Insights
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/schema:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationSchema
+      summary: Read visualization schema
+      description: Requires existing dataset.read permission and exact metadata.workflowStatus
+        COMPLETED on every request. No mutations. Asset counts exclude deleted/archived
+        assets; annotations are persisted records only. Activity lists durable Jobs,
+        not a reconstructed audit history.
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id001
+      - *id003
+      - *id004
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/Schema
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/activity:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationActivity
+      summary: Read visualization activity
+      description: Requires existing dataset.read permission and exact metadata.workflowStatus
+        COMPLETED on every request. No mutations. Asset counts exclude deleted/archived
+        assets; annotations are persisted records only. Activity lists durable Jobs,
+        not a reconstructed audit history.
+      security:
+      - sessionCookie: []
+      parameters:
+      - *id001
+      - *id003
+      - *id004
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/Activity
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/versions:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationVersions
+      summary: Read visualization Versions
+      description: Authorized read of immutable published content. Requires dataset.read,
+        a live dataset and exact COMPLETED, rechecked after artifact I/O. No processing
+        occurs in GET. IDs are dataset-scoped; private storage and Job internals are
+        never exposed.
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: datasetId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Existing Dataset CUID or UUID.
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 18
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/Versions
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/derived:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationDerived
+      summary: Read visualization Derived
+      description: Authorized read of immutable published content. Requires dataset.read,
+        a live dataset and exact COMPLETED, rechecked after artifact I/O. No processing
+        occurs in GET. IDs are dataset-scoped; private storage and Job internals are
+        never exposed.
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: datasetId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Existing Dataset CUID or UUID.
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 18
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/Derived
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/versions/{snapshotId}:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationSnapshot
+      summary: Read visualization Snapshot
+      description: Authorized read of immutable published content. Requires dataset.read,
+        a live dataset and exact COMPLETED, rechecked after artifact I/O. No processing
+        occurs in GET. IDs are dataset-scoped; private storage and Job internals are
+        never exposed.
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: datasetId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Existing Dataset CUID or UUID.
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 18
+      - in: path
+        name: snapshotId
+        required: true
+        schema:
+          type: string
+          pattern: ^vs_[a-f0-9]{64}$
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/SnapshotContent
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization/artifacts/{artifactId}:
+    get:
+      tags:
+      - Dataset
+      operationId: readVisualizationArtifact
+      summary: Read visualization Artifact
+      description: Authorized read of immutable published content. Requires dataset.read,
+        a live dataset and exact COMPLETED, rechecked after artifact I/O. No processing
+        occurs in GET. IDs are dataset-scoped; private storage and Job internals are
+        never exposed.
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: datasetId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Existing Dataset CUID or UUID.
+      - name: page
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 10000
+          default: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 18
+      - in: path
+        name: artifactId
+        required: true
+        schema:
+          type: string
+          pattern: ^va_[a-f0-9]{64}$
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+            image/avif:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+  /api/datasets/{datasetId}/visualization-processing:
+    post:
+      tags:
+      - Dataset
+      operationId: requestVisualizationProcessing
+      summary: Request durable immutable capture or current-snapshot derivation
+      description: Separate management mutation requiring dataset.update, live dataset
+        and exact COMPLETED. Empty validated body. Creates/reuses a common PostgreSQL
+        Job; enqueues only jobId. Capture schedules derivation through durable queue
+        recovery. Retry uses the existing Job retry endpoint and current generation.
+        Never called by the read-only viewer.
+      security:
+      - sessionCookie: []
+      parameters:
+      - name: datasetId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Existing Dataset CUID or UUID.
+      responses:
+        '200':
+          description: 'Allowlisted read-only result. Cache-Control: no-store.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/ProcessingRequest
+                additionalProperties: false
+        '400':
+          description: 'INVALID_REQUEST: malformed IDs or invalid/repeated/unknown pagination
+            and filter parameters.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '401':
+          description: AUTH_REQUIRED.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '404':
+          description: DATASET_NOT_FOUND or ASSET_NOT_IN_DATASET; includes inaccessible,
+            archived, deleted and cross-dataset records.
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '409':
+          description: 'DATASET_NOT_COMPLETED: authorized dataset reopened; discard
+            client data and replace route with /workspace/{datasetId}. Media also uses
+            ASSET_UNAVAILABLE for missing, unreadable or oversized objects.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '503':
+          description: 'INTERNAL_ERROR: sanitized temporary failure.'
+          content:
+            application/json:
+              schema:
+                $ref: ./schemas/common.yaml#/ApiError
+        '201':
+          description: Durable Job created and delivery accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/ProcessingRequest
+                additionalProperties: false
+        '202':
+          description: Job is durable; queue delivery is pending recovery.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: ./schemas/visualization.yaml#/ProcessingRequest
+                additionalProperties: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
   # ===================== Authentication =====================
   /api/auth/login:
     post:
@@ -1926,11 +2906,18 @@ paths:
     post:
       tags: [AI]
       operationId: createAiTask
-      summary: Request AI pre-annotation for one or more Assets
+      summary: Request AI pre-annotation for the current Asset or a selection
       description: >-
-        Requires "annotation.create" on the dataset. Creates a Job + AiTask in one
-        transaction and enqueues strictly after commit; this route never waits on
-        the AI provider (hence 202, not 200/201).
+        Requires "annotation.create" on the dataset. Every target form (current
+        Asset, Phase 022 explicit/filtered selection, legacy assetIds) resolves
+        through one server-side path: deduplicated, ordered by id, dataset-scoped,
+        authorized, single-modality and within the effective limit, or the whole
+        request is rejected (never a smaller batch). Creates exactly one Job + one
+        AiTask in one transaction (the authoritative target is stored in Job.input)
+        and enqueues a `{ jobId }`-only payload strictly after commit; this route
+        never waits on the AI provider (hence 202). Version 1 supports IMAGE
+        detection batches; a VIDEO/AUDIO batch is rejected with
+        409 AI_CAPABILITY_UNVERIFIED.
       requestBody:
         required: true
         content:
@@ -1946,7 +2933,11 @@ paths:
                 required: [data]
                 properties:
                   data: { $ref: '#/components/schemas/CreateAiTaskResponse' }
-        '400': { $ref: '#/components/responses/ValidationError' }
+        '400':
+          description: INVALID_REQUEST (malformed body, both `target` and `assetIds`, unknown fields in `target`, invalid model/class) or TARGET_EMPTY (the selection resolves to no assets).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '404':
@@ -1955,7 +2946,56 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ApiError' }
         '409':
-          description: AI_MODEL_INACTIVE, ASSET_NOT_IN_DATASET, or JOB_CONFLICT.
+          description: >-
+            AI_MODEL_INACTIVE (also when the model is absent from the deployed AI
+            catalog), ASSET_NOT_IN_DATASET (any member missing/archived/deleted/foreign
+            -- no per-id detail), TARGET_CHANGED (stale previewFingerprint),
+            AI_CAPABILITY_UNVERIFIED, or JOB_CONFLICT.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '422':
+          description: TARGET_TOO_LARGE (more than the effective limit), TARGET_MIXED_MODALITY, or TARGET_INELIGIBLE (an asset lacks a source file/size).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '502':
+          description: AI_MODEL_LABELS_UNAVAILABLE or AI_MODEL_CATALOG_UNAVAILABLE (provider discovery failed; nothing is created).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/ai/tasks/preview:
+    post:
+      tags: [AI]
+      operationId: previewAiTarget
+      summary: Preview what an AI run would target (read-only)
+      description: >-
+        Requires "annotation.create". Resolves the target exactly as creation
+        would but creates no Job, AiTask or provider work and returns no ids. An
+        ineligible target is a 200 with `eligible: false` and a safe reason; the
+        current Asset is never substituted. The returned previewFingerprint is an
+        advisory freshness token only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PreviewAiTargetRequest' }
+      responses:
+        '200':
+          description: Preview outcome.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/AiTargetPreview' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: DATASET_NOT_FOUND (also returned to a caller without dataset access).
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ApiError' }
@@ -2101,7 +3141,12 @@ paths:
       description: >-
         Requires "job.retry" on the Job's dataset. An authorized retry creates or
         reuses one successor Job linked to its predecessor (AGENTS.md's retry
-        idempotency rule).
+        idempotency rule). AI operations (feature 026) additionally require
+        "annotation.create" and are retryable only when it is definitely known no
+        external task exists (the AI provider is non-idempotent and has no lookup):
+        an ambiguous submission or an operation with a recorded external task is
+        refused with 409, and the accepted membership is re-validated whole (a
+        removed member rejects the retry). The successor gets its own AiTask. Visualization retries require exact COMPLETED and target current content generation, never stale Job input.
       parameters:
         - name: jobId
           in: path
@@ -2119,6 +3164,15 @@ paths:
                   data: { $ref: '#/components/schemas/RetryJobResponse' }
         '201':
           description: A new successor Job was created.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/RetryJobResponse' }
+        '202':
+          description: Visualization successor is durable; queue delivery awaits recovery.
           content:
             application/json:
               schema:
@@ -2218,10 +3272,15 @@ paths:
       operationId: createExportJob
       summary: Start (or idempotently reuse) a dataset export
       description: >-
-        Requires "job.createExport" on the dataset. One canonical export format
-        (JSON) exists today; a repeated request while a pending/running export
-        exists reuses it outright. A finished export's canonical key is freed so a
-        fresh export reflecting current dataset content can be started.
+        Requires "job.createExport" on the dataset. Two export formats: JSON
+        (the lossless, complete platform manifest) and COCO (the
+        interoperable image-annotation export -- images, annotations,
+        categories -- generated from canonical Dataset state, not from any
+        external provider's per-task formatted result). Each
+        (dataset, format) pair has its own idempotent canonical key; a
+        repeated request while a pending/running export of that format
+        exists reuses it outright. A finished export's canonical key is freed
+        so a fresh export reflecting current dataset content can be started.
       requestBody:
         required: true
         content:
@@ -2343,6 +3402,93 @@ paths:
         '400': { $ref: '#/components/responses/ValidationError' }
         '401': { $ref: '#/components/responses/Unauthorized' }
         '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/datasets/{datasetId}/workspace-state:
+    get:
+      tags: [Dataset]
+      operationId: getDatasetWorkspaceState
+      summary: Read the authorized Dataset engine state
+      description: Dataset modality is the only engine selector. No Asset or query can override it. Unresolved historical datasets return an explicit state without an engine; unavailable or outside-scope datasets preserve safe 404 disclosure.
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+          description: CUID or UUID.
+      responses:
+        '200':
+          description: Resolved Dataset state; private receipt/counter and account identity are excluded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/WorkspaceDataset' }
+                additionalProperties: false
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: GITEA_NOT_FOUND; unavailable or outside the actor's scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: DATASET_MODALITY_UNRESOLVED; EMPTY, MIXED, or SINGLE historical state with no engine.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UnresolvedWorkspaceResponse' }
+        '500':
+          description: INTERNAL_ERROR; safe server failure, never Asset-derived fallback.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
+  /api/datasets/{datasetId}/modality-resolution:
+    post:
+      tags: [Dataset]
+      operationId: resolveEmptyDatasetModality
+      summary: Assign an EMPTY historical Dataset modality once
+      description: Actual Dataset owner or current system ADMIN only; dataset.update/MANAGER authority is insufficient. Counts every belonging Asset, including archived/deleted history. Same-value authorized replay returns the original receipt. Different-value replay is rejected. No MIXED/SINGLE resolution or backfill.
+      parameters:
+        - name: datasetId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResolveEmptyDatasetRequest' }
+      responses:
+        '200':
+          description: Immutable safe resolution receipt; refresh authoritative Dataset state before engine mounting.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/DatasetModalityReceipt' }
+                additionalProperties: false
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: DATASET_NOT_FOUND; missing, unavailable, or outside scope.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: DATASET_NOT_EMPTY, DATASET_MODALITY_IMMUTABLE, or bounded DATASET_MODALITY_CONFLICT; no assignment is committed on rejection.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '500':
+          description: INTERNAL_ERROR; no raw database error is exposed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
 
   /api/datasets/{datasetId}:
     get:

@@ -80,6 +80,17 @@ export async function listActiveAiModels(modality?: string, taskName?: AiToolTas
   return pending;
 }
 
+/**
+ * Decision D-STALE / DI-5: a locally registered model that the deployed AI
+ * Service no longer lists must not be accepted, because the provider would
+ * answer 422 only after a Job already exists. Throws AI_MODEL_CATALOG_UNAVAILABLE
+ * when the catalog cannot be read (fail closed).
+ */
+export async function isModelInDeployedCatalog(modelKey: string, modality: string): Promise<boolean> {
+  const models = await listActiveAiModels(modality);
+  return models.some((model) => model.key === modelKey);
+}
+
 const labelsSchema = z.object({
   success: z.literal(true),
   data: z.object({ model_id: z.string().uuid(), classes: z.array(z.string().min(1).max(256)).max(10000) }),

@@ -18,13 +18,13 @@ DatasetSourceMode:
 DatasetWorkflowStatus:
   type: string
   enum: [IN_PROGRESS, COMPLETED, REVIEWED]
-  description: Write-only convenience field on PATCH; persisted inside the Dataset's metadata JSON rather than as its own column.
+  description: Safe lifecycle projection on list responses and convenience field on PATCH; persisted inside the Dataset's metadata JSON rather than as its own column.
 
 Dataset:
   type: object
   description: Safe dataset projection (datasetMetadataSelect). Never includes ownerId, member rows, or source-connection detail.
-  required: [id, name, description, type, primaryModality, sourceMode, createdAt, updatedAt, archivedAt]
-  properties:
+  required: [id, name, description, type, modality, primaryModality, sourceMode, createdAt, updatedAt, archivedAt]
+  properties: &datasetProperties
     id:
       $ref: './common.yaml#/Cuid'
     name:
@@ -33,6 +33,11 @@ Dataset:
       type: [string, "null"]
     type:
       $ref: '#/DatasetType'
+    modality:
+      oneOf:
+        - $ref: './assets.yaml#/Modality'
+        - type: "null"
+      description: Authoritative fixed Dataset modality; null only for unresolved historical EMPTY/SINGLE/MIXED records.
     primaryModality:
       oneOf:
         - $ref: './assets.yaml#/Modality'
@@ -49,6 +54,15 @@ Dataset:
         - type: "null"
   additionalProperties: false
 
+DatasetListItem:
+  type: object
+  required: [id, name, description, type, modality, primaryModality, sourceMode, createdAt, updatedAt, archivedAt, workflowStatus]
+  properties:
+    <<: *datasetProperties
+    workflowStatus:
+      $ref: '#/DatasetWorkflowStatus'
+  additionalProperties: false
+
 DatasetListResponse:
   type: object
   description: >-
@@ -62,7 +76,7 @@ DatasetListResponse:
     items:
       type: array
       items:
-        $ref: '#/Dataset'
+        $ref: '#/DatasetListItem'
     page:
       type: integer
       minimum: 1
@@ -83,7 +97,7 @@ CreateDatasetRequest:
   description: >-
     Source: createDatasetSchema. Requires the actor to pass canCreateDataset
     (MANAGER or ADMIN role).
-  required: [name]
+  required: [name, modality]
   properties:
     name:
       type: string
@@ -95,10 +109,9 @@ CreateDatasetRequest:
     type:
       $ref: '#/DatasetType'
       default: MULTI_MODAL
-    primaryModality:
-      oneOf:
-        - $ref: './assets.yaml#/Modality'
-        - type: "null"
+    modality:
+      $ref: './assets.yaml#/Modality'
+      description: Required at creation and immutable through normal Dataset CRUD.
     metadata:
       type: object
       description: Free-form JSON object; defaults to {}.
@@ -127,4 +140,73 @@ UpdateDatasetRequest:
       description: When provided, replaces the metadata object except for the workflowStatus key (merged separately when workflowStatus is also present).
     workflowStatus:
       $ref: '#/DatasetWorkflowStatus'
+  additionalProperties: false
+
+# Canonical Phase029 workspace projection; receipts and private counters stay internal.
+WorkspaceDataset:
+  type: object
+  required: [id, name, modality, modalityResolution, canResolve]
+  properties:
+    id:
+      type: string
+      description: CUID or UUID.
+    name:
+      type: string
+    modality:
+      oneOf:
+        - $ref: './assets.yaml#/Modality'
+        - type: "null"
+    modalityResolution:
+      enum: [RESOLVED, EMPTY_UNRESOLVED, MIXED_UNRESOLVED, SINGLE_UNRESOLVED]
+    canResolve:
+      type: boolean
+      description: Server-computed EMPTY eligibility and actual owner/system ADMIN authority; the mutation endpoint reauthorizes.
+  oneOf:
+    - properties:
+        modality: { $ref: './assets.yaml#/Modality' }
+        modalityResolution: { const: RESOLVED }
+        canResolve: { const: false }
+    - properties:
+        modality: { type: "null" }
+        modalityResolution: { const: EMPTY_UNRESOLVED }
+    - properties:
+        modality: { type: "null" }
+        modalityResolution: { enum: [MIXED_UNRESOLVED, SINGLE_UNRESOLVED] }
+        canResolve: { const: false }
+  additionalProperties: false
+
+ResolveEmptyDatasetRequest:
+  type: object
+  required: [modality]
+  properties:
+    modality: { $ref: './assets.yaml#/Modality' }
+  additionalProperties: false
+
+DatasetModalityReceipt:
+  type: object
+  required: [id, modality, modalityResolution, resolvedAt]
+  properties:
+    id: { type: string }
+    modality: { $ref: './assets.yaml#/Modality' }
+    modalityResolution: { const: RESOLVED }
+    resolvedAt: { $ref: './common.yaml#/Timestamp' }
+  additionalProperties: false
+
+UnresolvedWorkspaceResponse:
+  type: object
+  required: [error]
+  properties:
+    error:
+      type: object
+      required: [code, message, details]
+      properties:
+        code: { const: DATASET_MODALITY_UNRESOLVED }
+        message: { type: string }
+        details:
+          type: object
+          required: [dataset]
+          properties:
+            dataset: { $ref: '#/WorkspaceDataset' }
+          additionalProperties: false
+      additionalProperties: false
   additionalProperties: false

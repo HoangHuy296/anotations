@@ -1,0 +1,735 @@
+Dataset:
+  type: object
+  required:
+  - id
+  - name
+  properties:
+    id:
+      type: string
+    name:
+      type: string
+  additionalProperties: false
+Label:
+  type: object
+  required:
+  - id
+  - name
+  - color
+  properties:
+    id:
+      type: string
+    name:
+      type: string
+    color:
+      type: string
+  additionalProperties: false
+Asset:
+  type: object
+  required:
+  - row_id
+  - filename
+  - modality
+  - width
+  - height
+  - mediaAvailable
+  properties:
+    row_id:
+      type: string
+    filename:
+      type: string
+    modality:
+      type: string
+      enum:
+      - IMAGE
+      - VIDEO
+      - AUDIO
+      - TEXT
+    width:
+      type:
+      - integer
+      - 'null'
+    height:
+      type:
+      - integer
+      - 'null'
+    mediaAvailable:
+      type: boolean
+  additionalProperties: false
+NormalizedBox:
+  type: object
+  required:
+  - x
+  - y
+  - width
+  - height
+  properties:
+    x:
+      type: number
+      minimum: 0
+      maximum: 1
+    y:
+      type: number
+      minimum: 0
+      maximum: 1
+    width:
+      type: number
+      minimum: 0
+      maximum: 1
+    height:
+      type: number
+      minimum: 0
+      maximum: 1
+  additionalProperties: false
+  description: Normalized original-image xywh, never viewport or percentage coordinates.
+    Width/height > 0; x+width and y+height <= 1.
+Annotation:
+  type: object
+  required:
+  - id
+  - type
+  - revision
+  - label
+  - geometry
+  - overlayUnavailable
+  properties:
+    id:
+      type: string
+    type:
+      type: string
+    revision:
+      type: integer
+    label:
+      oneOf:
+      - $ref: '#/Label'
+      - type: 'null'
+    geometry:
+      oneOf:
+      - $ref: '#/NormalizedBox'
+      - type: 'null'
+    overlayUnavailable:
+      type:
+      - string
+      - 'null'
+  additionalProperties: false
+AssetDetail:
+  type: object
+  required:
+  - row_id
+  - filename
+  - modality
+  - width
+  - height
+  - mediaAvailable
+  - annotations
+  - annotationCount
+  - annotationsTruncated
+  properties:
+    row_id:
+      type: string
+    filename:
+      type: string
+    modality:
+      type: string
+      enum:
+      - IMAGE
+      - VIDEO
+      - AUDIO
+      - TEXT
+    width:
+      type:
+      - integer
+      - 'null'
+    height:
+      type:
+      - integer
+      - 'null'
+    mediaAvailable:
+      type: boolean
+    annotations:
+      type: array
+      items:
+        $ref: '#/Annotation'
+      maxItems: 500
+    annotationCount:
+      type: integer
+    annotationsTruncated:
+      type: boolean
+  additionalProperties: false
+Assets:
+  type: object
+  required:
+  - items
+  - page
+  - pageSize
+  - total
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Asset'
+      maxItems: 50
+    page:
+      type: integer
+    pageSize:
+      type: integer
+    total:
+      type: integer
+  additionalProperties: false
+Insights:
+  type: object
+  required:
+  - assetCount
+  - imageCount
+  - unsupportedCount
+  - annotationCount
+  - labelDistribution
+  - distributionTruncated
+  - dimensions
+  properties:
+    assetCount:
+      type: integer
+    imageCount:
+      type: integer
+    unsupportedCount:
+      type: integer
+    annotationCount:
+      type: integer
+    labelDistribution:
+      type: array
+      items:
+        type: object
+        required:
+        - label
+        - count
+        properties:
+          label:
+            oneOf:
+            - $ref: '#/Label'
+            - type: 'null'
+          count:
+            type: integer
+        additionalProperties: false
+      maxItems: 50
+    distributionTruncated:
+      type: boolean
+    dimensions:
+      type: object
+      required:
+      - count
+      - minWidth
+      - maxWidth
+      - minHeight
+      - maxHeight
+      properties:
+        count:
+          type: integer
+        minWidth:
+          type:
+          - integer
+          - 'null'
+        maxWidth:
+          type:
+          - integer
+          - 'null'
+        minHeight:
+          type:
+          - integer
+          - 'null'
+        maxHeight:
+          type:
+          - integer
+          - 'null'
+      additionalProperties: false
+  additionalProperties: false
+Schema:
+  type: object
+  required:
+  - fields
+  - labels
+  properties:
+    fields:
+      type: array
+      items:
+        type: object
+        required:
+        - name
+        - type
+        properties:
+          name:
+            type: string
+          type:
+            type: string
+        additionalProperties: false
+    labels:
+      type: object
+      required:
+      - items
+      - page
+      - pageSize
+      - total
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/Label'
+          maxItems: 50
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+      additionalProperties: false
+  additionalProperties: false
+Activity:
+  type: object
+  required:
+  - items
+  - page
+  - pageSize
+  - total
+  properties:
+    items:
+      type: array
+      items:
+        type: object
+        required:
+        - id
+        - type
+        - status
+        - createdAt
+        - finishedAt
+        properties:
+          id:
+            type: string
+          type:
+            type: string
+          status:
+            type: string
+          createdAt:
+            type: string
+            format: date-time
+          finishedAt:
+            type:
+            - string
+            - 'null'
+            format: date-time
+        additionalProperties: false
+      maxItems: 50
+    page:
+      type: integer
+    pageSize:
+      type: integer
+    total:
+      type: integer
+  additionalProperties: false
+DerivedState:
+  type: object
+  additionalProperties: false
+  required:
+  - status
+  - generation
+  - snapshotId
+  - current
+  properties:
+    status:
+      type: string
+      enum:
+      - pending
+      - processing
+      - ready
+      - failed
+    generation:
+      type: string
+    snapshotId:
+      type:
+      - string
+      - 'null'
+    current:
+      type: boolean
+Snapshot:
+  type: object
+  additionalProperties: false
+  required:
+  - id
+  - ordinal
+  - generation
+  - assetCount
+  - annotationCount
+  - publishedAt
+  properties:
+    id:
+      type: string
+    ordinal:
+      type: integer
+      minimum: 0
+    generation:
+      type: string
+    assetCount:
+      type: integer
+      minimum: 0
+    annotationCount:
+      type: integer
+      minimum: 0
+    publishedAt:
+      type: string
+      format: date-time
+Versions:
+  type: object
+  additionalProperties: false
+  required:
+  - items
+  - total
+  - page
+  - pageSize
+  - state
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Snapshot'
+      maxItems: 50
+    total:
+      type: integer
+      minimum: 0
+    page:
+      type: integer
+      minimum: 1
+    pageSize:
+      type: integer
+      minimum: 1
+      maximum: 50
+    state:
+      $ref: '#/DerivedState'
+Profile:
+  type: object
+  additionalProperties: false
+  required:
+  - schemaVersion
+  - assetCount
+  - imageCount
+  - unsupportedCount
+  - annotationCount
+  - unlabeledAssetCount
+  - validBoundingBoxCount
+  - invalidBoundingBoxCount
+  - labels
+  - labelsTruncated
+  - boxAreaHistogram
+  - dimensions
+  - schema
+  properties:
+    schemaVersion:
+      const: 1
+    assetCount:
+      type: integer
+      minimum: 0
+    imageCount:
+      type: integer
+      minimum: 0
+    unsupportedCount:
+      type: integer
+      minimum: 0
+    annotationCount:
+      type: integer
+      minimum: 0
+    unlabeledAssetCount:
+      type: integer
+      minimum: 0
+    validBoundingBoxCount:
+      type: integer
+      minimum: 0
+    invalidBoundingBoxCount:
+      type: integer
+      minimum: 0
+    labels:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required:
+        - id
+        - name
+        - color
+        - count
+        properties:
+          id:
+            type:
+            - string
+            - 'null'
+          name:
+            type: string
+          color:
+            type:
+            - string
+            - 'null'
+          count:
+            type: integer
+            minimum: 0
+      maxItems: 50
+    labelsTruncated:
+      type: boolean
+    boxAreaHistogram:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required:
+        - lower
+        - upper
+        - count
+        properties:
+          lower:
+            type: number
+          upper:
+            type: number
+          count:
+            type: integer
+            minimum: 0
+      maxItems: 10
+    dimensions:
+      type: object
+      additionalProperties: false
+      required:
+      - count
+      - minWidth
+      - maxWidth
+      - minHeight
+      - maxHeight
+      properties:
+        count:
+          type: integer
+          minimum: 0
+        minWidth:
+          type:
+          - integer
+          - 'null'
+        maxWidth:
+          type:
+          - integer
+          - 'null'
+        minHeight:
+          type:
+          - integer
+          - 'null'
+        maxHeight:
+          type:
+          - integer
+          - 'null'
+    schema:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required:
+        - field
+        - type
+        - units
+        - presentCount
+        properties:
+          field:
+            type: string
+          type:
+            type: string
+          units:
+            type:
+            - string
+            - 'null'
+          presentCount:
+            type: integer
+            minimum: 0
+      maxItems: 20
+Derived:
+  type: object
+  additionalProperties: false
+  required:
+  - state
+  - profile
+  - profileSnapshotId
+  - profileCurrent
+  properties:
+    state:
+      $ref: '#/DerivedState'
+    profile:
+      oneOf:
+      - $ref: '#/Profile'
+      - type: 'null'
+    profileSnapshotId:
+      type:
+      - string
+      - 'null'
+    profileCurrent:
+      type: boolean
+SnapshotContent:
+  type: object
+  additionalProperties: false
+  required:
+  - id
+  - generation
+  - dataset
+  - items
+  - total
+  - page
+  - pageSize
+  - annotations
+  - annotationsTruncated
+  - labels
+  - labelsTruncated
+  properties:
+    id:
+      type: string
+    generation:
+      type: string
+    dataset:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - name
+      - description
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type:
+          - string
+          - 'null'
+    items:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required:
+        - id
+        - filename
+        - modality
+        - mimeType
+        - width
+        - height
+        - imageArtifactId
+        properties:
+          id:
+            type: string
+          filename:
+            type: string
+          modality:
+            type: string
+          mimeType:
+            type: string
+          width:
+            type:
+            - integer
+            - 'null'
+          height:
+            type:
+            - integer
+            - 'null'
+          imageArtifactId:
+            type:
+            - string
+            - 'null'
+      maxItems: 50
+    total:
+      type: integer
+      minimum: 0
+    page:
+      type: integer
+      minimum: 1
+    pageSize:
+      type: integer
+      minimum: 1
+      maximum: 50
+    annotations:
+      type: array
+      items:
+        type: object
+        required:
+        - id
+        - type
+        - revision
+        - label
+        - geometry
+        - overlayUnavailable
+        - assetId
+        properties:
+          id:
+            type: string
+          type:
+            type: string
+          revision:
+            type: integer
+          label:
+            oneOf:
+            - $ref: '#/Label'
+            - type: 'null'
+          geometry:
+            oneOf:
+            - $ref: '#/NormalizedBox'
+            - type: 'null'
+          overlayUnavailable:
+            type:
+            - string
+            - 'null'
+          assetId:
+            type: string
+        additionalProperties: false
+      maxItems: 500
+    annotationsTruncated:
+      type: boolean
+    labels:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required:
+        - id
+        - name
+        - color
+        - modality
+        - scope
+        - description
+        properties:
+          id:
+            type: string
+          name:
+            type: string
+          color:
+            type: string
+          modality:
+            type:
+            - string
+            - 'null'
+          scope:
+            type: string
+          description:
+            type:
+            - string
+            - 'null'
+      maxItems: 500
+    labelsTruncated:
+      type: boolean
+ProcessingRequest:
+  type: object
+  additionalProperties: false
+  required:
+  - id
+  - datasetId
+  - type
+  - status
+  - deliveryPending
+  properties:
+    id:
+      type: string
+    datasetId:
+      type: string
+    type:
+      type: string
+      enum:
+      - VISUALIZATION_CAPTURE
+      - VISUALIZATION_DERIVE
+    status:
+      type: string
+    deliveryPending:
+      type: boolean

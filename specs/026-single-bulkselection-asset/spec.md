@@ -115,6 +115,7 @@ As an annotator or reviewer, I can trust that every prediction belongs to the in
 ### Session 2026-09-24 (analysis reconciliation)
 
 - Q: Does a review-frozen or policy-skipped Asset make a single-Asset run unsuccessful? → A: Yes. FR-026 applies to every accepted operation: any skipped or failed target ends the aggregate unsuccessful, and successful targets remain visible. Data-safety behavior (no write to the frozen Asset) is unchanged; historical tasks keep their recorded outcome.
+- Q: What does version 1 cover, and what is the batch limit? → A: IMAGE detection only; VIDEO/AUDIO are deferred until separately evidenced and are rejected with a visible reason. The effective limit is the lower of the Phase 022 selection ceiling (200) and the provider-verified limit, which starts at the largest size actually verified and rises only through recorded real runs; 200 is never claimed as a provider capability.
 - Q: Which Assets are eligible with respect to source identity? → A: Any Asset with a stable source fingerprint, known size and a storage location — the same requirement media processing already applies. A checksum is not required for eligibility.
 
 ## Requirements *(mandatory)*

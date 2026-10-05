@@ -1,6 +1,6 @@
 import "server-only";
 
-import { AssetStatus } from "@internal/db";
+import { AssetStatus, type Prisma } from "@internal/db";
 
 import { db } from "@/lib/db";
 import { buildAssetListWhere } from "@/lib/workspace/workspace-assets";
@@ -48,6 +48,47 @@ export async function resolveBulkSelection(datasetId: string, selection: BulkSel
   if (resolvedCount > maxAssets) return { ok: false, reason: "TOO_LARGE", max: maxAssets, resolvedCount };
   const rows = await db.asset.findMany({ where, select: { id: true }, take: maxAssets });
   return { ok: true, assetIds: rows.map((row) => row.id), notFoundIds: [] };
+}
+
+export type StrictResolvedSelection =
+  | { ok: true; assetIds: string[] }
+  | { ok: false; reason: "EMPTY" }
+  | { ok: false; reason: "TOO_LARGE"; max: number }
+  | { ok: false; reason: "MEMBER_NOT_FOUND" };
+
+/**
+ * All-or-nothing, ordered resolution for callers that must not act on a
+ * partial target (AI acceptance, feature 026). The existing
+ * `resolveBulkSelection` keeps its partial-skip semantics for the organize
+ * actions; this is a separate mode, not a change to them.
+ *
+ * - EXPLICIT: ids are deduplicated before the limit check; every id must be a
+ *   live, unarchived Asset of this dataset, otherwise the whole request is
+ *   rejected (`MEMBER_NOT_FOUND`) without saying which id.
+ * - FILTERED: one query reads `max + 1` rows so an over-limit match is
+ *   rejected instead of silently truncated; membership is decided once, here.
+ * - Both return ids ordered by `id ASC`, independent of any UI sort.
+ * `client` may be a transaction client so resolution shares the acceptance
+ * transaction's snapshot.
+ */
+export async function resolveBulkSelectionStrict(
+  datasetId: string,
+  selection: BulkSelectionInput,
+  maxAssets: number,
+  client: Pick<Prisma.TransactionClient, "asset"> = db,
+): Promise<StrictResolvedSelection> {
+  if (selection.mode === "EXPLICIT") {
+    const unique = [...new Set(selection.assetIds)];
+    if (unique.length === 0) return { ok: false, reason: "EMPTY" };
+    if (unique.length > maxAssets) return { ok: false, reason: "TOO_LARGE", max: maxAssets };
+    const rows = await client.asset.findMany({ where: { id: { in: unique }, datasetId, deletedAt: null, archivedAt: null }, select: { id: true }, orderBy: { id: "asc" } });
+    if (rows.length !== unique.length) return { ok: false, reason: "MEMBER_NOT_FOUND" };
+    return { ok: true, assetIds: rows.map((row) => row.id) };
+  }
+  const rows = await client.asset.findMany({ where: buildAssetListWhere(datasetId, selection.query), select: { id: true }, orderBy: { id: "asc" }, take: maxAssets + 1 });
+  if (rows.length === 0) return { ok: false, reason: "EMPTY" };
+  if (rows.length > maxAssets) return { ok: false, reason: "TOO_LARGE", max: maxAssets };
+  return { ok: true, assetIds: rows.map((row) => row.id) };
 }
 
 function baseResult(assetIds: string[], notFoundIds: string[]): BulkOperationResult {

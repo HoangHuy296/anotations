@@ -1,3 +1,4 @@
+import "../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { createHmac, randomUUID } from "node:crypto";
 import { createServer } from "node:http";

@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { writeSafeJobEvent } from "./job-event-writer.js";
 import { claimJob as claimDurableJob } from "./job.repository.js";
+import { repositoryCompletedSummary, repositoryIncompleteSummary, validateRepositoryTerminalCounts } from "./repository-ingestion-contract.js";
 
 const leaseDurationMs = 5 * 60 * 1000;
 
@@ -14,6 +15,7 @@ const progressInputSchema = jobReferenceSchema.extend({
   stage: z.enum([
     "VALIDATING_INPUT",
     "PREPARING_WORKSPACE",
+    "SCANNING_FILES",
     "EXTRACTING_METADATA",
     "GENERATING_WAVEFORM",
     "UPLOADING_OBJECTS",
@@ -40,7 +42,7 @@ const completionInputSchema = jobReferenceSchema.extend({
   resultStorageKey: z.string().min(1).max(1_024).optional(),
   resultFilename: z.string().min(1).max(255).regex(/^[^/\\]+$/).optional(),
   stage: z.literal("FINISHED").optional(),
-  summary: z.object({
+  summary: z.union([repositoryCompletedSummary, z.object({
     message: z.string().max(500).optional(),
     outcome: z.literal("completed").optional(),
     completedAt: z.string().datetime().optional(),
@@ -48,14 +50,26 @@ const completionInputSchema = jobReferenceSchema.extend({
     imported: z.number().int().nonnegative().optional(),
     skipped: z.number().int().nonnegative().optional(),
     failed: z.number().int().nonnegative().optional(),
-  }).strict().optional(),
+  }).strict()]).optional(),
   progress: z.number().int().min(0).max(100).optional(),
   totalItems: z.number().int().nonnegative().nullable().optional(),
   processedItems: z.number().int().nonnegative().optional(),
   successItems: z.number().int().nonnegative().optional(),
   failedItems: z.number().int().nonnegative().optional(),
   skippedItems: z.number().int().nonnegative().optional(),
-}).strict();
+}).strict().superRefine(validateRepositoryTerminalCounts);
+const failureInputSchema = z.union([
+  jobReferenceSchema.extend({
+    stage: z.literal("FINISHED"), errorCode: z.literal("IMPORT_INCOMPLETE"),
+    summary: repositoryIncompleteSummary, progress: z.literal(100),
+    totalItems: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+    processedItems: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+    successItems: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+    failedItems: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+    skippedItems: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  }).strict().superRefine(validateRepositoryTerminalCounts),
+  jobReferenceSchema.strict(),
+]);
 
 export type ClaimResult = { kind: "claimed"; jobId: string; lockToken: string } | { kind: "refused" };
 export type LeaseMutationResult = { kind: "updated" } | { kind: "refused" };
@@ -112,10 +126,11 @@ export async function completeJob(db: PrismaClient, input: unknown): Promise<Lea
 }
 
 export async function failJob(db: PrismaClient, input: unknown): Promise<LeaseMutationResult> {
-  const parsed = jobReferenceSchema.safeParse(input);
+  const parsed = failureInputSchema.safeParse(input);
   if (!parsed.success) return { kind: "refused" };
   const now = new Date();
-  const updated = await db.job.updateMany({ where: { ...currentLeaseWhere(parsed.data.jobId, parsed.data.lockToken, now), status: "RUNNING" }, data: terminalData("FAILED", now) });
+  const { jobId, lockToken, ...failure } = parsed.data;
+  const updated = await db.job.updateMany({ where: { ...currentLeaseWhere(jobId, lockToken, now), status: "RUNNING" }, data: { ...terminalData("FAILED", now), ...failure } });
   if (updated.count !== 1) return { kind: "refused" };
   await writeSafeJobEvent(db, { jobId: parsed.data.jobId, kind: "JOB_FAILED" });
   logJobEvent("JOB_FAILED", { jobId: parsed.data.jobId, status: "FAILED" }, "error");

@@ -1,3 +1,4 @@
+import "./db-safety/deny-entry.cjs"; // G1: live mutating probes require separate authorization.
 import { mkdir, writeFile } from 'node:fs/promises';
 import { normalizeAiozOutput } from '../apps/worker/src/providers/ai/aioz-annotation-services-normalization';
 import { getAiozAnnotationServicesConfig } from '../apps/worker/src/config';

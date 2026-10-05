@@ -434,7 +434,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
       <AssetBrowserFilters datasetId={datasetId} search={search} statuses={statuses} filterModality={filters.filterModality} beforeNavigate={flushBeforeNavigation} />
       <div className="mt-3" aria-label="Dataset progress"><div className="flex justify-between text-[11px] text-zinc-500"><span>Dataset progress</span><span>{completedAssets} / {totalAssets}</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${totalAssets ? Math.round((completedAssets / totalAssets) * 100) : 0}%` }} /></div></div>
       <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} filters={filters} onNavigate={guardNavigation} />
-      <BulkActionBar datasetId={datasetId} labels={taxonomy} />
+      <BulkActionBar datasetId={datasetId} labels={taxonomy} onRunAi={readOnly ? undefined : () => useVideoAnnotationStore.getState().setTool("aidetect")} />
     </section>}
   </aside>;
 }

@@ -22,7 +22,7 @@ export const bulkSelectionQuerySchema = z.object({
   if (value.updatedFrom && value.updatedTo && value.updatedFrom > value.updatedTo) context.addIssue({ code: "custom", path: ["updatedTo"], message: "updatedTo must not be before updatedFrom." });
 });
 
-const bulkSelectionSchema = z.discriminatedUnion("mode", [
+export const bulkSelectionSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("EXPLICIT"), assetIds: z.array(z.string().cuid()).min(1).max(1000) }),
   z.object({ mode: z.literal("FILTERED"), query: bulkSelectionQuerySchema }),
 ]);

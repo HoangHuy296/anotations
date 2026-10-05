@@ -32,6 +32,8 @@ JobType:
     - AI_PREANNOTATE_ASSET
     - AI_PREANNOTATE_DATASET
     - AI_TASK_SYNC
+    - VISUALIZATION_CAPTURE
+    - VISUALIZATION_DERIVE
 
 JobStatus:
   type: string
@@ -206,7 +208,7 @@ RetryJobResponse:
 
 CommitImportJobResponse:
   type: object
-  required: [id, status, replayed, completed, total]
+  required: [id, status, replayed, accepted, unchanged, completed, total]
   properties:
     id:
       $ref: './common.yaml#/Cuid'
@@ -215,6 +217,8 @@ CommitImportJobResponse:
       enum: [COMPLETED]
     replayed:
       type: boolean
+    accepted: { type: integer, minimum: 0 }
+    unchanged: { type: integer, minimum: 0 }
     completed:
       type: integer
     total:
@@ -226,15 +230,21 @@ CommitImportJobResponse:
 ExportRequest:
   type: object
   description: >-
-    Source: exportRequestSchema. Phase 012 intentionally supports one bounded,
-    metadata-only export format.
+    Source: exportRequestSchema (specs/027-coco-dataset-export). Two export
+    formats: JSON is the lossless, complete platform manifest; COCO is the
+    interoperable image-annotation export, generated once from canonical
+    PostgreSQL Asset/Label/Annotation state -- never from any external
+    provider's per-task formatted result, and never scoped by annotation
+    source (manual/AI/imported all export identically). There is no
+    scope/source filter parameter; COCO always means every export-eligible
+    annotation in the Dataset.
   required: [datasetId]
   properties:
     datasetId:
       $ref: './common.yaml#/Cuid'
     format:
       type: string
-      enum: [JSON]
+      enum: [JSON, COCO]
       default: JSON
     manifestSchemaVersion:
       type: string

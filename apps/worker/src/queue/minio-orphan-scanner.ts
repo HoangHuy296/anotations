@@ -39,6 +39,13 @@ export type ReferenceChecker = (input: { db: PrismaClient; bucket: string; key: 
  * that is exactly what makes it eligible for cleanup.
  */
 export const defaultReferenceCheckers: ReferenceChecker[] = [
+  async ({ db, bucket, key }) => Boolean(await db.visualizationArtifact.findFirst({ where: { bucket, key, dataset: { deletedAt: null } }, select: { id: true } })),
+  // Unpublished capture/derive objects must survive their active job, even beyond the GC grace window.
+  async ({ db, key }) => {
+    if (!key.startsWith("visualization/")) return false;
+    const datasetId = key.split("/")[1];
+    return Boolean(await db.job.findFirst({ where: { datasetId, type: { in: ["VISUALIZATION_CAPTURE", "VISUALIZATION_DERIVE"] }, status: { in: ["QUEUED", "RUNNING", "RETRYING", "CANCELING"] }, dataset: { deletedAt: null } }, select: { id: true } }));
+  },
   async ({ db, bucket, key }) => Boolean(await db.asset.findFirst({ where: { storageBucket: bucket, storageKey: key, deletedAt: null }, select: { id: true } })),
   async ({ db, bucket, key }) => Boolean(await db.asset.findFirst({ where: { cacheBucket: bucket, cacheKey: key, deletedAt: null }, select: { id: true } })),
   async ({ db, bucket, key }) => Boolean(await db.assetVersion.findFirst({ where: { storageBucket: bucket, storageKey: key }, select: { id: true } })),

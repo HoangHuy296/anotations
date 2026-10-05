@@ -9,13 +9,17 @@ import type { SafeAnnotation } from "@/lib/annotations/safe-annotation";
 
 type Props = {
   assetId: string;
+  /** Every Asset in a batch run that has predictions; the canvas Asset is `assetId`. */
+  assetIds?: string[];
   taskId?: string;
   onPreviews: (predictions: AiPredictionPreview[]) => void;
   onSaved: (annotation: SafeAnnotation) => void;
 };
 
-export function AiPredictionReview({ assetId, taskId, onPreviews, onSaved }: Props) {
+export function AiPredictionReview({ assetId: canvasAssetId, assetIds, taskId, onPreviews, onSaved }: Props) {
   const { datasetId } = useParams<{ datasetId: string }>();
+  const [pickedAssetId, setPickedAssetId] = useState<string | null>(null);
+  const assetId = pickedAssetId && assetIds?.includes(pickedAssetId) ? pickedAssetId : canvasAssetId;
   const [results, setResults] = useState<AiPredictionResults | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState<number | null>(null);
@@ -40,9 +44,10 @@ export function AiPredictionReview({ assetId, taskId, onPreviews, onSaved }: Pro
   }, [assetId, taskId, reload]);
 
   useEffect(() => {
-    onPreviews(results?.predictions.filter((p) => !p.saved) ?? []);
+    // Canvas overlays exist only for the Asset shown on the canvas.
+    onPreviews(assetId === canvasAssetId ? results?.predictions.filter((p) => !p.saved) ?? [] : []);
     return () => onPreviews([]);
-  }, [results, onPreviews]);
+  }, [results, onPreviews, assetId, canvasAssetId]);
 
   async function findOrCreateLabel(p: AiPredictionPreview): Promise<DatasetLabel> {
     const normalizedName = p.labelKey.trim().toLocaleLowerCase("en-US");
@@ -91,6 +96,11 @@ export function AiPredictionReview({ assetId, taskId, onPreviews, onSaved }: Pro
 
   return <section aria-label="Prediction previews" className="mt-5 border-t border-zinc-200 pt-4">
     <h3 className="text-sm font-semibold text-zinc-900">Prediction previews</h3>
+    {assetIds && assetIds.length > 1 && <label className="mt-2 block text-xs text-zinc-600">Asset
+      <select value={assetId} onChange={(event) => { setResults(null); setPickedAssetId(event.target.value); }} disabled={saving !== null} className="mt-1 block w-full rounded border border-zinc-300 bg-white px-2 py-1 text-xs">
+        {assetIds.map((id, position) => <option key={id} value={id}>{`Asset ${position + 1}${id === canvasAssetId ? " (on canvas)" : ""}`}</option>)}
+      </select>
+    </label>}
     {error && <div role="alert" className="mt-2 text-xs text-rose-600">{error}<button type="button" disabled={saving !== null} onClick={() => setReload((value) => value + 1)} className="ml-2 underline">Reload results</button></div>}
     {!results && !error && <p className="mt-2 text-xs text-zinc-500">Loading predictions…</p>}
     {results && !results.taskId && <p className="mt-2 text-xs text-zinc-500">Completed detections will appear here.</p>}

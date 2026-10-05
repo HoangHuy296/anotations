@@ -100,3 +100,37 @@ Phase 025 is uncommitted in the shared working tree and 026 touches shared files
 
 ### Supplemental repository evidence (2026-09-24 audits)
 Local reads that the earlier blocked delegate could not provide: the AiTask/Job/submit/poll/writer path is already N-asset-shaped (`AiTask.input.assetIds` array; one POST with `files[]`; a 2-asset real-database pipeline test); the writer already skips a frozen Asset per prediction; the AIOZ normalizer fails the whole task on any output-count mismatch (conflicts with per-Asset outcomes, addressed in T034); AI job retry returns 409 today (T044); Phase 022's resolver does partial-skip, live re-resolution and has no `ORDER BY` (T011). These are code facts, not deployed-provider evidence.
+
+
+## Decision register — IMAGE detection v1 gate reconciliation (2026-09-24)
+
+Source: the controlled provider run (`verification/provider-contract.md`, `source-access.md`, `correlation.md`, `recovery-contract.md`). Hard gates are limited to invariants that could cause incorrect Asset writes, duplicate external work, credential leakage or undefined provider-state handling.
+
+### D-V1: v1 scope
+IMAGE detection only. VIDEO/AUDIO are deferred until separate evidence; they are rejected with `AI_CAPABILITY_UNVERIFIED` and the UI states why. This supersedes the plan's "VIDEO conditional on verified support" for v1 closure (VIDEO stays a future extension, not a v1 gate).
+
+### D-HG1: correlation stays a hard blocker
+Exact `image_path` echo and matching order were observed at N=3 but the deployed OpenAPI types `output` as free-form objects, so neither echo nor order is contractual. **Decision:** no code may attribute predictions to Assets until a contractual or otherwise deterministic guarantee exists (documented contract, written vendor statement, or a stable input identifier in every group). Not waived; ordering is never inferred. Observed evidence is recorded but never substituted for the guarantee.
+
+### D-FS: `failed_system`
+Observed as an intermediate status (three `failed_system`→`inprocess` cycles before `failed`), absent from the adapter's closed enum. **Decision:** explicit allowlist — `create|pending` PENDING, `inprocess` IN_PROGRESS, `success` completed, `failed` terminal failure, `failed_system` non-terminal `PROVIDER_DEGRADED`, anything else fail closed. `PROVIDER_DEGRADED` keeps polling inside the existing budget, is recorded durably, never becomes success and never triggers resubmission; nothing assumes it is terminal or recoverable. Budget exhaustion ends as `AI_PROVIDER_FAILED_SYSTEM`. **Rationale:** treating it as terminal would discard possibly recoverable work; treating it as recoverable is unproven; bounded polling plus fail-closed satisfies both. **Open (closure evidence):** whether it can recover, and whether `error` is populated while it is active.
+
+### D-NI: non-idempotent submission
+An identical repeated POST created a second task; the service has no idempotency key, no lookup and no list route. **Decision:** at most one create call per submission reservation; a new reservation is allowed only after a definite rejection (an HTTP 4xx/422 response was received, so no task exists). Timeout, connection reset, unparseable response or crash after the reservation is AMBIGUOUS and terminal (`AI_SUBMISSION_AMBIGUOUS`): never re-POSTed, never retry-successor eligible; only a new deliberate operation may follow, with wording that external work may already exist.
+
+### D-SAN: provider-error sanitization
+Provider error text contained the complete signed URL. **Decision:** one sanitizer maps provider errors, 422 `detail` and response bodies to allowlisted codes before any persistence, log, API or UI output; error text is never parsed (not even to identify a failing input).
+
+### D-LAYER: whole-batch provider failure versus per-Asset outcomes
+An unreachable input failed the entire provider task with `output:null`. **Decision:** two layers. Provider layer: terminal failure fails the whole batch and every accepted target is finalized FAILED with the same sanitized code. Platform layer: after a successful provider result each Asset independently ends SUCCEEDED, SKIPPED (policy, e.g. frozen) or FAILED (write/validation), with per-Asset atomicity. Pre-dispatch source verification (existence/accessibility) reduces poisoned batches; a source that fails it rejects the whole dispatch (no smaller batch).
+
+### D-LIM: limits
+Two distinct numbers. **Platform selection ceiling:** 200 (`BULK_SYNC_MAX_ASSETS`), an input-shape/UI ceiling, not a provider claim. **Provider-verified v1 limit:** `AI_BATCH_VERIFIED_MAX_ASSETS`, initially **3** (the largest size actually exercised), raised only by recorded real runs (3 → 7 → next) that also re-check correlation. Effective limit = `min(200, verified)`. Production closure needs either a documented verified maximum or an explicit statement that the limit remains the verified value.
+
+### D-STALE: stale local model registration
+The local `AiModel` for YOLO26s_COCO uses provider id `0307ee22-…`, absent from the deployed catalog (422 on create); the deployed image/detection model is `68d7f474-…`. **Decision:** a read-only drift report before runtime proof; a model absent from the deployed catalog is not selectable; any sync that writes data needs the user's approval.
+
+### D-CLOSE: closure evidence (not start gates)
+Expired-link behavior, download time at the maximum batch, N>3, `failed_system` recoverability, reordered/unknown/partial group behavior, VIDEO/AUDIO, deployment build identity. Implementation must treat download/provider failure safely and never blind-retry creation.
+
+**D-STALE finding (2026-09-24, `verification/model-catalog.md`):** the v1 model `68d7f474-…` is registered and active; one stale row (`0307ee22-…`) is absent from the deployed catalog. UI discovery already follows the deployed catalog, but `createAiTask` validates only the local row, so create must also verify deployed-catalog membership before creating a Job (T016/T019).

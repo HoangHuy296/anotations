@@ -1,5 +1,6 @@
 "use client";
 
+import type { AiDetectionTarget } from "@/types/ai-batch";
 import type { AiModelDto, AiTaskStatusDto, AiToolTaskName } from "@/types/ai";
 
 /**
@@ -49,7 +50,11 @@ export async function listActiveAiModelsClient(modality: NonNullable<AiModelDto[
   }).catch(() => ({ ok: false as const, code: "AI_MODEL_CATALOG_UNAVAILABLE", status: 0 }));
 }
 
-export type CreateAiTaskInput = { datasetId: string; modelId: string; assetIds: string[]; classes?: string[]; confidence_threshold?: number; iou_threshold?: number };
+export type CreateAiTaskInput = {
+  datasetId: string; modelId: string; classes?: string[]; confidence_threshold?: number; iou_threshold?: number;
+  /** Advisory freshness token from the preview; the server recomputes it and never treats it as authorization. */
+  previewFingerprint?: string;
+} & ({ assetIds: string[]; target?: never } | { target: AiDetectionTarget; assetIds?: never });
 export type CreateAiTaskResult = { ok: true; taskId: string; jobId: string } | AiApiFailure;
 
 export async function createAiTaskClient(input: CreateAiTaskInput): Promise<CreateAiTaskResult> {
@@ -63,6 +68,16 @@ export async function createAiTaskClient(input: CreateAiTaskInput): Promise<Crea
 }
 
 export type ReadAiTaskResult = { ok: true; task: AiTaskStatusDto } | AiApiFailure;
+
+/** Looks up an authorized in-flight task for the current dataset/asset after workspace remount. */
+export async function findPendingAiTaskClient(datasetId: string, assetId: string): Promise<{ ok: true; taskId: string | null } | AiApiFailure> {
+  const params = new URLSearchParams({ datasetId, assetId });
+  const response = await fetch(`/api/ai/tasks/pending?${params}`, { credentials: "same-origin", cache: "no-store" }).catch(() => null);
+  if (!response) return { ok: false, code: "AI_TASK_LOOKUP_FAILED", status: 0 };
+  const payload = await response.json().catch(() => null) as { data?: { taskId?: string | null }; error?: { code?: string } } | null;
+  if (!response.ok || !payload?.data || !(payload.data.taskId === null || typeof payload.data.taskId === "string")) return { ok: false, code: payload?.error?.code ?? "AI_TASK_LOOKUP_FAILED", status: response.status };
+  return { ok: true, taskId: payload.data.taskId };
+}
 
 export async function readAiTaskClient(taskId: string): Promise<ReadAiTaskResult> {
   const response = await fetch(`/api/ai/tasks/${taskId}`, { credentials: "same-origin", cache: "no-store" });
@@ -91,4 +106,20 @@ export async function listModelClassesClient(modelId: string): Promise<{ ok: tru
     }
     return { ok: true as const, classes: payload.data.classes as string[] };
   }).catch(() => ({ ok: false as const, code: "AI_MODEL_LABELS_UNAVAILABLE", status: 0 }));
+}
+
+export type AiTargetPreviewDto =
+  | { eligible: true; mode: string; count: number; modality: "IMAGE" | "VIDEO"; effectiveLimit: number; previewFingerprint: string }
+  | { eligible: false; reason: string; effectiveLimit: number };
+export type PreviewAiTargetResult = { ok: true; preview: AiTargetPreviewDto } | AiApiFailure;
+
+/** Read-only: asks the server what a target would resolve to. Never creates work. */
+export async function previewAiTargetClient(input: { datasetId: string; target: AiDetectionTarget; modelId?: string }): Promise<PreviewAiTargetResult> {
+  const response = await fetch("/api/ai/tasks/preview", {
+    method: "POST", credentials: "same-origin", cache: "no-store", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+  }).catch(() => null);
+  if (!response) return { ok: false, code: "INVALID_REQUEST", status: 0 };
+  const payload = await response.json().catch(() => null) as { data?: AiTargetPreviewDto; error?: { code?: string } } | null;
+  if (!response.ok || !payload?.data) return { ok: false, code: payload?.error?.code ?? "INVALID_REQUEST", status: response.status };
+  return { ok: true, preview: payload.data };
 }

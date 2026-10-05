@@ -1,11 +1,13 @@
 "use client";
 
 import { SpinnerGap, VideoCamera } from "@phosphor-icons/react";
+import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 
 import type { SafeMediaReadiness } from "@/types/media-processing";
 import type { SafeVideoAnnotations } from "@/types/video-annotation";
 import { AiDetectDialog } from "@/components/workspace/ai-detect-dialog";
+import { findPendingAiTaskClient } from "@/lib/ai/ai-task-api-client";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
@@ -216,6 +218,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   const [newTrackName, setNewTrackName] = useState("");
   const [newTrackError, setNewTrackError] = useState<string | null>(null);
   const [newTrackSaving, setNewTrackSaving] = useState(false);
+  const { datasetId } = useParams<{ datasetId: string }>();
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackCoordinators = useRef(new Map<string, TrackAutosaveCoordinator>());
   const keyframeDraftChanges = useRef(new Map<string, KeyframeChanges>());
@@ -295,6 +298,17 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   useEffect(() => {
     setSnapshot(annotations.tracks, annotations.keyframes);
   }, [annotations.keyframes, annotations.tracks, setSnapshot]);
+  // The AI dialog owns pending-task lookup and polling but only mounts for the
+  // "aidetect" tool, which resets on remount. Re-open it when this Dataset
+  // still has an in-flight task for this video so the pending status shows.
+  useEffect(() => {
+    if (readOnly || !datasetId) return;
+    let active = true;
+    void findPendingAiTaskClient(datasetId, video.id).then((pending) => {
+      if (active && pending.ok && pending.taskId) useVideoAnnotationStore.getState().setTool("aidetect");
+    });
+    return () => { active = false; };
+  }, [datasetId, readOnly, video.id]);
   useEffect(() => () => { void Promise.all([...trackCoordinators.current.values()].map((coordinator) => coordinator.dispose())); }, []);
 
   // Seeds the playback-state slice's fps/duration once known, so

@@ -241,6 +241,20 @@ model SourceConnection {
 }
 
 model Dataset {
+  /// Phase029 G2 candidate: null preserves unresolved history; new rows require DB-enforced assignment.
+  modality Modality?
+  /// Private parent-write fence, not a content version.
+  modalityContentRevision BigInt @default(0)
+  /// Database timestamp of first assignment; immutable even when the Dataset is empty.
+  modalityResolvedAt DateTime?
+  /// Immutable opaque actor subject (1..128 characters); no live User FK or account-deletion blocker.
+  modalityResolverSubject String?
+  /// Monotonic transaction-safe content fence; not a user-visible version.
+  visualizationGeneration BigInt @default(0)
+  visualizationPublicationFence BigInt @default(0)
+  visualizationCurrentSnapshotId String?
+  visualizationSnapshots DatasetSnapshot[]
+  visualizationArtifacts VisualizationArtifact[]
   id                     String              @id @default(cuid())
   ownerId                String
   name                   String
@@ -421,6 +435,19 @@ model Asset {
   sourceRef            String?
   sourceRevision       String?
   sourcePath           String?
+  /// *
+  ///    * specs/027-coco-dataset-export. Canonical, syntax-normalized,
+  ///    * case-sensitive dataset-relative identity (packages/domain's
+  ///    * normalizeAssetRelativePath) -- distinct from filename (display
+  ///    * name) and sourcePath (repository-root-relative provider metadata).
+  ///    * Nullable indefinitely by design; a live Asset requiring a non-null
+  ///    * value is an application/DB-CHECK-constraint invariant, never a
+  ///    * NOT NULL column constraint (see spec §10's steady-state invariant).
+  ///    * Populated by Phase EXPAND-2 write paths; historical rows are
+  ///    * populated by the Phase BACKFILL script. Uniqueness among live
+  ///    * (deletedAt IS NULL) rows is enforced by a database trigger
+  ///    * (Phase ENFORCE), not by a Prisma-level @@unique.
+  relativePath         String?
   sourceFileSha        String?
   sourceBlobSha        String?
   sourceLfsOid         String?
@@ -1259,6 +1286,8 @@ enum StorageProvider {
 }
 
 enum JobType {
+  VISUALIZATION_CAPTURE
+  VISUALIZATION_DERIVE
   CLONE_REPOSITORY
   IMPORT_DATASET
   SYNC_REPOSITORY
@@ -1376,4 +1405,43 @@ enum AiTaskType {
   CLASSIFY_TEXT
   CLASSIFY_AUDIO
   CUSTOM
+}
+
+model DatasetSnapshot {
+  id              String                  @id
+  datasetId       String
+  generation      BigInt
+  contentDigest   String
+  algorithm       String
+  ordinal         Int
+  assetCount      Int
+  annotationCount Int
+  publishedAt     DateTime                @default(now())
+  dataset         Dataset                 @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  artifacts       VisualizationArtifact[]
+
+  @@unique([id, datasetId])
+  @@unique([datasetId, ordinal])
+  @@index([datasetId, generation])
+}
+
+model VisualizationArtifact {
+  id          String          @id
+  datasetId   String
+  snapshotId  String
+  kind        String
+  algorithm   String
+  scope       String
+  bucket      String
+  key         String
+  sha256      String
+  sizeBytes   BigInt
+  contentType String
+  publishedAt DateTime        @default(now())
+  dataset     Dataset         @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  snapshot    DatasetSnapshot @relation(fields: [snapshotId, datasetId], references: [id, datasetId], onDelete: Cascade)
+
+  @@unique([bucket, key])
+  @@unique([datasetId, snapshotId, kind, algorithm, scope])
+  @@index([datasetId, snapshotId])
 }

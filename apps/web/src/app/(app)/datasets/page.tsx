@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getRequestActor } from "@/lib/auth";
 import { isDatabaseConfigured } from "@/lib/db";
-import { datasetLibraryHref, datasetLibraryQuerySchema, datasetStatusLabels, readDatasetWorkflowStatus } from "@/lib/datasets/dataset-library-query";
+import { datasetLibraryHref, datasetLibraryQuerySchema, datasetStatusLabels } from "@/lib/datasets/dataset-library-query";
+import { datasetDestination } from "@/lib/datasets/dataset-destination";
 import { getDatasetLibrary } from "@/lib/datasets/dataset-library-service";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -74,16 +75,17 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                 const total = dataset._count.assets;
                 const progressed = statusCounts.filter((count) => count.datasetId === dataset.id && count.status !== AssetStatus.NEW).reduce((sum, count) => sum + count._count._all, 0);
                 const progress = total === 0 ? 0 : Math.round((progressed / total) * 1000) / 10;
-                const workflowStatus = readDatasetWorkflowStatus(dataset.metadata);
+                const workflowStatus = dataset.workflowStatus;
+                const destination = datasetDestination(dataset.id, workflowStatus);
                 const canManage = actor.role === UserRole.ADMIN || dataset.ownerId === actor.id || dataset.members.some((member) => member.role === "MANAGER");
                 const uploaded = dataset.sourceMode === "UPLOAD";
                 const SourceIcon = uploaded ? UploadSimple : TrayArrowDown;
                 const modalities = ([Modality.IMAGE, Modality.VIDEO, Modality.AUDIO, Modality.TEXT] as const).map((modality) => ({ modality, count: modalityCounts.find((entry) => entry.datasetId === dataset.id && entry.modality === modality)?._count._all ?? 0 })).filter(({ count }) => count > 0);
-                return <article key={dataset.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-5 p-5 transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-zinc-50/60 xl:grid-cols-[minmax(0,1fr)_minmax(180px,0.65fr)_120px_92px] xl:items-center xl:gap-6 dark:hover:bg-zinc-800/40">
+                return <article key={dataset.id} className="relative grid grid-cols-[minmax(0,1fr)_auto] gap-5 p-5 transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-zinc-50/60 xl:grid-cols-[minmax(0,1fr)_minmax(180px,0.65fr)_120px_92px] xl:items-center xl:gap-6 dark:hover:bg-zinc-800/40">
                   <div className="col-span-2 flex min-w-0 items-start gap-3.5 sm:col-span-1">
                     <span className={`grid size-11 shrink-0 place-items-center rounded-xl border ${uploaded ? "border-zinc-200 bg-zinc-50 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400" : "border-sky-100 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-400"}`}><Database aria-hidden="true" size={21} weight="duotone" /></span>
                     <div className="min-w-0">
-                      <h3 className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50"><Link className="rounded-sm outline-none hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-400 dark:hover:text-sky-400" href={`/workspace/${dataset.id}`} aria-label={`Open ${dataset.name} workspace`}>{dataset.name}</Link></h3>
+                      <h3 className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50"><Link className="after:absolute after:inset-0 rounded-sm outline-none hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-400 dark:hover:text-sky-400" href={destination} prefetch={false} aria-label={`Open ${dataset.name}`}>{dataset.name}</Link></h3>
                       <div className="mt-1.5 flex min-w-0 items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
                         <span className="inline-flex shrink-0 items-center gap-1 font-medium"><SourceIcon aria-hidden="true" size={12} />{uploaded ? "Upload" : "Import"}</span>
                         <span aria-hidden="true" className="text-zinc-300 dark:text-zinc-700">/</span>
@@ -106,9 +108,9 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                     </div>
                   </div>
                   <div className="col-start-1 row-start-3 self-center xl:col-auto xl:row-auto"><Badge className="gap-1.5 whitespace-nowrap" variant={workflowStatus === "IN_PROGRESS" ? "warning" : "success"}><span aria-hidden="true" className="size-1.5 rounded-full bg-current" />{datasetStatusLabels[workflowStatus]}</Badge></div>
-                  <div className="col-start-2 row-start-3 flex items-center justify-end gap-2 sm:row-start-1 xl:col-auto xl:row-auto">
+                  <div className="relative z-10 col-start-2 row-start-3 flex items-center justify-end gap-2 sm:row-start-1 xl:col-auto xl:row-auto">
                     {canManage ? <DatasetRowActions datasetId={dataset.id} datasetName={dataset.name} workflowStatus={workflowStatus} /> : null}
-                    <Button asChild variant="icon" aria-label={`Open ${dataset.name}`}><Link href={`/workspace/${dataset.id}`}><ArrowRight aria-hidden="true" size={17} /></Link></Button>
+                    <Button asChild variant="icon" aria-label={`Open ${dataset.name}`}><Link href={destination} prefetch={false}><ArrowRight aria-hidden="true" size={17} /></Link></Button>
                   </div>
                 </article>;
               })}

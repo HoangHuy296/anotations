@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -16,9 +17,10 @@ async function readSource(file: string) {
   return readFile(path.join(workspaceDir, file), "utf8");
 }
 
-test("workspace-engine.tsx is the only component switching on selection.engine, via one registry lookup", async () => {
+test("workspace-engine.tsx looks up its registry only by authoritative Dataset modality", async () => {
   const source = await readSource("workspace-engine.tsx");
-  assert.match(source, /workspaceEngineRegistry\[selection\.engine\]/, "must look up the registry by selection.engine");
+  assert.match(source, /workspaceEngineRegistry\[dataset\.modality\]/, "must look up the registry by Dataset modality");
+  assert.doesNotMatch(source, /workspaceEngineRegistry\[selection\.engine\]/, "selected Assets must not choose an engine");
   assert.doesNotMatch(source, /switch\s*\(\s*selection\.engine\s*\)/, "must not contain an inline switch over selection.engine");
 });
 
@@ -31,14 +33,16 @@ test("dataset-sidebar.tsx sources its toolbox from the registry and contains no 
 
 test("properties-panel.tsx sources its tabs from the registry and contains no independent engine switch", async () => {
   const source = await readSource("properties-panel.tsx");
-  assert.match(source, /workspaceEngineRegistry\[selection\.engine\]/, "must look up the registry by selection.engine");
+  assert.match(source, /workspaceEngineRegistry\[engine\]/, "must look up the registry by authorized Dataset engine");
+  assert.doesNotMatch(source, /workspaceEngineRegistry\[selection\.engine\]/, "selected Assets must not choose tab engines");
   assert.doesNotMatch(source, /switch\s*\(/, "must not contain a switch statement");
   assert.doesNotMatch(source, /engine\s*===\s*"(IMAGE|VIDEO|AUDIO|TEXT)"/, "must not branch on a literal engine string outside the registry");
 });
 
 test("workspace-header.tsx sources its status fields from the registry and contains no independent engine switch", async () => {
   const source = await readSource("workspace-header.tsx");
-  assert.match(source, /workspaceEngineRegistry\[engine\s*\?\?\s*"IMAGE"\]/, "must look up the registry by the active engine");
+  assert.match(source, /workspaceEngineRegistry\[engine\]/, "must look up the registry by Dataset engine");
+  assert.doesNotMatch(source, /engine\s*\?\?\s*"IMAGE"/, "unresolved Dataset must not fall back to IMAGE");
   assert.doesNotMatch(source, /switch\s*\(/, "must not contain a switch statement");
 });
 

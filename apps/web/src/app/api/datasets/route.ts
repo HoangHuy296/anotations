@@ -4,6 +4,7 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
 import { canCreateDataset } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { projectDatasetWorkflowStatus } from "@/lib/datasets/dataset-destination";
 import { datasetMetadataSelect } from "@/lib/dataset-metadata";
 import { parsePageRequest } from "@/lib/pagination";
 import { createDatasetSchema } from "@/lib/validation/dataset";
@@ -26,10 +27,10 @@ export async function GET(request: Request) {
   };
   const { page, pageSize, skip, take } = parsePageRequest(new URL(request.url).searchParams, DEFAULT_PAGE_SIZE);
   const [datasets, total] = await Promise.all([
-    db.dataset.findMany({ where, orderBy: { updatedAt: "desc" }, select: datasetMetadataSelect, skip, take }),
+    db.dataset.findMany({ where, orderBy: { updatedAt: "desc" }, select: { ...datasetMetadataSelect, metadata: true }, skip, take }),
     db.dataset.count({ where }),
   ]);
-  return apiSuccess({ items: datasets, page, pageSize, total });
+  return apiSuccess({ items: datasets.map(projectDatasetWorkflowStatus), page, pageSize, total });
 }
 
 export async function POST(request: Request) {
@@ -38,6 +39,7 @@ export async function POST(request: Request) {
   if (!canCreateDataset(actor)) return apiError(403, "FORBIDDEN", "You cannot create datasets.");
   const parsed = createDatasetSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return apiError(400, "INVALID_REQUEST", "Dataset input is invalid.", parsed.error.flatten().fieldErrors);
-  const dataset = await db.dataset.create({ data: { ...parsed.data, description: parsed.data.description || null, ownerId: actor.id }, select: datasetMetadataSelect });
+  const { modality, ...legacyFields } = parsed.data;
+  const dataset = await db.dataset.create({ data: { ...legacyFields, modality, primaryModality: modality, modalityResolverSubject: actor.id, description: parsed.data.description || null, ownerId: actor.id }, select: datasetMetadataSelect });
   return apiSuccess(dataset, { status: 201 });
 }

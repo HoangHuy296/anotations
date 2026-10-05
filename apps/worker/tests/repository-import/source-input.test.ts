@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -25,8 +26,10 @@ test("adapter boundary caps legacy unknown manifests and rejects download failur
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test("modality detection rejects unsupported, traversal, and oversized candidates", () => {
+test("extensions are discovery hints; unknown files reach byte classification and unsafe paths fail", () => {
   assert.equal(detectRepositoryFile("images/cat.png", 12, "main", "blob", "http://server/file")?.modality, "IMAGE");
-  assert.equal(detectRepositoryFile("images/cat.exe", 12, "main", "blob", "http://server/file"), null);
+  const unknown = detectRepositoryFile("images/renamed.bin", 12, "main", "blob", "http://server/file");
+  assert.equal(unknown?.modality, null);
+  assert.equal(unknown?.mimeType, "application/octet-stream");
   assert.equal(detectRepositoryFile("images/../cat.png", 12, "main", "blob", "http://server/file"), null);
 });

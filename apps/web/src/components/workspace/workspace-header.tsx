@@ -5,7 +5,6 @@ import {
   CaretDown,
   ChatCircleText,
   CloudCheck,
-  GearSix,
   LockKey,
   UserCircle,
   WarningCircle,
@@ -19,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { DiscussionDrawer } from "@/components/workspace/discussion-drawer";
+import { WorkspaceSettingsOverlay } from "@/components/workspace/workspace-settings-overlay";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
@@ -34,7 +34,7 @@ type WorkspaceHeaderProps = {
   branch: string;
   repositoryFullName: string;
   rootPath: string;
-  /** The active selection's engine, or `null` when no asset is selected (defaults to the IMAGE status fields). */
+  /** Dataset modality; null means unresolved and must not select an engine. */
   engine: Modality | null;
   /** Signed-in actor, used to populate the account dropdown. `null` renders the trigger disabled. */
   actor: { email: string; name: string } | null;
@@ -58,7 +58,7 @@ export function WorkspaceHeader({
   workflow = null,
   discussion,
 }: WorkspaceHeaderProps) {
-  const { StatusFields } = workspaceEngineRegistry[engine ?? "IMAGE"];
+  const StatusFields = engine ? workspaceEngineRegistry[engine].StatusFields : null;
   const saveStates = useAnnotationStore((store) => store.saveStates);
   const currentSaveStates = Object.values(saveStates);
   const conflict = currentSaveStates.includes("conflict") || currentSaveStates.includes("failed");
@@ -85,7 +85,7 @@ export function WorkspaceHeader({
               {datasetName}
             </h1>
             <Badge variant="info">{branch}</Badge>
-            <StatusFields />
+            {StatusFields ? <StatusFields /> : null}
           </div>
           <p className="mt-1 truncate font-mono text-[10px] text-zinc-400">
             {repositoryFullName}
@@ -95,7 +95,7 @@ export function WorkspaceHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        {workflow ? <WorkflowControls key={`${workflow.assetId}:${workflow.revision}`} workflow={workflow} engine={engine ?? "IMAGE"} /> : null}
+        {workflow && engine ? <WorkflowControls key={`${workflow.datasetId}:${workflow.assetId}:${workflow.revision}`} workflow={workflow} engine={engine} /> : null}
         {discussion ? <Button type="button" size="sm" variant="secondary" aria-label="Open asset discussion" onClick={() => setDiscussionOpen(true)}><ChatCircleText aria-hidden="true" size={17} />Discussion</Button> : null}
         <CollaborationPresence members={presence} />
         <span className={`hidden items-center gap-2 text-xs sm:flex ${conflict ? "text-rose-700" : "text-zinc-500"}`}>
@@ -108,7 +108,7 @@ export function WorkspaceHeader({
           {saveLabel}
         </span>
         <span className="hidden rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 md:inline-flex">Connected</span>
-        <Button type="button" variant="icon" aria-label="Settings are not available yet" disabled><GearSix aria-hidden="true" size={17} /></Button>
+        <WorkspaceSettingsOverlay />
         {actor ? <NotificationBell /> : null}
         <AccountMenu actor={actor} />
       </div>

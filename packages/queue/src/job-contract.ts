@@ -21,6 +21,8 @@ export const annotationPlatformQueueName = "fieldframe-jobs";
  * PostgreSQL Job id.
  */
 export const supportedQueueJobTypes = [
+  "VISUALIZATION_CAPTURE",
+  "VISUALIZATION_DERIVE",
   "EXPORT_DATASET",
   "IMPORT_DATASET",
   "EXTRACT_VIDEO_METADATA",

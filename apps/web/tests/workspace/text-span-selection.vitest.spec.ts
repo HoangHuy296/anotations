@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import { describe, expect, it } from "vitest";
 import { normalizeTextSpanSelection } from "@/lib/workspace/text-span-selection";
 import { createTextSpanSchema } from "@/lib/validation/text-span";

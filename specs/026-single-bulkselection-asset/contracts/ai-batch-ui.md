@@ -19,3 +19,8 @@ While accepted work runs, show durable operation reference, progress and links t
 Show all per-Asset outcomes and reconciled aggregate counts on completion, failure or cancellation, including successful zero-detection rows and retry lineage. A failed batch can still expose successful predictions. Refresh the currently viewed Asset from canonical reads if affected, even when another target fails; never merge other Assets' geometry into its store. Preserve single-Asset callback behavior without applying an entire batch to the current canvas.
 
 Use existing dialog/drawer typography, loading/error primitives and keyboard/focus behavior. Disabled controls explain invalidity in visible text. Run can be disabled for a batch without removing existing successful output views. Bulk target intent must not inherit an unrelated open Asset's workflow eligibility; server eligibility governs every selected Asset.
+
+
+## Implemented status (2026-09-24)
+
+Implemented in the existing `ai-detect-dialog.tsx` (no second panel) with an "AI Detect" action in `bulk-action-bar.tsx` (image/video editable assets). Logic is unit-tested; **rendering is not browser-verified** (no browser automation in this repo). Per-Asset outcome display, operation reopening after refresh and retry/cancel result views (T039, T049) are not built.

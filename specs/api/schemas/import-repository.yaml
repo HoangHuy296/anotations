@@ -60,7 +60,7 @@ RepositoryImportRequest:
     provider/credentialMode (see the per-field descriptions); the server
     rejects a combination that supplies credentials it does not expect for the
     chosen mode.
-  required: [provider, repository, credentialMode, datasetName, idempotencyKey]
+  required: [provider, repository, credentialMode, datasetName, modality, idempotencyKey]
   properties:
     provider:
       $ref: '#/RepositoryProvider'
@@ -115,6 +115,9 @@ RepositoryImportRequest:
       type: string
       minLength: 1
       maxLength: 160
+    modality:
+      $ref: './assets.yaml#/Modality'
+      description: Required Dataset modality; each published Asset is independently classified from content and must match it.
     idempotencyKey:
       type: string
       minLength: 16
@@ -133,10 +136,11 @@ RepositoryImportAcceptance:
   properties:
     dataset:
       type: object
-      required: [id, name]
+      required: [id, name, modality]
       properties:
         id: { $ref: './common.yaml#/Cuid' }
         name: { type: string }
+        modality: { $ref: './assets.yaml#/Modality' }
       additionalProperties: false
     job:
       type: object
@@ -494,7 +498,7 @@ LocalFolderManifestItem:
 StartLocalFolderImportRequest:
   type: object
   description: "Source: startLocalFolderImportSchema. Creates a new Dataset."
-  required: [idempotencyKey, items, name]
+  required: [idempotencyKey, items, name, modality]
   properties:
     idempotencyKey:
       type: string
@@ -512,6 +516,9 @@ StartLocalFolderImportRequest:
     description:
       type: string
       maxLength: 2000
+    modality:
+      $ref: './assets.yaml#/Modality'
+      description: Required at Dataset creation; content is verified again before each Asset is published.
   additionalProperties: false
 
 AppendLocalFolderImportRequest:
@@ -620,11 +627,19 @@ CompleteLocalFolderItemRequest:
 
 CompleteLocalFolderItemResponse:
   type: object
-  required: [assetId, replayed, completed, total]
+  required: [assetId, replayed, disposition, accepted, unchanged, rejected, retryable, unprocessed, completed, total]
   properties:
     assetId: { $ref: './common.yaml#/Cuid' }
     replayed:
       type: boolean
+    disposition:
+      type: string
+      enum: [accepted, unchanged]
+    accepted: { type: integer, minimum: 0 }
+    unchanged: { type: integer, minimum: 0 }
+    rejected: { type: integer, minimum: 0 }
+    retryable: { type: integer, minimum: 0 }
+    unprocessed: { type: integer, minimum: 0 }
     completed:
       type: integer
     total:

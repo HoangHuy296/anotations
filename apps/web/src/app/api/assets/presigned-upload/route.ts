@@ -1,5 +1,6 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { createUploadCapability, UPLOAD_CAPABILITY_TTL_SECONDS } from "@/lib/upload-capability";
 import { browserReachableMinioUrl, getDirectUploadProviders } from "@/lib/providers";
@@ -17,6 +18,8 @@ export async function POST(request: Request) {
   const access = await requireDatasetPermission(actor, parsed.data.datasetId, "asset.upload");
   if (!access) return apiError(404, "GITEA_NOT_FOUND", "The dataset was not found.");
   if (access.forbidden) return apiError(403, "FORBIDDEN", "You do not have permission to upload to this dataset.");
+  const dataset = await db.dataset.findFirst({ where: { id: parsed.data.datasetId, deletedAt: null, archivedAt: null }, select: { modality: true } });
+  if (!dataset || dataset.modality === null) return apiError(409, "DATASET_MODALITY_UNRESOLVED", "This dataset must have an explicitly resolved modality before accepting assets.");
 
   let providers;
   try {

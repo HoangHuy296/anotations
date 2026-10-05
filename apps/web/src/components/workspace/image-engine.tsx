@@ -35,7 +35,7 @@ type ImageEngineProps = {
 
 export function ImageEngine({ image, annotations, unsupportedAnnotations, labels, readOnly = false }: ImageEngineProps) {
   const [previewState, setPreviewState] = useState<{ assetId: string; predictions: AiPredictionPreview[] } | null>(null);
-  const [completedRun, setCompletedRun] = useState<{ assetId: string; taskId: string } | null>(null);
+  const [completedRun, setCompletedRun] = useState<{ assetId: string; taskId: string; assetIds?: string[] } | null>(null);
   const imageId = image?.id;
   const updatePreviews = useCallback((predictions: AiPredictionPreview[]) => {
     if (imageId) setPreviewState({ assetId: imageId, predictions });
@@ -57,8 +57,8 @@ export function ImageEngine({ image, annotations, unsupportedAnnotations, labels
   // merge in the ones this task produced" through the same store every
   // manual edit already goes through. AiDetectDialog itself never touches
   // this store or knows what an annotation is.
-  async function applyAiResults(taskId: string): Promise<number> {
-    setCompletedRun({ assetId: currentImage.id, taskId });
+  async function applyAiResults(taskId: string, resultAssetIds?: string[]): Promise<number> {
+    setCompletedRun({ assetId: currentImage.id, taskId, assetIds: resultAssetIds });
     const result = await getAssetAnnotations(currentImage.id);
     if (!result.ok) throw new Error("Could not load annotations");
     const applied = predictionsForTask(result.annotations.map(toImageAnnotation).filter((item): item is SafeImageAnnotation => item !== null), taskId);
@@ -69,7 +69,7 @@ export function ImageEngine({ image, annotations, unsupportedAnnotations, labels
   return <div className={`relative grid min-h-0 min-w-0 ${!readOnly && aiTool ? "md:pl-80" : ""}`}>
     <CanvasStage key={`canvas-${currentImage.id}`} image={currentImage} annotations={annotations} unsupportedAnnotations={unsupportedAnnotations} labels={labels} aiPreviews={!readOnly && tool === "detection" && previewState?.assetId === currentImage.id ? previewState.predictions : []} tool={tool} onToolChange={setTool} readOnly={readOnly} />
     {!readOnly && aiTool && <AiDetectDialog key={`ai-${aiTool}-${currentImage.id}`} problem={aiTool} assetId={currentImage.id} modality={currentImage.modality} onClose={() => setTool("select")} onCompleted={applyAiResults}>
-      {aiTool === "detection" && <AiPredictionReview key={`${currentImage.id}:${completedRun?.assetId === currentImage.id ? completedRun.taskId : "latest"}`} assetId={currentImage.id} taskId={completedRun?.assetId === currentImage.id ? completedRun.taskId : undefined} onPreviews={updatePreviews} onSaved={(annotation) => { const safe = toImageAnnotation(annotation); if (safe) upsertSafeAnnotation(safe); }} />}
+      {aiTool === "detection" && <AiPredictionReview key={`${currentImage.id}:${completedRun?.assetId === currentImage.id ? completedRun.taskId : "latest"}`} assetId={currentImage.id} assetIds={completedRun?.assetId === currentImage.id ? completedRun.assetIds : undefined} taskId={completedRun?.assetId === currentImage.id ? completedRun.taskId : undefined} onPreviews={updatePreviews} onSaved={(annotation) => { if (annotation.assetId !== currentImage.id) return; const safe = toImageAnnotation(annotation); if (safe) upsertSafeAnnotation(safe); }} />}
     </AiDetectDialog>}
   </div>;
 }

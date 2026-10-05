@@ -16,13 +16,7 @@ export const datasetStatusLabels = {
   REVIEWED: "Reviewed",
 } as const;
 
-export function readDatasetWorkflowStatus(metadata: unknown): keyof typeof datasetStatusLabels {
-  if (metadata && typeof metadata === "object" && !Array.isArray(metadata)) {
-    const value = (metadata as Record<string, unknown>).workflowStatus;
-    if (value === "COMPLETED" || value === "REVIEWED") return value;
-  }
-  return "IN_PROGRESS";
-}
+export { readDatasetWorkflowStatus } from "@/lib/datasets/dataset-destination";
 
 export function datasetLibraryHref(
   query: DatasetLibraryQuery,

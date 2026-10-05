@@ -232,7 +232,8 @@ services:
     image: fieldframe-review-web:latest
     environment:
       DATABASE_URL: ${DATABASE_URL_DOCKER}
-    command: ["pnpm", "exec", "prisma", "migrate", "deploy"]
+    command: ["node", "scripts/db-safety/cli.mjs", "deploy"]
+    # G1: fail closed without a host-verified disposable receipt; never mount docker.sock here.
     depends_on:
       postgres:
         condition: service_healthy
@@ -250,7 +251,7 @@ services:
       SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-Review Operator}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-review-demo-8e2a7f186fd3}
       SEED_DATASET_NAME: ${SEED_DATASET_NAME:-Review Demo Dataset}
-    command: ["pnpm", "exec", "tsx", "prisma/review.seed.ts"]
+    command: ["node", "scripts/db-safety/cli.mjs", "seed", "prisma/review.seed.ts"]
     depends_on:
       migrate:
         condition: service_completed_successfully

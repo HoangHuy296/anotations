@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createVideoPlaybackController } from "@/lib/workspace/video-playback-controller";

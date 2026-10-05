@@ -28,7 +28,7 @@ export async function requirePreparedImportAccess(actor: RequestActor, preparedI
 }
 
 export async function requireImportJobAccess(actor: RequestActor, jobId: string) {
-  const job = await db.job.findFirst({ where: { id: jobId, type: "IMPORT_DATASET" }, select: { id: true, datasetId: true, status: true, type: true } });
+  const job = await db.job.findFirst({ where: { id: jobId, type: "IMPORT_DATASET" }, select: { id: true, datasetId: true, status: true, type: true, summary: true } });
   if (!job) return null;
   const access = await requireDatasetPermission(actor, job.datasetId, "asset.upload");
   if (!access || access.forbidden) return null;

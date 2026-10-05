@@ -12,10 +12,11 @@ export const datasetIdSchema = z.union([z.string().cuid(), z.string().uuid()]);
 export const createDatasetSchema = z.object({
   name: z.string().trim().min(2).max(120),
   description: optionalText,
+  // Explicit at creation; never infer this from the first Asset.
+  modality: z.enum(modalities),
   type: z.enum(datasetTypes).default("MULTI_MODAL"),
-  primaryModality: z.enum(modalities).nullable().optional().default(null),
   metadata: metadataSchema,
-});
+}).strict();
 export const updateDatasetSchema = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   description: optionalText,
@@ -23,4 +24,4 @@ export const updateDatasetSchema = z.object({
   primaryModality: z.enum(modalities).nullable().optional(),
   metadata: metadataSchema.optional(),
   workflowStatus: z.enum(datasetWorkflowStatuses).optional(),
-}).refine((value) => Object.keys(value).length > 0, "Provide at least one dataset field.");
+}).strict().refine((value) => Object.keys(value).length > 0, "Provide at least one dataset field.");

@@ -1,3 +1,4 @@
+import "../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import { PrismaClient, UserRole } from "../lib/generated/prisma/client";
 
 const prisma = new PrismaClient();

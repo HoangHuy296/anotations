@@ -36,6 +36,7 @@ function isCanonicalGithubRepositoryUrl(value: string, owner: string, name: stri
  */
 export const repositoryImportRequestSchema = z
   .object({
+    modality: z.enum(["IMAGE", "VIDEO", "AUDIO", "TEXT"]),
     provider: z.enum(["GITHUB", "GITEA"]),
     repository: z
       .object({

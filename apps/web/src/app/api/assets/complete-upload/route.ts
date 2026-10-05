@@ -1,3 +1,5 @@
+import { AssetWritesQuiescedError } from "@annotationplatform/domain/asset-write-quiescence";
+
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
@@ -51,7 +53,10 @@ export async function POST(request: Request) {
     if (error instanceof UploadVerificationFailure) {
       return verificationError(error);
     }
-    if (error instanceof UploadPublicationFailure) return apiError(409, error.code, "The upload could not be published safely.");
+    if (error instanceof UploadPublicationFailure) return apiError(error.code === "INVALID_RELATIVE_PATH" ? 422 : 409, error.code, "The upload could not be published safely.");
+    // specs/027-coco-dataset-export §10: a short, planned maintenance window
+    // -- distinct from every other failure, retryable shortly.
+    if (error instanceof AssetWritesQuiescedError) return apiError(503, "ASSET_WRITES_PAUSED_FOR_MIGRATION", "Asset creation is briefly paused for scheduled maintenance. Try again shortly.");
     return apiError(500, "INTERNAL_ERROR", "The upload could not be completed.");
   }
 }

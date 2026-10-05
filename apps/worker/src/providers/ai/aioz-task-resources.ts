@@ -1,9 +1,11 @@
 import { z } from "zod";
+import { AiSourceIdentityUnavailableError, computeAiSourceIdentityDigest, selectAiSourceObject } from "@annotationplatform/domain/ai-batch";
 
 import type { PrismaClient } from "../../../../../lib/generated/prisma/client.js";
 import { getWorkerConfig } from "../../config.js";
 import { createWorkerMinio } from "../minio.js";
 import { POLL_BASE_DELAY_MS } from "../../jobs/ai-poll-constants.js";
+import { resolveAiBatchInput } from "../../jobs/ai-batch-state.js";
 import { AiozProviderError, digestAiozImageUrl, type AiozTaskResources } from "./aioz-annotation-services-provider.js";
 
 const inputSchema = z.object({ confidence_threshold: z.number().min(0).max(1).optional(), iou_threshold: z.number().min(0).max(1).optional(), classes: z.array(z.string().min(1).max(256)).min(1).max(10000).optional(), assetIds: z.array(z.string().min(1)).min(1) });
@@ -36,7 +38,7 @@ export function createAiozTaskResources(db: PrismaClient, signer: AiozImageSigne
     async prepare(input) {
       const task = await db.aiTask.findUnique({
         where: { id: input.aiTaskId },
-        select: { datasetId: true, externalTaskId: true, input: true, summary: true, modelKeySnapshot: true, modality: true, type: true, model: { select: { metadata: true, isActive: true, provider: true } } },
+        select: { datasetId: true, externalTaskId: true, input: true, summary: true, modelKeySnapshot: true, modality: true, type: true, job: { select: { input: true } }, model: { select: { metadata: true, isActive: true, provider: true } } },
       });
       if (!task || !task.model.isActive || task.model.provider !== "aioz-company" || !((task.modality === "IMAGE" && ["DETECTION", "DETECT_OBJECTS"].includes(task.type)) || (task.modality === "VIDEO" && ["TRACKING", "DETECT_OBJECTS"].includes(task.type)))) throw new AiozProviderError("AIOZ_INVALID_TASK");
       if (task.externalTaskId) return { externalTaskId: task.externalTaskId };
@@ -49,21 +51,40 @@ export function createAiozTaskResources(db: PrismaClient, signer: AiozImageSigne
       if (ids.size !== persisted.data.assetIds.length || ids.size !== input.assetIds.length || new Set(input.assetIds).size !== ids.size || input.assetIds.some((id) => !ids.has(id))) throw new AiozProviderError("AIOZ_INVALID_INPUT");
       const metadata = z.object({ aioz: optionsSchema.optional() }).safeParse(task.model.metadata);
       if (!metadata.success) throw new AiozProviderError("AIOZ_INVALID_MODEL_OPTIONS");
-      const assets = await db.asset.findMany({
+      // Versioned Jobs sign in the accepted (inputIndex) order and must still match the source
+      // identity recorded at acceptance; historical Jobs keep the persisted request order.
+      const batch = resolveAiBatchInput(task.job.input);
+      if (batch.kind === "invalid") throw new AiozProviderError("AIOZ_INVALID_INPUT");
+      const orderedIds = batch.kind === "v1" ? batch.input.targets.map((target) => target.assetId) : persisted.data.assetIds;
+      if (JSON.stringify(orderedIds.slice().sort()) !== JSON.stringify([...ids].sort())) throw new AiozProviderError("AIOZ_INVALID_INPUT");
+      const rows = await db.asset.findMany({
         where: { id: { in: [...ids] }, datasetId: task.datasetId, modality: task.modality, deletedAt: null, archivedAt: null },
-        select: { id: true, storageProvider: true, storageBucket: true, storageKey: true, cacheProvider: true, cacheBucket: true, cacheKey: true, cacheStatus: true, cacheExpiresAt: true },
+        select: { id: true, sourceFingerprint: true, currentVersionId: true, sourceRevision: true, sizeBytes: true, checksum: true, cacheChecksum: true, storageProvider: true, storageBucket: true, storageKey: true, cacheProvider: true, cacheBucket: true, cacheKey: true, cacheStatus: true, cacheExpiresAt: true },
       });
-      if (assets.length !== ids.size) throw new AiozProviderError("AIOZ_ASSET_UNAVAILABLE");
+      if (rows.length !== ids.size) throw new AiozProviderError("AIOZ_ASSET_UNAVAILABLE");
+      const byId = new Map(rows.map((row) => [row.id, row]));
       const images = [];
-      for (const asset of assets) {
-        const stored = asset.storageProvider === "MINIO" && asset.storageBucket && asset.storageKey;
-        const cached = asset.cacheProvider === "MINIO" && asset.cacheBucket && asset.cacheKey && asset.cacheStatus === "CACHED" && (!asset.cacheExpiresAt || asset.cacheExpiresAt > new Date());
-        const bucket = stored ? asset.storageBucket : cached ? asset.cacheBucket : null;
-        const key = stored ? asset.storageKey : cached ? asset.cacheKey : null;
-        if (!bucket || !key) throw new AiozProviderError("AIOZ_ASSET_BINARY_UNAVAILABLE");
-        images.push({ assetId: asset.id, imageUrl: await signer(bucket, key) });
+      const identities: Array<{ inputIndex: number; sourceIdentityDigest: string } | null> = [];
+      for (const [position, assetId] of orderedIds.entries()) {
+        const asset = byId.get(assetId);
+        if (!asset) throw new AiozProviderError("AIOZ_ASSET_UNAVAILABLE");
+        const object = selectAiSourceObject(asset);
+        if (!object) throw new AiozProviderError("AIOZ_ASSET_BINARY_UNAVAILABLE");
+        if (batch.kind === "v1") {
+          let digest: string;
+          try {
+            digest = computeAiSourceIdentityDigest({ sourceFingerprint: asset.sourceFingerprint, currentVersionId: asset.currentVersionId, sourceRevision: asset.sourceRevision, sizeBytes: asset.sizeBytes, checksum: asset.checksum, cacheChecksum: asset.cacheChecksum, objectLocator: object });
+          } catch (error) {
+            if (error instanceof AiSourceIdentityUnavailableError) throw new AiozProviderError("AIOZ_ASSET_BINARY_UNAVAILABLE");
+            throw error;
+          }
+          const accepted = batch.input.targets[position];
+          if (accepted.assetId !== assetId || accepted.sourceIdentityDigest !== digest) throw new AiozProviderError("AIOZ_SOURCE_CHANGED");
+          identities.push({ inputIndex: accepted.inputIndex, sourceIdentityDigest: digest });
+        } else identities.push(null);
+        images.push({ assetId: asset.id, imageUrl: await signer(object.bucket, object.key) });
       }
-      const manifests = images.map((image) => ({ assetId: image.assetId, urlDigest: digestAiozImageUrl(image.imageUrl) }));
+      const manifests = images.map((image, position) => ({ assetId: image.assetId, urlDigest: digestAiozImageUrl(image.imageUrl), ...(identities[position] ?? {}) }));
       if (new Set(manifests.map((image) => image.urlDigest)).size !== images.length) throw new AiozProviderError("AIOZ_ASSET_ASSOCIATION_INVALID");
       const reserved = await db.aiTask.updateMany({
         where: { id: input.aiTaskId, externalTaskId: null, summary: { equals: summary.data }, status: { in: ["QUEUED", "RUNNING"] }, job: { status: "RUNNING", cancelRequestedAt: null } },

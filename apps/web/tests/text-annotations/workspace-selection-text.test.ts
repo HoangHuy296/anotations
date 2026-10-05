@@ -1,6 +1,7 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import test from "node:test";
+import test, { before } from "node:test";
 import { AssetStatus, Modality, UserRole } from "@internal/db";
 
 import { db } from "../../src/lib/db.js";
@@ -10,6 +11,17 @@ import { createLabelWithTextEligibility } from "../../src/lib/workspace/label-ma
 import { createWorkspaceUser, createWorkspaceDataset, cleanupWorkspaceFixture, workspaceUnique } from "../workspace/helpers.js";
 
 const hasIntegrationDatabase = Boolean(process.env.DATABASE_URL && process.env.MINIO_ENDPOINT);
+
+// The G1 first import has already verified this process's PostgreSQL/MinIO
+// receipt. Initialize only its configured disposable bucket; never substitute
+// an ambient endpoint or bucket name when storage has not been provisioned.
+before(async () => {
+  if (!hasIntegrationDatabase) return;
+  const { config, minio } = getWebProviders();
+  if (!(await minio.bucketExists(config.MINIO_BUCKET))) {
+    await minio.makeBucket(config.MINIO_BUCKET, "us-east-1");
+  }
+});
 
 /**
  * T048: the generic WorkspaceSelection DTO's TEXT variant now carries real
@@ -21,7 +33,7 @@ const hasIntegrationDatabase = Boolean(process.env.DATABASE_URL && process.env.M
 
 test("readWorkspaceSelection: an unprepared TEXT asset reports UNPREPARED readiness and no earned write capability", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const { config, minio } = getWebProviders();
   const marker = workspaceUnique("selection-unprepared");
   const storageKey = `text-sources/__test-fixtures__/${marker}/source.txt`;
@@ -52,7 +64,7 @@ test("readWorkspaceSelection: an unprepared TEXT asset reports UNPREPARED readin
 
 test("readWorkspaceSelection: a READY TEXT asset with an eligible ENTITY label and annotation.create grants span, reports the exact verified source context and current revision", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const { config, minio } = getWebProviders();
   const marker = workspaceUnique("selection-ready");
   const storageKey = `text-sources/__test-fixtures__/${marker}/source.txt`;
@@ -97,7 +109,7 @@ test("readWorkspaceSelection: a READY TEXT asset with an eligible ENTITY label a
 
 test("readWorkspaceSelection: a frozen workflow state (NEEDS_REVIEW) blocks every write capability even when otherwise eligible", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const { config, minio } = getWebProviders();
   const marker = workspaceUnique("selection-frozen");
   const storageKey = `text-sources/__test-fixtures__/${marker}/source.txt`;
@@ -140,7 +152,7 @@ test("readWorkspaceSelection: a frozen workflow state (NEEDS_REVIEW) blocks ever
 test("readWorkspaceSelection: existing TEXT annotation rows are projected through the shared safe serializer, and a non-member is concealed as null", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const outsider = await createWorkspaceUser(UserRole.LABELER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const { config, minio } = getWebProviders();
   const marker = workspaceUnique("selection-annotations");
   const storageKey = `text-sources/__test-fixtures__/${marker}/source.txt`;

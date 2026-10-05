@@ -13,15 +13,16 @@
     "db:generate": "prisma generate",
     "db:normalize-generated": "bash scripts/normalize-generated-prisma-whitespace.sh",
     "db:validate": "prisma validate",
-    "db:migrate": "prisma migrate dev",
-    "db:backfill-collaboration-assignments": "tsx scripts/backfill-collaboration-assignments.ts",
-    "db:seed": "prisma db seed",
-    "db:studio": "prisma studio",
-    "review:sync-from-dev": "bash scripts/sync-dev-to-review.sh",
+    "db:migrate": "node scripts/db-safety/cli.mjs deploy",
+    "db:backfill-collaboration-assignments": "node scripts/db-safety/deny.mjs",
+    "db:seed": "node scripts/db-safety/cli.mjs seed prisma/seed.ts",
+    "db:studio": "node scripts/db-safety/deny.mjs",
+    "review:sync-from-dev": "node scripts/db-safety/deny.mjs",
     "docs:validate-openapi": "python3 scripts/validate-openapi.py",
     "docs:bundle-openapi": "python3 scripts/bundle-openapi.py",
     "docs:swagger-ui": "node scripts/generate-swagger-ui.mjs",
-    "docs:build": "pnpm run docs:validate-openapi && pnpm run docs:bundle-openapi && pnpm run docs:swagger-ui"
+    "docs:build": "pnpm run docs:validate-openapi && pnpm run docs:bundle-openapi && pnpm run docs:swagger-ui",
+    "test:db-safety": "node --test scripts/db-safety/tests/policy.test.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3"

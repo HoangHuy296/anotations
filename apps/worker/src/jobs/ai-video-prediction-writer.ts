@@ -3,6 +3,14 @@ import type { AiTask, PrismaClient, Prisma } from "../../../../lib/generated/pri
 import { normalizedVideoPredictionSchema } from "../providers/ai/aioz-video-normalization.js";
 import { releaseLock } from "../queue/job-lock.js";
 
+const LABEL_PALETTE = ["#38bdf8", "#f97316", "#22c55e", "#e11d48", "#a855f7", "#eab308", "#14b8a6", "#ec4899"];
+/** Deterministic color so a class keeps one color across tasks. */
+function labelColor(normalizedName: string) {
+  let hash = 0;
+  for (const char of normalizedName) hash = (hash * 31 + char.codePointAt(0)!) >>> 0;
+  return LABEL_PALETTE[hash % LABEL_PALETTE.length];
+}
+
 /** Append video tracks and their observed keyframes atomically with Job completion. */
 export async function handleVideoAiTaskCompleted(
   db: PrismaClient, jobId: string,
@@ -24,8 +32,22 @@ export async function handleVideoAiTaskCompleted(
       data: { status: "COMPLETED", stage: "FINISHED", finishedAt: new Date() },
     });
     if (claimed.count !== 1) return;
-    const labels = await tx.label.findMany({ where: { datasetId: task.datasetId, OR: [{ modality: null }, { modality: "VIDEO" }] }, select: { id: true, normalizedName: true } });
-    const labelsByName = new Map(labels.map((label) => [label.normalizedName, label.id]));
+    // Provider classes become Dataset labels: reuse an existing label by
+    // normalized name, otherwise create it so tracks are never left unlabeled.
+    // "unknown" stays unlabeled. Names are unique per Dataset across modalities.
+    const classNames = new Map<string, string>();
+    for (const p of predictions) {
+      const key = p.labelKey.trim().toLocaleLowerCase("en-US");
+      if (key !== "unknown" && !classNames.has(key)) classNames.set(key, p.labelKey.trim());
+    }
+    const existing = await tx.label.findMany({ where: { datasetId: task.datasetId, normalizedName: { in: [...classNames.keys()] } }, select: { id: true, normalizedName: true, modality: true } });
+    const labelsByName = new Map(existing.filter((label) => label.modality === null || label.modality === "VIDEO").map((label) => [label.normalizedName, label.id]));
+    const taken = new Set(existing.map((label) => label.normalizedName));
+    for (const [normalizedName, name] of classNames) {
+      if (taken.has(normalizedName)) continue;
+      const created = await tx.label.create({ data: { datasetId: task.datasetId, modality: "VIDEO", name, normalizedName, color: labelColor(normalizedName) }, select: { id: true } });
+      labelsByName.set(normalizedName, created.id);
+    }
     let tracksCreated = 0;
     let keyframesCreated = 0;
     for (const [assetId, observations] of grouped) {

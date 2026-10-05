@@ -31,3 +31,7 @@ Phase 1 → T009–T011, T016; Phase 2 → T007, T017; Phase 3 → T019, T028–
 1. Rows 9/5b: deployed contract and N-input correlation guarantee unproven → T002/T003 (G1). **Do not start code.**
 2. Row 7: MinIO reachability from the AI Service network unproven → T004.
 3. Working tree holds uncommitted Phase 025 → user isolates it before production changes (E1 hold).
+
+## Update 2026-09-24 — controlled provider-evidence run
+
+Row 9 conflict resolved: the deployed OpenAPI (annotation-services 0.1.0) requires `type` + `task_name`; the adapter is correct and `docs/aioz-annotation-services.md` line 28 is wrong. New blockers/findings from the run (details in `provider-contract.md`, `correlation.md`, `recovery-contract.md`): the service emits an intermediate status `failed_system` that the adapter's status enum rejects (F3); an unreachable input fails the **whole** provider task (no partial output); provider error text echoes the full signed URL (F2); the local `AiModel` catalog references a provider model id that the deployed service does not have (F1); a repeated identical POST creates a second external task (no idempotency). Correlation remains observed-not-guaranteed, max batch size unproven (N≤3). Row 9 verdict: **still a blocker for T006/T007 closure**, now with partial evidence.

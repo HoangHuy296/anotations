@@ -5,6 +5,7 @@
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
+    "./visualization-processing": { "types": "./dist/visualization-processing.d.ts", "default": "./dist/visualization-processing.js" },
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
@@ -41,6 +42,10 @@
       "types": "./dist/text-properties-contract.d.ts",
       "default": "./dist/text-properties-contract.js"
     },
+    "./dataset-modality": {
+      "types": "./dist/dataset-modality.d.ts",
+      "default": "./dist/dataset-modality.js"
+    },
     "./text-annotation-contract": {
       "types": "./dist/text-annotation-contract.d.ts",
       "default": "./dist/text-annotation-contract.js"
@@ -60,12 +65,41 @@
     "./text-source-prepare-job": {
       "types": "./dist/text-source-prepare-job.d.ts",
       "default": "./dist/text-source-prepare-job.js"
+    },
+    "./ai-batch": {
+      "types": "./dist/ai-batch.d.ts",
+      "default": "./dist/ai-batch.js"
+    },
+    "./asset-relative-path": {
+      "types": "./dist/asset-relative-path.d.ts",
+      "default": "./dist/asset-relative-path.js"
+    },
+    "./asset-identity-conflict": {
+      "types": "./dist/asset-identity-conflict.d.ts",
+      "default": "./dist/asset-identity-conflict.js"
+    },
+    "./asset-relative-path-backfill": {
+      "types": "./dist/asset-relative-path-backfill.d.ts",
+      "default": "./dist/asset-relative-path-backfill.js"
+    },
+    "./asset-write-quiescence": {
+      "types": "./dist/asset-write-quiescence.d.ts",
+      "default": "./dist/asset-write-quiescence.js"
+    },
+    "./asset-revival": {
+      "types": "./dist/asset-revival.d.ts",
+      "default": "./dist/asset-revival.js"
+    },
+    "./export-format-capability": {
+      "types": "./dist/export-format-capability.d.ts",
+      "default": "./dist/export-format-capability.js"
     }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "zod": "^4.4.3"

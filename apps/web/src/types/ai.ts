@@ -24,6 +24,20 @@ export type AiModelDto = {
 /** `AiTaskStatus` (`prisma/schema.prisma`), as it crosses the wire. */
 export type AiTaskStatusValue = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "CANCELED";
 
+/** Per-Asset outcome of a versioned operation (feature 026); reasons are sanitized allowlisted codes. */
+export type AiAssetOutcomeDto = { assetId: string; inputIndex: number; outcome: "SUCCEEDED" | "FAILED" | "SKIPPED" | "MISSING_RESULT" | "CANCELED"; predictionCount: number; reason?: string };
+
+/** Bounded, allowlisted batch projection; `null` on `AiTaskStatusDto.batch` for historical tasks (never invented). */
+export type AiTaskBatchDto = {
+  targetMode: string;
+  count: number;
+  modality: "IMAGE" | "VIDEO";
+  counts: { total: number; processed: number; succeeded: number; failed: number; skipped: number; canceled: number };
+  outcomes: AiAssetOutcomeDto[];
+  /** True only when a failed operation is definitely known to have no external task (safe to retry). */
+  retryable: boolean;
+};
+
 export type AiTaskStatusDto = {
   taskId: string;
   jobId: string;
@@ -38,6 +52,7 @@ export type AiTaskStatusDto = {
   updatedAt: string;
   error: string | null;
   errorCode: string | null;
+  batch?: AiTaskBatchDto | null;
 };
 
 /** Provider task names used by workspace Toolbox model discovery. */

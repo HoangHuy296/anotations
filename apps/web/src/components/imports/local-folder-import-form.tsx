@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 //only review need sha256HexAuto, so we can keep it in the browser bundle for review stack only. The production build uses a server-side hash for the same purpose.
+import { ModalityCard } from "@/components/imports/modality-class-card";
 import { Button } from "@/components/ui/button";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 import { sha256HexAuto } from "@/lib/browser-sha256";
@@ -33,18 +34,21 @@ function safeMessage(payload: unknown, fallback: string) {
 
 /** Browser-only folder scan. Relative names are used for the manifest; no local handle or absolute path leaves the browser. */
 type LocalFolderImportFormProps = {
+  /** Append mode: the authorized parent Dataset's fixed modality, displayed read-only. A client value never overrides the server. */
+  datasetModality?: "IMAGE" | "VIDEO" | "AUDIO" | "TEXT";
   /** When supplied, files are appended to this authorized Dataset instead of creating one. */
   datasetId?: string;
   datasetName?: string;
   onClose?: () => void;
 };
 
-export function LocalFolderImportForm({ datasetId, datasetName, onClose }: LocalFolderImportFormProps = {}) {
+export function LocalFolderImportForm({ datasetId, datasetName, datasetModality, onClose }: LocalFolderImportFormProps = {}) {
   const router = useRouter();
   const folderInputRef = useRef<HTMLInputElement>(null);
   const filesInputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [name, setName] = useState("");
+  const [modality, setModality] = useState<"IMAGE" | "VIDEO" | "AUDIO" | "TEXT" | "">("");
   const [step, setStep] = useState<ImportStep>("idle");
   const [completed, setCompleted] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
@@ -79,12 +83,13 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
   }
 
   async function submit() {
-    if ((!appendMode && !name.trim()) || !files.length) return;
+    if ((!appendMode && (!name.trim() || !modality)) || !files.length) return;
     setStep("preparing"); setMessage(null); setCompleted(0); setJobId(null);
+    let accepted = 0; let unchanged = 0; let rejected = 0; let retryable = 0;
     try {
       const started = await fetch(appendMode ? `/api/datasets/${datasetId}/imports/local-folder` : "/api/imports/local-folder", {
         method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin",
-        body: JSON.stringify({ ...(appendMode ? {} : { name: name.trim() }), idempotencyKey: randomUUIDAuto() + randomUUIDAuto(), items: files.map(({ file, logicalPath, fingerprint }) => ({ logicalPath, contentType: file.type || "text/plain", sizeBytes: file.size, fingerprint })) }),
+        body: JSON.stringify({ ...(appendMode ? {} : { name: name.trim(), modality }), idempotencyKey: randomUUIDAuto() + randomUUIDAuto(), items: files.map(({ file, logicalPath, fingerprint }) => ({ logicalPath, contentType: file.type || "text/plain", sizeBytes: file.size, fingerprint })) }),
       });
       const startBody = await started.json().catch(() => null);
       if (!started.ok) throw new Error(safeMessage(startBody, "Could not prepare this import."));
@@ -112,11 +117,19 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
         Object.entries(capability.formFields).forEach(([key, value]) => form.append(key, value));
         form.append("file", files[index]!.file);
         const upload = await fetch(capability.uploadUrl, { method: "POST", body: form });
-        if (!upload.ok) throw new Error("A file upload was rejected. No dataset has been committed.");
+        if (!upload.ok) { retryable += 1; if (mountedRef.current) setCompleted(index + 1); continue; }
         const completedResponse = await fetch(`/api/imports/${preparation.id}/items/${capability.itemId}/complete`, {
           method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ fileId: capability.fileId }),
         });
-        if (!completedResponse.ok) throw new Error("An uploaded file could not be verified. No dataset has been committed.");
+        if (completedResponse.ok) {
+          const completionBody = await completedResponse.json().catch(() => null) as { data?: { disposition?: "accepted" | "unchanged" } } | null;
+          if (completionBody?.data?.disposition === "unchanged") unchanged += 1; else accepted += 1;
+        } else {
+          const completionBody = await completedResponse.json().catch(() => null) as { error?: { code?: string } } | null;
+          const code = completionBody?.error?.code;
+          if (["ASSET_MODALITY_MISMATCH", "DATASET_MODALITY_UNRESOLVED", "UNSUPPORTED_MEDIA", "INVALID_MEDIA", "INVALID_RELATIVE_PATH"].includes(code ?? "")) rejected += 1;
+          else retryable += 1;
+        }
         if (mountedRef.current) setCompleted(index + 1);
       }
       // Every prepared item is durably accounted for: finalize the import
@@ -125,10 +138,15 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
       // retries this same idempotent call on its own if it is ever lost.
       const commitResponse = await fetch(`/api/jobs/${preparation.jobId}/commit-import`, { method: "POST", credentials: "same-origin" });
       if (!commitResponse.ok) {
-        const commitBody = await commitResponse.json().catch(() => null);
-        throw new Error(safeMessage(commitBody, "Every file uploaded, but the import could not be finalized automatically. Open the job to finish it."));
+        const commitBody = await commitResponse.json().catch(() => null) as { error?: { code?: string; accepted?: number; rejected?: number; retryable?: number; unprocessed?: number; message?: string } } | null;
+        if (commitBody?.error?.code === "IMPORT_INCOMPLETE") {
+          const counts = commitBody.error;
+          if (mountedRef.current) { setStep("failed"); setMessage(`Import incomplete. Accepted ${counts.accepted ?? accepted + unchanged}, rejected ${counts.rejected ?? rejected}, retryable ${counts.retryable ?? retryable}, unprocessed ${counts.unprocessed ?? 0}. Valid Assets were retained.`); }
+          return;
+        }
+        throw new Error(safeMessage(commitBody, "The import could not be finalized. Valid Assets already accepted were retained."));
       }
-      if (mountedRef.current) { setStep("ready"); setMessage("Every file is verified and the import is complete."); }
+      if (mountedRef.current) { setStep("ready"); setMessage(`Import complete. Accepted ${accepted}, unchanged ${unchanged}, rejected ${rejected}, retryable ${retryable}.`); }
     } catch (error) {
       if (mountedRef.current) { setStep("failed"); setMessage(error instanceof Error ? error.message : "The import could not be completed."); }
     }
@@ -143,8 +161,10 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
 
         {!appendMode && <div className="mt-9 border-y border-zinc-200 py-6 dark:border-zinc-800">
           <label className="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">Dataset name<input value={name} onChange={(event) => setName(event.target.value)} disabled={busy} placeholder="e.g. North junction survey" className="mt-2 h-11 w-full rounded-xl border border-zinc-300 px-3 text-sm outline-none transition focus:border-sky-600 focus:ring-2 focus:ring-sky-100 disabled:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:ring-sky-900 dark:disabled:bg-zinc-900" /></label>
-          <p className="mt-2 text-xs leading-5 text-zinc-500 dark:text-zinc-400">A Dataset is created only after the server authorizes this import. Local absolute paths are never sent.</p>
+          <div className="mt-4"><ModalityCard value={modality} disabled={busy} onChange={setModality} /></div>
         </div>}
+
+        {appendMode && datasetModality && <div className="mt-6"><ModalityCard value={datasetModality} fixed={datasetModality} onChange={() => undefined} /></div>}
 
         <input ref={folderInputRef} type="file" multiple onChange={(event) => void scan(event.currentTarget)} className="sr-only" {...({ webkitdirectory: "", directory: "" } as Record<string, string>)} />
         <input ref={filesInputRef} type="file" multiple accept="image/*,video/*,audio/*,text/plain,.txt" onChange={(event) => void scan(event.currentTarget)} className="sr-only" />
@@ -158,7 +178,7 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
         {step === "uploading" && <div className="mt-6 rounded-2xl border border-sky-100 bg-sky-50 p-4 dark:border-sky-900 dark:bg-sky-950/40"><div className="flex items-center justify-between text-sm font-semibold text-sky-950 dark:text-sky-200"><span>Uploading and verifying</span><span>{completed} / {files.length}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-sky-100 dark:bg-sky-900"><div className="h-full rounded-full bg-sky-600 transition-[width] duration-300" style={{ width: `${uploadPercent}%` }} /></div><p className="mt-2 text-xs text-sky-800 dark:text-sky-300">Each completed item is reconciled before the next file proceeds.</p></div>}
         {message && <div role={step === "failed" ? "alert" : "status"} className={`mt-6 flex gap-3 rounded-xl border p-4 text-sm ${step === "failed" ? "border-rose-200 bg-rose-50 text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200" : "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"}`}>{step === "failed" ? <WarningCircle size={19} className="shrink-0" /> : <CheckCircle size={19} className="shrink-0" weight="fill" />}<p>{message}</p></div>}
 
-        <div className="mt-7 flex flex-wrap gap-3"><Button type="button" disabled={busy || files.length === 0 || (!appendMode && !name.trim())} onClick={() => void submit()}>{busy ? <><SpinnerGap className="animate-spin" size={17} />{step === "scanning" ? "Scanning selection…" : step === "preparing" ? "Preparing import…" : "Uploading files…"}</> : <><CloudArrowUp size={18} weight="bold" />{appendMode ? "Add files" : "Upload files"}</>}</Button>{jobId && <Button asChild variant="secondary"><Link href={`/jobs/${jobId}`}>Open import job</Link></Button>}{onClose && <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>Close</Button>}</div>
+        <div className="mt-7 flex flex-wrap gap-3"><Button type="button" disabled={busy || files.length === 0 || (!appendMode && (!name.trim() || !modality))} onClick={() => void submit()}>{busy ? <><SpinnerGap className="animate-spin" size={17} />{step === "scanning" ? "Scanning selection…" : step === "preparing" ? "Preparing import…" : "Uploading files…"}</> : <><CloudArrowUp size={18} weight="bold" />{appendMode ? "Add files" : "Upload files"}</>}</Button>{jobId && <Button asChild variant="secondary"><Link href={`/jobs/${jobId}`}>Open import job</Link></Button>}{onClose && <Button type="button" variant="ghost" onClick={onClose} disabled={busy}>Close</Button>}</div>
       </section>
       <aside className="h-fit border-t border-zinc-200 pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0 dark:border-zinc-800"><p className="text-xs font-bold uppercase tracking-[0.16em] text-zinc-400">Import lifecycle</p><ol className="mt-5 space-y-5">{[["1", "Scan", "Browser prepares a relative-path manifest."], ["2", "Transfer", "Files go directly to private storage through scoped forms."], ["3", "Verify", "Server reconciles each upload into metadata."], ["4", "Finalize", "The import completes automatically once every file is verified."]].map(([number, title, description]) => <li key={number} className="grid grid-cols-[28px_1fr] gap-3"><span className="grid size-7 place-items-center rounded-full border border-zinc-200 font-mono text-[11px] text-zinc-500 dark:border-zinc-700 dark:text-zinc-400">{number}</span><div><p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{title}</p><p className="mt-1 text-xs leading-5 text-zinc-500 dark:text-zinc-400">{description}</p></div></li>)}</ol></aside>
     </div>
@@ -166,8 +186,8 @@ export function LocalFolderImportForm({ datasetId, datasetName, onClose }: Local
 }
 
 /** A focusable in-workspace dialog; its upload behavior is identical to local import. */
-export function WorkspaceAppendFolderDialog({ datasetId, datasetName, onClose }: Required<Pick<LocalFolderImportFormProps, "datasetId">> & LocalFolderImportFormProps) {
+export function WorkspaceAppendFolderDialog({ datasetId, datasetName, datasetModality, onClose }: Required<Pick<LocalFolderImportFormProps, "datasetId">> & LocalFolderImportFormProps) {
   return <div role="dialog" aria-modal="true" aria-label="Add files to dataset" className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950/40 p-4 sm:p-8">
-    <div className="mx-auto min-h-full max-w-6xl rounded-2xl bg-white shadow-2xl"><LocalFolderImportForm datasetId={datasetId} datasetName={datasetName} onClose={onClose} /></div>
+    <div className="mx-auto min-h-full max-w-6xl rounded-2xl bg-white shadow-2xl"><LocalFolderImportForm datasetId={datasetId} datasetName={datasetName} datasetModality={datasetModality} onClose={onClose} /></div>
   </div>;
 }

@@ -1,5 +1,3 @@
-import { randomBytes } from "node:crypto";
-
 import { DatasetMemberRole, UserRole } from "@internal/db";
 
 import { hashPassword } from "@/lib/auth";
@@ -9,9 +7,9 @@ import { getDirectUploadProviders } from "@/lib/providers";
 export const hasIntegrationDatabase = Boolean(process.env.DATABASE_URL);
 
 export function configureDirectUploadTestEnvironment() {
-  if (!process.env.UPLOAD_CAPABILITY_SECRET) process.env.UPLOAD_CAPABILITY_SECRET = randomBytes(48).toString("base64");
-  process.env.MINIO_PUBLIC_ENDPOINT = "http://minio:9000";
-  process.env.MINIO_CORS_ALLOWED_ORIGIN = "http://localhost:3000";
+  if (!process.env.DB_SAFETY_RECEIPT || !process.env.UPLOAD_CAPABILITY_SECRET || !process.env.MINIO_PUBLIC_ENDPOINT || !process.env.MINIO_CORS_ALLOWED_ORIGIN) {
+    throw new Error("Verified disposable upload configuration is required.");
+  }
 }
 
 export function pngFixture() {
@@ -36,7 +34,7 @@ export async function createDirectUploadActors(password: string, suffix: string)
     db.user.create({ data: { email: `upload-manager-${suffix}@phase006.test`, passwordHash, role: UserRole.MANAGER }, select: { id: true, email: true } }),
     db.user.create({ data: { email: `upload-outsider-${suffix}@phase006.test`, passwordHash, role: UserRole.LABELER }, select: { id: true, email: true } }),
   ]);
-  const dataset = await db.dataset.create({ data: { ownerId: manager.id, name: `Direct upload ${suffix}` }, select: { id: true } });
+  const dataset = await db.dataset.create({ data: { ownerId: manager.id, name: `Direct upload ${suffix}`, modality: "IMAGE", modalityResolverSubject: manager.id }, select: { id: true } });
   return {
     manager,
     outsider,

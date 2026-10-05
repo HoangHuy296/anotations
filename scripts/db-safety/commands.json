@@ -1,0 +1,580 @@
+{
+  "web:test:auth-ownership": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "tests/auth-ownership/**/*.test.ts"
+    ]
+  },
+  "web:test:dataset-metadata": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "tests/dataset-metadata/**/*.test.ts"
+    ]
+  },
+  "web:test:direct-upload": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "tests/direct-upload/**/*.test.ts"
+    ]
+  },
+  "web:test:job-queue": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/job-queue/**/*.test.ts"
+    ]
+  },
+  "web:test:local-folder-import": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/local-folder-import/**/*.test.ts"
+    ]
+  },
+  "web:test:workspace": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/workspace/**/*.test.ts"
+    ]
+  },
+  "web:test:source-connections": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/source-connections/**/*.test.ts"
+    ]
+  },
+  "web:test:repository-preflight": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-preflight/**/*.test.ts"
+    ]
+  },
+  "web:test:repository-import-request": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import-request/**/*.test.ts"
+    ]
+  },
+  "web:test:repository-import-worker": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import-worker/**/*.test.ts"
+    ]
+  },
+  "web:test:ai": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/ai/**/*.test.ts"
+    ]
+  },
+  "web:test:source-connections:vitest": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "tests/source-connections/source-access-policy.vitest.spec.ts",
+      "--environment",
+      "node"
+    ]
+  },
+  "web:test:rate-limit": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/rate-limit/**/*.test.ts"
+    ]
+  },
+  "web:test:asset-write-quiescence": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/asset-write-quiescence/**/*.test.ts"
+    ]
+  },
+  "web:test:pagination": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/pagination/**/*.test.ts"
+    ]
+  },
+  "web:test:health": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/health/**/*.test.ts"
+    ]
+  },
+  "web:test:openapi-contract": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/openapi-contract/**/*.test.ts"
+    ]
+  },
+  "web:test:text-source": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/text-source/**/*.test.ts"
+    ]
+  },
+  "web:test:text-annotations": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/text-annotations/**/*.test.ts"
+    ]
+  },
+  "worker:test:ai-provider": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "tests/providers/ai/aioz-video-normalization.test.ts"
+    ]
+  },
+  "worker:test:queue": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/queue/**/*.test.ts"
+    ]
+  },
+  "worker:test:import": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/queue/import-*.test.ts"
+    ]
+  },
+  "worker:test:source-access": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/source/**/*.test.ts"
+    ]
+  },
+  "worker:test:repository-import": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import/**/*.test.ts"
+    ]
+  },
+  "realtime:test": {
+    "kind": "test",
+    "cwd": "apps/realtime",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/**/*.test.ts"
+    ]
+  },
+  "prisma/seed.ts": {
+    "kind": "seed",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "prisma/seed.ts"
+    ]
+  },
+  "prisma/review.seed.ts": {
+    "kind": "seed",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "prisma/review.seed.ts"
+    ]
+  },
+  "g1:fixture": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "scripts/db-safety/tests/disposable-fixture.test.ts"
+    ]
+  },
+  "g2:generate": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "scripts/db-safety/g2-generate.mjs"
+    ]
+  },
+  "g2:baseline": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/g2-baseline.test.ts"
+    ]
+  },
+  "g2:candidate": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/g2-candidate.test.ts"
+    ]
+  },
+  "g2:compatibility": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "scripts/db-safety/g2-compatibility.mjs"
+    ]
+  },
+  "g3:correctness": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/g3-correctness.test.ts"
+    ]
+  },
+  "g3:benchmark:baseline": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/g3-benchmark-baseline.test.ts"
+    ]
+  },
+  "g3:benchmark:candidate": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/g3-benchmark-candidate.test.ts"
+    ]
+  },
+  "g3:contention:baseline": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/g3-contention-baseline.test.ts"
+    ]
+  },
+  "g3:contention:candidate": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/g3-contention-candidate.test.ts"
+    ]
+  },
+  "worker:test:g4-modality-boundary": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import/g4-modality-boundary.test.ts",
+      "tests/repository-import/source-input.test.ts",
+      "tests/repository-import/g4-job-accounting.test.ts"
+    ]
+  },
+  "web:test:g4-contracts": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/local-folder-import/foundation.test.ts",
+      "tests/repository-import-request/acceptance-service.test.ts"
+    ]
+  },
+  "web:test:g4-upload-publisher": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/g4-upload-publisher.test.ts"
+    ]
+  },
+  "g4:runtime:safety": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/db-safety/runtime-suite.mjs",
+      "safety"
+    ]
+  },
+  "g4:runtime:e2e": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/db-safety/runtime-suite.mjs",
+      "e2e"
+    ]
+  },
+  "g5:baseline": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/workspace/g5-baseline.test.ts"
+    ]
+  },
+  "web:test:g5-workspace": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/workspace/g5-modality-routing.test.ts"
+    ]
+  },
+  "web:test:g5-workspace-ui": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/workspace/g5-engine-ui.test.ts",
+      "tests/workspace/workspace-state.test.ts"
+    ]
+  },
+  "g5:runtime:e2e": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/db-safety/runtime-suite.mjs",
+      "e2e"
+    ]
+  },
+  "web:test:g5-regressions": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "../../scripts/db-safety/g5-test-environment.mjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/workspace/asset-navigator-pagination.test.ts",
+      "tests/workspace/workspace-authorization.test.ts",
+      "tests/workspace/asset-browser-query.test.ts",
+      "tests/workspace/image-navigation.test.ts",
+      "tests/workspace/modality-details.test.ts",
+      "tests/workspace/discussion-deep-link.test.ts",
+      "tests/workspace/label-management.test.ts",
+      "tests/workspace/annotation-mutations.test.ts",
+      "tests/workspace/description-locking.test.ts",
+      "tests/workspace/annotation-locking.test.ts",
+      "tests/annotations/video-initial-load.test.ts",
+      "tests/text-annotations/workspace-selection-text.test.ts",
+      "tests/assets-bulk/delete-sync.test.ts",
+      "tests/workspace/workspace-shell-boundary.test.ts"
+    ]
+  }
+}

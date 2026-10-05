@@ -30,7 +30,7 @@ function currentSelectionPayload(datasetId: string): BulkSelection | null {
  * Export Selected is User Story 4's job; the backend already validates its
  * request shape but returns "not yet available" for it.
  */
-export function BulkActionBar({ datasetId, labels }: { datasetId: string; labels: DatasetLabel[] }) {
+export function BulkActionBar({ datasetId, labels, onRunAi }: { datasetId: string; labels: DatasetLabel[]; onRunAi?: () => void }) {
   const router = useRouter();
   const mode = useAssetSelectionStore((state) => state.mode);
   const storeDatasetId = useAssetSelectionStore((state) => state.datasetId);
@@ -141,6 +141,7 @@ export function BulkActionBar({ datasetId, labels }: { datasetId: string; labels
       <button type="button" onClick={() => { setOpenAction(openAction === "REMOVE_LABEL" ? null : "REMOVE_LABEL"); setError(null); setWarning(null); }} className="rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-100">Remove Label</button>
       <button type="button" onClick={() => { setOpenAction(openAction === "CHANGE_STATUS" ? null : "CHANGE_STATUS"); setError(null); }} className="rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-100">Change Status</button>
       <button type="button" onClick={() => { setOpenAction(openAction === "ASSIGN" ? null : "ASSIGN"); setError(null); }} className="rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-[11px] font-semibold text-zinc-700 hover:bg-zinc-100">Assign</button>
+      {onRunAi && <button type="button" onClick={onRunAi} className="rounded-lg border border-sky-200 bg-white px-2 py-1.5 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">AI Detect</button>}
       <button type="button" onClick={() => { setOpenAction(openAction === "DELETE" ? null : "DELETE"); setError(null); }} className="rounded-lg border border-rose-200 bg-white px-2 py-1.5 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete</button>
     </div>
 

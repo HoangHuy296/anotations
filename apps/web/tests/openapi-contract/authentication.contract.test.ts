@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 /**
  * OpenAPI contract check for the Authentication tag (specs/api/openapi.yaml,
  * schemas/authentication.yaml). Runs against an already-running web service

@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -29,14 +30,22 @@ test("discussion deep links are asset-scoped, dataset-scoped, and re-authorized"
   } finally { await cleanupWorkspaceFixture([owner.id, removed.id], [dataset.id, otherDataset.id]); }
 });
 
-test("workspace keeps image and video deep-link selection modality-neutral", { skip: !enabled }, async () => {
+test("workspace keeps deep links Dataset-scoped within IMAGE and VIDEO Datasets", { skip: !enabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const imageDataset = await createWorkspaceDataset(owner.id, Modality.IMAGE);
+  const videoDataset = await createWorkspaceDataset(owner.id, Modality.VIDEO);
   try {
-    const image = await createImageAsset(dataset.id);
-    const video = await (await import("@/lib/db")).db.asset.create({ data: { datasetId: dataset.id, modality: Modality.VIDEO, filename: "acceptance.mp4", mimeType: "video/mp4", sourceFingerprint: `video-${Date.now()}` }, select: { id: true } });
+    const image = await createImageAsset(imageDataset.id);
+    const video = await (await import("@/lib/db")).db.asset.create({ data: { datasetId: videoDataset.id, modality: Modality.VIDEO, filename: "acceptance.mp4", mimeType: "video/mp4", sourceFingerprint: `video-${Date.now()}` }, select: { id: true } });
     const actor = { id: owner.id, email: owner.email, name: owner.name, role: owner.role };
-    assert.equal((await readWorkspacePage(actor, dataset.id, { selectedAsset: { id: image.id, modality: Modality.IMAGE } }))?.page.selectedAsset?.id, image.id);
-    assert.equal((await readWorkspacePage(actor, dataset.id, { selectedAsset: { id: video.id, modality: Modality.VIDEO } }))?.page.selectedAsset?.id, video.id);
-  } finally { await cleanupWorkspaceFixture([owner.id], [dataset.id]); }
+    const imagePage = await readWorkspacePage(actor, imageDataset.id, { selectedAsset: { id: image.id, modality: Modality.IMAGE } });
+    const videoPage = await readWorkspacePage(actor, videoDataset.id, { selectedAsset: { id: video.id, modality: Modality.VIDEO } });
+    assert.equal(imagePage?.page.selectedAsset?.id, image.id);
+    assert.equal(imagePage?.dataset.modality, Modality.IMAGE);
+    assert.equal(videoPage?.page.selectedAsset?.id, video.id);
+    assert.equal(videoPage?.dataset.modality, Modality.VIDEO);
+    const foreignPage = await readWorkspacePage(actor, imageDataset.id, { selectedAsset: { id: video.id, modality: Modality.VIDEO } });
+    assert.equal(foreignPage?.dataset.modality, Modality.IMAGE, "a foreign deep link cannot choose another engine");
+    assert.equal(foreignPage?.page.selectedAsset?.id, image.id, "legacy content fallback stays within its Dataset");
+  } finally { await cleanupWorkspaceFixture([owner.id], [imageDataset.id, videoDataset.id]); }
 });

@@ -2,10 +2,12 @@
 
 import { Atom, BoundingBox, Selection, Tag, TextT, CheckCircle, SpinnerGap, StopCircle, WarningCircle, X } from "@phosphor-icons/react";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Modality } from "@internal/db";
 
-import { cancelAiTaskClient, createAiTaskClient, listActiveAiModelsClient, listModelClassesClient, readAiTaskClient } from "@/lib/ai/ai-task-api-client";
+import { cancelAiTaskClient, createAiTaskClient, findPendingAiTaskClient, listActiveAiModelsClient, listModelClassesClient, previewAiTargetClient, readAiTaskClient, type AiTargetPreviewDto } from "@/lib/ai/ai-task-api-client";
+import { aiProblemForModality, aiTargetKey, deriveAiTargetIntent, targetInvalidMessage } from "@/lib/ai/ai-target-context";
+import { useAssetSelectionStore } from "@/stores/asset-selection-store";
 import { aiTaskStatusMessage, AI_TOOL_PROBLEMS, modelSupportsModality, modelSupportsProblem, shouldPollAiTask } from "@/lib/ai/ai-detect-view";
 import type { AiModelDto, AiTaskStatusDto, AiToolTaskName } from "@/types/ai";
 
@@ -38,7 +40,7 @@ export type AiDetectDialogProps = {
    * `SUCCEEDED` and lets the caller return how many new predictions it
    * applied, so the dialog can say so without knowing what an annotation is.
    */
-  onCompleted?: (taskId: string) => Promise<number | void> | number | void;
+  onCompleted?: (taskId: string, resultAssetIds?: string[]) => Promise<number | void> | number | void;
 };
 
 /**
@@ -48,11 +50,50 @@ export type AiDetectDialogProps = {
  * this component is what an engine mounts in response to that, the same way
  * every other tool's UI lives outside the toolbox button itself.
  */
-export function AiDetectDialog({ assetId, modality, problem, onClose, onCompleted, children }: AiDetectDialogProps) {
+export function AiDetectDialog({ assetId, modality: openModality, problem: openProblem, onClose, onCompleted, children }: AiDetectDialogProps) {
+  const { datasetId } = useParams<{ datasetId: string }>();
+
+  // The panel targets the current Asset unless a Phase 022 selection is active. It only states
+  // intent; the server resolves and authorizes membership (feature 026). An active but stale or
+  // empty selection is invalid -- it never silently falls back to the current Asset.
+  const selectionDatasetId = useAssetSelectionStore((state) => state.datasetId);
+  const selectionMode = useAssetSelectionStore((state) => state.mode);
+  const explicitIds = useAssetSelectionStore((state) => state.explicitIds);
+  const filteredQuery = useAssetSelectionStore((state) => state.filteredQuery);
+  const filteredCount = useAssetSelectionStore((state) => state.filteredCount);
+  const clearSelection = useAssetSelectionStore((state) => state.clear);
+  const intent = useMemo(
+    () => deriveAiTargetIntent(datasetId, assetId, { datasetId: selectionDatasetId, mode: selectionMode, explicitIds, filteredQuery, filteredCount }),
+    [datasetId, assetId, selectionDatasetId, selectionMode, explicitIds, filteredQuery, filteredCount],
+  );
+  const targetKey = aiTargetKey(intent);
+  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+  const [previewNonce, setPreviewNonce] = useState(0);
+  const previewKey = `${targetKey}|${selectedModelId ?? ""}|${previewNonce}`;
+  const [previewResult, setPreviewResult] = useState<{ key: string; result: AiTargetPreviewDto | { error: true } } | null>(null);
+  const latestPreviewKey = useRef(previewKey);
+  useEffect(() => {
+    latestPreviewKey.current = previewKey;
+    if (intent.kind !== "BULK" || !datasetId) return;
+    let canceled = false;
+    void previewAiTargetClient({ datasetId, target: intent.target, ...(selectedModelId ? { modelId: selectedModelId } : {}) }).then((result) => {
+      // A response for anything but the latest selection/model is ignored (out-of-order safety).
+      if (canceled || latestPreviewKey.current !== previewKey) return;
+      setPreviewResult({ key: previewKey, result: result.ok ? result.preview : { error: true } });
+    });
+    return () => { canceled = true; };
+  }, [previewKey, intent, datasetId, selectedModelId]);
+  // `null` while the latest request is still loading; Run stays disabled until it resolves.
+  const preview = previewResult?.key === previewKey ? previewResult.result : null;
+  const previewReady = preview && "eligible" in preview && preview.eligible ? preview : null;
+  // Models are discovered for the resolved target's modality, which can differ from the open Asset's.
+  const modality = previewReady ? previewReady.modality : openModality;
+  const problem = previewReady && previewReady.modality !== openModality ? aiProblemForModality(previewReady.modality) : openProblem;
+  const targetOk = intent.kind === "CURRENT" || (intent.kind === "BULK" && previewReady !== null);
+
   const title = AI_TOOL_PROBLEMS[problem].label;
   const ProblemIcon = PROBLEM_ICONS[problem];
   const iconClassName = problem === "oriented_detection" ? "rotate-45 text-sky-600" : "text-sky-600";
-  const { datasetId } = useParams<{ datasetId: string }>();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const previous = document.activeElement;
@@ -61,7 +102,6 @@ export function AiDetectDialog({ assetId, modality, problem, onClose, onComplete
   }, []);
   const [phase, setPhase] = useState<Phase>("loading-models");
   const [models, setModels] = useState<AiModelDto[]>([]);
-  const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
   const [task, setTask] = useState<AiTaskStatusDto | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [appliedCount, setAppliedCount] = useState<number | null>(null);
@@ -73,7 +113,7 @@ export function AiDetectDialog({ assetId, modality, problem, onClose, onComplete
   const [classRetry, setClassRetry] = useState(0);
   const selectedModel = models.find((model) => model.id === selectedModelId);
   const classesReady = classResult?.modelId === selectedModelId && !classResult?.failed;
-  const canSubmit = thresholdsValid && selectedModel?.availableForTasks !== false && classesReady && selectedClasses.length > 0;
+  const canSubmit = targetOk && thresholdsValid && selectedModel?.availableForTasks !== false && classesReady && selectedClasses.length > 0;
 
   useEffect(() => {
     if (!selectedModelId) return;
@@ -112,9 +152,21 @@ export function AiDetectDialog({ assetId, modality, problem, onClose, onComplete
 
   useEffect(() => {
     let canceled = false;
-    void listActiveAiModelsClient(modality, problem).then((result) => { if (!canceled) applyModelsResult(result); });
+    void Promise.all([listActiveAiModelsClient(modality, problem), findPendingAiTaskClient(datasetId, assetId)]).then(async ([modelResult, pending]) => {
+      if (canceled) return;
+      if (pending.ok && pending.taskId) {
+        const current = await readAiTaskClient(pending.taskId);
+        if (canceled) return;
+        if (current.ok && shouldPollAiTask(current.task.status)) {
+          setTask(current.task);
+          setPhase("polling");
+          return;
+        }
+      }
+      applyModelsResult(modelResult);
+    });
     return () => { canceled = true; };
-  }, [applyModelsResult, modality, problem]);
+  }, [applyModelsResult, modality, problem, datasetId, assetId]);
 
   const refreshTask = useCallback(async (taskId: string) => {
     const result = await readAiTaskClient(taskId);
@@ -126,7 +178,7 @@ export function AiDetectDialog({ assetId, modality, problem, onClose, onComplete
       completedTaskIdRef.current = taskId;
       setPhase("succeeded");
       try {
-        const applied = await onCompleted?.(taskId);
+        const applied = await onCompleted?.(taskId, result.task.batch?.outcomes.filter((outcome) => outcome.predictionCount > 0).map((outcome) => outcome.assetId));
         setAppliedCount(typeof applied === "number" ? applied : null);
       } catch { setErrorMessage("Processing completed, but annotations could not be refreshed. Reload the workspace to view them."); }
     } else if (result.task.status === "FAILED") {
@@ -154,8 +206,14 @@ export function AiDetectDialog({ assetId, modality, problem, onClose, onComplete
     if (!selectedModelId || !datasetId || !canSubmit) return;
     setPhase("submitting");
     setErrorMessage(null);
-    const result = await createAiTaskClient({ datasetId, modelId: selectedModelId, assetIds: [assetId], classes: selectedClasses, confidence_threshold: Number(confidenceThreshold), iou_threshold: Number(iouThreshold) });
+    // One execution action for the current Asset and for a selection: same request, only the target differs.
+    const result = await createAiTaskClient({
+      datasetId, modelId: selectedModelId, target: intent.target, ...(previewReady ? { previewFingerprint: previewReady.previewFingerprint } : {}),
+      classes: selectedClasses, confidence_threshold: Number(confidenceThreshold), iou_threshold: Number(iouThreshold),
+    });
     if (!result.ok) {
+      // A changed selection is refreshed and needs a new deliberate click; it is never auto-resubmitted.
+      if (result.code === "TARGET_CHANGED") setPreviewNonce((value) => value + 1);
       setErrorMessage(createErrorMessage(result.code));
       setPhase("create-error");
       return;
@@ -192,6 +250,8 @@ export function AiDetectDialog({ assetId, modality, problem, onClose, onComplete
       setErrorMessage(cancelErrorMessage(result.code));
       return;
     }
+    // The status line reads `task`; without this it kept showing the last polled status (for example "Waiting for a worker…") after a successful cancel.
+    setTask((current) => (current ? { ...current, status: "CANCELED" } : current));
     setPhase("canceled");
   }
 
@@ -213,6 +273,23 @@ export function AiDetectDialog({ assetId, modality, problem, onClose, onComplete
         <h2 className="flex items-center gap-2 text-sm font-bold text-zinc-950"><ProblemIcon size={18} className={iconClassName} weight="duotone" />{title}</h2>
         <button ref={closeButtonRef} type="button" aria-label="Close" onClick={onClose} className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"><X size={16} /></button>
       </div>
+
+      {intent.kind !== "CURRENT" && <div aria-live="polite" className="mt-3 rounded-lg border border-sky-100 bg-sky-50 p-3 text-xs text-zinc-700">
+        {intent.kind === "INVALID" ? <>
+          <p role="alert" className="text-rose-700">{targetInvalidMessage(intent.reason)}</p>
+          <button type="button" onClick={clearSelection} className="mt-2 font-semibold text-sky-700">Clear selection</button>
+        </> : preview === null ? <StatusLine icon={<SpinnerGap className="animate-spin" size={16} />} text="Checking the selection…" />
+        : "error" in preview ? <>
+          <p role="alert" className="text-rose-700">Could not verify the selection. Try again.</p>
+          <button type="button" onClick={() => setPreviewNonce((value) => value + 1)} className="mt-2 font-semibold text-sky-700">Check again</button>
+        </> : preview.eligible ? <>
+          <p className="font-semibold text-zinc-900">{preview.count} {preview.modality.toLowerCase()} asset{preview.count === 1 ? "" : "s"} selected</p>
+          <p className="mt-1 text-zinc-500">AI runs on at most {preview.effectiveLimit} assets at a time.</p>
+        </> : <>
+          <p role="alert" className="text-rose-700">{targetInvalidMessage(preview.reason, preview.effectiveLimit)}</p>
+          <button type="button" onClick={clearSelection} className="mt-2 font-semibold text-sky-700">Clear selection</button>
+        </>}
+      </div>}
 
       <div className="mt-4" aria-live="polite">
         {phase === "loading-models" && <StatusLine icon={<SpinnerGap className="animate-spin" size={16} />} text="Loading available AI models…" />}
@@ -274,7 +351,7 @@ export function AiDetectDialog({ assetId, modality, problem, onClose, onComplete
       <div className="mt-5 flex justify-end gap-2">
         {phase === "polling" && <button type="button" disabled={canceling} onClick={() => void cancel()} className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"><StopCircle size={15} />{canceling ? "Canceling…" : "Cancel"}</button>}
         {(phase === "failed" || phase === "canceled" || phase === "create-error" || phase === "models-error") && <button type="button" onClick={retry} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-50">Try again</button>}
-        {(phase === "select-model" || phase === "submitting") && <button type="button" disabled={!selectedModelId || !canSubmit || phase === "submitting"} onClick={() => void submit()} className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{phase === "submitting" ? <SpinnerGap className="animate-spin" size={14} /> : <ProblemIcon size={14} className={problem === "oriented_detection" ? "rotate-45" : undefined} />}Run {title}</button>}
+        {(phase === "select-model" || phase === "submitting") && <button type="button" disabled={!selectedModelId || !canSubmit || phase === "submitting"} onClick={() => void submit()} className="flex items-center gap-1.5 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{phase === "submitting" ? <SpinnerGap className="animate-spin" size={14} /> : <ProblemIcon size={14} className={problem === "oriented_detection" ? "rotate-45" : undefined} />}Run {title}{previewReady ? ` on ${previewReady.count} asset${previewReady.count === 1 ? "" : "s"}` : ""}</button>}
         <button type="button" onClick={onClose} className="rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-500 hover:bg-zinc-100">{phase === "succeeded" || phase === "canceled" || phase === "failed" ? "Done" : "Close"}</button>
       </div>
     </div>
@@ -297,7 +374,14 @@ function createErrorMessage(code: string): string {
   switch (code) {
     case "AI_MODEL_INACTIVE": return "This model is no longer active. Choose another model.";
     case "AI_MODEL_NOT_FOUND": return "This model is no longer available. Choose another model.";
-    case "ASSET_NOT_IN_DATASET": return "This asset is no longer part of the dataset.";
+    case "ASSET_NOT_IN_DATASET": return "One or more selected assets are no longer part of the dataset.";
+    case "TARGET_CHANGED": return "The selection changed. Review it and run again.";
+    case "TARGET_EMPTY":
+    case "TARGET_TOO_LARGE":
+    case "TARGET_MIXED_MODALITY":
+    case "TARGET_INELIGIBLE":
+    case "AI_CAPABILITY_UNVERIFIED": return targetInvalidMessage(code);
+    case "AI_MODEL_CATALOG_UNAVAILABLE": return "The AI model list could not be verified. Try again.";
     case "FORBIDDEN": return "You do not have permission to request AI pre-annotation for this dataset.";
     case "DATASET_NOT_FOUND": return "This dataset is no longer available.";
     default: return "The AI task could not be created. Try again.";

@@ -1,10 +1,12 @@
 import "server-only";
 
 import { AssetStatus, AssetWorkflowAction, Modality } from "@internal/db";
+import { assertAssetModality, DatasetModalityError } from "@annotationplatform/domain";
 
 import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { readDatasetModality } from "@/lib/datasets/modality";
 import { readSafeMediaReadiness } from "@/lib/media-processing/safe-media-readiness";
 import { readVideoAnnotations, readVideoAnnotationsFullyPaged } from "@/lib/annotations/video-read-service";
 import { VIDEO_ANNOTATION_LIMITS } from "@/lib/annotations/video-limits";
@@ -35,7 +37,7 @@ export async function readSafeDiscussionCommentId(actor: RequestActor, datasetId
   const comment = await db.assetComment.findFirst({ where: { id: commentId, datasetId, assetId }, select: { id: true } });
   return comment?.id ?? null;
 }
-import type { AssetListOrder, AssetListSort, SafeTextSourceContext, SafeWorkspaceWorkflow, WorkspaceAssetPage, WorkspaceSelection } from "@/types/workspace";
+import type { AssetListOrder, AssetListSort, SafeTextSourceContext, SafeWorkspaceWorkflow, WorkspaceAssetPage, WorkspaceDataset, WorkspaceSelection } from "@/types/workspace";
 
 export type { WorkspaceSelection } from "@/types/workspace";
 
@@ -84,9 +86,9 @@ export async function readWorkspaceWorkflow(
  * expects it to have (the URL encodes modality via which navigation key
  * produced the id -- `?image=`, `?video=`, `?audio=`, `?text=`). The lookup
  * filters on both, so a stale or spoofed pairing (e.g. `?video=` pointing at
- * an IMAGE asset) fails to resolve rather than silently selecting the wrong
- * engine; the returned `selectedAsset` reports the modality actually
- * confirmed from the Dataset, not an echo of the request.
+ * an IMAGE asset) fails to resolve that content selection. These hints never
+ * choose the engine: the authorized Dataset projection below is authoritative.
+ * Unresolved history may be read safely, but it has no selected Asset/engine.
  */
 export async function readWorkspacePage(
   actor: RequestActor,
@@ -106,9 +108,9 @@ export async function readWorkspacePage(
     sort?: AssetListSort;
     order?: AssetListOrder;
   } = {},
-): Promise<{ dataset: { id: string; name: string }; page: WorkspaceAssetPage } | null> {
-  const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
-  if (!access || access.forbidden) return null;
+): Promise<{ dataset: WorkspaceDataset; page: WorkspaceAssetPage } | null> {
+  const dataset = await readDatasetModality(actor, datasetId);
+  if (!dataset) return null;
   const requestedPage = Math.max(1, Math.floor(options.page ?? 1));
   const sort = options.sort;
   const order = options.order ?? "desc";
@@ -124,7 +126,7 @@ export async function readWorkspacePage(
     updatedTo: options.updatedTo,
   });
   const orderBy = buildAssetListOrderBy(sort, order);
-  const requestedAsset = options.selectedAsset ? await db.asset.findFirst({
+  const requestedAsset = dataset.modality !== null && options.selectedAsset ? await db.asset.findFirst({
     where: { ...where, id: options.selectedAsset.id, modality: options.selectedAsset.modality },
     select: { id: true, batchIndex: true, orderIndex: true, createdAt: true, updatedAt: true, filename: true },
   }) : null;
@@ -132,8 +134,7 @@ export async function readWorkspacePage(
     where: { ...where, ...buildBeforeSelectionWhere(sort, order, requestedAsset) },
   }) : null;
   const page = selectedPosition === null ? requestedPage : Math.floor(selectedPosition / WORKSPACE_ASSET_PAGE_SIZE) + 1;
-  const [dataset, items, total, completed] = await Promise.all([
-    db.dataset.findFirst({ where: { id: datasetId, deletedAt: null, archivedAt: null }, select: { id: true, name: true } }),
+  const [items, total, completed] = await Promise.all([
     db.asset.findMany({
       where,
       orderBy,
@@ -144,9 +145,8 @@ export async function readWorkspacePage(
     db.asset.count({ where }),
     db.asset.count({ where: { datasetId, deletedAt: null, archivedAt: null, status: { not: AssetStatus.NEW } } }),
   ]);
-  if (!dataset) return null;
   const assets = items.map(toSafeWorkspaceAsset);
-  const selectedAssetId = requestedAsset?.id ?? assets[0]?.id ?? null;
+  const selectedAssetId = dataset.modality === null ? null : requestedAsset?.id ?? assets[0]?.id ?? null;
   const selectedIndex = selectedAssetId ? assets.findIndex((asset) => asset.id === selectedAssetId) : -1;
   const selectedAssetRecord = selectedIndex >= 0 ? assets[selectedIndex]! : null;
   const absoluteIndex = selectedIndex < 0 ? -1 : (page - 1) * WORKSPACE_ASSET_PAGE_SIZE + selectedIndex;
@@ -171,8 +171,9 @@ export async function readWorkspacePage(
 
 /**
  * The one server-only selected-asset boundary for the shared workspace route.
- * It resolves the Dataset/Asset relationship and permission before dispatching
- * a modality-specific projection. No browser route or canvas may duplicate
+ * It authorizes/loads the Dataset before choosing a modality-specific projection.
+ * A selected Asset must match that fixed engine; it never chooses the engine.
+ * No browser route or canvas may duplicate
  * those authorization or projection decisions.
  */
 export async function readWorkspaceSelection(
@@ -180,8 +181,9 @@ export async function readWorkspaceSelection(
   datasetId: string,
   assetId: string,
 ): Promise<WorkspaceSelection | null> {
-  const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
-  if (!access || access.forbidden) return null;
+  const dataset = await readDatasetModality(actor, datasetId);
+  if (!dataset) return null;
+  if (dataset.modality === null) throw new DatasetModalityError("DATASET_MODALITY_UNRESOLVED");
   const asset = await db.asset.findFirst({
     where: { id: assetId, datasetId, deletedAt: null, archivedAt: null },
     select: {
@@ -200,14 +202,15 @@ export async function readWorkspaceSelection(
     },
   });
   if (!asset) return null;
-  if (asset.modality === Modality.IMAGE) {
+  assertAssetModality(dataset.modality, asset.modality);
+  if (dataset.modality === Modality.IMAGE) {
     const image = await readImageWorkspaceAsset(actor, datasetId, assetId);
     return image ? { engine: "IMAGE", ...image } : null;
   }
-  if (asset.modality === Modality.VIDEO || asset.modality === Modality.AUDIO) {
+  if (dataset.modality === Modality.VIDEO || dataset.modality === Modality.AUDIO) {
     const readiness = await readSafeMediaReadiness(actor, datasetId, assetId);
     if (!readiness) return null;
-    if (asset.modality === Modality.VIDEO) {
+    if (dataset.modality === Modality.VIDEO) {
       // Initial page load always opens the timeline at t=0. When the video's
       // full duration is known and short enough to stay within one bounded
       // window (`maxWindowMs`), probe that window first -- a cheap single
@@ -237,7 +240,7 @@ export async function readWorkspaceSelection(
     }
     return {
       engine: "AUDIO",
-      asset: { id: asset.id, modality: asset.modality, filename: asset.filename, description: asset.description, version: asset.revision, status: asset.status },
+      asset: { id: asset.id, modality: "AUDIO", filename: asset.filename, description: asset.description, version: asset.revision, status: asset.status },
       readiness,
     };
   }

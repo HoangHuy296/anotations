@@ -35,3 +35,18 @@ After all N outcomes are final, reconcile counts and atomically set Job/AiTask t
 AiTask.externalTaskId remains unique on its original owner. A recovery successor references that owner via validated server-only metadata. Its polling schedule and Job lease belong to the successor; resolve manifest and external ID from the owner without updating terminal predecessor history. Extend scanner eligibility for this reference form so a null successor externalTaskId does not strand recovery. Duplicate queued predecessor deliveries remain no-ops. Unique retryOfJobId prevents competing successors; checkpoint lineage prevents replayed successful writes.
 
 Known external outputs are reused. Definite no-submit failures can perform one new reservation for the accepted target. Ambiguous acceptance stays blocked without proof; do not clear a reservation or call POST to discover whether it succeeded. Remote cancellation is best-effort only if an actual contract supports it; no such endpoint is assumed.
+
+
+## v1 reconciliation (2026-09-24; controlled provider run)
+
+- **Scope:** IMAGE detection only; VIDEO/AUDIO targets are rejected before dispatch.
+- **Correlation (hard gate HG-1):** the deployed contract does not guarantee result-to-input identity (free-form `output`). No write path may be implemented until a contractual or deterministic guarantee exists; observed exact `image_path` echo is evidence only. Never infer order.
+- **Statuses:** explicit allowlist; `failed_system` is non-terminal `PROVIDER_DEGRADED` (bounded polling, no resubmission, no assumption of recovery or terminality); unknown statuses fail closed.
+- **Submission:** the provider is non-idempotent and offers no lookup. One create call per reservation; only a definite rejection (HTTP 4xx/422 received) permits a new reservation; timeout/reset/crash after reservation is AMBIGUOUS, terminal and never retried.
+- **Errors:** provider error/`detail` text can contain signed URLs; it is mapped to allowlisted codes and never persisted, logged or displayed.
+- **Failure layering:** provider failure is whole-batch (an unreachable input fails every input); per-Asset outcomes come from platform write-time policy only.
+
+
+## Implemented status (2026-09-24)
+
+Built: versioned-input dispatch with projection/requester/source-identity revalidation and whole-operation rejection, ordered signing with the durable `{inputIndex, sourceIdentityDigest, urlDigest}` manifest, one create call per reservation (fault-injection tested), D-FS status allowlist, whole-batch failure/cancel finalization of every target, sanitized reasons. **Not built (HG-1):** correlation of results to Assets, per-Asset prediction transactions, success outcomes, replay/inherited successes, owner-referenced recovery of a known external task.

@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 
-import { DatasetSourceMode, JobStatus, Prisma, RepoProvider, type JobType } from "@internal/db";
+import { DatasetSourceMode, JobStatus, Modality, Prisma, RepoProvider, type JobType } from "@internal/db";
 import { getQueueDeliveryId, jobQueuePayloadSchema } from "@annotationplatform/queue";
 import { logJobEvent, logRedisEvent } from "@annotationplatform/domain";
 import type { BulkAssetJobInput } from "@annotationplatform/domain/bulk-asset-job";
@@ -49,6 +49,7 @@ export type SafeSourceJobInput = {
 
 export type NewDatasetSourceImportInput = {
   datasetName: string;
+  modality: Modality;
   /** Present only for the durable Phase-015 repository-create contract. */
   creationIdempotency?: { key: string; requestHash: string };
   sourceConnection: { id: string; baseUrl: string } | null;
@@ -231,6 +232,9 @@ export async function createAndEnqueueNewDatasetSourceImportJob(
       data: {
         ownerId: actor.id,
         name: input.datasetName,
+        modality: input.modality,
+        primaryModality: input.modality,
+        modalityResolverSubject: actor.id,
         sourceMode: DatasetSourceMode.MIRROR_TO_MINIO,
         sourceConnectionId,
         sourceRef: input.repository.ref,
@@ -323,7 +327,7 @@ type QueueClient = {
   queue: { add: (name: string, payload: unknown, options?: { jobId?: string }) => Promise<unknown> };
   close: () => Promise<void>;
 };
-type EnqueueOptions = { createQueue?: () => QueueClient };
+export type EnqueueOptions = { createQueue?: () => QueueClient };
 
 function bulkAssetJobIdempotencyKey(type: JobType, datasetId: string, selection: BulkAssetJobInput) {
   const fingerprint = createHash("sha256").update(JSON.stringify(selection)).digest("hex");

@@ -21,8 +21,8 @@ type DatasetSidebarProps = {
   page: number;
   previous: { id: string; modality: Modality; page: number } | null;
   next: { id: string; modality: Modality; page: number } | null;
-  /** The active selection's engine, or `null` when no asset is selected (defaults to the IMAGE toolbox). */
-  engine: Modality | null;
+  /** The resolved Dataset's authoritative modality, including when it has no Assets. */
+  engine: Modality;
   /** Active Asset Browser filters/sort (022), carried onto Previous/Next so they never silently drop the active query. */
   filters?: AssetNavigatorFilters;
 };
@@ -38,7 +38,7 @@ const engineLabel: Record<Modality, string> = { IMAGE: "Image", VIDEO: "Video", 
 export function DatasetSidebar({ datasetId, datasetName, selectedAssetId, search, statuses, previous, next, engine, filters }: DatasetSidebarProps) {
   const router = useRouter();
   const [appendOpen, setAppendOpen] = useState(false);
-  const activeEngine = engine ?? "IMAGE";
+  const activeEngine = engine;
   const { Toolbox } = workspaceEngineRegistry[activeEngine];
   const hrefFor = (target: { id: string; modality: Modality; page: number }) => {
     const params = new URLSearchParams({ [target.modality.toLowerCase()]: target.id });
@@ -69,7 +69,7 @@ export function DatasetSidebar({ datasetId, datasetName, selectedAssetId, search
     <button type="button" onClick={() => setAppendOpen(true)} className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"><FolderOpen size={15} />Add files</button>
     <ExportSelectedButton datasetId={datasetId} />
     <div className="mt-2 grid grid-cols-2 gap-1.5"><AssetNavigation href={previous ? hrefFor(previous) : null} label="Previous" onNavigate={guardNavigation} /><AssetNavigation href={next ? hrefFor(next) : null} label="Next" onNavigate={guardNavigation} /></div>
-    {appendOpen && <WorkspaceAppendFolderDialog datasetId={datasetId} datasetName={datasetName} onClose={() => setAppendOpen(false)} />}
+    {appendOpen && <WorkspaceAppendFolderDialog datasetId={datasetId} datasetName={datasetName} datasetModality={engine} onClose={() => setAppendOpen(false)} />}
   </aside>;
 }
 

@@ -5,6 +5,7 @@ import { buildMirrorObjectKey, buildSourceFingerprint } from "./source-fingerpri
 import { chunkRepositoryCandidates, downloadRepositoryCandidate, listRepositoryCandidateListing, parseRepositoryImportInput } from "./repository-import-source.js";
 import { mirrorRepositoryObject, safeCleanupUnpublishedObject } from "./repository-asset-mirror.js";
 import { reconcileMirroredRepositoryAsset, upsertMirroredRepositoryAsset } from "./repository-asset-upsert.js";
+import { verifyRepositoryObjectModality } from "./repository-media-classification.js";
 import { writeSafeJobEvent } from "./job-event-writer.js";
 import { resolveSourceAccessForJob, sourceAccessToRepositoryAccess } from "../source/source-access.js";
 import { applyRepositoryImportTestPoint } from "./repository-import-test-hooks.js";
@@ -32,10 +33,16 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
 
   const job = await db.job.findUnique({
     where: { id: jobId },
-    select: { id: true, datasetId: true, createdById: true, input: true, sourceConnectionId: true, dataset: { select: { sourceMode: true } } },
+    select: { id: true, datasetId: true, createdById: true, input: true, sourceConnectionId: true, dataset: { select: { sourceMode: true, modality: true, sourceRootPath: true } } },
   });
   const source = job ? parseRepositoryImportInput(job.input) : null;
   if (!job || job.dataset.sourceMode !== "MIRROR_TO_MINIO" || !source) return { kind: "not-applicable" };
+  if (job.dataset.modality === null) {
+    await db.job.updateMany({ where: { id: job.id, lockToken, status: "RUNNING" }, data: { errorCode: "DATASET_MODALITY_UNRESOLVED" } });
+    await failJob(db, { jobId: job.id, lockToken });
+    return { kind: "repository-refused" };
+  }
+  const datasetModality = job.dataset.modality;
 
   let safeFailureCode = "REPOSITORY_IMPORT_FAILED";
   try {
@@ -48,13 +55,16 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
       await failJob(db, { jobId: job.id, lockToken });
       return { kind: "repository-refused" };
     }
-    await updateJobProgress(db, { jobId: job.id, lockToken, stage: "SCANNING_FILES", progress: 1, totalItems: source.manifest.itemCount, processedItems: 0, successItems: 0, failedItems: 0, skippedItems: 0 });
+    const scanning = await updateJobProgress(db, { jobId: job.id, lockToken, stage: "SCANNING_FILES", progress: 1, totalItems: source.manifest.itemCount, processedItems: 0, successItems: 0, failedItems: 0, skippedItems: 0 });
+    if (scanning.kind !== "updated") throw new Error("LOCK_LOST");
     if (await acknowledgeCancellation(db, job.id, lockToken)) return { kind: "repository-refused" };
     safeFailureCode = "SOURCE_LIST_FAILED";
     const listing = await listRepositoryCandidateListing({ source, access });
     const { candidates } = listing;
     let imported = 0;
-    let failed = 0;
+    let unchanged = 0;
+    let rejected = 0;
+    let retryable = 0;
     let skipped = 0;
     const totalItems = candidates.length + listing.skippedItems;
     const batches = chunkRepositoryCandidates(candidates);
@@ -71,8 +81,8 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
           safeFailureCode = "SOURCE_RECONCILIATION_FAILED";
           const reconciled = await reconcileMirroredRepositoryAsset({ db, datasetId: job.datasetId, sourceFingerprint: fingerprint, candidate, bucket: getWorkerConfig().MINIO_BUCKET, objectKey });
           if (reconciled.kind === "conflict") throw new Error("SOURCE_RECONCILIATION_CONFLICT");
-          if (reconciled.kind === "reusable") { imported += 1; continue; }
-          await updateJobProgress(db, { jobId: job.id, lockToken, stage: "UPLOADING_OBJECTS", progress: Math.max(1, Math.floor(((imported + failed + skipped) / totalItems) * 80)), processedItems: imported + failed + skipped, successItems: imported, failedItems: failed, skippedItems: skipped });
+          if (reconciled.kind === "reusable") { unchanged += 1; continue; }
+          await updateJobProgress(db, { jobId: job.id, lockToken, stage: "UPLOADING_OBJECTS", progress: Math.max(1, Math.floor(((imported + unchanged + rejected + retryable + skipped) / totalItems) * 80)), processedItems: imported + unchanged + rejected + retryable + skipped, successItems: imported + unchanged, failedItems: rejected + retryable, skippedItems: skipped });
           await applyRepositoryImportTestPoint(db, job.id, "BEFORE_UPLOAD");
           safeFailureCode = "SOURCE_DOWNLOAD_FAILED";
           const downloaded = await downloadRepositoryCandidate(candidate, access);
@@ -84,9 +94,12 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
             return { kind: "repository-refused" };
           }
           await applyRepositoryImportTestPoint(db, job.id, "AFTER_UPLOAD_BEFORE_PERSIST");
-          await updateJobProgress(db, { jobId: job.id, lockToken, stage: "WRITING_ASSETS", progress: Math.max(1, Math.floor(((imported + failed + skipped) / totalItems) * 80) + 10), processedItems: imported + failed + skipped, successItems: imported, failedItems: failed, skippedItems: skipped });
+          await updateJobProgress(db, { jobId: job.id, lockToken, stage: "WRITING_ASSETS", progress: Math.max(1, Math.floor(((imported + unchanged + rejected + retryable + skipped) / totalItems) * 80) + 10), processedItems: imported + unchanged + rejected + retryable + skipped, successItems: imported + unchanged, failedItems: rejected + retryable, skippedItems: skipped });
+          const verifiedModality = await verifyRepositoryObjectModality({ jobId: job.id, bucket: published.bucket, objectKey: published.objectKey, expectedSizeBytes: downloaded.sizeBytes });
+          if (verifiedModality !== datasetModality) throw new Error("ASSET_MODALITY_MISMATCH");
           safeFailureCode = "ASSET_PERSIST_FAILED";
-          await upsertMirroredRepositoryAsset({ db, datasetId: job.datasetId, uploadedById: job.createdById, provider: source.repository.provider, candidate, sourceFingerprint: fingerprint, bucket: published.bucket, objectKey: published.objectKey });
+          const publication = await upsertMirroredRepositoryAsset({ db, datasetId: job.datasetId, uploadedById: job.createdById, provider: source.repository.provider, candidate, verifiedModality, sourceFingerprint: fingerprint, bucket: published.bucket, objectKey: published.objectKey, sourceRootPath: job.dataset.sourceRootPath });
+          if (publication.modality !== datasetModality) throw new Error("ASSET_MODALITY_MISMATCH");
           imported += 1;
         } catch (error) {
           if (published) await safeCleanupUnpublishedObject(db, { bucket: published.bucket, objectKey: published.objectKey, datasetId: job.datasetId });
@@ -95,7 +108,13 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
           // aggregate count; all other source/storage/DB/lock failures remain
           // terminal and use the existing safe failure policy.
           if (error instanceof Error && error.message === "SOURCE_DOWNLOAD_FAILED") {
-            failed += 1;
+            retryable += 1;
+            continue;
+          }
+          if (error instanceof Error && ["ASSET_MODALITY_MISMATCH", "SOURCE_CONTENT_UNVERIFIED", "SOURCE_CONTENT_UNSUPPORTED"].includes(error.message)) {
+            // Fail-closed byte classification is an explicit item rejection,
+            // never a silent skip or a whole-import success.
+            rejected += 1;
             continue;
           }
           throw error;
@@ -105,22 +124,30 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
       // supported candidate has reached a safe boundary.  This makes the
       // persisted outcome monotonic and ensures terminal equality.
       if (batchIndex === batches.length - 1) skipped = listing.skippedItems;
-      const processedItems = imported + failed + skipped;
+      const processedItems = imported + unchanged + rejected + retryable + skipped;
       const batchProgress = Math.max(1, Math.floor((processedItems / totalItems) * 90));
       const progressResult = await updateJobProgress(db, {
         jobId: job.id, lockToken, stage: "WRITING_ASSETS", progress: batchProgress,
-        totalItems, processedItems, successItems: imported, failedItems: failed, skippedItems: skipped,
+        totalItems, processedItems, successItems: imported + unchanged, failedItems: rejected + retryable, skippedItems: skipped,
       });
       if (progressResult.kind !== "updated") throw new Error("LOCK_LOST");
-      await writeSafeJobEvent(db, { jobId: job.id, kind: "IMPORT_BATCH_COMPLETED", aggregate: { imported, skipped, failed } });
+      await writeSafeJobEvent(db, { jobId: job.id, kind: "IMPORT_BATCH_COMPLETED", aggregate: { imported: imported + unchanged, skipped, failed: rejected + retryable } });
       await applyRepositoryImportTestPoint(db, job.id, "CANCEL_AFTER_BATCH");
       if (await acknowledgeCancellation(db, job.id, lockToken)) return { kind: "repository-refused" };
     }
     await applyRepositoryImportTestPoint(db, job.id, "AFTER_PERSIST_BEFORE_COMPLETE");
     if (await acknowledgeCancellation(db, job.id, lockToken)) return { kind: "repository-refused" };
+    const processedItems = imported + unchanged + rejected + retryable + skipped;
+    const finalSummary = { outcome: rejected || retryable || skipped ? "incomplete" : "completed", accepted: imported, unchanged, rejected, retryable, unprocessed: Math.max(0, totalItems - processedItems), skipped };
+    if (rejected || retryable || skipped) {
+      const recorded = await updateJobProgress(db, { jobId: job.id, lockToken, stage: "WRITING_ASSETS", progress: 100, totalItems, processedItems, successItems: imported + unchanged, failedItems: rejected + retryable, skippedItems: skipped });
+      if (recorded.kind !== "updated") return { kind: "repository-refused" };
+      await failJob(db, { jobId: job.id, lockToken, stage: "FINISHED", errorCode: "IMPORT_INCOMPLETE", summary: { ...finalSummary, outcome: "incomplete" }, progress: 100, totalItems, processedItems, successItems: imported + unchanged, failedItems: rejected + retryable, skippedItems: skipped });
+      return { kind: "repository-refused" };
+    }
     const completed = await completeJob(db, {
-      jobId: job.id, lockToken, stage: "FINISHED", progress: 100, totalItems, processedItems: imported + failed + skipped, successItems: imported, failedItems: failed, skippedItems: skipped,
-      summary: { outcome: "completed", resultCount: imported, imported, skipped, failed },
+      jobId: job.id, lockToken, stage: "FINISHED", progress: 100, totalItems, processedItems, successItems: imported + unchanged, failedItems: 0, skippedItems: skipped,
+      summary: { resultCount: imported + unchanged, ...finalSummary },
     });
     if (completed.kind !== "updated") return { kind: "repository-refused" };
     await applyRepositoryImportTestPoint(db, job.id, "AFTER_COMPLETE_BEFORE_ACK");

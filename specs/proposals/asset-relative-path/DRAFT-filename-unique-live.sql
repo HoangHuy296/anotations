@@ -1,0 +1,21 @@
+-- SUPERSEDED. Kept only so the earlier draft's history is visible in git.
+--
+-- The plain partial unique index this file originally proposed
+-- (`UNIQUE ("datasetId","filename") WHERE "deletedAt" IS NULL`) was rejected
+-- by the 2026-09-28 read-only audit: 66 live Assets across 30 groups already
+-- share a computed identity under this scheme (all from folders re-imported
+-- into the same Dataset more than once), and the binding historical-duplicate
+-- policy (specs/027-coco-dataset-export/spec.md §5) forbids deleting,
+-- renaming, suffixing, or flagging any of those 66 rows just to let an index
+-- build.
+--
+-- The current, approved-for-planning-only design lives in
+-- specs/027-coco-dataset-export/spec.md §6 and §10:
+--   - Asset.relativePath (not Asset.filename) is the identity column.
+--   - Enforcement is a Postgres constraint trigger + advisory lock, not a
+--     unique index, specifically so historical rows never need to be
+--     touched while new writes are still rejected DB-side, race-safe.
+--
+-- Nothing in this directory has been applied. See the spec for the exact
+-- staged SQL (Step A backfill, Step B trigger, Step C application wiring)
+-- and the blockers that gate each stage.

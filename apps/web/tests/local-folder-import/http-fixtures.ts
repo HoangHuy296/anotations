@@ -69,8 +69,6 @@ export async function createLocalImportHttpFixture(port: number): Promise<LocalI
       cwd: process.cwd(),
       env: {
         ...process.env,
-        MINIO_ENDPOINT: "http://localhost:9000",
-        MINIO_PUBLIC_ENDPOINT: "http://localhost:9000",
         PRISMA_QUERY_ENGINE_LIBRARY: resolve(process.cwd(), "../../lib/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node"),
       },
       stdio: "ignore",

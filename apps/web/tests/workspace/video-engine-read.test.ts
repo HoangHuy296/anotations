@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
@@ -44,7 +45,7 @@ before(async () => {
   if (!enabled) return;
   owner = await createAnnotationUser(UserRole.MANAGER);
   outsider = await createAnnotationUser(UserRole.MANAGER);
-  const dataset = await createAnnotationDataset(owner.id);
+  const dataset = await createAnnotationDataset(owner.id, Modality.VIDEO);
   datasetId = dataset.id;
   const { config, minio } = getDirectUploadProviders();
   objectKey = `phase019-video-view/${datasetId}/${suffix}.mp4`;

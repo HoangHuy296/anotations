@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { getRequestActor } from "@/lib/auth";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { datasetStatusLabels, readDatasetWorkflowStatus } from "@/lib/datasets/dataset-library-query";
+import { datasetDestination } from "@/lib/datasets/dataset-destination";
 
 const dateFormatter = new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
@@ -163,6 +164,7 @@ export default async function DashboardPage() {
                   const total = dataset._count.assets;
                   const progress = total === 0 ? 0 : Math.round((dataset.completedAssets / total) * 1000) / 10;
                   const workflowStatus = readDatasetWorkflowStatus(dataset.metadata);
+                  const destination = datasetDestination(dataset.id, workflowStatus);
                   const uploaded = dataset.sourceMode === DatasetSourceMode.UPLOAD;
                   const SourceIcon = uploaded ? UploadSimple : TrayArrowDown;
                   return (
@@ -170,7 +172,7 @@ export default async function DashboardPage() {
                       <div className="col-span-2 flex min-w-0 items-start gap-3.5 sm:col-span-1">
                         <span className={`grid size-11 shrink-0 place-items-center rounded-xl border ${uploaded ? "border-zinc-200 bg-zinc-50 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400" : "border-sky-100 bg-sky-50 text-sky-700 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-400"}`}><Database aria-hidden="true" size={21} weight="duotone" /></span>
                         <div className="min-w-0">
-                          <h3 className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50"><Link className="rounded-sm outline-none hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-400 dark:hover:text-sky-400" href={`/workspace/${dataset.id}`} aria-label={`Open ${dataset.name} workspace`}>{dataset.name}</Link></h3>
+                          <h3 className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50"><Link className="rounded-sm outline-none hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-400 dark:hover:text-sky-400" href={destination} prefetch={false} aria-label={`Open ${dataset.name}`}>{dataset.name}</Link></h3>
                           <div className="mt-1.5 flex min-w-0 items-center gap-2 text-[11px] text-zinc-500 dark:text-zinc-400">
                             <span className="inline-flex shrink-0 items-center gap-1 font-medium"><SourceIcon aria-hidden="true" size={12} />{uploaded ? "Upload" : "Import"}</span>
                             <span aria-hidden="true" className="text-zinc-300 dark:text-zinc-700">/</span>
@@ -194,7 +196,7 @@ export default async function DashboardPage() {
                       </div>
                       <div className="col-start-1 row-start-3 self-center xl:col-auto xl:row-auto"><Badge className="gap-1.5 whitespace-nowrap" variant={workflowStatus === "IN_PROGRESS" ? "warning" : "success"}><span aria-hidden="true" className="size-1.5 rounded-full bg-current" />{datasetStatusLabels[workflowStatus]}</Badge></div>
                       <div className="col-start-2 row-start-3 flex items-center justify-end sm:row-start-1 xl:col-auto xl:row-auto">
-                        <Button asChild variant="icon" aria-label={`Open ${dataset.name}`}><Link href={`/workspace/${dataset.id}`}><ArrowRight aria-hidden="true" size={17} /></Link></Button>
+                        <Button asChild variant="icon" aria-label={`Open ${dataset.name}`}><Link href={destination} prefetch={false}><ArrowRight aria-hidden="true" size={17} /></Link></Button>
                       </div>
                     </article>
                   );

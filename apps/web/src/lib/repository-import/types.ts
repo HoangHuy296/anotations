@@ -93,6 +93,7 @@ export function creationRequestHash(
     // A name is safe identity metadata. The PAT is intentionally omitted.
     connectionName: input.credentialMode === "ONE_TIME_PAT" ? input.connectionName?.trim() ?? null : null,
     datasetName: input.datasetName.trim(),
+    modality: input.modality,
   });
   return createHash("sha256").update(canonical).digest("hex");
 }

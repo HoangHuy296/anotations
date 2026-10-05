@@ -25,7 +25,7 @@ type PersistDatasetImportInput = {
     name: string;
     branch: string;
     rootPath: string;
-    primaryModality: Modality | null;
+    modality: Modality;
   };
   images: GiteaImageCandidate[];
 };
@@ -84,6 +84,11 @@ export async function persistDatasetImport(input: PersistDatasetImportInput) {
         select: { id: true },
       });
 
+      if (existingDataset) {
+        const existing = await client.dataset.findUniqueOrThrow({ where: { id: existingDataset.id }, select: { modality: true } });
+        if (existing.modality === null) throw new Error("DATASET_MODALITY_UNRESOLVED");
+        if (existing.modality !== input.dataset.modality) throw new Error("ASSET_MODALITY_MISMATCH");
+      }
       const dataset = existingDataset
         ? await client.dataset.update({
             where: { id: existingDataset.id },
@@ -94,7 +99,9 @@ export async function persistDatasetImport(input: PersistDatasetImportInput) {
             data: {
               ownerId: input.actor.id,
               name: input.dataset.name,
-              primaryModality: input.dataset.primaryModality,
+              modality: input.dataset.modality,
+              primaryModality: input.dataset.modality,
+              modalityResolverSubject: input.actor.id,
               sourceMode: DatasetSourceMode.EXTERNAL_REF,
               externalRepositoryId: repository.id,
               sourceConnectionId: input.sourceConnectionId,
@@ -105,6 +112,7 @@ export async function persistDatasetImport(input: PersistDatasetImportInput) {
           });
 
       for (let offset = 0; offset < input.images.length; offset += 100) {
+        if (input.dataset.modality !== Modality.IMAGE) throw new Error("ASSET_MODALITY_MISMATCH");
         const batch = input.images.slice(offset, offset + 100);
         await Promise.all(
           batch.map((image) =>
@@ -125,7 +133,8 @@ export async function persistDatasetImport(input: PersistDatasetImportInput) {
               },
               create: {
                 datasetId: dataset.id,
-                // This scanner only produces image candidates. Future
+                // This dormant legacy import accepts only an explicitly IMAGE Dataset;
+                // the candidate type is not used to select the Dataset modality. Future
                 // modality-aware import workers must detect each candidate
                 // independently and create the matching metadata child row.
                 modality: Modality.IMAGE,

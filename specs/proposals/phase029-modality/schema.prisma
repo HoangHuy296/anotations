@@ -1,0 +1,1447 @@
+generator client {
+  provider = "prisma-client"
+  output   = "/tmp/phase029-g2-proposal-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String               @id @default(cuid())
+  email                String               @unique
+  passwordHash         String?
+  name                 String?
+  role                 UserRole
+  /// Safe, non-authoritative self-service preferences (notifications,
+  /// language, accessibility). Never credentials/tokens; validated by Zod at
+  /// every write. See src/lib/validation/account-preferences.ts.
+  preferences          Json?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  aiTasksCreated       AiTask[]             @relation("AiTaskCreatedBy")
+  annotationsCreated   Annotation[]         @relation("AnnotationCreatedBy")
+  annotationsReviewed  Annotation[]         @relation("AnnotationReviewedBy")
+  annotationsUpdated   Annotation[]         @relation("AnnotationUpdatedBy")
+  uploadedAssets       Asset[]              @relation("AssetUploadedBy")
+  assignedAssets       Asset[]              @relation("AssetAssignedTo")
+  assetLabelsCreated   AssetLabel[]         @relation("AssetLabelCreatedBy")
+  sessions             AuthSession[]
+  ownedDatasets        Dataset[]            @relation("DatasetOwner")
+  memberships          DatasetMember[]
+  externalRepositories ExternalRepository[] @relation("ExternalRepositoryCreatedBy")
+  jobsCanceled         Job[]                @relation("JobCanceledBy")
+  jobsCreated          Job[]                @relation("JobCreatedBy")
+  preparedImports      PreparedImport[]     @relation("PreparedImportCreatedBy")
+  sourceConnections    SourceConnection[]   @relation("SourceConnectionOwner")
+  tracksCreated        VideoObjectTrack[]   @relation("TrackCreatedBy")
+  workflowEvents       AssetWorkflowEvent[] @relation("AssetWorkflowActor")
+  invitationsReceived  DatasetInvitation[]  @relation("DatasetInvitationInvitee")
+  invitationsSent      DatasetInvitation[]  @relation("DatasetInvitationInvitedBy")
+  assignmentSlots      AssetAssignment[]    @relation("AssetAssignmentUser")
+  assignmentsCreated   AssetAssignment[]    @relation("AssetAssignmentCreatedBy")
+  assignmentEvents     AssetAssignmentEvent[] @relation("AssetAssignmentEventActor")
+  commentsAuthored     AssetComment[]       @relation("AssetCommentAuthor")
+  commentsResolved     AssetComment[]       @relation("AssetCommentResolver")
+  commentMentions      CommentMention[]
+  notifications        Notification[]       @relation("NotificationRecipient")
+  notificationsActed   Notification[]       @relation("NotificationActor")
+  membershipEventsFor  DatasetMembershipEvent[] @relation("DatasetMembershipEventMember")
+  membershipEventsBy   DatasetMembershipEvent[] @relation("DatasetMembershipEventActor")
+  outboxEventsActed    CollaborationOutboxEvent[] @relation("CollaborationOutboxActor")
+  outboxEventsFor      CollaborationOutboxEvent[] @relation("CollaborationOutboxRecipient")
+  annotationMutationReceipts AnnotationMutationReceipt[] @relation("AnnotationMutationReceiptActor")
+}
+
+model AuthSession {
+  id               String    @id @default(cuid())
+  userId           String
+  refreshTokenHash String    @unique
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Job {
+  id                   String              @id @default(cuid())
+  datasetId            String
+  createdById          String
+  canceledById         String?
+  type                 JobType
+  modality             Modality?
+  status               JobStatus           @default(QUEUED)
+  stage                JobStage            @default(WAITING)
+  queueName            String?
+  queueJobId           String?
+  enqueuedAt           DateTime?
+  dequeuedAt           DateTime?
+  priority             JobPriority         @default(NORMAL)
+  priorityValue        Int                 @default(50)
+  trigger              JobTrigger          @default(USER)
+  provider             RepoProvider?
+  sourceConnectionId   String?
+  externalRepositoryId String?
+  /// *
+  ///    * Task-specific request payload.
+  ///    * Do not store secrets here.
+  input                Json                @default("{}")
+  /// *
+  ///    * Runtime checkpoint.
+  ///    * Worker can update this while running.
+  state                Json                @default("{}")
+  /// *
+  ///    * Realtime/final summary for frontend.
+  summary              Json                @default("{}")
+  progress             Int                 @default(0)
+  totalItems           Int?
+  processedItems       Int                 @default(0)
+  successItems         Int                 @default(0)
+  failedItems          Int                 @default(0)
+  skippedItems         Int                 @default(0)
+  error                String?
+  errorCode            String?
+  errorDetails         Json?
+  /// *
+  ///    * Worker locking.
+  lockedBy             String?
+  lockToken            String?
+  lockedAt             DateTime?
+  lockedUntil          DateTime?
+  heartbeatAt          DateTime?
+  startedAt            DateTime?
+  finishedAt           DateTime?
+  runAfter             DateTime?
+  attempts             Int                 @default(0)
+  maxAttempts          Int                 @default(3)
+  /// *
+  ///    * Soft cancel.
+  cancelRequestedAt    DateTime?
+  canceledAt           DateTime?
+  /// *
+  ///    * Prevent duplicate jobs.
+  ///    * For clone repo, generate from dataset/repo/ref/rootPath/modality/sourceMode.
+  idempotencyKey       String?
+  /// *
+  ///    * Output result if job creates a file.
+  resultStorageKey     String?
+  resultFilename       String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  retryOfJobId         String?             @unique
+  aiTasks              AiTask?
+  canceledBy           User?               @relation("JobCanceledBy", fields: [canceledById], references: [id])
+  createdBy            User                @relation("JobCreatedBy", fields: [createdById], references: [id])
+  dataset              Dataset             @relation("DatasetJobs", fields: [datasetId], references: [id], onDelete: Cascade)
+  externalRepository   ExternalRepository? @relation("ExternalRepositoryJobs", fields: [externalRepositoryId], references: [id])
+  retryOfJob           Job?                @relation("JobRetryLineage", fields: [retryOfJobId], references: [id], onDelete: Restrict)
+  retrySuccessor       Job?                @relation("JobRetryLineage")
+  sourceConnection     SourceConnection?   @relation(fields: [sourceConnectionId], references: [id])
+  events               JobEvent[]
+  preparedImport       PreparedImport?
+  collaborationOutboxEvent CollaborationOutboxEvent?
+
+  @@unique([datasetId, idempotencyKey])
+  @@index([datasetId, status])
+  @@index([createdById])
+  @@index([canceledById])
+  @@index([status, runAfter])
+  @@index([status, priorityValue, createdAt])
+  @@index([status, heartbeatAt])
+  @@index([lockedUntil])
+  @@index([sourceConnectionId])
+  @@index([externalRepositoryId])
+  @@index([type, status])
+  @@index([queueName, queueJobId])
+}
+
+model JobEvent {
+  id        String        @id @default(cuid())
+  jobId     String
+  level     JobEventLevel @default(INFO)
+  stage     JobStage?
+  message   String
+  data      Json          @default("{}")
+  createdAt DateTime      @default(now())
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([jobId, createdAt])
+  @@index([level])
+}
+
+model ExternalRepository {
+  id             String         @id @default(cuid())
+  provider       RepoProvider
+  visibility     RepoVisibility @default(PUBLIC)
+  /// *
+  ///    * Normalized base URL.
+  ///    * Use empty string for provider default, e.g. github.com / huggingface.co.
+  baseUrl        String         @default("")
+  owner          String?
+  repo           String
+  fullName       String
+  externalRepoId String?
+  repoType       String?
+  defaultBranch  String?
+  description    String?
+  homepageUrl    String?
+  createdById    String?
+  metadata       Json           @default("{}")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  assets         Asset[]
+  assetVersions  AssetVersion[]
+  datasets       Dataset[]
+  createdBy      User?          @relation("ExternalRepositoryCreatedBy", fields: [createdById], references: [id])
+  jobs           Job[]          @relation("ExternalRepositoryJobs")
+
+  @@unique([provider, baseUrl, fullName])
+  @@index([provider])
+  @@index([createdById])
+}
+
+model SourceConnection {
+  id                    String                 @id @default(cuid())
+  userId                String
+  provider              RepoProvider
+  authType              RepoAuthType           @default(TOKEN)
+  baseUrl               String                 @default("")
+  name                  String?
+  externalAccountId     String?
+  accountUsername       String?
+  accountEmail          String?
+  tokenEncrypted        String?
+  refreshTokenEncrypted String?
+  tokenExpiresAt        DateTime?
+  scopes                Json                   @default("[]")
+  status                SourceConnectionStatus @default(ACTIVE)
+  revokedAt             DateTime?
+  metadata              Json                   @default("{}")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  datasets              Dataset[]
+  jobs                  Job[]
+  user                  User                   @relation("SourceConnectionOwner", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, externalAccountId])
+  @@index([userId])
+  @@index([provider])
+  @@index([provider, baseUrl])
+  @@index([status])
+  @@index([tokenExpiresAt])
+}
+
+model Dataset {
+  /// Phase029 G2 candidate: null preserves unresolved history; new rows require DB-enforced assignment.
+  modality Modality?
+  /// Private parent-write fence, not a content version.
+  modalityContentRevision BigInt @default(0)
+  /// Database timestamp of first assignment; immutable even when the Dataset is empty.
+  modalityResolvedAt DateTime?
+  /// Immutable opaque actor subject (1..128 characters); no live User FK or account-deletion blocker.
+  modalityResolverSubject String?
+  /// Monotonic transaction-safe content fence; not a user-visible version.
+  visualizationGeneration BigInt @default(0)
+  visualizationPublicationFence BigInt @default(0)
+  visualizationCurrentSnapshotId String?
+  visualizationSnapshots DatasetSnapshot[]
+  visualizationArtifacts VisualizationArtifact[]
+  id                     String              @id @default(cuid())
+  ownerId                String
+  name                   String
+  description            String?
+  type                   DatasetType         @default(MULTI_MODAL)
+  primaryModality        Modality?
+  metadata               Json                @default("{}")
+  sourceMode             DatasetSourceMode   @default(UPLOAD)
+  externalRepositoryId   String?
+  sourceConnectionId     String?
+  sourceRootPath         String?
+  sourceRef              String?
+  lockedRevision         String?
+  currentRevision        String?
+  creationIdempotencyKey String?
+  creationRequestHash    String?
+  includePatterns        Json                @default("[]")
+  excludePatterns        Json                @default("[]")
+  lastSyncedAt           DateTime?
+  syncStatus             AssetSyncStatus     @default(SYNCED)
+  syncSummary            Json                @default("{}")
+  /// * Versioned TEXT taxonomy policy: schemaVersion, classificationGroups, relationTypes. Empty means one implicit SINGLE document group.
+  textPolicy             Json                @default("{}")
+  /// * Increments on every relevant TEXT policy/label-eligibility change.
+  textPolicyRevision     Int                 @default(1)
+  /// * Guarded increment serializing TEXT writes and taxonomy-sensitive operations for this dataset. Not user-visible content revision.
+  textMutationRevision   Int                 @default(0)
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+  archivedAt             DateTime?
+  deletedAt              DateTime?
+  aiTasks                AiTask[]
+  annotations            Annotation[]
+  assets                 Asset[]
+  assetVersions          AssetVersion[]
+  externalRepository     ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
+  owner                  User                @relation("DatasetOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  sourceConnection       SourceConnection?   @relation(fields: [sourceConnectionId], references: [id])
+  members                DatasetMember[]
+  jobs                   Job[]               @relation("DatasetJobs")
+  labels                 Label[]
+  preparedImports        PreparedImport[]
+  invitations            DatasetInvitation[]
+  assignmentSlots        AssetAssignment[]
+  assignmentEvents       AssetAssignmentEvent[]
+  comments               AssetComment[]
+  membershipEvents       DatasetMembershipEvent[]
+  notifications          Notification[]
+  outboxEvents           CollaborationOutboxEvent[]
+
+  @@unique([ownerId, creationIdempotencyKey])
+  @@index([ownerId])
+  @@index([ownerId, primaryModality])
+  @@index([type])
+  @@index([primaryModality])
+  @@index([sourceMode])
+  @@index([externalRepositoryId])
+  @@index([sourceConnectionId])
+  @@index([currentRevision])
+}
+
+/// *
+///  * Durable browser-to-MinIO import preparation. It stores only bounded metadata
+///  * and private object references; no binary, browser handle, or local path is
+///  * ever persisted.
+model PreparedImport {
+  id                String               @id @default(cuid())
+  datasetId         String
+  jobId             String               @unique
+  createdById       String
+  status            PreparedImportStatus @default(PREPARING)
+  expectedItemCount Int
+  deadlineAt        DateTime
+  committedAt       DateTime?
+  idempotencyKey    String
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  createdBy         User                 @relation("PreparedImportCreatedBy", fields: [createdById], references: [id])
+  dataset           Dataset              @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  job               Job                  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  items             PreparedImportItem[]
+
+  @@unique([createdById, idempotencyKey])
+  @@index([datasetId, createdAt])
+  @@index([status, deadlineAt])
+  @@index([createdById, createdAt])
+}
+
+model PreparedImportItem {
+  id               String         @id @default(cuid())
+  preparedImportId String
+  logicalPath      String
+  normalizedPath   String
+  filename         String
+  mimeType         String
+  sizeBytes        BigInt
+  modality         Modality
+  position         Int
+  fingerprint      String
+  storageKey       String         @unique
+  assetId          String?        @unique
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  asset            Asset?         @relation(fields: [assetId], references: [id])
+  preparedImport   PreparedImport @relation(fields: [preparedImportId], references: [id], onDelete: Cascade)
+
+  @@unique([preparedImportId, normalizedPath])
+  @@unique([preparedImportId, position])
+  @@index([preparedImportId, completedAt])
+  @@index([assetId])
+}
+
+model DatasetMember {
+  id        String            @id @default(cuid())
+  datasetId String
+  userId    String
+  role      DatasetMemberRole @default(LABELER)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  dataset   Dataset           @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([datasetId, userId])
+  @@index([userId])
+  @@index([datasetId])
+  @@index([datasetId, role])
+}
+
+/// Durable, existing-user invitation. A pending invitation is not a
+/// DatasetMember and therefore never grants access before acceptance.
+model DatasetInvitation {
+  id            String                  @id @default(cuid())
+  datasetId     String
+  inviteeUserId String
+  invitedById   String
+  role          DatasetMemberRole
+  status        DatasetInvitationStatus @default(PENDING)
+  /// `PENDING` while active and null after a terminal state. PostgreSQL allows
+  /// multiple nulls, making this portable Prisma uniqueness enforcement.
+  activeKey     String?
+  expiresAt     DateTime
+  respondedAt   DateTime?
+  revokedAt     DateTime?
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  dataset       Dataset                 @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  invitee       User                    @relation("DatasetInvitationInvitee", fields: [inviteeUserId], references: [id], onDelete: Cascade)
+  invitedBy     User                    @relation("DatasetInvitationInvitedBy", fields: [invitedById], references: [id], onDelete: Restrict)
+
+  @@unique([datasetId, inviteeUserId, activeKey])
+  @@index([inviteeUserId, status, createdAt])
+  @@index([datasetId, status, createdAt])
+  @@index([expiresAt])
+}
+
+model Asset {
+  id                   String               @id @default(cuid())
+  datasetId            String
+  uploadedById         String?
+  assignedToId         String?
+  modality             Modality
+  filename             String
+  originalFilename     String?
+  mimeType             String
+  sizeBytes            BigInt?
+  width                Int?
+  height               Int?
+  durationMs           Int?
+  textLength           Int?
+  sourceMode           DatasetSourceMode    @default(UPLOAD)
+  storageProvider      StorageProvider?
+  storageBucket        String?
+  storageKey           String?
+  checksum             String?
+  externalRepositoryId String?
+  sourceProvider       RepoProvider?
+  sourceRef            String?
+  sourceRevision       String?
+  sourcePath           String?
+  /// *
+  ///    * specs/027-coco-dataset-export. Canonical, syntax-normalized,
+  ///    * case-sensitive dataset-relative identity (packages/domain's
+  ///    * normalizeAssetRelativePath) -- distinct from filename (display
+  ///    * name) and sourcePath (repository-root-relative provider metadata).
+  ///    * Nullable indefinitely by design; a live Asset requiring a non-null
+  ///    * value is an application/DB-CHECK-constraint invariant, never a
+  ///    * NOT NULL column constraint (see spec §10's steady-state invariant).
+  ///    * Populated by Phase EXPAND-2 write paths; historical rows are
+  ///    * populated by the Phase BACKFILL script. Uniqueness among live
+  ///    * (deletedAt IS NULL) rows is enforced by a database trigger
+  ///    * (Phase ENFORCE), not by a Prisma-level @@unique.
+  relativePath         String?
+  sourceFileSha        String?
+  sourceBlobSha        String?
+  sourceLfsOid         String?
+  sourceEtag           String?
+  sourceUrl            String?
+  sourceFingerprint    String
+  cacheStatus          CacheStatus          @default(NOT_CACHED)
+  cacheProvider        StorageProvider?
+  cacheBucket          String?
+  cacheKey             String?
+  cacheChecksum        String?
+  cachedAt             DateTime?
+  cacheExpiresAt       DateTime?
+  cacheError           String?
+  currentVersionId     String?
+  syncStatus           AssetSyncStatus      @default(SYNCED)
+  lastSyncedAt         DateTime?
+  syncSummary          Json                 @default("{}")
+  status               AssetStatus          @default(NEW)
+  batchIndex           Int                  @default(0)
+  orderIndex           Int                  @default(0)
+  description          String?
+  metadata             Json                 @default("{}")
+  revision             Int                  @default(1)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  archivedAt           DateTime?
+  deletedAt            DateTime?
+  annotations          Annotation[]
+  dataset              Dataset              @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  externalRepository   ExternalRepository?  @relation(fields: [externalRepositoryId], references: [id])
+  uploadedBy           User?                @relation("AssetUploadedBy", fields: [uploadedById], references: [id])
+  assignedTo           User?                @relation("AssetAssignedTo", fields: [assignedToId], references: [id])
+  versions             AssetVersion[]
+  audioAsset           AudioAsset?
+  imageAsset           ImageAsset?
+  preparedImportItem   PreparedImportItem?
+  textAsset            TextAsset?
+  videoAsset           VideoAsset?
+  assetLabels          AssetLabel[]
+  workflowEvents       AssetWorkflowEvent[]
+  assignmentSlots      AssetAssignment[]
+  assignmentEvents     AssetAssignmentEvent[]
+  comments             AssetComment[]
+  notifications        Notification[]
+  outboxEvents         CollaborationOutboxEvent[]
+  mutationReceipts     AnnotationMutationReceipt[]
+
+  @@unique([storageProvider, storageBucket, storageKey])
+  @@unique([cacheProvider, cacheBucket, cacheKey])
+  @@unique([datasetId, sourceFingerprint])
+  @@index([sourceFingerprint])
+  @@index([datasetId, modality])
+  @@index([datasetId, batchIndex])
+  @@index([datasetId, batchIndex, orderIndex])
+  @@index([datasetId, filename])
+  @@index([datasetId, status])
+  @@index([datasetId, syncStatus])
+  @@index([datasetId, cacheStatus])
+  @@index([uploadedById])
+  @@index([assignedToId])
+  @@index([externalRepositoryId])
+  @@index([sourceProvider])
+  @@index([sourceRevision])
+  @@index([sourcePath])
+  @@index([sourceFileSha])
+  @@index([sourceBlobSha])
+  @@index([sourceLfsOid])
+  @@index([currentVersionId])
+}
+
+/// The single current responsibility slot for each asset/type. Assignment
+/// history is append-only in AssetAssignmentEvent, so removing this slot does
+/// not erase attribution.
+model AssetAssignment {
+  id           String              @id @default(cuid())
+  datasetId    String
+  assetId      String
+  userId       String
+  type         AssetAssignmentType
+  assignedById String?
+  assignedAt   DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  dataset      Dataset             @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  asset        Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  user         User                @relation("AssetAssignmentUser", fields: [userId], references: [id], onDelete: Restrict)
+  assignedBy   User?               @relation("AssetAssignmentCreatedBy", fields: [assignedById], references: [id], onDelete: SetNull)
+
+  @@unique([assetId, type])
+  @@index([datasetId, type])
+  @@index([userId, type])
+}
+
+model AssetAssignmentEvent {
+  id             String                     @id @default(cuid())
+  datasetId      String
+  assetId        String
+  assignmentId   String?
+  action         AssetAssignmentEventAction
+  previousUserId String?
+  nextUserId     String?
+  actorId        String?
+  createdAt      DateTime                   @default(now())
+  dataset        Dataset                    @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  asset          Asset                      @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  actor          User?                      @relation("AssetAssignmentEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([assetId, createdAt])
+  @@index([datasetId, createdAt])
+  @@index([assignmentId])
+}
+
+model AssetComment {
+  id           String         @id @default(cuid())
+  datasetId    String
+  assetId      String
+  authorId     String
+  parentId     String?
+  body         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
+  resolvedAt   DateTime?
+  resolvedById String?
+  dataset      Dataset        @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  asset        Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  author       User           @relation("AssetCommentAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  parent       AssetComment?  @relation("AssetCommentReplies", fields: [parentId], references: [id], onDelete: Restrict)
+  replies      AssetComment[] @relation("AssetCommentReplies")
+  resolvedBy   User?          @relation("AssetCommentResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  mentions     CommentMention[]
+  notifications Notification[]
+
+  @@index([assetId, parentId, createdAt])
+  @@index([datasetId, createdAt])
+  @@index([authorId, createdAt])
+}
+
+model CommentMention {
+  id        String       @id @default(cuid())
+  commentId String
+  userId    String
+  createdAt DateTime     @default(now())
+  comment   AssetComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([commentId, userId])
+  @@index([userId, createdAt])
+}
+
+model Notification {
+  id                   String           @id @default(cuid())
+  userId               String
+  type                 NotificationType
+  datasetId            String?
+  assetId              String?
+  commentId            String?
+  actorId              String?
+  title                String
+  body                 String
+  dedupeKey            String
+  contextUnavailableAt DateTime?
+  readAt               DateTime?
+  createdAt            DateTime         @default(now())
+  user                 User             @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  actor                User?            @relation("NotificationActor", fields: [actorId], references: [id], onDelete: SetNull)
+  dataset              Dataset?         @relation(fields: [datasetId], references: [id], onDelete: SetNull)
+  asset                Asset?           @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  comment              AssetComment?    @relation(fields: [commentId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, readAt, createdAt])
+  @@index([datasetId, createdAt])
+  @@index([assetId, createdAt])
+}
+
+model DatasetMembershipEvent {
+  id           String                       @id @default(cuid())
+  datasetId    String
+  memberUserId String
+  actorId      String?
+  action       DatasetMembershipEventAction
+  previousRole DatasetMemberRole?
+  nextRole     DatasetMemberRole?
+  createdAt    DateTime                     @default(now())
+  dataset      Dataset                      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  member       User                         @relation("DatasetMembershipEventMember", fields: [memberUserId], references: [id], onDelete: Restrict)
+  actor        User?                        @relation("DatasetMembershipEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([datasetId, createdAt])
+  @@index([memberUserId, createdAt])
+}
+
+/// Durable delivery intent. It is not Activity and it is never consumed by a
+/// browser or gateway. The private worker resolves it through the linked Job.
+model CollaborationOutboxEvent {
+  id              String                       @id @default(cuid())
+  datasetId       String
+  assetId         String?
+  recipientUserId String?
+  actorId         String?
+  jobId           String                       @unique
+  type            CollaborationOutboxEventType
+  dedupeKey       String                       @unique
+  payload         Json                         @default("{}")
+  dispatchedAt    DateTime?
+  createdAt       DateTime                     @default(now())
+  dataset         Dataset                      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  asset           Asset?                       @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  recipient       User?                        @relation("CollaborationOutboxRecipient", fields: [recipientUserId], references: [id], onDelete: SetNull)
+  actor           User?                        @relation("CollaborationOutboxActor", fields: [actorId], references: [id], onDelete: SetNull)
+  job             Job                          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([datasetId, dispatchedAt, createdAt])
+  @@index([recipientUserId, createdAt])
+  @@index([assetId, createdAt])
+}
+
+/// Append-only audit trail for the Asset.status review workflow. This is
+/// history only; Asset.status remains the sole workflow-state authority.
+model AssetWorkflowEvent {
+  id            String              @id @default(cuid())
+  assetId       String
+  actorId       String
+  action        AssetWorkflowAction
+  fromStatus    AssetStatus?
+  toStatus      AssetStatus?
+  assetRevision Int
+  feedback      String?
+  createdAt     DateTime            @default(now())
+  asset         Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  actor         User                @relation("AssetWorkflowActor", fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([assetId, createdAt])
+  @@index([actorId, createdAt])
+}
+
+/// *
+///  * Asset-level metadata label attachment (Phase 022). Fully independent of
+///  * `Annotation.labelId`: attaching/detaching an AssetLabel never creates,
+///  * modifies, or deletes an Annotation, even when an Annotation on the same
+///  * Asset happens to reference the same Label. See
+///  * specs/022-asset-browser-dataset-management-workspace/data-model.md.
+model AssetLabel {
+  id          String   @id @default(cuid())
+  assetId     String
+  labelId     String
+  createdAt   DateTime @default(now())
+  createdById String?
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  label       Label    @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  createdBy   User?    @relation("AssetLabelCreatedBy", fields: [createdById], references: [id])
+
+  @@unique([assetId, labelId])
+  @@index([labelId])
+  @@index([createdById])
+}
+
+model AssetVersion {
+  id                   String              @id @default(cuid())
+  assetId              String
+  datasetId            String
+  versionNumber        Int
+  isCurrent            Boolean             @default(false)
+  modality             Modality
+  sourceMode           DatasetSourceMode
+  externalRepositoryId String?
+  sourceProvider       RepoProvider?
+  sourceRef            String?
+  sourceRevision       String?
+  sourcePath           String?
+  sourceFileSha        String?
+  sourceBlobSha        String?
+  sourceLfsOid         String?
+  sourceEtag           String?
+  sourceUrl            String?
+  sourceFingerprint    String
+  storageProvider      StorageProvider?
+  storageBucket        String?
+  storageKey           String?
+  checksum             String?
+  cacheStatus          CacheStatus         @default(NOT_CACHED)
+  cacheProvider        StorageProvider?
+  cacheBucket          String?
+  cacheKey             String?
+  cacheChecksum        String?
+  cachedAt             DateTime?
+  cacheExpiresAt       DateTime?
+  cacheError           String?
+  filename             String
+  originalFilename     String?
+  mimeType             String
+  sizeBytes            BigInt?
+  width                Int?
+  height               Int?
+  durationMs           Int?
+  textLength           Int?
+  syncStatus           AssetSyncStatus     @default(SYNCED)
+  metadata             Json                @default("{}")
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  annotations          Annotation[]
+  asset                Asset               @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  dataset              Dataset             @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  externalRepository   ExternalRepository? @relation(fields: [externalRepositoryId], references: [id])
+
+  @@unique([assetId, versionNumber])
+  @@unique([storageProvider, storageBucket, storageKey])
+  @@unique([cacheProvider, cacheBucket, cacheKey])
+  @@unique([datasetId, sourceFingerprint])
+  @@index([assetId])
+  @@index([datasetId])
+  @@index([datasetId, isCurrent])
+  @@index([externalRepositoryId])
+  @@index([sourceRevision])
+  @@index([sourcePath])
+  @@index([sourceFileSha])
+  @@index([sourceBlobSha])
+  @@index([sourceLfsOid])
+  @@index([syncStatus])
+  @@index([cacheStatus])
+  @@index([sourceFingerprint])
+}
+
+model Label {
+  id             String             @id @default(cuid())
+  datasetId      String
+  modality       Modality?
+  scope          LabelScope         @default(OBJECT)
+  name           String
+  normalizedName String
+  color          String
+  description    String?
+  hotkey         String?
+  properties     Json               @default("{}")
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  annotations    Annotation[]
+  dataset        Dataset            @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  videoTracks    VideoObjectTrack[] @relation("TrackLabel")
+  assetLabels    AssetLabel[]
+
+  @@unique([datasetId, normalizedName])
+  @@index([datasetId])
+  @@index([datasetId, scope])
+  @@index([datasetId, modality])
+}
+
+model Annotation {
+  id                    String            @id @default(cuid())
+  datasetId             String
+  assetId               String
+  assetVersionId        String?
+  labelId               String?
+  createdById           String
+  updatedById           String?
+  reviewedById          String?
+  modality              Modality
+  type                  AnnotationType
+  source                AnnotationSource  @default(MANUAL)
+  /// *
+  ///    * Canonical geometry payload.
+  ///    * Validate this with Zod/application schemas.
+  geometry              Json              @default("{}")
+  /// *
+  ///    * Metadata, model provenance, confidence, notes, custom fields.
+  properties            Json              @default("{}")
+  status                AnnotationStatus  @default(DRAFT)
+  revision              Int               @default(1)
+  frameIndex            Int?
+  timestampMs           Int?
+  trackId               String?
+  isKeyframe            Boolean           @default(false)
+  isInterpolated        Boolean           @default(false)
+  startMs               Int?
+  endMs                 Int?
+  startChar             Int?
+  endChar               Int?
+  startToken            Int?
+  endToken              Int?
+  tokenIndex            Int?
+  sentenceIndex         Int?
+  textValue             String?
+  fromAnnotationId      String?
+  toAnnotationId        String?
+  speakerId             String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  asset                 Asset             @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  assetVersion          AssetVersion?     @relation(fields: [assetVersionId], references: [id])
+  createdBy             User              @relation("AnnotationCreatedBy", fields: [createdById], references: [id])
+  dataset               Dataset           @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  fromAnnotation        Annotation?       @relation("TextRelationFrom", fields: [fromAnnotationId], references: [id], onDelete: Restrict)
+  outgoingTextRelations Annotation[]      @relation("TextRelationFrom")
+  label                 Label?            @relation(fields: [labelId], references: [id])
+  reviewedBy            User?             @relation("AnnotationReviewedBy", fields: [reviewedById], references: [id])
+  audioSpeaker          AudioSpeaker?     @relation(fields: [speakerId], references: [id])
+  toAnnotation          Annotation?       @relation("TextRelationTo", fields: [toAnnotationId], references: [id], onDelete: Restrict)
+  incomingTextRelations Annotation[]      @relation("TextRelationTo")
+  track                 VideoObjectTrack? @relation(fields: [trackId], references: [id])
+  updatedBy             User?             @relation("AnnotationUpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([datasetId, modality])
+  @@index([datasetId, status])
+  @@index([assetId, type])
+  @@index([assetId, status, createdAt])
+  @@index([assetVersionId])
+  @@index([labelId])
+  @@index([createdById])
+  @@index([assetId, frameIndex])
+  @@index([trackId, frameIndex])
+  @@index([assetId, timestampMs])
+  @@index([assetId, startMs, endMs])
+  @@index([assetId, startChar, endChar])
+  @@index([assetId, tokenIndex])
+  @@index([fromAnnotationId, toAnnotationId])
+  @@index([fromAnnotationId])
+  @@index([toAnnotationId])
+  @@index([speakerId])
+}
+
+/// *
+///  * Idempotent replay record for a TEXT mutation command. Keyed by actor/asset/
+///  * operation, not by a live annotation, so replay history survives deletion.
+model AnnotationMutationReceipt {
+  id          String   @id @default(cuid())
+  assetId     String
+  actorId     String
+  operationId String
+  requestHash String
+  /// * Bounded safe result only: IDs, revisions, outcome. Never source content or private locators.
+  result      Json
+  createdAt   DateTime @default(now())
+  asset       Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  actor       User     @relation("AnnotationMutationReceiptActor", fields: [actorId], references: [id])
+
+  @@unique([assetId, actorId, operationId])
+  @@index([assetId])
+}
+
+model ImageAsset {
+  id           String  @id @default(cuid())
+  assetId      String  @unique
+  thumbnailKey String?
+  exif         Json    @default("{}")
+  asset        Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+}
+
+model VideoAsset {
+  id              String             @id @default(cuid())
+  assetId         String             @unique
+  fps             Float?
+  totalFrames     Int?
+  codec           String?
+  thumbnailKey    String?
+  frameStorageKey String?
+  metadata        Json               @default("{}")
+  asset           Asset              @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  tracks          VideoObjectTrack[]
+
+  @@index([assetId])
+}
+
+model VideoObjectTrack {
+  id                String                 @id @default(cuid())
+  videoAssetId      String
+  labelId           String?
+  createdById       String?
+  name              String?
+  color             String?
+  properties        Json                   @default("{}")
+  status            AnnotationStatus       @default(DRAFT)
+  revision          Int                    @default(1)
+  annotationType    AnnotationType         @default(BOUNDING_BOX)
+  interpolationMode VideoInterpolationMode @default(LINEAR)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  annotations       Annotation[]
+  createdBy         User?                  @relation("TrackCreatedBy", fields: [createdById], references: [id])
+  label             Label?                 @relation("TrackLabel", fields: [labelId], references: [id])
+  videoAsset        VideoAsset             @relation(fields: [videoAssetId], references: [id], onDelete: Cascade)
+
+  @@index([videoAssetId])
+  @@index([labelId])
+  @@index([createdById])
+}
+
+model TextAsset {
+  id                       String    @id @default(cuid())
+  assetId                  String    @unique
+  content                  String?
+  language                 String?
+  tokenization             Json      @default("{}")
+  metadata                 Json      @default("{}")
+  /// * Raw-byte SHA-256 identity of the verified source, scoped to this asset: "sha256:<hex>".
+  sourceIdentity           String?
+  /// * Always "UTF8" once verified by full fatal decode.
+  sourceEncoding           String?
+  /// * Durable offset unit for all TEXT geometry: "UTF16_CODE_UNIT".
+  offsetUnit               String?
+  sourceByteLength         Int?
+  sourceCodeUnitLength     Int?
+  /// * Private MinIO pointer to the versioned grapheme-boundary derivative. Never returned to the browser.
+  boundaryArtifactKey      String?
+  boundaryArtifactDigest   String?
+  /// * Validated JSON: artifact schema version, algorithm, actual Node/ICU/Unicode profile.
+  boundaryProfile          Json?
+  preparedSourceFingerprint String?
+  preparedAt               DateTime?
+  asset                    Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+}
+
+model AudioAsset {
+  id          String         @id @default(cuid())
+  assetId     String         @unique
+  sampleRate  Int?
+  channels    Int?
+  codec       String?
+  bitRate     Int?
+  waveformKey String?
+  metadata    Json           @default("{}")
+  asset       Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  speakers    AudioSpeaker[]
+
+  @@index([assetId])
+}
+
+model AudioSpeaker {
+  id           String       @id @default(cuid())
+  audioAssetId String
+  externalId   String?
+  name         String?
+  role         String?
+  color        String?
+  properties   Json         @default("{}")
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  annotations  Annotation[]
+  audioAsset   AudioAsset   @relation(fields: [audioAssetId], references: [id], onDelete: Cascade)
+
+  @@unique([audioAssetId, externalId])
+  @@index([audioAssetId])
+}
+
+model AiTask {
+  id                   String       @id @default(cuid())
+  externalTaskId       String?      @unique
+  datasetId            String
+  jobId                String       @unique
+  createdById          String
+  type                 AiTaskType
+  status               AiTaskStatus @default(QUEUED)
+  modality             Modality?
+  modelId              String
+  modelNameSnapshot    String
+  modelVersionSnapshot String?
+  modelKeySnapshot     String
+  input                Json         @default("{}")
+  output               Json?
+  summary              Json         @default("{}")
+  error                String?
+  errorCode            String?
+  errorDetails         Json?
+  pollAttempts         Int          @default(0)
+  nextPollAt           DateTime?
+  resultStorageKey     String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  createdBy            User         @relation("AiTaskCreatedBy", fields: [createdById], references: [id])
+  dataset              Dataset      @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  job                  Job          @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  model                AiModel      @relation(fields: [modelId], references: [id])
+
+  @@index([datasetId])
+  @@index([createdById])
+  @@index([status])
+  @@index([modelId])
+  @@index([nextPollAt])
+}
+
+model AiModel {
+  id          String     @id @default(cuid())
+  key         String     @unique // định danh ổn định, dùng khi gọi API đồng nghiệp
+  displayName String
+  provider    String // khớp AiProviderAdapter registry, VD: "colleague-api"
+  modality    Modality? // null = hỗ trợ đa modality
+  taskType    AiTaskType
+  isActive    Boolean    @default(true)
+  metadata    Json       @default("{}")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  aiTasks     AiTask[]
+
+  @@index([provider])
+  @@index([taskType])
+  @@index([isActive])
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  LABELER
+  REVIEWER
+}
+
+enum DatasetMemberRole {
+  OWNER
+  MANAGER
+  LABELER
+  REVIEWER
+}
+
+enum DatasetInvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  REVOKED
+  EXPIRED
+}
+
+enum AssetAssignmentType {
+  ANNOTATION
+  REVIEW
+}
+
+enum AssetAssignmentEventAction {
+  ASSIGNED
+  REASSIGNED
+  UNASSIGNED
+  REMOVED_FOR_ROLE_CHANGE
+}
+
+enum DatasetMembershipEventAction {
+  INVITED
+  ACCEPTED
+  DECLINED
+  REVOKED
+  ROLE_CHANGED
+  REMOVED
+}
+
+enum NotificationType {
+  DATASET_INVITE
+  ASSET_ASSIGNED
+  REVIEW_ASSIGNED
+  MENTIONED
+  COMMENT_REPLY
+  REVIEW_SUBMITTED
+  REVIEW_APPROVED
+  REVIEW_REJECTED
+}
+
+enum CollaborationOutboxEventType {
+  MEMBER_CHANGED
+  ASSIGNMENT_CHANGED
+  COMMENT_CHANGED
+  NOTIFICATION_CREATED
+  WORKFLOW_CHANGED
+  MEMBERSHIP_REVOKED
+  ANNOTATION_CHANGED
+  TEXT_POLICY_CHANGED
+}
+
+enum Modality {
+  IMAGE
+  VIDEO
+  TEXT
+  AUDIO
+}
+
+enum DatasetType {
+  IMAGE_LABELING
+  VIDEO_LABELING
+  TEXT_LABELING
+  AUDIO_LABELING
+  MULTI_MODAL
+}
+
+enum DatasetSourceMode {
+  UPLOAD
+  MIRROR_TO_MINIO
+  EXTERNAL_REF
+  HYBRID_CACHE
+}
+
+enum RepoProvider {
+  GITHUB
+  GITEA
+  GITLAB
+  HUGGING_FACE
+  GENERIC_GIT
+}
+
+enum RepoVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum RepoAuthType {
+  NONE
+  TOKEN
+  OAUTH
+  APP
+}
+
+enum SourceConnectionStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  ERROR
+}
+
+enum AssetStatus {
+  NEW
+  PROCESSING
+  READY
+  IN_PROGRESS
+  COMPLETED
+  NEEDS_REVIEW
+  REVIEWED
+  REJECTED
+  SKIPPED
+  ARCHIVED
+  FAILED
+}
+
+enum AssetWorkflowAction {
+  START
+  SUBMIT
+  OPEN_REVIEW
+  APPROVE
+  REJECT
+  START_REWORK
+  RESUBMIT
+}
+
+enum AssetSyncStatus {
+  SYNCED
+  ADDED_UPSTREAM
+  MODIFIED_UPSTREAM
+  DELETED_UPSTREAM
+  RENAMED_UPSTREAM
+  CONFLICT
+  UNKNOWN
+}
+
+enum CacheStatus {
+  NOT_CACHED
+  CACHING
+  CACHED
+  STALE
+  FAILED
+  MIRRORED
+}
+
+enum AnnotationStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  SUBMITTED
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+enum AnnotationSource {
+  MANUAL
+  IMPORTED
+  AI
+  SYSTEM
+}
+
+enum AnnotationType {
+  BOUNDING_BOX
+  ROTATED_BOUNDING_BOX
+  POLYGON
+  CIRCLE
+  POINT
+  POLYLINE
+  SEGMENTATION_MASK
+  KEYPOINT
+  IMAGE_CLASSIFICATION
+  VIDEO_CLASSIFICATION
+  OBJECT_TRACK
+  ACTION
+  EVENT
+  SCENE
+  SHOT_BOUNDARY
+  NAMED_ENTITY_RECOGNITION
+  POS_TAG
+  TEXT_RELATION
+  TEXT_CLASSIFICATION
+  SENTIMENT
+  INTENT
+  TRANSCRIPT
+  AUDIO_CLASSIFICATION
+  SPEAKER_DIARIZATION
+  SPEAKER_IDENTIFICATION
+  NATURAL_LANGUAGE_UTTERANCE
+  ACOUSTIC_EVENT
+}
+
+enum VideoInterpolationMode {
+  NONE
+  LINEAR
+}
+
+enum LabelScope {
+  OBJECT
+  SEGMENTATION
+  KEYPOINT
+  CLASSIFICATION
+  ACTION
+  EVENT
+  SCENE
+  ENTITY
+  POS
+  RELATION
+  SENTIMENT
+  INTENT
+  TRANSCRIPT
+  SPEAKER
+  ACOUSTIC_EVENT
+  CUSTOM
+}
+
+enum StorageProvider {
+  MINIO
+  S3
+  R2
+  SUPABASE
+  LOCAL
+  EXTERNAL
+}
+
+enum JobType {
+  VISUALIZATION_CAPTURE
+  VISUALIZATION_DERIVE
+  CLONE_REPOSITORY
+  IMPORT_DATASET
+  SYNC_REPOSITORY
+  EXPORT_DATASET
+  GENERATE_THUMBNAILS
+  EXTRACT_VIDEO_METADATA
+  EXTRACT_VIDEO_FRAMES
+  GENERATE_AUDIO_WAVEFORM
+  AUTO_TRANSCRIBE_AUDIO
+  AUTO_LABEL_DATASET
+  AI_PREANNOTATE_ASSET
+  AI_PREANNOTATE_DATASET
+  AI_TASK_SYNC
+  BULK_DELETE_ASSETS
+  BULK_EXPORT_SELECTED
+  COLLABORATION_OUTBOX_DISPATCH
+  TEXT_SOURCE_PREPARE
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  RETRYING
+  COMPLETED
+  FAILED
+  CANCELING
+  CANCELED
+}
+
+enum JobStage {
+  WAITING
+  VALIDATING_INPUT
+  PREPARING_WORKSPACE
+  CLONING_REPOSITORY
+  CHECKING_OUT_REVISION
+  SCANNING_FILES
+  FILTERING_FILES
+  PARSING_IMPORT_FILE
+  VALIDATING_IMPORT_ROWS
+  MAPPING_LABELS
+  UPLOADING_OBJECTS
+  WRITING_ASSETS
+  WRITING_ANNOTATIONS
+  WRITING_METADATA
+  EXTRACTING_METADATA
+  GENERATING_THUMBNAILS
+  EXTRACTING_FRAMES
+  GENERATING_WAVEFORM
+  CREATING_AI_TASK
+  WAITING_AI_RESULT
+  FETCHING_AI_RESULT
+  VALIDATING_AI_RESULT
+  WRITING_AI_SUGGESTIONS
+  EXPORTING_DATASET
+  WRITING_EXPORT_FILE
+  CLEANING_UP
+  FINISHED
+  RESOLVING_SELECTION
+  DELETING_ASSETS
+  EXPORTING_SELECTED_ASSETS
+}
+
+enum JobPriority {
+  BACKGROUND
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum JobTrigger {
+  USER
+  SYSTEM
+  RETRY
+  SCHEDULED
+}
+
+enum JobEventLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
+enum PreparedImportStatus {
+  PREPARING
+  COMMITTED
+  EXPIRED
+}
+
+enum AiTaskStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+enum AiTaskType {
+  DETECTION
+  TRACKING
+  SEGMENTATION
+  ORIENTED_DETECTION
+  CLASSIFICATION
+  OCR
+  TRANSCRIBE
+
+  // Legacy values remain valid for historical AiTask snapshots and existing
+  // model registrations. Provider adapters map them at their boundary.
+  PREANNOTATE_ASSET
+  PREANNOTATE_DATASET
+  TRANSCRIBE_AUDIO
+  DETECT_OBJECTS
+  SEGMENT_IMAGE
+  CLASSIFY_TEXT
+  CLASSIFY_AUDIO
+  CUSTOM
+}
+
+model DatasetSnapshot {
+  id              String                  @id
+  datasetId       String
+  generation      BigInt
+  contentDigest   String
+  algorithm       String
+  ordinal         Int
+  assetCount      Int
+  annotationCount Int
+  publishedAt     DateTime                @default(now())
+  dataset         Dataset                 @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  artifacts       VisualizationArtifact[]
+
+  @@unique([id, datasetId])
+  @@unique([datasetId, ordinal])
+  @@index([datasetId, generation])
+}
+
+model VisualizationArtifact {
+  id          String          @id
+  datasetId   String
+  snapshotId  String
+  kind        String
+  algorithm   String
+  scope       String
+  bucket      String
+  key         String
+  sha256      String
+  sizeBytes   BigInt
+  contentType String
+  publishedAt DateTime        @default(now())
+  dataset     Dataset         @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  snapshot    DatasetSnapshot @relation(fields: [snapshotId, datasetId], references: [id, datasetId], onDelete: Cascade)
+
+  @@unique([bucket, key])
+  @@unique([datasetId, snapshotId, kind, algorithm, scope])
+  @@index([datasetId, snapshotId])
+}

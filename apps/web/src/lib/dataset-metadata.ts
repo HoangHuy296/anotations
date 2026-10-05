@@ -3,7 +3,7 @@ import "server-only";
 import { db } from "@/lib/db";
 
 export const datasetMetadataSelect = {
-  id: true, name: true, description: true, type: true, primaryModality: true,
+  id: true, name: true, description: true, type: true, modality: true, primaryModality: true,
   sourceMode: true, createdAt: true, updatedAt: true, archivedAt: true,
 } as const;
 export const labelMetadataSelect = {

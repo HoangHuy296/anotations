@@ -1,0 +1,87 @@
+--- recovery.review.sql (v1, preserved)
++++ recovery.v2.review.sql
+@@ -133,15 +133,17 @@
+ -- tombstones; include definitions, ownership, ACLs, comments, policies and sequences.
+ -- expected_after=true subtracts ONLY the exact objects verified above.
+ CREATE FUNCTION pg_temp.phase029_schema_manifest(expected_after boolean) RETURNS jsonb
+-LANGUAGE sql AS $manifest$
++LANGUAGE plpgsql AS $manifest$
++DECLARE manifest jsonb;
++BEGIN
+ WITH objects AS (
+-  SELECT 'relation' AS kind, c.relname AS name,
++  SELECT 'relation'::text AS kind, jsonb_build_array(n.nspname::text,c.relname::text)::text AS name,
+     jsonb_build_array(c.relkind,c.relpersistence,c.relowner,c.relacl,c.reloptions,
+       c.relrowsecurity,c.relforcerowsecurity,obj_description(c.oid,'pg_class'),
+       CASE WHEN c.relkind IN ('v','m') THEN pg_get_viewdef(c.oid) END) AS shape
+     FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'
+   UNION ALL
+-  SELECT 'column',c.relname||'.'||a.attname,
++  SELECT 'column',jsonb_build_array(n.nspname::text,c.relname::text,a.attname::text)::text,
+     jsonb_build_array(format_type(a.atttypid,a.atttypmod),a.attnotnull,a.attidentity,
+       a.attgenerated,a.attcollation,a.attacl,pg_get_expr(d.adbin,d.adrelid),col_description(c.oid,a.attnum))
+     FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace JOIN pg_attribute a ON a.attrelid=c.oid
+@@ -150,44 +152,53 @@
+       AND NOT (expected_after AND c.relname='Dataset' AND a.attname IN
+         ('modality','modalityContentRevision','modalityResolvedAt','modalityResolverSubject'))
+   UNION ALL
+-  SELECT 'constraint',coalesce(c.conrelid::regclass::text,c.contypid::regtype::text)||'.'||c.conname,
++  SELECT 'constraint',jsonb_build_array(n.nspname::text,CASE WHEN c.conrelid<>0 THEN 'relation' ELSE 'domain' END,CASE WHEN c.conrelid<>0 THEN c.conrelid::regclass::text ELSE c.contypid::regtype::text END,c.conname::text)::text,
+     jsonb_build_array(pg_get_constraintdef(c.oid),c.convalidated,c.condeferrable,c.condeferred)
+     FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace WHERE n.nspname='public'
+     AND NOT (expected_after AND c.conrelid='public."Dataset"'::regclass AND c.conname IN
+       ('dataset_modality_resolution_shape','dataset_modality_revision_nonnegative'))
+   UNION ALL
+-  SELECT 'index',c.relname,to_jsonb(pg_get_indexdef(c.oid)) FROM pg_class c
++  SELECT 'index',jsonb_build_array(n.nspname::text,c.relname::text)::text,to_jsonb(pg_get_indexdef(c.oid)) FROM pg_class c
+     JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind IN ('i','I')
+   UNION ALL
+-  SELECT 'trigger',c.relname||'.'||t.tgname,jsonb_build_array(pg_get_triggerdef(t.oid),t.tgenabled)
++  SELECT 'trigger',jsonb_build_array(n.nspname::text,c.relname::text,t.tgname::text)::text,jsonb_build_array(pg_get_triggerdef(t.oid),t.tgenabled)
+     FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace
+     WHERE n.nspname='public' AND NOT t.tgisinternal AND NOT (expected_after AND
+       ((c.relname='Dataset' AND t.tgname IN ('dataset_modality_insert_guard','dataset_modality_assignment_guard'))
+         OR (c.relname='Asset' AND t.tgname='asset_modality_write_guard')))
+   UNION ALL
+-  SELECT 'routine',p.oid::regprocedure::text,jsonb_build_array(pg_get_functiondef(p.oid),p.proowner,p.proacl,obj_description(p.oid,'pg_proc'))
++  SELECT 'routine',jsonb_build_array(n.nspname::text,p.oid::regprocedure::text)::text,jsonb_build_array(pg_get_functiondef(p.oid),p.proowner,p.proacl,obj_description(p.oid,'pg_proc'))
+     FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='public' AND p.prokind IN ('f','p')
+       AND NOT (expected_after AND p.pronargs=0 AND p.proname IN
+         ('phase029_guard_dataset_insert','phase029_guard_dataset_assignment','phase029_guard_asset_write'))
+   UNION ALL
+-  SELECT 'type',t.typname,jsonb_build_array(t.typtype,t.typowner,t.typacl,t.typbasetype,
++  SELECT 'type',jsonb_build_array(n.nspname::text,t.typname::text)::text,jsonb_build_array(t.typtype,t.typowner,t.typacl,t.typbasetype,
+     t.typtypmod,t.typnotnull,t.typdefault,obj_description(t.oid,'pg_type'))
+     FROM pg_type t JOIN pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='public'
+   UNION ALL
+-  SELECT 'enum',t.typname||'.'||e.enumlabel,to_jsonb(e.enumsortorder) FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid
++  SELECT 'enum',jsonb_build_array(n.nspname::text,t.typname::text,e.enumlabel)::text,to_jsonb(e.enumsortorder) FROM pg_enum e JOIN pg_type t ON t.oid=e.enumtypid
+     JOIN pg_namespace n ON n.oid=t.typnamespace WHERE n.nspname='public'
+   UNION ALL
+-  SELECT 'policy',c.relname||'.'||p.polname,jsonb_build_array(p.polcmd,p.polpermissive,p.polroles,
++  SELECT 'policy',jsonb_build_array(n.nspname::text,c.relname::text,p.polname::text)::text,jsonb_build_array(p.polcmd,p.polpermissive,p.polroles,
+     pg_get_expr(p.polqual,p.polrelid),pg_get_expr(p.polwithcheck,p.polrelid)) FROM pg_policy p
+     JOIN pg_class c ON c.oid=p.polrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'
+   UNION ALL
+-  SELECT 'sequence',c.relname,to_jsonb(s)-'seqrelid' FROM pg_sequence s JOIN pg_class c ON c.oid=s.seqrelid
++  SELECT 'sequence',jsonb_build_array(n.nspname::text,c.relname::text)::text,to_jsonb(s)-'seqrelid' FROM pg_sequence s JOIN pg_class c ON c.oid=s.seqrelid
+     JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'
+   UNION ALL
+-  SELECT 'rule',c.relname||'.'||r.rulename,to_jsonb(pg_get_ruledef(r.oid)) FROM pg_rewrite r
++  SELECT 'rule',jsonb_build_array(n.nspname::text,c.relname::text,r.rulename::text)::text,to_jsonb(pg_get_ruledef(r.oid)) FROM pg_rewrite r
+     JOIN pg_class c ON c.oid=r.ev_class JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public'
+ )
+-SELECT coalesce(jsonb_agg(jsonb_build_array(kind,name,shape) ORDER BY kind,name),'[]'::jsonb) FROM objects;
++SELECT coalesce(jsonb_agg(jsonb_build_array(kind,name,shape)
++  ORDER BY kind COLLATE "C",name COLLATE "C"),'[]'::jsonb) INTO manifest FROM objects;
++IF EXISTS (
++  SELECT 1 FROM jsonb_array_elements(manifest) AS e(value)
++  GROUP BY value->0,value->1 HAVING count(*) > 1
++) THEN
++  RAISE EXCEPTION 'RECOVERY_MANIFEST_IDENTITY_COLLISION';
++END IF;
++RETURN manifest;
++END;
+ $manifest$;
+ 
+ -- Hash row content without printing it. Dataset's four disposable Phase029 fields

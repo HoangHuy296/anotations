@@ -12,8 +12,8 @@ export async function POST(_: Request, context: { params: Promise<{ jobId: strin
   const result = await commitLocalFolderImport(actor, jobId);
   if (!result.ok) {
     if (result.status === 404) return apiError(404, "JOB_NOT_FOUND", "The import job was not found.");
-    if ("code" in result && result.code === "IMPORT_INCOMPLETE") return apiError(409, "IMPORT_INCOMPLETE", "All prepared files must complete before committing.");
+    if ("code" in result && result.code === "IMPORT_INCOMPLETE") return apiError(409, "IMPORT_INCOMPLETE", "The import finished with rejected, retryable, or unprocessed files. Valid Assets were retained.", undefined, undefined, { outcome: "incomplete", accepted: result.accepted, unchanged: result.unchanged, rejected: result.rejected, retryable: result.retryable, unprocessed: result.unprocessed });
     return apiError(409, "JOB_CONFLICT", "The import cannot be committed in its current state.");
   }
-  return apiSuccess({ id: jobId, status: "COMPLETED", replayed: result.replayed, completed: result.completed, total: result.total });
+  return apiSuccess({ id: jobId, status: "COMPLETED", replayed: result.replayed, accepted: result.accepted, unchanged: result.unchanged, completed: result.completed, total: result.total });
 }

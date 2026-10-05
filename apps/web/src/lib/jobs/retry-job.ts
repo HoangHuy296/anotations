@@ -1,11 +1,13 @@
 import "server-only";
+import { requestVisualizationProcessing } from "@/lib/visualization/processing-service";
 
 import { JobStatus, JobTrigger, Prisma, type JobType } from "@internal/db";
 
 import type { RequestActor } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { readAuthorizedJobForAction } from "@/lib/jobs/authorization";
-import { enqueueExistingJob } from "@/lib/queue/enqueue-job";
+import { enqueueExistingJob, type EnqueueOptions } from "@/lib/queue/enqueue-job";
+import { isAiJobType, retryAiJob } from "@/lib/ai/ai-retry-service";
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { exportJobInputSchema } from "@/lib/validation/export";
 import {
@@ -28,7 +30,7 @@ type RetryContext = {
  * errors, provider connections and storage references never cross retries.
  */
 function extractRetryContext(job: RetryContext): {
-  input: { format: "JSON"; manifestSchemaVersion: "1" } | ReturnType<typeof buildSafeRepositoryImportJobInput> | TextSourcePrepareJobInput;
+  input: { format: "JSON" | "COCO"; manifestSchemaVersion: "1" } | ReturnType<typeof buildSafeRepositoryImportJobInput> | TextSourcePrepareJobInput;
   modality: RetryContext["modality"];
   sourceConnectionId: string | null;
 } | null {
@@ -86,9 +88,9 @@ function extractRetryContext(job: RetryContext): {
 
 export type RetryJobResult =
   | { ok: false; status: 403 | 404 | 409 }
-  | { ok: true; status: 200 | 201; job: { id: string; datasetId: string; type: JobType; status: JobStatus } };
+  | { ok: true; status: 200 | 201 | 202; job: { id: string; datasetId: string; type: JobType; status: JobStatus } };
 
-export async function retryAuthorizedJob(actor: RequestActor, jobId: string): Promise<RetryJobResult> {
+export async function retryAuthorizedJob(actor: RequestActor, jobId: string, enqueueOptions: EnqueueOptions = {}): Promise<RetryJobResult> {
   const authorized = await readAuthorizedJobForAction(actor, jobId, "job.retry");
   if (!authorized.ok) return authorized;
 
@@ -99,6 +101,9 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string): Pr
   if (!queueName || queueName.status !== JobStatus.FAILED || !resolveQueueName(queueName.type)) {
     return { ok: false, status: 409 };
   }
+  if (queueName.type === "VISUALIZATION_CAPTURE" || queueName.type === "VISUALIZATION_DERIVE") return requestVisualizationProcessing(actor, queueName.datasetId, jobId, enqueueOptions);
+  // AI operations need a paired AiTask and their own recovery rules (non-idempotent provider).
+  if (isAiJobType(queueName.type)) return retryAiJob(actor, jobId, enqueueOptions);
   const context = extractRetryContext(queueName);
   if (!context) return { ok: false, status: 409 };
 
@@ -178,7 +183,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string): Pr
 
   // Enqueue after the durable successor commits. Failure intentionally leaves
   // it QUEUED/un-enqueued for the Phase 007 recovery scanner.
-  await enqueueExistingJob(successor.id);
+  await enqueueExistingJob(successor.id, undefined, undefined, enqueueOptions);
   return { ok: true, status: created ? 201 : 200, job: successor };
 }
 

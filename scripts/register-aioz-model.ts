@@ -1,3 +1,4 @@
+import "db-safety/deny-entry.cjs"; // G1: this writer has no approved operation scope.
 import { PrismaClient } from "../lib/generated/prisma/client.js";
 import { AiozRegistrationError, registerAiozModel } from "../apps/worker/src/providers/ai/aioz-model-registration.js";
 

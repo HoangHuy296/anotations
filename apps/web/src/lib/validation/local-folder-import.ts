@@ -29,6 +29,7 @@ const localFolderImportManifestSchema = z.object({
 export const startLocalFolderImportSchema = localFolderImportManifestSchema.extend({
   name: z.string().trim().min(1).max(160),
   description: z.string().trim().max(2_000).optional(),
+  modality: z.enum(["IMAGE", "VIDEO", "AUDIO", "TEXT"]),
 }).superRefine(manifestRefinement);
 
 /** A workspace append uses the Dataset selected by the route, never browser input. */

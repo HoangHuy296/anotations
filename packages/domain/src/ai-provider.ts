@@ -49,7 +49,8 @@ export type AiProviderPrediction = {
  * `AiProviderPrediction`.
  */
 export type AiProviderStatusResult =
-  | { status: "PENDING" | "IN_PROGRESS" }
+  /** `degraded`: the provider reported a non-terminal system failure (`failed_system`); polling continues within its budget (decision D-FS). */
+  | { status: "PENDING" | "IN_PROGRESS"; degraded?: boolean }
   | { status: "COMPLETED"; rawPredictions: unknown }
   | { status: "FAILED"; error: { code: string; message: string } };
 

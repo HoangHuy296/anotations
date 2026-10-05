@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ensureTextSourceReady, fetchTextSource, triggerTextSourcePreparation } from "@/lib/workspace/text-read-client";

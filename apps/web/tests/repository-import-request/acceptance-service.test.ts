@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -24,6 +25,7 @@ const baseRequest = {
     expectedVisibility: "PUBLIC" as const,
   },
   datasetName: "Phase 015 contract fixture",
+  modality: "IMAGE" as const,
   idempotencyKey: "phase015-idempotency-key-0001",
 };
 
@@ -53,6 +55,7 @@ test("hybrid credential modes allow only the approved fields and exclude a one-t
     connectionName: "Phase 015 fixture",
     repository: { owner: "fixture", name: "private-images", ref: "main", expectedVisibility: "PRIVATE" },
     datasetName: "Private fixture",
+    modality: "IMAGE",
     idempotencyKey: "phase015-idempotency-key-one-time",
   });
   assert.equal(repositoryImportRequestSchema.safeParse({ ...oneTime, saveAsSourceConnection: false }).success, true);
@@ -85,8 +88,10 @@ test("canonical request hash is stable for equivalent input and differs for a ch
     },
   });
   const changed = repositoryImportRequestSchema.parse({ ...baseRequest, datasetName: "different Dataset" });
+  const changedModality = repositoryImportRequestSchema.parse({ ...baseRequest, modality: "VIDEO" });
   assert.equal(creationRequestHash(parsed, "images"), creationRequestHash(equivalent, "images"));
   assert.notEqual(creationRequestHash(parsed, "images"), creationRequestHash(changed, "images"));
+  assert.notEqual(creationRequestHash(parsed, "images"), creationRequestHash(changedModality, "images"));
 });
 
 test("accepted Job input is deeply allowlisted and rejects credential-shaped values", () => {

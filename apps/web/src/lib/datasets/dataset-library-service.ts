@@ -2,6 +2,8 @@ import "server-only";
 
 import { Prisma, UserRole } from "@internal/db";
 
+import { projectDatasetWorkflowStatus } from "@/lib/datasets/dataset-destination";
+
 import type { RequestActor } from "@/lib/auth";
 import { db } from "@/lib/db";
 import type { DatasetLibraryQuery } from "@/types/dataset-library";
@@ -64,7 +66,7 @@ export async function getDatasetLibrary(actor: RequestActor, query: DatasetLibra
     db.asset.groupBy({ by: ["datasetId", "modality"], where: assetWhere, _count: { _all: true } }),
   ]);
   return {
-    datasets, total, statusCounts, modalityCounts,
+    datasets: datasets.map(projectDatasetWorkflowStatus), total, statusCounts, modalityCounts,
     hasNext: backwards ? true : overflow,
     hasPrevious: backwards ? overflow : Boolean(query.after),
   };

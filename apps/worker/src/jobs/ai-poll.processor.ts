@@ -10,6 +10,7 @@ import {
   POLL_MAX_DELAY_MS,
 } from "./ai-poll-constants.js";
 import { releaseLock, renewLock, renewOrReclaimLock } from "../queue/job-lock.js";
+import { finalizeAllTargetsCanceled, finalizeAllTargetsFailed, pollFailureReason, resolveAiBatchInput } from "./ai-batch-state.js";
 import { resolveAiProviderForTask } from "../providers/ai/ai-provider-registry.js";
 import type { AiTask, PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
@@ -54,7 +55,7 @@ export async function processAiPoll(
   providerRegistry?: Record<string, AiProviderAdapter>,
 ): Promise<void> {
   // 1. Load Job.
-  const job = await db.job.findUnique({ where: { id: jobId }, select: { id: true, lockToken: true } });
+  const job = await db.job.findUnique({ where: { id: jobId }, select: { id: true, lockToken: true, input: true } });
   if (!job) return;
 
   // 2. Claim/renew-or-reclaim the lock.
@@ -71,7 +72,7 @@ export async function processAiPoll(
 
   const aiTask = await db.aiTask.findUnique({
     where: { jobId },
-    select: { id: true, datasetId: true, createdById: true, modality: true, type: true, modelKeySnapshot: true, input: true, modelId: true, externalTaskId: true, pollAttempts: true, createdAt: true },
+    select: { id: true, datasetId: true, createdById: true, modality: true, type: true, modelKeySnapshot: true, input: true, modelId: true, externalTaskId: true, pollAttempts: true, createdAt: true, summary: true },
   });
   if (!aiTask || !aiTask.externalTaskId) {
     await releaseLock(db, jobId, lockToken, workerId);
@@ -80,14 +81,22 @@ export async function processAiPoll(
 
   // Poll budget (FR-010) is checked before every provider call, not just on
   // a non-terminal result — a task must never poll forever.
+  const batch = resolveAiBatchInput(job.input);
+  const summaryRecord = (aiTask.summary && typeof aiTask.summary === "object" && !Array.isArray(aiTask.summary) ? aiTask.summary : {}) as Record<string, unknown>;
+  const degradedNow = summaryRecord.providerStatus === "PROVIDER_DEGRADED";
+
   if (hasExceededPollBudget(aiTask)) {
+    // Decision D-FS: a provider still reporting `failed_system` when the budget runs out ends as
+    // AI_PROVIDER_FAILED_SYSTEM; otherwise the ordinary timeout code applies.
+    const errorCode = degradedNow ? "AI_PROVIDER_FAILED_SYSTEM" : "AI_TASK_TIMEOUT";
+    if (batch.kind === "v1") await finalizeAllTargetsFailed(db, { jobId, aiTaskId: aiTask.id, lockToken, targets: batch.input.targets, reason: pollFailureReason(errorCode) }).catch(() => undefined);
     await db.aiTask.update({
       where: { id: aiTask.id },
-      data: { status: "FAILED", error: "AI task exceeded its poll budget.", errorCode: "AI_TASK_TIMEOUT" },
+      data: { status: "FAILED", error: "AI task exceeded its poll budget.", errorCode },
     });
     await db.job.updateMany({
       where: { id: jobId, lockToken, status: "RUNNING" },
-      data: { status: "FAILED", stage: "FINISHED", errorCode: "AI_TASK_TIMEOUT", finishedAt: new Date() },
+      data: { status: "FAILED", stage: "FINISHED", errorCode, finishedAt: new Date() },
     });
     await releaseLock(db, jobId, lockToken, workerId);
     return;
@@ -110,9 +119,14 @@ export async function processAiPoll(
     case "PENDING":
     case "IN_PROGRESS": {
       const delay = computePollDelay(aiTask.pollAttempts);
+      const degraded = result.degraded === true;
       await db.aiTask.update({
         where: { id: aiTask.id },
-        data: { pollAttempts: { increment: 1 }, nextPollAt: new Date(Date.now() + delay) },
+        data: {
+          pollAttempts: { increment: 1 }, nextPollAt: new Date(Date.now() + delay),
+          // Only a change is written: the last provider status stays durable and diagnosable.
+          ...(degraded !== degradedNow ? { summary: { ...summaryRecord, providerStatus: degraded ? "PROVIDER_DEGRADED" : "PROVIDER_ACTIVE" } as never } : {}),
+        },
       });
       await renewLock(db, jobId, lockToken, workerId, delay + LOCK_RENEWAL_BUFFER_MS);
       return;
@@ -123,14 +137,19 @@ export async function processAiPoll(
       return;
     }
     case "FAILED": {
+      // Finalize targets while the Job is still RUNNING and locked (the counters are fenced on that).
+      if (batch.kind === "v1") await finalizeAllTargetsFailed(db, { jobId, aiTaskId: aiTask.id, lockToken, targets: batch.input.targets, reason: pollFailureReason(result.error.code) }).catch(() => undefined);
       await db.aiTask.update({
         where: { id: aiTask.id },
-        data: { status: "FAILED", error: result.error.message, errorCode: result.error.code },
+        // Adapter-supplied text is never persisted (a provider message can echo signed URLs); the code is the diagnosis.
+        data: { status: "FAILED", error: "AI provider task failed.", errorCode: result.error.code },
       });
       await db.job.updateMany({
         where: { id: jobId, lockToken, status: "RUNNING" },
         data: { status: "FAILED", stage: "FINISHED", errorCode: result.error.code, finishedAt: new Date() },
       });
+      // A provider failure is whole-batch (verification/provider-contract.md): every accepted target is
+      // finalized with one sanitized reason; nothing is attributed per Asset from provider error text.
       await releaseLock(db, jobId, lockToken, workerId);
       return;
     }
@@ -154,7 +173,10 @@ export async function processAiPoll(
  */
 export async function finalizeCanceledAiTask(db: PrismaClient, jobId: string, lockToken: string, workerId: string): Promise<void> {
   const now = new Date();
+  const jobRow = await db.job.findUnique({ where: { id: jobId }, select: { input: true, aiTasks: { select: { id: true } } } });
+  const batch = resolveAiBatchInput(jobRow?.input);
   await db.$transaction(async (tx) => {
+    if (batch.kind === "v1" && jobRow?.aiTasks) await finalizeAllTargetsCanceled(tx, { jobId, aiTaskId: jobRow.aiTasks.id, targets: batch.input.targets });
     await tx.aiTask.updateMany({
       where: { jobId, status: { in: ["QUEUED", "RUNNING"] } },
       data: { status: "CANCELED" },

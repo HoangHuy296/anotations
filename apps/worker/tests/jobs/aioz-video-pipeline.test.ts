@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -23,7 +24,7 @@ async function setup() {
   return { ...f, predictions, task: await f.db.aiTask.findUniqueOrThrow({ where: { id: f.aiTaskId } }) };
 }
 
-test("video submit/poll/restart writes ten unlabeled tracks and 38 AI keyframes once", { skip: !hasIntegrationDatabase }, async () => {
+test("video submit/poll/restart writes ten labeled tracks and 38 AI keyframes once", { skip: !hasIntegrationDatabase }, async () => {
   const f = await setup(); const remoteId = randomUUID(); let posts = 0;
   const provider = () => new AiozAnnotationServicesProvider({ baseUrl: "http://aioz.test", apiKey: "test", timeoutMs: 1000 }, createAiozTaskResources(f.db, async () => fixture[0].video_path), async (_url, init) => {
     if (init?.method === "POST") {
@@ -45,7 +46,7 @@ test("video submit/poll/restart writes ten unlabeled tracks and 38 AI keyframes 
     const tracks = await f.db.videoObjectTrack.findMany({ where: { videoAsset: { assetId: f.assetIds[0] } } });
     const frames = await f.db.annotation.findMany({ where: { assetId: f.assetIds[0] }, orderBy: { frameIndex: "asc" } });
     assert.equal(tracks.length, 10); assert.equal(frames.length, 38);
-    assert.ok(tracks.every((track) => track.labelId === null && track.interpolationMode === "NONE" && track.status === "DRAFT"));
+    assert.ok(tracks.every((track) => track.labelId !== null && track.interpolationMode === "NONE" && track.status === "DRAFT"));
     assert.ok(frames.every((frame) => frame.source === "AI" && frame.isKeyframe && !frame.isInterpolated && frame.modality === "VIDEO" && frame.trackId && frame.revision === 1));
     assert.equal(frames[0].frameIndex, 54); assert.equal(frames[0].timestampMs, 1806);
     assert.equal((frames[0].properties as { providerClassId: number }).providerClassId, 56);

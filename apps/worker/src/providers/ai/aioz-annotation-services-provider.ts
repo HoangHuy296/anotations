@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 
+import { classifyAiProviderStatus } from "@annotationplatform/domain/ai-batch";
 import type { AiProviderAdapter, AiProviderPrediction, AiProviderStatusResult, AiProviderSubmitInput, AiProviderSubmitResult } from "@annotationplatform/domain/ai-provider";
 import type { AiozAnnotationServicesConfig } from "../../config.js";
 import { AiozResultError, normalizeAiozOutput, type AiozImageAssociation } from "./aioz-annotation-services-normalization.js";
@@ -30,7 +31,9 @@ export interface AiozTaskResources {
   loadImages(externalTaskId: string): Promise<AiozSubmittedImage[]>;
 }
 
-const status = z.enum(["create", "pending", "inprocess", "failed", "success"]);
+// The deployed service also emits `failed_system` (verification/provider-contract.md F3); statuses are
+// classified by an explicit allowlist (classifyAiProviderStatus) instead of a closed enum.
+const status = z.string();
 const created = z.object({ success: z.boolean().default(true), data: z.object({ task_id: z.string().uuid(), status, created_at: z.string() }) });
 const result = z.object({ success: z.boolean().default(true), data: z.object({ task_id: z.string().uuid(), status, output: z.array(z.unknown()).nullable(), error: z.string().nullable() }) });
 const request = z.object({
@@ -52,7 +55,9 @@ export class AiozAnnotationServicesProvider implements AiProviderAdapter {
       if (!body.success) throw new AiozProviderError("AIOZ_INVALID_INPUT");
       const parsed = created.safeParse(await this.call("/api/v1/tasks/create", { method: "POST", body: JSON.stringify(body.data) }));
       if (!parsed.success) throw new AiozProviderError("AIOZ_INVALID_CREATE_RESPONSE");
-      if (!parsed.data.success || parsed.data.data.status === "failed") throw new AiozProviderError("AIOZ_EXTERNAL_FAILED");
+      // A task id exists once the service accepted the request: record it whatever the status, so
+      // an unexpected status can never orphan an already-created (non-idempotent) external task.
+      if (!parsed.data.success || classifyAiProviderStatus(parsed.data.data.status) === "FAILED") throw new AiozProviderError("AIOZ_EXTERNAL_FAILED");
       const externalTaskId = parsed.data.data.task_id;
       await this.resources.recordSubmission(input.aiTaskId, externalTaskId);
       return { externalTaskId };
@@ -65,9 +70,14 @@ export class AiozAnnotationServicesProvider implements AiProviderAdapter {
       const parsed = result.safeParse(await this.call(`/api/v1/tasks/result/${encodeURIComponent(externalTaskId)}`, { method: "GET" }));
       if (!parsed.success || parsed.data.data.task_id !== externalTaskId) throw new AiozProviderError("AIOZ_INVALID_RESULT_RESPONSE");
       const data = parsed.data.data;
-      if (!parsed.data.success || data.status === "failed" || data.error !== null) throw new AiozProviderError("AIOZ_EXTERNAL_FAILED");
-      if (data.status === "create" || data.status === "pending") return { status: "PENDING" };
-      if (data.status === "inprocess") return { status: "IN_PROGRESS" };
+      const statusClass = classifyAiProviderStatus(data.status);
+      if (!parsed.data.success || statusClass === "FAILED") throw new AiozProviderError("AIOZ_EXTERNAL_FAILED");
+      if (statusClass === "UNKNOWN") throw new AiozProviderError("AIOZ_STATUS_UNKNOWN");
+      // Decision D-FS: `failed_system` is non-terminal and not assumed recoverable; its error text is never read.
+      if (statusClass === "DEGRADED") return { status: "IN_PROGRESS", degraded: true };
+      if (data.error !== null) throw new AiozProviderError("AIOZ_EXTERNAL_FAILED");
+      if (statusClass === "PENDING") return { status: "PENDING" };
+      if (statusClass === "IN_PROGRESS") return { status: "IN_PROGRESS" };
       const submitted = await this.resources.loadImages(externalTaskId);
       if (!data.output || data.output.length !== submitted.length || !submitted.length) throw new AiozProviderError("AIOZ_INVALID_OUTPUT");
       const byDigest = new Map(submitted.map((image) => [image.urlDigest, image.assetId]));

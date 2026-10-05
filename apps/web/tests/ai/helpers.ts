@@ -41,7 +41,11 @@ export function request(path: string, init: RequestInit = {}) {
   return fetch(`${baseUrl}${path}`, init);
 }
 
-/** Dataset + one Asset + one active AiModel, owned by `ownerId`. */
+/**
+ * Dataset + one Asset + one active AiModel, owned by `ownerId`. The model uses the
+ * test-only provider (026): the real-provider gates (deployed-catalog membership,
+ * modality) need the deployed AI Service and are covered by ai-batch-task-creation.test.ts.
+ */
 export async function createAiTaskFixture(ownerId: string) {
   const suffix = `${Date.now()}-${randomBytes(4).toString("hex")}`;
   const dataset = await db.dataset.create({ data: { ownerId, name: `ai-fixture-${suffix}` }, select: { id: true } });
@@ -52,11 +56,16 @@ export async function createAiTaskFixture(ownerId: string) {
       filename: `fixture-${suffix}.jpg`,
       mimeType: "image/jpeg",
       sourceFingerprint: `ai-fixture-${suffix}`,
+      // Deliberate 026 fixture change: acceptance now requires a size and a storage location (decision D-U1).
+      sizeBytes: BigInt(1024),
+      storageProvider: "MINIO",
+      storageBucket: "ai-fixture-bucket",
+      storageKey: `ai-fixture/${suffix}.jpg`,
     },
     select: { id: true },
   });
   const model = await db.aiModel.create({
-    data: { key: `ai-fixture-model-${suffix}`, displayName: "Fixture Model", provider: "aioz-company", modality: "IMAGE", taskType: "DETECT_OBJECTS", isActive: true },
+    data: { key: `ai-fixture-model-${suffix}`, displayName: "Fixture Model", provider: "aioz-test-result", modality: "IMAGE", taskType: "DETECT_OBJECTS", isActive: true },
     select: { id: true },
   });
   return { datasetId: dataset.id, assetId: asset.id, modelId: model.id };

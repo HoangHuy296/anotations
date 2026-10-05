@@ -61,3 +61,24 @@ docker-data/
 # generated OpenAPI bundle + standalone Swagger UI docs page
 # (pnpm docs:build -> scripts/bundle-openapi.py + scripts/generate-swagger-ui.mjs)
 /specs/api/dist/
+
+# Generated repository text exports; source files remain authoritative.
+/repomix-output.*
+
+# Phase 029 generated verification evidence (kept locally; see cleanup review).
+# Keep Markdown reports, test/source files and SQL visible to Git.
+/specs/029-modality-specific-datasets/verification/**/*.log
+/specs/029-modality-specific-datasets/verification/**/*.json
+/specs/029-modality-specific-datasets/verification/**/*.gz
+/specs/029-modality-specific-datasets/verification/**/*.diff
+/specs/029-modality-specific-datasets/verification/**/*.txt
+/specs/029-modality-specific-datasets/verification/**/*.before
+
+# Phase 029 verification: raw run evidence stays local (archived under .data/cleanup-archives, see ARCHIVE-INDEX.md).
+/specs/029-modality-specific-datasets/verification/*
+!/specs/029-modality-specific-datasets/verification/ARCHIVE-INDEX.md
+!/specs/029-modality-specific-datasets/verification/mvp-modality-card-status-20261005.md
+
+# Python bytecode
+__pycache__/
+*.pyc

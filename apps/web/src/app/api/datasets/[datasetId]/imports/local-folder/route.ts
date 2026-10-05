@@ -17,6 +17,10 @@ export async function POST(request: Request, context: { params: Promise<{ datase
   const parsed = appendLocalFolderImportSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return apiError(400, "INVALID_REQUEST", "Local-folder import input is invalid.", parsed.error.flatten().fieldErrors);
   const result = await prepareDatasetAppendImport(actor, datasetId, parsed.data);
-  if (!result.ok) return apiError(result.status, result.status === 404 ? "DATASET_NOT_FOUND" : "FORBIDDEN", result.status === 404 ? "The dataset was not found." : "You do not have permission to upload to this dataset.");
+  if (!result.ok) {
+    const resultCode = "code" in result ? result.code : undefined;
+    const code = resultCode === "IDEMPOTENCY_KEY_CONFLICT" ? "IDEMPOTENCY_KEY_CONFLICT" : resultCode === "DATASET_MODALITY_UNRESOLVED" ? "DATASET_MODALITY_UNRESOLVED" : result.status === 404 ? "DATASET_NOT_FOUND" : "FORBIDDEN";
+    return apiError(result.status, code, "The dataset import cannot be started in its current state.");
+  }
   return apiSuccess({ preparation: result.preparation, replayed: result.replayed, deliveryPending: result.deliveryPending ?? false }, { status: result.status });
 }

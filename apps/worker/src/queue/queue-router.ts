@@ -16,6 +16,8 @@ import { processBulkExportSelected } from "../jobs/bulk-export-selected.js";
 import { processCollaborationOutboxDispatch } from "../jobs/collaboration-outbox-relay.js";
 import { processTextSourcePrepare } from "../jobs/text-source-prepare.processor.js";
 
+import { processVisualization } from "../jobs/visualization.processor.js";
+
 export type QueueRouteResult =
   | { kind: "received"; jobId: string }
   | { kind: "claimed"; jobId: string }
@@ -75,6 +77,7 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
       return { kind: "claimed", jobId: job.id };
     }
   }
+  if (job.type === "VISUALIZATION_CAPTURE" || job.type === "VISUALIZATION_DERIVE") await processVisualization(input.db, job.id, claim.lockToken);
   if (job.type === "IMPORT_DATASET") await processImportDataset(input.db, job.id, claim.lockToken);
   if (job.type === "EXPORT_DATASET") await processExportDataset(input.db, job.id, claim.lockToken);
   if (job.type === "EXTRACT_VIDEO_METADATA") await processVideoMetadata(input.db, job.id, claim.lockToken);

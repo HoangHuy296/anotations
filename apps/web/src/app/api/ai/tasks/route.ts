@@ -34,10 +34,24 @@ export async function POST(request: Request) {
         return apiError(409, "AI_MODEL_INACTIVE", "The selected AI model is not active.");
       case "ASSET_NOT_IN_DATASET":
         return apiError(409, "ASSET_NOT_IN_DATASET", "One or more assets do not belong to this dataset.");
+      case "AI_MODEL_CATALOG_UNAVAILABLE":
+        return apiError(502, "AI_MODEL_CATALOG_UNAVAILABLE", "The AI model catalog is unavailable. Try again.");
+      case "TARGET_EMPTY":
+        return apiError(400, "TARGET_EMPTY", "Select at least one asset.");
+      case "TARGET_TOO_LARGE":
+        return apiError(422, "TARGET_TOO_LARGE", "The selection exceeds the maximum number of assets for one AI run.");
+      case "TARGET_MIXED_MODALITY":
+        return apiError(422, "TARGET_MIXED_MODALITY", "The selected assets must all have the same type.");
+      case "TARGET_INELIGIBLE":
+        return apiError(422, "TARGET_INELIGIBLE", "One or more selected assets cannot be processed.");
+      case "TARGET_CHANGED":
+        return apiError(409, "TARGET_CHANGED", "The selection changed. Review it and run again.");
+      case "AI_CAPABILITY_UNVERIFIED":
+        return apiError(409, "AI_CAPABILITY_UNVERIFIED", "AI is not available for this asset type or batch size yet.");
       case "JOB_CONFLICT":
         return apiError(409, "JOB_CONFLICT", "The AI task could not be enqueued.");
     }
   }
 
-  return apiSuccess({ taskId: result.taskId, jobId: result.jobId }, { status: 202 });
+  return apiSuccess({ taskId: result.taskId, jobId: result.jobId, target: result.target }, { status: 202 });
 }

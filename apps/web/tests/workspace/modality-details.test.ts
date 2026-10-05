@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -17,7 +18,7 @@ const enabled = process.env.WORKSPACE_INTEGRATION_TESTS === "1" && Boolean(proce
  */
 test("AUDIO selection carries real AudioAsset metadata, not just a filename", { skip: !enabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.AUDIO);
   try {
     const marker = workspaceUnique("audio-details");
     const asset = await db.asset.create({
@@ -42,7 +43,7 @@ test("AUDIO selection carries real AudioAsset metadata, not just a filename", { 
 
 test("AUDIO selection reports waveformReady=false when no waveform has been generated yet", { skip: !enabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.AUDIO);
   try {
     const marker = workspaceUnique("audio-no-waveform");
     const asset = await db.asset.create({ data: { datasetId: dataset.id, modality: Modality.AUDIO, filename: `${marker}.wav`, mimeType: "audio/wav", sourceFingerprint: marker, audioAsset: { create: {} } }, select: { id: true } });
@@ -55,7 +56,7 @@ test("AUDIO selection reports waveformReady=false when no waveform has been gene
 
 test("TEXT selection carries real TextAsset/Asset metadata, not just a filename", { skip: !enabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   try {
     const marker = workspaceUnique("text-details");
     const asset = await db.asset.create({
@@ -79,7 +80,7 @@ test("TEXT selection carries real TextAsset/Asset metadata, not just a filename"
 
 test("TEXT selection reports Unknown-safe nulls when no TextAsset row exists yet", { skip: !enabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   try {
     const marker = workspaceUnique("text-no-textasset");
     const asset = await db.asset.create({ data: { datasetId: dataset.id, modality: Modality.TEXT, filename: `${marker}.txt`, mimeType: "text/plain", sourceFingerprint: marker } }, );

@@ -63,10 +63,63 @@ AiModelListResponse:
       examples: [4]
   additionalProperties: false
 
+AiSelectionQuery:
+  type: object
+  description: "Phase 022 FILTERED selection query (bulkSelectionQuerySchema), reused exactly: no sort/order/cursor/page/limit fields."
+  additionalProperties: false
+  properties:
+    q: { type: string, minLength: 1, maxLength: 100 }
+    status: { type: array, minItems: 1, items: { type: string } }
+    modality: { type: string }
+    labelId: { type: array, minItems: 1, items: { type: string } }
+    assignedToId: { type: string }
+    createdFrom: { type: string, format: date-time }
+    createdTo: { type: string, format: date-time }
+    updatedFrom: { type: string, format: date-time }
+    updatedTo: { type: string, format: date-time }
+
+AiDetectionTarget:
+  description: >-
+    What an AI run targets (feature 026; source: aiDetectionTargetSchema). The
+    browser states intent only -- the server resolves membership, deduplicates,
+    orders by id, authorizes and validates it atomically. Never send resolved
+    records, counts, filenames or file locations (unknown fields are rejected).
+  oneOf:
+    - type: object
+      required: [mode, assetId]
+      additionalProperties: false
+      properties:
+        mode: { const: CURRENT_ASSET }
+        assetId: { type: string, minLength: 1 }
+    - type: object
+      required: [mode, selection]
+      additionalProperties: false
+      properties:
+        mode: { const: BULK_SELECTION }
+        selection:
+          oneOf:
+            - type: object
+              required: [mode, assetIds]
+              additionalProperties: false
+              properties:
+                mode: { const: EXPLICIT }
+                assetIds: { type: array, minItems: 1, maxItems: 1000, items: { type: string } }
+            - type: object
+              required: [mode, query]
+              additionalProperties: false
+              properties:
+                mode: { const: FILTERED }
+                query: { $ref: '#/AiSelectionQuery' }
+
 CreateAiTaskRequest:
   type: object
-  description: "Source: createAiTaskSchema."
-  required: [datasetId, modelId, assetIds]
+  description: >-
+    Source: createAiTaskSchema. Provide exactly one of `assetIds` (legacy form,
+    normalized to an explicit selection) or `target` (feature 026); both together
+    are rejected as 400 INVALID_REQUEST. Both forms go through the same server
+    resolution, limit (effective limit = min(platform selection ceiling 200,
+    provider-verified batch size, currently 3)), modality and authorization rules.
+  required: [datasetId, modelId]
   properties:
     datasetId:
       $ref: './common.yaml#/Cuid'
@@ -79,21 +132,89 @@ CreateAiTaskRequest:
         type: string
         minLength: 1
       minItems: 1
-      description: Every asset must belong to datasetId (validated server-side; a mismatch is rejected as 409 ASSET_NOT_IN_DATASET).
+      description: Legacy target form. Deduplicated server-side; every asset must be a live asset of datasetId (a mismatch rejects the whole request as 409 ASSET_NOT_IN_DATASET).
+    target:
+      $ref: '#/AiDetectionTarget'
+    previewFingerprint:
+      type: string
+      minLength: 1
+      maxLength: 256
+      description: Advisory freshness token from POST /api/ai/tasks/preview. A mismatch is 409 TARGET_CHANGED. It is never authorization.
+    classes:
+      type: array
+      minItems: 1
+      maxItems: 10000
+      uniqueItems: true
+      items: { type: string, minLength: 1, maxLength: 256 }
+    confidence_threshold: { type: number, minimum: 0, maximum: 1, default: 0.5 }
+    iou_threshold: { type: number, minimum: 0, maximum: 1, default: 0.5 }
+  additionalProperties: true
+
+AiAcceptedTargetSummary:
+  type: object
+  description: Safe summary of the accepted target; never ids, locations or counts of concealed resources.
+  required: [mode, count, modality, effectiveLimit]
+  properties:
+    mode: { type: string, enum: [CURRENT_ASSET, EXPLICIT, FILTERED, LEGACY_ASSET_IDS] }
+    count: { type: integer, minimum: 1 }
+    modality: { type: string, enum: [IMAGE, VIDEO] }
+    effectiveLimit: { type: integer, minimum: 1 }
   additionalProperties: false
 
 CreateAiTaskResponse:
   type: object
   description: >-
-    Returned with 202 -- creation is a Job+AiTask created in one transaction and
-    enqueued strictly after commit. This route never waits on the AI provider.
+    Returned with 202 -- creation is one Job + one AiTask created in one
+    transaction (never one per Asset) and enqueued strictly after commit with a
+    `{ jobId }`-only queue payload. This route never waits on the AI provider.
   required: [taskId, jobId]
   properties:
     taskId:
       $ref: './common.yaml#/Cuid'
     jobId:
       $ref: './common.yaml#/Cuid'
+    target:
+      $ref: '#/AiAcceptedTargetSummary'
   additionalProperties: false
+
+PreviewAiTargetRequest:
+  type: object
+  description: "Source: previewAiTargetSchema. Same target contract as creation, plus the model being considered."
+  required: [datasetId, target]
+  properties:
+    datasetId:
+      $ref: './common.yaml#/Cuid'
+    target:
+      $ref: '#/AiDetectionTarget'
+    modelId:
+      type: string
+      minLength: 1
+  additionalProperties: false
+
+AiTargetPreview:
+  description: >-
+    Read-only outcome. An ineligible target is a normal 200 with a safe reason and
+    no count or ids (nothing is created, and the current Asset is never substituted).
+  oneOf:
+    - type: object
+      required: [eligible, mode, count, modality, effectiveLimit, previewFingerprint]
+      additionalProperties: false
+      properties:
+        eligible: { const: true }
+        mode: { type: string, enum: [CURRENT_ASSET, EXPLICIT, FILTERED, LEGACY_ASSET_IDS] }
+        count: { type: integer, minimum: 1 }
+        modality: { type: string, enum: [IMAGE, VIDEO] }
+        effectiveLimit: { type: integer, minimum: 1 }
+        previewFingerprint: { type: string }
+    - type: object
+      required: [eligible, reason, effectiveLimit]
+      additionalProperties: false
+      properties:
+        eligible: { const: false }
+        reason:
+          type: string
+          enum: [TARGET_EMPTY, TARGET_TOO_LARGE, ASSET_NOT_IN_DATASET, TARGET_MIXED_MODALITY, TARGET_INELIGIBLE, AI_CAPABILITY_UNVERIFIED]
+        effectiveLimit: { type: integer, minimum: 1 }
 
 AiTaskStatus:
   type: object
@@ -134,6 +255,47 @@ AiTaskStatus:
       type: [string, "null"]
     errorCode:
       type: [string, "null"]
+    batch:
+      description: >-
+        Bounded projection of a versioned (feature 026) operation: accepted target
+        summary and per-Asset outcomes with sanitized reasons. `null` for historical
+        tasks (never invented). Never includes ids of concealed resources, digests,
+        provider output or external identifiers. Absent in responses from older servers.
+      oneOf:
+        - type: "null"
+        - type: object
+          required: [targetMode, count, modality, counts, outcomes, retryable]
+          additionalProperties: false
+          properties:
+            targetMode: { type: string, enum: [CURRENT_ASSET, EXPLICIT, FILTERED, LEGACY_ASSET_IDS] }
+            count: { type: integer, minimum: 1 }
+            modality: { type: string, enum: [IMAGE, VIDEO] }
+            counts:
+              type: object
+              required: [total, processed, succeeded, failed, skipped, canceled]
+              additionalProperties: false
+              properties:
+                total: { type: integer }
+                processed: { type: integer }
+                succeeded: { type: integer }
+                failed: { type: integer }
+                skipped: { type: integer }
+                canceled: { type: integer }
+            outcomes:
+              type: array
+              items:
+                type: object
+                required: [assetId, inputIndex, outcome, predictionCount]
+                additionalProperties: false
+                properties:
+                  assetId: { type: string }
+                  inputIndex: { type: integer, minimum: 0 }
+                  outcome: { type: string, enum: [SUCCEEDED, FAILED, SKIPPED, MISSING_RESULT, CANCELED] }
+                  predictionCount: { type: integer, minimum: 0 }
+                  reason: { type: string, description: "Sanitized allowlisted code (for example ASSET_UNAVAILABLE, AI_PROVIDER_FAILED, OPERATION_CANCELED)." }
+            retryable:
+              type: boolean
+              description: True only when a failed operation is definitely known to have no external task (safe to retry via POST /api/jobs/{jobId}/retry).
   additionalProperties: false
 
 CancelAiTaskResponse:

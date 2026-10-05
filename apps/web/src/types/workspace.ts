@@ -6,6 +6,14 @@ import type { SafeImageAnnotation, SafeImageWorkspaceAsset, SafeReadOnlyImageAnn
 import type { TextSourceReadiness } from "@/lib/annotations/text-source-readiness";
 import type { TextEngineCapabilities } from "@/lib/workspace/text-engine-capabilities";
 import type { SafeTextAnnotation } from "@annotationplatform/domain/text-annotation-contract";
+import type { DatasetModalityState } from "@annotationplatform/domain";
+
+/** Authorized live Dataset state chooses the engine, even before an Asset exists. */
+export type WorkspaceDataset = {
+  id: string;
+  name: string;
+  canResolve: boolean;
+} & DatasetModalityState;
 
 /** Lightweight, modality-neutral record used by the shared Assets navigator. */
 export type SafeWorkspaceAsset = {

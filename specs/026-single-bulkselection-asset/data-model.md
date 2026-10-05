@@ -63,3 +63,27 @@ A target finalized `SKIPPED` (for example reason `WORKFLOW_FROZEN`) makes the ag
 | recovery owner | The original AiTask that holds the unique `externalTaskId` a successor refers to | "retry owner", "external-task owner" |
 | effective limit | The published maximum distinct Assets per operation (at most 200, lowered by verified provider limits) | "batch limit", "ceiling" |
 | operation | The common Job plus its subordinate AiTask | "bulk job" |
+
+
+## Provider status mapping (decision D-FS)
+
+| Provider status | Platform state | Notes |
+| --- | --- | --- |
+| `create`, `pending` | PENDING | keep polling |
+| `inprocess` | IN_PROGRESS | keep polling |
+| `success` | completed → correlation (HG-1) then per-Asset writes | |
+| `failed` | terminal failure `AI_PROVIDER_FAILED` | whole batch |
+| `failed_system` | non-terminal `PROVIDER_DEGRADED` | bounded by the poll budget; recorded durably in Job state; never success, never resubmit; on budget exhaustion `AI_PROVIDER_FAILED_SYSTEM` |
+| anything else | terminal `AI_PROVIDER_STATUS_UNKNOWN` | fail closed, no writes |
+
+## Sanitized reason codes (decision D-SAN)
+
+Only these strings may be persisted or shown for provider-originated failures: `AI_PROVIDER_REJECTED`, `AI_PROVIDER_FAILED`, `AI_PROVIDER_SOURCE_UNREACHABLE`, `AI_PROVIDER_FAILED_SYSTEM`, `AI_PROVIDER_STATUS_UNKNOWN`, `AI_SUBMISSION_AMBIGUOUS`, plus the per-Asset write codes (`WORKFLOW_FROZEN`, `SOURCE_CHANGED`, `MISSING_RESULT`, …). Raw provider text is never stored.
+
+## Outcome layering (decision D-LAYER)
+
+Provider layer: all-or-nothing (a terminal failure finalizes every accepted target FAILED with one code). Platform layer: independent per-Asset outcomes after a successful, correlated result. Aggregate: any FAILED or SKIPPED target → operation FAILED (D-I2).
+
+## Limits (decision D-LIM)
+
+`platformSelectionCeiling = 200`; `AI_BATCH_VERIFIED_MAX_ASSETS = 3` initially; `effectiveLimit = min(both)`. The persisted `Job.input` records the effective limit in force at acceptance.

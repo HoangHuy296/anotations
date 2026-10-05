@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -7,9 +8,9 @@ import { appendLocalFolderImportSchema, startLocalFolderImportSchema } from "@/l
 import { safeManifestItem } from "./helpers";
 
 test("local-folder manifest rejects absolute paths and duplicate logical paths", () => {
-  assert.equal(startLocalFolderImportSchema.safeParse({ name: "x", idempotencyKey: "a".repeat(16), items: [safeManifestItem("/tmp/private.txt")] }).success, false);
+  assert.equal(startLocalFolderImportSchema.safeParse({ name: "x", modality: "IMAGE", idempotencyKey: "a".repeat(16), items: [safeManifestItem("/tmp/private.txt")] }).success, false);
   const item = safeManifestItem("folder/a.txt");
-  assert.equal(startLocalFolderImportSchema.safeParse({ name: "x", idempotencyKey: "a".repeat(16), items: [item, item] }).success, false);
+  assert.equal(startLocalFolderImportSchema.safeParse({ name: "x", modality: "IMAGE", idempotencyKey: "a".repeat(16), items: [item, item] }).success, false);
 });
 
 test("IMPORT_DATASET is delivered with the strict canonical payload", () => {
@@ -18,10 +19,10 @@ test("IMPORT_DATASET is delivered with the strict canonical payload", () => {
   assert.equal(jobQueuePayloadSchema.safeParse({ jobId: "job-1", input: {} }).success, false);
 });
 
-test("safe import request schema admits all supported modalities without a binary field", () => {
+test("safe import request schema requires a chosen modality and admits bounded file hints without a binary field", () => {
   const types = ["image/png", "video/mp4", "text/plain", "audio/wav"] as const;
   for (const contentType of types) {
-    const parsed = startLocalFolderImportSchema.safeParse({ name: "mixed", idempotencyKey: "b".repeat(16), items: [safeManifestItem(`folder/file-${contentType.replace("/", "-")}`, contentType)] });
+    const parsed = startLocalFolderImportSchema.safeParse({ name: "mixed", modality: "IMAGE", idempotencyKey: "b".repeat(16), items: [safeManifestItem(`folder/file-${contentType.replace("/", "-")}`, contentType)] });
     assert.equal(parsed.success, true);
     if (parsed.success) assert.equal("binary" in parsed.data.items[0]!, false);
   }

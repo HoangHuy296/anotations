@@ -1,7 +1,7 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
-import { spawn, type ChildProcess } from "node:child_process";
+import { createRequire } from "node:module";
 import { randomBytes } from "node:crypto";
-import { resolve } from "node:path";
 import test, { after, before } from "node:test";
 
 import { AssetStatus, Modality, UserRole } from "@internal/db";
@@ -10,13 +10,13 @@ import { hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { hasIntegrationDatabase } from "../auth-ownership/helpers";
 
-const port = 3_105;
-const baseUrl = `http://127.0.0.1:${port}`;
+const authority = createRequire(import.meta.url)("../../../../scripts/db-safety/runtime-authority.cjs");
+const runtime = process.env.G1_RUNTIME_RECEIPT ? authority.receipt() : null;
+const baseUrl = runtime ? `http://127.0.0.1:${runtime.roles.web.port}` : "";
 const password = "phase-five-http-password";
 const suffix = `${Date.now()}-${randomBytes(5).toString("hex")}`;
 const managerEmail = `manager-http-${suffix}@phase005.test`;
 const outsiderEmail = `outsider-http-${suffix}@phase005.test`;
-let server: ChildProcess | undefined;
 let managerId = "";
 let managerCookie = "";
 let outsiderCookie = "";
@@ -50,42 +50,33 @@ async function login(email: string) {
 
 before(async () => {
   if (!hasIntegrationDatabase) return;
+  assert.ok(runtime, "A receipt-owned disposable HTTP runtime is required before fixture writes.");
+  authority.ports();
   const passwordHash = await hashPassword(password);
   const [manager] = await Promise.all([
     db.user.create({ data: { email: managerEmail, passwordHash, role: UserRole.MANAGER }, select: { id: true } }),
     db.user.create({ data: { email: outsiderEmail, passwordHash, role: UserRole.LABELER }, select: { id: true } }),
   ]);
   managerId = manager.id;
-  server = spawn("node_modules/.bin/next", ["start", "--port", String(port)], {
-    cwd: process.cwd(),
-    env: {
-      ...process.env,
-      PRISMA_QUERY_ENGINE_LIBRARY: resolve(process.cwd(), "../../lib/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node"),
-    },
-    stdio: "ignore",
-  });
   await waitForServer();
   managerCookie = await login(managerEmail);
   outsiderCookie = await login(outsiderEmail);
 });
 
 after(async () => {
-  const runningServer = server;
-  if (runningServer && runningServer.exitCode === null) {
-    await new Promise<void>((resolve) => {
-      runningServer.once("exit", () => resolve());
-      runningServer.kill("SIGTERM");
-    });
-  }
   await db.user.deleteMany({ where: { email: { in: [managerEmail, outsiderEmail] } } });
 });
 
 test("Dataset CRUD, archive, and server-derived ownership work through HTTP", { skip: !hasIntegrationDatabase }, async () => {
-  const created = await fetch(`${baseUrl}/api/datasets`, { method: "POST", headers: { "Content-Type": "application/json", Cookie: managerCookie }, body: JSON.stringify({ name: "HTTP multimodal dataset", type: "MULTI_MODAL", primaryModality: null, ownerId: "forged" }) });
+  const countBeforeSpoof = await db.dataset.count({ where: { ownerId: managerId } });
+  const spoofed = await fetch(`${baseUrl}/api/datasets`, { method: "POST", headers: { "Content-Type": "application/json", Cookie: managerCookie }, body: JSON.stringify({ name: "HTTP image dataset", modality: "IMAGE", type: "MULTI_MODAL", ownerId: "forged" }) });
+  assert.equal(spoofed.status, 400);
+  assert.equal(await db.dataset.count({ where: { ownerId: managerId } }), countBeforeSpoof);
+  const created = await fetch(`${baseUrl}/api/datasets`, { method: "POST", headers: { "Content-Type": "application/json", Cookie: managerCookie }, body: JSON.stringify({ name: "HTTP image dataset", modality: "IMAGE", type: "MULTI_MODAL" }) });
   assert.equal(created.status, 201);
   const dataset = await created.json() as { data: { id: string; ownerId?: string; primaryModality: string | null } };
   datasetId = dataset.data.id;
-  assert.equal(dataset.data.primaryModality, null);
+  assert.equal(dataset.data.primaryModality, Modality.IMAGE);
   assert.equal("ownerId" in dataset.data, false);
   assert.equal((await db.dataset.findUnique({ where: { id: datasetId }, select: { ownerId: true } }))?.ownerId, managerId);
 
@@ -97,7 +88,7 @@ test("Dataset CRUD, archive, and server-derived ownership work through HTTP", { 
 });
 
 test("Labels reject duplicate normalized names and outsiders have no side effect", { skip: !hasIntegrationDatabase }, async () => {
-  const active = await db.dataset.create({ data: { ownerId: managerId, name: `HTTP labels ${suffix}` }, select: { id: true } });
+  const active = await db.dataset.create({ data: { ownerId: managerId, name: `HTTP labels ${suffix}`, modality: Modality.IMAGE, modalityResolverSubject: managerId }, select: { id: true } });
   const body = { name: "Traffic Sign", color: "#0EA5E9" };
   const first = await fetch(`${baseUrl}/api/datasets/${active.id}/labels`, { method: "POST", headers: { "Content-Type": "application/json", Cookie: managerCookie }, body: JSON.stringify(body) });
   assert.equal(first.status, 201);
@@ -110,7 +101,7 @@ test("Labels reject duplicate normalized names and outsiders have no side effect
 });
 
 test("Asset pagination/filter is Dataset-scoped and returns only safe metadata", { skip: !hasIntegrationDatabase }, async () => {
-  const active = await db.dataset.create({ data: { ownerId: managerId, name: `HTTP assets ${suffix}` }, select: { id: true } });
+  const active = await db.dataset.create({ data: { ownerId: managerId, name: `HTTP assets ${suffix}`, modality: Modality.IMAGE, modalityResolverSubject: managerId }, select: { id: true } });
   await Promise.all(["road-a.png", "road-b.png"].map((filename) => db.asset.create({ data: { datasetId: active.id, modality: Modality.IMAGE, filename, mimeType: "image/png", sourceFingerprint: `http-${suffix}-${filename}`, status: AssetStatus.NEW, sourcePath: "private/path.png" } })));
   const response = await fetch(`${baseUrl}/api/datasets/${active.id}/assets?limit=1&status=NEW&q=road`, { headers: { Cookie: managerCookie } });
   assert.equal(response.status, 200);

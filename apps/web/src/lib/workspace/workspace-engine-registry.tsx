@@ -49,7 +49,7 @@ export type PropertiesTabsProps = {
 };
 
 /**
- * One entry per `WorkspaceSelection.engine`. `WorkspaceEngine`,
+ * One entry per authoritative Dataset modality. `WorkspaceEngine`,
  * `DatasetSidebar`, `PropertiesPanel`, and the shared status surface each
  * read their modality-specific content from this single registry instead of
  * maintaining an independent `switch`/`if` over `engine`/`asset.modality`
@@ -57,7 +57,7 @@ export type PropertiesTabsProps = {
  */
 export type WorkspaceEngineRegistryEntry = {
   /** Rendered by `WorkspaceEngine` — canvas/player/waveform/document surface only. */
-  Component: ComponentType<{ selection: WorkspaceSelection }>;
+  Component: ComponentType<{ selection: WorkspaceSelection | null }>;
   /** Rendered by `DatasetSidebar`'s toolbox region. */
   Toolbox: ComponentType<Record<string, never>>;
   /** Rendered by `PropertiesPanel`'s tab region. */
@@ -82,22 +82,32 @@ function isWorkflowReadOnly(status: AssetStatus) {
   return status === "NEEDS_REVIEW" || status === "REVIEWED" || status === "REJECTED";
 }
 
-function ImageEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
+/** A Dataset-selected engine shell with no content, player or fake Asset. */
+function EmptyEngineSurface({ modality }: { modality: Exclude<Engine, "IMAGE"> }) {
+  const label = { VIDEO: "video", AUDIO: "audio", TEXT: "text" }[modality];
+  return <section className="canvas-grid grid min-h-[520px] min-w-0 place-items-center bg-zinc-950 px-6 text-center lg:min-h-0"><div><h2 className="text-sm font-semibold text-zinc-200">{label[0].toUpperCase() + label.slice(1)} workspace</h2><p className="mt-2 text-xs leading-5 text-zinc-400">No {label} selected. Choose an asset from the list or import compatible content into this dataset.</p></div></section>;
+}
+
+function ImageEngineEntry({ selection }: { selection: WorkspaceSelection | null }): ReactElement | null {
+  if (!selection) return <ImageEngine image={null} annotations={[]} unsupportedAnnotations={[]} labels={[]} />;
   if (selection.engine !== "IMAGE") return null;
   return <ImageEngine image={selection.asset} annotations={selection.annotations} unsupportedAnnotations={selection.unsupportedAnnotations} labels={selection.labels} readOnly={isWorkflowReadOnly(selection.asset.status)} />;
 }
 
-function VideoEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
+function VideoEngineEntry({ selection }: { selection: WorkspaceSelection | null }): ReactElement | null {
+  if (!selection) return <EmptyEngineSurface modality="VIDEO" />;
   if (selection.engine !== "VIDEO") return null;
   return <VideoEngine key={selection.asset.id} video={selection.asset} readiness={selection.readiness} annotations={selection.annotations} readOnly={isWorkflowReadOnly(selection.asset.status)} />;
 }
 
-function AudioEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
+function AudioEngineEntry({ selection }: { selection: WorkspaceSelection | null }): ReactElement | null {
+  if (!selection) return <EmptyEngineSurface modality="AUDIO" />;
   if (selection.engine !== "AUDIO") return null;
   return <AudioEngine key={selection.asset.id} audio={selection.asset} readiness={selection.readiness} />;
 }
 
-function TextEngineEntry({ selection }: { selection: WorkspaceSelection }): ReactElement | null {
+function TextEngineEntry({ selection }: { selection: WorkspaceSelection | null }): ReactElement | null {
+  if (!selection) return <EmptyEngineSurface modality="TEXT" />;
   if (selection.engine !== "TEXT") return null;
   return <TextEngine key={selection.asset.id} selection={selection} />;
 }

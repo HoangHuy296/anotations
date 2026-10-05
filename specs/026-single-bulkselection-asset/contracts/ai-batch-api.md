@@ -51,3 +51,13 @@ Prediction/task and Asset AI-result reads must expose committed successful outpu
 POST /api/ai/tasks/{aiTaskId}/cancel continues delegating to common Job cancellation. Current Job cancellation semantics apply; no invented remote cancellation endpoint.
 
 The existing common Job retry action is extended, not replaced: require job.retry plus current annotation.create access, retain unique successor lineage, accept only server-derived allowlisted recovery context, and return existing successor on repeats. Unknown submission or insufficient historical evidence returns a safe 409 recovery conflict. No arbitrary external ID or retry payload from the browser is accepted.
+
+
+## Limit terminology (v1 reconciliation)
+
+`TARGET_TOO_LARGE` reports the **effective limit** = `min(platform selection ceiling 200, provider-verified AI_BATCH_VERIFIED_MAX_ASSETS)` (initially 3). 200 is the Phase 022 selection ceiling, never a provider claim, and must not appear as a provider capability in messages or docs. VIDEO/AUDIO targets return `AI_CAPABILITY_UNVERIFIED` (409) in v1. A model absent from the deployed catalog is not selectable.
+
+
+## Implemented status (2026-09-24)
+
+Implemented as specified with these final decisions: statuses per the I3 mapping (over-limit/mixed/ineligible 422, whole-batch member failure 409 `ASSET_NOT_IN_DATASET`, empty 400, `TARGET_CHANGED`/`AI_CAPABILITY_UNVERIFIED` 409); the model must also be present in the deployed catalog (409 `AI_MODEL_INACTIVE`, outage 502 `AI_MODEL_CATALOG_UNAVAILABLE`); `POST /api/ai/tasks/preview` returns 200 with `eligible:false` for ineligible targets; accepted-target summary is returned as `data.target`; AI retry only for definitely-unsubmitted failures. `GET /api/ai/tasks/{aiTaskId}` now returns an allowlisted `batch` projection (target summary, counts, per-Asset outcomes, `retryable`; `null` for historical tasks); the generic Job read views are not yet extended and success outcomes await HG-1 (T060). See `specs/api/openapi.yaml`.

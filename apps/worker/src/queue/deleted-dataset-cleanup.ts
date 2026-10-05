@@ -27,11 +27,12 @@ export type CapturedStorageKey = { bucket: string; key: string };
  * hardening phase's scope.
  */
 export async function captureDatasetAssetStorageKeys(db: PrismaClient, datasetId: string): Promise<CapturedStorageKey[]> {
-  const [assets, versions] = await Promise.all([
+  const [visualization, assets, versions] = await Promise.all([
+    db.visualizationArtifact.findMany({ where: { datasetId }, select: { bucket: true, key: true } }),
     db.asset.findMany({ where: { datasetId }, select: { storageBucket: true, storageKey: true, cacheBucket: true, cacheKey: true } }),
     db.assetVersion.findMany({ where: { datasetId }, select: { storageBucket: true, storageKey: true, cacheBucket: true, cacheKey: true } }),
   ]);
-  const keys: CapturedStorageKey[] = [];
+  const keys: CapturedStorageKey[] = [...visualization];
   for (const row of [...assets, ...versions]) {
     if (row.storageBucket && row.storageKey) keys.push({ bucket: row.storageBucket, key: row.storageKey });
     if (row.cacheBucket && row.cacheKey) keys.push({ bucket: row.cacheBucket, key: row.cacheKey });

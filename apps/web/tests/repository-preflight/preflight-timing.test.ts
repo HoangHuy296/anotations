@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { writeFile } from "node:fs/promises";
 import { performance } from "node:perf_hooks";

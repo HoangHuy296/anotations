@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { spawn, type ChildProcess } from "node:child_process";
 import { randomBytes } from "node:crypto";
@@ -56,7 +57,7 @@ before(async () => {
     db.user.create({ data: { email: `workspace-view-outsider-${suffix}@test.invalid`, passwordHash, role: UserRole.LABELER }, select: { id: true, email: true } }),
   ]);
   managerEmail = manager.email; outsiderEmail = outsider.email;
-  const dataset = await db.dataset.create({ data: { ownerId: manager.id, name: workspaceUnique("workspace-view-dataset") }, select: { id: true } });
+  const dataset = await db.dataset.create({ data: { ownerId: manager.id, name: workspaceUnique("workspace-view-dataset"), modality: Modality.IMAGE, modalityResolverSubject: manager.id }, select: { id: true } });
   const { config, minio } = getDirectUploadProviders();
   objectKey = `workspace-view-tests/${dataset.id}/${suffix}.png`;
   const bytes = Buffer.from([0x89, 0x50, 0x4e, 0x47]);

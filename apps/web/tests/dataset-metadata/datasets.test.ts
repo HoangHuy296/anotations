@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -17,8 +18,10 @@ test("system ADMIN overrides Dataset membership while MANAGER remains scoped", {
   } finally { await data.cleanup(); }
 });
 
-test("MULTI_MODAL Dataset input allows absent primary modality and excludes browser ownership", () => {
-  const parsed = createDatasetSchema.parse({ name: "Multimodal", type: "MULTI_MODAL", ownerId: "forged" });
-  assert.equal(parsed.primaryModality, null);
+test("Dataset creation requires explicit modality and excludes browser ownership", () => {
+  assert.equal(createDatasetSchema.safeParse({ name: "Image dataset", type: "MULTI_MODAL" }).success, false);
+  assert.equal(createDatasetSchema.safeParse({ name: "Image dataset", type: "MULTI_MODAL", modality: "IMAGE", ownerId: "forged" }).success, false);
+  const parsed = createDatasetSchema.parse({ name: "Image dataset", type: "MULTI_MODAL", modality: "IMAGE" });
+  assert.equal(parsed.modality, "IMAGE");
   assert.equal("ownerId" in parsed, false);
 });

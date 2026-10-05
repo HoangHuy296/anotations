@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import test, { after, before } from "node:test";
@@ -48,7 +49,7 @@ before(async () => {
   if (!enabled) return;
   const created = await createAnnotationUser(UserRole.MANAGER);
   user = { id: created.id, role: UserRole.MANAGER, email: created.email, name: created.name };
-  const dataset = await createAnnotationDataset(user.id);
+  const dataset = await createAnnotationDataset(user.id, Modality.VIDEO);
   datasetId = dataset.id;
 });
 

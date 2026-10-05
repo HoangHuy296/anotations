@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# G1: no generic review-data replacement authorization.
+printf "%s\n" "DB_SAFETY_SYNC_DISABLED: separate operation scope required." >&2
+exit 1
 
 # Mirrors Postgres data and MinIO objects from the Dev Docker Compose stack
 # (AnnotationPlatformDev) into the Review stack (AnnotationPlatformReview) so

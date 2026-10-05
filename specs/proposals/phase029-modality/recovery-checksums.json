@@ -1,0 +1,12 @@
+{
+  "v1": {
+    "path": "recovery.review.sql",
+    "sha256": "b5be6dcf4cec4b87b4e6b150bdd41f71794dbdcbb57a44d3d606e9abc8cb73ac"
+  },
+  "v2": {
+    "path": "recovery.v2.review.sql",
+    "sha256": "3bb6389f380ffaa5c3be88d26d56782065a00b3844f0326ccba1c05ee4b5a1db"
+  },
+  "scope": "Only temporary schema-manifest helper changed; all bytes before and after helper unchanged.",
+  "applicationExecutionApproved": false
+}

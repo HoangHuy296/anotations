@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import test, { after } from "node:test";
 
@@ -32,6 +33,28 @@ test("GET /api/ai/tasks/{aiTaskId} reports an in-progress task", { skip: aiHttpE
   assert.equal(body.data.type, "DETECT_OBJECTS");
   assert.equal(body.data.modelNameSnapshot, "Fixture Model");
   assert.equal("externalTaskId" in body.data, false, "externalTaskId must never be returned to a browser client");
+});
+
+test("GET /api/ai/tasks/pending recovers the same-dataset task and rejects an asset from another dataset", { skip: aiHttpEnabled ? false : aiHttpSkipReason }, async () => {
+  const owner = await signupAndLogin();
+  const fixture = await createAiTaskFixture(owner.userId);
+  const foreign = await createAiTaskFixture(owner.userId);
+  cleanupDatasetIds.push(fixture.datasetId, foreign.datasetId);
+  const created = await request("/api/ai/tasks", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: owner.cookie },
+    body: JSON.stringify({ datasetId: fixture.datasetId, modelId: fixture.modelId, assetIds: [fixture.assetId] }),
+  });
+  assert.equal(created.status, 202);
+  const { data } = await created.json() as { data: { taskId: string } };
+
+  const recovered = await request(`/api/ai/tasks/pending?datasetId=${fixture.datasetId}&assetId=${fixture.assetId}`, { headers: { Cookie: owner.cookie } });
+  assert.equal(recovered.status, 200);
+  assert.equal((await recovered.json() as { data: { taskId: string | null } }).data.taskId, data.taskId);
+
+  const wrongAsset = await request(`/api/ai/tasks/pending?datasetId=${fixture.datasetId}&assetId=${foreign.assetId}`, { headers: { Cookie: owner.cookie } });
+  assert.equal(wrongAsset.status, 404);
+  assert.equal((await wrongAsset.json() as { error: { code: string } }).error.code, "ASSET_NOT_IN_DATASET");
 });
 
 test("GET /api/ai/tasks/{aiTaskId} reports a succeeded task", { skip: aiHttpEnabled ? false : aiHttpSkipReason }, async () => {

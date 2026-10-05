@@ -58,11 +58,8 @@ function imageMetadata(bytes: Buffer) {
 function mediaMetadata(bytes: Buffer) {
   const image = imageMetadata(bytes);
   if (image) return { modality: Modality.IMAGE, ...image };
-  if (bytes.subarray(4, 8).toString("ascii") === "ftyp") return { modality: Modality.VIDEO, mimeType: "video/mp4" };
-  if (startsWith(bytes, [0x1a, 0x45, 0xdf, 0xa3])) return { modality: Modality.VIDEO, mimeType: "video/webm" };
   if (bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WAVE") return { modality: Modality.AUDIO, mimeType: "audio/wav" };
   if (startsWith(bytes, [0x49, 0x44, 0x33]) || (bytes[0] === 0xff && (bytes[1] ?? 0) >= 0xe0)) return { modality: Modality.AUDIO, mimeType: "audio/mpeg" };
-  if (bytes.subarray(0, 4).toString("ascii") === "OggS") return { modality: Modality.AUDIO, mimeType: "audio/ogg" };
   return null;
 }
 

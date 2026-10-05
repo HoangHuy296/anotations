@@ -29,6 +29,7 @@ export type SafeJobStatus = {
 };
 
 const safeErrorCodes = new Set([
+  "VISUALIZATION_STALE_GENERATION", "VISUALIZATION_PROCESSING_FAILED",
   "SOURCE_TOKEN_EXPIRED", "SOURCE_TOKEN_INVALID", "SOURCE_CONNECTION_NOT_FOUND", "SOURCE_URL_UNSAFE",
   "SOURCE_ROOT_PATH_UNSAFE", "SOURCE_IMPORT_LIMIT_EXCEEDED", "SOURCE_PROVIDER_UNAVAILABLE",
   "SOURCE_DOWNLOAD_FAILED", "SOURCE_RECONCILIATION_CONFLICT", "MINIO_UPLOAD_FAILED", "MINIO_OBJECT_VERIFICATION_FAILED",
@@ -41,6 +42,8 @@ const safeErrorCodes = new Set([
 ]);
 
 const textSourceErrorMessages: Record<string, string> = {
+  VISUALIZATION_STALE_GENERATION: "Dataset content or eligibility changed; retry targets its current generation.",
+  VISUALIZATION_PROCESSING_FAILED: "Snapshot or artifact processing failed. Existing published content is retained.",
   TEXT_SOURCE_MISSING: "The original source object could not be found.",
   TEXT_SOURCE_STALE: "The source changed after preparation started; retry preparation.",
   TEXT_SOURCE_OVERSIZED_BYTES: "This source is larger than the supported reader size.",

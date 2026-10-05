@@ -3,7 +3,7 @@
 **Feature**: `026-single-bulkselection-asset` | **Date**: 2026-09-24 | **Spec**: [spec.md](spec.md)
 **Git branch**: `025-text-workspace-engine` (unchanged). Setup's BRANCH is the configured feature identifier, not a new Git branch.
 **Input**: `specs/026-single-bulkselection-asset/spec.md` and [planning constraints](planning-constraints.md).
-**Status**: Draft prepared; **ERROR: research/provider evidence gate not passed**. Implementation is not authorized by this document. `tasks.md` exists as a conditional breakdown: T006 is the sole stop gate, and no task from T007 onward may run while E1–E3 are open or while the Phase 025 working tree is unisolated (see the gate register at the top of tasks.md). Design artifacts are provisional review material until E1–E3 in [research.md](research.md) close. Phase 1 design cannot be signed off before that closure.
+**Status**: Draft prepared; **ERROR: research/provider evidence gate not passed**. Implementation is not authorized by this document; v1 (IMAGE detection) is blocked only by HG-1 (contractual correlation); HG-2 (Phase 025 isolation) is released. `tasks.md` exists as a conditional breakdown: T006 is the sole stop gate, and no task from T007 onward may run while E1–E3 are open or while the Phase 025 working tree is unisolated (see the gate register at the top of tasks.md). Design artifacts are provisional review material until E1–E3 in [research.md](research.md) close. Phase 1 design cannot be signed off before that closure.
 
 ## Summary
 
@@ -18,7 +18,7 @@ Extend the existing AI Detection panel and durable Job/AiTask pipeline to resolv
 **Target Platform**: Existing browser workspace, Next.js server, private worker and PostgreSQL/Redis/MinIO deployment.
 **Project Type**: Single-repository web application with private asynchronous worker.
 **Performance Goals**: p95 acceptance within five seconds at documented load; no inference wait in the request. Test 100 valid submissions with concurrency five, rotating sizes 1/2/7/effective maximum, prepared fixtures and healthy dependencies; report actual hardware, versions, model/class-cache condition and external latency. Separate cold catalog discovery from submission measurements and report both.
-**Constraints**: At most 200 distinct inputs, reduced by verified provider/model limits; bounded JSON metadata; no raw SQL or new Job states; preserve manual/accepted work and current revision semantics. Provider limit, download window and deployed identity guarantees are unresolved evidence gates E1–E3.
+**Constraints**: Effective limit = min(platform selection ceiling 200, provider-verified `AI_BATCH_VERIFIED_MAX_ASSETS`, initially 3); v1 is IMAGE detection only; bounded JSON metadata; no raw SQL or new Job states; preserve manual/accepted work and current revision semantics. Provider limit, download window and deployed identity guarantees are unresolved evidence gates E1–E3.
 **Scale/Scope**: One Dataset and one modality per accepted operation, one external task; current/explicit/filtered targets; IMAGE detection baseline, VIDEO tracking only after verified batch support. AUDIO/TEXT inference, mixed partitioning, global Job Center redesign and new realtime behavior excluded.
 
 ## Constitution Check
@@ -34,7 +34,7 @@ The constitution file is an unfilled template, not adopted policy. Binding gates
 | Canonical geometry/revisions/workflow | PASS | PASS by design: guarded per-Asset writer transaction and replay checkpoint |
 | Retry lineage/idempotency/cancel | PASS as constraint | PASS by design; implementation race tests required, current AI retry gap explicitly addressed |
 | No unapproved packages/migrations/phase skipping | PASS | PASS: planning documents only; earlier-phase completion not inferred |
-| Verified provider contract and real execution (FR-013/031) | OPEN | **ERROR/BLOCKED: E1–E3** |
+| Verified provider contract and real execution (FR-013/031) | OPEN | **PARTIAL.** Hard gates for v1 (IMAGE detection): **HG-1** deterministic/contractual correlation (OPEN) and **HG-2** Phase 025 isolation (RELEASED — committed as d95a5c5). Other E1–E3 items are closure evidence; safety invariants DI-1…DI-6 are decided in research.md and enforced by tests. |
 
 No architecture exceptions are proposed. `tasks.md` was generated at the user's request but is conditional; do not execute past T006 or claim the research/design gate passed while E1–E3 remain open.
 

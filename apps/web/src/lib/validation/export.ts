@@ -2,10 +2,16 @@ import { z } from "zod";
 
 import { datasetIdSchema } from "@/lib/validation/dataset";
 
-/** Phase 012 intentionally has one bounded, metadata-only export format. */
+/**
+ * Two export formats: JSON (the lossless, complete platform manifest -- the
+ * original Phase 012 format) and COCO (the interoperable image-annotation
+ * export; specs/027-coco-dataset-export). COCO always means "every
+ * export-eligible annotation in the Dataset" -- there is no source/scope
+ * filter (§2 of the spec dropped that as unnecessary for the MVP).
+ */
 export const exportRequestSchema = z.object({
   datasetId: datasetIdSchema,
-  format: z.literal("JSON").default("JSON"),
+  format: z.enum(["JSON", "COCO"]).default("JSON"),
   manifestSchemaVersion: z.literal("1").default("1"),
 }).strict();
 

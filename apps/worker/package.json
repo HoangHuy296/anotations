@@ -9,10 +9,11 @@
     "start": "node --import tsx src/index.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test:queue": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/queue/**/*.test.ts",
-    "test:import": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/queue/import-*.test.ts",
-    "test:source-access": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/source/**/*.test.ts",
-    "test:repository-import": "node --env-file-if-exists=../../.env --import tsx --test --test-concurrency=1 tests/repository-import/**/*.test.ts"
+    "test:ai-provider": "node ../../scripts/db-safety/cli.mjs test worker:test:ai-provider",
+    "test:queue": "node ../../scripts/db-safety/cli.mjs test worker:test:queue",
+    "test:import": "node ../../scripts/db-safety/cli.mjs test worker:test:import",
+    "test:source-access": "node ../../scripts/db-safety/cli.mjs test worker:test:source-access",
+    "test:repository-import": "node ../../scripts/db-safety/cli.mjs test worker:test:repository-import"
   },
   "dependencies": {
     "@annotationplatform/domain": "workspace:*",

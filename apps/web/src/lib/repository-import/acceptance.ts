@@ -106,6 +106,7 @@ export async function acceptRepositoryImportRequest(
 
   const accepted = await createAndEnqueueNewDatasetSourceImportJob(actor, {
     datasetName: request.datasetName,
+    modality: request.modality,
     creationIdempotency: {
       key: request.idempotencyKey,
       requestHash: creationRequestHash(

@@ -1,3 +1,4 @@
+import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -20,14 +21,17 @@ const enabled = process.env.WORKSPACE_INTEGRATION_TESTS === "1" && Boolean(proce
 test("modality, status, and label filters intersect rather than union", { skip: !enabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const dataset = await createWorkspaceDataset(owner.id);
+  const videoDataset = await createWorkspaceDataset(owner.id, Modality.VIDEO);
   try {
     const label = await db.label.create({ data: { datasetId: dataset.id, modality: Modality.IMAGE, name: "cat", normalizedName: workspaceUnique("cat"), color: "#0EA5E9" }, select: { id: true } });
     const marker = workspaceUnique("browser-query");
     const matching = await db.asset.create({ data: { datasetId: dataset.id, modality: Modality.IMAGE, filename: `${marker}-match.png`, mimeType: "image/png", sourceFingerprint: `${marker}-match`, status: AssetStatus.NEEDS_REVIEW } });
     await db.assetLabel.create({ data: { assetId: matching.id, labelId: label.id } });
-    // Wrong modality, same status+label: must be excluded by the modality filter.
-    const wrongModality = await db.asset.create({ data: { datasetId: dataset.id, modality: Modality.VIDEO, filename: `${marker}-wrong-modality.png`, mimeType: "video/mp4", sourceFingerprint: `${marker}-wrong-modality`, status: AssetStatus.NEEDS_REVIEW } });
-    await db.assetLabel.create({ data: { assetId: wrongModality.id, labelId: label.id } });
+    // The other modality lives in a separate Dataset; equal category/status
+    // never allows its content to leak into this Dataset's filtered page.
+    const videoLabel = await db.label.create({ data: { datasetId: videoDataset.id, modality: Modality.VIDEO, name: "cat", normalizedName: workspaceUnique("cat"), color: "#0EA5E9" }, select: { id: true } });
+    const wrongModality = await db.asset.create({ data: { datasetId: videoDataset.id, modality: Modality.VIDEO, filename: `${marker}-wrong-modality.mp4`, mimeType: "video/mp4", sourceFingerprint: `${marker}-wrong-modality`, status: AssetStatus.NEEDS_REVIEW } });
+    await db.assetLabel.create({ data: { assetId: wrongModality.id, labelId: videoLabel.id } });
     // Wrong status, same modality+label: must be excluded by the status filter.
     const wrongStatus = await db.asset.create({ data: { datasetId: dataset.id, modality: Modality.IMAGE, filename: `${marker}-wrong-status.png`, mimeType: "image/png", sourceFingerprint: `${marker}-wrong-status`, status: AssetStatus.COMPLETED } });
     await db.assetLabel.create({ data: { assetId: wrongStatus.id, labelId: label.id } });
@@ -38,7 +42,12 @@ test("modality, status, and label filters intersect rather than union", { skip: 
       modality: Modality.IMAGE, statuses: [AssetStatus.NEEDS_REVIEW], labelId: [label.id],
     });
     assert.deepEqual(page?.page.items.map((item) => item.id), [matching.id], "only the asset matching modality AND status AND label is returned");
-  } finally { await cleanupWorkspaceFixture([owner.id], [dataset.id]); }
+    const incompatibleFilter = await readWorkspacePage(owner, dataset.id, {
+      modality: Modality.VIDEO, statuses: [AssetStatus.NEEDS_REVIEW], labelId: [label.id],
+    });
+    assert.deepEqual(incompatibleFilter?.page.items, [], "an incompatible modality filter cannot cross Dataset scope");
+    assert.equal(incompatibleFilter?.dataset.modality, Modality.IMAGE, "filters do not override the Dataset engine");
+  } finally { await cleanupWorkspaceFixture([owner.id], [dataset.id, videoDataset.id]); }
 });
 
 test("changing sort order alone never changes which assets match, only their order", { skip: !enabled }, async () => {

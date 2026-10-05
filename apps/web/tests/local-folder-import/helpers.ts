@@ -12,8 +12,9 @@ export const hasImportIntegration = process.env.LOCAL_IMPORT_INTEGRATION_TESTS =
  * Compose services themselves retain `minio:9000` as their internal endpoint. */
 export function configureLocalImportHostMinio() {
   if (!hasImportIntegration) return;
-  process.env.MINIO_ENDPOINT = "http://localhost:9000";
-  process.env.MINIO_PUBLIC_ENDPOINT = "http://localhost:9000";
+  if (!process.env.DB_SAFETY_RECEIPT || !process.env.MINIO_ENDPOINT || process.env.MINIO_PUBLIC_ENDPOINT !== process.env.MINIO_ENDPOINT) {
+    throw new Error("Verified disposable MinIO configuration is required.");
+  }
 }
 
 export function safeManifestItem(logicalPath: string, contentType = "text/plain", body = "fixture") {
@@ -32,7 +33,7 @@ export function buildSafeManifest(items: Array<{ logicalPath: string; contentTyp
 export async function createPreparedImportFixture(options: { expectedItemCount?: number; status?: JobStatus; deadlineAt?: Date } = {}) {
   const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const owner = await db.user.create({ data: { email: `import-${suffix}@test.local`, role: UserRole.MANAGER }, select: { id: true, role: true, email: true, name: true } });
-  const dataset = await db.dataset.create({ data: { ownerId: owner.id, name: `Import ${suffix}`, sourceMode: DatasetSourceMode.UPLOAD }, select: { id: true } });
+  const dataset = await db.dataset.create({ data: { ownerId: owner.id, name: `Import ${suffix}`, modality: "TEXT", modalityResolverSubject: owner.id, sourceMode: DatasetSourceMode.UPLOAD }, select: { id: true } });
   const job = await db.job.create({ data: { datasetId: dataset.id, createdById: owner.id, type: JobType.IMPORT_DATASET, status: options.status ?? JobStatus.RUNNING, totalItems: options.expectedItemCount ?? 1, input: {} }, select: { id: true } });
   const preparedImport = await db.preparedImport.create({ data: { datasetId: dataset.id, jobId: job.id, createdById: owner.id, expectedItemCount: options.expectedItemCount ?? 1, deadlineAt: options.deadlineAt ?? new Date(Date.now() + 60_000), idempotencyKey: `test-${suffix}` }, select: { id: true, datasetId: true, jobId: true } });
   return { owner: { ...owner, name: owner.name ?? owner.email }, dataset, job, preparedImport, cleanup: async () => { await db.dataset.delete({ where: { id: dataset.id } }); await db.user.delete({ where: { id: owner.id } }); } };

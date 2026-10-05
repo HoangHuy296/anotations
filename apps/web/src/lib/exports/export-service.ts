@@ -23,8 +23,8 @@ type ExportJobProjection = PrismaTypes.JobGetPayload<{ select: typeof exportJobS
 /** COMPLETED/FAILED/CANCELED never re-run; a new create request supersedes them instead of reusing their result forever. */
 const terminalJobStatuses = new Set<typeof JobStatus[keyof typeof JobStatus]>([JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELED]);
 
-function exportIdempotencyKey(datasetId: string) {
-  return createHash("sha256").update(`fieldframe:export:v1:${datasetId}:JSON:1`).digest("hex");
+function exportIdempotencyKey(datasetId: string, format: "JSON" | "COCO") {
+  return createHash("sha256").update(`fieldframe:export:v1:${datasetId}:${format}:1`).digest("hex");
 }
 
 function toSafeExportJob(job: ExportJobProjection): SafeExportJob {
@@ -49,7 +49,7 @@ export async function createAuthorizedExportJob(actor: RequestActor, input: unkn
   if (!access) return { ok: false, status: 404 };
   if (access.forbidden) return { ok: false, status: 403 };
 
-  const idempotencyKey = exportIdempotencyKey(parsed.data.datasetId);
+  const idempotencyKey = exportIdempotencyKey(parsed.data.datasetId, parsed.data.format);
   let created = false;
   let job: ExportJobProjection | null = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {

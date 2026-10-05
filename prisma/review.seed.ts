@@ -1,3 +1,4 @@
+import "../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import { randomBytes, scrypt as scryptCallback } from "node:crypto";
 import { promisify } from "node:util";
 

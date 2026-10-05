@@ -45,6 +45,8 @@ export function cleanJobPayload(jobId: string) { return jobQueuePayloadSchema.pa
 export async function authorizeFoundationJobSubmission(actor: RequestActor, input: unknown) {
   const parsed = foundationJobInputSchema.safeParse(input);
   if (!parsed.success) return { ok: false as const, status: 400 as const };
+  // Visualization submissions resolve generation server-side through their dedicated management service.
+  if (parsed.data.type === "VISUALIZATION_CAPTURE" || parsed.data.type === "VISUALIZATION_DERIVE") return { ok: false as const, status: 400 as const };
   const queueName = resolveQueueName(parsed.data.type);
   if (!queueName) return { ok: false as const, status: 400 as const };
   const access = await requireJobPermission(actor, parsed.data.datasetId, "job.createExport");
