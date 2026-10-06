@@ -794,5 +794,41 @@
       "--test-concurrency=1",
       "tests/dataset-modality/dataset-ref-contract.test.ts"
     ]
+  },
+  "web:test:ai-model-catalog": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/ai/ai-model-catalog.test.ts"
+    ]
+  },
+  "worker:test:ai-canonical-endpoint": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/providers/ai/canonical-endpoint.test.ts"
+    ]
+  },
+  "seed:register-aioz-model:yolo26s-coco": {
+    "kind": "seed",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/register-aioz-model.ts",
+      "--apply",
+      "68d7f474-6982-446c-8c5a-121d56d12dc9",
+      "YOLO26s_COCO"
+    ]
   }
 }

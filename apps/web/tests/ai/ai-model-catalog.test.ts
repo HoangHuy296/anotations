@@ -144,6 +144,33 @@ test("every image tool forwards its task name to provider discovery", async (t) 
   }
 });
 
+test("the provider origin comes only from AIOZ_ANNOTATION_SERVICES_URL: request and query state cannot choose another provider", async (t) => {
+  process.env.AIOZ_ANNOTATION_SERVICES_URL = "http://canonical.example.test:7000";
+  const origins: string[] = [];
+  t.mock.method(globalThis, "fetch", async (url: URL) => { origins.push(url.origin); return Response.json(catalog); });
+  mockModelMethod(t, "findMany", async () => []);
+  // listActiveAiModels accepts only (modality, taskName); there is no parameter through which a caller could supply an endpoint.
+  await listActiveAiModels("IMAGE", "detection");
+  assert.deepEqual(origins, ["http://canonical.example.test:7000"]);
+  assert.equal(listActiveAiModels.length <= 2, true);
+});
+
+test("a stale local row never makes a model absent from the canonical provider available", async (t) => {
+  const staleKey = "11111111-1111-4111-8111-111111111111";
+  t.mock.method(globalThis, "fetch", async () => Response.json({ success: true, data: [image] }));
+  mockModelMethod(t, "findMany", async () => [local, { ...local, id: "stale-internal-id", key: staleKey }]);
+  const models = await listActiveAiModels("IMAGE", "detection");
+  assert.deepEqual(models.map((m) => m.key), [imageId], "only provider-returned models are listed");
+  assert.equal(models.some((m) => m.key === staleKey), false);
+});
+
+test("a provider model without an active local registration is listed but never available", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => Response.json({ success: true, data: [image] }));
+  mockModelMethod(t, "findMany", async () => []);
+  const [model] = await listActiveAiModels("IMAGE", "detection");
+  assert.equal(model.availableForTasks, false);
+});
+
 const originalProviderUrl = process.env.AIOZ_ANNOTATION_SERVICES_URL;
 beforeEach(() => { process.env.AIOZ_ANNOTATION_SERVICES_URL = "https://ai.example.test"; });
 afterEach(() => {
