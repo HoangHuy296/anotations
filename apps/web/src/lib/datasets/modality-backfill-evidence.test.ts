@@ -152,3 +152,40 @@ test("T029 is select-only: the manifest builder contains no write call, and T031
   assert.match(t031, /Serializable/); assert.match(t031, /modalityContentRevision: expectedRevision/);
   assert.doesNotMatch(source, /canResolveEmptyDataset|resolveEmptyDataset\(|requireDatasetPermission/, "no human authority is reused for the evidence backfill");
 });
+
+// ---------------------------------------------------------------- approval lifecycle (observed → approved → executed)
+import { deriveApprovedManifest, selectApprovedCandidates, verifyApprovedManifest } from "@/lib/datasets/modality-backfill-evidence";
+const observed3 = () => sealManifest({ generatedAt: "2026-10-06T00:00:00.000Z", policy, candidates: [candidate("d1"), candidate("d2"), candidate("d3", "VIDEO")], rejected: [{ datasetId: "d9", code: "EMPTY_DATASET" }] });
+const approvedFor = (ids: string[], observed = observed3()) => deriveApprovedManifest({ observed, approvedIds: ids, approver: "release owner", approvedAt: "2026-10-06T01:00:00.000Z", statement: "approved for the maintenance window" });
+
+test("approval: the approved manifest is a separate artifact bound to ONE observed manifest, and only its ids can be executed", () => {
+  const observed = observed3();
+  const approved = approvedFor(["d3", "d1"], observed);
+  assert.deepEqual(approved.approvedIds, ["d1", "d3"]);
+  assert.equal(approved.observedManifestSha256, observed.manifestSha256);
+  const selected = selectApprovedCandidates(observed, approved);
+  assert.deepEqual(selected.executed.candidates.map(c => c.datasetId), ["d1", "d3"], "d2 appeared in the observed manifest but was not approved, so it is not executable");
+  assert.deepEqual(selected.executed.candidates, observed.candidates.filter(c => c.datasetId !== "d2"), "approved candidates keep their observed evidence exactly");
+  assert.notEqual(selected.executed.manifestSha256, observed.manifestSha256);
+  assert.equal(verifyApprovedManifest(JSON.parse(JSON.stringify(approved))).sha256, approved.sha256);
+  assert.equal(approvedFor(["d1", "d3"], observed).sha256.length, 64);
+});
+test("approval fails closed: unknown ids, empty or duplicate lists, tampering, and an approval for a different observed manifest", () => {
+  const observed = observed3();
+  assert.throws(() => approvedFor(["d1", "d404"], observed), /APPROVED_ID_NOT_CANDIDATE/, "an id that is not an observed candidate");
+  assert.throws(() => approvedFor(["d9"], observed), /APPROVED_ID_NOT_CANDIDATE/, "a rejected Dataset can never be approved");
+  assert.throws(() => approvedFor([], observed), /APPROVED_MANIFEST_INVALID/);
+  assert.throws(() => approvedFor(["d1", "d1"], observed), /APPROVED_MANIFEST_INVALID/);
+  const approved = approvedFor(["d1"], observed);
+  type Mutable = { [key: string]: unknown; approvedIds: string[] };
+  const tampers: Record<string, (m: Mutable) => void> = {
+    "id added": m => { m.approvedIds.push("d2"); }, "id swapped": m => { m.approvedIds[0] = "d2"; }, "approver changed": m => { m.approver = "someone else"; }, "statement changed": m => { m.statement = "x"; },
+    "observed hash changed": m => { m.observedManifestSha256 = "d".repeat(64); }, "hash replaced": m => { m.sha256 = "c".repeat(64); }, "digest replaced": m => { m.approvedIdsDigest = "c".repeat(64); }, "unknown key": m => { m.extra = 1; }, "unsorted": m => { m.approvedIds = ["d3", "d1"]; },
+    "empty approver": m => { m.approver = ""; }, "bad timestamp": m => { m.approvedAt = "yesterday"; },
+  };
+  for (const [label, tamper] of Object.entries(tampers)) { const m = JSON.parse(JSON.stringify(approved)); tamper(m); assert.throws(() => verifyApprovedManifest(m), /APPROVED_MANIFEST_INVALID/, label); }
+  assert.throws(() => selectApprovedCandidates(observed, approvedFor(["d1"], sealManifest({ generatedAt: "2026-10-06T00:00:00.000Z", policy, candidates: [candidate("d1")], rejected: [] }))), /APPROVED_OBSERVED_MISMATCH/, "approval for another observed manifest");
+  const forgedObserved = JSON.parse(JSON.stringify(observed)); forgedObserved.candidates[0].modality = "VIDEO";
+  assert.throws(() => selectApprovedCandidates(forgedObserved, approved), /MANIFEST_INVALID/, "a tampered observed manifest");
+  assert.throws(() => selectApprovedCandidates(observed, null), /APPROVED_MANIFEST_INVALID/);
+});

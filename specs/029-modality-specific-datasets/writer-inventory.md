@@ -55,6 +55,8 @@ Classes: **G** guarded and verified, **D** dormant/unreachable with evidence, **
 | `apps/worker/src/queue/deleted-dataset-cleanup.ts` | hard DELETE (cascade) | — | Asset DELETE trigger tolerates the parent being deleted | **G** — G3 correctness "dataset hard-delete cascade with Assets and annotations" |
 | `apps/web/src/lib/dataset-import.ts` (`persistDatasetImport`) | INSERT + UPDATE | no modality | would fail closed | **D** — no production caller (pinned); unmodified |
 
+The only caller of `applyApprovedBackfill`/`buildBackfillManifest` is the maintenance child `apps/web/scripts/backfill-run.ts`, started only by `scripts/db-safety/backfill-launcher.mjs` (hash-bound, fenced, disposable targets only until a reviewed enablement); it is outside the application source roots and reachable from no route, action or job.
+
 ### Asset update writers (no production writer creates, reparents or deletes an Asset outside the creators above; `asset.delete*` and `datasetId` updates are absent and pinned)
 | Class of write | Writers | Trigger path | Class and evidence |
 | --- | --- | --- | --- |

@@ -9,6 +9,7 @@ import { loadExpectations } from '../cleanup-verify.mjs';
 import { isDeepStrictEqual } from 'node:util';
 import {
   SUPPORTED_COMMANDS, PROPOSAL_CHAIN, REHEARSALS, REHEARSAL_ID, FIXTURE_COMMAND, FIXTURE_FILE, FIXTURE_SPEC, FIXTURE_ROWS, HISTORY_SQL,
+  MAINTENANCE_ID, MAINT_SEED_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_SEED_SPEC, MAINT_OBJECTS_SPEC, MAINT_CHECK_SPEC, MAINTENANCE_FILES, MAINTENANCE_COMMANDS,
   BACKFILL_ID, BACKFILL_SEED_COMMAND, BACKFILL_VERIFY_COMMAND, BACKFILL_SEED_FILE, BACKFILL_VERIFY_FILE, BACKFILL_SEED_SPEC, BACKFILL_VERIFY_SPEC, BACKFILL_TOPOLOGY, BACKFILL_ALLOWED_IMPORTS,
   RELEASE_ID, RELEASE_COUNTS, RELEASE_SPECS, RELEASE_TOPOLOGY, RECOVERY_REVIEW, assertRelease24, assertRelease25, manifestDiff, extractManifestSql, releaseManifestSqlFrom, releaseExtraSql, captureScript,
   realDeps, runFocusedTest, validateCommand, validateChain, checkHistory, assertMigration25, primaryCleanup, resolvePlan,
@@ -24,7 +25,7 @@ const PROPOSAL1_SQL = '-- fake migration 24 bytes\n';
 const PROPOSAL2_SQL = '-- fake migration 25 bytes\n';
 const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1];
 const FAKE_CHAIN = [{ ...P1, sha256: sha(PROPOSAL1_SQL) }, { ...P2, sha256: sha(PROPOSAL2_SQL) }];
-const CATALOG = { [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [BACKFILL_SEED_COMMAND]: BACKFILL_SEED_SPEC, [BACKFILL_VERIFY_COMMAND]: BACKFILL_VERIFY_SPEC, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
+const CATALOG = { [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [BACKFILL_SEED_COMMAND]: BACKFILL_SEED_SPEC, [BACKFILL_VERIFY_COMMAND]: BACKFILL_VERIFY_SPEC, [MAINT_SEED_COMMAND]: MAINT_SEED_SPEC, [MAINT_OBJECTS_COMMAND]: MAINT_OBJECTS_SPEC, [MAINT_CHECK_COMMAND]: MAINT_CHECK_SPEC, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'dt-root-'));
@@ -39,6 +40,7 @@ function fixture() {
   put(BACKFILL_SEED_FILE, 'import "../../../../scripts/db-safety/test-entry.cjs";\n// seed stub\n');
   put(BACKFILL_VERIFY_FILE, readFileSync(join(guard.root, BACKFILL_VERIFY_FILE), 'utf8'));
   for (const file of ['apps/web/src/lib/datasets/modality-backfill.ts', 'apps/web/src/lib/datasets/modality-backfill-evidence.ts']) put(file, '// stub\n');
+  for (const file of MAINTENANCE_FILES) put(file, file.endsWith('.test.ts') ? 'import "../../../../scripts/db-safety/test-entry.cjs";\n// stub\n' : '// stub\n');
   put(FIXTURE_FILE, 'import "../../../../scripts/db-safety/test-entry.cjs"; // gate\n// fixture body\n');
   put('lib/generated/prisma/models/Dataset.ts', 'export type X = { modalityContentRevision: bigint }\n');
   for (const rel of ['internal/class.ts', 'internal/prismaNamespace.ts', 'internal/prismaNamespaceBrowser.ts', 'models/PreparedImport.ts']) put(`${CLIENT_DIR}/${rel}`, `generated ${rel}\n`);
@@ -1655,5 +1657,49 @@ test('backfill plan: each failing stage fails the run, still cleans up and is in
       assert.equal(out.result, 'FAIL', label); assert.ok(out.failures.includes(code), `${label}: ${JSON.stringify(out.failures)}`);
       expectCleanedAndVerified(w, out);
     } finally { cleanup(w); }
+  }
+});
+
+// =====================================================================================================================
+// Maintenance launcher rehearsal plan (release:phase029-backfill-maintenance): fixed plan, pinned catalog, consistent constants
+// =====================================================================================================================
+test('maintenance plan is a fixed plan; its catalog entries are pinned and equal the real catalog; the rehearsal constants agree with the fixture', async () => {
+  assert.equal(validateCommand(MAINTENANCE_ID, CATALOG), MAINTENANCE_ID);
+  assert.equal(resolvePlan(MAINTENANCE_ID).kind, 'maintenance'); assert.equal(resolvePlan(MAINTENANCE_ID).through, 2);
+  assert.ok(!SUPPORTED_COMMANDS.includes(MAINTENANCE_ID));
+  const catalog = JSON.parse(readFileSync(join(guard.root, 'scripts/db-safety/commands.json'), 'utf8'));
+  for (const [name, spec] of [[MAINT_SEED_COMMAND, MAINT_SEED_SPEC], [MAINT_OBJECTS_COMMAND, MAINT_OBJECTS_SPEC], [MAINT_CHECK_COMMAND, MAINT_CHECK_SPEC]]) { assert.deepEqual(catalog[name], spec, name); assert.equal(spec.maintenanceOnly, MAINTENANCE_ID); assert.ok(!SUPPORTED_COMMANDS.includes(name)); }
+  const rehearsal = await import('../backfill-maintenance-rehearsal.mjs');
+  // 5 chain steps + 4 fixed child steps + (check + repair) per apply run, the last run has no repair + the drift check
+  assert.equal(MAINTENANCE_COMMANDS.length, 5 + 4 + rehearsal.APPLY_EXPECTATIONS.length * 2 - 1 + 1);
+  assert.equal(rehearsal.APPLY_EXPECTATIONS.at(-1).repair, null);
+  const fixture = readFileSync(join(guard.root, 'apps/web/tests/dataset-modality/maintenance-fixture.ts'), 'utf8');
+  const list = name => [...fixture.match(new RegExp(`export const ${name} = \\[([^\\]]*)\\]`))[1].matchAll(/"([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(list('EXPECTED_CANDIDATES'), rehearsal.EXPECTED_CANDIDATES);
+  const rejected = Object.fromEntries([...fixture.match(/export const EXPECTED_REJECTED[^=]*= \{([^}]*)\}/)[1].matchAll(/"([^"]+)": "([^"]+)"/g)].map(match => [match[1], match[2]]));
+  assert.deepEqual(rejected, rehearsal.EXPECTED_REJECTED);
+  assert.deepEqual(rehearsal.APPROVED, rehearsal.EXPECTED_CANDIDATES.filter(id => id !== rehearsal.UNAPPROVED));
+  assert.ok(rehearsal.APPROVED.every((id, index, all) => index === 0 || all[index - 1] < id), 'approved ids are in ascending order, which is the apply order');
+  for (const expectation of rehearsal.APPLY_EXPECTATIONS) assert.equal(expectation.statuses.length, rehearsal.APPROVED.length, expectation.name);
+  const resolvedAfter = { 'apply-1': 5, 'apply-2': 6, 'apply-3': 7, 'apply-4': 10 };
+  for (const expectation of rehearsal.APPLY_EXPECTATIONS) assert.equal(expectation.statuses.filter(status => status === 'COMMITTED' || status === 'COMMITTED_REPLAY').length, resolvedAfter[expectation.name], expectation.name);
+});
+test('maintenance plan: preflight tampering aborts before anything is provisioned', async () => {
+  const edit = (w, fn) => { const file = join(w.root, 'scripts/db-safety/commands.json'); const catalog = JSON.parse(readFileSync(file, 'utf8')); fn(catalog); writeFileSync(file, JSON.stringify(catalog)); };
+  const setups = {
+    'seed spec extended': [w => edit(w, c => c[MAINT_SEED_COMMAND].args.push('x')), /MAINTENANCE_COMMAND_TAMPERED/],
+    'objects spec re-pathed': [w => edit(w, c => { c[MAINT_OBJECTS_COMMAND].args[c[MAINT_OBJECTS_COMMAND].args.length - 1] = 'tests/other.test.ts'; }), /MAINTENANCE_COMMAND_TAMPERED/],
+    'check marker removed': [w => edit(w, c => { delete c[MAINT_CHECK_COMMAND].maintenanceOnly; }), /MAINTENANCE_COMMAND_TAMPERED/],
+    'g2:generate changed': [w => edit(w, c => { c['g2:generate'].cwd = 'apps/web'; }), /RELEASE_COMMAND_TAMPERED/],
+    'launcher missing': [w => rmSync(join(w.root, 'scripts/db-safety/backfill-launcher.mjs')), /MAINTENANCE_FILE_MISSING/],
+    'child runner missing': [w => rmSync(join(w.root, 'apps/web/scripts/backfill-run.ts')), /MAINTENANCE_FILE_MISSING/],
+    'storage adapter missing': [w => rmSync(join(w.root, 'apps/web/src/lib/datasets/modality-backfill-storage.ts')), /MAINTENANCE_FILE_MISSING/],
+    'check test ungated': [w => writeFileSync(join(w.root, 'apps/web/tests/dataset-modality/maintenance-check.test.ts'), '// no gate\n'), /MAINTENANCE_FILE_UNGATED/],
+    'frozen client drift': [w => writeFileSync(join(w.root, CLIENT_DIR, 'models/Dataset.ts'), 'export type X = { modalityContentRevision: bigint, extra: 1 }\n'), /FROZEN_CLIENT_DRIFT|FROZEN_CLIENT_FILE_DRIFT/],
+    'implementation set unreadable': [w => { w.deps.maintenanceImplementation = () => { throw Error('IMPLEMENTATION_FILE_MISSING'); }; }, /IMPLEMENTATION_FILE_MISSING/],
+  };
+  for (const [label, [setup, expected]] of Object.entries(setups)) {
+    const w = world();
+    try { setup(w); await assert.rejects(() => failuresOf(w, MAINTENANCE_ID), expected, label); assert.equal(w.calls.length, 0, label); assert.equal(w.stages.length, 0, label); assert.equal(readdirSync(w.outBase).length, 0, label); } finally { cleanup(w); }
   }
 });
