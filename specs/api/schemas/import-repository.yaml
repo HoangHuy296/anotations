@@ -588,8 +588,16 @@ LocalFolderImportPreparation:
 
 StartOrAppendLocalFolderImportResponse:
   type: object
-  required: [preparation, replayed, deliveryPending]
+  required: [dataset, preparation, replayed, deliveryPending]
   properties:
+    dataset:
+      type: object
+      description: Authoritative persisted Dataset identity (fresh, replayed and append responses); never an echo of request input.
+      required: [id, modality]
+      properties:
+        id: { type: string }
+        modality: { $ref: './assets.yaml#/Modality' }
+      additionalProperties: false
     preparation: { $ref: '#/LocalFolderImportPreparation' }
     replayed:
       type: boolean

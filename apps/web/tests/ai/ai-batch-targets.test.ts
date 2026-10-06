@@ -105,18 +105,45 @@ test("a filtered selection is resolved server-side across the whole dataset, ord
   if (!none.ok) assert.equal(none.code, "TARGET_EMPTY");
 });
 
-test("mixed modality is rejected atomically; VIDEO batches and AUDIO are unverified in v1 while one VIDEO Asset keeps working", { skip: !enabled }, async () => {
-  const datasetId = await fixtureDataset();
-  const image = await asset(datasetId);
-  const videoA = await asset(datasetId, { modality: Modality.VIDEO, mimeType: "video/mp4", filename: "v1.mp4" });
-  const videoB = await asset(datasetId, { modality: Modality.VIDEO, mimeType: "video/mp4", filename: "v2.mp4" });
-  const audio = await asset(datasetId, { modality: Modality.AUDIO, mimeType: "audio/wav", filename: "a.wav" });
-  const code = async (assetIds: string[]) => { const r = await resolveAiTarget(datasetId, { mode: "BULK_SELECTION", selection: { mode: "EXPLICIT", assetIds } }); return r.ok ? "OK" : r.code; };
-  assert.equal(await code([image.id, videoA.id]), "TARGET_MIXED_MODALITY");
-  assert.equal(await code([image.id, audio.id]), "TARGET_MIXED_MODALITY");
-  assert.equal(await code([videoA.id, videoB.id]), "AI_CAPABILITY_UNVERIFIED");
-  assert.equal(await code([audio.id]), "AI_CAPABILITY_UNVERIFIED");
-  assert.equal(await code([videoA.id]), "OK");
+async function modalityDataset(modality: Modality | null) {
+  const owner = await createWorkspaceUser(UserRole.MANAGER);
+  const dataset = modality === null
+    ? await db.dataset.create({ data: { ownerId: owner.id, name: workspaceUnique("ai-target-unresolved") }, select: { id: true } })
+    : await createWorkspaceDataset(owner.id, modality);
+  users.push(owner.id); datasets.push(dataset.id);
+  return dataset.id;
+}
+const targetCode = async (datasetId: string, assetIds: string[]) => { const r = await resolveAiTarget(datasetId, { mode: "BULK_SELECTION", selection: { mode: "EXPLICIT", assetIds } }); return r.ok ? `OK:${r.modality}:${r.targets.length}` : r.code; };
+
+test("Dataset.modality alone selects the AI target kind: IMAGE batches stay capped at the verified limit and VIDEO stays single-asset", { skip: !enabled }, async () => {
+  const image = await modalityDataset(Modality.IMAGE);
+  const images = await Promise.all(Array.from({ length: AI_BATCH_VERIFIED_MAX_ASSETS + 1 }, () => asset(image)));
+  const ids = images.map((row) => row.id);
+  assert.equal(await targetCode(image, ids.slice(0, AI_BATCH_VERIFIED_MAX_ASSETS)), `OK:IMAGE:${AI_BATCH_VERIFIED_MAX_ASSETS}`, "an IMAGE Dataset batch up to the proven limit resolves");
+  assert.equal(await targetCode(image, ids), "TARGET_TOO_LARGE", "one more than the proven limit is refused");
+
+  const video = await modalityDataset(Modality.VIDEO);
+  const videoA = await asset(video, { modality: Modality.VIDEO, mimeType: "video/mp4", filename: "v1.mp4" });
+  const videoB = await asset(video, { modality: Modality.VIDEO, mimeType: "video/mp4", filename: "v2.mp4" });
+  assert.equal(await targetCode(video, [videoA.id]), "OK:VIDEO:1", "one VIDEO Asset keeps working");
+  assert.equal(await targetCode(video, [videoA.id, videoB.id]), "AI_CAPABILITY_UNVERIFIED", "a VIDEO batch is not evidenced");
+
+  const audio = await modalityDataset(Modality.AUDIO);
+  const wav = await asset(audio, { modality: Modality.AUDIO, mimeType: "audio/wav", filename: "a.wav" });
+  assert.equal(await targetCode(audio, [wav.id]), "AI_CAPABILITY_UNVERIFIED", "AUDIO has no verified AI capability");
+});
+
+test("an Asset row can never establish the AI target kind: a Dataset that is unresolved or of another modality fails closed", { skip: !enabled }, async () => {
+  // The M24 fence makes an unresolved Dataset or a cross-modality Asset unrepresentable in a fresh database, so the Dataset read is injected: the
+  // service must trust only that read, never the (IMAGE-looking) Asset rows.
+  const datasetId = await modalityDataset(Modality.IMAGE);
+  const hinted = await asset(datasetId);
+  const withDataset = (modality: Modality | null) => ({ asset: db.asset, dataset: { findFirst: async () => (modality === undefined ? null : { modality }) } }) as unknown as Parameters<typeof resolveAiTarget>[2];
+  const run = async (modality: Modality | null) => { const r = await resolveAiTarget(datasetId, { mode: "CURRENT_ASSET", assetId: hinted.id }, withDataset(modality)); return r.ok ? `OK:${r.modality}` : r.code; };
+  assert.equal(await run(Modality.IMAGE), "OK:IMAGE");
+  assert.equal(await run(null), "AI_CAPABILITY_UNVERIFIED", "an unresolved Dataset has no verified capability, whatever its Assets look like");
+  assert.equal(await run(Modality.VIDEO), "TARGET_MIXED_MODALITY", "an IMAGE-looking Asset in a VIDEO Dataset is refused, not trusted");
+  assert.equal(await run(Modality.TEXT), "AI_CAPABILITY_UNVERIFIED", "a Dataset modality without AI capability is unverified");
 });
 
 test("source identity: an Asset without size or storage location is ineligible; a missing checksum is not", { skip: !enabled }, async () => {
