@@ -34,6 +34,8 @@ const MATRIX = {
   'apps/web/src/lib/imports/prepare-local-folder-import.ts': { counts: { datasetCreate: 1 }, class: 'G' },
   // Dataset modality assignment (the only writer of modality / receipt / fence from the application).
   'apps/web/src/lib/datasets/modality.ts': { counts: { datasetUpdate: 2 }, class: 'G' },
+  // T031 evidence-bound SINGLE backfill (claim + assignment); no human authority; rehearsed by release:phase029-backfill and not wired to any route.
+  'apps/web/src/lib/datasets/modality-backfill.ts': { counts: { datasetUpdate: 1, datasetUpdateMany: 1 }, class: 'G' },
   // Dataset UPDATE of non-modality columns (metadata, archive, text policy, claims, visualization): trigger passes for resolved and unresolved parents.
   'apps/web/src/app/(app)/datasets/actions.ts': { counts: { datasetUpdate: 1 }, class: 'G' },
   'apps/web/src/app/api/datasets/[datasetId]/route.ts': { counts: { datasetUpdate: 2 }, class: 'G' },
@@ -84,10 +86,10 @@ test('every Dataset creator supplies an explicit modality (the insert trigger re
     assert.ok(at >= 0, file); assert.match(text.slice(at, at + 700), /\bmodality\b/, `${file} creates a Dataset without modality`);
   }
 });
-test('only the resolution service writes Dataset.modality, the resolver subject or the content revision', () => {
+test('only the resolution service and the evidence backfill write Dataset.modality, the resolver subject or the content revision', () => {
   for (const file of sources) {
     const rel = relative(root, file); const text = read(file);
-    if (rel === 'apps/web/src/lib/datasets/modality.ts' || !/\.dataset\.update(?:Many)?\(/.test(text)) continue;
+    if (rel === 'apps/web/src/lib/datasets/modality.ts' || rel === 'apps/web/src/lib/datasets/modality-backfill.ts' || !/\.dataset\.update(?:Many)?\(/.test(text)) continue;
     for (const match of text.matchAll(/\.dataset\.update(?:Many)?\(\s*\{[\s\S]{0,900}?\bdata:\s*\{([^}]*)\}/g)) assert.doesNotMatch(match[1], /\b(?:modality|modalityContentRevision|modalityResolvedAt|modalityResolverSubject)\b/, `${rel} writes a modality field`);
   }
 });
@@ -96,6 +98,10 @@ test('no production Asset update changes datasetId or modality (no reparent), an
     const text = read(join(root, file));
     for (const match of text.matchAll(/\.asset\.update(?:Many)?\(\s*\{[\s\S]{0,900}?\bdata:\s*(\{[^}]*\}|[A-Za-z.]+)/g)) assert.doesNotMatch(match[1], /\b(?:datasetId|modality)\s*:/, `${file} changes datasetId/modality`);
   }
+});
+test('the backfill writer is reachable from no route, action or job (library only, used by a receipt-bound runner)', () => {
+  const importers = sources.filter(file => !file.endsWith('apps/web/src/lib/datasets/modality-backfill.ts') && /datasets\/modality-backfill['"]|\.\/modality-backfill['"]/.test(read(file))).map(file => relative(root, file));
+  assert.deepEqual(importers, []);
 });
 test('the dormant importer has no production caller', () => {
   assert.deepEqual(sources.filter(file => !file.endsWith('apps/web/src/lib/dataset-import.ts') && /\bpersistDatasetImport\b/.test(read(file))).map(file => relative(root, file)), []);

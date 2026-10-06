@@ -121,6 +121,21 @@ export const RELEASE_TOPOLOGY = Object.freeze([
   ['baseline-deploy', 'deploy', null], ['generate', 'test', 'g2:generate'], ['baseline-seed', 'test', 'g2:baseline'], ['proposal-1-deploy', 'deploy', null],
   ['fixture', 'test', FIXTURE_COMMAND], ['proposal-2-deploy', 'deploy', null], ['schema-compat', 'test', 'g2:compatibility'], ['client-compat', 'test', COMPAT_COMMAND], ['candidate-contracts', 'test', 'g2:candidate'],
 ]);
+// ---- T029/T031 backfill rehearsal: the canonical 25-migration chain plus the evidence-bound SINGLE-modality backfill, on disposable PostgreSQL only ----
+export const BACKFILL_ID = 'release:phase029-backfill';
+export const BACKFILL_SEED_COMMAND = 'backfill-seed:dataset-modality';
+export const BACKFILL_VERIFY_COMMAND = 'verify-test:dataset-modality-backfill';
+export const BACKFILL_SEED_FILE = 'apps/web/tests/dataset-modality/backfill-baseline.test.ts';
+export const BACKFILL_VERIFY_FILE = 'apps/web/tests/dataset-modality/backfill-rehearsal.test.ts';
+export const BACKFILL_SEED_SPEC = Object.freeze({ kind: 'test', cwd: 'apps/web', args: [...G2_ARGS, 'tests/dataset-modality/backfill-baseline.test.ts'], backfillOnly: BACKFILL_ID });
+export const BACKFILL_VERIFY_SPEC = Object.freeze({ kind: 'test', cwd: 'apps/web', args: [...G2_ARGS, 'tests/dataset-modality/backfill-rehearsal.test.ts'], backfillOnly: BACKFILL_ID });
+export const BACKFILLS = Object.freeze({
+  [BACKFILL_ID]: Object.freeze({ through: 2, newColumn: NEW_COLUMN, scope: 'release-chain-backfill-rehearsal' }),
+});
+export const BACKFILL_TOPOLOGY = Object.freeze([
+  ['baseline-deploy', 'deploy', null], ['generate', 'test', 'g2:generate'], ['baseline-seed', 'test', BACKFILL_SEED_COMMAND], ['proposal-1-deploy', 'deploy', null],
+  ['proposal-2-deploy', 'deploy', null], ['backfill-verify', 'test', BACKFILL_VERIFY_COMMAND], ['schema-compat', 'test', 'g2:compatibility'],
+]);
 export const PORT_RANGE = [55460, 55479];
 const COMMAND_SHAPE = /^[a-z0-9]+(?::[a-z0-9-]+)+$/;
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -134,7 +149,7 @@ const safe = error => (/^[A-Z][A-Z0-9_]+$/.test(error?.message ?? '') ? error.me
 /** Pure, runs before anything is created. */
 export function validateCommand(name, catalog) {
   must(typeof name === 'string' && name.length <= 80 && COMMAND_SHAPE.test(name), 'COMMAND_NAME_INVALID');
-  if (Object.hasOwn(REHEARSALS, name) || Object.hasOwn(COMPATIBILITY, name) || Object.hasOwn(RELEASES, name)) return name; // fixed plans; their child commands are bound in preflight, never selectable here
+  if (Object.hasOwn(REHEARSALS, name) || Object.hasOwn(COMPATIBILITY, name) || Object.hasOwn(RELEASES, name) || Object.hasOwn(BACKFILLS, name)) return name; // fixed plans; their child commands are bound in preflight, never selectable here
   must(SUPPORTED_COMMANDS.includes(name), 'COMMAND_NOT_SUPPORTED');
   must(catalog?.[name]?.kind === 'test', 'COMMAND_NOT_ALLOWLISTED');
   return name;
@@ -152,6 +167,7 @@ export function resolvePlan(name) {
   if (Object.hasOwn(REHEARSALS, name)) return { kind: 'rehearsal', id: name, ...REHEARSALS[name] };
   if (Object.hasOwn(COMPATIBILITY, name)) return { kind: 'compat', id: name, ...COMPATIBILITY[name] };
   if (Object.hasOwn(RELEASES, name)) return { kind: 'release', id: name, ...RELEASES[name] };
+  if (Object.hasOwn(BACKFILLS, name)) return { kind: 'backfill', id: name, ...BACKFILLS[name] };
   return { kind: 'test', id: name, through: 1 };
 }
 
@@ -393,6 +409,7 @@ export const INGEST_ALLOWED_IMPORTS = new Set([
   '@/lib/asset-upload', '@/lib/upload-capability',
 ]);
 export const INGEST_ALLOWED_REQUIRES = new Set(['node:module', '@/lib/providers', '@/lib/db', '@/lib/imports/complete-local-folder-item', '@/lib/imports/commit-local-folder-import']);
+export const BACKFILL_ALLOWED_IMPORTS = new Set([...COMPAT_ALLOWED_IMPORTS, '@/lib/datasets/modality', '@/lib/datasets/modality-backfill', '@/lib/datasets/modality-backfill-evidence']);
 const COMPAT_FORBIDDEN = [
   ['RAW_SQL', /\$queryRaw|\$executeRaw|\$runCommandRaw|queryRawUnsafe|executeRawUnsafe|\bPrisma\.sql\b|\bPrisma\.raw\b|\bsql`/],
   ['ALTERNATE_PRISMA_CLIENT', /\bPrismaClient\b|@prisma\/client|@prisma\/adapter|generated\/prisma\/client|generated\/prisma\/internal/],
@@ -407,7 +424,7 @@ const COMPAT_FORBIDDEN = [
  * Profile `t015` also allows `require("<allowed specifier>")` (the module-load pattern used to substitute only the request-actor lookup).
  */
 export function scanCompatTestSource(text, profile = 'compat') {
-  const allowed = profile === 't015' ? T015_ALLOWED_IMPORTS : profile === 'ingest' ? INGEST_ALLOWED_IMPORTS : COMPAT_ALLOWED_IMPORTS;
+  const allowed = profile === 't015' ? T015_ALLOWED_IMPORTS : profile === 'ingest' ? INGEST_ALLOWED_IMPORTS : profile === 'backfill' ? BACKFILL_ALLOWED_IMPORTS : COMPAT_ALLOWED_IMPORTS;
   const violations = [];
   const first = text.split('\n')[0];
   if (!/^import ["']\.\.\/\.\.\/\.\.\/\.\.\/scripts\/db-safety\/test-entry\.cjs["'];/.test(first)) violations.push('MISSING_FIRST_LINE_GATE');
@@ -519,6 +536,16 @@ export async function runFocusedTest(command, deps = realDeps()) {
     assertCompatTestSource(readFileSync(join(deps.root, plan.compatFile), 'utf8'), 'compat');
     releaseManifest = deps.releaseManifestSql();
   }
+  if (plan.kind === 'backfill') {
+    compatBindings = verifyCompatBindings(deps);
+    for (const name of ['g2:generate', 'g2:compatibility']) must(isDeepStrictEqual(catalog[name], RELEASE_SPECS[name]), 'RELEASE_COMMAND_TAMPERED');
+    must(isDeepStrictEqual(catalog[BACKFILL_SEED_COMMAND], BACKFILL_SEED_SPEC), 'BACKFILL_COMMAND_TAMPERED');
+    must(isDeepStrictEqual(catalog[BACKFILL_VERIFY_COMMAND], BACKFILL_VERIFY_SPEC), 'BACKFILL_COMMAND_TAMPERED');
+    for (const file of ['scripts/db-safety/g2-generate.mjs', 'scripts/db-safety/g2-compatibility.mjs', BACKFILL_SEED_FILE, BACKFILL_VERIFY_FILE, 'apps/web/src/lib/datasets/modality-backfill.ts', 'apps/web/src/lib/datasets/modality-backfill-evidence.ts']) must(existsSync(join(deps.root, file)), 'BACKFILL_STEP_FILE_MISSING');
+    must(/import .*db-safety\/test-entry.cjs/.test(readFileSync(join(deps.root, BACKFILL_SEED_FILE), 'utf8').split('\n')[0]), 'BACKFILL_FILE_UNGATED');
+    assertCompatTestSource(readFileSync(join(deps.root, BACKFILL_VERIFY_FILE), 'utf8'), 'backfill');
+    releaseManifest = deps.releaseManifestSql();
+  }
   const generatedModel = join(deps.root, 'lib/generated/prisma/models/Dataset.ts');
   must(existsSync(generatedModel) && readFileSync(generatedModel, 'utf8').includes('modalityContentRevision'), 'GENERATED_CLIENT_NOT_PHASE029'); // never regenerated here
   const protectedBefore = { migrations: treeHash(deps.root, 'prisma/migrations'), generated: treeHash(deps.root, 'lib/generated/prisma'), schema: sha(readFileSync(join(deps.root, 'prisma/schema.prisma'))) };
@@ -538,7 +565,9 @@ export async function runFocusedTest(command, deps = realDeps()) {
   };
   // Explicit evidence classification: a focused run is never G3/G5 closure evidence and writes only below outBase.
   const migrationChain = { active: baseline.map(row => row.name), proposals: chain.map(({ order, name, sha256, path }) => ({ order, name, sha256, path })) };
-  const classification = plan.kind === 'release'
+  const classification = plan.kind === 'backfill'
+    ? { kind: 'dataset-modality-backfill-rehearsal', scope: plan.scope, countsAsG3Evidence: false, countsAsG5Evidence: false, notAuthorizationToApplyMigration: true, notAuthorizationToBackfill: true, backfillRehearsalPassed: false, expectedSchemaEntries: RELEASE_COUNTS, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain, sourceBindings: compatBindings }
+    : plan.kind === 'release'
     ? { kind: 'release-chain-proof', scope: plan.scope, countsAsG3Evidence: false, countsAsG5Evidence: false, notAuthorizationToApplyMigration: true, releaseChainProven: false, expectedSchemaEntries: RELEASE_COUNTS, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain, sourceBindings: compatBindings }
     : plan.kind === 'compat'
     ? { kind: plan.evidenceKind, scope: plan.scope, countsAsG3Evidence: false, countsAsG5Evidence: false, migrationBehaviorAlreadyProvenSeparately: true, notAuthorizationToApplyMigration: true, [plan.provenFlag]: false, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain, sourceBindings: compatBindings }
@@ -596,7 +625,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
   const verifyHistory = (stageLabel, entries) => checkHistory(readHistory(), [...baseline, ...entries], stageLabel);
   const capture = () => {
     const tables = JSON.parse(psqlMany([TABLES_SQL])[0]);
-    const script = captureScript(tables, plan.kind === 'release' ? releaseExtraSql(releaseManifest) : {});
+    const script = captureScript(tables, plan.kind === 'release' || plan.kind === 'backfill' ? releaseExtraSql(releaseManifest) : {});
     return parseCapture(psqlMany(script.statements), script);
   };
   const deployRequest = () => ({
@@ -660,6 +689,15 @@ export async function runFocusedTest(command, deps = realDeps()) {
     verifyHistory('BASELINE', []);
     let pre = null;
     const releaseCaptures = {};
+    if (plan.kind === 'backfill') {
+      releaseCaptures.baseline = capture();
+      must(releaseCaptures.baseline.schemaManifest.length === RELEASE_COUNTS.baseline, 'RELEASE_BASELINE_SCHEMA_COUNT_UNEXPECTED');
+      testStep('generate', 'g2:generate', 'RELEASE_GENERATE_FAILED');
+      testStep('baseline-seed', BACKFILL_SEED_COMMAND, 'BACKFILL_SEED_FAILED');
+      releaseCaptures.seeded = capture();
+      must(isDeepStrictEqual(releaseCaptures.seeded.schemaManifest, releaseCaptures.baseline.schemaManifest) && releaseCaptures.seeded.datasetLegacy[0] > 0, 'RELEASE_BASELINE_SEED_UNEXPECTED');
+      save('backfill-seeded-datasets.json', releaseCaptures.seeded.datasetModality);
+    }
     if (plan.kind === 'release') {
       // Historical state: the baseline client is generated by the pinned G2 step and seeds synthetic unresolved history (EMPTY, SINGLE, MIXED, deleted, archived) on the 23-migration database only.
       releaseCaptures.baseline = capture();
@@ -677,6 +715,11 @@ export async function runFocusedTest(command, deps = realDeps()) {
       must(sha(readFileSync(join(staged, 'migration.sql'))) === entry.sha256, 'PROPOSAL_CHECKSUM_MISMATCH');
       must(launch(`proposal-${entry.order}-deploy`, issue(`proposal-${entry.order}-deploy`, deployRequest(), null), 'deploy') === 0, 'PROPOSAL_DEPLOY_FAILED');
       verifyHistory('PROPOSAL', chain.slice(0, entry.order));
+      if (plan.kind === 'backfill') {
+        const snapshot = capture();
+        if (entry.order === 1) { save('release-m24-assertions.json', assertRelease24(releaseCaptures.seeded, snapshot, { proposal: entry })); releaseCaptures.m24 = snapshot; }
+        else { save('release-m25-assertions.json', assertRelease25(releaseCaptures.m24, snapshot, { newColumn: plan.newColumn })); releaseCaptures.m25 = snapshot; }
+      }
       if (plan.kind === 'release' && entry.order === 1) {
         releaseCaptures.m24 = capture();
         const m24Assertions = assertRelease24(releaseCaptures.seeded, releaseCaptures.m24, { proposal: entry });
@@ -692,7 +735,20 @@ export async function runFocusedTest(command, deps = realDeps()) {
       }
     }
 
-    if (plan.kind === 'release') {
+    if (plan.kind === 'backfill') {
+      // The chain is complete (25 records, 1842 schema entries, all historical Datasets still unresolved); only now does the evidence-bound backfill rehearsal run.
+      must(releaseCaptures.m25.schemaManifest.length === RELEASE_COUNTS.m25 && releaseCaptures.m25.datasetModality.every(row => row.m === null), 'BACKFILL_PRECONDITION_UNEXPECTED');
+      testStep('backfill-verify', BACKFILL_VERIFY_COMMAND, 'BACKFILL_REHEARSAL_FAILED');
+      testStep('schema-compat', 'g2:compatibility', 'RELEASE_SCHEMA_COMPAT_FAILED');
+      verifyCompatBindings(deps);
+      const final = capture();
+      save('backfill-final-datasets.json', final.datasetModality);
+      // Data-only run: the schema and the migration history must be exactly what the chain left.
+      must(isDeepStrictEqual(final.schemaManifest, releaseCaptures.m25.schemaManifest) && isDeepStrictEqual(final.migrations, releaseCaptures.m25.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
+      verifyHistory('FINAL', chain);
+      must(isDeepStrictEqual(state.topology.map(({ step, operation, command: receiptCommand }) => [step, operation, receiptCommand]), BACKFILL_TOPOLOGY.map(row => [...row])), 'RECEIPT_TOPOLOGY_UNEXPECTED');
+      save('backfill-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, releaseCaptures.m25.schemaManifest.length, final.schemaManifest.length], datasetsResolved: final.datasetModality.filter(row => row.m !== null).length, datasetsUnresolved: final.datasetModality.filter(row => row.m === null).length, migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })) });
+    } else if (plan.kind === 'release') {
       must(pre !== null, 'REHEARSAL_PRECAPTURE_MISSING');
       const post = capture();
       save('m25-pre-fingerprint.json', pre); save('m25-post-fingerprint.json', post);
@@ -750,7 +806,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
     if (remaining.length) state.failures.push('RECEIPT_REGISTRATION_REMAINS');
   }
   const result = state.failures.length === 0 ? 'PASS' : 'FAIL';
-  const finalClassification = plan.kind === 'compat' ? { ...classification, [plan.provenFlag]: result === 'PASS' } : plan.kind === 'release' ? { ...classification, releaseChainProven: result === 'PASS' } : classification;
+  const finalClassification = plan.kind === 'compat' ? { ...classification, [plan.provenFlag]: result === 'PASS' } : plan.kind === 'release' ? { ...classification, releaseChainProven: result === 'PASS' } : plan.kind === 'backfill' ? { ...classification, backfillRehearsalPassed: result === 'PASS' } : classification;
   save('results.json', { ...finalClassification, result, command, runToken: token, testExit: state.testExit, failures: state.failures, receiptTopology: state.topology, cleanup: state.cleanup, independentCleanupExit: state.independent.status });
   return { result, runDir, failures: state.failures, testExit: state.testExit };
 }
