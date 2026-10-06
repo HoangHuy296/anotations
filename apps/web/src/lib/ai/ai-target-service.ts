@@ -62,7 +62,7 @@ function toSelection(target: AiTargetInput): { selection: BulkSelectionInput; ta
 export async function resolveAiTarget(
   datasetId: string,
   target: AiTargetInput,
-  client: Pick<Prisma.TransactionClient, "asset"> = db,
+  client: Pick<Prisma.TransactionClient, "asset" | "dataset"> = db,
 ): Promise<ResolvedAiTarget> {
   const effectiveLimit = effectiveAiBatchLimit(BULK_SYNC_MAX_ASSETS);
   const fail = (code: AiTargetFailureCode): ResolvedAiTarget => ({ ok: false, code, status: failureStatus[code], effectiveLimit });
@@ -75,10 +75,12 @@ export async function resolveAiTarget(
   // A concurrent delete/archive between the two reads must reject, not shrink, the target.
   if (rows.length !== resolved.assetIds.length) return fail("ASSET_NOT_IN_DATASET");
 
-  const modalities = new Set(rows.map((row) => row.modality));
-  if (modalities.size > 1) return fail("TARGET_MIXED_MODALITY");
-  const modality = rows[0].modality;
+  // Dataset.modality is the sole authority for the target kind. Asset rows are only checked against it: they never select it, and an
+  // unresolved (EMPTY/legacy MIXED) Dataset has no verified AI capability.
+  const dataset = await client.dataset.findFirst({ where: { id: datasetId, deletedAt: null }, select: { modality: true } });
+  const modality = dataset?.modality ?? null;
   if (modality !== Modality.IMAGE && modality !== Modality.VIDEO) return fail("AI_CAPABILITY_UNVERIFIED");
+  if (rows.some((row) => row.modality !== modality)) return fail("TARGET_MIXED_MODALITY");
   // v1 (decision D-V1): batches are IMAGE detection only. A single VIDEO Asset keeps
   // its existing behavior through this same path; a VIDEO batch is not evidenced.
   if (modality === Modality.VIDEO && rows.length > 1) return fail("AI_CAPABILITY_UNVERIFIED");
