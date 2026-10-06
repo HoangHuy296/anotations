@@ -685,5 +685,33 @@
       "tests/dataset-modality/ingestion-replay-summary.test.ts"
     ],
     "verifyOnly": "verify:ingestion-replay-summary"
+  },
+  "backfill-seed:dataset-modality": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/backfill-baseline.test.ts"
+    ],
+    "backfillOnly": "release:phase029-backfill"
+  },
+  "verify-test:dataset-modality-backfill": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/backfill-rehearsal.test.ts"
+    ],
+    "backfillOnly": "release:phase029-backfill"
   }
 }

@@ -9,6 +9,7 @@ import { loadExpectations } from '../cleanup-verify.mjs';
 import { isDeepStrictEqual } from 'node:util';
 import {
   SUPPORTED_COMMANDS, PROPOSAL_CHAIN, REHEARSALS, REHEARSAL_ID, FIXTURE_COMMAND, FIXTURE_FILE, FIXTURE_SPEC, FIXTURE_ROWS, HISTORY_SQL,
+  BACKFILL_ID, BACKFILL_SEED_COMMAND, BACKFILL_VERIFY_COMMAND, BACKFILL_SEED_FILE, BACKFILL_VERIFY_FILE, BACKFILL_SEED_SPEC, BACKFILL_VERIFY_SPEC, BACKFILL_TOPOLOGY, BACKFILL_ALLOWED_IMPORTS,
   RELEASE_ID, RELEASE_COUNTS, RELEASE_SPECS, RELEASE_TOPOLOGY, RECOVERY_REVIEW, assertRelease24, assertRelease25, manifestDiff, extractManifestSql, releaseManifestSqlFrom, releaseExtraSql, captureScript,
   realDeps, runFocusedTest, validateCommand, validateChain, checkHistory, assertMigration25, primaryCleanup, resolvePlan,
   COMPAT_ID, COMPAT_COMMAND, COMPAT_FILE, COMPAT_SPEC, COMPAT_BINDINGS, COMPATIBILITY, T015_ID, T015_COMMAND, T015_FILE, T015_SPEC, T015_ALLOWED_IMPORTS, INGEST_ID, INGEST_COMMAND, INGEST_FILE, INGEST_SPEC, INGEST_ALLOWED_IMPORTS, INGEST_ALLOWED_REQUIRES, verifyCompatBindings, scanCompatTestSource, assertCompatTestSource, assertCompatColumn,
@@ -23,7 +24,7 @@ const PROPOSAL1_SQL = '-- fake migration 24 bytes\n';
 const PROPOSAL2_SQL = '-- fake migration 25 bytes\n';
 const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1];
 const FAKE_CHAIN = [{ ...P1, sha256: sha(PROPOSAL1_SQL) }, { ...P2, sha256: sha(PROPOSAL2_SQL) }];
-const CATALOG = { [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
+const CATALOG = { [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [BACKFILL_SEED_COMMAND]: BACKFILL_SEED_SPEC, [BACKFILL_VERIFY_COMMAND]: BACKFILL_VERIFY_SPEC, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'dt-root-'));
@@ -35,6 +36,9 @@ function fixture() {
   put(`${P1.path}/migration.sql`, PROPOSAL1_SQL);
   put(`${P2.path}/migration.sql`, PROPOSAL2_SQL);
   for (const file of ['scripts/db-safety/g2-generate.mjs', 'scripts/db-safety/g2-compatibility.mjs', 'apps/web/tests/dataset-modality/g2-baseline.test.ts', 'apps/web/tests/dataset-modality/g2-candidate.test.ts']) put(file, '// release step stub\n');
+  put(BACKFILL_SEED_FILE, 'import "../../../../scripts/db-safety/test-entry.cjs";\n// seed stub\n');
+  put(BACKFILL_VERIFY_FILE, readFileSync(join(guard.root, BACKFILL_VERIFY_FILE), 'utf8'));
+  for (const file of ['apps/web/src/lib/datasets/modality-backfill.ts', 'apps/web/src/lib/datasets/modality-backfill-evidence.ts']) put(file, '// stub\n');
   put(FIXTURE_FILE, 'import "../../../../scripts/db-safety/test-entry.cjs"; // gate\n// fixture body\n');
   put('lib/generated/prisma/models/Dataset.ts', 'export type X = { modalityContentRevision: bigint }\n');
   for (const rel of ['internal/class.ts', 'internal/prismaNamespace.ts', 'internal/prismaNamespaceBrowser.ts', 'models/PreparedImport.ts']) put(`${CLIENT_DIR}/${rel}`, `generated ${rel}\n`);
@@ -173,7 +177,8 @@ function world(overrides = {}) {
       if (script === 'cli.mjs') {
         if (args[1] === 'deploy') { w.deployCalls += 1; if (w.failDeployAt === w.deployCalls) return { status: 1, stdout: '', stderr: '' }; if (!w.deployExit) deployFrom(env.DB_SAFETY_RECEIPT); return { status: w.deployExit, stdout: '', stderr: '' }; }
         if (args[1] === 'test' && (args[2] === COMPAT_COMMAND || args[2] === T015_COMMAND || args[2] === INGEST_COMMAND)) { w.onCompatTest?.(w.root); return { status: w.compatExit, stdout: 'compat ran', stderr: '' }; }
-        if (args[1] === 'test' && args[2] === 'g2:baseline') { if (!w.baselineSeedExit) { w.db.datasets = ['g2-empty', 'g2-single', 'g2-mixed'].map(id => ({ id, m: null })); w.db.tables.Dataset = [3, 'g2-ds-md5']; } return { status: w.baselineSeedExit ?? 0, stdout: 'seeded', stderr: '' }; }
+        if (args[1] === 'test' && args[2] === BACKFILL_VERIFY_COMMAND) { w.onBackfillVerify?.(w.db); return { status: w.backfillExit ?? 0, stdout: 'verified', stderr: '' }; }
+        if (args[1] === 'test' && (args[2] === 'g2:baseline' || args[2] === BACKFILL_SEED_COMMAND)) { if (!w.baselineSeedExit) { w.db.datasets = ['g2-empty', 'g2-single', 'g2-mixed'].map(id => ({ id, m: null })); w.db.tables.Dataset = [3, 'g2-ds-md5']; } return { status: w.baselineSeedExit ?? 0, stdout: 'seeded', stderr: '' }; }
         if (args[1] === 'test' && args[2] === 'g2:compatibility' && w.schemaCompatExit) return { status: w.schemaCompatExit, stdout: '', stderr: '' };
         if (args[1] === 'test' && args[2] === 'g2:candidate' && w.candidateExit) return { status: w.candidateExit, stdout: '', stderr: '' };
         if (args[1] === 'test' && args[2] === FIXTURE_COMMAND) { if (!w.fixtureExit) seedFixture(); return { status: w.fixtureExit, stdout: 'fixture ran', stderr: '' }; }
@@ -1573,6 +1578,80 @@ test('release plan: failures at each stage fail the run, still clean up and are 
     try {
       Object.assign(w, overrides);
       const out = await failuresOf(w, RELEASE_ID);
+      assert.equal(out.result, 'FAIL', label); assert.ok(out.failures.includes(code), `${label}: ${JSON.stringify(out.failures)}`);
+      expectCleanedAndVerified(w, out);
+    } finally { cleanup(w); }
+  }
+});
+
+// =====================================================================================================================
+// T029/T031 backfill rehearsal plan (release:phase029-backfill)
+// =====================================================================================================================
+test('backfill plan is a fixed plan; its catalog entries are pinned and equal the real catalog; its test file passes the source scan', () => {
+  assert.equal(validateCommand(BACKFILL_ID, CATALOG), BACKFILL_ID);
+  assert.equal(resolvePlan(BACKFILL_ID).kind, 'backfill'); assert.equal(resolvePlan(BACKFILL_ID).through, 2);
+  assert.ok(!SUPPORTED_COMMANDS.includes(BACKFILL_ID));
+  const catalog = JSON.parse(readFileSync(join(guard.root, 'scripts/db-safety/commands.json'), 'utf8'));
+  assert.deepEqual(catalog[BACKFILL_SEED_COMMAND], BACKFILL_SEED_SPEC); assert.deepEqual(catalog[BACKFILL_VERIFY_COMMAND], BACKFILL_VERIFY_SPEC);
+  assert.equal(BACKFILL_TOPOLOGY.length, 7);
+  assert.deepEqual(scanCompatTestSource(readFileSync(join(guard.root, BACKFILL_VERIFY_FILE), 'utf8'), 'backfill'), []);
+  assert.ok(BACKFILL_ALLOWED_IMPORTS.has('@/lib/datasets/modality-backfill') && !BACKFILL_ALLOWED_IMPORTS.has('minio'));
+  const forbidden = readFileSync(join(guard.root, BACKFILL_VERIFY_FILE), 'utf8') + '\nimport pg from "pg";\nawait db.$queryRaw`select 1`;\n';
+  assert.ok(scanCompatTestSource(forbidden, 'backfill').length >= 2);
+});
+test('backfill lifecycle: 23 -> seed -> 24 -> 25 -> backfill rehearsal -> drift check -> cleanup -> independent verification', async () => {
+  const w = world();
+  try {
+    const out = await failuresOf(w, BACKFILL_ID);
+    assert.equal(out.result, 'PASS', JSON.stringify(out.failures));
+    assert.equal(deployCalls(w).length, 3);
+    assert.deepEqual(testCalls(w), ['g2:generate', BACKFILL_SEED_COMMAND, BACKFILL_VERIFY_COMMAND, 'g2:compatibility']);
+    const results = JSON.parse(readFileSync(join(out.runDir, 'results.json'), 'utf8'));
+    assert.equal(results.kind, 'dataset-modality-backfill-rehearsal'); assert.equal(results.backfillRehearsalPassed, true);
+    assert.equal(results.notAuthorizationToApplyMigration, true); assert.equal(results.notAuthorizationToBackfill, true); assert.equal(results.countsAsG3Evidence, false); assert.equal(results.countsAsG5Evidence, false);
+    assert.deepEqual(results.receiptTopology.map(({ step, operation, command }) => [step, operation, command]), BACKFILL_TOPOLOGY.map(row => [...row]));
+    const summary = JSON.parse(readFileSync(join(out.runDir, 'backfill-summary.json'), 'utf8'));
+    assert.deepEqual(summary.schemaEntries, [1829, 1841, 1842, 1842]); assert.equal(summary.activeChainMigrations, 25); assert.equal(summary.migrationChecksums.length, 25);
+    for (const name of ['release-m24-assertions.json', 'release-m25-assertions.json', 'backfill-seeded-datasets.json', 'backfill-final-datasets.json']) assert.ok(existsSync(join(out.runDir, name)), name);
+    expectCleanedAndVerified(w, out);
+  } finally { cleanup(w); }
+});
+test('backfill plan: preflight tampering aborts before anything is provisioned', async () => {
+  const edit = (w, fn) => { const file = join(w.root, 'scripts/db-safety/commands.json'); const catalog = JSON.parse(readFileSync(file, 'utf8')); fn(catalog); writeFileSync(file, JSON.stringify(catalog)); };
+  const setups = {
+    'seed spec extended': w => edit(w, c => c[BACKFILL_SEED_COMMAND].args.push('x')),
+    'verify spec re-pathed': w => edit(w, c => { c[BACKFILL_VERIFY_COMMAND].args[c[BACKFILL_VERIFY_COMMAND].args.length - 1] = 'tests/other.test.ts'; }),
+    'verify spec marker removed': w => edit(w, c => { delete c[BACKFILL_VERIFY_COMMAND].backfillOnly; }),
+    'g2:generate spec changed': w => edit(w, c => { c['g2:generate'].cwd = 'apps/web'; }),
+    'verify test file missing': w => rmSync(join(w.root, BACKFILL_VERIFY_FILE)),
+    'verify test uses a driver': w => writeFileSync(join(w.root, BACKFILL_VERIFY_FILE), readFileSync(join(w.root, BACKFILL_VERIFY_FILE), 'utf8') + '\nimport pg from "pg";\n'),
+    'verify test uses raw SQL': w => writeFileSync(join(w.root, BACKFILL_VERIFY_FILE), readFileSync(join(w.root, BACKFILL_VERIFY_FILE), 'utf8') + '\nawait db.$executeRaw`select 1`;\n'),
+    'seed file ungated': w => writeFileSync(join(w.root, BACKFILL_SEED_FILE), '// no gate\n'),
+    'application module missing': w => rmSync(join(w.root, 'apps/web/src/lib/datasets/modality-backfill.ts')),
+    'frozen client drift': w => writeFileSync(join(w.root, CLIENT_DIR, 'models/Dataset.ts'), 'export type X = { modalityContentRevision: bigint, extra: 1 }\n'),
+    'migration 24 bytes': w => writeFileSync(join(w.root, P1.path, 'migration.sql'), PROPOSAL1_SQL + '-- x\n'),
+  };
+  for (const [label, setup] of Object.entries(setups)) {
+    const w = world();
+    try { setup(w); await assert.rejects(() => failuresOf(w, BACKFILL_ID), /./, label); assert.equal(w.calls.length, 0, label); assert.equal(w.stages.length, 0, label); assert.equal(readdirSync(w.outBase).length, 0, label); } finally { cleanup(w); }
+  }
+});
+test('backfill plan: each failing stage fails the run, still cleans up and is independently verified', async () => {
+  const scenarios = {
+    'seed fails': [{ baselineSeedExit: 1 }, 'BACKFILL_SEED_FAILED'],
+    'rehearsal tests fail': [{ backfillExit: 1 }, 'BACKFILL_REHEARSAL_FAILED'],
+    'drift check fails': [{ schemaCompatExit: 1 }, 'RELEASE_SCHEMA_COMPAT_FAILED'],
+    'migration 24 adds an unexpected entry': [{ m24Mutation: db => db.manifest.push(['index', '["public","x"]', 'i']) }, 'RELEASE_M24_SCHEMA_COUNT_UNEXPECTED'],
+    'migration 25 modifies a historical dataset': [{ m25Mutation: db => { db.datasets[0].m = 'IMAGE'; } }, 'RELEASE_M25_DATASETS_CHANGED'],
+    'the rehearsal changes the schema': [{ onBackfillVerify: db => db.manifest.push(['index', '["public","z"]', 'i']) }, 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED'],
+    'the rehearsal changes migration history': [{ onBackfillVerify: db => { db.migrations.pop(); } }, 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED'],
+    'history checksum differs': [{ historyMutate: rows => (rows.length === 25 ? rows.map((row, index) => (index === 24 ? { ...row, c: 'a'.repeat(64) } : row)) : rows) }, 'PROPOSAL_HISTORY_CHECKSUM_MISMATCH'],
+  };
+  for (const [label, [overrides, code]] of Object.entries(scenarios)) {
+    const w = world();
+    try {
+      Object.assign(w, overrides);
+      const out = await failuresOf(w, BACKFILL_ID);
       assert.equal(out.result, 'FAIL', label); assert.ok(out.failures.includes(code), `${label}: ${JSON.stringify(out.failures)}`);
       expectCleanedAndVerified(w, out);
     } finally { cleanup(w); }

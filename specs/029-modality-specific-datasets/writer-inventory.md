@@ -44,6 +44,7 @@ Classes: **G** guarded and verified, **D** dormant/unreachable with evidence, **
 | `apps/web/src/app/api/datasets/route.ts` | INSERT | explicit `modality` + `modalityResolverSubject`, confirmed labels | accepted; trigger stamps `modalityResolvedAt` | **G** — `web:test:dataset-metadata`, T015 creation paths, G2 candidate DB test (NULL rejected) |
 | `apps/web/src/lib/queue/enqueue-job.ts` | INSERT (repository start) | explicit modality | accepted | **G** — T015 creation paths |
 | `apps/web/src/lib/imports/prepare-local-folder-import.ts` | INSERT (folder start); append path rejects an unresolved parent (`DATASET_MODALITY_UNRESOLVED`) | explicit modality | accepted | **G** — `web:test:local-folder-modality-idempotency`, T015 |
+| `apps/web/src/lib/datasets/modality-backfill.ts` (T031, `applyBackfillManifest`) | UPDATE (fence claim, compare-and-swap on the manifest revision) + UPDATE (assignment of `modality` and the opaque `system:phase029-backfill:<run-token>` subject) | the trigger repeats the all-Asset equality check and stamps `modalityResolvedAt`; no actor authority, no route or job reaches it (pinned) | **G** — `release:phase029-backfill` PASS (14 DB-backed cases incl. stale fence, changed evidence, atomicity, interruption, concurrency, immutability); not executed on shared dev |
 | `apps/web/src/lib/datasets/modality.ts` | UPDATE ×2 (fence bump, EMPTY assignment) | `modalityContentRevision`, `modality`, `modalityResolverSubject` | designed counterpart of the assignment guard | **G** — G2 candidate tests; G3 correctness/contention (disposable) |
 | `apps/web/src/app/api/datasets/[datasetId]/route.ts` (PATCH, DELETE→archive) | UPDATE ×2 | strict schema: name/description/metadata/`primaryModality` (legacy), `archivedAt`; never `modality` | passes for resolved and unresolved parents | **G** — `web:test:dataset-patch-route`. Note: legacy `primaryModality` stays writable and is not authoritative |
 | `apps/web/src/app/(app)/datasets/actions.ts` | UPDATE | `archivedAt` | passes | **G** |
@@ -81,6 +82,7 @@ No unresolved active writer. Every production writer is either guarded by an app
 - `apps/web/src/lib/queue/enqueue-job.ts`
 - `apps/web/src/lib/imports/prepare-local-folder-import.ts`
 - `apps/web/src/lib/datasets/modality.ts`
+- `apps/web/src/lib/datasets/modality-backfill.ts`
 - `apps/web/src/app/(app)/datasets/actions.ts`
 - `apps/web/src/app/api/datasets/[datasetId]/route.ts`
 - `apps/web/src/lib/workspace/label-management.ts`

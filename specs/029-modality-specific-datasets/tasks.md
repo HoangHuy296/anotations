@@ -90,9 +90,9 @@ Tasks tagged **[GATE]** MUST NOT be executed without explicit, scoped user appro
 
 ## Phase 6: US4 — Historical data resolution (P3) — all **[GATE G-DATA]**
 
-- [ ] T029 [US4] Fresh read-only dry run (select-only Prisma): classify all Assets incl. archived/deleted; record candidate ID, proposed modality, counter
+- [X] T029 [US4] BUILT and disposable-verified 2026-10-06 (not executed on shared dev; no shared-dev backfill authorized): select-only manifest builder `buildBackfillManifest` (`apps/web/src/lib/datasets/modality-backfill.ts`, pure rules in `modality-backfill-evidence.ts`). SINGLE modality only from Asset evidence; rejects EMPTY, MIXED, inconsistent, insufficient-evidence, in-flight, non-live and already-resolved Datasets; binds Dataset id, modality, fence revision, a deterministic Asset-evidence digest and object metadata (D-3); never reads `primaryModality`. Rehearsal `release:phase029-backfill` PASS (`focused-runs/20261006T070008Z-15b5db36`); details `release/t029-t031-backfill.md`. The window-time run on shared dev, with real object metadata, remains a separate G-DATA step
 - [ ] T030 [US4] Remediate 523 unverified source assets / 22 missing subtypes before affected backfill
-- [ ] T031 [US4] Per-candidate Serializable assignment with fence/counter protocol for approved IDs only
+- [X] T031 [US4] BUILT and disposable-verified 2026-10-06 (not executed on shared dev): `applyBackfillManifest`, one Serializable transaction per approved Dataset with a compare-and-swap fence claim against the manifest revision (no `+1` assumed), in-transaction Asset-evidence digest comparison, in-flight re-check, assignment with the opaque `system:phase029-backfill:<run-token>` subject, deterministic stopped/committed accounting and idempotent replay. Fence semantics: `release/t031-fence-semantics.md`. A receipt-bound shared-dev launcher and storage adapter are NOT built
 - [ ] T032 [US4] MIXED stays null/blocked; no split/move/delete/relabel (separate future approval)
 
 ---
