@@ -3,7 +3,7 @@ import { isModalityTransactionConflict, retryModalityTransaction } from "@annota
 import { Prisma } from "@internal/db";
 import { db } from "@/lib/db";
 import {
-  ASSET_EVIDENCE_SELECT, assetEvidenceDigest, backfillSubject, classifyDatasetEvidence, observeObjects, sealManifest, summarizeRun, verifyManifest,
+  ASSET_EVIDENCE_SELECT, assetEvidenceDigest, backfillSubject, classifyDatasetEvidence, observeObjects, sealManifest, selectApprovedCandidates, summarizeRun, verifyManifest,
   type AssetEvidenceRow, type BackfillManifest, type CandidateOutcome, type DatasetEvidence, type ManifestCandidate, type RejectCode, type RunResult, type StatObject, type StopCode,
 } from "./modality-backfill-evidence";
 
@@ -49,6 +49,20 @@ export async function buildBackfillManifest(input: { client?: Client; statObject
     candidates.push({ datasetId, modality: verdict.modality, datasetRevision: evidence.revision.toString(), assetCount: evidence.assets.length, assetEvidenceDigest: assetEvidenceDigest(evidence.assets), objects: observed.objects });
   }
   return sealManifest({ generatedAt: (input.now?.() ?? new Date()).toISOString(), policy, candidates, rejected });
+}
+
+// ============================================================ T031 — approved-ID execution
+export type ApprovalLineage = { observedManifestSha256: string; approvedManifestSha256: string; approvedIdsDigest: string; executedManifestSha256: string };
+/**
+ * Executes only what the release owner approved. Both manifests are verified first (throws before any database access); the executed set is the
+ * observed candidates named by the approved manifest, so a Dataset that merely appeared in the observed manifest is never mutated.
+ */
+export async function applyApprovedBackfill(input: {
+  client?: Client; observed: unknown; approved: unknown; runToken: string; statObject: StatObject; signal?: AbortSignal; testPoint?: (point: BackfillTestPoint, datasetId: string) => Promise<void>;
+}): Promise<{ run: RunResult; lineage: ApprovalLineage }> {
+  const { observed, approved, executed } = selectApprovedCandidates(input.observed, input.approved);
+  const run = await applyBackfillManifest({ client: input.client, manifest: executed, runToken: input.runToken, statObject: input.statObject, signal: input.signal, testPoint: input.testPoint });
+  return { run, lineage: { observedManifestSha256: observed.manifestSha256, approvedManifestSha256: approved.sha256, approvedIdsDigest: approved.approvedIdsDigest, executedManifestSha256: executed.manifestSha256 } };
 }
 
 // ============================================================ T031 — evidence-bound assignment

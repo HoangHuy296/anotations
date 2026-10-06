@@ -13,7 +13,8 @@ M24/M25 promotion → disposable 25-chain proof → T007 → T008 exception acce
 | T008 provenance exception RPE-029-M24 | **ACCEPTED 2026-10-05** (missing provenance accepted, not reconstructed; reconstruction is supporting evidence only) | `t008-provenance-exception.md` |
 | T018 writer audit | **CLOSED 2026-10-05; no unresolved writer** | `../writer-inventory.md` (+ pinned by two offline tests) |
 | Historical Dataset plan (67 single-modality; EMPTY and MIXED separate; 3 disagreements) | **decisions D-1…D-8 recorded 2026-10-06; G-DATA still open** | `historical-data-release-plan.md`, `decisions-20261006.md` |
-| T029/T031 backfill tooling | **BUILT and disposable-verified (not run on shared dev)**; launcher/storage adapter not built | `t029-t031-backfill.md`, `t031-fence-semantics.md` |
+| T029/T031 backfill tooling | **BUILT and disposable-verified (not run on shared dev)** | `t029-t031-backfill.md`, `t031-fence-semantics.md` |
+| T029/T031 maintenance launcher + real MinIO proof | **BUILT and verified on disposable PostgreSQL + MinIO; shared-dev execution NOT enabled** | `t029-t031-launcher.md` |
 | In-flight work disposition (19 import Jobs, 11 PREPARING imports, 8 stale AI Jobs) | **F-1/F-3 deferred; F-2 comparison done; Redis reconciled; nothing mutated** | `in-flight-work-plan.md` |
 | Final rollout authorization, build, backup, drain, apply, cutover, G5 | **not started, not authorized** | — |
 
@@ -39,7 +40,7 @@ Creating application test data after cutover is **not** authorized now. It needs
 
 ## Still open before any shared-dev rollout
 1. ~~T007 approval and T008 exception acceptance~~ — granted 2026-10-05; production capacity acceptance remains open.
-2. A receipt-bound shared-dev launcher and storage adapter for T029/T031 (the tooling itself is built); the T030 Cohort-C remediation proposal (D-8, no deletion by default); Cohort B/D policy.
+2. Enabling the launcher for shared dev (a reviewed, hash-bound change plus a per-run release-owner authorization file) and a credential path for the real storage; the T030 Cohort-C remediation proposal (D-8, no deletion by default); Cohort B/D policy.
 3. In-flight decisions F-1 … F-5.
 4. Backup policy; rollout window; permission to build release images; permission to run the read-only pre-window checks (fresh inventory, Redis queue).
 5. G5 (browser/runtime end-to-end) is still OPEN/UNVERIFIED.

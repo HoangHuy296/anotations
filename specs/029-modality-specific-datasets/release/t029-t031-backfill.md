@@ -2,7 +2,9 @@
 
 **Status: BUILT and disposable-verified. Not executed on shared dev. No shared-dev migration or backfill is authorized.** This is a library plus a receipt-bound rehearsal; the maintenance-window launcher is not built (see "Not built").
 
-## Implementation (SHA-256 of the files rehearsed)
+## Implementation (SHA-256 of the files rehearsed at the T029/T031 checkpoint)
+> Superseded for execution purposes by `t029-t031-launcher.md`: the approved-ID layer (`applyApprovedBackfill`), the storage adapter and the maintenance launcher were added afterwards, so `modality-backfill-evidence.ts`, `modality-backfill.ts`, `disposable-test.mjs` and `commands.json` have new hashes there. The eligibility rules, the fence protocol and the accounting below are unchanged.
+
 | File | SHA-256 |
 | --- | --- |
 | `apps/web/src/lib/datasets/modality-backfill-evidence.ts` (pure rules: classification, digest, manifest, subject, accounting) | `3a13b73efa84740600aefa721f8e2c5ebf3cf90b6d777d140274a58effde7a8c` |
@@ -53,6 +55,6 @@ Plan `release:phase029-backfill`: baseline 23 → baseline client generated → 
 Applying rules 1–6 to the 67 single-modality Datasets gives **28** candidates (24 IMAGE, 4 VIDEO), 189 → 188 Assets. The earlier proposed 29 included the single TEXT Dataset `cmrono652000d10va60fr6prt` (no annotations), now excluded: its only Asset has no `sizeBytes` and its bucket is `test`, not `annotation-assets` (`SIZE_UNRECORDED`, `BUCKET_NOT_APPROVED`). Rule 7 (the objects exist, sizes match) cannot be evaluated without a storage read and is decided only by the window-time T029 run. The other 38 single-modality Datasets are Cohort B (6, in-flight work), C (22, missing subtype/storage metadata) and D (10, not live); none enters Cohort A.
 
 ## Not built / not claimed
-- **No shared-dev launcher.** Executing T029/T031 against the shared database needs a receipt-bound maintenance runner (identity pinning to the application system identifier, the approved-manifest hash in the receipt, web and worker stopped, evidence directory) and a storage adapter that implements `StatObject` with the server-side MinIO client. That is the next scoped design and a G-DATA gate.
+- ~~No shared-dev launcher.~~ Built afterwards (`t029-t031-launcher.md`), disabled for shared dev. Executing T029/T031 against the shared database needs a receipt-bound maintenance runner (identity pinning to the application system identifier, the approved-manifest hash in the receipt, web and worker stopped, evidence directory) and a storage adapter that implements `StatObject` with the server-side MinIO client. That is the next scoped design and a G-DATA gate.
 - Real MinIO was not used: object metadata was an in-memory map behind `statObject`. Production-scale timing and storage failures other than missing/size/ETag/exception were not exercised.
 - Cohort B/C/D, EMPTY and MIXED were not touched and no shared-dev value was read or written by the rehearsal.

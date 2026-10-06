@@ -26,6 +26,8 @@ import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
 import { basename, join, resolve, sep } from 'node:path';
 import * as guard from './guard.mjs';
+import { computeImplementation as maintenanceImplementation, manifestDigest as maintenanceManifestDigest } from './backfill-binding.mjs';
+import { runMaintenanceRehearsal } from './backfill-maintenance-rehearsal.mjs';
 import { readTree as readClientTree, treeHash as clientTreeHash } from './prisma-client-stage.mjs';
 
 export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'];
@@ -136,6 +138,20 @@ export const BACKFILL_TOPOLOGY = Object.freeze([
   ['baseline-deploy', 'deploy', null], ['generate', 'test', 'g2:generate'], ['baseline-seed', 'test', BACKFILL_SEED_COMMAND], ['proposal-1-deploy', 'deploy', null],
   ['proposal-2-deploy', 'deploy', null], ['backfill-verify', 'test', BACKFILL_VERIFY_COMMAND], ['schema-compat', 'test', 'g2:compatibility'],
 ]);
+// ---- Maintenance launcher rehearsal: T029/T031 through the receipt-bound launcher against REAL PostgreSQL and REAL MinIO (disposable only) ----
+export const MAINTENANCE_ID = 'release:phase029-backfill-maintenance';
+export const MAINT_SEED_COMMAND = 'maintenance-seed:dataset-modality';
+export const MAINT_OBJECTS_COMMAND = 'maintenance-objects:dataset-modality';
+export const MAINT_CHECK_COMMAND = 'maintenance-check:dataset-modality';
+const maintenanceSpec = file => Object.freeze({ kind: 'test', cwd: 'apps/web', args: [...G2_ARGS, `tests/dataset-modality/${file}`], maintenanceOnly: MAINTENANCE_ID });
+export const MAINT_SEED_SPEC = maintenanceSpec('maintenance-baseline.test.ts');
+export const MAINT_OBJECTS_SPEC = maintenanceSpec('maintenance-objects.test.ts');
+export const MAINT_CHECK_SPEC = maintenanceSpec('maintenance-check.test.ts');
+export const MAINTENANCE_FILES = Object.freeze(['apps/web/tests/dataset-modality/maintenance-baseline.test.ts', 'apps/web/tests/dataset-modality/maintenance-objects.test.ts', 'apps/web/tests/dataset-modality/maintenance-check.test.ts', 'apps/web/tests/dataset-modality/maintenance-fixture.ts', 'scripts/db-safety/backfill-launcher.mjs', 'scripts/db-safety/backfill-binding.mjs', 'scripts/db-safety/maintenance-fence.cjs', 'scripts/db-safety/backfill-maintenance-rehearsal.mjs', 'apps/web/scripts/backfill-run.ts', 'apps/web/scripts/backfill-approve.ts', 'apps/web/src/lib/datasets/modality-backfill-storage.ts']);
+export const MAINTENANCE = Object.freeze({ [MAINTENANCE_ID]: Object.freeze({ through: 2, newColumn: NEW_COLUMN, scope: 'release-chain-maintenance-launcher-real-storage' }) });
+/** Commands of the receipt topology, in order: the five chain steps, then the rehearsal's fixed child steps (names carry a counter), then the drift check. */
+export const MAINTENANCE_COMMANDS = Object.freeze([null, 'g2:generate', MAINT_SEED_COMMAND, null, null, MAINT_CHECK_COMMAND, MAINT_CHECK_COMMAND, MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND,
+  MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, 'g2:compatibility']);
 export const PORT_RANGE = [55460, 55479];
 const COMMAND_SHAPE = /^[a-z0-9]+(?::[a-z0-9-]+)+$/;
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -149,7 +165,7 @@ const safe = error => (/^[A-Z][A-Z0-9_]+$/.test(error?.message ?? '') ? error.me
 /** Pure, runs before anything is created. */
 export function validateCommand(name, catalog) {
   must(typeof name === 'string' && name.length <= 80 && COMMAND_SHAPE.test(name), 'COMMAND_NAME_INVALID');
-  if (Object.hasOwn(REHEARSALS, name) || Object.hasOwn(COMPATIBILITY, name) || Object.hasOwn(RELEASES, name) || Object.hasOwn(BACKFILLS, name)) return name; // fixed plans; their child commands are bound in preflight, never selectable here
+  if (Object.hasOwn(REHEARSALS, name) || Object.hasOwn(COMPATIBILITY, name) || Object.hasOwn(RELEASES, name) || Object.hasOwn(BACKFILLS, name) || Object.hasOwn(MAINTENANCE, name)) return name; // fixed plans; their child commands are bound in preflight, never selectable here
   must(SUPPORTED_COMMANDS.includes(name), 'COMMAND_NOT_SUPPORTED');
   must(catalog?.[name]?.kind === 'test', 'COMMAND_NOT_ALLOWLISTED');
   return name;
@@ -168,6 +184,7 @@ export function resolvePlan(name) {
   if (Object.hasOwn(COMPATIBILITY, name)) return { kind: 'compat', id: name, ...COMPATIBILITY[name] };
   if (Object.hasOwn(RELEASES, name)) return { kind: 'release', id: name, ...RELEASES[name] };
   if (Object.hasOwn(BACKFILLS, name)) return { kind: 'backfill', id: name, ...BACKFILLS[name] };
+  if (Object.hasOwn(MAINTENANCE, name)) return { kind: 'maintenance', id: name, ...MAINTENANCE[name] };
   return { kind: 'test', id: name, through: 1 };
 }
 
@@ -496,6 +513,7 @@ export function realDeps() {
       return { status: p.status ?? 1, output: (p.stdout ?? '') + (p.stderr ?? '') };
     },
     pinned: { baseline: BASELINE_MIGRATIONS, chain: PROPOSAL_CHAIN, compat: COMPAT_BINDINGS },
+    maintenanceImplementation: () => maintenanceImplementation(root),
     releaseManifestSql: () => releaseManifestSqlFrom(join(root, RECOVERY_REVIEW.path)),
   };
 }
@@ -525,6 +543,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
     must(existsSync(fixturePath) && /import .*db-safety\/test-entry.cjs/.test(readFileSync(fixturePath, 'utf8').split('\n')[0]), 'FIXTURE_FILE_MISSING_OR_UNGATED');
   }
   let releaseManifest = null;
+  let maintenanceImplementationAtStart = null;
   if (plan.kind === 'release') {
     // The release proof composes only reviewed, pinned pieces: frozen schema/client/chain, the pinned G2 catalog steps, the fixture, the compat test and the pinned manifest definition.
     compatBindings = verifyCompatBindings(deps);
@@ -546,6 +565,15 @@ export async function runFocusedTest(command, deps = realDeps()) {
     assertCompatTestSource(readFileSync(join(deps.root, BACKFILL_VERIFY_FILE), 'utf8'), 'backfill');
     releaseManifest = deps.releaseManifestSql();
   }
+  if (plan.kind === 'maintenance') {
+    compatBindings = verifyCompatBindings(deps);
+    for (const name of ['g2:generate', 'g2:compatibility']) must(isDeepStrictEqual(catalog[name], RELEASE_SPECS[name]), 'RELEASE_COMMAND_TAMPERED');
+    for (const [name, spec] of [[MAINT_SEED_COMMAND, MAINT_SEED_SPEC], [MAINT_OBJECTS_COMMAND, MAINT_OBJECTS_SPEC], [MAINT_CHECK_COMMAND, MAINT_CHECK_SPEC]]) must(isDeepStrictEqual(catalog[name], spec), 'MAINTENANCE_COMMAND_TAMPERED');
+    for (const file of [...MAINTENANCE_FILES, 'scripts/db-safety/g2-generate.mjs', 'scripts/db-safety/g2-compatibility.mjs']) must(existsSync(join(deps.root, file)), 'MAINTENANCE_FILE_MISSING');
+    for (const file of MAINTENANCE_FILES.filter(entry => entry.endsWith('.test.ts'))) must(/import .*db-safety\/test-entry.cjs/.test(readFileSync(join(deps.root, file), 'utf8').split('\n')[0]), 'MAINTENANCE_FILE_UNGATED');
+    maintenanceImplementationAtStart = deps.maintenanceImplementation?.() ?? null; // the pinned implementation set must be readable and complete before anything is provisioned
+    releaseManifest = deps.releaseManifestSql();
+  }
   const generatedModel = join(deps.root, 'lib/generated/prisma/models/Dataset.ts');
   must(existsSync(generatedModel) && readFileSync(generatedModel, 'utf8').includes('modalityContentRevision'), 'GENERATED_CLIENT_NOT_PHASE029'); // never regenerated here
   const protectedBefore = { migrations: treeHash(deps.root, 'prisma/migrations'), generated: treeHash(deps.root, 'lib/generated/prisma'), schema: sha(readFileSync(join(deps.root, 'prisma/schema.prisma'))) };
@@ -565,7 +593,9 @@ export async function runFocusedTest(command, deps = realDeps()) {
   };
   // Explicit evidence classification: a focused run is never G3/G5 closure evidence and writes only below outBase.
   const migrationChain = { active: baseline.map(row => row.name), proposals: chain.map(({ order, name, sha256, path }) => ({ order, name, sha256, path })) };
-  const classification = plan.kind === 'backfill'
+  const classification = plan.kind === 'maintenance'
+    ? { kind: 'maintenance-launcher-rehearsal', scope: plan.scope, countsAsG3Evidence: false, countsAsG5Evidence: false, notAuthorizationToApplyMigration: true, notAuthorizationToBackfill: true, notAuthorizationForSharedDevExecution: true, maintenanceRehearsalPassed: false, usesRealStorage: true, expectedSchemaEntries: RELEASE_COUNTS, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain, sourceBindings: compatBindings }
+    : plan.kind === 'backfill'
     ? { kind: 'dataset-modality-backfill-rehearsal', scope: plan.scope, countsAsG3Evidence: false, countsAsG5Evidence: false, notAuthorizationToApplyMigration: true, notAuthorizationToBackfill: true, backfillRehearsalPassed: false, expectedSchemaEntries: RELEASE_COUNTS, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain, sourceBindings: compatBindings }
     : plan.kind === 'release'
     ? { kind: 'release-chain-proof', scope: plan.scope, countsAsG3Evidence: false, countsAsG5Evidence: false, notAuthorizationToApplyMigration: true, releaseChainProven: false, expectedSchemaEntries: RELEASE_COUNTS, command, runToken: token, outputNamespace: 'verification/focused-runs', migrationChain, sourceBindings: compatBindings }
@@ -625,7 +655,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
   const verifyHistory = (stageLabel, entries) => checkHistory(readHistory(), [...baseline, ...entries], stageLabel);
   const capture = () => {
     const tables = JSON.parse(psqlMany([TABLES_SQL])[0]);
-    const script = captureScript(tables, plan.kind === 'release' || plan.kind === 'backfill' ? releaseExtraSql(releaseManifest) : {});
+    const script = captureScript(tables, plan.kind === 'release' || plan.kind === 'backfill' || plan.kind === 'maintenance' ? releaseExtraSql(releaseManifest) : {});
     return parseCapture(psqlMany(script.statements), script);
   };
   const deployRequest = () => ({
@@ -689,11 +719,11 @@ export async function runFocusedTest(command, deps = realDeps()) {
     verifyHistory('BASELINE', []);
     let pre = null;
     const releaseCaptures = {};
-    if (plan.kind === 'backfill') {
+    if (plan.kind === 'backfill' || plan.kind === 'maintenance') {
       releaseCaptures.baseline = capture();
       must(releaseCaptures.baseline.schemaManifest.length === RELEASE_COUNTS.baseline, 'RELEASE_BASELINE_SCHEMA_COUNT_UNEXPECTED');
       testStep('generate', 'g2:generate', 'RELEASE_GENERATE_FAILED');
-      testStep('baseline-seed', BACKFILL_SEED_COMMAND, 'BACKFILL_SEED_FAILED');
+      testStep('baseline-seed', plan.kind === 'maintenance' ? MAINT_SEED_COMMAND : BACKFILL_SEED_COMMAND, 'BACKFILL_SEED_FAILED');
       releaseCaptures.seeded = capture();
       must(isDeepStrictEqual(releaseCaptures.seeded.schemaManifest, releaseCaptures.baseline.schemaManifest) && releaseCaptures.seeded.datasetLegacy[0] > 0, 'RELEASE_BASELINE_SEED_UNEXPECTED');
       save('backfill-seeded-datasets.json', releaseCaptures.seeded.datasetModality);
@@ -715,7 +745,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
       must(sha(readFileSync(join(staged, 'migration.sql'))) === entry.sha256, 'PROPOSAL_CHECKSUM_MISMATCH');
       must(launch(`proposal-${entry.order}-deploy`, issue(`proposal-${entry.order}-deploy`, deployRequest(), null), 'deploy') === 0, 'PROPOSAL_DEPLOY_FAILED');
       verifyHistory('PROPOSAL', chain.slice(0, entry.order));
-      if (plan.kind === 'backfill') {
+      if (plan.kind === 'backfill' || plan.kind === 'maintenance') {
         const snapshot = capture();
         if (entry.order === 1) { save('release-m24-assertions.json', assertRelease24(releaseCaptures.seeded, snapshot, { proposal: entry })); releaseCaptures.m24 = snapshot; }
         else { save('release-m25-assertions.json', assertRelease25(releaseCaptures.m24, snapshot, { newColumn: plan.newColumn })); releaseCaptures.m25 = snapshot; }
@@ -735,7 +765,30 @@ export async function runFocusedTest(command, deps = realDeps()) {
       }
     }
 
-    if (plan.kind === 'backfill') {
+    if (plan.kind === 'maintenance') {
+      must(releaseCaptures.m25.schemaManifest.length === RELEASE_COUNTS.m25 && releaseCaptures.m25.datasetModality.every(row => row.m === null), 'BACKFILL_PRECONDITION_UNEXPECTED');
+      let stepCounter = 0;
+      const childStep = (name, kind, payload) => {
+        writeFileSync(join(stage, kind === 'check' ? 'maintenance-check.json' : 'maintenance-step.json'), JSON.stringify(payload), { mode: 0o600 });
+        stepCounter += 1;
+        testStep(`${name}-${stepCounter}`, kind === 'check' ? MAINT_CHECK_COMMAND : MAINT_OBJECTS_COMMAND, 'MAINTENANCE_STEP_FAILED');
+      };
+      const summary = await runMaintenanceRehearsal({
+        root: deps.root, stage, runDir, save, sh: (cmd, args, options) => deps.sh(cmd, args, options), cleanEnv: () => ({ ...deps.baseEnv() }), pins: state.pins, token, password, minioUser: env.MINIO_ROOT_USER,
+        bucket: `g1-${token}`, pgPort: pg().port, minioPort: state.pins.find(pin => pin.role === 'minio').port, historyRows: [...baseline, ...chain], m25: releaseCaptures.m25, childStep,
+      });
+      save('maintenance-summary-rehearsal.json', summary);
+      testStep('schema-compat', 'g2:compatibility', 'RELEASE_SCHEMA_COMPAT_FAILED');
+      verifyCompatBindings(deps);
+      const final = capture();
+      save('backfill-final-datasets.json', final.datasetModality);
+      must(isDeepStrictEqual(final.schemaManifest, releaseCaptures.m25.schemaManifest) && isDeepStrictEqual(final.migrations, releaseCaptures.m25.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
+      verifyHistory('FINAL', chain);
+      const commandsSeen = state.topology.map(({ command: receiptCommand }) => receiptCommand);
+      must(isDeepStrictEqual(commandsSeen, [...MAINTENANCE_COMMANDS]), 'RECEIPT_TOPOLOGY_UNEXPECTED');
+      must(maintenanceImplementationAtStart !== null && isDeepStrictEqual(maintenanceImplementation(deps.root), maintenanceImplementationAtStart), 'IMPLEMENTATION_CHANGED_DURING_RUN');
+      save('maintenance-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, releaseCaptures.m25.schemaManifest.length, final.schemaManifest.length], schemaManifestSha256: maintenanceManifestDigest(final.schemaManifest), datasetsResolved: final.datasetModality.filter(row => row.m !== null).length, datasetsUnresolved: final.datasetModality.filter(row => row.m === null).length, migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })), launcherEvidenceDirs: summary.evidenceDirs });
+    } else if (plan.kind === 'backfill') {
       // The chain is complete (25 records, 1842 schema entries, all historical Datasets still unresolved); only now does the evidence-bound backfill rehearsal run.
       must(releaseCaptures.m25.schemaManifest.length === RELEASE_COUNTS.m25 && releaseCaptures.m25.datasetModality.every(row => row.m === null), 'BACKFILL_PRECONDITION_UNEXPECTED');
       testStep('backfill-verify', BACKFILL_VERIFY_COMMAND, 'BACKFILL_REHEARSAL_FAILED');
@@ -806,7 +859,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
     if (remaining.length) state.failures.push('RECEIPT_REGISTRATION_REMAINS');
   }
   const result = state.failures.length === 0 ? 'PASS' : 'FAIL';
-  const finalClassification = plan.kind === 'compat' ? { ...classification, [plan.provenFlag]: result === 'PASS' } : plan.kind === 'release' ? { ...classification, releaseChainProven: result === 'PASS' } : plan.kind === 'backfill' ? { ...classification, backfillRehearsalPassed: result === 'PASS' } : classification;
+  const finalClassification = plan.kind === 'compat' ? { ...classification, [plan.provenFlag]: result === 'PASS' } : plan.kind === 'release' ? { ...classification, releaseChainProven: result === 'PASS' } : plan.kind === 'backfill' ? { ...classification, backfillRehearsalPassed: result === 'PASS' } : plan.kind === 'maintenance' ? { ...classification, maintenanceRehearsalPassed: result === 'PASS' } : classification;
   save('results.json', { ...finalClassification, result, command, runToken: token, testExit: state.testExit, failures: state.failures, receiptTopology: state.topology, cleanup: state.cleanup, independentCleanupExit: state.independent.status });
   return { result, runDir, failures: state.failures, testExit: state.testExit };
 }

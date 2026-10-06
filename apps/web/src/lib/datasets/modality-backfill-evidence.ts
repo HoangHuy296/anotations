@@ -194,6 +194,59 @@ export function verifyManifest(raw: unknown): BackfillManifest {
   return manifest;
 }
 
+// ---------------------------------------------------------------- approval lifecycle
+// Three distinct artifacts: (1) the T029 OBSERVED manifest (what the tool saw), (2) the release owner's APPROVED-ID manifest (an explicit
+// list derived from it, with the approver's statement), (3) the T031 execution receipt/outcomes. Appearing in (1) is never approval.
+export const approvedManifestSchema = z.object({
+  schemaVersion: z.literal(1),
+  kind: z.literal("dataset-modality-backfill-approved-ids"),
+  observedManifestSha256: hex64,
+  approvedIds: z.array(z.string().min(1)).min(1),
+  approvedIdsDigest: hex64,
+  approver: z.string().min(1).max(128),
+  approvedAt: z.iso.datetime(),
+  statement: z.string().min(1).max(500),
+  sha256: hex64,
+}).strict();
+export type ApprovedManifest = z.infer<typeof approvedManifestSchema>;
+const approvedBody = (m: Omit<ApprovedManifest, "sha256">) => canonicalJson(m);
+
+export function deriveApprovedManifest(input: { observed: BackfillManifest; approvedIds: readonly string[]; approver: string; approvedAt: string; statement: string }): ApprovedManifest {
+  const observed = verifyManifest(input.observed);
+  const ids = [...input.approvedIds].sort();
+  if (ids.length === 0 || new Set(ids).size !== ids.length) throw new Error("APPROVED_MANIFEST_INVALID");
+  const candidateIds = new Set(observed.candidates.map(candidate => candidate.datasetId));
+  if (ids.some(id => !candidateIds.has(id))) throw new Error("APPROVED_ID_NOT_CANDIDATE");
+  const body = { schemaVersion: 1 as const, kind: "dataset-modality-backfill-approved-ids" as const, observedManifestSha256: observed.manifestSha256, approvedIds: ids, approvedIdsDigest: approvedIdsDigest(ids), approver: input.approver, approvedAt: input.approvedAt, statement: input.statement };
+  return approvedManifestSchema.parse({ ...body, sha256: sha256(approvedBody(body)) });
+}
+
+/** Fails closed: unknown keys, unsorted or duplicate ids, a wrong ids digest or a wrong hash all throw `APPROVED_MANIFEST_INVALID`. */
+export function verifyApprovedManifest(raw: unknown): ApprovedManifest {
+  const parsed = approvedManifestSchema.safeParse(raw);
+  if (!parsed.success) throw new Error("APPROVED_MANIFEST_INVALID");
+  const { sha256: hash, ...body } = parsed.data;
+  const ids = body.approvedIds;
+  if (new Set(ids).size !== ids.length || ids.some((id, index) => index > 0 && ids[index - 1] >= id)) throw new Error("APPROVED_MANIFEST_INVALID");
+  if (body.approvedIdsDigest !== approvedIdsDigest(ids) || hash !== sha256(approvedBody(body))) throw new Error("APPROVED_MANIFEST_INVALID");
+  return parsed.data;
+}
+
+/**
+ * The exact set T031 may mutate: the observed candidates whose ids the approved manifest lists, nothing more. The approved manifest must name
+ * THIS observed manifest and every approved id must be an observed candidate (a Dataset the tool did not find eligible can never be approved).
+ */
+export function selectApprovedCandidates(observedRaw: unknown, approvedRaw: unknown): { observed: BackfillManifest; approved: ApprovedManifest; executed: BackfillManifest } {
+  const observed = verifyManifest(observedRaw);
+  const approved = verifyApprovedManifest(approvedRaw);
+  if (approved.observedManifestSha256 !== observed.manifestSha256) throw new Error("APPROVED_OBSERVED_MISMATCH");
+  const byId = new Map(observed.candidates.map(candidate => [candidate.datasetId, candidate]));
+  const selected = approved.approvedIds.map(id => byId.get(id));
+  if (selected.some(candidate => candidate === undefined)) throw new Error("APPROVED_ID_NOT_CANDIDATE");
+  const executed = sealManifest({ generatedAt: observed.generatedAt, policy: observed.policy, candidates: selected as ManifestCandidate[], rejected: [] });
+  return { observed, approved, executed };
+}
+
 // ---------------------------------------------------------------- subject and accounting
 const RUN_TOKEN = /^[a-z0-9][a-z0-9-]{6,62}[a-z0-9]$/;
 export const BACKFILL_SUBJECT_PREFIX = "system:phase029-backfill:";
