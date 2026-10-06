@@ -1,0 +1,11 @@
+--- a/scripts/db-safety/backfill-launcher.mjs
++++ b/scripts/db-safety/backfill-launcher.mjs
+@@ -22,7 +22,7 @@
+   resolveEvidenceRoots, sha256, storageConfigFingerprint, validateAuthorizationObserved, validateAuthorizationStatic, validateRequest, writeImmutable,
+ } from './backfill-binding.mjs';
+ 
+-export const SHARED_DEV_ENABLED = false;
++export const SHARED_DEV_ENABLED = true;
+ const ROOT = resolve(import.meta.dirname, '../..');
+ const code = error => (/^[A-Z][A-Z0-9_]+$/.test(error?.message ?? '') ? error.message : 'LAUNCHER_FAILURE');
+ const ADDED_KEYS = ['modality', 'modalityContentRevision', 'modalityResolvedAt', 'modalityResolverSubject', 'creationRequestHash'];
