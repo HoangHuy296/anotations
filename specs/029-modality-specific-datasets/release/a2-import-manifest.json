@@ -1,0 +1,286 @@
+{
+ "schema": "phase029-a2-import-manifest/v1",
+ "purpose": "Selective, provenance-recorded import of the frozen A2 contract and the S0 storage-authority package into the A2 implementation lineage. No cherry-pick, no merge of a2/s0-storage-authority.",
+ "baseCommit": "c46c928e07a5cfeac2672532066a28bea3755c52",
+ "source": {
+  "commit": "a5aa248f6b65344199333965616d959ca4014f8a",
+  "tree": "ebf2f89204c96e21bc2152342acc790aa57b482f",
+  "checkout": "canonical a2/s0-storage-authority (uncommitted deltas imported only where listed as DIRTY_PROVEN_SNAPSHOT)"
+ },
+ "historicalS0Proof": {
+  "run": "authoritative-20261006T120356Z-127c23c2",
+  "result": "111/111 PASS (99 battery + 12 controls), replay idempotent, static audit equal to allowlist",
+  "hashBoundArtifacts": [
+   "deprovision.sh",
+   "frozen-images.json",
+   "lifecycle.json",
+   "policy-verifier.json",
+   "policy-web.json",
+   "policy-worker.json",
+   "provision.sh",
+   "snapshot.sh"
+  ],
+  "note": "Only the eight receipt artifacts above are hash-bound by that run. Runner scripts, worker code and tests were exercised but are NOT receipt hash-bound. A2 documents are frozen/provenance evidence, not runtime S0 proof. The historical run is not overwritten or reinterpreted."
+ },
+ "integrationS0Verification": {
+  "run": "authoritative-20261007T063320Z-d776274e",
+  "result": "AUTHORITATIVE PASS 111/111, replay idempotent, audit true, independent cleanup verification true",
+  "priorAttempt": {
+   "run": "authoritative-20261007T063209Z-3c621100",
+   "result": "FAIL before any check: S0_SECRET_IN_OUTPUT (the runner secret-scan guard tripped on a provisioning-container log; evidence retained, containers removed, cause not diagnosed \u2014 see residual note)"
+  },
+  "guardedTests": "worker:test:sealed-namespace 6/6; minio-authority.test.mjs 11/11; static write audit ok:true",
+  "note": "Recorded separately from, and never overwriting, the historical authoritative-20261006T120356Z-127c23c2. Evidence directories are not tracked."
+ },
+ "proofClassifications": {
+  "S0_HASH_BOUND": "receipt-bound artifact: exact S0 hash evidence",
+  "S0_EXECUTED_NOT_HASH_BOUND": "exercised by the S0 run/tests but not receipt hash-bound",
+  "FROZEN_SPEC": "frozen A2/S0 document: provenance evidence, not runtime proof",
+  "SELECTIVE_INTEGRATION": "new integration state requiring verification on this branch"
+ },
+ "entries": [
+  {
+   "sourcePath": "scripts/db-safety/minio-authority.mjs",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot",
+   "sourceSha256": "f9001037ea4814833370a6c9c76d17bb1325a12476ec867c078fcbc27c8cb034",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "scripts/db-safety/minio-authority.mjs",
+   "resultingSha256": "f9001037ea4814833370a6c9c76d17bb1325a12476ec867c078fcbc27c8cb034",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority-s0.mjs",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot",
+   "sourceSha256": "d34204b9dc013a6b80fe7cbd7f13d884c833546f7cdd79f24756335836450e68",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "scripts/db-safety/minio-authority-s0.mjs",
+   "resultingSha256": "d34204b9dc013a6b80fe7cbd7f13d884c833546f7cdd79f24756335836450e68",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority-verify.mjs",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "4042edcf37a4df43323728eba828a8ec192e667ccf29ab76b6d7169eb0e014f1",
+   "importMode": "EXACT",
+   "targetPath": "scripts/db-safety/minio-authority-verify.mjs",
+   "resultingSha256": "4042edcf37a4df43323728eba828a8ec192e667ccf29ab76b6d7169eb0e014f1",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-write-audit.mjs",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "ecfe74b488a87d64635c101960515f634b52a4a90b06e8712e46b3bf835e4934",
+   "importMode": "EXACT",
+   "targetPath": "scripts/db-safety/minio-write-audit.mjs",
+   "resultingSha256": "ecfe74b488a87d64635c101960515f634b52a4a90b06e8712e46b3bf835e4934",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-write-audit.allowlist.json",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "00d681262d0a1845ca4d1812a0d3352b5d8748d5b6e913821ec540fb043b43e6",
+   "importMode": "EXACT",
+   "targetPath": "scripts/db-safety/minio-write-audit.allowlist.json",
+   "resultingSha256": "00d681262d0a1845ca4d1812a0d3352b5d8748d5b6e913821ec540fb043b43e6",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority/deprovision.sh",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "25c9f09314978b55f7c04da256afb731d17aadc92222611d07e12028de0fbfda",
+   "importMode": "EXACT",
+   "targetPath": "scripts/db-safety/minio-authority/deprovision.sh",
+   "resultingSha256": "25c9f09314978b55f7c04da256afb731d17aadc92222611d07e12028de0fbfda",
+   "proofClassification": "S0_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority/lifecycle.json",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "736b4b890c9d2bb13cca0a56f0db7c4c31ae2fe6d0ca1d01fc12478f8cd93e7c",
+   "importMode": "EXACT",
+   "targetPath": "scripts/db-safety/minio-authority/lifecycle.json",
+   "resultingSha256": "736b4b890c9d2bb13cca0a56f0db7c4c31ae2fe6d0ca1d01fc12478f8cd93e7c",
+   "proofClassification": "S0_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority/policy-verifier.json",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "ac0e1c7dd4590d895753974ef71de7779c84e17688ca81916f461f091b22ccea",
+   "importMode": "EXACT",
+   "targetPath": "scripts/db-safety/minio-authority/policy-verifier.json",
+   "resultingSha256": "ac0e1c7dd4590d895753974ef71de7779c84e17688ca81916f461f091b22ccea",
+   "proofClassification": "S0_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority/provision.sh",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "1d2e05bb3a346fdd636e1f2010eeddceff3a70bb71960aeb4cfbd1be72c19541",
+   "importMode": "EXACT",
+   "targetPath": "scripts/db-safety/minio-authority/provision.sh",
+   "resultingSha256": "1d2e05bb3a346fdd636e1f2010eeddceff3a70bb71960aeb4cfbd1be72c19541",
+   "proofClassification": "S0_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority/snapshot.sh",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "a819e35e083913bde99140fd4cd8b5c7150b5035ef244bd4f03a80917d64bced",
+   "importMode": "EXACT",
+   "targetPath": "scripts/db-safety/minio-authority/snapshot.sh",
+   "resultingSha256": "a819e35e083913bde99140fd4cd8b5c7150b5035ef244bd4f03a80917d64bced",
+   "proofClassification": "S0_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority/frozen-images.json",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot",
+   "sourceSha256": "5d3866d0161d46d6cef15b8e9e48cd39d2f2d3ede58b04f0b2d74e006fbb7731",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "scripts/db-safety/minio-authority/frozen-images.json",
+   "resultingSha256": "5d3866d0161d46d6cef15b8e9e48cd39d2f2d3ede58b04f0b2d74e006fbb7731",
+   "proofClassification": "S0_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority/policy-web.json",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot",
+   "sourceSha256": "23ce76efdaf62f25f066059c5c90d5eb5f4c68c118d08cba8a4e11114f6c9e45",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "scripts/db-safety/minio-authority/policy-web.json",
+   "resultingSha256": "23ce76efdaf62f25f066059c5c90d5eb5f4c68c118d08cba8a4e11114f6c9e45",
+   "proofClassification": "S0_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/minio-authority/policy-worker.json",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot",
+   "sourceSha256": "4ee7d65676b13e0dbb212c955e640edb87c18ece56b034b66a6cd5e95b11d3d0",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "scripts/db-safety/minio-authority/policy-worker.json",
+   "resultingSha256": "4ee7d65676b13e0dbb212c955e640edb87c18ece56b034b66a6cd5e95b11d3d0",
+   "proofClassification": "S0_HASH_BOUND"
+  },
+  {
+   "sourcePath": "scripts/db-safety/tests/minio-authority.test.mjs",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot (untracked at basis)",
+   "sourceSha256": "aada435833a5c2e61755942405b5b20608ab5e1ae9f2cb2fb52d21fd00504dbf",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "scripts/db-safety/tests/minio-authority.test.mjs",
+   "resultingSha256": "aada435833a5c2e61755942405b5b20608ab5e1ae9f2cb2fb52d21fd00504dbf",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "apps/worker/src/providers/sealed-namespace.ts",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "5cc570b57b60f6b6ec8632f42a2c262a2fa7e39bbf614c17f9c8ead4033f7021",
+   "importMode": "EXACT",
+   "targetPath": "apps/worker/src/providers/sealed-namespace.ts",
+   "resultingSha256": "5cc570b57b60f6b6ec8632f42a2c262a2fa7e39bbf614c17f9c8ead4033f7021",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "apps/worker/src/providers/minio.ts",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "4c2500d4cc2000139095d26d644d7174e3a502aceb3ba66a2b8c4328d9053fe9",
+   "importMode": "EXACT",
+   "targetPath": "apps/worker/src/providers/minio.ts",
+   "resultingSha256": "4c2500d4cc2000139095d26d644d7174e3a502aceb3ba66a2b8c4328d9053fe9",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "apps/worker/src/providers/index.ts",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "4030d005f30902d4df7e626f93c37e939dae6f48303f6cdbdb50463d08ef3507",
+   "importMode": "EXACT",
+   "targetPath": "apps/worker/src/providers/index.ts",
+   "resultingSha256": "4030d005f30902d4df7e626f93c37e939dae6f48303f6cdbdb50463d08ef3507",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "apps/worker/src/readiness.ts",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "0c01df64b3685548516c0cc4314cba2cb9e182a58cdb0d26d46ba0e8bab4baf9",
+   "importMode": "EXACT",
+   "targetPath": "apps/worker/src/readiness.ts",
+   "resultingSha256": "0c01df64b3685548516c0cc4314cba2cb9e182a58cdb0d26d46ba0e8bab4baf9",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "apps/worker/src/jobs/bulk-delete-assets.ts",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "9670ac7f1fdaf78bd5081c99fd6291e1c5951235e8479a8e7fe7a8429e3306bf",
+   "importMode": "EXACT",
+   "targetPath": "apps/worker/src/jobs/bulk-delete-assets.ts",
+   "resultingSha256": "9670ac7f1fdaf78bd5081c99fd6291e1c5951235e8479a8e7fe7a8429e3306bf",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "apps/worker/tests/queue/sealed-namespace.test.ts",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot (untracked at basis)",
+   "sourceSha256": "2b23c021fc2df01906ef312bc5c895788ff68c114e22a34d3d078e0bcfd95cce",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "apps/worker/tests/queue/sealed-namespace.test.ts",
+   "resultingSha256": "2b23c021fc2df01906ef312bc5c895788ff68c114e22a34d3d078e0bcfd95cce",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+  },
+  {
+   "sourcePath": "specs/029-modality-specific-datasets/contracts/premedia-verification-a2.md",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot",
+   "sourceSha256": "6f7339a00b0c585475a110c4cf2bb38ad76202c65359ee2e99b1f74c6129d83f",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "specs/029-modality-specific-datasets/contracts/premedia-verification-a2.md",
+   "resultingSha256": "6f7339a00b0c585475a110c4cf2bb38ad76202c65359ee2e99b1f74c6129d83f",
+   "proofClassification": "FROZEN_SPEC"
+  },
+  {
+   "sourcePath": "specs/029-modality-specific-datasets/release/s0-storage-authority.md",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot (untracked at basis)",
+   "sourceSha256": "27dcad7fab0553a00159dc5cd22a33656b536aad1f08110ad4cf2aa048e2b0ca",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "specs/029-modality-specific-datasets/release/s0-storage-authority.md",
+   "resultingSha256": "27dcad7fab0553a00159dc5cd22a33656b536aad1f08110ad4cf2aa048e2b0ca",
+   "proofClassification": "FROZEN_SPEC"
+  },
+  {
+   "sourcePath": "specs/029-modality-specific-datasets/release/disposable-http-runtime-plan.md",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot",
+   "sourceSha256": "a98d6963eba543c4624cb479dc468914f4ae4548db00c7efe88d0ef8bae8d762",
+   "importMode": "DIRTY_PROVEN_SNAPSHOT",
+   "targetPath": "specs/029-modality-specific-datasets/release/disposable-http-runtime-plan.md",
+   "resultingSha256": "a98d6963eba543c4624cb479dc468914f4ae4548db00c7efe88d0ef8bae8d762",
+   "proofClassification": "FROZEN_SPEC"
+  },
+  {
+   "sourcePath": "scripts/db-safety/commands.json",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot (mixed file)",
+   "sourceSha256": "4ea80e937e46366dfc6702c5aa36a37b9ba2a3473f683ebace7a5f287c26c344",
+   "importMode": "SELECTIVE_HUNKS",
+   "targetPath": "scripts/db-safety/commands.json",
+   "resultingSha256": "93bed858ccae0c8503e85747434fe591b93089f89fb7ceb21f471e7c032d1abf",
+   "proofClassification": "SELECTIVE_INTEGRATION",
+   "note": "only the worker:test:sealed-namespace entry (commands.json) / name (SUPPORTED_COMMANDS) transplanted; feasibility entries and FOCUSED_FULL_CHAIN change NOT imported"
+  },
+  {
+   "sourcePath": "scripts/db-safety/disposable-test.mjs",
+   "sourceBasis": "a5aa248f + dirty working-tree snapshot (mixed file)",
+   "sourceSha256": "62fdc5cc60eb6fc918d88a8fbaa3ae2b16d093a358157b13859f5f83ec258f07",
+   "importMode": "SELECTIVE_HUNKS",
+   "targetPath": "scripts/db-safety/disposable-test.mjs",
+   "resultingSha256": "e0576fd95983ccdf63f93c3bf6726e04cf9f8c63777545694b1dbc5e041df6fb",
+   "proofClassification": "SELECTIVE_INTEGRATION",
+   "note": "only the worker:test:sealed-namespace entry (commands.json) / name (SUPPORTED_COMMANDS) transplanted; feasibility entries and FOCUSED_FULL_CHAIN change NOT imported"
+  }
+ ],
+ "selectiveHunks": {
+  "scripts/db-safety/commands.json": "only the worker:test:sealed-namespace entry, copied verbatim from the canonical source; all 68 pre-existing c46c928 entries unchanged",
+  "scripts/db-safety/disposable-test.mjs": "only 'worker:test:sealed-namespace' added to SUPPORTED_COMMANDS; no other line changed"
+ },
+ "excluded": [
+  "specs/029-modality-specific-datasets/release/shared-dev-execution-package.md (negative scope invariant, contract \u00a71.1)",
+  "T003/T033 closure documents and AGENTS.md/docs edits",
+  "final-go-no-go-package.md, phase029-closure-sequence.md, post-rollout-web-change-set.md, t033-g-sql-evidence-map.md, both transition-feasibility documents",
+  "feasibility tests asset-guard-transitions.test.ts and modality-engine-feasibility.test.ts and their catalog entries",
+  "mixed plan.md and tasks.md",
+  "creation-ingestion.md and openapi.yaml changes from a5aa248",
+  "backfill/maintenance/rollout tooling from a5aa248 (backfill-*.mjs, backup-proof, release-image-verify, launcher patch, backfill-maintenance-rehearsal.mjs)",
+  "classification/upload-verification code and tests from a5aa248 (repository-media-classification.ts, classification-boundary.test.ts, upload-verification.ts): candidate A2 prerequisites, to be decided in A2.1/A2.2, not imported here",
+  "M24/M25 (unchanged), M26 (does not exist)",
+  "private env, credentials, certificates/keys, evidence/run directories, generated runtime state"
+ ]
+}

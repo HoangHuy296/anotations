@@ -1,0 +1,14 @@
+{
+  "Rules": [
+    {
+      "ID": "annotationplatform-expire-direct-uploads",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "direct-uploads/"
+      },
+      "Expiration": {
+        "Days": 7
+      }
+    }
+  ]
+}

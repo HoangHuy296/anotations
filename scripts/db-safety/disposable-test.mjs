@@ -30,7 +30,7 @@ import { computeImplementation as maintenanceImplementation, manifestDigest as m
 import { runMaintenanceRehearsal } from './backfill-maintenance-rehearsal.mjs';
 import { readTree as readClientTree, treeHash as clientTreeHash } from './prisma-client-stage.mjs';
 
-export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency'];
+export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace'];
 const PROMOTED = 'prisma/migrations';
 /**
  * Ordered, frozen Phase029 chain applied AFTER the 23 historical migrations. Since the release-chain promotion these two
