@@ -302,6 +302,7 @@ export type PreparedImportItemWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"PreparedImportItem"> | Date | string
   asset?: Prisma.XOR<Prisma.AssetNullableScalarRelationFilter, Prisma.AssetWhereInput> | null
   preparedImport?: Prisma.XOR<Prisma.PreparedImportScalarRelationFilter, Prisma.PreparedImportWhereInput>
+  mediaVerifications?: Prisma.MediaVerificationListRelationFilter
 }
 
 export type PreparedImportItemOrderByWithRelationInput = {
@@ -322,6 +323,7 @@ export type PreparedImportItemOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   asset?: Prisma.AssetOrderByWithRelationInput
   preparedImport?: Prisma.PreparedImportOrderByWithRelationInput
+  mediaVerifications?: Prisma.MediaVerificationOrderByRelationAggregateInput
 }
 
 export type PreparedImportItemWhereUniqueInput = Prisma.AtLeast<{
@@ -347,6 +349,7 @@ export type PreparedImportItemWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"PreparedImportItem"> | Date | string
   asset?: Prisma.XOR<Prisma.AssetNullableScalarRelationFilter, Prisma.AssetWhereInput> | null
   preparedImport?: Prisma.XOR<Prisma.PreparedImportScalarRelationFilter, Prisma.PreparedImportWhereInput>
+  mediaVerifications?: Prisma.MediaVerificationListRelationFilter
 }, "id" | "storageKey" | "assetId" | "preparedImportId_normalizedPath" | "preparedImportId_position">
 
 export type PreparedImportItemOrderByWithAggregationInput = {
@@ -409,6 +412,7 @@ export type PreparedImportItemCreateInput = {
   updatedAt?: Date | string
   asset?: Prisma.AssetCreateNestedOneWithoutPreparedImportItemInput
   preparedImport: Prisma.PreparedImportCreateNestedOneWithoutItemsInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutPreparedImportItemInput
 }
 
 export type PreparedImportItemUncheckedCreateInput = {
@@ -427,6 +431,7 @@ export type PreparedImportItemUncheckedCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutPreparedImportItemInput
 }
 
 export type PreparedImportItemUpdateInput = {
@@ -445,6 +450,7 @@ export type PreparedImportItemUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   asset?: Prisma.AssetUpdateOneWithoutPreparedImportItemNestedInput
   preparedImport?: Prisma.PreparedImportUpdateOneRequiredWithoutItemsNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutPreparedImportItemNestedInput
 }
 
 export type PreparedImportItemUncheckedUpdateInput = {
@@ -463,6 +469,7 @@ export type PreparedImportItemUncheckedUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutPreparedImportItemNestedInput
 }
 
 export type PreparedImportItemCreateManyInput = {
@@ -684,6 +691,22 @@ export type PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PreparedImportItemUpdateToOneWithWhereWithoutAssetInput, Prisma.PreparedImportItemUpdateWithoutAssetInput>, Prisma.PreparedImportItemUncheckedUpdateWithoutAssetInput>
 }
 
+export type PreparedImportItemCreateNestedOneWithoutMediaVerificationsInput = {
+  create?: Prisma.XOR<Prisma.PreparedImportItemCreateWithoutMediaVerificationsInput, Prisma.PreparedImportItemUncheckedCreateWithoutMediaVerificationsInput>
+  connectOrCreate?: Prisma.PreparedImportItemCreateOrConnectWithoutMediaVerificationsInput
+  connect?: Prisma.PreparedImportItemWhereUniqueInput
+}
+
+export type PreparedImportItemUpdateOneWithoutMediaVerificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.PreparedImportItemCreateWithoutMediaVerificationsInput, Prisma.PreparedImportItemUncheckedCreateWithoutMediaVerificationsInput>
+  connectOrCreate?: Prisma.PreparedImportItemCreateOrConnectWithoutMediaVerificationsInput
+  upsert?: Prisma.PreparedImportItemUpsertWithoutMediaVerificationsInput
+  disconnect?: Prisma.PreparedImportItemWhereInput | boolean
+  delete?: Prisma.PreparedImportItemWhereInput | boolean
+  connect?: Prisma.PreparedImportItemWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PreparedImportItemUpdateToOneWithWhereWithoutMediaVerificationsInput, Prisma.PreparedImportItemUpdateWithoutMediaVerificationsInput>, Prisma.PreparedImportItemUncheckedUpdateWithoutMediaVerificationsInput>
+}
+
 export type PreparedImportItemCreateWithoutPreparedImportInput = {
   id?: string
   logicalPath: string
@@ -699,6 +722,7 @@ export type PreparedImportItemCreateWithoutPreparedImportInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   asset?: Prisma.AssetCreateNestedOneWithoutPreparedImportItemInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutPreparedImportItemInput
 }
 
 export type PreparedImportItemUncheckedCreateWithoutPreparedImportInput = {
@@ -716,6 +740,7 @@ export type PreparedImportItemUncheckedCreateWithoutPreparedImportInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutPreparedImportItemInput
 }
 
 export type PreparedImportItemCreateOrConnectWithoutPreparedImportInput = {
@@ -780,6 +805,7 @@ export type PreparedImportItemCreateWithoutAssetInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   preparedImport: Prisma.PreparedImportCreateNestedOneWithoutItemsInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutPreparedImportItemInput
 }
 
 export type PreparedImportItemUncheckedCreateWithoutAssetInput = {
@@ -797,6 +823,7 @@ export type PreparedImportItemUncheckedCreateWithoutAssetInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutPreparedImportItemInput
 }
 
 export type PreparedImportItemCreateOrConnectWithoutAssetInput = {
@@ -830,6 +857,7 @@ export type PreparedImportItemUpdateWithoutAssetInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   preparedImport?: Prisma.PreparedImportUpdateOneRequiredWithoutItemsNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutPreparedImportItemNestedInput
 }
 
 export type PreparedImportItemUncheckedUpdateWithoutAssetInput = {
@@ -844,6 +872,95 @@ export type PreparedImportItemUncheckedUpdateWithoutAssetInput = {
   position?: Prisma.IntFieldUpdateOperationsInput | number
   fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
   storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutPreparedImportItemNestedInput
+}
+
+export type PreparedImportItemCreateWithoutMediaVerificationsInput = {
+  id?: string
+  logicalPath: string
+  normalizedPath: string
+  filename: string
+  mimeType: string
+  sizeBytes: bigint | number
+  modality: $Enums.Modality
+  position: number
+  fingerprint: string
+  storageKey: string
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  asset?: Prisma.AssetCreateNestedOneWithoutPreparedImportItemInput
+  preparedImport: Prisma.PreparedImportCreateNestedOneWithoutItemsInput
+}
+
+export type PreparedImportItemUncheckedCreateWithoutMediaVerificationsInput = {
+  id?: string
+  preparedImportId: string
+  logicalPath: string
+  normalizedPath: string
+  filename: string
+  mimeType: string
+  sizeBytes: bigint | number
+  modality: $Enums.Modality
+  position: number
+  fingerprint: string
+  storageKey: string
+  assetId?: string | null
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PreparedImportItemCreateOrConnectWithoutMediaVerificationsInput = {
+  where: Prisma.PreparedImportItemWhereUniqueInput
+  create: Prisma.XOR<Prisma.PreparedImportItemCreateWithoutMediaVerificationsInput, Prisma.PreparedImportItemUncheckedCreateWithoutMediaVerificationsInput>
+}
+
+export type PreparedImportItemUpsertWithoutMediaVerificationsInput = {
+  update: Prisma.XOR<Prisma.PreparedImportItemUpdateWithoutMediaVerificationsInput, Prisma.PreparedImportItemUncheckedUpdateWithoutMediaVerificationsInput>
+  create: Prisma.XOR<Prisma.PreparedImportItemCreateWithoutMediaVerificationsInput, Prisma.PreparedImportItemUncheckedCreateWithoutMediaVerificationsInput>
+  where?: Prisma.PreparedImportItemWhereInput
+}
+
+export type PreparedImportItemUpdateToOneWithWhereWithoutMediaVerificationsInput = {
+  where?: Prisma.PreparedImportItemWhereInput
+  data: Prisma.XOR<Prisma.PreparedImportItemUpdateWithoutMediaVerificationsInput, Prisma.PreparedImportItemUncheckedUpdateWithoutMediaVerificationsInput>
+}
+
+export type PreparedImportItemUpdateWithoutMediaVerificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalPath?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedPath?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  asset?: Prisma.AssetUpdateOneWithoutPreparedImportItemNestedInput
+  preparedImport?: Prisma.PreparedImportUpdateOneRequiredWithoutItemsNestedInput
+}
+
+export type PreparedImportItemUncheckedUpdateWithoutMediaVerificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  preparedImportId?: Prisma.StringFieldUpdateOperationsInput | string
+  logicalPath?: Prisma.StringFieldUpdateOperationsInput | string
+  normalizedPath?: Prisma.StringFieldUpdateOperationsInput | string
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
+  position?: Prisma.IntFieldUpdateOperationsInput | number
+  fingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  storageKey?: Prisma.StringFieldUpdateOperationsInput | string
+  assetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -881,6 +998,7 @@ export type PreparedImportItemUpdateWithoutPreparedImportInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   asset?: Prisma.AssetUpdateOneWithoutPreparedImportItemNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutPreparedImportItemNestedInput
 }
 
 export type PreparedImportItemUncheckedUpdateWithoutPreparedImportInput = {
@@ -898,6 +1016,7 @@ export type PreparedImportItemUncheckedUpdateWithoutPreparedImportInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutPreparedImportItemNestedInput
 }
 
 export type PreparedImportItemUncheckedUpdateManyWithoutPreparedImportInput = {
@@ -918,6 +1037,35 @@ export type PreparedImportItemUncheckedUpdateManyWithoutPreparedImportInput = {
 }
 
 
+/**
+ * Count Type PreparedImportItemCountOutputType
+ */
+
+export type PreparedImportItemCountOutputType = {
+  mediaVerifications: number
+}
+
+export type PreparedImportItemCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  mediaVerifications?: boolean | PreparedImportItemCountOutputTypeCountMediaVerificationsArgs
+}
+
+/**
+ * PreparedImportItemCountOutputType without action
+ */
+export type PreparedImportItemCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PreparedImportItemCountOutputType
+   */
+  select?: Prisma.PreparedImportItemCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * PreparedImportItemCountOutputType without action
+ */
+export type PreparedImportItemCountOutputTypeCountMediaVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MediaVerificationWhereInput
+}
+
 
 export type PreparedImportItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -937,6 +1085,8 @@ export type PreparedImportItemSelect<ExtArgs extends runtime.Types.Extensions.In
   updatedAt?: boolean
   asset?: boolean | Prisma.PreparedImportItem$assetArgs<ExtArgs>
   preparedImport?: boolean | Prisma.PreparedImportDefaultArgs<ExtArgs>
+  mediaVerifications?: boolean | Prisma.PreparedImportItem$mediaVerificationsArgs<ExtArgs>
+  _count?: boolean | Prisma.PreparedImportItemCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["preparedImportItem"]>
 
 export type PreparedImportItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1001,6 +1151,8 @@ export type PreparedImportItemOmit<ExtArgs extends runtime.Types.Extensions.Inte
 export type PreparedImportItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asset?: boolean | Prisma.PreparedImportItem$assetArgs<ExtArgs>
   preparedImport?: boolean | Prisma.PreparedImportDefaultArgs<ExtArgs>
+  mediaVerifications?: boolean | Prisma.PreparedImportItem$mediaVerificationsArgs<ExtArgs>
+  _count?: boolean | Prisma.PreparedImportItemCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PreparedImportItemIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asset?: boolean | Prisma.PreparedImportItem$assetArgs<ExtArgs>
@@ -1016,6 +1168,7 @@ export type $PreparedImportItemPayload<ExtArgs extends runtime.Types.Extensions.
   objects: {
     asset: Prisma.$AssetPayload<ExtArgs> | null
     preparedImport: Prisma.$PreparedImportPayload<ExtArgs>
+    mediaVerifications: Prisma.$MediaVerificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1429,6 +1582,7 @@ export interface Prisma__PreparedImportItemClient<T, Null = never, ExtArgs exten
   readonly [Symbol.toStringTag]: "PrismaPromise"
   asset<T extends Prisma.PreparedImportItem$assetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PreparedImportItem$assetArgs<ExtArgs>>): Prisma.Prisma__AssetClient<runtime.Types.Result.GetResult<Prisma.$AssetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   preparedImport<T extends Prisma.PreparedImportDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PreparedImportDefaultArgs<ExtArgs>>): Prisma.Prisma__PreparedImportClient<runtime.Types.Result.GetResult<Prisma.$PreparedImportPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  mediaVerifications<T extends Prisma.PreparedImportItem$mediaVerificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PreparedImportItem$mediaVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1885,6 +2039,30 @@ export type PreparedImportItem$assetArgs<ExtArgs extends runtime.Types.Extension
    */
   include?: Prisma.AssetInclude<ExtArgs> | null
   where?: Prisma.AssetWhereInput
+}
+
+/**
+ * PreparedImportItem.mediaVerifications
+ */
+export type PreparedImportItem$mediaVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MediaVerification
+   */
+  select?: Prisma.MediaVerificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MediaVerification
+   */
+  omit?: Prisma.MediaVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaVerificationInclude<ExtArgs> | null
+  where?: Prisma.MediaVerificationWhereInput
+  orderBy?: Prisma.MediaVerificationOrderByWithRelationInput | Prisma.MediaVerificationOrderByWithRelationInput[]
+  cursor?: Prisma.MediaVerificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MediaVerificationScalarFieldEnum | Prisma.MediaVerificationScalarFieldEnum[]
 }
 
 /**

@@ -8,9 +8,10 @@ import {
   createWorkerDatabase,
   createWorkerMinio,
   createWorkerQueue,
-  ensureBucket,
-  ensureTempUploadLifecyclePolicy,
+  createRoutedWorkerMinio,
+  probeMinioProvisioning,
 } from "./providers/index.js";
+import { assertVerifierReadinessWhenEnabled } from "./providers/verifier-readiness.js";
 import { createFoundationWorker } from "./queue/bullmq-worker.js";
 import { failExpiredPreparedImports } from "./queue/import-timeout-scanner.js";
 import { pollDueAiTasks } from "./queue/ai-poll-scanner.js";
@@ -31,6 +32,10 @@ export async function startWorkerReadiness() {
     getTextSourceLimits();
     const db = createWorkerDatabase(config);
     const minio = createWorkerMinio(config);
+    // Scanners delete through the routed client: sealed keys go to the owner identity by key classification, never by caller choice.
+    const cleanupMinio = createRoutedWorkerMinio(config);
+    // A2: required only when MEDIA_VERIFICATION_ENABLED=1 (off by default); a missing/non-distinct verifier identity then fails startup closed.
+    assertVerifierReadinessWhenEnabled(config);
     const { connection, queue } = createWorkerQueue(config);
 
     const results: ProviderReadiness[] = [
@@ -38,15 +43,7 @@ export async function startWorkerReadiness() {
         await db.$connect();
       }),
       await probeProvider("minio", async () => {
-        await ensureBucket(minio, config.MINIO_BUCKET);
-        // Secondary GC safety net (021-...), not a readiness requirement —
-        // never blocks startup if the deployment lacks permission to set a
-        // bucket lifecycle policy. Idempotent, prefix-scoped only to the
-        // two known temp/staging prefixes (see the function's own doc
-        // comment) — never touches a permanent asset prefix.
-        await ensureTempUploadLifecyclePolicy(minio, config.MINIO_BUCKET, hardening.MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS).catch(() => {
-          console.warn("MinIO temp-upload lifecycle policy could not be applied (non-fatal).");
-        });
+        await probeMinioProvisioning(minio, config.MINIO_BUCKET, hardening.MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS);
       }),
       await probeProvider("redis", async () => {
         await queue.waitUntilReady();
@@ -100,8 +97,8 @@ export async function startWorkerReadiness() {
 
     // Cross-replica GC coordination remains inside each scanner. The local
     // scheduler prevents overlap and catches failures between interval ticks.
-    schedule("orphan scan", 60 * 60_000, () => runScheduledOrphanScan({ db, minio, bucket: config.MINIO_BUCKET, dryRun: hardening.MINIO_ORPHAN_SCAN_DRY_RUN, gracePeriodMs: hardening.MINIO_ORPHAN_GRACE_PERIOD_MS }));
-    schedule("temp upload cleanup", 30 * 60_000, () => runScheduledTempUploadCleanup({ db, minio, bucket: config.MINIO_BUCKET, dryRun: hardening.MINIO_ORPHAN_SCAN_DRY_RUN, gracePeriodMs: hardening.TEMP_UPLOAD_RETENTION_MS }));
+    schedule("orphan scan", 60 * 60_000, () => runScheduledOrphanScan({ db, minio: cleanupMinio, bucket: config.MINIO_BUCKET, dryRun: hardening.MINIO_ORPHAN_SCAN_DRY_RUN, gracePeriodMs: hardening.MINIO_ORPHAN_GRACE_PERIOD_MS }));
+    schedule("temp upload cleanup", 30 * 60_000, () => runScheduledTempUploadCleanup({ db, minio: cleanupMinio, bucket: config.MINIO_BUCKET, dryRun: hardening.MINIO_ORPHAN_SCAN_DRY_RUN, gracePeriodMs: hardening.TEMP_UPLOAD_RETENTION_MS }));
     schedule("job event retention", 60 * 60_000, () => runScheduledJobEventRetention({ db, retentionDays: hardening.JOB_EVENT_RETENTION_DAYS, batchSize: hardening.JOB_EVENT_CLEANUP_BATCH_SIZE }));
 
     const shutdown = async () => {

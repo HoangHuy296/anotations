@@ -340,7 +340,8 @@ export const JobType = {
   BULK_DELETE_ASSETS: 'BULK_DELETE_ASSETS',
   BULK_EXPORT_SELECTED: 'BULK_EXPORT_SELECTED',
   COLLABORATION_OUTBOX_DISPATCH: 'COLLABORATION_OUTBOX_DISPATCH',
-  TEXT_SOURCE_PREPARE: 'TEXT_SOURCE_PREPARE'
+  TEXT_SOURCE_PREPARE: 'TEXT_SOURCE_PREPARE',
+  VERIFY_UPLOADED_MEDIA: 'VERIFY_UPLOADED_MEDIA'
 } as const
 
 export type JobType = (typeof JobType)[keyof typeof JobType]
@@ -465,3 +466,25 @@ export const AiTaskType = {
 } as const
 
 export type AiTaskType = (typeof AiTaskType)[keyof typeof AiTaskType]
+
+
+export const MediaVerificationSource = {
+  DIRECT_UPLOAD: 'DIRECT_UPLOAD',
+  LOCAL_FOLDER_ITEM: 'LOCAL_FOLDER_ITEM'
+} as const
+
+export type MediaVerificationSource = (typeof MediaVerificationSource)[keyof typeof MediaVerificationSource]
+
+
+export const MediaVerificationStatus = {
+  PENDING: 'PENDING',
+  SEALED: 'SEALED',
+  VERIFIED: 'VERIFIED',
+  PUBLISHED: 'PUBLISHED',
+  REJECTED: 'REJECTED',
+  STALE: 'STALE',
+  CANCELED: 'CANCELED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type MediaVerificationStatus = (typeof MediaVerificationStatus)[keyof typeof MediaVerificationStatus]

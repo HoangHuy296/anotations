@@ -17,6 +17,7 @@ import { processCollaborationOutboxDispatch } from "../jobs/collaboration-outbox
 import { processTextSourcePrepare } from "../jobs/text-source-prepare.processor.js";
 
 import { processVisualization } from "../jobs/visualization.processor.js";
+import { MEDIA_VERIFICATION_PROCESSOR_REGISTERED } from "../jobs/media-verification-registration.js";
 
 export type QueueRouteResult =
   | { kind: "received"; jobId: string }
@@ -50,7 +51,9 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
       : !["QUEUED", "RETRYING"].includes(job.status) ? "NOT_QUEUED"
         : job.dataset.archivedAt || job.dataset.deletedAt ? "INACTIVE_DATASET"
           : !queueNameForJobType(job.type) ? "UNSUPPORTED_TYPE"
-            : null;
+            // A2 foundation: transport-supported but not yet processable; refuse before claiming so such a Job can never be left RUNNING without a processor.
+            : job.type === "VERIFY_UPLOADED_MEDIA" && !MEDIA_VERIFICATION_PROCESSOR_REGISTERED ? "UNSUPPORTED_TYPE"
+              : null;
   if (reason) {
     await writeSafeJobEvent(input.db, { jobId: job.id, kind: "QUEUE_SKIPPED", reason });
     return { kind: "skipped", reason };

@@ -207,3 +207,8 @@ export type DatasetSnapshot = Prisma.DatasetSnapshotModel
  * 
  */
 export type VisualizationArtifact = Prisma.VisualizationArtifactModel
+/**
+ * Model MediaVerification
+ * A2 durable pre-publication media verification (frozen contract: specs/029-modality-specific-datasets/contracts/premedia-verification-a2.md section 4).
+ */
+export type MediaVerification = Prisma.MediaVerificationModel

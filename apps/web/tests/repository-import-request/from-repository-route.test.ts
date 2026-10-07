@@ -23,7 +23,7 @@ import {
 
 type AcceptedResponse = {
   data?: {
-    dataset?: { id?: string; name?: string };
+    dataset?: { id?: string; name?: string; modality?: string };
     job?: { id?: string; datasetId?: string; type?: string; status?: string };
     progressPath?: string;
   };
@@ -33,7 +33,8 @@ type AcceptedResponse = {
 function assertSafeAcceptedResponse(payload: AcceptedResponse, sentinels: readonly string[] = []) {
   assert.deepEqual(Object.keys(payload).sort(), ["data"]);
   assert.deepEqual(Object.keys(payload.data ?? {}).sort(), ["dataset", "job", "progressPath"]);
-  assert.deepEqual(Object.keys(payload.data?.dataset ?? {}).sort(), ["id", "name"]);
+  assert.deepEqual(Object.keys(payload.data?.dataset ?? {}).sort(), ["id", "modality", "name"]);
+  assert.ok(["IMAGE", "VIDEO", "AUDIO", "TEXT"].includes(payload.data?.dataset?.modality ?? ""), "the persisted Dataset modality is exposed");
   assert.deepEqual(Object.keys(payload.data?.job ?? {}).sort(), ["datasetId", "id", "status", "type"]);
   assertNoRepositoryImportSecret(payload, sentinels);
   const serialized = JSON.stringify(payload);

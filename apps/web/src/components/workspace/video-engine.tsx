@@ -9,6 +9,7 @@ import type { SafeVideoAnnotations } from "@/types/video-annotation";
 import { AiDetectDialog } from "@/components/workspace/ai-detect-dialog";
 import { findPendingAiTaskClient } from "@/lib/ai/ai-task-api-client";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
+import { useMediaProcessing } from "@/components/workspace/use-media-processing";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
 import { readVideoAnnotationsClient, readVideoAnnotationsAcrossDurationClient, addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoTrack, updateVideoKeyframe } from "@/lib/workspace/video-annotation-client";
@@ -70,6 +71,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // same fallback inline at every call site (frame-index math, the
   // `onTimeUpdate`/`durationchange` handlers, and the rAF playback-sync
   // loop below all need the same value).
+  useMediaProcessing(video.id, "VIDEO", readiness.state);
   const fps = readiness.video?.fps && readiness.video.fps > 0 ? readiness.video.fps : 30;
   const [viewUrl, setViewUrl] = useState<string | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "unavailable">("loading");
