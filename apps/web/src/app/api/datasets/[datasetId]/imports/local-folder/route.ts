@@ -1,5 +1,6 @@
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
+import { readPersistedDatasetRef } from "@/lib/datasets/dataset-ref";
 import { prepareDatasetAppendImport } from "@/lib/imports/prepare-local-folder-import";
 import { enforceRateLimit } from "@/lib/rate-limit/enforce";
 import { datasetIdSchema } from "@/lib/validation/dataset";
@@ -22,5 +23,8 @@ export async function POST(request: Request, context: { params: Promise<{ datase
     const code = resultCode === "IDEMPOTENCY_KEY_CONFLICT" ? "IDEMPOTENCY_KEY_CONFLICT" : resultCode === "DATASET_MODALITY_UNRESOLVED" ? "DATASET_MODALITY_UNRESOLVED" : result.status === 404 ? "DATASET_NOT_FOUND" : "FORBIDDEN";
     return apiError(result.status, code, "The dataset import cannot be started in its current state.");
   }
-  return apiSuccess({ preparation: result.preparation, replayed: result.replayed, deliveryPending: result.deliveryPending ?? false }, { status: result.status });
+  // Authoritative persisted Dataset identity; hints in the request never select or echo a modality.
+  const dataset = await readPersistedDatasetRef(result.preparation.datasetId);
+  if (!dataset) return apiError(409, "DATASET_MODALITY_UNRESOLVED", "The dataset modality has not been resolved.");
+  return apiSuccess({ dataset, preparation: result.preparation, replayed: result.replayed, deliveryPending: result.deliveryPending ?? false }, { status: result.status });
 }

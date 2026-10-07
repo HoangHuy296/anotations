@@ -3,6 +3,7 @@
 import { MusicNotes, SpinnerGap } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
+import { useMediaProcessing } from "@/components/workspace/use-media-processing";
 import type { SafeMediaReadiness } from "@/types/media-processing";
 
 type AudioEngineProps = { audio: { id: string; filename: string; description: string | null }; readiness: SafeMediaReadiness };
@@ -42,6 +43,7 @@ async function getViewUrl(assetId: string): Promise<string> {
 
 /** Safe read-only AUDIO workspace; waveform bytes/keys never reach the browser DTO. */
 export function AudioEngine({ audio, readiness }: AudioEngineProps) {
+  useMediaProcessing(audio.id, "AUDIO", readiness.state);
   const [viewUrl, setViewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {

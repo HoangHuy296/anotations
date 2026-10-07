@@ -30,7 +30,7 @@ export type SafeRepositoryImportJobInput = {
 };
 
 export type RepositoryImportAcceptance = {
-  dataset: { id: string; name: string };
+  dataset: { id: string; name: string; modality: "IMAGE" | "VIDEO" | "AUDIO" | "TEXT" };
   job: { id: string; datasetId: string; type: "IMPORT_DATASET"; status: JobStatus };
   progressPath: string;
   reused: boolean;

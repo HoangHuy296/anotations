@@ -472,6 +472,7 @@ export type DatasetWhereInput = {
   membershipEvents?: Prisma.DatasetMembershipEventListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   outboxEvents?: Prisma.CollaborationOutboxEventListRelationFilter
+  mediaVerifications?: Prisma.MediaVerificationListRelationFilter
 }
 
 export type DatasetOrderByWithRelationInput = {
@@ -530,6 +531,7 @@ export type DatasetOrderByWithRelationInput = {
   membershipEvents?: Prisma.DatasetMembershipEventOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   outboxEvents?: Prisma.CollaborationOutboxEventOrderByRelationAggregateInput
+  mediaVerifications?: Prisma.MediaVerificationOrderByRelationAggregateInput
 }
 
 export type DatasetWhereUniqueInput = Prisma.AtLeast<{
@@ -592,6 +594,7 @@ export type DatasetWhereUniqueInput = Prisma.AtLeast<{
   membershipEvents?: Prisma.DatasetMembershipEventListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   outboxEvents?: Prisma.CollaborationOutboxEventListRelationFilter
+  mediaVerifications?: Prisma.MediaVerificationListRelationFilter
 }, "id" | "ownerId_creationIdempotencyKey">
 
 export type DatasetOrderByWithAggregationInput = {
@@ -731,6 +734,7 @@ export type DatasetCreateInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateInput = {
@@ -786,6 +790,7 @@ export type DatasetUncheckedCreateInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUpdateInput = {
@@ -841,6 +846,7 @@ export type DatasetUpdateInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateInput = {
@@ -896,6 +902,7 @@ export type DatasetUncheckedUpdateInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateManyInput = {
@@ -1540,6 +1547,20 @@ export type DatasetUpdateOneRequiredWithoutVisualizationArtifactsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutVisualizationArtifactsInput, Prisma.DatasetUpdateWithoutVisualizationArtifactsInput>, Prisma.DatasetUncheckedUpdateWithoutVisualizationArtifactsInput>
 }
 
+export type DatasetCreateNestedOneWithoutMediaVerificationsInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutMediaVerificationsInput, Prisma.DatasetUncheckedCreateWithoutMediaVerificationsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutMediaVerificationsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+}
+
+export type DatasetUpdateOneRequiredWithoutMediaVerificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.DatasetCreateWithoutMediaVerificationsInput, Prisma.DatasetUncheckedCreateWithoutMediaVerificationsInput>
+  connectOrCreate?: Prisma.DatasetCreateOrConnectWithoutMediaVerificationsInput
+  upsert?: Prisma.DatasetUpsertWithoutMediaVerificationsInput
+  connect?: Prisma.DatasetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DatasetUpdateToOneWithWhereWithoutMediaVerificationsInput, Prisma.DatasetUpdateWithoutMediaVerificationsInput>, Prisma.DatasetUncheckedUpdateWithoutMediaVerificationsInput>
+}
+
 export type DatasetCreateWithoutOwnerInput = {
   modality?: $Enums.Modality | null
   modalityContentRevision?: bigint | number
@@ -1592,6 +1613,7 @@ export type DatasetCreateWithoutOwnerInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutOwnerInput = {
@@ -1646,6 +1668,7 @@ export type DatasetUncheckedCreateWithoutOwnerInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutOwnerInput = {
@@ -1767,6 +1790,7 @@ export type DatasetCreateWithoutJobsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutJobsInput = {
@@ -1821,6 +1845,7 @@ export type DatasetUncheckedCreateWithoutJobsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutJobsInput = {
@@ -1891,6 +1916,7 @@ export type DatasetUpdateWithoutJobsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutJobsInput = {
@@ -1945,6 +1971,7 @@ export type DatasetUncheckedUpdateWithoutJobsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutExternalRepositoryInput = {
@@ -1999,6 +2026,7 @@ export type DatasetCreateWithoutExternalRepositoryInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutExternalRepositoryInput = {
@@ -2053,6 +2081,7 @@ export type DatasetUncheckedCreateWithoutExternalRepositoryInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutExternalRepositoryInput = {
@@ -2133,6 +2162,7 @@ export type DatasetCreateWithoutSourceConnectionInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutSourceConnectionInput = {
@@ -2187,6 +2217,7 @@ export type DatasetUncheckedCreateWithoutSourceConnectionInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutSourceConnectionInput = {
@@ -2267,6 +2298,7 @@ export type DatasetCreateWithoutPreparedImportsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutPreparedImportsInput = {
@@ -2321,6 +2353,7 @@ export type DatasetUncheckedCreateWithoutPreparedImportsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutPreparedImportsInput = {
@@ -2391,6 +2424,7 @@ export type DatasetUpdateWithoutPreparedImportsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutPreparedImportsInput = {
@@ -2445,6 +2479,7 @@ export type DatasetUncheckedUpdateWithoutPreparedImportsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutMembersInput = {
@@ -2499,6 +2534,7 @@ export type DatasetCreateWithoutMembersInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutMembersInput = {
@@ -2553,6 +2589,7 @@ export type DatasetUncheckedCreateWithoutMembersInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutMembersInput = {
@@ -2623,6 +2660,7 @@ export type DatasetUpdateWithoutMembersInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutMembersInput = {
@@ -2677,6 +2715,7 @@ export type DatasetUncheckedUpdateWithoutMembersInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutInvitationsInput = {
@@ -2731,6 +2770,7 @@ export type DatasetCreateWithoutInvitationsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutInvitationsInput = {
@@ -2785,6 +2825,7 @@ export type DatasetUncheckedCreateWithoutInvitationsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutInvitationsInput = {
@@ -2855,6 +2896,7 @@ export type DatasetUpdateWithoutInvitationsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutInvitationsInput = {
@@ -2909,6 +2951,7 @@ export type DatasetUncheckedUpdateWithoutInvitationsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAssetsInput = {
@@ -2963,6 +3006,7 @@ export type DatasetCreateWithoutAssetsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAssetsInput = {
@@ -3017,6 +3061,7 @@ export type DatasetUncheckedCreateWithoutAssetsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAssetsInput = {
@@ -3087,6 +3132,7 @@ export type DatasetUpdateWithoutAssetsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAssetsInput = {
@@ -3141,6 +3187,7 @@ export type DatasetUncheckedUpdateWithoutAssetsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAssignmentSlotsInput = {
@@ -3195,6 +3242,7 @@ export type DatasetCreateWithoutAssignmentSlotsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAssignmentSlotsInput = {
@@ -3249,6 +3297,7 @@ export type DatasetUncheckedCreateWithoutAssignmentSlotsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAssignmentSlotsInput = {
@@ -3319,6 +3368,7 @@ export type DatasetUpdateWithoutAssignmentSlotsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAssignmentSlotsInput = {
@@ -3373,6 +3423,7 @@ export type DatasetUncheckedUpdateWithoutAssignmentSlotsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAssignmentEventsInput = {
@@ -3427,6 +3478,7 @@ export type DatasetCreateWithoutAssignmentEventsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAssignmentEventsInput = {
@@ -3481,6 +3533,7 @@ export type DatasetUncheckedCreateWithoutAssignmentEventsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAssignmentEventsInput = {
@@ -3551,6 +3604,7 @@ export type DatasetUpdateWithoutAssignmentEventsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAssignmentEventsInput = {
@@ -3605,6 +3659,7 @@ export type DatasetUncheckedUpdateWithoutAssignmentEventsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutCommentsInput = {
@@ -3659,6 +3714,7 @@ export type DatasetCreateWithoutCommentsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutCommentsInput = {
@@ -3713,6 +3769,7 @@ export type DatasetUncheckedCreateWithoutCommentsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutCommentsInput = {
@@ -3783,6 +3840,7 @@ export type DatasetUpdateWithoutCommentsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutCommentsInput = {
@@ -3837,6 +3895,7 @@ export type DatasetUncheckedUpdateWithoutCommentsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutNotificationsInput = {
@@ -3891,6 +3950,7 @@ export type DatasetCreateWithoutNotificationsInput = {
   comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutNotificationsInput = {
@@ -3945,6 +4005,7 @@ export type DatasetUncheckedCreateWithoutNotificationsInput = {
   comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutNotificationsInput = {
@@ -4015,6 +4076,7 @@ export type DatasetUpdateWithoutNotificationsInput = {
   comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutNotificationsInput = {
@@ -4069,6 +4131,7 @@ export type DatasetUncheckedUpdateWithoutNotificationsInput = {
   comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutMembershipEventsInput = {
@@ -4123,6 +4186,7 @@ export type DatasetCreateWithoutMembershipEventsInput = {
   comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutMembershipEventsInput = {
@@ -4177,6 +4241,7 @@ export type DatasetUncheckedCreateWithoutMembershipEventsInput = {
   comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutMembershipEventsInput = {
@@ -4247,6 +4312,7 @@ export type DatasetUpdateWithoutMembershipEventsInput = {
   comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutMembershipEventsInput = {
@@ -4301,6 +4367,7 @@ export type DatasetUncheckedUpdateWithoutMembershipEventsInput = {
   comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutOutboxEventsInput = {
@@ -4355,6 +4422,7 @@ export type DatasetCreateWithoutOutboxEventsInput = {
   comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutOutboxEventsInput = {
@@ -4409,6 +4477,7 @@ export type DatasetUncheckedCreateWithoutOutboxEventsInput = {
   comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutOutboxEventsInput = {
@@ -4479,6 +4548,7 @@ export type DatasetUpdateWithoutOutboxEventsInput = {
   comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutOutboxEventsInput = {
@@ -4533,6 +4603,7 @@ export type DatasetUncheckedUpdateWithoutOutboxEventsInput = {
   comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAssetVersionsInput = {
@@ -4587,6 +4658,7 @@ export type DatasetCreateWithoutAssetVersionsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAssetVersionsInput = {
@@ -4641,6 +4713,7 @@ export type DatasetUncheckedCreateWithoutAssetVersionsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAssetVersionsInput = {
@@ -4711,6 +4784,7 @@ export type DatasetUpdateWithoutAssetVersionsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAssetVersionsInput = {
@@ -4765,6 +4839,7 @@ export type DatasetUncheckedUpdateWithoutAssetVersionsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutLabelsInput = {
@@ -4819,6 +4894,7 @@ export type DatasetCreateWithoutLabelsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutLabelsInput = {
@@ -4873,6 +4949,7 @@ export type DatasetUncheckedCreateWithoutLabelsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutLabelsInput = {
@@ -4943,6 +5020,7 @@ export type DatasetUpdateWithoutLabelsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutLabelsInput = {
@@ -4997,6 +5075,7 @@ export type DatasetUncheckedUpdateWithoutLabelsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAnnotationsInput = {
@@ -5051,6 +5130,7 @@ export type DatasetCreateWithoutAnnotationsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAnnotationsInput = {
@@ -5105,6 +5185,7 @@ export type DatasetUncheckedCreateWithoutAnnotationsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAnnotationsInput = {
@@ -5175,6 +5256,7 @@ export type DatasetUpdateWithoutAnnotationsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAnnotationsInput = {
@@ -5229,6 +5311,7 @@ export type DatasetUncheckedUpdateWithoutAnnotationsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutAiTasksInput = {
@@ -5283,6 +5366,7 @@ export type DatasetCreateWithoutAiTasksInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutAiTasksInput = {
@@ -5337,6 +5421,7 @@ export type DatasetUncheckedCreateWithoutAiTasksInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutAiTasksInput = {
@@ -5407,6 +5492,7 @@ export type DatasetUpdateWithoutAiTasksInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutAiTasksInput = {
@@ -5461,6 +5547,7 @@ export type DatasetUncheckedUpdateWithoutAiTasksInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutVisualizationSnapshotsInput = {
@@ -5515,6 +5602,7 @@ export type DatasetCreateWithoutVisualizationSnapshotsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutVisualizationSnapshotsInput = {
@@ -5569,6 +5657,7 @@ export type DatasetUncheckedCreateWithoutVisualizationSnapshotsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutVisualizationSnapshotsInput = {
@@ -5639,6 +5728,7 @@ export type DatasetUpdateWithoutVisualizationSnapshotsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutVisualizationSnapshotsInput = {
@@ -5693,6 +5783,7 @@ export type DatasetUncheckedUpdateWithoutVisualizationSnapshotsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetCreateWithoutVisualizationArtifactsInput = {
@@ -5747,6 +5838,7 @@ export type DatasetCreateWithoutVisualizationArtifactsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetUncheckedCreateWithoutVisualizationArtifactsInput = {
@@ -5801,6 +5893,7 @@ export type DatasetUncheckedCreateWithoutVisualizationArtifactsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutDatasetInput
 }
 
 export type DatasetCreateOrConnectWithoutVisualizationArtifactsInput = {
@@ -5871,6 +5964,7 @@ export type DatasetUpdateWithoutVisualizationArtifactsInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutVisualizationArtifactsInput = {
@@ -5910,6 +6004,243 @@ export type DatasetUncheckedUpdateWithoutVisualizationArtifactsInput = {
   archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   visualizationSnapshots?: Prisma.DatasetSnapshotUncheckedUpdateManyWithoutDatasetNestedInput
+  aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUncheckedUpdateManyWithoutDatasetNestedInput
+  members?: Prisma.DatasetMemberUncheckedUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUncheckedUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetCreateWithoutMediaVerificationsInput = {
+  modality?: $Enums.Modality | null
+  modalityContentRevision?: bigint | number
+  modalityResolvedAt?: Date | string | null
+  modalityResolverSubject?: string | null
+  visualizationGeneration?: bigint | number
+  visualizationPublicationFence?: bigint | number
+  visualizationCurrentSnapshotId?: string | null
+  id?: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  textPolicy?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  textPolicyRevision?: number
+  textMutationRevision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  visualizationSnapshots?: Prisma.DatasetSnapshotCreateNestedManyWithoutDatasetInput
+  visualizationArtifacts?: Prisma.VisualizationArtifactCreateNestedManyWithoutDatasetInput
+  aiTasks?: Prisma.AiTaskCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionCreateNestedManyWithoutDatasetInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutDatasetsInput
+  owner: Prisma.UserCreateNestedOneWithoutOwnedDatasetsInput
+  sourceConnection?: Prisma.SourceConnectionCreateNestedOneWithoutDatasetsInput
+  members?: Prisma.DatasetMemberCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetUncheckedCreateWithoutMediaVerificationsInput = {
+  modality?: $Enums.Modality | null
+  modalityContentRevision?: bigint | number
+  modalityResolvedAt?: Date | string | null
+  modalityResolverSubject?: string | null
+  visualizationGeneration?: bigint | number
+  visualizationPublicationFence?: bigint | number
+  visualizationCurrentSnapshotId?: string | null
+  id?: string
+  ownerId: string
+  name: string
+  description?: string | null
+  type?: $Enums.DatasetType
+  primaryModality?: $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: $Enums.DatasetSourceMode
+  externalRepositoryId?: string | null
+  sourceConnectionId?: string | null
+  sourceRootPath?: string | null
+  sourceRef?: string | null
+  lockedRevision?: string | null
+  currentRevision?: string | null
+  creationIdempotencyKey?: string | null
+  creationRequestHash?: string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Date | string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  textPolicy?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  textPolicyRevision?: number
+  textMutationRevision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  visualizationSnapshots?: Prisma.DatasetSnapshotUncheckedCreateNestedManyWithoutDatasetInput
+  visualizationArtifacts?: Prisma.VisualizationArtifactUncheckedCreateNestedManyWithoutDatasetInput
+  aiTasks?: Prisma.AiTaskUncheckedCreateNestedManyWithoutDatasetInput
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutDatasetInput
+  assets?: Prisma.AssetUncheckedCreateNestedManyWithoutDatasetInput
+  assetVersions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutDatasetInput
+  members?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutDatasetInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutDatasetInput
+  labels?: Prisma.LabelUncheckedCreateNestedManyWithoutDatasetInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutDatasetInput
+  invitations?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutDatasetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutDatasetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutDatasetInput
+  membershipEvents?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutDatasetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutDatasetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutDatasetInput
+}
+
+export type DatasetCreateOrConnectWithoutMediaVerificationsInput = {
+  where: Prisma.DatasetWhereUniqueInput
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutMediaVerificationsInput, Prisma.DatasetUncheckedCreateWithoutMediaVerificationsInput>
+}
+
+export type DatasetUpsertWithoutMediaVerificationsInput = {
+  update: Prisma.XOR<Prisma.DatasetUpdateWithoutMediaVerificationsInput, Prisma.DatasetUncheckedUpdateWithoutMediaVerificationsInput>
+  create: Prisma.XOR<Prisma.DatasetCreateWithoutMediaVerificationsInput, Prisma.DatasetUncheckedCreateWithoutMediaVerificationsInput>
+  where?: Prisma.DatasetWhereInput
+}
+
+export type DatasetUpdateToOneWithWhereWithoutMediaVerificationsInput = {
+  where?: Prisma.DatasetWhereInput
+  data: Prisma.XOR<Prisma.DatasetUpdateWithoutMediaVerificationsInput, Prisma.DatasetUncheckedUpdateWithoutMediaVerificationsInput>
+}
+
+export type DatasetUpdateWithoutMediaVerificationsInput = {
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  modalityContentRevision?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  modalityResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  modalityResolverSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visualizationGeneration?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  visualizationPublicationFence?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  visualizationCurrentSnapshotId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  textPolicy?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  textPolicyRevision?: Prisma.IntFieldUpdateOperationsInput | number
+  textMutationRevision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  visualizationSnapshots?: Prisma.DatasetSnapshotUpdateManyWithoutDatasetNestedInput
+  visualizationArtifacts?: Prisma.VisualizationArtifactUpdateManyWithoutDatasetNestedInput
+  aiTasks?: Prisma.AiTaskUpdateManyWithoutDatasetNestedInput
+  annotations?: Prisma.AnnotationUpdateManyWithoutDatasetNestedInput
+  assets?: Prisma.AssetUpdateManyWithoutDatasetNestedInput
+  assetVersions?: Prisma.AssetVersionUpdateManyWithoutDatasetNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutDatasetsNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedDatasetsNestedInput
+  sourceConnection?: Prisma.SourceConnectionUpdateOneWithoutDatasetsNestedInput
+  members?: Prisma.DatasetMemberUpdateManyWithoutDatasetNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutDatasetNestedInput
+  labels?: Prisma.LabelUpdateManyWithoutDatasetNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutDatasetNestedInput
+  invitations?: Prisma.DatasetInvitationUpdateManyWithoutDatasetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutDatasetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutDatasetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutDatasetNestedInput
+  membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+}
+
+export type DatasetUncheckedUpdateWithoutMediaVerificationsInput = {
+  modality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  modalityContentRevision?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  modalityResolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  modalityResolverSubject?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  visualizationGeneration?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  visualizationPublicationFence?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  visualizationCurrentSnapshotId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumDatasetTypeFieldUpdateOperationsInput | $Enums.DatasetType
+  primaryModality?: Prisma.NullableEnumModalityFieldUpdateOperationsInput | $Enums.Modality | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceConnectionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRootPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lockedRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationIdempotencyKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  creationRequestHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  includePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  excludePatterns?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  textPolicy?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  textPolicyRevision?: Prisma.IntFieldUpdateOperationsInput | number
+  textMutationRevision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  visualizationSnapshots?: Prisma.DatasetSnapshotUncheckedUpdateManyWithoutDatasetNestedInput
+  visualizationArtifacts?: Prisma.VisualizationArtifactUncheckedUpdateManyWithoutDatasetNestedInput
   aiTasks?: Prisma.AiTaskUncheckedUpdateManyWithoutDatasetNestedInput
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutDatasetNestedInput
   assets?: Prisma.AssetUncheckedUpdateManyWithoutDatasetNestedInput
@@ -6016,6 +6347,7 @@ export type DatasetUpdateWithoutOwnerInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutOwnerInput = {
@@ -6070,6 +6402,7 @@ export type DatasetUncheckedUpdateWithoutOwnerInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutOwnerInput = {
@@ -6198,6 +6531,7 @@ export type DatasetUpdateWithoutExternalRepositoryInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutExternalRepositoryInput = {
@@ -6252,6 +6586,7 @@ export type DatasetUncheckedUpdateWithoutExternalRepositoryInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutExternalRepositoryInput = {
@@ -6380,6 +6715,7 @@ export type DatasetUpdateWithoutSourceConnectionInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateWithoutSourceConnectionInput = {
@@ -6434,6 +6770,7 @@ export type DatasetUncheckedUpdateWithoutSourceConnectionInput = {
   membershipEvents?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutDatasetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutDatasetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutDatasetNestedInput
+  mediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutDatasetNestedInput
 }
 
 export type DatasetUncheckedUpdateManyWithoutSourceConnectionInput = {
@@ -6496,6 +6833,7 @@ export type DatasetCountOutputType = {
   membershipEvents: number
   notifications: number
   outboxEvents: number
+  mediaVerifications: number
 }
 
 export type DatasetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6516,6 +6854,7 @@ export type DatasetCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   membershipEvents?: boolean | DatasetCountOutputTypeCountMembershipEventsArgs
   notifications?: boolean | DatasetCountOutputTypeCountNotificationsArgs
   outboxEvents?: boolean | DatasetCountOutputTypeCountOutboxEventsArgs
+  mediaVerifications?: boolean | DatasetCountOutputTypeCountMediaVerificationsArgs
 }
 
 /**
@@ -6647,6 +6986,13 @@ export type DatasetCountOutputTypeCountOutboxEventsArgs<ExtArgs extends runtime.
   where?: Prisma.CollaborationOutboxEventWhereInput
 }
 
+/**
+ * DatasetCountOutputType without action
+ */
+export type DatasetCountOutputTypeCountMediaVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MediaVerificationWhereInput
+}
+
 
 export type DatasetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   modality?: boolean
@@ -6704,6 +7050,7 @@ export type DatasetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   membershipEvents?: boolean | Prisma.Dataset$membershipEventsArgs<ExtArgs>
   notifications?: boolean | Prisma.Dataset$notificationsArgs<ExtArgs>
   outboxEvents?: boolean | Prisma.Dataset$outboxEventsArgs<ExtArgs>
+  mediaVerifications?: boolean | Prisma.Dataset$mediaVerificationsArgs<ExtArgs>
   _count?: boolean | Prisma.DatasetCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dataset"]>
 
@@ -6849,6 +7196,7 @@ export type DatasetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   membershipEvents?: boolean | Prisma.Dataset$membershipEventsArgs<ExtArgs>
   notifications?: boolean | Prisma.Dataset$notificationsArgs<ExtArgs>
   outboxEvents?: boolean | Prisma.Dataset$outboxEventsArgs<ExtArgs>
+  mediaVerifications?: boolean | Prisma.Dataset$mediaVerificationsArgs<ExtArgs>
   _count?: boolean | Prisma.DatasetCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type DatasetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -6885,6 +7233,7 @@ export type $DatasetPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     membershipEvents: Prisma.$DatasetMembershipEventPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     outboxEvents: Prisma.$CollaborationOutboxEventPayload<ExtArgs>[]
+    mediaVerifications: Prisma.$MediaVerificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     /**
@@ -7360,6 +7709,7 @@ export interface Prisma__DatasetClient<T, Null = never, ExtArgs extends runtime.
   membershipEvents<T extends Prisma.Dataset$membershipEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$membershipEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DatasetMembershipEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.Dataset$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   outboxEvents<T extends Prisma.Dataset$outboxEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$outboxEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollaborationOutboxEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mediaVerifications<T extends Prisma.Dataset$mediaVerificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Dataset$mediaVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8263,6 +8613,30 @@ export type Dataset$outboxEventsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.CollaborationOutboxEventScalarFieldEnum | Prisma.CollaborationOutboxEventScalarFieldEnum[]
+}
+
+/**
+ * Dataset.mediaVerifications
+ */
+export type Dataset$mediaVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MediaVerification
+   */
+  select?: Prisma.MediaVerificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MediaVerification
+   */
+  omit?: Prisma.MediaVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaVerificationInclude<ExtArgs> | null
+  where?: Prisma.MediaVerificationWhereInput
+  orderBy?: Prisma.MediaVerificationOrderByWithRelationInput | Prisma.MediaVerificationOrderByWithRelationInput[]
+  cursor?: Prisma.MediaVerificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MediaVerificationScalarFieldEnum | Prisma.MediaVerificationScalarFieldEnum[]
 }
 
 /**

@@ -33,6 +33,9 @@ export const supportedQueueJobTypes = [
   "BULK_EXPORT_SELECTED",
   "COLLABORATION_OUTBOX_DISPATCH",
   "TEXT_SOURCE_PREPARE",
+  // A2 (frozen contract section 3): transport contract only. No processor is registered and no Job of this type is created until the A2 runtime increment; the
+  // worker router refuses delivery of this type while `MEDIA_VERIFICATION_PROCESSOR_REGISTERED` is false.
+  "VERIFY_UPLOADED_MEDIA",
 ] as const;
 export type SupportedQueueJobType = (typeof supportedQueueJobTypes)[number];
 

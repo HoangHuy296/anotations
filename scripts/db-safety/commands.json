@@ -755,5 +755,154 @@
       "tests/dataset-modality/maintenance-check.test.ts"
     ],
     "maintenanceOnly": "release:phase029-backfill-maintenance"
+  },
+  "worker:test:classification-boundary": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import/classification-boundary.test.ts"
+    ]
+  },
+  "worker:test:sealed-namespace": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/queue/sealed-namespace.test.ts"
+    ]
+  },
+  "web:test:upload-verification-boundary": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/direct-upload/upload-verification-boundary.test.ts"
+    ]
+  },
+  "web:test:ai-batch-targets": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/ai/ai-batch-targets.test.ts"
+    ]
+  },
+  "web:test:dataset-ref-contract": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/dataset-ref-contract.test.ts"
+    ]
+  },
+  "web:test:ai-model-catalog": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/ai/ai-model-catalog.test.ts"
+    ]
+  },
+  "worker:test:ai-canonical-endpoint": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/providers/ai/canonical-endpoint.test.ts"
+    ]
+  },
+  "seed:register-aioz-model:yolo26s-coco": {
+    "kind": "seed",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/register-aioz-model.ts",
+      "--apply",
+      "68d7f474-6982-446c-8c5a-121d56d12dc9",
+      "YOLO26s_COCO"
+    ]
+  },
+  "web:test:media-processing-client:vitest": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "tests/workspace/media-processing-client.vitest.spec.ts",
+      "tests/workspace/video-tool-capabilities.vitest.spec.tsx",
+      "--pool=threads",
+      "--environment",
+      "node"
+    ]
+  },
+  "web:test:media-processing-concurrency": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media-processing/ensure-concurrency.test.ts"
+    ]
+  },
+  "web:test:candidate-content-types": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/direct-upload/candidate-content-types.test.ts"
+    ]
+  },
+  "worker:test:media-verification-foundation": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media/classification-policy.test.ts",
+      "tests/queue/media-verification-router-guard.test.ts",
+      "tests/providers/verifier-readiness.test.ts"
+    ]
   }
 }

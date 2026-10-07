@@ -48,6 +48,8 @@ function startsWith(bytes: Buffer, signature: readonly number[]) {
 
 function imageMetadata(bytes: Buffer) {
   if (startsWith(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
+    // A PNG signature without a complete IHDR is malformed media: a controlled rejection, never an out-of-range read.
+    if (bytes.length < 24) throw new UploadVerificationFailure("INVALID_MEDIA");
     return { mimeType: "image/png", width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
   }
   if (startsWith(bytes, [0xff, 0xd8, 0xff])) return { mimeType: "image/jpeg" };

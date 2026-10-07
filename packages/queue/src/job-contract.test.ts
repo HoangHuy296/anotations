@@ -10,3 +10,11 @@ test("media job types are transport-supported without widening the payload", () 
   assert.deepEqual(jobQueuePayloadSchema.parse({ jobId: "job_media_1" }), { jobId: "job_media_1" });
   assert.throws(() => jobQueuePayloadSchema.parse({ jobId: "job_media_1", assetId: "asset_secret" }));
 });
+
+test("VERIFY_UPLOADED_MEDIA is a transport-supported type whose payload is still strictly { jobId }", () => {
+  assert.ok(supportedQueueJobTypes.includes("VERIFY_UPLOADED_MEDIA"));
+  assert.equal(queueNameForJobType("VERIFY_UPLOADED_MEDIA"), "fieldframe-jobs");
+  assert.equal(queueNameForJobType("VERIFY_UPLOADED_MEDIAS"), null);
+  assert.deepEqual(jobQueuePayloadSchema.parse({ jobId: "job_verify_1" }), { jobId: "job_verify_1" });
+  assert.throws(() => jobQueuePayloadSchema.parse({ jobId: "job_verify_1", verificationId: "v" }), "no verification detail may ride in the queue payload");
+});

@@ -498,7 +498,7 @@ LocalFolderManifestItem:
       maxLength: 1024
     contentType:
       type: string
-      enum: [image/png, image/jpeg, image/webp, video/mp4, video/webm, text/plain, text/csv, application/json, audio/wav, audio/mpeg, audio/ogg]
+      enum: [image/png, image/jpeg, image/webp, video/mp4, video/webm, text/plain, text/csv, application/json, audio/wav, audio/mpeg]
     sizeBytes:
       type: integer
       minimum: 1
@@ -588,8 +588,16 @@ LocalFolderImportPreparation:
 
 StartOrAppendLocalFolderImportResponse:
   type: object
-  required: [preparation, replayed, deliveryPending]
+  required: [dataset, preparation, replayed, deliveryPending]
   properties:
+    dataset:
+      type: object
+      description: Authoritative persisted Dataset identity (fresh, replayed and append responses); never an echo of request input.
+      required: [id, modality]
+      properties:
+        id: { type: string }
+        modality: { $ref: './assets.yaml#/Modality' }
+      additionalProperties: false
     preparation: { $ref: '#/LocalFolderImportPreparation' }
     replayed:
       type: boolean

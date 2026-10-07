@@ -234,6 +234,7 @@ export type UserWhereInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventListRelationFilter
   outboxEventsFor?: Prisma.CollaborationOutboxEventListRelationFilter
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptListRelationFilter
+  requestedMediaVerifications?: Prisma.MediaVerificationListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -277,6 +278,7 @@ export type UserOrderByWithRelationInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventOrderByRelationAggregateInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventOrderByRelationAggregateInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptOrderByRelationAggregateInput
+  requestedMediaVerifications?: Prisma.MediaVerificationOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -323,6 +325,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   outboxEventsActed?: Prisma.CollaborationOutboxEventListRelationFilter
   outboxEventsFor?: Prisma.CollaborationOutboxEventListRelationFilter
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptListRelationFilter
+  requestedMediaVerifications?: Prisma.MediaVerificationListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -394,6 +397,7 @@ export type UserCreateInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -437,6 +441,7 @@ export type UserUncheckedCreateInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUpdateInput = {
@@ -480,6 +485,7 @@ export type UserUpdateInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -523,6 +529,7 @@ export type UserUncheckedUpdateInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -1093,6 +1100,20 @@ export type UserUpdateOneRequiredWithoutAiTasksCreatedNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiTasksCreatedInput, Prisma.UserUpdateWithoutAiTasksCreatedInput>, Prisma.UserUncheckedUpdateWithoutAiTasksCreatedInput>
 }
 
+export type UserCreateNestedOneWithoutRequestedMediaVerificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRequestedMediaVerificationsInput, Prisma.UserUncheckedCreateWithoutRequestedMediaVerificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRequestedMediaVerificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutRequestedMediaVerificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutRequestedMediaVerificationsInput, Prisma.UserUncheckedCreateWithoutRequestedMediaVerificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutRequestedMediaVerificationsInput
+  upsert?: Prisma.UserUpsertWithoutRequestedMediaVerificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutRequestedMediaVerificationsInput, Prisma.UserUpdateWithoutRequestedMediaVerificationsInput>, Prisma.UserUncheckedUpdateWithoutRequestedMediaVerificationsInput>
+}
+
 export type UserCreateWithoutSessionsInput = {
   id?: string
   email: string
@@ -1133,6 +1154,7 @@ export type UserCreateWithoutSessionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1175,6 +1197,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1233,6 +1256,7 @@ export type UserUpdateWithoutSessionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1275,6 +1299,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutJobsCanceledInput = {
@@ -1317,6 +1342,7 @@ export type UserCreateWithoutJobsCanceledInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutJobsCanceledInput = {
@@ -1359,6 +1385,7 @@ export type UserUncheckedCreateWithoutJobsCanceledInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutJobsCanceledInput = {
@@ -1406,6 +1433,7 @@ export type UserCreateWithoutJobsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutJobsCreatedInput = {
@@ -1448,6 +1476,7 @@ export type UserUncheckedCreateWithoutJobsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutJobsCreatedInput = {
@@ -1506,6 +1535,7 @@ export type UserUpdateWithoutJobsCanceledInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobsCanceledInput = {
@@ -1548,6 +1578,7 @@ export type UserUncheckedUpdateWithoutJobsCanceledInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutJobsCreatedInput = {
@@ -1601,6 +1632,7 @@ export type UserUpdateWithoutJobsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutJobsCreatedInput = {
@@ -1643,6 +1675,7 @@ export type UserUncheckedUpdateWithoutJobsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutExternalRepositoriesInput = {
@@ -1685,6 +1718,7 @@ export type UserCreateWithoutExternalRepositoriesInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutExternalRepositoriesInput = {
@@ -1727,6 +1761,7 @@ export type UserUncheckedCreateWithoutExternalRepositoriesInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutExternalRepositoriesInput = {
@@ -1785,6 +1820,7 @@ export type UserUpdateWithoutExternalRepositoriesInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExternalRepositoriesInput = {
@@ -1827,6 +1863,7 @@ export type UserUncheckedUpdateWithoutExternalRepositoriesInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutSourceConnectionsInput = {
@@ -1869,6 +1906,7 @@ export type UserCreateWithoutSourceConnectionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutSourceConnectionsInput = {
@@ -1911,6 +1949,7 @@ export type UserUncheckedCreateWithoutSourceConnectionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutSourceConnectionsInput = {
@@ -1969,6 +2008,7 @@ export type UserUpdateWithoutSourceConnectionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSourceConnectionsInput = {
@@ -2011,6 +2051,7 @@ export type UserUncheckedUpdateWithoutSourceConnectionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutOwnedDatasetsInput = {
@@ -2053,6 +2094,7 @@ export type UserCreateWithoutOwnedDatasetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutOwnedDatasetsInput = {
@@ -2095,6 +2137,7 @@ export type UserUncheckedCreateWithoutOwnedDatasetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutOwnedDatasetsInput = {
@@ -2153,6 +2196,7 @@ export type UserUpdateWithoutOwnedDatasetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOwnedDatasetsInput = {
@@ -2195,6 +2239,7 @@ export type UserUncheckedUpdateWithoutOwnedDatasetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutPreparedImportsInput = {
@@ -2237,6 +2282,7 @@ export type UserCreateWithoutPreparedImportsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutPreparedImportsInput = {
@@ -2279,6 +2325,7 @@ export type UserUncheckedCreateWithoutPreparedImportsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutPreparedImportsInput = {
@@ -2337,6 +2384,7 @@ export type UserUpdateWithoutPreparedImportsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPreparedImportsInput = {
@@ -2379,6 +2427,7 @@ export type UserUncheckedUpdateWithoutPreparedImportsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutMembershipsInput = {
@@ -2421,6 +2470,7 @@ export type UserCreateWithoutMembershipsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutMembershipsInput = {
@@ -2463,6 +2513,7 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutMembershipsInput = {
@@ -2521,6 +2572,7 @@ export type UserUpdateWithoutMembershipsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipsInput = {
@@ -2563,6 +2615,7 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutInvitationsReceivedInput = {
@@ -2605,6 +2658,7 @@ export type UserCreateWithoutInvitationsReceivedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsReceivedInput = {
@@ -2647,6 +2701,7 @@ export type UserUncheckedCreateWithoutInvitationsReceivedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsReceivedInput = {
@@ -2694,6 +2749,7 @@ export type UserCreateWithoutInvitationsSentInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutInvitationsSentInput = {
@@ -2736,6 +2792,7 @@ export type UserUncheckedCreateWithoutInvitationsSentInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutInvitationsSentInput = {
@@ -2794,6 +2851,7 @@ export type UserUpdateWithoutInvitationsReceivedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsReceivedInput = {
@@ -2836,6 +2894,7 @@ export type UserUncheckedUpdateWithoutInvitationsReceivedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutInvitationsSentInput = {
@@ -2889,6 +2948,7 @@ export type UserUpdateWithoutInvitationsSentInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitationsSentInput = {
@@ -2931,6 +2991,7 @@ export type UserUncheckedUpdateWithoutInvitationsSentInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutUploadedAssetsInput = {
@@ -2973,6 +3034,7 @@ export type UserCreateWithoutUploadedAssetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutUploadedAssetsInput = {
@@ -3015,6 +3077,7 @@ export type UserUncheckedCreateWithoutUploadedAssetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutUploadedAssetsInput = {
@@ -3062,6 +3125,7 @@ export type UserCreateWithoutAssignedAssetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAssignedAssetsInput = {
@@ -3104,6 +3168,7 @@ export type UserUncheckedCreateWithoutAssignedAssetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAssignedAssetsInput = {
@@ -3162,6 +3227,7 @@ export type UserUpdateWithoutUploadedAssetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUploadedAssetsInput = {
@@ -3204,6 +3270,7 @@ export type UserUncheckedUpdateWithoutUploadedAssetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutAssignedAssetsInput = {
@@ -3257,6 +3324,7 @@ export type UserUpdateWithoutAssignedAssetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignedAssetsInput = {
@@ -3299,6 +3367,7 @@ export type UserUncheckedUpdateWithoutAssignedAssetsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutAssignmentSlotsInput = {
@@ -3341,6 +3410,7 @@ export type UserCreateWithoutAssignmentSlotsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAssignmentSlotsInput = {
@@ -3383,6 +3453,7 @@ export type UserUncheckedCreateWithoutAssignmentSlotsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAssignmentSlotsInput = {
@@ -3430,6 +3501,7 @@ export type UserCreateWithoutAssignmentsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAssignmentsCreatedInput = {
@@ -3472,6 +3544,7 @@ export type UserUncheckedCreateWithoutAssignmentsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAssignmentsCreatedInput = {
@@ -3530,6 +3603,7 @@ export type UserUpdateWithoutAssignmentSlotsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignmentSlotsInput = {
@@ -3572,6 +3646,7 @@ export type UserUncheckedUpdateWithoutAssignmentSlotsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutAssignmentsCreatedInput = {
@@ -3625,6 +3700,7 @@ export type UserUpdateWithoutAssignmentsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignmentsCreatedInput = {
@@ -3667,6 +3743,7 @@ export type UserUncheckedUpdateWithoutAssignmentsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutAssignmentEventsInput = {
@@ -3709,6 +3786,7 @@ export type UserCreateWithoutAssignmentEventsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAssignmentEventsInput = {
@@ -3751,6 +3829,7 @@ export type UserUncheckedCreateWithoutAssignmentEventsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAssignmentEventsInput = {
@@ -3809,6 +3888,7 @@ export type UserUpdateWithoutAssignmentEventsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignmentEventsInput = {
@@ -3851,6 +3931,7 @@ export type UserUncheckedUpdateWithoutAssignmentEventsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutCommentsAuthoredInput = {
@@ -3893,6 +3974,7 @@ export type UserCreateWithoutCommentsAuthoredInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutCommentsAuthoredInput = {
@@ -3935,6 +4017,7 @@ export type UserUncheckedCreateWithoutCommentsAuthoredInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutCommentsAuthoredInput = {
@@ -3982,6 +4065,7 @@ export type UserCreateWithoutCommentsResolvedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutCommentsResolvedInput = {
@@ -4024,6 +4108,7 @@ export type UserUncheckedCreateWithoutCommentsResolvedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutCommentsResolvedInput = {
@@ -4082,6 +4167,7 @@ export type UserUpdateWithoutCommentsAuthoredInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentsAuthoredInput = {
@@ -4124,6 +4210,7 @@ export type UserUncheckedUpdateWithoutCommentsAuthoredInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutCommentsResolvedInput = {
@@ -4177,6 +4264,7 @@ export type UserUpdateWithoutCommentsResolvedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentsResolvedInput = {
@@ -4219,6 +4307,7 @@ export type UserUncheckedUpdateWithoutCommentsResolvedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutCommentMentionsInput = {
@@ -4261,6 +4350,7 @@ export type UserCreateWithoutCommentMentionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutCommentMentionsInput = {
@@ -4303,6 +4393,7 @@ export type UserUncheckedCreateWithoutCommentMentionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutCommentMentionsInput = {
@@ -4361,6 +4452,7 @@ export type UserUpdateWithoutCommentMentionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCommentMentionsInput = {
@@ -4403,6 +4495,7 @@ export type UserUncheckedUpdateWithoutCommentMentionsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -4445,6 +4538,7 @@ export type UserCreateWithoutNotificationsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -4487,6 +4581,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -4534,6 +4629,7 @@ export type UserCreateWithoutNotificationsActedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsActedInput = {
@@ -4576,6 +4672,7 @@ export type UserUncheckedCreateWithoutNotificationsActedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsActedInput = {
@@ -4634,6 +4731,7 @@ export type UserUpdateWithoutNotificationsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -4676,6 +4774,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutNotificationsActedInput = {
@@ -4729,6 +4828,7 @@ export type UserUpdateWithoutNotificationsActedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsActedInput = {
@@ -4771,6 +4871,7 @@ export type UserUncheckedUpdateWithoutNotificationsActedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutMembershipEventsForInput = {
@@ -4813,6 +4914,7 @@ export type UserCreateWithoutMembershipEventsForInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutMembershipEventsForInput = {
@@ -4855,6 +4957,7 @@ export type UserUncheckedCreateWithoutMembershipEventsForInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutMembershipEventsForInput = {
@@ -4902,6 +5005,7 @@ export type UserCreateWithoutMembershipEventsByInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutMembershipEventsByInput = {
@@ -4944,6 +5048,7 @@ export type UserUncheckedCreateWithoutMembershipEventsByInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutMembershipEventsByInput = {
@@ -5002,6 +5107,7 @@ export type UserUpdateWithoutMembershipEventsForInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipEventsForInput = {
@@ -5044,6 +5150,7 @@ export type UserUncheckedUpdateWithoutMembershipEventsForInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutMembershipEventsByInput = {
@@ -5097,6 +5204,7 @@ export type UserUpdateWithoutMembershipEventsByInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembershipEventsByInput = {
@@ -5139,6 +5247,7 @@ export type UserUncheckedUpdateWithoutMembershipEventsByInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutOutboxEventsForInput = {
@@ -5181,6 +5290,7 @@ export type UserCreateWithoutOutboxEventsForInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutOutboxEventsForInput = {
@@ -5223,6 +5333,7 @@ export type UserUncheckedCreateWithoutOutboxEventsForInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutOutboxEventsForInput = {
@@ -5270,6 +5381,7 @@ export type UserCreateWithoutOutboxEventsActedInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutOutboxEventsActedInput = {
@@ -5312,6 +5424,7 @@ export type UserUncheckedCreateWithoutOutboxEventsActedInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutOutboxEventsActedInput = {
@@ -5370,6 +5483,7 @@ export type UserUpdateWithoutOutboxEventsForInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOutboxEventsForInput = {
@@ -5412,6 +5526,7 @@ export type UserUncheckedUpdateWithoutOutboxEventsForInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutOutboxEventsActedInput = {
@@ -5465,6 +5580,7 @@ export type UserUpdateWithoutOutboxEventsActedInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOutboxEventsActedInput = {
@@ -5507,6 +5623,7 @@ export type UserUncheckedUpdateWithoutOutboxEventsActedInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutWorkflowEventsInput = {
@@ -5549,6 +5666,7 @@ export type UserCreateWithoutWorkflowEventsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutWorkflowEventsInput = {
@@ -5591,6 +5709,7 @@ export type UserUncheckedCreateWithoutWorkflowEventsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutWorkflowEventsInput = {
@@ -5649,6 +5768,7 @@ export type UserUpdateWithoutWorkflowEventsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWorkflowEventsInput = {
@@ -5691,6 +5811,7 @@ export type UserUncheckedUpdateWithoutWorkflowEventsInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutAssetLabelsCreatedInput = {
@@ -5733,6 +5854,7 @@ export type UserCreateWithoutAssetLabelsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAssetLabelsCreatedInput = {
@@ -5775,6 +5897,7 @@ export type UserUncheckedCreateWithoutAssetLabelsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAssetLabelsCreatedInput = {
@@ -5833,6 +5956,7 @@ export type UserUpdateWithoutAssetLabelsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssetLabelsCreatedInput = {
@@ -5875,6 +5999,7 @@ export type UserUncheckedUpdateWithoutAssetLabelsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutAnnotationsCreatedInput = {
@@ -5917,6 +6042,7 @@ export type UserCreateWithoutAnnotationsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsCreatedInput = {
@@ -5959,6 +6085,7 @@ export type UserUncheckedCreateWithoutAnnotationsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsCreatedInput = {
@@ -6006,6 +6133,7 @@ export type UserCreateWithoutAnnotationsReviewedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsReviewedInput = {
@@ -6048,6 +6176,7 @@ export type UserUncheckedCreateWithoutAnnotationsReviewedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsReviewedInput = {
@@ -6095,6 +6224,7 @@ export type UserCreateWithoutAnnotationsUpdatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationsUpdatedInput = {
@@ -6137,6 +6267,7 @@ export type UserUncheckedCreateWithoutAnnotationsUpdatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationsUpdatedInput = {
@@ -6195,6 +6326,7 @@ export type UserUpdateWithoutAnnotationsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsCreatedInput = {
@@ -6237,6 +6369,7 @@ export type UserUncheckedUpdateWithoutAnnotationsCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutAnnotationsReviewedInput = {
@@ -6290,6 +6423,7 @@ export type UserUpdateWithoutAnnotationsReviewedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsReviewedInput = {
@@ -6332,6 +6466,7 @@ export type UserUncheckedUpdateWithoutAnnotationsReviewedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUpsertWithoutAnnotationsUpdatedInput = {
@@ -6385,6 +6520,7 @@ export type UserUpdateWithoutAnnotationsUpdatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationsUpdatedInput = {
@@ -6427,6 +6563,7 @@ export type UserUncheckedUpdateWithoutAnnotationsUpdatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutAnnotationMutationReceiptsInput = {
@@ -6469,6 +6606,7 @@ export type UserCreateWithoutAnnotationMutationReceiptsInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAnnotationMutationReceiptsInput = {
@@ -6511,6 +6649,7 @@ export type UserUncheckedCreateWithoutAnnotationMutationReceiptsInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAnnotationMutationReceiptsInput = {
@@ -6569,6 +6708,7 @@ export type UserUpdateWithoutAnnotationMutationReceiptsInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAnnotationMutationReceiptsInput = {
@@ -6611,6 +6751,7 @@ export type UserUncheckedUpdateWithoutAnnotationMutationReceiptsInput = {
   membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutTracksCreatedInput = {
@@ -6653,6 +6794,7 @@ export type UserCreateWithoutTracksCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutTracksCreatedInput = {
@@ -6695,6 +6837,7 @@ export type UserUncheckedCreateWithoutTracksCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutTracksCreatedInput = {
@@ -6753,6 +6896,7 @@ export type UserUpdateWithoutTracksCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTracksCreatedInput = {
@@ -6795,6 +6939,7 @@ export type UserUncheckedUpdateWithoutTracksCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserCreateWithoutAiTasksCreatedInput = {
@@ -6837,6 +6982,7 @@ export type UserCreateWithoutAiTasksCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserUncheckedCreateWithoutAiTasksCreatedInput = {
@@ -6879,6 +7025,7 @@ export type UserUncheckedCreateWithoutAiTasksCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedCreateNestedManyWithoutRequestedByInput
 }
 
 export type UserCreateOrConnectWithoutAiTasksCreatedInput = {
@@ -6937,6 +7084,7 @@ export type UserUpdateWithoutAiTasksCreatedInput = {
   outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
   outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
   annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUpdateManyWithoutRequestedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiTasksCreatedInput = {
@@ -6948,6 +7096,195 @@ export type UserUncheckedUpdateWithoutAiTasksCreatedInput = {
   preferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUncheckedUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUncheckedUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUncheckedUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUncheckedUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUncheckedUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUncheckedUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUncheckedUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUncheckedUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUncheckedUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutRecipientNestedInput
+  annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutActorNestedInput
+  requestedMediaVerifications?: Prisma.MediaVerificationUncheckedUpdateManyWithoutRequestedByNestedInput
+}
+
+export type UserCreateWithoutRequestedMediaVerificationsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  preferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutRecipientInput
+  annotationMutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutRequestedMediaVerificationsInput = {
+  id?: string
+  email: string
+  passwordHash?: string | null
+  name?: string | null
+  role: $Enums.UserRole
+  preferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsCreated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutCreatedByInput
+  annotationsReviewed?: Prisma.AnnotationUncheckedCreateNestedManyWithoutReviewedByInput
+  annotationsUpdated?: Prisma.AnnotationUncheckedCreateNestedManyWithoutUpdatedByInput
+  uploadedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutUploadedByInput
+  assignedAssets?: Prisma.AssetUncheckedCreateNestedManyWithoutAssignedToInput
+  assetLabelsCreated?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutCreatedByInput
+  sessions?: Prisma.AuthSessionUncheckedCreateNestedManyWithoutUserInput
+  ownedDatasets?: Prisma.DatasetUncheckedCreateNestedManyWithoutOwnerInput
+  memberships?: Prisma.DatasetMemberUncheckedCreateNestedManyWithoutUserInput
+  externalRepositories?: Prisma.ExternalRepositoryUncheckedCreateNestedManyWithoutCreatedByInput
+  jobsCanceled?: Prisma.JobUncheckedCreateNestedManyWithoutCanceledByInput
+  jobsCreated?: Prisma.JobUncheckedCreateNestedManyWithoutCreatedByInput
+  preparedImports?: Prisma.PreparedImportUncheckedCreateNestedManyWithoutCreatedByInput
+  sourceConnections?: Prisma.SourceConnectionUncheckedCreateNestedManyWithoutUserInput
+  tracksCreated?: Prisma.VideoObjectTrackUncheckedCreateNestedManyWithoutCreatedByInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutActorInput
+  invitationsReceived?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInviteeInput
+  invitationsSent?: Prisma.DatasetInvitationUncheckedCreateNestedManyWithoutInvitedByInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutUserInput
+  assignmentsCreated?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutActorInput
+  commentsAuthored?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAuthorInput
+  commentsResolved?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutResolvedByInput
+  commentMentions?: Prisma.CommentMentionUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  notificationsActed?: Prisma.NotificationUncheckedCreateNestedManyWithoutActorInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutMemberInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutActorInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutRecipientInput
+  annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutRequestedMediaVerificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutRequestedMediaVerificationsInput, Prisma.UserUncheckedCreateWithoutRequestedMediaVerificationsInput>
+}
+
+export type UserUpsertWithoutRequestedMediaVerificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutRequestedMediaVerificationsInput, Prisma.UserUncheckedUpdateWithoutRequestedMediaVerificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutRequestedMediaVerificationsInput, Prisma.UserUncheckedCreateWithoutRequestedMediaVerificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutRequestedMediaVerificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutRequestedMediaVerificationsInput, Prisma.UserUncheckedUpdateWithoutRequestedMediaVerificationsInput>
+}
+
+export type UserUpdateWithoutRequestedMediaVerificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  preferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUpdateManyWithoutCreatedByNestedInput
+  annotationsCreated?: Prisma.AnnotationUpdateManyWithoutCreatedByNestedInput
+  annotationsReviewed?: Prisma.AnnotationUpdateManyWithoutReviewedByNestedInput
+  annotationsUpdated?: Prisma.AnnotationUpdateManyWithoutUpdatedByNestedInput
+  uploadedAssets?: Prisma.AssetUpdateManyWithoutUploadedByNestedInput
+  assignedAssets?: Prisma.AssetUpdateManyWithoutAssignedToNestedInput
+  assetLabelsCreated?: Prisma.AssetLabelUpdateManyWithoutCreatedByNestedInput
+  sessions?: Prisma.AuthSessionUpdateManyWithoutUserNestedInput
+  ownedDatasets?: Prisma.DatasetUpdateManyWithoutOwnerNestedInput
+  memberships?: Prisma.DatasetMemberUpdateManyWithoutUserNestedInput
+  externalRepositories?: Prisma.ExternalRepositoryUpdateManyWithoutCreatedByNestedInput
+  jobsCanceled?: Prisma.JobUpdateManyWithoutCanceledByNestedInput
+  jobsCreated?: Prisma.JobUpdateManyWithoutCreatedByNestedInput
+  preparedImports?: Prisma.PreparedImportUpdateManyWithoutCreatedByNestedInput
+  sourceConnections?: Prisma.SourceConnectionUpdateManyWithoutUserNestedInput
+  tracksCreated?: Prisma.VideoObjectTrackUpdateManyWithoutCreatedByNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutActorNestedInput
+  invitationsReceived?: Prisma.DatasetInvitationUpdateManyWithoutInviteeNestedInput
+  invitationsSent?: Prisma.DatasetInvitationUpdateManyWithoutInvitedByNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutUserNestedInput
+  assignmentsCreated?: Prisma.AssetAssignmentUpdateManyWithoutAssignedByNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutActorNestedInput
+  commentsAuthored?: Prisma.AssetCommentUpdateManyWithoutAuthorNestedInput
+  commentsResolved?: Prisma.AssetCommentUpdateManyWithoutResolvedByNestedInput
+  commentMentions?: Prisma.CommentMentionUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  notificationsActed?: Prisma.NotificationUpdateManyWithoutActorNestedInput
+  membershipEventsFor?: Prisma.DatasetMembershipEventUpdateManyWithoutMemberNestedInput
+  membershipEventsBy?: Prisma.DatasetMembershipEventUpdateManyWithoutActorNestedInput
+  outboxEventsActed?: Prisma.CollaborationOutboxEventUpdateManyWithoutActorNestedInput
+  outboxEventsFor?: Prisma.CollaborationOutboxEventUpdateManyWithoutRecipientNestedInput
+  annotationMutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutRequestedMediaVerificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  preferences?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aiTasksCreated?: Prisma.AiTaskUncheckedUpdateManyWithoutCreatedByNestedInput
   annotationsCreated?: Prisma.AnnotationUncheckedUpdateManyWithoutCreatedByNestedInput
   annotationsReviewed?: Prisma.AnnotationUncheckedUpdateManyWithoutReviewedByNestedInput
   annotationsUpdated?: Prisma.AnnotationUncheckedUpdateManyWithoutUpdatedByNestedInput
@@ -7019,6 +7356,7 @@ export type UserCountOutputType = {
   outboxEventsActed: number
   outboxEventsFor: number
   annotationMutationReceipts: number
+  requestedMediaVerifications: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -7054,6 +7392,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   outboxEventsActed?: boolean | UserCountOutputTypeCountOutboxEventsActedArgs
   outboxEventsFor?: boolean | UserCountOutputTypeCountOutboxEventsForArgs
   annotationMutationReceipts?: boolean | UserCountOutputTypeCountAnnotationMutationReceiptsArgs
+  requestedMediaVerifications?: boolean | UserCountOutputTypeCountRequestedMediaVerificationsArgs
 }
 
 /**
@@ -7290,6 +7629,13 @@ export type UserCountOutputTypeCountAnnotationMutationReceiptsArgs<ExtArgs exten
   where?: Prisma.AnnotationMutationReceiptWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRequestedMediaVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MediaVerificationWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -7332,6 +7678,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   outboxEventsActed?: boolean | Prisma.User$outboxEventsActedArgs<ExtArgs>
   outboxEventsFor?: boolean | Prisma.User$outboxEventsForArgs<ExtArgs>
   annotationMutationReceipts?: boolean | Prisma.User$annotationMutationReceiptsArgs<ExtArgs>
+  requestedMediaVerifications?: boolean | Prisma.User$requestedMediaVerificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -7402,6 +7749,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   outboxEventsActed?: boolean | Prisma.User$outboxEventsActedArgs<ExtArgs>
   outboxEventsFor?: boolean | Prisma.User$outboxEventsForArgs<ExtArgs>
   annotationMutationReceipts?: boolean | Prisma.User$annotationMutationReceiptsArgs<ExtArgs>
+  requestedMediaVerifications?: boolean | Prisma.User$requestedMediaVerificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -7442,6 +7790,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     outboxEventsActed: Prisma.$CollaborationOutboxEventPayload<ExtArgs>[]
     outboxEventsFor: Prisma.$CollaborationOutboxEventPayload<ExtArgs>[]
     annotationMutationReceipts: Prisma.$AnnotationMutationReceiptPayload<ExtArgs>[]
+    requestedMediaVerifications: Prisma.$MediaVerificationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -7883,6 +8232,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   outboxEventsActed<T extends Prisma.User$outboxEventsActedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$outboxEventsActedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollaborationOutboxEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   outboxEventsFor<T extends Prisma.User$outboxEventsForArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$outboxEventsForArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollaborationOutboxEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   annotationMutationReceipts<T extends Prisma.User$annotationMutationReceiptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$annotationMutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  requestedMediaVerifications<T extends Prisma.User$requestedMediaVerificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$requestedMediaVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9073,6 +9423,30 @@ export type User$annotationMutationReceiptsArgs<ExtArgs extends runtime.Types.Ex
   take?: number
   skip?: number
   distinct?: Prisma.AnnotationMutationReceiptScalarFieldEnum | Prisma.AnnotationMutationReceiptScalarFieldEnum[]
+}
+
+/**
+ * User.requestedMediaVerifications
+ */
+export type User$requestedMediaVerificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MediaVerification
+   */
+  select?: Prisma.MediaVerificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MediaVerification
+   */
+  omit?: Prisma.MediaVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaVerificationInclude<ExtArgs> | null
+  where?: Prisma.MediaVerificationWhereInput
+  orderBy?: Prisma.MediaVerificationOrderByWithRelationInput | Prisma.MediaVerificationOrderByWithRelationInput[]
+  cursor?: Prisma.MediaVerificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MediaVerificationScalarFieldEnum | Prisma.MediaVerificationScalarFieldEnum[]
 }
 
 /**
