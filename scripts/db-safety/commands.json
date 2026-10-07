@@ -891,5 +891,18 @@
       "--test-concurrency=1",
       "tests/direct-upload/candidate-content-types.test.ts"
     ]
+  },
+  "worker:test:media-verification-foundation": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media/classification-policy.test.ts",
+      "tests/queue/media-verification-router-guard.test.ts",
+      "tests/providers/verifier-readiness.test.ts"
+    ]
   }
 }

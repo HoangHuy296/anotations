@@ -1048,6 +1048,40 @@ export type EnumAiTaskStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumAiTaskStatusFilter<$PrismaModel>
 }
 
+export type EnumMediaVerificationSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.MediaVerificationSource | Prisma.EnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.MediaVerificationSource[] | Prisma.ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MediaVerificationSource[] | Prisma.ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMediaVerificationSourceFilter<$PrismaModel> | $Enums.MediaVerificationSource
+}
+
+export type EnumMediaVerificationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MediaVerificationStatus | Prisma.EnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MediaVerificationStatus[] | Prisma.ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MediaVerificationStatus[] | Prisma.ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMediaVerificationStatusFilter<$PrismaModel> | $Enums.MediaVerificationStatus
+}
+
+export type EnumMediaVerificationSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MediaVerificationSource | Prisma.EnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.MediaVerificationSource[] | Prisma.ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MediaVerificationSource[] | Prisma.ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMediaVerificationSourceWithAggregatesFilter<$PrismaModel> | $Enums.MediaVerificationSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMediaVerificationSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMediaVerificationSourceFilter<$PrismaModel>
+}
+
+export type EnumMediaVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MediaVerificationStatus | Prisma.EnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MediaVerificationStatus[] | Prisma.ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MediaVerificationStatus[] | Prisma.ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMediaVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.MediaVerificationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMediaVerificationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMediaVerificationStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -2028,6 +2062,40 @@ export type NestedEnumAiTaskStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumAiTaskStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumAiTaskStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumMediaVerificationSourceFilter<$PrismaModel = never> = {
+  equals?: $Enums.MediaVerificationSource | Prisma.EnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.MediaVerificationSource[] | Prisma.ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MediaVerificationSource[] | Prisma.ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMediaVerificationSourceFilter<$PrismaModel> | $Enums.MediaVerificationSource
+}
+
+export type NestedEnumMediaVerificationStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.MediaVerificationStatus | Prisma.EnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MediaVerificationStatus[] | Prisma.ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MediaVerificationStatus[] | Prisma.ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMediaVerificationStatusFilter<$PrismaModel> | $Enums.MediaVerificationStatus
+}
+
+export type NestedEnumMediaVerificationSourceWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MediaVerificationSource | Prisma.EnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  in?: $Enums.MediaVerificationSource[] | Prisma.ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MediaVerificationSource[] | Prisma.ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMediaVerificationSourceWithAggregatesFilter<$PrismaModel> | $Enums.MediaVerificationSource
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMediaVerificationSourceFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMediaVerificationSourceFilter<$PrismaModel>
+}
+
+export type NestedEnumMediaVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.MediaVerificationStatus | Prisma.EnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.MediaVerificationStatus[] | Prisma.ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.MediaVerificationStatus[] | Prisma.ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumMediaVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.MediaVerificationStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumMediaVerificationStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumMediaVerificationStatusFilter<$PrismaModel>
 }
 
 

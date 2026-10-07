@@ -25,7 +25,12 @@ const PROPOSAL1_SQL = '-- fake migration 24 bytes\n';
 const PROPOSAL2_SQL = '-- fake migration 25 bytes\n';
 const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1];
 const FAKE_CHAIN = [{ ...P1, sha256: sha(PROPOSAL1_SQL) }, { ...P2, sha256: sha(PROPOSAL2_SQL) }];
-const CATALOG = { [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [BACKFILL_SEED_COMMAND]: BACKFILL_SEED_SPEC, [BACKFILL_VERIFY_COMMAND]: BACKFILL_VERIFY_SPEC, [MAINT_SEED_COMMAND]: MAINT_SEED_SPEC, [MAINT_OBJECTS_COMMAND]: MAINT_OBJECTS_SPEC, [MAINT_CHECK_COMMAND]: MAINT_CHECK_SPEC, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
+const REVIEWED_EXTRA_COMMANDS = ['web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation'];
+const assertSupportedSet = (message) => {
+  assert.deepEqual(SUPPORTED_COMMANDS.slice(0, 5), [COMMAND, 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'], message);
+  assert.deepEqual([...SUPPORTED_COMMANDS.slice(5)].sort(), [...REVIEWED_EXTRA_COMMANDS].sort(), 'every additional supported command is a deliberate, reviewed catalog addition');
+};
+const CATALOG = { ...Object.fromEntries(REVIEWED_EXTRA_COMMANDS.map(name => [name, { kind: 'test' }])), [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [BACKFILL_SEED_COMMAND]: BACKFILL_SEED_SPEC, [BACKFILL_VERIFY_COMMAND]: BACKFILL_VERIFY_SPEC, [MAINT_SEED_COMMAND]: MAINT_SEED_SPEC, [MAINT_OBJECTS_COMMAND]: MAINT_OBJECTS_SPEC, [MAINT_CHECK_COMMAND]: MAINT_CHECK_SPEC, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
 
 function fixture() {
   const root = mkdtempSync(join(tmpdir(), 'dt-root-'));
@@ -244,7 +249,7 @@ test('unknown, malformed and injected command names are rejected before any side
       assert.equal(w.stages.length, 0);
     } finally { cleanup(w); }
   }
-  assert.deepEqual(SUPPORTED_COMMANDS, [COMMAND, 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'], 'the supported set is exactly the intended named commands');
+  assertSupportedSet('the supported set is the five original commands plus exactly the reviewed additions');
   assert.throws(() => validateCommand(COMMAND, { [COMMAND]: { kind: 'seed' } }), /COMMAND_NOT_ALLOWLISTED/);
 });
 
@@ -401,6 +406,7 @@ test('the real defaults reuse the committed G1 primitives and keep the applicati
   assert.deepEqual(real.pinned.chain.map(({ order, name, sha256 }) => [order, name, sha256]), [
     [1, '20260930030000_dataset_modality_g2', '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7'],
     [2, '20261006000000_prepared_import_creation_request_hash', 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859'],
+    [3, '20261007000000_media_verification_a2', 'ede5e8c511705521e1e6a18563ebaa602e9c24430946acddbed91340d923df5a'],
   ]);
   assert.equal(real.pinned.baseline, 23);
   assert.ok(real.outBase.includes('verification/focused-runs'));
@@ -556,6 +562,7 @@ test('frozen proposal chain is exactly the two approved migrations, in order, wi
   assert.deepEqual(PROPOSAL_CHAIN, [
     { order: 1, name: '20260930030000_dataset_modality_g2', path: 'prisma/migrations/20260930030000_dataset_modality_g2', sha256: '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7' },
     { order: 2, name: '20261006000000_prepared_import_creation_request_hash', path: 'prisma/migrations/20261006000000_prepared_import_creation_request_hash', sha256: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' },
+    { order: 3, name: '20261007000000_media_verification_a2', path: 'prisma/migrations/20261007000000_media_verification_a2', sha256: 'ede5e8c511705521e1e6a18563ebaa602e9c24430946acddbed91340d923df5a' },
   ]);
   // The real bytes on disk still match the frozen manifest, and the real migration 25 is the single approved statement.
   for (const entry of PROPOSAL_CHAIN) assert.equal(sha(readFileSync(join(guard.root, entry.path, 'migration.sql'))), entry.sha256, entry.name);
@@ -563,9 +570,9 @@ test('frozen proposal chain is exactly the two approved migrations, in order, wi
   assert.deepEqual(readdirSync(join(guard.root, P2.path)), ['migration.sql']);
   // Release-chain promotion: the canonical active chain is the 23 historical migrations followed by exactly these two, in order.
   const active = readdirSync(join(guard.root, 'prisma/migrations'), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();
-  assert.equal(active.length, 25, 'active chain is 25 migrations');
-  assert.deepEqual(active.slice(23), [P1.name, P2.name], 'migrations 24 and 25 are the last two, in order');
-  assert.equal(active.at(-3), '20260930020000_revert_dataset_modality');
+  assert.equal(active.length, 26, 'active chain is 26 migrations after the A2 promotion of M26');
+  assert.deepEqual(active.slice(23), [P1.name, P2.name, '20261007000000_media_verification_a2'], 'migrations 24, 25 and 26 are the last three, in order');
+  assert.equal(active.at(-4), '20260930020000_revert_dataset_modality');
   assert.ok(!existsSync(join(guard.root, 'specs/proposals/phase029-modality/migrations')), 'promoted migrations are not duplicated under proposals');
 });
 
@@ -710,7 +717,7 @@ test('real catalog: the internal fixture entry equals FIXTURE_SPEC, resolves to 
   assert.deepEqual(catalog[FIXTURE_COMMAND], FIXTURE_SPEC);
   assert.equal(catalog[FIXTURE_COMMAND].rehearsalOnly, REHEARSAL_ID);
   assert.ok(!SUPPORTED_COMMANDS.includes(FIXTURE_COMMAND));
-  assert.deepEqual(SUPPORTED_COMMANDS, [COMMAND, 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse']);
+  assertSupportedSet('supported set');
   const dir = join(guard.root, 'apps/web/tests/prepared-import-rehearsal');
   assert.doesNotThrow(() => guard.assertEntryScope(catalog[FIXTURE_COMMAND], join(dir, 'seed-prepared-imports.test.ts'), []));
   for (const other of [join(dir, 'other.test.ts'), join(guard.root, 'apps/web/tests/local-folder-import/prepare-modality-idempotency.test.ts'), join(guard.root, 'apps/web/tests/dataset-metadata/dataset-patch-route.test.ts')]) assert.throws(() => guard.assertEntryScope(catalog[FIXTURE_COMMAND], other, []), /ENTRY_COMMAND_SCOPE_MISMATCH/, other);
@@ -1110,7 +1117,7 @@ test('compat plan failure paths: clientCompatibilityProven stays false, primary 
 test('existing plans are unchanged: the three focused commands stay migration-24-only and the migration-25 rehearsal keeps its own evidence and topology', async () => {
   for (const name of SUPPORTED_COMMANDS) assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 1 });
   assert.equal(resolvePlan(REHEARSAL_ID).kind, 'rehearsal'); assert.equal(resolvePlan(COMPAT_ID).kind, 'compat'); assert.equal(resolvePlan(COMPAT_ID).through, 2);
-  assert.deepEqual(SUPPORTED_COMMANDS, [COMMAND, 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse']);
+  assertSupportedSet('supported set');
   const rehearsal = world();
   try {
     const out = await runFocusedTest(REHEARSAL_ID, rehearsal.deps);
@@ -1125,17 +1132,17 @@ test('existing plans are unchanged: the three focused commands stay migration-24
 });
 
 test('real repository: the compat plan bindings equal the accepted frozen values and verify against the repository, the catalog entry is pinned, and the test is clean', () => {
-  assert.equal(COMPAT_BINDINGS.schemaSha256, '4fe3d96a334e18e504ea14fd5519a1a363fae5ea6d9845355c9d548698eed174');
-  assert.equal(COMPAT_BINDINGS.generatedTreeSha256, 'a750e6b900e00991e818b660f7af67866d1c8ea2ec7774ff2f92f0b40fb54a52');
+  assert.equal(COMPAT_BINDINGS.schemaSha256, '4a85c754d067ae64f0f767d5e6cd49f37c6d5f004865257faef66025d6000993');
+  assert.equal(COMPAT_BINDINGS.generatedTreeSha256, 'b88f7a3dc76134aaf11d4962159bafde47a5904f9eb7e11e0edc4247cd79083c');
   assert.deepEqual(COMPAT_BINDINGS.generatedFiles, {
-    'lib/generated/prisma/internal/class.ts': 'f194d490baba32627a971828abadbcdecb904b0a96ce1e1ca73824019614ec11',
-    'lib/generated/prisma/internal/prismaNamespace.ts': '059962520fae3aa7dbabf3f704e278e0d832c8307101fa8d5f02fa147406866b',
-    'lib/generated/prisma/internal/prismaNamespaceBrowser.ts': '247578b6c493d6fd8a69ff0f55d6beb2a3b943c62091ff1f9459671195f95a47',
+    'lib/generated/prisma/internal/class.ts': '9b6b2597bc60aec0108647f44c869dc1eaa7e9413d5c3e9ae91ae4fdbc2db967',
+    'lib/generated/prisma/internal/prismaNamespace.ts': 'f73d435a34eb6b47093d2dde8bd13ac56af3be81a1abd240c438be466f3ab115',
+    'lib/generated/prisma/internal/prismaNamespaceBrowser.ts': 'fdd5dc8da705cc502370c4785226175f7b1fcf08b96a9305c3bff73ccdb2d20b',
     'lib/generated/prisma/models/PreparedImport.ts': 'd48ac861e7e8d6020d614a6faf706f9f4a146447c0599faabe798a02251af45d',
     'lib/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node': 'a2924eab1c78a0a7bb67edac5738939fa10589ef073af5542f53812a22e4a7d8',
   });
   assert.doesNotThrow(() => verifyCompatBindings(realDeps()));
-  assert.deepEqual(PROPOSAL_CHAIN.map(entry => entry.sha256), ['13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7', 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859']);
+  assert.deepEqual(PROPOSAL_CHAIN.map(entry => entry.sha256), ['13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7', 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859', 'ede5e8c511705521e1e6a18563ebaa602e9c24430946acddbed91340d923df5a']);
   const catalog = guard.read(join(guard.root, 'scripts/db-safety/commands.json'));
   assert.deepEqual(catalog[COMPAT_COMMAND], COMPAT_SPEC); assert.equal(catalog[COMPAT_COMMAND].compatOnly, COMPAT_ID); assert.ok(!SUPPORTED_COMMANDS.includes(COMPAT_COMMAND));
   const dir = join(guard.root, 'apps/web/tests/prepared-import-compat');
@@ -1540,7 +1547,7 @@ test('release lifecycle: 23 -> seed -> 24 -> fixture -> 25 -> drift/compat/contr
     assert.equal(new Set(results.receiptTopology.map(entry => entry.receiptId)).size, 9);
     const summary = JSON.parse(readFileSync(join(out.runDir, 'release-summary.json'), 'utf8'));
     assert.deepEqual(summary.schemaEntries, [1829, 1841, 1842]); assert.equal(summary.historicalMigrations, 23); assert.equal(summary.activeChainMigrations, 25); assert.equal(summary.migrationChecksums.length, 25);
-    assert.deepEqual(summary.migrationChecksums.slice(23).map(row => [row.name, row.checksum]), PROPOSAL_CHAIN.map((entry, index) => [entry.name, FAKE_CHAIN[index].sha256]));
+    assert.deepEqual(summary.migrationChecksums.slice(23).map(row => [row.name, row.checksum]), PROPOSAL_CHAIN.slice(0, 2).map((entry, index) => [entry.name, FAKE_CHAIN[index].sha256]));
     for (const name of ['release-m24-assertions.json', 'release-m25-assertions.json', 'release-seeded-datasets.json', 'release-m24-datasets.json', 'release-baseline-schema-count.json']) assert.ok(existsSync(join(out.runDir, name)), name);
     expectCleanedAndVerified(w, out);
     assert.ok(existsSync(join(w.root, 'prisma/migrations', P1.name)) && existsSync(join(w.root, 'prisma/migrations', P2.name)), 'canonical chain untouched');

@@ -143,7 +143,7 @@ test('audit: the repository equals the committed allowlist (a new write site, a 
   assert.deepEqual(result.differences, []);
   const report = buildReport();
   assert.deepEqual(report.webIndirect, ['apps/worker/src/queue/minio-orphan-scanner.ts'], 'the web → worker cleanup import is found');
-  assert.deepEqual(report.verifierEnvModules, ['apps/worker/src/providers/sealed-namespace.ts'], 'MINIO_VERIFIER_* is referenced by exactly one module');
+  assert.deepEqual(report.verifierEnvModules, ['apps/worker/src/providers/sealed-namespace.ts', 'packages/domain/src/provider-config.ts'], 'MINIO_VERIFIER_* is referenced by exactly these two modules');
   const web = report.sites.filter(site => site.file.startsWith('apps/web/src/'));
   assert.deepEqual(web.map(site => `${site.file}|${site.method}`).sort(), ['apps/web/src/app/api/assets/presigned-upload/route.ts|presignedPostPolicy', 'apps/web/src/lib/asset-upload.ts|removeObject', 'apps/web/src/lib/imports/local-folder-upload.ts|presignedPostPolicy']);
   // mutation: a changed allowlist is detected in both directions

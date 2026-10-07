@@ -631,6 +631,7 @@ export type AssetWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   outboxEvents?: Prisma.CollaborationOutboxEventListRelationFilter
   mutationReceipts?: Prisma.AnnotationMutationReceiptListRelationFilter
+  mediaVerification?: Prisma.XOR<Prisma.MediaVerificationNullableScalarRelationFilter, Prisma.MediaVerificationWhereInput> | null
 }
 
 export type AssetOrderByWithRelationInput = {
@@ -705,6 +706,7 @@ export type AssetOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   outboxEvents?: Prisma.CollaborationOutboxEventOrderByRelationAggregateInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptOrderByRelationAggregateInput
+  mediaVerification?: Prisma.MediaVerificationOrderByWithRelationInput
 }
 
 export type AssetWhereUniqueInput = Prisma.AtLeast<{
@@ -785,6 +787,7 @@ export type AssetWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   outboxEvents?: Prisma.CollaborationOutboxEventListRelationFilter
   mutationReceipts?: Prisma.AnnotationMutationReceiptListRelationFilter
+  mediaVerification?: Prisma.XOR<Prisma.MediaVerificationNullableScalarRelationFilter, Prisma.MediaVerificationWhereInput> | null
 }, "id" | "storageProvider_storageBucket_storageKey" | "cacheProvider_cacheBucket_cacheKey" | "datasetId_sourceFingerprint">
 
 export type AssetOrderByWithAggregationInput = {
@@ -973,6 +976,7 @@ export type AssetCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateInput = {
@@ -1043,6 +1047,7 @@ export type AssetUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUpdateInput = {
@@ -1113,6 +1118,7 @@ export type AssetUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateInput = {
@@ -1183,6 +1189,7 @@ export type AssetUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateManyInput = {
@@ -1970,6 +1977,22 @@ export type AssetUpdateOneRequiredWithoutAudioAssetNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutAudioAssetInput, Prisma.AssetUpdateWithoutAudioAssetInput>, Prisma.AssetUncheckedUpdateWithoutAudioAssetInput>
 }
 
+export type AssetCreateNestedOneWithoutMediaVerificationInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutMediaVerificationInput, Prisma.AssetUncheckedCreateWithoutMediaVerificationInput>
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutMediaVerificationInput
+  connect?: Prisma.AssetWhereUniqueInput
+}
+
+export type AssetUpdateOneWithoutMediaVerificationNestedInput = {
+  create?: Prisma.XOR<Prisma.AssetCreateWithoutMediaVerificationInput, Prisma.AssetUncheckedCreateWithoutMediaVerificationInput>
+  connectOrCreate?: Prisma.AssetCreateOrConnectWithoutMediaVerificationInput
+  upsert?: Prisma.AssetUpsertWithoutMediaVerificationInput
+  disconnect?: Prisma.AssetWhereInput | boolean
+  delete?: Prisma.AssetWhereInput | boolean
+  connect?: Prisma.AssetWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssetUpdateToOneWithWhereWithoutMediaVerificationInput, Prisma.AssetUpdateWithoutMediaVerificationInput>, Prisma.AssetUncheckedUpdateWithoutMediaVerificationInput>
+}
+
 export type AssetCreateWithoutUploadedByInput = {
   id?: string
   modality: $Enums.Modality
@@ -2037,6 +2060,7 @@ export type AssetCreateWithoutUploadedByInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutUploadedByInput = {
@@ -2106,6 +2130,7 @@ export type AssetUncheckedCreateWithoutUploadedByInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutUploadedByInput = {
@@ -2185,6 +2210,7 @@ export type AssetCreateWithoutAssignedToInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutAssignedToInput = {
@@ -2254,6 +2280,7 @@ export type AssetUncheckedCreateWithoutAssignedToInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutAssignedToInput = {
@@ -2423,6 +2450,7 @@ export type AssetCreateWithoutExternalRepositoryInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutExternalRepositoryInput = {
@@ -2492,6 +2520,7 @@ export type AssetUncheckedCreateWithoutExternalRepositoryInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutExternalRepositoryInput = {
@@ -2587,6 +2616,7 @@ export type AssetCreateWithoutDatasetInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutDatasetInput = {
@@ -2656,6 +2686,7 @@ export type AssetUncheckedCreateWithoutDatasetInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutDatasetInput = {
@@ -2751,6 +2782,7 @@ export type AssetCreateWithoutPreparedImportItemInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutPreparedImportItemInput = {
@@ -2820,6 +2852,7 @@ export type AssetUncheckedCreateWithoutPreparedImportItemInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutPreparedImportItemInput = {
@@ -2905,6 +2938,7 @@ export type AssetUpdateWithoutPreparedImportItemInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutPreparedImportItemInput = {
@@ -2974,6 +3008,7 @@ export type AssetUncheckedUpdateWithoutPreparedImportItemInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutAssignmentSlotsInput = {
@@ -3043,6 +3078,7 @@ export type AssetCreateWithoutAssignmentSlotsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutAssignmentSlotsInput = {
@@ -3112,6 +3148,7 @@ export type AssetUncheckedCreateWithoutAssignmentSlotsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutAssignmentSlotsInput = {
@@ -3197,6 +3234,7 @@ export type AssetUpdateWithoutAssignmentSlotsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutAssignmentSlotsInput = {
@@ -3266,6 +3304,7 @@ export type AssetUncheckedUpdateWithoutAssignmentSlotsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutAssignmentEventsInput = {
@@ -3335,6 +3374,7 @@ export type AssetCreateWithoutAssignmentEventsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutAssignmentEventsInput = {
@@ -3404,6 +3444,7 @@ export type AssetUncheckedCreateWithoutAssignmentEventsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutAssignmentEventsInput = {
@@ -3489,6 +3530,7 @@ export type AssetUpdateWithoutAssignmentEventsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutAssignmentEventsInput = {
@@ -3558,6 +3600,7 @@ export type AssetUncheckedUpdateWithoutAssignmentEventsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutCommentsInput = {
@@ -3627,6 +3670,7 @@ export type AssetCreateWithoutCommentsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutCommentsInput = {
@@ -3696,6 +3740,7 @@ export type AssetUncheckedCreateWithoutCommentsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutCommentsInput = {
@@ -3781,6 +3826,7 @@ export type AssetUpdateWithoutCommentsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutCommentsInput = {
@@ -3850,6 +3896,7 @@ export type AssetUncheckedUpdateWithoutCommentsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutNotificationsInput = {
@@ -3919,6 +3966,7 @@ export type AssetCreateWithoutNotificationsInput = {
   comments?: Prisma.AssetCommentCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutNotificationsInput = {
@@ -3988,6 +4036,7 @@ export type AssetUncheckedCreateWithoutNotificationsInput = {
   comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutNotificationsInput = {
@@ -4073,6 +4122,7 @@ export type AssetUpdateWithoutNotificationsInput = {
   comments?: Prisma.AssetCommentUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutNotificationsInput = {
@@ -4142,6 +4192,7 @@ export type AssetUncheckedUpdateWithoutNotificationsInput = {
   comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutOutboxEventsInput = {
@@ -4211,6 +4262,7 @@ export type AssetCreateWithoutOutboxEventsInput = {
   comments?: Prisma.AssetCommentCreateNestedManyWithoutAssetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutOutboxEventsInput = {
@@ -4280,6 +4332,7 @@ export type AssetUncheckedCreateWithoutOutboxEventsInput = {
   comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAssetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutOutboxEventsInput = {
@@ -4365,6 +4418,7 @@ export type AssetUpdateWithoutOutboxEventsInput = {
   comments?: Prisma.AssetCommentUpdateManyWithoutAssetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutOutboxEventsInput = {
@@ -4434,6 +4488,7 @@ export type AssetUncheckedUpdateWithoutOutboxEventsInput = {
   comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutAssetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutWorkflowEventsInput = {
@@ -4503,6 +4558,7 @@ export type AssetCreateWithoutWorkflowEventsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutWorkflowEventsInput = {
@@ -4572,6 +4628,7 @@ export type AssetUncheckedCreateWithoutWorkflowEventsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutWorkflowEventsInput = {
@@ -4657,6 +4714,7 @@ export type AssetUpdateWithoutWorkflowEventsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutWorkflowEventsInput = {
@@ -4726,6 +4784,7 @@ export type AssetUncheckedUpdateWithoutWorkflowEventsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutAssetLabelsInput = {
@@ -4795,6 +4854,7 @@ export type AssetCreateWithoutAssetLabelsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutAssetLabelsInput = {
@@ -4864,6 +4924,7 @@ export type AssetUncheckedCreateWithoutAssetLabelsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutAssetLabelsInput = {
@@ -4949,6 +5010,7 @@ export type AssetUpdateWithoutAssetLabelsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutAssetLabelsInput = {
@@ -5018,6 +5080,7 @@ export type AssetUncheckedUpdateWithoutAssetLabelsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutVersionsInput = {
@@ -5087,6 +5150,7 @@ export type AssetCreateWithoutVersionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutVersionsInput = {
@@ -5156,6 +5220,7 @@ export type AssetUncheckedCreateWithoutVersionsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutVersionsInput = {
@@ -5241,6 +5306,7 @@ export type AssetUpdateWithoutVersionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutVersionsInput = {
@@ -5310,6 +5376,7 @@ export type AssetUncheckedUpdateWithoutVersionsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutAnnotationsInput = {
@@ -5379,6 +5446,7 @@ export type AssetCreateWithoutAnnotationsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutAnnotationsInput = {
@@ -5448,6 +5516,7 @@ export type AssetUncheckedCreateWithoutAnnotationsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutAnnotationsInput = {
@@ -5533,6 +5602,7 @@ export type AssetUpdateWithoutAnnotationsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutAnnotationsInput = {
@@ -5602,6 +5672,7 @@ export type AssetUncheckedUpdateWithoutAnnotationsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutMutationReceiptsInput = {
@@ -5671,6 +5742,7 @@ export type AssetCreateWithoutMutationReceiptsInput = {
   comments?: Prisma.AssetCommentCreateNestedManyWithoutAssetInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutMutationReceiptsInput = {
@@ -5740,6 +5812,7 @@ export type AssetUncheckedCreateWithoutMutationReceiptsInput = {
   comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAssetInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutMutationReceiptsInput = {
@@ -5825,6 +5898,7 @@ export type AssetUpdateWithoutMutationReceiptsInput = {
   comments?: Prisma.AssetCommentUpdateManyWithoutAssetNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutMutationReceiptsInput = {
@@ -5894,6 +5968,7 @@ export type AssetUncheckedUpdateWithoutMutationReceiptsInput = {
   comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutAssetNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutImageAssetInput = {
@@ -5963,6 +6038,7 @@ export type AssetCreateWithoutImageAssetInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutImageAssetInput = {
@@ -6032,6 +6108,7 @@ export type AssetUncheckedCreateWithoutImageAssetInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutImageAssetInput = {
@@ -6117,6 +6194,7 @@ export type AssetUpdateWithoutImageAssetInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutImageAssetInput = {
@@ -6186,6 +6264,7 @@ export type AssetUncheckedUpdateWithoutImageAssetInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutVideoAssetInput = {
@@ -6255,6 +6334,7 @@ export type AssetCreateWithoutVideoAssetInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutVideoAssetInput = {
@@ -6324,6 +6404,7 @@ export type AssetUncheckedCreateWithoutVideoAssetInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutVideoAssetInput = {
@@ -6409,6 +6490,7 @@ export type AssetUpdateWithoutVideoAssetInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutVideoAssetInput = {
@@ -6478,6 +6560,7 @@ export type AssetUncheckedUpdateWithoutVideoAssetInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutTextAssetInput = {
@@ -6547,6 +6630,7 @@ export type AssetCreateWithoutTextAssetInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutTextAssetInput = {
@@ -6616,6 +6700,7 @@ export type AssetUncheckedCreateWithoutTextAssetInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutTextAssetInput = {
@@ -6701,6 +6786,7 @@ export type AssetUpdateWithoutTextAssetInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutTextAssetInput = {
@@ -6770,6 +6856,7 @@ export type AssetUncheckedUpdateWithoutTextAssetInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetCreateWithoutAudioAssetInput = {
@@ -6839,6 +6926,7 @@ export type AssetCreateWithoutAudioAssetInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationCreateNestedOneWithoutAssetInput
 }
 
 export type AssetUncheckedCreateWithoutAudioAssetInput = {
@@ -6908,6 +6996,7 @@ export type AssetUncheckedCreateWithoutAudioAssetInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedCreateNestedOneWithoutAssetInput
 }
 
 export type AssetCreateOrConnectWithoutAudioAssetInput = {
@@ -6993,6 +7082,7 @@ export type AssetUpdateWithoutAudioAssetInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutAudioAssetInput = {
@@ -7050,6 +7140,303 @@ export type AssetUncheckedUpdateWithoutAudioAssetInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
   versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
+  imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
+  preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
+  videoAsset?: Prisma.VideoAssetUncheckedUpdateOneWithoutAssetNestedInput
+  assetLabels?: Prisma.AssetLabelUncheckedUpdateManyWithoutAssetNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedUpdateManyWithoutAssetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedUpdateManyWithoutAssetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedUpdateManyWithoutAssetNestedInput
+  comments?: Prisma.AssetCommentUncheckedUpdateManyWithoutAssetNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
+  mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
+}
+
+export type AssetCreateWithoutMediaVerificationInput = {
+  id?: string
+  modality: $Enums.Modality
+  filename: string
+  originalFilename?: string | null
+  mimeType: string
+  sizeBytes?: bigint | number | null
+  width?: number | null
+  height?: number | null
+  durationMs?: number | null
+  textLength?: number | null
+  sourceMode?: $Enums.DatasetSourceMode
+  storageProvider?: $Enums.StorageProvider | null
+  storageBucket?: string | null
+  storageKey?: string | null
+  checksum?: string | null
+  sourceProvider?: $Enums.RepoProvider | null
+  sourceRef?: string | null
+  sourceRevision?: string | null
+  sourcePath?: string | null
+  relativePath?: string | null
+  sourceFileSha?: string | null
+  sourceBlobSha?: string | null
+  sourceLfsOid?: string | null
+  sourceEtag?: string | null
+  sourceUrl?: string | null
+  sourceFingerprint: string
+  cacheStatus?: $Enums.CacheStatus
+  cacheProvider?: $Enums.StorageProvider | null
+  cacheBucket?: string | null
+  cacheKey?: string | null
+  cacheChecksum?: string | null
+  cachedAt?: Date | string | null
+  cacheExpiresAt?: Date | string | null
+  cacheError?: string | null
+  currentVersionId?: string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  lastSyncedAt?: Date | string | null
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.AssetStatus
+  batchIndex?: number
+  orderIndex?: number
+  description?: string | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  revision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  annotations?: Prisma.AnnotationCreateNestedManyWithoutAssetInput
+  dataset: Prisma.DatasetCreateNestedOneWithoutAssetsInput
+  externalRepository?: Prisma.ExternalRepositoryCreateNestedOneWithoutAssetsInput
+  uploadedBy?: Prisma.UserCreateNestedOneWithoutUploadedAssetsInput
+  assignedTo?: Prisma.UserCreateNestedOneWithoutAssignedAssetsInput
+  versions?: Prisma.AssetVersionCreateNestedManyWithoutAssetInput
+  audioAsset?: Prisma.AudioAssetCreateNestedOneWithoutAssetInput
+  imageAsset?: Prisma.ImageAssetCreateNestedOneWithoutAssetInput
+  preparedImportItem?: Prisma.PreparedImportItemCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetCreateNestedOneWithoutAssetInput
+  videoAsset?: Prisma.VideoAssetCreateNestedOneWithoutAssetInput
+  assetLabels?: Prisma.AssetLabelCreateNestedManyWithoutAssetInput
+  workflowEvents?: Prisma.AssetWorkflowEventCreateNestedManyWithoutAssetInput
+  assignmentSlots?: Prisma.AssetAssignmentCreateNestedManyWithoutAssetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventCreateNestedManyWithoutAssetInput
+  comments?: Prisma.AssetCommentCreateNestedManyWithoutAssetInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutAssetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventCreateNestedManyWithoutAssetInput
+  mutationReceipts?: Prisma.AnnotationMutationReceiptCreateNestedManyWithoutAssetInput
+}
+
+export type AssetUncheckedCreateWithoutMediaVerificationInput = {
+  id?: string
+  datasetId: string
+  uploadedById?: string | null
+  assignedToId?: string | null
+  modality: $Enums.Modality
+  filename: string
+  originalFilename?: string | null
+  mimeType: string
+  sizeBytes?: bigint | number | null
+  width?: number | null
+  height?: number | null
+  durationMs?: number | null
+  textLength?: number | null
+  sourceMode?: $Enums.DatasetSourceMode
+  storageProvider?: $Enums.StorageProvider | null
+  storageBucket?: string | null
+  storageKey?: string | null
+  checksum?: string | null
+  externalRepositoryId?: string | null
+  sourceProvider?: $Enums.RepoProvider | null
+  sourceRef?: string | null
+  sourceRevision?: string | null
+  sourcePath?: string | null
+  relativePath?: string | null
+  sourceFileSha?: string | null
+  sourceBlobSha?: string | null
+  sourceLfsOid?: string | null
+  sourceEtag?: string | null
+  sourceUrl?: string | null
+  sourceFingerprint: string
+  cacheStatus?: $Enums.CacheStatus
+  cacheProvider?: $Enums.StorageProvider | null
+  cacheBucket?: string | null
+  cacheKey?: string | null
+  cacheChecksum?: string | null
+  cachedAt?: Date | string | null
+  cacheExpiresAt?: Date | string | null
+  cacheError?: string | null
+  currentVersionId?: string | null
+  syncStatus?: $Enums.AssetSyncStatus
+  lastSyncedAt?: Date | string | null
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: $Enums.AssetStatus
+  batchIndex?: number
+  orderIndex?: number
+  description?: string | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  revision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  archivedAt?: Date | string | null
+  deletedAt?: Date | string | null
+  annotations?: Prisma.AnnotationUncheckedCreateNestedManyWithoutAssetInput
+  versions?: Prisma.AssetVersionUncheckedCreateNestedManyWithoutAssetInput
+  audioAsset?: Prisma.AudioAssetUncheckedCreateNestedOneWithoutAssetInput
+  imageAsset?: Prisma.ImageAssetUncheckedCreateNestedOneWithoutAssetInput
+  preparedImportItem?: Prisma.PreparedImportItemUncheckedCreateNestedOneWithoutAssetInput
+  textAsset?: Prisma.TextAssetUncheckedCreateNestedOneWithoutAssetInput
+  videoAsset?: Prisma.VideoAssetUncheckedCreateNestedOneWithoutAssetInput
+  assetLabels?: Prisma.AssetLabelUncheckedCreateNestedManyWithoutAssetInput
+  workflowEvents?: Prisma.AssetWorkflowEventUncheckedCreateNestedManyWithoutAssetInput
+  assignmentSlots?: Prisma.AssetAssignmentUncheckedCreateNestedManyWithoutAssetInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUncheckedCreateNestedManyWithoutAssetInput
+  comments?: Prisma.AssetCommentUncheckedCreateNestedManyWithoutAssetInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutAssetInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUncheckedCreateNestedManyWithoutAssetInput
+  mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedCreateNestedManyWithoutAssetInput
+}
+
+export type AssetCreateOrConnectWithoutMediaVerificationInput = {
+  where: Prisma.AssetWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssetCreateWithoutMediaVerificationInput, Prisma.AssetUncheckedCreateWithoutMediaVerificationInput>
+}
+
+export type AssetUpsertWithoutMediaVerificationInput = {
+  update: Prisma.XOR<Prisma.AssetUpdateWithoutMediaVerificationInput, Prisma.AssetUncheckedUpdateWithoutMediaVerificationInput>
+  create: Prisma.XOR<Prisma.AssetCreateWithoutMediaVerificationInput, Prisma.AssetUncheckedCreateWithoutMediaVerificationInput>
+  where?: Prisma.AssetWhereInput
+}
+
+export type AssetUpdateToOneWithWhereWithoutMediaVerificationInput = {
+  where?: Prisma.AssetWhereInput
+  data: Prisma.XOR<Prisma.AssetUpdateWithoutMediaVerificationInput, Prisma.AssetUncheckedUpdateWithoutMediaVerificationInput>
+}
+
+export type AssetUpdateWithoutMediaVerificationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  textLength?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  storageProvider?: Prisma.NullableEnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relativePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceBlobSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceLfsOid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceEtag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  cacheStatus?: Prisma.EnumCacheStatusFieldUpdateOperationsInput | $Enums.CacheStatus
+  cacheProvider?: Prisma.NullableEnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider | null
+  cacheBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cacheKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cacheChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cachedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cacheExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cacheError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumAssetStatusFieldUpdateOperationsInput | $Enums.AssetStatus
+  batchIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  annotations?: Prisma.AnnotationUpdateManyWithoutAssetNestedInput
+  dataset?: Prisma.DatasetUpdateOneRequiredWithoutAssetsNestedInput
+  externalRepository?: Prisma.ExternalRepositoryUpdateOneWithoutAssetsNestedInput
+  uploadedBy?: Prisma.UserUpdateOneWithoutUploadedAssetsNestedInput
+  assignedTo?: Prisma.UserUpdateOneWithoutAssignedAssetsNestedInput
+  versions?: Prisma.AssetVersionUpdateManyWithoutAssetNestedInput
+  audioAsset?: Prisma.AudioAssetUpdateOneWithoutAssetNestedInput
+  imageAsset?: Prisma.ImageAssetUpdateOneWithoutAssetNestedInput
+  preparedImportItem?: Prisma.PreparedImportItemUpdateOneWithoutAssetNestedInput
+  textAsset?: Prisma.TextAssetUpdateOneWithoutAssetNestedInput
+  videoAsset?: Prisma.VideoAssetUpdateOneWithoutAssetNestedInput
+  assetLabels?: Prisma.AssetLabelUpdateManyWithoutAssetNestedInput
+  workflowEvents?: Prisma.AssetWorkflowEventUpdateManyWithoutAssetNestedInput
+  assignmentSlots?: Prisma.AssetAssignmentUpdateManyWithoutAssetNestedInput
+  assignmentEvents?: Prisma.AssetAssignmentEventUpdateManyWithoutAssetNestedInput
+  comments?: Prisma.AssetCommentUpdateManyWithoutAssetNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
+  outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
+  mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+}
+
+export type AssetUncheckedUpdateWithoutMediaVerificationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  datasetId?: Prisma.StringFieldUpdateOperationsInput | string
+  uploadedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  modality?: Prisma.EnumModalityFieldUpdateOperationsInput | $Enums.Modality
+  filename?: Prisma.StringFieldUpdateOperationsInput | string
+  originalFilename?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  sizeBytes?: Prisma.NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+  width?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  height?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  durationMs?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  textLength?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  sourceMode?: Prisma.EnumDatasetSourceModeFieldUpdateOperationsInput | $Enums.DatasetSourceMode
+  storageProvider?: Prisma.NullableEnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider | null
+  storageBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  storageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  checksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalRepositoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceProvider?: Prisma.NullableEnumRepoProviderFieldUpdateOperationsInput | $Enums.RepoProvider | null
+  sourceRef?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceRevision?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourcePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relativePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceFileSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceBlobSha?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceLfsOid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceEtag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceFingerprint?: Prisma.StringFieldUpdateOperationsInput | string
+  cacheStatus?: Prisma.EnumCacheStatusFieldUpdateOperationsInput | $Enums.CacheStatus
+  cacheProvider?: Prisma.NullableEnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider | null
+  cacheBucket?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cacheKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cacheChecksum?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cachedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cacheExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cacheError?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  currentVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  syncStatus?: Prisma.EnumAssetSyncStatusFieldUpdateOperationsInput | $Enums.AssetSyncStatus
+  lastSyncedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  syncSummary?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  status?: Prisma.EnumAssetStatusFieldUpdateOperationsInput | $Enums.AssetStatus
+  batchIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  metadata?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  archivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  annotations?: Prisma.AnnotationUncheckedUpdateManyWithoutAssetNestedInput
+  versions?: Prisma.AssetVersionUncheckedUpdateManyWithoutAssetNestedInput
+  audioAsset?: Prisma.AudioAssetUncheckedUpdateOneWithoutAssetNestedInput
   imageAsset?: Prisma.ImageAssetUncheckedUpdateOneWithoutAssetNestedInput
   preparedImportItem?: Prisma.PreparedImportItemUncheckedUpdateOneWithoutAssetNestedInput
   textAsset?: Prisma.TextAssetUncheckedUpdateOneWithoutAssetNestedInput
@@ -7239,6 +7626,7 @@ export type AssetUpdateWithoutUploadedByInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutUploadedByInput = {
@@ -7308,6 +7696,7 @@ export type AssetUncheckedUpdateWithoutUploadedByInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutUploadedByInput = {
@@ -7431,6 +7820,7 @@ export type AssetUpdateWithoutAssignedToInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutAssignedToInput = {
@@ -7500,6 +7890,7 @@ export type AssetUncheckedUpdateWithoutAssignedToInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutAssignedToInput = {
@@ -7677,6 +8068,7 @@ export type AssetUpdateWithoutExternalRepositoryInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutExternalRepositoryInput = {
@@ -7746,6 +8138,7 @@ export type AssetUncheckedUpdateWithoutExternalRepositoryInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutExternalRepositoryInput = {
@@ -7923,6 +8316,7 @@ export type AssetUpdateWithoutDatasetInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateWithoutDatasetInput = {
@@ -7992,6 +8386,7 @@ export type AssetUncheckedUpdateWithoutDatasetInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutAssetNestedInput
   outboxEvents?: Prisma.CollaborationOutboxEventUncheckedUpdateManyWithoutAssetNestedInput
   mutationReceipts?: Prisma.AnnotationMutationReceiptUncheckedUpdateManyWithoutAssetNestedInput
+  mediaVerification?: Prisma.MediaVerificationUncheckedUpdateOneWithoutAssetNestedInput
 }
 
 export type AssetUncheckedUpdateManyWithoutDatasetInput = {
@@ -8232,6 +8627,7 @@ export type AssetSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.Asset$notificationsArgs<ExtArgs>
   outboxEvents?: boolean | Prisma.Asset$outboxEventsArgs<ExtArgs>
   mutationReceipts?: boolean | Prisma.Asset$mutationReceiptsArgs<ExtArgs>
+  mediaVerification?: boolean | Prisma.Asset$mediaVerificationArgs<ExtArgs>
   _count?: boolean | Prisma.AssetCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asset"]>
 
@@ -8429,6 +8825,7 @@ export type AssetInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   notifications?: boolean | Prisma.Asset$notificationsArgs<ExtArgs>
   outboxEvents?: boolean | Prisma.Asset$outboxEventsArgs<ExtArgs>
   mutationReceipts?: boolean | Prisma.Asset$mutationReceiptsArgs<ExtArgs>
+  mediaVerification?: boolean | Prisma.Asset$mediaVerificationArgs<ExtArgs>
   _count?: boolean | Prisma.AssetCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssetIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -8466,6 +8863,7 @@ export type $AssetPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     outboxEvents: Prisma.$CollaborationOutboxEventPayload<ExtArgs>[]
     mutationReceipts: Prisma.$AnnotationMutationReceiptPayload<ExtArgs>[]
+    mediaVerification: Prisma.$MediaVerificationPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -8947,6 +9345,7 @@ export interface Prisma__AssetClient<T, Null = never, ExtArgs extends runtime.Ty
   notifications<T extends Prisma.Asset$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   outboxEvents<T extends Prisma.Asset$outboxEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$outboxEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollaborationOutboxEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mutationReceipts<T extends Prisma.Asset$mutationReceiptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$mutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnotationMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mediaVerification<T extends Prisma.Asset$mediaVerificationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Asset$mediaVerificationArgs<ExtArgs>>): Prisma.Prisma__MediaVerificationClient<runtime.Types.Result.GetResult<Prisma.$MediaVerificationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9813,6 +10212,25 @@ export type Asset$mutationReceiptsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.AnnotationMutationReceiptScalarFieldEnum | Prisma.AnnotationMutationReceiptScalarFieldEnum[]
+}
+
+/**
+ * Asset.mediaVerification
+ */
+export type Asset$mediaVerificationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MediaVerification
+   */
+  select?: Prisma.MediaVerificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MediaVerification
+   */
+  omit?: Prisma.MediaVerificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaVerificationInclude<ExtArgs> | null
+  where?: Prisma.MediaVerificationWhereInput
 }
 
 /**

@@ -80,3 +80,25 @@ export function readDirectUploadConfig(
   const invalidVariables = [...new Set(parsed.error.issues.map((issue) => String(issue.path[0])))];
   throw new ProviderConfigError(invalidVariables);
 }
+
+// ---- A2 I-VERIFIER (worker-only; contract section 5.5). Optional as a pair; never falls back to, or equals, the general MinIO identity.
+const verifierMinioSchema = z.object({
+  MINIO_VERIFIER_ACCESS_KEY: z.string().min(1),
+  MINIO_VERIFIER_SECRET_KEY: z.string().min(8),
+});
+export type VerifierMinioConfig = { accessKey: string; secretKey: string };
+
+/**
+ * Parses the worker-only verifier identity. Absent pair => null (the sealed namespace is then unavailable, fail-closed elsewhere); exactly one half or an identity
+ * equal to the general MinIO identity => ProviderConfigError naming only the VARIABLES, never a value.
+ */
+export function readVerifierMinioConfig(environment: NodeJS.ProcessEnv = process.env): VerifierMinioConfig | null {
+  const access = environment.MINIO_VERIFIER_ACCESS_KEY?.trim() ?? "";
+  const secret = environment.MINIO_VERIFIER_SECRET_KEY?.trim() ?? "";
+  if (!access && !secret) return null;
+  const parsed = verifierMinioSchema.safeParse({ MINIO_VERIFIER_ACCESS_KEY: access, MINIO_VERIFIER_SECRET_KEY: secret });
+  if (!parsed.success) throw new ProviderConfigError([...new Set(parsed.error.issues.map((issue) => String(issue.path[0])))]);
+  if (parsed.data.MINIO_VERIFIER_ACCESS_KEY === environment.MINIO_ACCESS_KEY?.trim()) throw new ProviderConfigError(["MINIO_VERIFIER_ACCESS_KEY"]);
+  if (parsed.data.MINIO_VERIFIER_SECRET_KEY === environment.MINIO_SECRET_KEY?.trim()) throw new ProviderConfigError(["MINIO_VERIFIER_SECRET_KEY"]);
+  return { accessKey: parsed.data.MINIO_VERIFIER_ACCESS_KEY, secretKey: parsed.data.MINIO_VERIFIER_SECRET_KEY };
+}
