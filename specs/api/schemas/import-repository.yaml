@@ -498,7 +498,7 @@ LocalFolderManifestItem:
       maxLength: 1024
     contentType:
       type: string
-      enum: [image/png, image/jpeg, image/webp, video/mp4, video/webm, text/plain, text/csv, application/json, audio/wav, audio/mpeg, audio/ogg]
+      enum: [image/png, image/jpeg, image/webp, video/mp4, video/webm, text/plain, text/csv, application/json, audio/wav, audio/mpeg]
     sizeBytes:
       type: integer
       minimum: 1

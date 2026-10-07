@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, readdirSyn
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
-  ALLOWED_ACTIONS, SEALED_DENY_ACTIONS, analyzePolicy, assertNoSecrets, checkImagePins, loadArtifacts, mcReference, normalizePolicy, parseSnapshot, policyDigest, randomCredentials, renderPolicy, snapshotDigest, verifySnapshot, ROLES, POLICY_NAME,
+  ALLOWED_ACTIONS, SEALED_DENY_ACTIONS, analyzePolicy, assertNoSecrets, checkImagePins, loadArtifacts, mcReference, normalizePolicy, parseSnapshot, policyDigest, newSecretKey, randomCredentials, renderPolicy, snapshotDigest, verifySnapshot, ROLES, POLICY_NAME,
 } from '../minio-authority.mjs';
 import { buildReport, compareAudit, findSites, loadAllowlist, webReachableMutatingModules } from '../minio-write-audit.mjs';
 
@@ -186,4 +186,34 @@ test('audit: a MINIO_VERIFIER_* reference outside the allowlisted module is a fa
     const result = compareAudit(report, { sites: [], webDirect: [], webIndirect: [], verifierEnvModules: ['apps/worker/src/providers/sealed-namespace.ts'] });
     assert.ok(result.differences.some(d => d.kind === 'VERIFIER_ENV_OUTSIDE_ALLOWLIST' && d.entry.includes('leak.ts')));
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test('generated secrets never begin with "-" (mc would parse it as an option and echo it), without losing randomness', () => {
+  // Deterministic: a source that first yields a base64url "-" lead (byte 0xF8 => index 62) must be rejected and re-drawn, never patched.
+  const draws = [Buffer.concat([Buffer.from([0xf8]), Buffer.alloc(23, 7)]), Buffer.concat([Buffer.from([0xfb]), Buffer.alloc(23, 9)]), Buffer.alloc(24, 5)];
+  let calls = 0;
+  const secret = newSecretKey(() => draws[calls++]);
+  assert.equal(calls, 3, 'both "-"-leading draws were rejected');
+  assert.equal(secret, Buffer.alloc(24, 5).toString('base64url'), 'the accepted secret is the untouched third draw');
+  assert.equal(Buffer.concat([Buffer.from([0xf8]), Buffer.alloc(23, 7)]).toString('base64url')[0], '-', 'the rejected draw really did lead with "-"');
+  // Statistical: with the unfixed generator about 1 in 64 would lead with "-"; 6,000 secrets (24,000 credentials worth of draws) must have none, and stay distinct.
+  const seen = new Set();
+  for (let i = 0; i < 1500; i += 1) {
+    const credentials = randomCredentials();
+    for (const entry of Object.values(credentials)) { assert.equal(entry.secretKey.startsWith('-'), false); assert.equal(entry.secretKey.length, 32); assert.match(entry.secretKey, /^[A-Za-z0-9_-]{32}$/); seen.add(entry.secretKey); }
+  }
+  assert.equal(seen.size, 6000, 'all distinct: no repeated or constant-patched secrets');
+});
+
+test('provisioning passes secrets as positional mc arguments, so the generator guarantee is what keeps them from being parsed as options', () => {
+  const provision = readFileSync(new URL('../minio-authority/provision.sh', import.meta.url), 'utf8');
+  assert.match(provision, /mc admin user add local "\$S0_WEB_KEY" "\$S0_WEB_SECRET"/);
+  assert.equal(/mc admin user add[^\n]*--/.test(provision), false);
+});
+
+test('the secret-output guard stays fail-closed with the exact error code', () => {
+  const credentials = randomCredentials();
+  const secrets = Object.values(credentials).map(entry => entry.secretKey);
+  for (const secret of secrets) assert.throws(() => assertNoSecrets(`mc: <ERROR> flag provided but not defined: ${secret}`, secrets), { message: 'S0_SECRET_IN_OUTPUT' });
+  assert.doesNotThrow(() => assertNoSecrets('Added user `s0web123` successfully.', secrets));
 });

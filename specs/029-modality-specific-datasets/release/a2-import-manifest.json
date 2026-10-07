@@ -30,7 +30,17 @@
    "result": "FAIL before any check: S0_SECRET_IN_OUTPUT (the runner secret-scan guard tripped on a provisioning-container log; evidence retained, containers removed, cause not diagnosed \u2014 see residual note)"
   },
   "guardedTests": "worker:test:sealed-namespace 6/6; minio-authority.test.mjs 11/11; static write audit ok:true",
-  "note": "Recorded separately from, and never overwriting, the historical authoritative-20261006T120356Z-127c23c2. Evidence directories are not tracked."
+  "note": "Recorded separately from, and never overwriting, the historical authoritative-20261006T120356Z-127c23c2. Evidence directories are not tracked.",
+  "correctedGeneratorRun": {
+   "run": "authoritative-20261007T065935Z-8f553809",
+   "result": "AUTHORITATIVE PASS 111/111, replay idempotent, audit true, independent cleanup verification true"
+  },
+  "runs": [
+   "authoritative-20261006T120356Z-127c23c2 (historical, 111/111, preserved)",
+   "authoritative-20261007T063209Z-3c621100 (fail-safe S0_SECRET_IN_OUTPUT: leading \"-\" secret, explained and reproduced; preserved)",
+   "authoritative-20261007T063320Z-d776274e (111/111)",
+   "authoritative-20261007T065935Z-8f553809 (111/111, corrected generator)"
+  ]
  },
  "proofClassifications": {
   "S0_HASH_BOUND": "receipt-bound artifact: exact S0 hash evidence",
@@ -45,8 +55,9 @@
    "sourceSha256": "f9001037ea4814833370a6c9c76d17bb1325a12476ec867c078fcbc27c8cb034",
    "importMode": "DIRTY_PROVEN_SNAPSHOT",
    "targetPath": "scripts/db-safety/minio-authority.mjs",
-   "resultingSha256": "f9001037ea4814833370a6c9c76d17bb1325a12476ec867c078fcbc27c8cb034",
-   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+   "resultingSha256": "f003b3767ac8e4042fc268e1037538a5d2e08deddaa2e9fcfe7aba534d3dc231",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND",
+   "note": "A2.2 correction after the historical proof: generated secrets are drawn by rejection sampling so they never begin with \"-\" (mc would parse it as an option and echo it; reproduced). Re-verified by authoritative-20261007T065935Z-8f553809 (111/111) and by the new focused regression tests. The historical proof hash-bound artifacts are unchanged."
   },
   {
    "sourcePath": "scripts/db-safety/minio-authority-s0.mjs",
@@ -162,8 +173,9 @@
    "sourceSha256": "aada435833a5c2e61755942405b5b20608ab5e1ae9f2cb2fb52d21fd00504dbf",
    "importMode": "DIRTY_PROVEN_SNAPSHOT",
    "targetPath": "scripts/db-safety/tests/minio-authority.test.mjs",
-   "resultingSha256": "aada435833a5c2e61755942405b5b20608ab5e1ae9f2cb2fb52d21fd00504dbf",
-   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND"
+   "resultingSha256": "37a98ceb79da438aa8a338539347b875708b4151adce1ade1cd847c0a0eaaa58",
+   "proofClassification": "S0_EXECUTED_NOT_HASH_BOUND",
+   "note": "A2.2 correction after the historical proof: generated secrets are drawn by rejection sampling so they never begin with \"-\" (mc would parse it as an option and echo it; reproduced). Re-verified by authoritative-20261007T065935Z-8f553809 (111/111) and by the new focused regression tests. The historical proof hash-bound artifacts are unchanged."
   },
   {
    "sourcePath": "apps/worker/src/providers/sealed-namespace.ts",
@@ -252,9 +264,9 @@
    "sourceSha256": "4ea80e937e46366dfc6702c5aa36a37b9ba2a3473f683ebace7a5f287c26c344",
    "importMode": "SELECTIVE_HUNKS",
    "targetPath": "scripts/db-safety/commands.json",
-   "resultingSha256": "93bed858ccae0c8503e85747434fe591b93089f89fb7ceb21f471e7c032d1abf",
+   "resultingSha256": "78bbd2238ed2aa673f6e8e22fa0332345e97a02986d59f552a610dbe29453a8d",
    "proofClassification": "SELECTIVE_INTEGRATION",
-   "note": "only the worker:test:sealed-namespace entry (commands.json) / name (SUPPORTED_COMMANDS) transplanted; feasibility entries and FOCUSED_FULL_CHAIN change NOT imported"
+   "note": "A2.2 update: transplanted entries/names are worker:test:sealed-namespace (S0), worker:test:classification-boundary (D7 prerequisite, verbatim from the canonical source) and web:test:candidate-content-types (new A2-0 test); the feasibility entries are NOT imported; all 68 pre-existing c46c928 entries unchanged"
   },
   {
    "sourcePath": "scripts/db-safety/disposable-test.mjs",
@@ -262,9 +274,29 @@
    "sourceSha256": "62fdc5cc60eb6fc918d88a8fbaa3ae2b16d093a358157b13859f5f83ec258f07",
    "importMode": "SELECTIVE_HUNKS",
    "targetPath": "scripts/db-safety/disposable-test.mjs",
-   "resultingSha256": "e0576fd95983ccdf63f93c3bf6726e04cf9f8c63777545694b1dbc5e041df6fb",
+   "resultingSha256": "42403ab484a4072c624d8caa6f4710e8306e6ba0c49b7dd029c1788105cb9d2d",
    "proofClassification": "SELECTIVE_INTEGRATION",
-   "note": "only the worker:test:sealed-namespace entry (commands.json) / name (SUPPORTED_COMMANDS) transplanted; feasibility entries and FOCUSED_FULL_CHAIN change NOT imported"
+   "note": "A2.2 update: transplanted entries/names are worker:test:sealed-namespace (S0), worker:test:classification-boundary (D7 prerequisite, verbatim from the canonical source) and web:test:candidate-content-types (new A2-0 test); the feasibility entries are NOT imported; all 68 pre-existing c46c928 entries unchanged"
+  },
+  {
+   "sourcePath": "apps/worker/src/jobs/repository-media-classification.ts",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "ccb8b7ee8783193506289413fb475bb7d850370493bd9d3e1696138b12752072",
+   "importMode": "EXACT",
+   "targetPath": "apps/worker/src/jobs/repository-media-classification.ts",
+   "resultingSha256": "ccb8b7ee8783193506289413fb475bb7d850370493bd9d3e1696138b12752072",
+   "proofClassification": "SELECTIVE_INTEGRATION",
+   "note": "A2.2 D7 characterization prerequisite (contract section 6.3): exports the existing classifier functions for characterization; no behavior change"
+  },
+  {
+   "sourcePath": "apps/worker/tests/repository-import/classification-boundary.test.ts",
+   "sourceBasis": "a5aa248f (tree ebf2f89204c9)",
+   "sourceSha256": "51b8dd6d4eafdfb717f97a09c47e7c60e6539979ee4e006562bfb64898132dd0",
+   "importMode": "EXACT",
+   "targetPath": "apps/worker/tests/repository-import/classification-boundary.test.ts",
+   "resultingSha256": "51b8dd6d4eafdfb717f97a09c47e7c60e6539979ee4e006562bfb64898132dd0",
+   "proofClassification": "SELECTIVE_INTEGRATION",
+   "note": "A2.2 D7 characterization prerequisite (contract section 6.3): exports the existing classifier functions for characterization; no behavior change"
   }
  ],
  "selectiveHunks": {
@@ -282,5 +314,23 @@
   "classification/upload-verification code and tests from a5aa248 (repository-media-classification.ts, classification-boundary.test.ts, upload-verification.ts): candidate A2 prerequisites, to be decided in A2.1/A2.2, not imported here",
   "M24/M25 (unchanged), M26 (does not exist)",
   "private env, credentials, certificates/keys, evidence/run directories, generated runtime state"
- ]
+ ],
+ "a22": {
+  "status": "DESIGN ONLY; M26 is NOT applied to any persistent database and is NOT in prisma/migrations",
+  "proposalDirectory": "specs/proposals/phase029-a2-media-verification",
+  "proposalFiles": {
+   "20261007000000_media_verification_a2/migration.sql": "ede5e8c511705521e1e6a18563ebaa602e9c24430946acddbed91340d923df5a",
+   "schema.candidate.prisma": "4a85c754d067ae64f0f767d5e6cd49f37c6d5f004865257faef66025d6000993",
+   "schema.candidate.diff": "7e3f49e297dea3fd5f93051e4960d7f7276b591593f7610ddc7f345daf47c45b"
+  },
+  "newTrackedCode": {
+   "scripts/db-safety/a2-chain.mjs": "5563e6ebb2707c872b38b6961dc168910b9f8df8284100017174a18f8f976e21",
+   "scripts/db-safety/a2-chain-client-probe.mts": "68eeabda31b8834ed68ace8acd2f20703534d1342399c29e3c743e462526d47f",
+   "scripts/db-safety/a2-d7-characterize.mts": "d871d76a50147151936d7f39641fea5aa6c6e55374ad01d2e3bf44237230686b",
+   "scripts/db-safety/tests/a2-chain.test.mjs": "39032664234d98a34195fd4d98adfafebd2c6a5dc7d995eb1cdcab44a06a7420",
+   "apps/web/tests/direct-upload/candidate-content-types.test.ts": "248490f25033f2ef3f64cf2b5a07f5324664cb310fda7023b1c416196cc6a507",
+   "specs/029-modality-specific-datasets/release/a2-m26-design.md": "f1b0af5d60606dba71f75033130a775e916957ceb56c7c0fb342f497d8626f8c"
+  },
+  "advertisedCapabilityChange": "audio/ogg removed from candidateContentTypes, OpenAPI assets.yaml/import-repository.yaml and the local-folder file picker; repository-import Ogg handling untouched; Ogg remains deferred"
+ }
 }

@@ -22,7 +22,7 @@ async function readPrefix(client: ReturnType<typeof createWorkerMinio>, bucket: 
   return Buffer.concat(chunks);
 }
 
-function classifyDefinitiveHeader(bytes: Buffer): VerifiedRepositoryModality | null {
+export function classifyDefinitiveHeader(bytes: Buffer): VerifiedRepositoryModality | null {
   if (bytes.length >= 24 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
     const width = bytes.readUInt32BE(16); const height = bytes.readUInt32BE(20);
     return width > 0 && height > 0 ? "IMAGE" : null;
@@ -36,6 +36,23 @@ function classifyDefinitiveHeader(bytes: Buffer): VerifiedRepositoryModality | n
     if (text.length > 0 && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text)) return "TEXT";
   } catch { /* Binary/ambiguous prefix; ffprobe or rejection below. */ }
   return null;
+}
+
+/**
+ * Interprets bounded ffprobe stream JSON. Anything that is not a clearly identified
+ * video or audio stream (including unparseable output and data/subtitle-only
+ * containers) fails closed; a container with both video and audio is VIDEO.
+ */
+export function classifyProbeOutput(stdout: string): VerifiedRepositoryModality {
+  let parsed: unknown;
+  try { parsed = JSON.parse(stdout); } catch { throw new Error("SOURCE_CONTENT_UNVERIFIED"); }
+  const streams = parsed && typeof parsed === "object" && Array.isArray((parsed as { streams?: unknown }).streams)
+    ? (parsed as { streams: unknown[] }).streams : [];
+  const kinds = streams.flatMap((stream) => stream && typeof stream === "object" && typeof (stream as { codec_type?: unknown }).codec_type === "string"
+    ? [(stream as { codec_type: string }).codec_type] : []);
+  if (kinds.includes("video")) return "VIDEO";
+  if (kinds.includes("audio")) return "AUDIO";
+  throw new Error("SOURCE_CONTENT_UNSUPPORTED");
 }
 
 /**
@@ -74,14 +91,6 @@ export async function verifyRepositoryObjectModality(input: {
       maxOutputBytes: defaultMediaProcessingPolicy.maxProcessOutputBytes,
     });
     if (probe.kind !== "completed") throw new Error("SOURCE_CONTENT_UNVERIFIED");
-    let parsed: unknown;
-    try { parsed = JSON.parse(probe.stdout.toString("utf8")); } catch { throw new Error("SOURCE_CONTENT_UNVERIFIED"); }
-    const streams = parsed && typeof parsed === "object" && Array.isArray((parsed as { streams?: unknown }).streams)
-      ? (parsed as { streams: unknown[] }).streams : [];
-    const kinds = streams.flatMap((stream) => stream && typeof stream === "object" && typeof (stream as { codec_type?: unknown }).codec_type === "string"
-      ? [(stream as { codec_type: string }).codec_type] : []);
-    if (kinds.includes("video")) return "VIDEO";
-    if (kinds.includes("audio")) return "AUDIO";
-    throw new Error("SOURCE_CONTENT_UNSUPPORTED");
+    return classifyProbeOutput(probe.stdout.toString("utf8"));
   });
 }

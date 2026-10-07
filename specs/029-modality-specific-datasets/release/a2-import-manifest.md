@@ -34,3 +34,12 @@ Machine-readable source of truth: [a2-import-manifest.json](./a2-import-manifest
 
 Full 64-hex hashes, per-file source basis and the exclusion list are in the JSON manifest.
 
+
+## A2.2 additions (design checkpoint)
+
+- D7 prerequisite imported EXACT from `a5aa248`: `apps/worker/src/jobs/repository-media-classification.ts` (exports only) and `apps/worker/tests/repository-import/classification-boundary.test.ts`.
+- M26 candidate lives in `specs/proposals/phase029-a2-media-verification/` (not in `prisma/migrations`); see `a2-m26-design.md`.
+- `audio/ogg` removed from every advertised upload surface; Ogg stays deferred.
+
+## S0 generator correction
+`minio-authority.mjs` now draws generated secrets by rejection sampling so a secret can never begin with `-`. Authoritative integration runs: `…063209Z-3c621100` (fail-safe, explained), `…063320Z-d776274e` (111/111), `…065935Z-8f553809` (111/111, corrected generator). The historical `authoritative-20261006T120356Z-127c23c2` is untouched.
