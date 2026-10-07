@@ -120,6 +120,7 @@
     "apps/worker/src/queue/minio-orphan-scanner.ts"
   ],
   "verifierEnvModules": [
-    "apps/worker/src/providers/sealed-namespace.ts"
+    "apps/worker/src/providers/sealed-namespace.ts",
+    "packages/domain/src/provider-config.ts"
   ]
 }

@@ -4,8 +4,8 @@
 // It never touches the fresh-MVP, shared-dev or application database: it provisions its own G1 postgres (labels, loopback port, container name), applies
 // the chain through the repository's receipt-bound approve-disposable.mjs -> cli.mjs deploy path (25 migrations, then the candidate as the 26th), proves
 // M24/M25 are unchanged, captures the reviewed schema manifest before/after, proves the candidate equals its Prisma schema (no drift), proves PostgreSQL
-// enum-value visibility, checks generated-client compatibility, and removes exactly what it created. The candidate lives in specs/proposals (not in
-// prisma/migrations) so every existing 25-migration plan keeps working; promotion into prisma/migrations is a later, separately approved A2 step.
+// enum-value visibility, checks generated-client compatibility, and removes exactly what it created. A2.3: the reviewed M26 bytes are now PROMOTED into prisma/migrations
+// (the proposal copy under specs/proposals stays as the review record and must be byte-identical); the tracked schema is the candidate schema and the tracked client was regenerated.
 // F13 pinning in this plan: the candidate migration bytes, the candidate schema, M24/M25, the 23-migration baseline tree and the reviewed manifest CTE.
 // job-contract.ts and the tracked generated client are NOT pinned here because A2.2 does not change them (they change with the A2 runtime increment).
 import { spawnSync } from 'node:child_process';
@@ -27,6 +27,9 @@ export const M26 = Object.freeze({
   candidateSchema: `${PROPOSAL_DIR}/schema.candidate.prisma`,
   candidateSchemaSha256: '4a85c754d067ae64f0f767d5e6cd49f37c6d5f004865257faef66025d6000993',
 });
+/** The M25-state schema and client are anchored to this immutable commit (they are what the 25-migration database was proven against). */
+export const M25_COMMIT = 'c46c928e07a5cfeac2672532066a28bea3755c52';
+export const M25_SCHEMA_SHA256 = '4fe3d96a334e18e504ea14fd5519a1a363fae5ea6d9845355c9d548698eed174';
 /** Reviewed-manifest entry count after M26; pinned after the first disposable computation (null while discovering). */
 export const A2_COUNTS = Object.freeze({ ...RELEASE_COUNTS, m26: 1942 });
 const EXPECTED_COLUMNS = ['id', 'datasetId', 'requestedById', 'source', 'preparedImportItemId', 'currentJobId', 'generation', 'boundDatasetModality', 'stagedBucket', 'stagedKey', 'stagedEtag', 'stagedSizeBytes', 'stagedLastModified', 'stagedVersionId', 'filename', 'relativePathHint', 'declaredContentType', 'declaredSizeBytes', 'sealedKey', 'sealedEtag', 'sealedSizeBytes', 'sealedLastModified', 'sealedVersionId', 'contentSha256', 'status', 'verifiedModality', 'resultCode', 'resultReason', 'probe', 'policyVersion', 'processorVersion', 'lastFailureCode', 'lastFailureReason', 'lastFailureAt', 'objectsClearedAt', 'assetId', 'verificationDeadlineAt', 'sealedAt', 'verifiedAt', 'publishedAt', 'finishedAt', 'createdAt', 'updatedAt'];
@@ -49,18 +52,19 @@ async function main() {
   // ---- F13 pins and invariants: nothing is provisioned before they hold
   const migrationsDir = join(ROOT, 'prisma/migrations');
   const active = readdirSync(migrationsDir, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name).sort();
-  check('active-chain-is-exactly-the-25-and-has-no-m26', active.length === BASELINE_MIGRATIONS + PROPOSAL_CHAIN.length && !active.includes(M26.name), { count: active.length });
+  check('active-chain-is-26-with-the-reviewed-m26-last', active.length === BASELINE_MIGRATIONS + PROPOSAL_CHAIN.length && active.at(-1) === M26.name, { count: active.length, last: active.at(-1) });
   for (const entry of PROPOSAL_CHAIN) check(`m${23 + entry.order}-bytes-pinned`, sha(readFileSync(join(ROOT, entry.path, 'migration.sql'))) === entry.sha256, entry.name);
-  const m26Sql = readFileSync(join(ROOT, M26.path, 'migration.sql'));
+  check('m26-active-pin-equals-the-chain-pin', PROPOSAL_CHAIN[2].name === M26.name && PROPOSAL_CHAIN[2].sha256 === M26.sha256, M26.name);
+  const m26Sql = readFileSync(join(ROOT, 'prisma/migrations', M26.name, 'migration.sql'));
   evidence.m26 = { name: M26.name, sha256: sha(m26Sql), bytes: m26Sql.length };
-  const schemaCandidate = readFileSync(join(ROOT, M26.candidateSchema));
-  evidence.candidateSchemaSha256 = sha(schemaCandidate);
-  if (M26.sha256 !== 'M26_SHA256_PIN') check('m26-bytes-pinned', evidence.m26.sha256 === M26.sha256, evidence.m26.sha256);
-  if (M26.candidateSchemaSha256 !== 'SCHEMA_SHA256_PIN') check('candidate-schema-pinned', evidence.candidateSchemaSha256 === M26.candidateSchemaSha256, evidence.candidateSchemaSha256);
-  check('m26-readdir-is-only-migration-sql', JSON.stringify(readdirSync(join(ROOT, M26.path))) === JSON.stringify(['migration.sql']), readdirSync(join(ROOT, M26.path)));
+  check('promoted-m26-is-byte-identical-to-the-reviewed-proposal', sha(readFileSync(join(ROOT, M26.path, 'migration.sql'))) === evidence.m26.sha256 && evidence.m26.sha256 === M26.sha256, evidence.m26.sha256);
+  const schemaTracked = readFileSync(join(ROOT, 'prisma/schema.prisma'));
+  evidence.trackedSchemaSha256 = sha(schemaTracked);
+  check('tracked-schema-equals-the-pinned-candidate-schema-and-the-proposal-copy', evidence.trackedSchemaSha256 === M26.candidateSchemaSha256 && sha(readFileSync(join(ROOT, M26.candidateSchema))) === M26.candidateSchemaSha256, evidence.trackedSchemaSha256);
+  check('m26-readdir-is-only-migration-sql', JSON.stringify(readdirSync(join(ROOT, 'prisma/migrations', M26.name))) === JSON.stringify(['migration.sql']), readdirSync(join(ROOT, 'prisma/migrations', M26.name)));
   check('recovery-review-manifest-pinned', sha(readFileSync(join(ROOT, RECOVERY_REVIEW.path))) === RECOVERY_REVIEW.sha256, RECOVERY_REVIEW.sha256.slice(0, 12));
-  const tracked = run('git', ['show', 'HEAD:prisma/schema.prisma'], { cwd: ROOT }).stdout;
-  check('tracked-schema-is-the-m25-schema-unchanged', sha(readFileSync(join(ROOT, 'prisma/schema.prisma'))) === sha(tracked), 'working tree equals HEAD');
+  const schemaM25 = Buffer.from(run('git', ['show', `${M25_COMMIT}:prisma/schema.prisma`], { cwd: ROOT }).stdout, 'utf8');
+  check('m25-state-schema-from-the-immutable-commit-matches-its-pin', sha(schemaM25) === M25_SCHEMA_SHA256, M25_COMMIT.slice(0, 12));
   const sqlText = m26Sql.toString('utf8');
   check('m26-uses-the-new-enum-value-exactly-once-as-ADD-VALUE', (sqlText.match(/VERIFY_UPLOADED_MEDIA/g) ?? []).length === 1 && /ALTER TYPE "JobType" ADD VALUE 'VERIFY_UPLOADED_MEDIA';/.test(sqlText), 'no later statement references the new value');
   const statements = sqlText.split('\n').filter(l => !l.startsWith('--')).join('\n').split(/;\s*(?:\n|$)/).map(t => t.trim()).filter(Boolean);
@@ -119,31 +123,31 @@ async function main() {
     };
     return { manifestEntries: rows.length, manifestDigest: manifestDigest(rows), manifestRows: rows, detail };
   };
-  const names25 = active;
+  const names25 = active.filter(name => name !== M26.name);
   const promoted = new Set(PROPOSAL_CHAIN.map(e => e.name));
   void promoted;
 
   // ===== Stage A: the unchanged 25-migration chain with the unchanged tracked schema (receipt-bound deploy)
   check('database-is-genuinely-empty', q(`SELECT count(*) FROM pg_tables WHERE schemaname='public'`) === '0', 'no public tables');
-  const stageA = stage('25', { names: names25, from: () => migrationsDir }, readFileSync(join(ROOT, 'prisma/schema.prisma')));
+  const stageA = stage('25', { names: names25, from: () => migrationsDir }, schemaM25);
   const depA = deploy(stageA, 'chain25');
   check('deploy-25-succeeded-through-the-guarded-path', depA.status === 0 && depA.applied.length === 25, { status: depA.status, applied: depA.applied.length });
   const h25 = history();
   check('history-25-finished-none-rolled-back-names-and-checksums-equal-the-files', h25.length === 25 && h25.every((row, i) => row.finished && !row.rolledBack && row.name === names25[i] && row.checksum === sha(readFileSync(join(migrationsDir, row.name, 'migration.sql'))) ), { rows: h25.length });
-  check('m24-m25-recorded-checksums-exact-before-m26', PROPOSAL_CHAIN.every(entry => h25.find(row => row.name === entry.name)?.checksum === entry.sha256), PROPOSAL_CHAIN.map(e => e.name));
+  check('m24-m25-recorded-checksums-exact-before-m26', PROPOSAL_CHAIN.slice(0, 2).every(entry => h25.find(row => row.name === entry.name)?.checksum === entry.sha256), PROPOSAL_CHAIN.map(e => e.name));
   const before = catalog();
   check('before-manifest-is-the-reviewed-1842-entries', before.manifestEntries === RELEASE_COUNTS.m25, { entries: before.manifestEntries, digest: before.manifestDigest });
   evidence.before = { entries: before.manifestEntries, digest: before.manifestDigest, jobTypeEnum: before.detail.enums.filter(e => e[0] === 'JobType').map(e => e[1]) };
   check('before-state-has-no-media-verification-objects', !before.detail.tables.includes('MediaVerification') && !before.detail.enums.some(e => /MediaVerification|VERIFY_UPLOADED_MEDIA/.test(e[0] + e[1])), 'absent');
 
   // ===== Stage B: the candidate as the 26th migration, with the candidate schema (receipt-bound deploy of exactly one pending migration)
-  const stageB = stage('26', { names: [...names25, M26.name], from: name => (name === M26.name ? join(ROOT, PROPOSAL_DIR) : migrationsDir) }, schemaCandidate);
+  const stageB = stage('26', { names: active, from: () => migrationsDir }, schemaTracked);
   const depB = deploy(stageB, 'chain26');
   check('deploy-26-applies-exactly-the-candidate', depB.status === 0 && depB.applied.length === 1 && depB.applied[0] === M26.name, { status: depB.status, applied: depB.applied, lines: depB.lines });
   const h26 = history();
-  const expected26 = [...names25, M26.name];
+  const expected26 = active;
   check('history-26-finished-none-rolled-back-in-order', h26.length === 26 && h26.every((row, i) => row.finished && !row.rolledBack && row.name === expected26[i]), { rows: h26.length });
-  check('m24-m25-checksums-unchanged-after-m26', PROPOSAL_CHAIN.every(entry => h26.find(row => row.name === entry.name)?.checksum === entry.sha256) && h26.slice(0, 25).every((row, i) => row.checksum === h25[i].checksum), 'identical to the 25-run');
+  check('m24-m25-checksums-unchanged-after-m26', PROPOSAL_CHAIN.slice(0, 2).every(entry => h26.find(row => row.name === entry.name)?.checksum === entry.sha256) && h26.slice(0, 25).every((row, i) => row.checksum === h25[i].checksum), 'identical to the 25-run');
   check('m26-recorded-checksum-equals-the-candidate-file', h26[25].checksum === evidence.m26.sha256, evidence.m26.sha256.slice(0, 16));
   const after = catalog();
   evidence.after = { entries: after.manifestEntries, digest: after.manifestDigest };
@@ -192,7 +196,7 @@ async function main() {
   const status = run(process.execPath, [prismaCli, 'migrate', 'status', '--config', join(stageB, 'prisma.config.ts')], { env: { ...base, DATABASE_URL: url }, cwd: ROOT });
   check('prisma-migrate-status-up-to-date-with-26', status.status === 0 && /Database schema is up to date/.test(status.stdout + status.stderr) && /26 migrations found/.test(status.stdout + status.stderr), redact(status.stdout + status.stderr).split('\n').filter(l => l.trim()).slice(-4));
   const drift = run(process.execPath, [prismaCli, 'migrate', 'diff', '--config', join(stageB, 'prisma.config.ts'), '--from-url', url, '--to-schema-datamodel', join(stageB, 'schema.prisma'), '--exit-code'], { env: { ...base, DATABASE_URL: url }, cwd: stageB });
-  check('no-drift-between-the-migrated-database-and-the-candidate-schema', drift.status === 0, { exit: drift.status, out: redact(drift.stdout).split('\n').filter(l => l.trim()).slice(-3) });
+  check('no-drift-between-the-migrated-database-and-the-tracked-schema', drift.status === 0, { exit: drift.status, out: redact(drift.stdout).split('\n').filter(l => l.trim()).slice(-3) });
   evidence.result = 'PASS';
   evidence.afterDigest = after.manifestDigest;
   return { url, psql, q, stageB, catalogAfter: after };
@@ -204,7 +208,7 @@ finally {
   // client compatibility runs while the database still exists (only when the chain proof passed)
   if (ctx && evidence.result === 'PASS') {
     try {
-      const probe = run(process.execPath, ['--import', 'tsx', join(ROOT, 'scripts/db-safety/a2-chain-client-probe.mts')], { env: { ...base, A2_PROBE_DATABASE_URL: ctx.url, A2_PROBE_SCHEMA: join(ctx.stageB, 'schema.prisma'), A2_PROBE_ROOT: ROOT }, cwd: ROOT });
+      const probe = run(process.execPath, ['--import', 'tsx', join(ROOT, 'scripts/db-safety/a2-chain-client-probe.mts')], { env: { ...base, A2_PROBE_DATABASE_URL: ctx.url, A2_PROBE_SCHEMA: join(ctx.stageB, 'schema.prisma'), A2_PROBE_ROOT: ROOT, A2_PROBE_M25_COMMIT: M25_COMMIT }, cwd: ROOT });
       evidence.clientCompatibility = { status: probe.status, report: redact(probe.stdout).trim().split('\n').slice(-30), stderrTail: redact(probe.stderr).trim().split('\n').slice(-6) };
       check('generated-client-and-old-client-compatibility-probe', probe.status === 0, evidence.clientCompatibility.report.slice(-6));
     } catch (error) { evidence.result = 'FAIL'; evidence.failure = { code: error.message, detail: error.detail ?? null }; }

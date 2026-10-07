@@ -1,0 +1,626 @@
+{
+ "schema": "phase029-a2-premedia-corpus/v1",
+ "image": "annotationplatformmvp-worker:mvp-029-92ebc7117602",
+ "ffprobeVersion": "ffprobe version 5.1.9-0+deb12u1 Copyright (c) 2007-2026 the FFmpeg developers",
+ "probeArgs": "-v error -hide_banner -probesize 10000000 -analyzeduration 5000000 -show_entries format=format_name,duration,size,nb_streams:format_tags=major_brand,compatible_brands:stream=index,codec_type,codec_name,width,height,avg_frame_rate,nb_frames,duration:stream_disposition=default,attached_pic,still_image,timed_thumbnails -of json",
+ "generationWarnings": [],
+ "fixtures": [
+  {
+   "file": "data_only.mp4",
+   "sha256": "0c0ec5a613716e93523d83ef0a4cd5b94d6a0aee22584511fdd5737f2d182a31",
+   "bytes": 4096,
+   "ffprobeExit": 1,
+   "stderrFirstLine": "[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5f6ce978b300] moov atom not found",
+   "document": {}
+  },
+  {
+   "file": "mp4_h264_video_audio.mp4",
+   "sha256": "d6d264b2a03630224c0e29e95f43066f8119827434f9af35579c5e25beeadc25",
+   "bytes": 24184,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 128,
+      "height": 96,
+      "avg_frame_rate": "10/1",
+      "duration": "2.000000",
+      "nb_frames": "20",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     },
+     {
+      "index": 1,
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "avg_frame_rate": "0/0",
+      "duration": "2.000000",
+      "nb_frames": "88",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 2,
+     "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+     "duration": "2.000000",
+     "size": "24184",
+     "tags": {
+      "major_brand": "isom",
+      "compatible_brands": "isomiso2avc1mp41"
+     }
+    }
+   }
+  },
+  {
+   "file": "mp4_h264_with_cover.mp4",
+   "sha256": "dec494566d9fa86b7b6c712942814622dc1ffb76faef60789f5d9243ec052f65",
+   "bytes": 7293,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 128,
+      "height": 96,
+      "avg_frame_rate": "10/1",
+      "duration": "2.000000",
+      "nb_frames": "20",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     },
+     {
+      "index": 1,
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "avg_frame_rate": "0/0",
+      "duration": "0.092993",
+      "nb_frames": "5",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     },
+     {
+      "index": 2,
+      "codec_name": "mjpeg",
+      "codec_type": "video",
+      "width": 64,
+      "height": 64,
+      "avg_frame_rate": "0/0",
+      "duration": "2.000000",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 1,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 3,
+     "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+     "duration": "2.000000",
+     "size": "7293",
+     "tags": {
+      "major_brand": "isom",
+      "compatible_brands": "isomiso2avc1mp41"
+     }
+    }
+   }
+  },
+  {
+   "file": "mp4_hevc.mp4",
+   "sha256": "04f0d5fc8abcf7c6383d97abafc459d853ad5e942c9047ea3773054b85cd8b3b",
+   "bytes": 5993,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "hevc",
+      "codec_type": "video",
+      "width": 128,
+      "height": 96,
+      "avg_frame_rate": "10/1",
+      "duration": "2.000000",
+      "nb_frames": "20",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+     "duration": "2.000000",
+     "size": "5993",
+     "tags": {
+      "major_brand": "isom",
+      "compatible_brands": "isomiso2mp41"
+     }
+    }
+   }
+  },
+  {
+   "file": "mp4_single_frame.mp4",
+   "sha256": "be2dfb421106b8389d5eb5308f197aec7f2dca7035ce9c233f99c6cc408b2c36",
+   "bytes": 2069,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 64,
+      "height": 64,
+      "avg_frame_rate": "25/1",
+      "duration": "0.040000",
+      "nb_frames": "1",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+     "duration": "0.040000",
+     "size": "2069",
+     "tags": {
+      "major_brand": "isom",
+      "compatible_brands": "isomiso2avc1mp41"
+     }
+    }
+   }
+  },
+  {
+   "file": "mp4_tiny_8x8.mp4",
+   "sha256": "5741e050a59bee5f2901d3a48b9db5ac807d910cbcf4e14ce232edc89441a803",
+   "bytes": 2644,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 8,
+      "height": 8,
+      "avg_frame_rate": "10/1",
+      "duration": "2.000000",
+      "nb_frames": "20",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+     "duration": "2.000000",
+     "size": "2644",
+     "tags": {
+      "major_brand": "isom",
+      "compatible_brands": "isomiso2avc1mp41"
+     }
+    }
+   }
+  },
+  {
+   "file": "mp4_truncated.mp4",
+   "sha256": "7b632513192adbfbd6d2c2b6864a3f29d23e5d303e5dee8eac1b451ee153e5ab",
+   "bytes": 2000,
+   "ffprobeExit": 1,
+   "stderrFirstLine": "[mov,mp4,m4a,3gp,3g2,mj2 @ 0x5f8615b4e300] moov atom not found",
+   "document": {}
+  },
+  {
+   "file": "m4a_cover_art.m4a",
+   "sha256": "072945776b85109b000bcb2c75e2be94ac6c83a4f16808b0d576011af52cad46",
+   "bytes": 19075,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "avg_frame_rate": "0/0",
+      "duration": "2.000000",
+      "nb_frames": "88",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     },
+     {
+      "index": 1,
+      "codec_name": "mjpeg",
+      "codec_type": "video",
+      "width": 64,
+      "height": 64,
+      "avg_frame_rate": "0/0",
+      "duration": "2.000000",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 1,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 2,
+     "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+     "duration": "2.000000",
+     "size": "19075",
+     "tags": {
+      "major_brand": "M4A ",
+      "compatible_brands": "M4A isomiso2"
+     }
+    }
+   }
+  },
+  {
+   "file": "mp4_audio_only.m4a",
+   "sha256": "dfe54094db9149c213ec5f86ed1580960f6b3f434654f85d7e98d4e7f4f18cc5",
+   "bytes": 18779,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "avg_frame_rate": "0/0",
+      "duration": "2.000000",
+      "nb_frames": "88",
+      "disposition": {
+       "default": 1,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+     "duration": "2.000000",
+     "size": "18779",
+     "tags": {
+      "major_brand": "M4A ",
+      "compatible_brands": "M4A isomiso2"
+     }
+    }
+   }
+  },
+  {
+   "file": "flac_picture.flac",
+   "sha256": "fa35e9319f033e97bba43468fdd35022d9f901ad8c0168331774b4f311f60cf5",
+   "bytes": 32805,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "flac",
+      "codec_type": "audio",
+      "avg_frame_rate": "0/0",
+      "duration": "2.000000",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     },
+     {
+      "index": 1,
+      "codec_name": "mjpeg",
+      "codec_type": "video",
+      "width": 64,
+      "height": 64,
+      "avg_frame_rate": "0/0",
+      "duration": "2.000000",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 1,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 2,
+     "format_name": "flac",
+     "duration": "2.000000",
+     "size": "32805",
+     "tags": {}
+    }
+   }
+  },
+  {
+   "file": "webm_av1.webm",
+   "sha256": "0d09a72f3d4be44ff7fc863112a29f9f9cb62c6e6676fe7d4587f1976d9bc7ef",
+   "bytes": 3679,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "av1",
+      "codec_type": "video",
+      "width": 128,
+      "height": 96,
+      "avg_frame_rate": "10/1",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "matroska,webm",
+     "duration": "2.000000",
+     "size": "3679",
+     "tags": {}
+    }
+   }
+  },
+  {
+   "file": "webm_vp8.webm",
+   "sha256": "eaa3b59a006b243d038090309e1778e01955f8e74dda4405c5af09b8e2f7b6a5",
+   "bytes": 10629,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "vp8",
+      "codec_type": "video",
+      "width": 128,
+      "height": 96,
+      "avg_frame_rate": "10/1",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "matroska,webm",
+     "duration": "2.000000",
+     "size": "10629",
+     "tags": {}
+    }
+   }
+  },
+  {
+   "file": "webm_vp9.webm",
+   "sha256": "27ee54554201c057c1d9250895a107fa0f5414a9782ff5e677d93712e09f71f5",
+   "bytes": 6824,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "vp9",
+      "codec_type": "video",
+      "width": 128,
+      "height": 96,
+      "avg_frame_rate": "10/1",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "matroska,webm",
+     "duration": "2.000000",
+     "size": "6824",
+     "tags": {}
+    }
+   }
+  },
+  {
+   "file": "mkv_h264.mkv",
+   "sha256": "4bd773fa88d98c0ccef27016fc8995e1f70c329af7600ac0317904a4f54c6194",
+   "bytes": 5006,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "h264",
+      "codec_type": "video",
+      "width": 128,
+      "height": 96,
+      "avg_frame_rate": "10/1",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "matroska,webm",
+     "duration": "2.000000",
+     "size": "5006",
+     "tags": {}
+    }
+   }
+  },
+  {
+   "file": "ogg_vorbis.ogg",
+   "sha256": "e267336fef6122aca4db94c2744296d91d901f91bf07d99c50172f94ec7dded3",
+   "bytes": 6965,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "vorbis",
+      "codec_type": "audio",
+      "avg_frame_rate": "0/0",
+      "duration": "2.000000",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "ogg",
+     "duration": "2.000000",
+     "size": "6965"
+    }
+   }
+  },
+  {
+   "file": "avi_mpeg4.avi",
+   "sha256": "748d867bf486918d1ed5225982a3fa196748ffb5a816fb821e8f7d09cb10a37b",
+   "bytes": 22092,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "mpeg4",
+      "codec_type": "video",
+      "width": 128,
+      "height": 96,
+      "avg_frame_rate": "10/1",
+      "duration": "2.000000",
+      "nb_frames": "20",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "avi",
+     "duration": "2.000000",
+     "size": "22092",
+     "tags": {}
+    }
+   }
+  },
+  {
+   "file": "avif_still.avif",
+   "sha256": "828e815cd933aa81b2ac074dfd0bba9733b745bf69a5f6dadd85d9981d0cd6d1",
+   "bytes": 639,
+   "ffprobeExit": 0,
+   "stderrFirstLine": "",
+   "document": {
+    "programs": [],
+    "streams": [
+     {
+      "index": 0,
+      "codec_name": "av1",
+      "codec_type": "video",
+      "width": 64,
+      "height": 64,
+      "avg_frame_rate": "1/1",
+      "nb_frames": "1",
+      "disposition": {
+       "default": 0,
+       "attached_pic": 0,
+       "timed_thumbnails": 0,
+       "still_image": 0
+      }
+     }
+    ],
+    "format": {
+     "nb_streams": 1,
+     "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+     "size": "639",
+     "tags": {
+      "major_brand": "avif",
+      "compatible_brands": "avifmif1miafMA1A"
+     }
+    }
+   }
+  }
+ ]
+}

@@ -1,10 +1,10 @@
-// Generated-client compatibility probe for the M26 CANDIDATE (disposable database only; invoked by a2-chain.mjs, never by the application).
-//  1. Generate a client from the candidate schema into a scratch directory (the tracked lib/generated/prisma is NOT rewritten).
-//  2. Exercise MediaVerification/Job against the migrated database, every write inside a transaction that is rolled back, except one committed Job fixture
-//     (disposable DB) used to show what the CURRENT tracked client does when it reads the new JobType value.
-//  3. Run the tracked (M25) client against the 26-migration database to document the fix-forward implication.
+// Generated-client compatibility probe for the PROMOTED M26 (disposable database only; invoked by a2-chain.mjs, never by the application).
+//  1. Regenerate a client from the tracked schema into a scratch directory and prove it equals the tracked client (only the two checkout-path lines may differ).
+//  2. Exercise MediaVerification/Job through the TRACKED regenerated client against the migrated database, every write inside a transaction that is rolled back,
+//     except one committed Job fixture (disposable DB) used to show what an OLD client does when it reads the new JobType value.
+//  3. Run the OLD (M25-state) client, extracted from the immutable M25 commit, against the 26-migration database to document the fix-forward implication.
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync, readdirSync, rmSync, symlinkSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync, readdirSync, rmSync, symlinkSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
@@ -16,17 +16,38 @@ class Rollback extends Error {}
 
 const dir = mkdtempSync(join(tmpdir(), "a2-client-"));
 try {
-  const outDir = join(dir, "client");
-  const schema = readFileSync(schemaPath, "utf8").replace(/output\s*=\s*"[^"]+"/, `output = "${outDir}"`);
-  writeFileSync(join(dir, "schema.prisma"), schema);
+  // the tracked schema is copied byte-identical to <dir>/prisma/schema.prisma so its relative output (../lib/generated/prisma) resolves to <dir>/lib/generated/prisma,
+  // the same layout as the checkout; the generator then differs from the tracked client only in the two embedded absolute paths
+  const outDir = join(dir, "lib/generated/prisma");
+  mkdirSync(join(dir, "prisma"), { recursive: true });
+  writeFileSync(join(dir, "prisma/schema.prisma"), readFileSync(schemaPath));
   symlinkSync(join(root, "node_modules"), join(dir, "node_modules"), "dir");
-  writeFileSync(join(dir, "prisma.config.ts"), `import {defineConfig} from ${JSON.stringify(join(root, "node_modules/prisma/config.js"))}; export default defineConfig(${JSON.stringify({ schema: join(dir, "schema.prisma"), engine: "classic", datasource: { url } })});`);
+  writeFileSync(join(dir, "prisma.config.ts"), `import {defineConfig} from ${JSON.stringify(join(root, "node_modules/prisma/config.js"))}; export default defineConfig(${JSON.stringify({ schema: join(dir, "prisma/schema.prisma"), engine: "classic", datasource: { url } })});`);
   const gen = spawnSync(process.execPath, [join(root, "node_modules/prisma/build/index.js"), "generate", "--config", join(dir, "prisma.config.ts")], { cwd: dir, encoding: "utf8", env: { PATH: process.env.PATH, HOME: process.env.HOME, DATABASE_URL: url } });
-  rec("candidate-client-generated-into-scratch-without-touching-the-tracked-client", gen.status === 0, gen.status === 0 ? readdirSync(outDir).slice(0, 4) : (gen.stderr || gen.stdout).slice(0, 200));
+  rec("client-regenerated-into-scratch-from-the-tracked-schema", gen.status === 0, gen.status === 0 ? readdirSync(outDir).slice(0, 4) : (gen.stderr || gen.stdout).slice(0, 200));
   if (gen.status !== 0) throw new Error("GENERATE_FAILED");
 
+  // 1. the regenerated scratch client equals the tracked client; only the embedded checkout paths (class.ts) may differ.
+  const walk = (base: string, rel = ""): string[] => readdirSync(join(base, rel)).flatMap(name => { const next = rel ? `${rel}/${name}` : name; return statSync(join(base, next)).isDirectory() ? walk(base, next) : [next]; });
+  const trackedDir = join(root, "lib/generated/prisma");
+  const scratchFiles = walk(outDir).sort(), trackedFiles = walk(trackedDir).sort();
+  const differing: string[] = [];
+  for (const file of trackedFiles) {
+    let a = readFileSync(join(trackedDir, file)), b = scratchFiles.includes(file) ? readFileSync(join(outDir, file)) : Buffer.alloc(0);
+    if (file === "internal/class.ts") {
+      // the generator embeds the output directory and the schema path of the checkout it ran in; everything else must be byte-identical
+      const OUTPUT = /"value": "[^"\n]*\/lib\/generated\/prisma"/g, SCHEMA = /"sourceFilePath": "[^"\n]*\/prisma\/schema\.prisma"/g;
+      const count = (buf: Buffer, re: RegExp) => (buf.toString("utf8").match(re) ?? []).length;
+      if (count(a, OUTPUT) !== 1 || count(a, SCHEMA) !== 1 || count(b, OUTPUT) !== 1 || count(b, SCHEMA) !== 1) { differing.push(`${file}:path-field-count`); continue; }
+      const norm = (buf: Buffer) => Buffer.from(buf.toString("utf8").replace(OUTPUT, '"value": "<OUTPUT>"').replace(SCHEMA, '"sourceFilePath": "<SCHEMA>"'));
+      a = norm(a); b = norm(b);
+    }
+    if (!a.equals(b)) differing.push(file);
+  }
+  rec("tracked-client-equals-a-fresh-generation-from-the-tracked-schema-except-the-two-embedded-checkout-paths", JSON.stringify(scratchFiles) === JSON.stringify(trackedFiles) && differing.length === 0, { files: trackedFiles.length, differing });
+
   process.env.DATABASE_URL = url;
-  const candidate = await import(join(outDir, "client.ts"));
+  const candidate = await import(join(root, "lib/generated/prisma/client.ts"));
   const db = new candidate.PrismaClient();
   const suffix = randomUUID().slice(0, 8);
   const fixture = async (tx: any) => {
@@ -68,13 +89,16 @@ try {
   await db.$disconnect();
 
   // the CURRENT tracked (M25) client against the 26-migration database
-  const old = await import(join(root, "lib/generated/prisma/client.ts"));
+  const m25Dir = join(dir, "m25");
+  const archive = spawnSync("git", ["archive", process.env.A2_PROBE_M25_COMMIT!, "--", "lib/generated/prisma"], { cwd: root, maxBuffer: 256 * 1024 * 1024 });
+  spawnSync("mkdir", ["-p", m25Dir]); spawnSync("tar", ["-x", "-C", m25Dir], { input: archive.stdout });
+  const old = await import(join(m25Dir, "lib/generated/prisma/client.ts"));
   const oldDb = new old.PrismaClient();
-  rec("tracked-client-still-reads-existing-tables", (await oldDb.user.count()) >= 1 && (await oldDb.dataset.count()) >= 1);
-  rec("tracked-client-filtered-job-reads-for-existing-types-work", (await oldDb.job.findMany({ where: { type: "IMPORT_DATASET" } })).length >= 0);
+  rec("OLD-M25-client-still-reads-existing-tables", (await oldDb.user.count()) >= 1 && (await oldDb.dataset.count()) >= 1);
+  rec("OLD-M25-client-filtered-job-reads-for-existing-types-work", (await oldDb.job.findMany({ where: { type: "IMPORT_DATASET" } })).length >= 0);
   let oldRead = "READ_OK";
   try { await oldDb.job.findUnique({ where: { id: committed.job.id } }); } catch (error: any) { oldRead = `REJECTED:${String(error?.name ?? "error")}`; }
-  rec("FIX-FORWARD-NOTE tracked-client-reading-a-VERIFY_UPLOADED_MEDIA-Job", true, { outcome: oldRead, implication: oldRead === "READ_OK" ? "tolerant" : "web/worker must be upgraded before any VERIFY_UPLOADED_MEDIA Job can exist" });
+  rec("FIX-FORWARD-NOTE OLD-M25-client-reading-a-VERIFY_UPLOADED_MEDIA-Job", true, { outcome: oldRead, implication: oldRead === "READ_OK" ? "tolerant" : "web/worker must be upgraded before any VERIFY_UPLOADED_MEDIA Job can exist" });
   await oldDb.$disconnect();
 } catch (error: any) {
   rec("probe-completed", false, String(error?.message ?? error).slice(0, 200));

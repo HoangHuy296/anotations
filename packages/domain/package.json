@@ -22,6 +22,10 @@
       "types": "./dist/source-access-policy.d.ts",
       "default": "./dist/source-access-policy.js"
     },
+    "./media-verification": {
+      "types": "./dist/media-verification.d.ts",
+      "default": "./dist/media-verification.js"
+    },
     "./media-processing": {
       "types": "./dist/media-processing.d.ts",
       "default": "./dist/media-processing.js"

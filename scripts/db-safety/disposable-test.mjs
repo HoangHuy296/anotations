@@ -30,7 +30,7 @@ import { computeImplementation as maintenanceImplementation, manifestDigest as m
 import { runMaintenanceRehearsal } from './backfill-maintenance-rehearsal.mjs';
 import { readTree as readClientTree, treeHash as clientTreeHash } from './prisma-client-stage.mjs';
 
-export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types'];
+export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation'];
 const PROMOTED = 'prisma/migrations';
 /**
  * Ordered, frozen Phase029 chain applied AFTER the 23 historical migrations. Since the release-chain promotion these two
@@ -42,6 +42,9 @@ const PROMOTED = 'prisma/migrations';
 export const PROPOSAL_CHAIN = [
   { order: 1, name: '20260930030000_dataset_modality_g2', path: `${PROMOTED}/20260930030000_dataset_modality_g2`, sha256: '13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7' },
   { order: 2, name: '20261006000000_prepared_import_creation_request_hash', path: `${PROMOTED}/20261006000000_prepared_import_creation_request_hash`, sha256: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' },
+  // A2 / M26 (promoted from specs/proposals/phase029-a2-media-verification, exact reviewed bytes). Every pre-A2 plan applies a slice of at most two entries
+  // (`through` <= 2), so the 23+M24+M25 plans are unchanged; only release:phase029-a2-chain (scripts/db-safety/a2-chain.mjs) applies the third.
+  { order: 3, name: '20261007000000_media_verification_a2', path: `${PROMOTED}/20261007000000_media_verification_a2`, sha256: 'ede5e8c511705521e1e6a18563ebaa602e9c24430946acddbed91340d923df5a' },
 ];
 export const BASELINE_MIGRATIONS = 23;
 export const REHEARSAL_ID = 'rehearse:prepared-import-creation-request-hash';
@@ -63,16 +66,16 @@ export const COMPAT_SPEC = {
 };
 /** Frozen inputs of the compatibility plan: the accepted canonical schema, the complete tracked generated client, and the active migration chain. */
 export const COMPAT_BINDINGS = Object.freeze({
-  schemaSha256: '4fe3d96a334e18e504ea14fd5519a1a363fae5ea6d9845355c9d548698eed174',
-  generatedTreeSha256: 'a750e6b900e00991e818b660f7af67866d1c8ea2ec7774ff2f92f0b40fb54a52',
+  schemaSha256: '4a85c754d067ae64f0f767d5e6cd49f37c6d5f004865257faef66025d6000993',
+  generatedTreeSha256: 'b88f7a3dc76134aaf11d4962159bafde47a5904f9eb7e11e0edc4247cd79083c',
   generatedFiles: Object.freeze({
-    'lib/generated/prisma/internal/class.ts': 'f194d490baba32627a971828abadbcdecb904b0a96ce1e1ca73824019614ec11',
-    'lib/generated/prisma/internal/prismaNamespace.ts': '059962520fae3aa7dbabf3f704e278e0d832c8307101fa8d5f02fa147406866b',
-    'lib/generated/prisma/internal/prismaNamespaceBrowser.ts': '247578b6c493d6fd8a69ff0f55d6beb2a3b943c62091ff1f9459671195f95a47',
+    'lib/generated/prisma/internal/class.ts': '9b6b2597bc60aec0108647f44c869dc1eaa7e9413d5c3e9ae91ae4fdbc2db967',
+    'lib/generated/prisma/internal/prismaNamespace.ts': 'f73d435a34eb6b47093d2dde8bd13ac56af3be81a1abd240c438be466f3ab115',
+    'lib/generated/prisma/internal/prismaNamespaceBrowser.ts': 'fdd5dc8da705cc502370c4785226175f7b1fcf08b96a9305c3bff73ccdb2d20b',
     'lib/generated/prisma/models/PreparedImport.ts': 'd48ac861e7e8d6020d614a6faf706f9f4a146447c0599faabe798a02251af45d',
     'lib/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node': 'a2924eab1c78a0a7bb67edac5738939fa10589ef073af5542f53812a22e4a7d8',
   }),
-  activeChainTreeSha256: 'f0da8710b3c874f842de6b686ae5b025dffd59f8acdab74a6e1c00faadb54ca8',
+  activeChainTreeSha256: 'ad6cf07925c9422a715e0ea90616b45ca1e54a58d1ea0f55ea1496dd8b9ec54a',
 });
 export const T015_ID = 'verify:confirmed-taxonomy-creation';
 export const T015_COMMAND = 'verify-test:confirmed-taxonomy-creation';

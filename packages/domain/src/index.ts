@@ -13,3 +13,4 @@ export * from "./text-source-prepare-job.js";
 export * from "./ai-batch.js";
 
 export * from "./dataset-modality.js";
+export * from "./media-verification.js";

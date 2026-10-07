@@ -11,6 +11,7 @@ import {
   createRoutedWorkerMinio,
   probeMinioProvisioning,
 } from "./providers/index.js";
+import { assertVerifierReadinessWhenEnabled } from "./providers/verifier-readiness.js";
 import { createFoundationWorker } from "./queue/bullmq-worker.js";
 import { failExpiredPreparedImports } from "./queue/import-timeout-scanner.js";
 import { pollDueAiTasks } from "./queue/ai-poll-scanner.js";
@@ -33,6 +34,8 @@ export async function startWorkerReadiness() {
     const minio = createWorkerMinio(config);
     // Scanners delete through the routed client: sealed keys go to the owner identity by key classification, never by caller choice.
     const cleanupMinio = createRoutedWorkerMinio(config);
+    // A2: required only when MEDIA_VERIFICATION_ENABLED=1 (off by default); a missing/non-distinct verifier identity then fails startup closed.
+    assertVerifierReadinessWhenEnabled(config);
     const { connection, queue } = createWorkerQueue(config);
 
     const results: ProviderReadiness[] = [
