@@ -2,7 +2,7 @@ import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { bulkAssetJobInputSchema } from "@annotationplatform/domain/bulk-asset-job";
 
 import { getWorkerConfig } from "../config.js";
-import { createWorkerMinio } from "../providers/minio.js";
+import { createRoutedWorkerMinio } from "../providers/sealed-namespace.js";
 import { cleanupDeletedAssetObject } from "../queue/deleted-asset-cleanup.js";
 import { buildBulkAssetWhere } from "./bulk-asset-selection.js";
 import { cancelJob, completeJob, failJob, heartbeatJob, updateJobProgress } from "./job-claim-lock.js";
@@ -68,7 +68,7 @@ export async function processBulkDeleteAssets(db: PrismaClient, jobId: string, l
     if (await cancellationRequested(db, jobId)) return (await cancelJob(db, { jobId, lockToken })).kind === "updated" ? "canceled" : "refused";
 
     const config = getWorkerConfig();
-    const minio = createWorkerMinio(config);
+    const minio = createRoutedWorkerMinio(config);
     if (!(await setStage(db, jobId, lockToken, "DELETING_ASSETS"))) return "refused";
 
     let processed = 0;

@@ -756,6 +756,17 @@
     ],
     "maintenanceOnly": "release:phase029-backfill-maintenance"
   },
+  "worker:test:sealed-namespace": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/queue/sealed-namespace.test.ts"
+    ]
+  },
   "web:test:upload-verification-boundary": {
     "kind": "test",
     "cwd": "apps/web",

@@ -1,0 +1,125 @@
+{
+  "schema": "phase029-minio-write-audit-allowlist/v1",
+  "generatedFor": "A2 S0 (R9/M1), 2026-10-06",
+  "notes": {
+    "apps/web/src/app/api/assets/presigned-upload/route.ts": "web: presigned POST for a fixed staging key (direct-uploads/…); signed by I-WEB, so IAM confines it to staging",
+    "apps/web/src/lib/imports/local-folder-upload.ts": "web: presigned POST for a fixed staging key (prepared-imports/…); signed by I-WEB",
+    "apps/web/src/lib/asset-upload.ts": "web: deletes an unpublished staged object (direct-uploads/… or prepared-imports/…); I-WEB cannot delete under verified-uploads/",
+    "apps/worker/src/queue/minio-orphan-scanner.ts": "worker GC sweep; reachable FROM THE WEB via lib/imports/import-cleanup.ts (prefix prepared-imports/<datasetId>/ only). Deletions go through the routed client: sealed keys only by I-VERIFIER",
+    "apps/worker/src/providers/sealed-namespace.ts": "sealed-namespace boundary: removeObjects routing by trusted key classification; putObject = readiness probe expecting AccessDenied for non-owner identities",
+    "apps/worker/src/providers/minio.ts": "legacy application-side bucket administration, disabled unless MINIO_LEGACY_APP_ADMIN=1 (decision R11); provisioning owns bucket/lifecycle"
+  },
+  "webDirect": [
+    "apps/web/src/app/api/assets/presigned-upload/route.ts|presignedPostPolicy",
+    "apps/web/src/lib/asset-upload.ts|removeObject",
+    "apps/web/src/lib/imports/local-folder-upload.ts|presignedPostPolicy"
+  ],
+  "sites": [
+    {
+      "file": "apps/web/src/app/api/assets/presigned-upload/route.ts",
+      "method": "presignedPostPolicy",
+      "count": 1
+    },
+    {
+      "file": "apps/web/src/lib/asset-upload.ts",
+      "method": "removeObject",
+      "count": 1
+    },
+    {
+      "file": "apps/web/src/lib/imports/local-folder-upload.ts",
+      "method": "presignedPostPolicy",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/audio-waveform.ts",
+      "method": "putObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/bulk-export-selected.ts",
+      "method": "putObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/bulk-export-selected.ts",
+      "method": "removeObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/export-dataset.ts",
+      "method": "putObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/export-dataset.ts",
+      "method": "removeObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/repository-asset-mirror.ts",
+      "method": "putObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/repository-asset-mirror.ts",
+      "method": "removeObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/text-source-prepare.processor.ts",
+      "method": "putObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/visualization.processor.ts",
+      "method": "putObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/media/audio-derivative.ts",
+      "method": "removeObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/media/minio-compensation.ts",
+      "method": "removeObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/providers/minio.ts",
+      "method": "makeBucket",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/providers/minio.ts",
+      "method": "setBucketLifecycle",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/providers/sealed-namespace.ts",
+      "method": "putObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/providers/sealed-namespace.ts",
+      "method": "removeObjects",
+      "count": 2
+    },
+    {
+      "file": "apps/worker/src/queue/minio-orphan-scanner.ts",
+      "method": "removeObject",
+      "count": 2
+    },
+    {
+      "file": "apps/worker/src/source/text-boundary-derivative.ts",
+      "method": "removeObject",
+      "count": 1
+    }
+  ],
+  "webIndirect": [
+    "apps/worker/src/queue/minio-orphan-scanner.ts"
+  ],
+  "verifierEnvModules": [
+    "apps/worker/src/providers/sealed-namespace.ts"
+  ]
+}
