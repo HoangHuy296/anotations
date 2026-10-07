@@ -137,7 +137,6 @@ PresignedUploadRequest:
         - application/json
         - audio/wav
         - audio/mpeg
-        - audio/ogg
     sizeBytes:
       type: integer
       minimum: 1

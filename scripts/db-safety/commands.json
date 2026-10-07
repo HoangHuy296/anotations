@@ -756,6 +756,17 @@
     ],
     "maintenanceOnly": "release:phase029-backfill-maintenance"
   },
+  "worker:test:classification-boundary": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import/classification-boundary.test.ts"
+    ]
+  },
   "worker:test:sealed-namespace": {
     "kind": "test",
     "cwd": "apps/worker",
@@ -866,6 +877,19 @@
       "--test",
       "--test-concurrency=1",
       "tests/media-processing/ensure-concurrency.test.ts"
+    ]
+  },
+  "web:test:candidate-content-types": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/direct-upload/candidate-content-types.test.ts"
     ]
   }
 }

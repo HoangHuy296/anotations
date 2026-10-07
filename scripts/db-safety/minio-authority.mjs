@@ -124,9 +124,17 @@ export const snapshotDigest = snapshot => sha256(JSON.stringify({
   lifecycle: snapshot.lifecycle,
 }));
 
+/**
+ * A generated secret is passed to `mc admin user add` as a positional argument. A secret whose first base64url character is `-` (1 in 64) is parsed by mc as an
+ * option; the usage error then echoes it into the container log (reproduced with dummy secrets; the runner's secret-output guard failed closed on it:
+ * authoritative-20261007T063209Z-3c621100). Rejection sampling keeps the secret uniformly random over the remaining space; no character is ever substituted.
+ */
+export function newSecretKey(random = randomBytes) {
+  for (;;) { const secret = random(24).toString('base64url'); if (!secret.startsWith('-')) return secret; }
+}
 export function randomCredentials() {
-  const make = prefix => ({ accessKey: `${prefix}${randomBytes(6).toString('hex')}`, secretKey: randomBytes(24).toString('base64url') });
-  return { root: { accessKey: `s0root${randomBytes(4).toString('hex')}`, secretKey: randomBytes(24).toString('base64url') }, web: make('s0web'), worker: make('s0wrk'), verifier: make('s0ver') };
+  const make = prefix => ({ accessKey: `${prefix}${randomBytes(6).toString('hex')}`, secretKey: newSecretKey() });
+  return { root: { accessKey: `s0root${randomBytes(4).toString('hex')}`, secretKey: newSecretKey() }, web: make('s0web'), worker: make('s0wrk'), verifier: make('s0ver') };
 }
 export function collectSecrets(credentials) { return Object.values(credentials).flatMap(entry => [entry.secretKey]); }
 export function assertNoSecrets(text, secrets) { for (const secret of secrets) if (secret && text.includes(secret)) throw Error('S0_SECRET_IN_OUTPUT'); }
