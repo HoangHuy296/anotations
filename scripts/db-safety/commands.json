@@ -830,5 +830,31 @@
       "68d7f474-6982-446c-8c5a-121d56d12dc9",
       "YOLO26s_COCO"
     ]
+  },
+  "web:test:media-processing-client:vitest": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "tests/workspace/media-processing-client.vitest.spec.ts",
+      "tests/workspace/video-tool-capabilities.vitest.spec.tsx",
+      "--pool=threads",
+      "--environment",
+      "node"
+    ]
+  },
+  "web:test:media-processing-concurrency": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media-processing/ensure-concurrency.test.ts"
+    ]
   }
 }

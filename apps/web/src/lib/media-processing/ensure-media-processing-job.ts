@@ -89,7 +89,8 @@ export async function ensureMediaProcessingJob(actor: RequestActor, raw: unknown
   });
   let job: SafeScheduledMediaJob | null = null;
   let reused = false;
-  try {
+  // Serializable isolation makes concurrent first requests for one Asset conflict (P2034); retrying lets the loser find the winner's Job and reuse it.
+  for (let attempt = 0; ; attempt += 1) try {
     job = await db.$transaction(async (tx) => {
       const existing = await findExisting(tx as typeof db);
       if (existing) {
@@ -126,10 +127,13 @@ export async function ensureMediaProcessingJob(actor: RequestActor, raw: unknown
         select: jobSelect,
       });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    break;
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034" && attempt < 5) { await new Promise((resolve) => setTimeout(resolve, 20 * (attempt + 1))); continue; }
     if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
     job = await findExisting(db);
     reused = Boolean(job);
+    break;
   }
   if (!job) return { ok: false, status: 409, code: "MEDIA_SOURCE_STALE" };
   if (reused && job.enqueuedAt) return { ok: true, status: 200, job, reused: true, deliveryPending: false };
