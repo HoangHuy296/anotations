@@ -15,6 +15,7 @@ import {
   isSafeRepositoryImportJobInput,
 } from "@/lib/repository-import/types";
 import { textSourcePrepareJobInputSchema, type TextSourcePrepareJobInput } from "@annotationplatform/domain/text-source-prepare-job";
+import { isMediaVerificationRetryEligible, mediaVerificationJobInputSchema, type MediaVerificationJobInput, type MediaVerificationStatus } from "@annotationplatform/domain/media-verification";
 
 type RetryContext = {
   datasetId: string;
@@ -22,6 +23,9 @@ type RetryContext = {
   modality: "IMAGE" | "VIDEO" | "TEXT" | "AUDIO" | null;
   input: unknown;
   sourceConnectionId: string | null;
+  /** A2: only read for VERIFY_UPLOADED_MEDIA. */
+  errorCode?: string | null;
+  verification?: { status: string; verificationDeadlineAt: Date } | null;
 };
 
 /**
@@ -30,11 +34,19 @@ type RetryContext = {
  * errors, provider connections and storage references never cross retries.
  */
 function extractRetryContext(job: RetryContext): {
-  input: { format: "JSON" | "COCO"; manifestSchemaVersion: "1" } | ReturnType<typeof buildSafeRepositoryImportJobInput> | TextSourcePrepareJobInput;
+  input: { format: "JSON" | "COCO"; manifestSchemaVersion: "1" } | ReturnType<typeof buildSafeRepositoryImportJobInput> | TextSourcePrepareJobInput | MediaVerificationJobInput;
   modality: RetryContext["modality"];
   sourceConnectionId: string | null;
 } | null {
   switch (job.type) {
+    case "VERIFY_UPLOADED_MEDIA": {
+      // Contract section 9 / F12: non-retryability is encoded here. Only an OPERATIONAL failure code, on a verification that is still non-terminal and inside its allowance,
+      // may produce a successor; a deterministic rejection, stale evidence, cancellation or expiry returns null (=> 409). The successor carries only { verificationId, contractVersion }.
+      const parsed = mediaVerificationJobInputSchema.safeParse(job.input);
+      if (!parsed.success || !job.verification) return null;
+      const eligible = isMediaVerificationRetryEligible({ errorCode: job.errorCode ?? null, verificationStatus: job.verification.status as MediaVerificationStatus, now: new Date(), verificationDeadlineAt: job.verification.verificationDeadlineAt });
+      return eligible ? { input: { verificationId: parsed.data.verificationId, contractVersion: parsed.data.contractVersion }, modality: job.modality, sourceConnectionId: null } : null;
+    }
     case "TEXT_SOURCE_PREPARE": {
       // The failed attempt's own recorded identity is reused verbatim (a
       // retry re-attempts the same intent after a transient failure like a
@@ -86,6 +98,17 @@ function extractRetryContext(job: RetryContext): {
   }
 }
 
+/**
+ * A2: the verification a VERIFY_UPLOADED_MEDIA Job belongs to, resolved from the Job's OWN `verificationId` (never through `currentJobId`, which moves to the retry
+ * successor): retrying a superseded predecessor must keep returning its one successor instead of failing.
+ */
+async function loadVerificationFor(client: Pick<typeof db, "mediaVerification">, job: { type: JobType; input: unknown }) {
+  if (job.type !== "VERIFY_UPLOADED_MEDIA") return null;
+  const parsed = mediaVerificationJobInputSchema.safeParse(job.input);
+  if (!parsed.success) return null;
+  return client.mediaVerification.findUnique({ where: { id: parsed.data.verificationId }, select: { status: true, verificationDeadlineAt: true } });
+}
+
 export type RetryJobResult =
   | { ok: false; status: 403 | 404 | 409 }
   | { ok: true; status: 200 | 201 | 202; job: { id: string; datasetId: string; type: JobType; status: JobStatus } };
@@ -96,7 +119,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string, enq
 
   const queueName = await db.job.findUnique({
     where: { id: authorized.job.id },
-    select: { id: true, datasetId: true, type: true, status: true, modality: true, input: true, sourceConnectionId: true },
+    select: { id: true, datasetId: true, type: true, status: true, modality: true, input: true, sourceConnectionId: true, errorCode: true },
   });
   if (!queueName || queueName.status !== JobStatus.FAILED || !resolveQueueName(queueName.type)) {
     return { ok: false, status: 409 };
@@ -104,7 +127,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string, enq
   if (queueName.type === "VISUALIZATION_CAPTURE" || queueName.type === "VISUALIZATION_DERIVE") return requestVisualizationProcessing(actor, queueName.datasetId, jobId, enqueueOptions);
   // AI operations need a paired AiTask and their own recovery rules (non-idempotent provider).
   if (isAiJobType(queueName.type)) return retryAiJob(actor, jobId, enqueueOptions);
-  const context = extractRetryContext(queueName);
+  const context = extractRetryContext({ ...queueName, verification: await loadVerificationFor(db, queueName) });
   if (!context) return { ok: false, status: 409 };
 
   let created = false;
@@ -119,7 +142,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string, enq
       const original = await tx.job.findUnique({
         where: { id: jobId },
         select: {
-          id: true, datasetId: true, type: true, status: true, modality: true, input: true, sourceConnectionId: true,
+          id: true, datasetId: true, type: true, status: true, modality: true, input: true, sourceConnectionId: true, errorCode: true,
           retrySuccessor: { select: { id: true, datasetId: true, type: true, status: true } },
         },
       });
@@ -127,7 +150,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string, enq
         throw new RetryConflict();
       }
       if (original.retrySuccessor) return original.retrySuccessor;
-      const retryContext = extractRetryContext(original);
+      const retryContext = extractRetryContext({ ...original, verification: await loadVerificationFor(tx, original) });
       if (!retryContext || !resolveQueueName(original.type)) throw new RetryConflict();
       if (retryContext.sourceConnectionId) {
         const connection = await tx.sourceConnection.findFirst({
@@ -143,7 +166,7 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string, enq
         if (!connection) throw new RetryConflict();
       }
       created = true;
-      return tx.job.create({
+      const successorJob = await tx.job.create({
         data: {
           datasetId: original.datasetId,
           createdById: actor.id,
@@ -159,6 +182,12 @@ export async function retryAuthorizedJob(actor: RequestActor, jobId: string, enq
         },
         select: { id: true, datasetId: true, type: true, status: true },
       });
+      // A2 (contract section 9): the verification follows its retry successor, so the cap slot, the polling view and the worker all read the CURRENT Job.
+      if (original.type === "VERIFY_UPLOADED_MEDIA") {
+        const verificationId = (retryContext.input as MediaVerificationJobInput).verificationId;
+        await tx.mediaVerification.updateMany({ where: { id: verificationId, status: { in: ["PENDING", "SEALED", "VERIFIED"] } }, data: { currentJobId: successorJob.id } });
+      }
+      return successorJob;
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
       break;
     } catch (error) {

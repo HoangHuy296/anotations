@@ -114,6 +114,21 @@
       "file": "apps/worker/src/source/text-boundary-derivative.ts",
       "method": "removeObject",
       "count": 1
+    },
+    {
+      "file": "apps/worker/src/verification/seal.ts",
+      "method": "copyObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/verification/seal.ts",
+      "method": "removeObject",
+      "count": 2
+    },
+    {
+      "file": "apps/worker/src/verification/terminalize.ts",
+      "method": "removeObject",
+      "count": 1
     }
   ],
   "webIndirect": [

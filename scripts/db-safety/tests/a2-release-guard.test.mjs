@@ -25,15 +25,24 @@ test("the guard passes only when EVERY named consumer knows the value, and refus
   assert.deepEqual(evaluateConsumers({}, probes), { ok: false, offenders: ["NO_CONSUMER_NAMED"] });
 });
 
-test("static scan: nothing in this increment CREATES a VERIFY_UPLOADED_MEDIA Job; the literal appears only in the contract, transport, router-guard and registration modules", () => {
+test("static scan: the ONLY site that CREATES a VERIFY_UPLOADED_MEDIA Job is the admission module, behind the release guard; every other mention is the contract, transport, routing, retry, refusal or processor", () => {
+  const creator = "apps/web/src/lib/media-verification/admission.ts";
   const allowed = new Set([
-    "packages/domain/src/media-verification.ts", "packages/queue/src/job-contract.ts", "packages/queue/src/job-contract.test.ts",
+    creator, "packages/domain/src/media-verification.ts", "packages/queue/src/job-contract.ts", "packages/queue/src/job-contract.test.ts",
     "apps/worker/src/queue/queue-router.ts", "apps/worker/src/jobs/media-verification-registration.ts",
+    // A2.4 consumers (read/filter/process; none creates a Job): processor, scanners, retry mapping, hand-made-Job refusal, safe error codes.
+    "apps/worker/src/verification/process.ts", "apps/worker/src/queue/media-verification-scanners.ts",
+    "apps/web/src/lib/jobs/retry-job.ts", "apps/web/src/lib/jobs/authorization.ts", "apps/web/src/lib/jobs/safe-job-status.ts",
   ]);
   const walk = dir => readdirSync(join(root, dir)).flatMap(name => { const rel = `${dir}/${name}`; if (["node_modules", "dist", ".next"].includes(name)) return []; return statSync(join(root, rel)).isDirectory() ? walk(rel) : [rel]; });
   const sources = ["apps/web/src", "apps/worker/src", "apps/realtime/src", "packages/domain/src", "packages/queue/src"].flatMap(walk).filter(file => /\.(ts|tsx|mjs|js)$/.test(file));
   const hits = sources.filter(file => /VERIFY_UPLOADED_MEDIA/.test(readFileSync(join(root, file), "utf8")));
-  assert.deepEqual(hits.filter(file => !allowed.has(file)), [], "no creation site, no consumer and no web usage exists yet");
-  for (const file of hits) assert.equal(/job\.create\(|jobType:|type:\s*["']VERIFY_UPLOADED_MEDIA["']\s*,\s*(modality|status)/.test(readFileSync(join(root, file), "utf8")), false, `${file} creates no Job`);
+  assert.deepEqual(hits.filter(file => !allowed.has(file)), [], "no unreviewed file mentions the verification Job type");
+  const creates = file => /type:\s*["']VERIFY_UPLOADED_MEDIA["']/.test(readFileSync(join(root, file), "utf8")) && /job\.create\(/.test(readFileSync(join(root, file), "utf8"));
+  assert.deepEqual(hits.filter(creates), [creator], "exactly one creation site");
+  const admission = readFileSync(join(root, creator), "utf8");
+  assert.ok(admission.indexOf("assertMediaVerificationJobCreationAllowed()") > -1 && admission.indexOf("assertMediaVerificationJobCreationAllowed()") < admission.indexOf("job.create("), "the release guard runs before the Job is created");
+  assert.match(readFileSync(join(root, "apps/web/src/lib/jobs/authorization.ts"), "utf8"), /type === "VERIFY_UPLOADED_MEDIA"\) return \{ ok: false/, "a browser-supplied Job request can never create one");
   assert.equal(readFileSync(join(root, "packages/domain/src/media-verification.ts"), "utf8").includes("export function createMediaVerificationJob"), false);
 });
+

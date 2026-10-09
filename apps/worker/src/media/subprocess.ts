@@ -2,7 +2,9 @@ import { spawn } from "node:child_process";
 
 export type MediaProcessResult =
   | { kind: "completed"; exitCode: number; stdout: Buffer; stderr: Buffer }
-  | { kind: "failed"; exitCode: number | null }
+  // `signal`/`stderr` are additive (A2.4): a signal-terminated or non-zero exit is distinguishable, and the bounded stderr is available to the
+  // version-pinned demuxer-invalid marker check. Existing callers ignore them.
+  | { kind: "failed"; exitCode: number | null; signal?: NodeJS.Signals | null; stderr?: Buffer }
   | { kind: "canceled" }
   | { kind: "timed_out" }
   | { kind: "output_limit_exceeded" }
@@ -78,10 +80,10 @@ export async function runBoundedMediaProcess(input: RunBoundedMediaProcessInput)
     child.stderr.on("data", (chunk: Buffer) => {
       if (!appendBounded(stderr, Buffer.from(chunk), stderrSize, input.maxOutputBytes)) terminate({ kind: "output_limit_exceeded" });
     });
-    child.once("close", (code) => {
+    child.once("close", (code, signal) => {
       if (terminal) return finish(terminal);
       if (code === 0) return finish({ kind: "completed", exitCode: 0, stdout: Buffer.concat(stdout), stderr: Buffer.concat(stderr) });
-      return finish({ kind: "failed", exitCode: code });
+      return finish({ kind: "failed", exitCode: code, signal, stderr: Buffer.concat(stderr) });
     });
 
     timeoutTimer = setTimeout(() => terminate({ kind: "timed_out" }), input.timeoutMs).unref();

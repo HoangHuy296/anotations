@@ -5,6 +5,7 @@ import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { cleanupUnpublishedObject, publishUploadedAsset, UploadPublicationFailure } from "@/lib/asset-upload";
 import { getDirectUploadProviders } from "@/lib/providers";
+import { replayExistingVerification, routeToMediaVerification } from "@/lib/media-verification/routing";
 import { verifyUploadCapability } from "@/lib/upload-capability";
 import { UploadVerificationFailure, verifyUploadedObject } from "@/lib/upload-verification";
 import { completeUploadSchema } from "@/lib/validation/upload";
@@ -38,6 +39,10 @@ export async function POST(request: Request) {
   if (!access) return apiError(404, "GITEA_NOT_FOUND", "The dataset was not found.");
   if (access.forbidden || capability.actorId !== actor.id) return apiError(403, "FORBIDDEN", "You do not have permission to complete this upload.");
 
+  // A2 replay: a completion that already has a live or PUBLISHED verification answers from it without touching the (possibly sealed and removed) staged object.
+  const existing = await replayExistingVerification({ bucket: providers.config.MINIO_BUCKET, objectKey: capability.objectKey });
+  if (existing) return existing.dto.status === "PUBLISHED" && existing.dto.asset ? apiSuccess({ asset: existing.dto.asset, replayed: true }, { status: 200 }) : apiSuccess({ verification: existing.dto }, { status: 202 });
+
   try {
     const verified = await verifyUploadedObject(
       providers.minio,
@@ -49,6 +54,21 @@ export async function POST(request: Request) {
     const published = await publishUploadedAsset({ capability, verified, bucket: providers.config.MINIO_BUCKET });
     return apiSuccess({ asset: published.asset, replayed: published.replayed }, { status: published.replayed ? 200 : 201 });
   } catch (error) {
+    // A2: an object the lightweight verifier cannot classify, declared video/mp4|webm into a VIDEO Dataset, is verified by the durable pipeline INSTEAD of being deleted.
+    // Nothing is published and the staged object is kept; the Asset appears only after the worker's authoritative verification.
+    if (error instanceof UploadVerificationFailure && error.code === "UNSUPPORTED_MEDIA") {
+      const routed = await routeToMediaVerification({ minio: providers.minio, bucket: providers.config.MINIO_BUCKET, capability, source: "DIRECT_UPLOAD" });
+      if (routed.kind === "refused") {
+        return routed.result.status === 429
+          ? apiError(429, "UPLOAD_VERIFICATION_LIMIT_REACHED", "Too many uploads are awaiting verification. Try again shortly.", undefined, { "Retry-After": "30" }, { scope: routed.result.scope, limit: routed.result.limit })
+          : apiError(503, "UPLOAD_VERIFICATION_BUSY", "Upload verification is busy. Try again shortly.", undefined, { "Retry-After": "5" });
+      }
+      if (routed.kind === "not_ready") return apiError(409, "UPLOAD_NOT_READY", "The uploaded object is not ready.");
+      if (routed.kind === "admitted") {
+        if (routed.dto.status === "PUBLISHED" && routed.dto.asset) return apiSuccess({ asset: routed.dto.asset, replayed: true }, { status: 200 });
+        return apiSuccess({ verification: routed.dto }, { status: 202 });
+      }
+    }
     await cleanupUnpublishedObject(providers.minio, providers.config.MINIO_BUCKET, capability.objectKey);
     if (error instanceof UploadVerificationFailure) {
       return verificationError(error);

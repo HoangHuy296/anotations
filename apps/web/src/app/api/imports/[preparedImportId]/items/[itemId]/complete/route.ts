@@ -13,8 +13,13 @@ export async function POST(request: Request, context: { params: Promise<{ prepar
   const result = await completeLocalFolderItem(actor, preparedImportId, itemId, parsed.data.fileId);
   if (!result.ok) {
     const code = result.code;
+    // A2 (contract sections 8 and 10): admission refusals keep their own, retryable semantics and never count the item as rejected.
+    if (result.status === 429) return apiError(429, "UPLOAD_VERIFICATION_LIMIT_REACHED", "Too many uploads are awaiting verification. Try again shortly.", undefined, { "Retry-After": "30" }, { scope: (result as { scope?: string }).scope, limit: (result as { limit?: number }).limit });
+    if (code === "UPLOAD_VERIFICATION_BUSY") return apiError(503, "UPLOAD_VERIFICATION_BUSY", "Upload verification is busy. Try again shortly.", undefined, { "Retry-After": "5" });
     const allowed = new Set(["INVALID_REQUEST", "UPLOAD_CONFLICT", "DATASET_MODALITY_UNRESOLVED", "ASSET_MODALITY_MISMATCH", "UNSUPPORTED_MEDIA", "INVALID_MEDIA", "UPLOAD_NOT_READY", "INVALID_RELATIVE_PATH", "ASSET_WRITES_PAUSED_FOR_MIGRATION", "IMPORT_ITEM_RETRYABLE"] as const);
-    return apiError(result.status, allowed.has(code as never) ? code as "UPLOAD_CONFLICT" : "INTERNAL_ERROR", "The import item could not be completed.", undefined, undefined, "accepted" in result ? { outcome: result.outcome, accepted: result.accepted, unchanged: result.unchanged, rejected: result.rejected, retryable: result.retryable, unprocessed: result.unprocessed } : undefined);
+    return apiError(result.status, allowed.has(code as never) ? code as "UPLOAD_CONFLICT" : "INTERNAL_ERROR", "The import item could not be completed.", undefined, undefined, "accepted" in result && result.accepted !== undefined ? { outcome: (result as { outcome?: string }).outcome, accepted: result.accepted, unchanged: result.unchanged, rejected: result.rejected, retryable: result.retryable, unprocessed: result.unprocessed } : undefined);
   }
+  // A2: 202 = accepted for verification, NOT published. The item is accounted as `verifying`; the client polls the verification and commits after it settles.
+  if (result.status === 202) return apiSuccess({ verification: result.verification, replayed: result.replayed, accepted: result.accepted, unchanged: result.unchanged, rejected: result.rejected, retryable: result.retryable, unprocessed: result.unprocessed, verifying: result.verifying, completed: result.completed, total: result.total }, { status: 202 });
   return apiSuccess({ assetId: result.assetId, replayed: result.replayed, disposition: result.disposition, accepted: result.accepted, unchanged: result.unchanged, rejected: result.rejected, retryable: result.retryable, unprocessed: result.unprocessed, completed: result.completed, total: result.total }, { status: result.status });
 }

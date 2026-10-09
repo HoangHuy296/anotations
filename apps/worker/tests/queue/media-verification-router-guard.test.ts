@@ -2,7 +2,7 @@ import "../../../../scripts/db-safety/test-entry.cjs"; // G1 gate (offline test:
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { MEDIA_VERIFICATION_PROCESSOR_REGISTERED } from "../../src/jobs/media-verification-registration.js";
+import { isMediaVerificationProcessorRegistered } from "../../src/jobs/media-verification-registration.js";
 import { routeQueueDelivery } from "../../src/queue/queue-router.js";
 
 // A2 foundation: VERIFY_UPLOADED_MEDIA is transport-supported but has no processor. The router must refuse it BEFORE claiming, so such a Job can never be left RUNNING.
@@ -18,7 +18,7 @@ function fakeDb(type: string) {
   return { db: db as never, events, claims };
 }
 
-test("no processor is registered in this increment", () => assert.equal(MEDIA_VERIFICATION_PROCESSOR_REGISTERED, false));
+test("a processor is registered only when verifier dependencies exist", () => { assert.equal(isMediaVerificationProcessorRegistered(null), false); assert.equal(isMediaVerificationProcessorRegistered(undefined), false); assert.equal(isMediaVerificationProcessorRegistered({} as never), true); });
 
 test("a delivered VERIFY_UPLOADED_MEDIA Job is skipped as UNSUPPORTED_TYPE before any claim, with a safe QUEUE_SKIPPED event", async () => {
   const { db, events, claims } = fakeDb("VERIFY_UPLOADED_MEDIA");

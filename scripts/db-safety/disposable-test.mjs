@@ -30,7 +30,12 @@ import { computeImplementation as maintenanceImplementation, manifestDigest as m
 import { runMaintenanceRehearsal } from './backfill-maintenance-rehearsal.mjs';
 import { readTree as readClientTree, treeHash as clientTreeHash } from './prisma-client-stage.mjs';
 
-export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation'];
+export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap'];
+/**
+ * A2.4 runtime commands. They exercise the verification tables, so (unlike every other focused test, which runs on the 24-migration chain) they run on the
+ * promoted 26-migration chain: the reviewed M24, M25 and M26 are applied from their pinned bytes, exactly as in release:phase029-a2-chain.
+ */
+export const A2_RUNTIME_COMMANDS = Object.freeze(['worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap']);
 const PROMOTED = 'prisma/migrations';
 /**
  * Ordered, frozen Phase029 chain applied AFTER the 23 historical migrations. Since the release-chain promotion these two
@@ -181,14 +186,14 @@ function treeHash(root, rel) {
   return sha(files.map(file => file.slice(base.length) + ':' + sha(readFileSync(file))).join('\n'));
 }
 
-/** Resolves a validated name to its plan. Test plans stay migration-24-only. */
+/** Resolves a validated name to its plan. Test plans stay migration-24-only, except the reviewed A2.4 runtime commands (26-migration chain). */
 export function resolvePlan(name) {
   if (Object.hasOwn(REHEARSALS, name)) return { kind: 'rehearsal', id: name, ...REHEARSALS[name] };
   if (Object.hasOwn(COMPATIBILITY, name)) return { kind: 'compat', id: name, ...COMPATIBILITY[name] };
   if (Object.hasOwn(RELEASES, name)) return { kind: 'release', id: name, ...RELEASES[name] };
   if (Object.hasOwn(BACKFILLS, name)) return { kind: 'backfill', id: name, ...BACKFILLS[name] };
   if (Object.hasOwn(MAINTENANCE, name)) return { kind: 'maintenance', id: name, ...MAINTENANCE[name] };
-  return { kind: 'test', id: name, through: 1 };
+  return { kind: 'test', id: name, through: A2_RUNTIME_COMMANDS.includes(name) ? 3 : 1 };
 }
 
 const activeNames = root => readdirSync(join(root, 'prisma/migrations'), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();

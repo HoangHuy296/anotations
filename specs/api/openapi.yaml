@@ -130,6 +130,10 @@ components:
       $ref: './schemas/assets.yaml#/CompleteUploadRequest'
     CompleteUploadResponse:
       $ref: './schemas/assets.yaml#/CompleteUploadResponse'
+    UploadVerification:
+      $ref: './schemas/assets.yaml#/UploadVerification'
+    UploadVerificationAccepted:
+      $ref: './schemas/assets.yaml#/UploadVerificationAccepted'
     AssetViewUrlResponse:
       $ref: './schemas/assets.yaml#/AssetViewUrlResponse'
 
@@ -1647,6 +1651,36 @@ paths:
                   value: { error: { code: GITEA_NOT_FOUND, message: The dataset was not found. } }
         '500': { $ref: '#/components/responses/InternalError' }
 
+  /api/uploads/verifications/{verificationId}:
+    get:
+      tags: [Assets]
+      operationId: getUploadVerification
+      summary: Poll one upload verification
+      description: >-
+        Returns the current state of a durable upload verification (A2). Visible to the requester while they still hold "asset.upload" and to any "dataset.read" holder;
+        a foreign or unknown id is 404. HTTP 200 for every recorded state.
+      parameters:
+        - name: verificationId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: The verification state.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/UploadVerification' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: UPLOAD_VERIFICATION_NOT_FOUND -- unknown, malformed or inaccessible id.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+
   /api/assets/complete-upload:
     post:
       tags: [Assets]
@@ -1680,6 +1714,28 @@ paths:
                 required: [data]
                 properties:
                   data: { $ref: '#/components/schemas/CompleteUploadResponse' }
+        '202':
+          description: >-
+            Accepted for verification, NOT published (A2, only for a video/mp4 or video/webm declared upload into a VIDEO dataset while media verification is enabled).
+            Poll GET /api/uploads/verifications/{verificationId}; an Asset exists only once the verification is PUBLISHED. Replaying the same completion while the
+            verification is live returns the same record.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/UploadVerificationAccepted' }
+        '429':
+          description: UPLOAD_VERIFICATION_LIMIT_REACHED -- 50 non-terminal verifications per actor or per dataset. Carries `scope` and `limit` and a Retry-After header; the staged object is kept.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: UPLOAD_VERIFICATION_BUSY -- the admission transaction could not be serialized; retry shortly (Retry-After).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
         '400':
           description: Invalid input, or the upload capability is invalid/expired, or it belongs to a prepared import.
           content:
@@ -3261,7 +3317,9 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ApiError' }
         '409':
-          description: IMPORT_INCOMPLETE -- not every prepared file has completed, or JOB_CONFLICT -- the import cannot be committed in its current state.
+          description: >-
+            IMPORT_INCOMPLETE -- not every prepared file has completed; UPLOAD_VERIFICATION_PENDING -- some videos are still being verified (the import Job is NOT failed; repeat the
+            commit once they settle; the body carries a `verifying` count); or JOB_CONFLICT -- the import cannot be committed in its current state.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ApiError' }
@@ -3553,6 +3611,16 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ApiError' }
+        '409':
+          description: >-
+            DATASET_MODALITY_IMMUTABLE -- a Dataset's modality is fixed at creation; any request body that carries a `modality` field is refused with this code
+            (the rest of the Dataset is unchanged). The modality of a legacy unresolved Dataset is assigned only through its dedicated resolution route.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+              examples:
+                default:
+                  value: { error: { code: DATASET_MODALITY_IMMUTABLE, message: Dataset modality cannot be changed. } }
     delete:
       tags: [Dataset]
       operationId: archiveDataset
@@ -4290,6 +4358,27 @@ paths:
                 required: [data]
                 properties:
                   data: { $ref: '#/components/schemas/CompleteLocalFolderItemResponse' }
+        '202':
+          description: >-
+            Accepted for verification, NOT published (A2: a video/mp4 or video/webm declared file in a VIDEO dataset). The item is accounted as `verifying`, never as accepted.
+            Poll GET /api/uploads/verifications/{verificationId}, then commit.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: '#/components/schemas/UploadVerificationAccepted' }
+        '429':
+          description: UPLOAD_VERIFICATION_LIMIT_REACHED -- 50 non-terminal verifications per actor or dataset; the item stays uncompleted (Retry-After).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
+        '503':
+          description: UPLOAD_VERIFICATION_BUSY (retry shortly) or ASSET_WRITES_PAUSED_FOR_MIGRATION.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ApiError' }
         '400':
           description: >-
             INVALID_REQUEST -- malformed request body, or the fileId capability does

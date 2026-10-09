@@ -106,8 +106,24 @@ export function classOfPremedia(document: ProbeDocument): "VIDEO" | "AUDIO" | "S
 }
 
 // ---- Probe completion (section 6.2 step 9, R5): only a COMPLETED probe may classify; everything else is operational and is never a REJECTED verdict.
-/** Frozen, version-keyed demuxer-invalid markers. EMPTY until the G-PROBE characterization proves non-overlap for a pinned ffprobe version: every non-zero exit is then operational. */
-export const FFPROBE_INVALID_MARKERS: Readonly<Record<string, readonly { exitCode: number; stderr: RegExp }[]>> = Object.freeze({});
+/**
+ * Frozen, version-keyed demuxer-invalid markers (G-PROBE, contract section 6.2 step 9). A version absent from this table has NO markers: every non-zero exit is operational.
+ *
+ * `5.1.9-0+deb12u1` (the pinned worker image): exit status 1 with the final line `<path>: Invalid data found when processing input`, which the demuxer emits when the container
+ * header of a fully readable file cannot be parsed (forged/random/empty/text content, mp4 without moov, Matroska without a valid EBML header). Characterization on the pinned image
+ * (scripts/db-safety/a2-probe-markers.mjs -> tests/media/fixtures/probe-characterization.json) shows this exact pair does NOT occur for a read I/O error, permission denied, missing
+ * file, directory, dangling link, memory exhaustion, SIGKILL or a timeout, and that a Matroska file truncated by content ends in `Input/output error` / `End of file` (kept operational,
+ * never a marker). The marker also matches a file truncated by INFRASTRUCTURE: that overlap is excluded by construction because the verifier only invokes ffprobe on a temp file
+ * whose byte count equals the recorded sealed size and whose sealed identity was re-checked around the read (a short read is an operational storage failure and never reaches ffprobe).
+ */
+export const FFPROBE_INVALID_MARKERS: Readonly<Record<string, readonly { exitCode: number; stderr: RegExp }[]>> = Object.freeze({
+  "5.1.9-0+deb12u1": Object.freeze([Object.freeze({ exitCode: 1, stderr: /: Invalid data found when processing input\s*$/m })]),
+});
+
+/** `ffprobe version 5.1.9-0+deb12u1 Copyright ...` -> `5.1.9-0+deb12u1`; anything else -> `unknown` (which has no markers). */
+export function parseFfprobeVersion(banner: string): string {
+  return /^ffprobe version (\S+)/.exec(banner.trim())?.[1] ?? "unknown";
+}
 
 export type ProbeCompletionInput = { ffprobeVersion: string; spawnError: boolean; timedOut: boolean; signal: string | null; exitCode: number | null; stdoutTruncated: boolean; stdout: string; stderr: string };
 export type ProbeCompletion =

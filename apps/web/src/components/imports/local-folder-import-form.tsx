@@ -12,10 +12,12 @@ import { buildFolderStartBody, changeModality, confirmedClassesMessage, initialC
 import { Button } from "@/components/ui/button";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 import { sha256HexAuto } from "@/lib/browser-sha256";
+import { pollVerification } from "@/lib/client/verification-polling";
+import { partitionUploadSelection, skippedFilesMessage } from "@/lib/imports/upload-content-type";
 
 type Prepared = { id: string; datasetId: string; jobId: string; items: { id: string }[] };
 type Capability = { itemId: string; fileId: string; uploadUrl: string; formFields: Record<string, string> };
-type FileEntry = { file: File; logicalPath: string; fingerprint: string };
+type FileEntry = { file: File; logicalPath: string; fingerprint: string; contentType: string };
 type ImportStep = "idle" | "scanning" | "preparing" | "uploading" | "ready" | "failed";
 
 async function fingerprint(file: File) {
@@ -73,8 +75,11 @@ export function LocalFolderImportForm({ datasetId, datasetName, datasetModality,
     const selected = Array.from(input?.files ?? []);
     setStep("scanning"); setMessage(null); setCompleted(0); setJobId(null);
     try {
-      const entries = await Promise.all(selected.map(async (file) => ({ file, logicalPath: file.webkitRelativePath || file.name, fingerprint: await fingerprint(file) })));
+      // The declared type comes from the extension (deterministic), not the browser's unreliable MIME; unsupported files are reported and skipped, never sent.
+      const { supported, skipped } = partitionUploadSelection(selected);
+      const entries = await Promise.all(supported.map(async ({ file, contentType }) => ({ file, contentType, logicalPath: file.webkitRelativePath || file.name, fingerprint: await fingerprint(file) })));
       setFiles(entries);
+      setMessage(skippedFilesMessage(skipped));
       if (!appendMode && !name && entries.length) {
         const [first] = entries;
         const defaultName = first?.logicalPath.includes("/") ? first.logicalPath.split("/")[0] : first?.file.name.replace(/\.[^./]+$/, "");
@@ -89,10 +94,11 @@ export function LocalFolderImportForm({ datasetId, datasetName, datasetModality,
   async function submit() {
     if ((!appendMode && (!name.trim() || !modality)) || !files.length) return;
     // A key is minted per submit (this flow retains none). Invalid confirmed classes never become a request.
-    const built = buildFolderStartBody({ appendMode, name, modality, classes: confirmedClasses, idempotencyKey: randomUUIDAuto() + randomUUIDAuto(), items: files.map(({ file, logicalPath, fingerprint }) => ({ logicalPath, contentType: file.type || "text/plain", sizeBytes: file.size, fingerprint })) });
+    const built = buildFolderStartBody({ appendMode, name, modality, classes: confirmedClasses, idempotencyKey: randomUUIDAuto() + randomUUIDAuto(), items: files.map(({ file, logicalPath, fingerprint, contentType }) => ({ logicalPath, contentType, sizeBytes: file.size, fingerprint })) });
     if (!built.ok) { setMessage(confirmedClassesMessage(built.issue)); return; }
     setStep("preparing"); setMessage(null); setCompleted(0); setJobId(null);
     let accepted = 0; let unchanged = 0; let rejected = 0; let retryable = 0;
+    const verifying: string[] = [];
     try {
       const started = await fetch(appendMode ? `/api/datasets/${datasetId}/imports/local-folder` : "/api/imports/local-folder", {
         method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin",
@@ -128,6 +134,13 @@ export function LocalFolderImportForm({ datasetId, datasetName, datasetModality,
         const completedResponse = await fetch(`/api/imports/${preparation.id}/items/${capability.itemId}/complete`, {
           method: "POST", headers: { "content-type": "application/json" }, credentials: "same-origin", body: JSON.stringify({ fileId: capability.fileId }),
         });
+        // A2: 202 = accepted for verification, NOT published. Never count it as accepted; it is resolved below, before the import is committed.
+        if (completedResponse.status === 202) {
+          const pending = await completedResponse.json().catch(() => null) as { data?: { verification?: { id?: string } } } | null;
+          if (pending?.data?.verification?.id) verifying.push(pending.data.verification.id); else retryable += 1;
+          if (mountedRef.current) setCompleted(index + 1);
+          continue;
+        }
         if (completedResponse.ok) {
           const completionBody = await completedResponse.json().catch(() => null) as { data?: { disposition?: "accepted" | "unchanged" } } | null;
           if (completionBody?.data?.disposition === "unchanged") unchanged += 1; else accepted += 1;
@@ -139,11 +152,23 @@ export function LocalFolderImportForm({ datasetId, datasetName, datasetModality,
         }
         if (mountedRef.current) setCompleted(index + 1);
       }
+      for (let index = 0; index < verifying.length; index += 1) {
+        if (mountedRef.current) setMessage(`Verifying video ${index + 1} of ${verifying.length}. The file is published only after it passes verification.`);
+        const final = await pollVerification(verifying[index]!);
+        if (final.status === "PUBLISHED") accepted += 1; else if (final.status === "REJECTED") rejected += 1; else retryable += 1;
+      }
       // Every prepared item is durably accounted for: finalize the import
       // immediately instead of waiting for a manual "Commit import" click.
       // The job page (apps/web/src/components/jobs/job-detail-client.tsx)
       // retries this same idempotent call on its own if it is ever lost.
-      const commitResponse = await fetch(`/api/jobs/${preparation.jobId}/commit-import`, { method: "POST", credentials: "same-origin" });
+      let commitResponse = await fetch(`/api/jobs/${preparation.jobId}/commit-import`, { method: "POST", credentials: "same-origin" });
+      // D9: a verification that is still settling answers 409 UPLOAD_VERIFICATION_PENDING (the import is NOT failed); wait briefly and commit again.
+      for (let wait = 0; wait < 20 && commitResponse.status === 409; wait += 1) {
+        const pendingBody = await commitResponse.clone().json().catch(() => null) as { error?: { code?: string } } | null;
+        if (pendingBody?.error?.code !== "UPLOAD_VERIFICATION_PENDING") break;
+        await new Promise((resolve) => setTimeout(resolve, 2_000));
+        commitResponse = await fetch(`/api/jobs/${preparation.jobId}/commit-import`, { method: "POST", credentials: "same-origin" });
+      }
       if (!commitResponse.ok) {
         const commitBody = await commitResponse.json().catch(() => null) as { error?: { code?: string; accepted?: number; rejected?: number; retryable?: number; unprocessed?: number; message?: string } } | null;
         if (commitBody?.error?.code === "IMPORT_INCOMPLETE") {
