@@ -18,15 +18,15 @@ export function WorkspaceSettingsOverlay() {
 
   return (
     <>
-      <button ref={triggerRef} type="button" aria-label="Settings" onClick={() => setOpen(true)} className="grid size-9 place-items-center rounded-lg text-zinc-600 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-sky-500">
+      <button ref={triggerRef} type="button" aria-label="Settings" onClick={() => setOpen(true)} className="grid size-9 place-items-center rounded-xl text-zinc-600 transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-sky-500 dark:text-zinc-400 dark:hover:bg-zinc-800">
         <GearSix aria-hidden="true" size={17} />
       </button>
       {open ? (
-        <div className="fixed inset-0 z-[100] bg-zinc-950/45 p-2 sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) closeOverlay(); }}>
-          <section role="dialog" aria-modal="true" aria-label="Workspace settings" className="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 px-4">
-              <h2 className="text-sm font-semibold text-zinc-900">Settings</h2>
-              <button ref={closeRef} type="button" aria-label="Close settings" onClick={closeOverlay} className="grid size-8 place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-sky-500"><X aria-hidden="true" size={17} /></button>
+        <div className="fixed inset-0 z-[100] bg-zinc-950/55 p-2 backdrop-blur-[2px] sm:p-5 lg:p-8" onMouseDown={(event) => { if (event.target === event.currentTarget) closeOverlay(); }}>
+          <section role="dialog" aria-modal="true" aria-label="Workspace settings" className="mx-auto flex h-full max-w-[1440px] flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-950">
+            <div className="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 px-4 dark:border-zinc-800">
+              <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Settings</h2>
+              <button ref={closeRef} type="button" aria-label="Close settings" onClick={closeOverlay} className="grid size-8 place-items-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-sky-500 dark:text-zinc-400 dark:hover:bg-zinc-800"><X aria-hidden="true" size={17} /></button>
             </div>
             <iframe title="Account settings" src="/account#account" className="min-h-0 flex-1 border-0" />
           </section>

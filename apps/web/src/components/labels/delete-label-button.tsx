@@ -44,7 +44,7 @@ export function DeleteLabelButton({
   return (
     <div className="flex flex-wrap items-center justify-end gap-3">
       <span
-        className="text-right text-[11px] leading-4 text-rose-600"
+        className="text-right text-[11px] leading-4 text-rose-600 dark:text-rose-400"
         aria-live="polite"
       >
         {message}
@@ -53,7 +53,7 @@ export function DeleteLabelButton({
         type="button"
         variant="ghost"
         size="sm"
-        className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+        className="text-rose-600 hover:bg-rose-50 hover:text-rose-700 dark:text-rose-400 dark:hover:bg-rose-950/50 dark:hover:text-rose-300"
         disabled={disabled}
         onClick={handleDelete}
         title={

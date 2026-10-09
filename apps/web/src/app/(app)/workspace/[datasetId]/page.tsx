@@ -11,6 +11,7 @@ import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { getRequestActor } from "@/lib/auth";
 import { isDatabaseConfigured } from "@/lib/db";
 import { readDatasetModality } from "@/lib/datasets/modality";
+import { readAccountPreferences } from "@/lib/validation/account-preferences";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 import { workspaceListQuerySchema } from "@/lib/validation/image-workspace";
 import { readSafeDiscussionCommentId, readWorkspacePage, readWorkspaceSelection, readWorkspaceWorkflow } from "@/lib/workspace/workspace-read";
@@ -34,10 +35,11 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   if (!isDatabaseConfigured()) return <WorkspaceSetupState />;
   const actor = await getRequestActor();
   if (!actor) notFound();
+  const theme = readAccountPreferences(actor.preferences).theme;
   const dataset = await readDatasetModality(actor, datasetId);
   if (!dataset) notFound();
   if (dataset.modality === null) return <div key={dataset.id} className="flex min-h-100dvh flex-col bg-zinc-100">
-    <WorkspaceHeader datasetName={dataset.name} branch="Unresolved dataset" repositoryFullName="Dataset storage" rootPath="" engine={null} actor={{ email: actor.email, name: actor.name }} />
+    <WorkspaceHeader datasetName={dataset.name} branch="Unresolved dataset" repositoryFullName="Dataset storage" rootPath="" engine={null} actor={{ email: actor.email, name: actor.name }} theme={theme} />
     <WorkspaceEngine dataset={dataset} selection={null} />
   </div>;
   const query = await searchParams;
@@ -112,7 +114,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
     sort: listQuery.sort, order: listQuery.order,
   };
   return <div key={datasetId} className="flex min-h-100dvh flex-col bg-zinc-100">
-    <WorkspaceHeader key={datasetId} datasetName={workspace.dataset.name} branch={`${engine.toLowerCase()} workspace`} repositoryFullName="Dataset storage" rootPath="" engine={engine} actor={{ email: actor.email, name: actor.name }} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId, commentId: safeDiscussionCommentId }} />
+    <WorkspaceHeader key={datasetId} datasetName={workspace.dataset.name} branch={`${engine.toLowerCase()} workspace`} repositoryFullName="Dataset storage" rootPath="" engine={engine} actor={{ email: actor.email, name: actor.name }} theme={theme} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId, commentId: safeDiscussionCommentId }} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
       <DatasetSidebar key={datasetId} datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={engine} filters={filters} />
       <WorkspaceEngine dataset={workspace.dataset} selection={selected} />

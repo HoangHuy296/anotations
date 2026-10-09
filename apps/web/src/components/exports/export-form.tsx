@@ -69,22 +69,22 @@ export function ExportForm({ datasets }: { datasets: Array<{ id: string; name: s
     });
   }
 
-  if (datasets.length === 0) return <div className="mt-7 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center text-sm leading-6 text-zinc-500">Create or join a dataset before requesting an export.</div>;
+  if (datasets.length === 0) return <div className="mt-7 rounded-2xl border border-dashed border-zinc-300 bg-zinc-50 p-8 text-center text-sm leading-6 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-zinc-400">Create or join a dataset before requesting an export.</div>;
 
   return <div className="mt-7 grid gap-7 xl:grid-cols-[minmax(300px,0.72fr)_minmax(0,1.28fr)]">
-    <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 lg:p-6">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">New export</p>
-      <h2 className="mt-2 text-lg font-bold text-zinc-950">Annotation manifest</h2>
-      <p className="mt-2 text-sm leading-6 text-zinc-500">Exports are generated asynchronously. JSON is the lossless, complete platform manifest; COCO is the interoperable image-annotation export.</p>
-      <label className="mt-6 block"><span className="text-xs font-semibold text-zinc-700">Dataset</span><select className="mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100" disabled={isPending} onChange={(event) => setDatasetId(event.target.value)} value={datasetId}>{datasets.map((dataset) => <option key={dataset.id} value={dataset.id}>{dataset.name}</option>)}</select></label>
-      <label className="mt-4 block"><span className="text-xs font-semibold text-zinc-700">Format</span><select className="mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100" disabled={isPending} onChange={(event) => setFormat(event.target.value as ExportFormat)} value={format}><option value="JSON">JSON (full platform manifest)</option><option value="COCO">COCO (image annotations)</option></select></label>
-      {format === "COCO" && <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900">COCO export includes bounding-box annotations on IMAGE assets only. Other geometry types, unlabeled annotations, and rejected annotations are skipped and reported in the export summary.</p>}
+    <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 lg:p-6 dark:border-zinc-800 dark:bg-zinc-900/60">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400 dark:text-zinc-500">New export</p>
+      <h2 className="mt-2 text-lg font-bold text-zinc-950 dark:text-zinc-50">Annotation manifest</h2>
+      <p className="mt-2 text-sm leading-6 text-zinc-500 dark:text-zinc-400">Exports are generated asynchronously. JSON is the lossless, complete platform manifest; COCO is the interoperable image-annotation export.</p>
+      <label className="mt-6 block"><span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Dataset</span><select className="mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:ring-sky-900" disabled={isPending} onChange={(event) => setDatasetId(event.target.value)} value={datasetId}>{datasets.map((dataset) => <option key={dataset.id} value={dataset.id}>{dataset.name}</option>)}</select></label>
+      <label className="mt-4 block"><span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Format</span><select className="mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:ring-sky-900" disabled={isPending} onChange={(event) => setFormat(event.target.value as ExportFormat)} value={format}><option value="JSON">JSON (full platform manifest)</option><option value="COCO">COCO (image annotations)</option></select></label>
+      {format === "COCO" && <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">COCO export includes bounding-box annotations on IMAGE assets only. Other geometry types, unlabeled annotations, and rejected annotations are skipped and reported in the export summary.</p>}
       <Button className="mt-6 w-full" disabled={isPending || !datasetId} onClick={createExport} type="button">{isPending ? <SpinnerGap aria-hidden="true" className="animate-spin" size={17} /> : <Export aria-hidden="true" size={17} />}{isPending ? "Starting export..." : `Create ${format} export`}</Button>
     </section>
-    <section className="min-h-80 rounded-2xl border border-zinc-200 bg-white p-5 lg:p-6" aria-live="polite">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Export status</p>
-      {!job ? <div className="grid min-h-56 place-items-center text-center"><p className="max-w-xs text-sm leading-6 text-zinc-400">Choose an authorized dataset and format, then start an export. Progress and a download link will appear here.</p></div> : <ExportStatus download={download} job={job} message={message} />}
-      {!job && message && <p className="mt-4 text-xs text-rose-700">{message}</p>}
+    <section className="min-h-80 rounded-2xl border border-zinc-200 bg-white p-5 lg:p-6 dark:border-zinc-800 dark:bg-zinc-900" aria-live="polite">
+      <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400 dark:text-zinc-500">Export status</p>
+      {!job ? <div className="grid min-h-56 place-items-center text-center"><p className="max-w-xs text-sm leading-6 text-zinc-400 dark:text-zinc-500">Choose an authorized dataset and format, then start an export. Progress and a download link will appear here.</p></div> : <ExportStatus download={download} job={job} message={message} />}
+      {!job && message && <p className="mt-4 text-xs text-rose-700 dark:text-rose-400">{message}</p>}
     </section>
   </div>;
 }
@@ -98,10 +98,10 @@ function ExportStatus({ job, download, message }: { job: ExportJob; download: Do
   // own format selection state, which can be stale after a page reload.
   const isCoco = download?.filename.includes("coco") ?? false;
   return <div className="mt-5">
-    <div className="flex items-start justify-between gap-4"><div><h2 className="text-lg font-bold text-zinc-950">{completed ? "Export ready" : failed ? "Export did not finish" : "Preparing export"}</h2><p className="mt-1 font-mono text-xs text-zinc-500">{job.stage ?? job.status}</p></div>{completed ? <CheckCircle aria-hidden="true" className="text-emerald-600" size={24} weight="fill" /> : failed ? <WarningCircle aria-hidden="true" className="text-rose-600" size={24} weight="fill" /> : <SpinnerGap aria-hidden="true" className="animate-spin text-sky-600" size={24} />}</div>
-    <div className="mt-7"><div className="flex justify-between text-xs text-zinc-500"><span>{job.processedItems ?? 0}{job.totalItems !== null ? ` / ${job.totalItems}` : ""} items</span><span className="font-mono font-semibold text-zinc-800">{progress}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-sky-600 transition-[width]" style={{ width: `${progress}%` }} /></div></div>
-    <p className={`mt-5 text-sm leading-6 ${failed ? "text-rose-700" : "text-zinc-500"}`}>{message ?? job.summary?.message ?? (completed ? "Your export is available for download." : "The export status refreshes automatically.")}</p>
+    <div className="flex items-start justify-between gap-4"><div><h2 className="text-lg font-bold text-zinc-950 dark:text-zinc-50">{completed ? "Export ready" : failed ? "Export did not finish" : "Preparing export"}</h2><p className="mt-1 font-mono text-xs text-zinc-500 dark:text-zinc-400">{job.stage ?? job.status}</p></div>{completed ? <CheckCircle aria-hidden="true" className="text-emerald-600" size={24} weight="fill" /> : failed ? <WarningCircle aria-hidden="true" className="text-rose-600" size={24} weight="fill" /> : <SpinnerGap aria-hidden="true" className="animate-spin text-sky-600" size={24} />}</div>
+    <div className="mt-7"><div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-400"><span>{job.processedItems ?? 0}{job.totalItems !== null ? ` / ${job.totalItems}` : ""} items</span><span className="font-mono font-semibold text-zinc-800 dark:text-zinc-200">{progress}%</span></div><div className="mt-2 h-2 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800"><div className="h-full rounded-full bg-sky-600 transition-[width]" style={{ width: `${progress}%` }} /></div></div>
+    <p className={`mt-5 text-sm leading-6 ${failed ? "text-rose-700 dark:text-rose-400" : "text-zinc-500 dark:text-zinc-400"}`}>{message ?? job.summary?.message ?? (completed ? "Your export is available for download." : "The export status refreshes automatically.")}</p>
     {completed && download && <Button className="mt-6" onClick={() => window.location.assign(download.url)} type="button"><DownloadSimple aria-hidden="true" size={17} />Download {isCoco ? "COCO" : "JSON"}</Button>}
-    {completed && !download && <p className="mt-5 text-sm text-amber-700">The export completed, but its download is not yet available.</p>}
+    {completed && !download && <p className="mt-5 text-sm text-amber-700 dark:text-amber-400">The export completed, but its download is not yet available.</p>}
   </div>;
 }
