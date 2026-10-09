@@ -30,7 +30,7 @@ import { computeImplementation as maintenanceImplementation, manifestDigest as m
 import { runMaintenanceRehearsal } from './backfill-maintenance-rehearsal.mjs';
 import { readTree as readClientTree, treeHash as clientTreeHash } from './prisma-client-stage.mjs';
 
-export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions'];
+export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'http:dataset-metadata'];
 /**
  * A2.4 runtime commands. They exercise the verification tables, so (unlike every other focused test, which runs on the 24-migration chain) they run on the
  * promoted 26-migration chain: the reviewed M24, M25 and M26 are applied from their pinned bytes, exactly as in release:phase029-a2-chain.
@@ -41,7 +41,7 @@ export const A2_RUNTIME_COMMANDS = Object.freeze(['worker:test:media-verificatio
  * verification tables. They run the same reviewed, pinned 26-migration chain as A2_RUNTIME_COMMANDS; nothing about their command line or fixtures changes. (Restored from
  * the a5aa248 lineage, adapted from its 25-migration chain to the frozen 26.)
  */
-export const FOCUSED_FULL_CHAIN = Object.freeze(['web:test:local-folder-modality-idempotency', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions']);
+export const FOCUSED_FULL_CHAIN = Object.freeze(['web:test:local-folder-modality-idempotency', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'http:dataset-metadata']);
 const PROMOTED = 'prisma/migrations';
 /**
  * Ordered, frozen Phase029 chain applied AFTER the 23 historical migrations. Since the release-chain promotion these two
