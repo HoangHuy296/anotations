@@ -1,4 +1,5 @@
 import { LockKey, Tag, WarningCircle } from "@phosphor-icons/react/dist/ssr";
+import Link from "next/link";
 import { connection } from "next/server";
 
 import { AppShell } from "@/components/layout/app-shell";
@@ -8,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
+import { listLabelLibraryDatasets, pickLabelLibraryDataset, shouldBackfillDefaultImageLabels, type LabelLibraryDataset } from "@/lib/labels/label-library";
 import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
 
 type LabelSummary = {
@@ -28,10 +30,11 @@ function textEligibilityBadge(label: Pick<LabelSummary, "modality" | "scope">) {
   return label.scope;
 }
 
-export default async function LabelsPage() {
+export default async function LabelsPage({ searchParams }: { searchParams: Promise<{ dataset?: string | string[] }> }) {
   await connection();
 
-  const data = await loadLabelPageData();
+  const requested = (await searchParams).dataset;
+  const data = await loadLabelPageData(Array.isArray(requested) ? requested[0] : requested);
 
   if (!data) {
     return (
@@ -57,7 +60,7 @@ export default async function LabelsPage() {
     );
   }
 
-  const { labels, actor, dataset, canManage } = data;
+  const { labels, actor, dataset, datasets, canManage } = data;
 
   return (
     <AppShell currentPath="/labels">
@@ -103,6 +106,30 @@ export default async function LabelsPage() {
           </div>
         )}
 
+        {datasets.length > 0 && (
+          <nav aria-label="Your datasets" className="mt-6">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">Your taxonomies</p>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {datasets.map((item) => {
+                const selected = item.id === dataset?.id;
+                return (
+                  <li key={item.id}>
+                    <Link
+                      href={`/labels?dataset=${item.id}`}
+                      aria-current={selected ? "page" : undefined}
+                      className={`inline-flex max-w-[18rem] items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-sky-500 ${selected ? "border-sky-300 bg-sky-50 text-sky-900 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-200" : "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"}`}
+                    >
+                      <span className="truncate">{item.name}</span>
+                      <Badge variant="neutral" className="shrink-0">{item.modality ?? "Unresolved"}</Badge>
+                      <span className="shrink-0 font-normal text-zinc-500 dark:text-zinc-400">{item.labelCount} · {item.owned ? "Yours" : "Shared"}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        )}
+
         <div className="mt-7 grid items-start gap-7 xl:grid-cols-[minmax(300px,0.72fr)_minmax(0,1.28fr)]">
           <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5 lg:p-6 dark:border-zinc-800 dark:bg-zinc-900/60">
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400">
@@ -128,7 +155,7 @@ export default async function LabelsPage() {
               Current taxonomy
             </p>
             <h2 className="mt-2 text-lg font-bold tracking-[-0.02em] text-zinc-950 dark:text-zinc-50">
-              {labels.length} label{labels.length === 1 ? "" : "s"}
+              {labels.length} label{labels.length === 1 ? "" : "s"}{dataset ? ` in ${dataset.name}` : ""}
             </h2>
 
             {labels.length === 0 ? (
@@ -213,21 +240,16 @@ export default async function LabelsPage() {
   );
 }
 
-async function loadLabelPageData() {
+async function loadLabelPageData(requestedDatasetId: string | undefined) {
   if (!isDatabaseConfigured()) {
     return null;
   }
 
   try {
     const actor = await getRequestActor();
-    if (!actor) return { labels: [], actor: null, dataset: null, canManage: false };
-    const datasets = await db.dataset.findMany({
-        where: { deletedAt: null, archivedAt: null, OR: [{ ownerId: actor.id }, { members: { some: { userId: actor.id } } }] },
-        orderBy: { updatedAt: "desc" },
-        take: 1,
-        select: { id: true, name: true },
-      });
-    const dataset = datasets[0] ?? null;
+    if (!actor) return { labels: [], actor: null, dataset: null, datasets: [] as LabelLibraryDataset[], canManage: false };
+    const datasets = await listLabelLibraryDatasets(actor.id);
+    const dataset = pickLabelLibraryDataset(datasets, requestedDatasetId);
     const access = dataset ? await requireDatasetPermission(actor, dataset.id, "label.manage") : null;
     let labels: LabelSummary[] = dataset
       ? await db.label.findMany({
@@ -243,7 +265,7 @@ async function loadLabelPageData() {
 
     // Keep the taxonomy consistent for every authorized reader. The shared
     // service backfills only missing defaults, so custom labels are preserved.
-    if (dataset) {
+    if (dataset && shouldBackfillDefaultImageLabels(dataset.modality)) {
       await ensureDefaultImageLabels(actor, dataset.id);
       labels = await db.label.findMany({
         where: { datasetId: dataset.id },
@@ -251,7 +273,7 @@ async function loadLabelPageData() {
         include: { _count: { select: { annotations: true } } },
       }) as LabelSummary[];
     }
-    return { labels, actor, dataset, canManage: Boolean(access && !access.forbidden) };
+    return { labels, actor, dataset, datasets, canManage: Boolean(access && !access.forbidden) };
   } catch (error: unknown) {
     console.error("Label page data could not be loaded.", error);
     return null;
