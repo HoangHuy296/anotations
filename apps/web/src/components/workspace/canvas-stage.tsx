@@ -11,6 +11,7 @@ import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 import { normalizeBoundingBox, viewportPointToImage } from "@/lib/workspace/geometry";
 import { replacePathVertex, resizeNormalizedCircle, translateImageGeometry } from "@/lib/workspace/annotation-geometry";
+import { canCancelPath, canFinishPath, classifyPathClick, isPathClosing, isPathTool, isWithinPathCloseThreshold, pathPreviewPoints, POLYGON_CLOSE_THRESHOLD_PX } from "@/lib/workspace/path-interaction";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import type { AnnotationTool } from "@/types/annotation";
 import type { ImageAnnotationGeometry, NormalizedBoundingBox, NormalizedPoint, SafeImageAnnotation, SafeImageWorkspaceAsset, SafeReadOnlyImageAnnotation, SafeWorkspaceLabel } from "@/types/image-workspace";
@@ -107,6 +108,11 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
   const [draft, setDraft] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [drawingStart, setDrawingStart] = useState<{ x: number; y: number } | null>(null);
   const [pathPoints, setPathPoints] = useState<NormalizedPoint[]>([]);
+  // Live path preview: Konva nodes mutated directly. Pointer movement must not re-render React or persist anything (canvas rule); only a click changes React state.
+  const previewCursorRef = useRef<NormalizedPoint | null>(null);
+  const previewLineRef = useRef<Konva.Line>(null);
+  const previewDotRef = useRef<Konva.Circle>(null);
+  const previewHintRef = useRef<Konva.Text>(null);
   // Ids of client-created annotations still awaiting server confirmation.
   // They render immediately (optimistic UI) but stay non-interactive so a
   // drag/transform can never race the create that establishes their
@@ -242,16 +248,48 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
   }
 
   function finishPath() {
-    const minimum = tool === "polygon" ? 3 : 2;
-    if ((tool !== "polygon" && tool !== "polyline") || pathPoints.length < minimum) return;
+    if (!canFinishPath(tool, pathPoints.length)) return;
     const type = tool === "polygon" ? "POLYGON" : "POLYLINE";
     const geometry = { points: pathPoints } as ImageAnnotationGeometry;
+    previewCursorRef.current = null;
     setPathPoints([]);
     const id = beginOptimisticCreate(type, geometry);
     // Path finish is already the commit boundary -- there's no next
     // keystroke to coalesce with, so save immediately instead of waiting out
-    // the debounce that exists for continuous drag/transform edits.
+    // the debounce.
     scheduleAutosave(`create-${id}`, () => persistCreate(id, type, geometry), 0);
+  }
+
+  /** Drops the unfinished path. Nothing was persisted while drawing, so there is nothing to undo on the server. */
+  function cancelPath() {
+    previewCursorRef.current = null;
+    setPathPoints([]);
+  }
+
+  function firstVertexScreenPosition() {
+    const stage = stageRef.current;
+    const first = pathPoints[0];
+    return stage && first ? { x: stage.x() + first[0] * originalWidth * stage.scaleX(), y: stage.y() + first[1] * originalHeight * stage.scaleY() } : null;
+  }
+
+  /** Updates the cursor segment, the close highlight and the hint on the Konva nodes. No React state is touched. */
+  function updatePathPreview() {
+    const point = pointerInImage();
+    const pointer = stageRef.current?.getPointerPosition();
+    if (!point || !pointer || !originalWidth || !originalHeight) return;
+    const cursor: NormalizedPoint = [point.x / originalWidth, point.y / originalHeight];
+    previewCursorRef.current = cursor;
+    const first = firstVertexScreenPosition();
+    const closing = isPathClosing(tool, pathPoints.length, Boolean(first && isWithinPathCloseThreshold(pointer, first)));
+    const line = previewLineRef.current, dot = previewDotRef.current, hint = previewHintRef.current;
+    line?.points(pathPreviewPoints(pathPoints, closing ? null : cursor, originalWidth, originalHeight));
+    line?.closed(closing);
+    line?.stroke(closing ? "#34d399" : "#7dd3fc");
+    line?.dash(closing ? [] : [6, 4]);
+    dot?.position({ x: cursor[0] * originalWidth, y: cursor[1] * originalHeight });
+    dot?.fill(closing ? "#34d399" : "#7dd3fc");
+    hint?.fill(closing ? "#34d399" : "#e4e4e7");
+    (line ?? dot ?? hint)?.getLayer()?.batchDraw();
   }
 
   function startCanvasInteraction(event: Konva.KonvaEventObject<MouseEvent>) {
@@ -270,8 +308,15 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
       scheduleAutosave(`create-${id}`, () => persistCreate(id, "POINT", geometry), 0);
       return;
     }
-    if (tool === "polygon" || tool === "polyline") {
-      setPathPoints((current) => [...current, [point.x / originalWidth, point.y / originalHeight]]);
+    if (isPathTool(tool)) {
+      const pointer = stageRef.current?.getPointerPosition();
+      const first = firstVertexScreenPosition();
+      const action = classifyPathClick({ tool, vertexCount: pathPoints.length, doubleClick: event.evt.detail >= 2, nearFirstVertex: Boolean(pointer && first && isWithinPathCloseThreshold(pointer, first)) });
+      // The finishing click closes the shape at the vertices already committed; it is never appended as another vertex.
+      if (action === "finish") { finishPath(); return; }
+      const vertex: NormalizedPoint = [point.x / originalWidth, point.y / originalHeight];
+      previewCursorRef.current = vertex;
+      setPathPoints((current) => [...current, vertex]);
       return;
     }
     // This mousedown handler is on the Stage, so it also fires for a
@@ -286,6 +331,7 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
 
   function updateCanvasDraft() {
     if (readOnly) return;
+    if (isPathTool(tool) && pathPoints.length > 0) { updatePathPreview(); return; }
     if (!drawingStart || (tool !== "box" && tool !== "circle")) return;
     const point = pointerInImage();
     if (!point) return;
@@ -312,6 +358,22 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
     setDraft(null);
     setDrawingStart(null);
   }
+
+  // A half-drawn path never survives a tool change (polygon <-> polyline need different lengths) and is cancelled with Escape. Asset navigation remounts this component
+  // (key = asset id in image-engine.tsx), which drops the path without a write.
+  useEffect(() => { previewCursorRef.current = null; setPathPoints([]); }, [tool]);
+  useEffect(() => {
+    if (readOnly || !isPathTool(tool) || pathPoints.length === 0) return;
+    const cancelOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented || (event.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName))) return;
+      event.preventDefault();
+      cancelPath();
+    };
+    window.addEventListener("keydown", cancelOnEscape);
+    return () => window.removeEventListener("keydown", cancelOnEscape);
+    // cancelPath only resets state and a ref
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathPoints.length, readOnly, tool]);
 
   return <section className="flex min-h-[520px] min-w-0 flex-col bg-zinc-900 lg:min-h-0">
     <div ref={containerRef} className="canvas-grid relative min-h-0 flex-1 overflow-hidden">
@@ -381,7 +443,12 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
           </Group>)}
           {draft && tool === "box" && <Rect x={draft.x} y={draft.y} width={draft.width} height={draft.height} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}
           {draft && tool === "circle" && drawingStart && <Circle x={drawingStart.x} y={drawingStart.y} radius={Math.hypot(draft.width, draft.height)} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}
-          {pathPoints.length > 0 && (tool === "polygon" || tool === "polyline") && <Line points={pathPoints.flatMap(([x, y]) => [x * originalWidth, y * originalHeight])} closed={tool === "polygon" && pathPoints.length > 2} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}
+          {pathPoints.length > 0 && isPathTool(tool) && <>
+            <Line ref={previewLineRef} points={pathPreviewPoints(pathPoints, previewCursorRef.current, originalWidth, originalHeight)} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} listening={false} />
+            {pathPoints.map(([x, y], index) => <Circle key={`draft-vertex-${index}`} x={x * originalWidth} y={y * originalHeight} radius={index === 0 ? 6 : 5} fill={index === 0 ? "#34d399" : "#ffffff"} stroke="#0284c7" strokeWidth={2} listening={false} />)}
+            {previewCursorRef.current && <Circle ref={previewDotRef} x={previewCursorRef.current[0] * originalWidth} y={previewCursorRef.current[1] * originalHeight} radius={5} fill="#7dd3fc" stroke="#ffffff" strokeWidth={2} listening={false} />}
+            {tool === "polygon" && pathPoints.length >= 3 && <Text ref={previewHintRef} x={12} y={12} text={`Close within ${POLYGON_CLOSE_THRESHOLD_PX}px of the first point, or double-click`} fontSize={12} fill="#e4e4e7" listening={false} />}
+          </>}
           <Transformer ref={transformerRef} rotateEnabled={false} enabledAnchors={["top-left", "top-right", "bottom-left", "bottom-right"]} boundBoxFunc={(_, next) => next.width < 2 || next.height < 2 ? _ : next} />
         </Layer>
       </Stage>}
@@ -392,6 +459,6 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
       {unsupportedAnnotations.length > 0 && <p className="absolute left-4 top-4 max-w-sm rounded-lg bg-zinc-950/90 px-3 py-2 text-xs text-zinc-200">{unsupportedAnnotations.length} unsupported annotation{unsupportedAnnotations.length === 1 ? "" : "s"} retained as read-only: {unsupportedAnnotations.map((annotation) => annotation.type.replaceAll("_", " ")).join(", ")}.</p>}
       {conflictKey && <div className="absolute bottom-12 left-4 max-w-sm"><SaveConflictPanel message="The canvas kept your local geometry. Reload the durable version, discard the local draft, or keep it visible while you reconcile it manually." onReload={() => window.location.reload()} onDiscard={() => { clearConflictDraft(conflictKey); window.location.reload(); }} onReconcile={() => setConflictKey(null)} /></div>}
     </div>
-    <Toolbar zoomPercent={zoomPercent} onFit={fitImage} onZoomIn={() => zoomAtCenter(1.2)} onZoomOut={() => zoomAtCenter(1 / 1.2)} tool={readOnly ? "pan" : tool} onToolChange={readOnly ? () => undefined : onToolChange} onDelete={removeSelected} canDelete={!readOnly && Boolean(selectedId)} labels={labels} activeLabelId={activeLabelId} onActiveLabelChange={setActiveLabelId} onFinishPath={finishPath} canFinishPath={!readOnly && pathPoints.length >= (tool === "polygon" ? 3 : 2)} />
+    <Toolbar zoomPercent={zoomPercent} onFit={fitImage} onZoomIn={() => zoomAtCenter(1.2)} onZoomOut={() => zoomAtCenter(1 / 1.2)} tool={readOnly ? "pan" : tool} onToolChange={readOnly ? () => undefined : onToolChange} onDelete={removeSelected} canDelete={!readOnly && Boolean(selectedId)} labels={labels} activeLabelId={activeLabelId} onActiveLabelChange={setActiveLabelId} onFinishPath={finishPath} canFinishPath={!readOnly && canFinishPath(tool, pathPoints.length)} onCancelPath={cancelPath} canCancelPath={!readOnly && canCancelPath(pathPoints.length)} />
   </section>;
 }

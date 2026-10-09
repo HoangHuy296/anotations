@@ -800,7 +800,10 @@
       "tsx",
       "--test",
       "--test-concurrency=1",
-      "tests/workspace/modality-engine-feasibility.test.ts"
+      "tests/workspace/modality-engine-feasibility.test.ts",
+      "tests/workspace/g5-engine-ui.test.ts",
+      "tests/workspace/image-video-flush-regression.test.ts",
+      "tests/workspace/path-interaction.test.ts"
     ]
   },
   "web:test:asset-guard-transitions": {
