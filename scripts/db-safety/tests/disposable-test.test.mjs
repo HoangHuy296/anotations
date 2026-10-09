@@ -25,7 +25,7 @@ const PROPOSAL1_SQL = '-- fake migration 24 bytes\n';
 const PROPOSAL2_SQL = '-- fake migration 25 bytes\n';
 const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1];
 const FAKE_CHAIN = [{ ...P1, sha256: sha(PROPOSAL1_SQL) }, { ...P2, sha256: sha(PROPOSAL2_SQL) }];
-const REVIEWED_EXTRA_COMMANDS = ['web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap'];
+const REVIEWED_EXTRA_COMMANDS = ['http:dataset-metadata', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap'];
 const assertSupportedSet = (message) => {
   assert.deepEqual(SUPPORTED_COMMANDS.slice(0, 5), [COMMAND, 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'], message);
   assert.deepEqual([...SUPPORTED_COMMANDS.slice(5)].sort(), [...REVIEWED_EXTRA_COMMANDS].sort(), 'every additional supported command is a deliberate, reviewed catalog addition');
@@ -1723,7 +1723,7 @@ test('A2.4 runtime commands: exactly three reviewed names, all supported, and on
 
 test('full-chain focused commands (tracked client needs migration 25) resolve to the reviewed 26-migration chain, are supported, and are disjoint from the A2 runtime list', () => {
   // The fake world stages only the 24-chain fixture, so the applied chain itself is proven against a real disposable database (web:test:local-folder-modality-idempotency run).
-  assert.deepEqual([...FOCUSED_FULL_CHAIN], ['web:test:local-folder-modality-idempotency', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions']);
+  assert.deepEqual([...FOCUSED_FULL_CHAIN], ['web:test:local-folder-modality-idempotency', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'http:dataset-metadata']);
   assert.equal(PROPOSAL_CHAIN.length, 3);
   for (const name of FOCUSED_FULL_CHAIN) {
     assert.ok(SUPPORTED_COMMANDS.includes(name), name);

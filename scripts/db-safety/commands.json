@@ -820,6 +820,15 @@
       "tests/dataset-modality/creation-paths.test.ts"
     ]
   },
+  "http:dataset-metadata": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/db-safety/runtime-http-suite.mjs"
+    ]
+  },
   "web:test:ai-batch-targets": {
     "kind": "test",
     "cwd": "apps/web",
