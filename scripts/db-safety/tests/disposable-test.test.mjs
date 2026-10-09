@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync, rmSync, cpSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,7 +11,7 @@ import { A2_RUNTIME_COMMANDS, FOCUSED_FULL_CHAIN,
   SUPPORTED_COMMANDS, PROPOSAL_CHAIN, REHEARSALS, REHEARSAL_ID, FIXTURE_COMMAND, FIXTURE_FILE, FIXTURE_SPEC, FIXTURE_ROWS, HISTORY_SQL,
   MAINTENANCE_ID, MAINT_SEED_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_SEED_SPEC, MAINT_OBJECTS_SPEC, MAINT_CHECK_SPEC, MAINTENANCE_FILES, MAINTENANCE_COMMANDS,
   BACKFILL_ID, BACKFILL_SEED_COMMAND, BACKFILL_VERIFY_COMMAND, BACKFILL_SEED_FILE, BACKFILL_VERIFY_FILE, BACKFILL_SEED_SPEC, BACKFILL_VERIFY_SPEC, BACKFILL_TOPOLOGY, BACKFILL_ALLOWED_IMPORTS,
-  RELEASE_ID, RELEASE_M26_ID, RELEASE_M26_ENTRIES, RELEASE_M26_TOPOLOGY, assertRelease26, RELEASE_COUNTS, RELEASE_SPECS, RELEASE_TOPOLOGY, RECOVERY_REVIEW, assertRelease24, assertRelease25, manifestDiff, extractManifestSql, releaseManifestSqlFrom, releaseExtraSql, captureScript,
+  normalizeGeneratedClassFile, readNormalizedClientTree, normalizedClientTreeHash, CLIENT_ROOT_TOKEN, RELEASE_ID, RELEASE_M26_ID, RELEASE_M26_ENTRIES, RELEASE_M26_TOPOLOGY, assertRelease26, RELEASE_COUNTS, RELEASE_SPECS, RELEASE_TOPOLOGY, RECOVERY_REVIEW, assertRelease24, assertRelease25, manifestDiff, extractManifestSql, releaseManifestSqlFrom, releaseExtraSql, captureScript,
   realDeps, runFocusedTest, validateCommand, validateChain, checkHistory, assertMigration25, primaryCleanup, resolvePlan,
   COMPAT_ID, COMPAT_COMMAND, COMPAT_FILE, COMPAT_SPEC, COMPAT_BINDINGS, COMPATIBILITY, T015_ID, T015_COMMAND, T015_FILE, T015_SPEC, T015_ALLOWED_IMPORTS, INGEST_ID, INGEST_COMMAND, INGEST_FILE, INGEST_SPEC, INGEST_ALLOWED_IMPORTS, INGEST_ALLOWED_REQUIRES, verifyCompatBindings, scanCompatTestSource, assertCompatTestSource, assertCompatColumn,
 } from '../disposable-test.mjs';
@@ -1133,9 +1133,11 @@ test('existing plans are unchanged: the three focused commands stay migration-24
 
 test('real repository: the compat plan bindings equal the accepted frozen values and verify against the repository, the catalog entry is pinned, and the test is clean', () => {
   assert.equal(COMPAT_BINDINGS.schemaSha256, '4a85c754d067ae64f0f767d5e6cd49f37c6d5f004865257faef66025d6000993');
-  assert.equal(COMPAT_BINDINGS.generatedTreeSha256, 'b88f7a3dc76134aaf11d4962159bafde47a5904f9eb7e11e0edc4247cd79083c');
+  // B2.0 before/after: tree b88f7a3d…083c -> 38f157f2…2af46 and class.ts 9b6b2597…db967 -> 0942ef46…d6c33. The old values were the RAW bytes (valid only at the generating checkout); the
+  // new ones tokenize exactly the two root lines. The four other bound files keep their previous hashes (asserted below), and the raw-bytes proof is in the portability tests.
+  assert.equal(COMPAT_BINDINGS.generatedTreeSha256, '38f157f20c2275a5e8e5e349a472de97df30d62e45f8191ad1d7521bc4a2af46');
   assert.deepEqual(COMPAT_BINDINGS.generatedFiles, {
-    'lib/generated/prisma/internal/class.ts': '9b6b2597bc60aec0108647f44c869dc1eaa7e9413d5c3e9ae91ae4fdbc2db967',
+    'lib/generated/prisma/internal/class.ts': '0942ef4695c47560264c981dce7a7bc504215a1a403bc9eefa24aa40870d6c33',
     'lib/generated/prisma/internal/prismaNamespace.ts': 'f73d435a34eb6b47093d2dde8bd13ac56af3be81a1abd240c438be466f3ab115',
     'lib/generated/prisma/internal/prismaNamespaceBrowser.ts': 'fdd5dc8da705cc502370c4785226175f7b1fcf08b96a9305c3bff73ccdb2d20b',
     'lib/generated/prisma/models/PreparedImport.ts': 'd48ac861e7e8d6020d614a6faf706f9f4a146447c0599faabe798a02251af45d',
@@ -1763,4 +1765,68 @@ test('assertRelease26: purely additive M26 delta, unchanged Dataset rows, M26 la
   assert.throws(() => assertRelease26(pre, { ...post, schemaManifest: post.schemaManifest.slice(0, -1) }, { proposal }), /RELEASE_M26_SCHEMA_COUNT_UNEXPECTED/, 'a short delta');
   assert.throws(() => assertRelease26(pre, { ...post, datasetModality: [{ id: 'd', m: 'IMAGE' }] }, { proposal }), /RELEASE_M26_DATASETS_CHANGED/, 'M26 must not touch Datasets');
   assert.throws(() => assertRelease26(pre, { ...post, migrations }, { proposal }), /RELEASE_M26_HISTORY_UNEXPECTED/, 'M26 missing from the history');
+});
+
+// ---- B2.0: the frozen generated client verifies at any checkout path (root-normalized class.ts), and every genuine drift still fails ----
+const portableRoot = label => {
+  // A byte-for-byte copy of the real frozen inputs at a NEW filesystem path, as `prisma generate` would leave it there: only the two root lines of class.ts name that path.
+  const root = mkdtempSync(join(tmpdir(), `dt-portable-${label}-`));
+  mkdirSync(join(root, 'prisma'), { recursive: true });
+  cpSync(join(guard.root, CLIENT_DIR), join(root, CLIENT_DIR), { recursive: true });
+  cpSync(join(guard.root, SCHEMA_PATH), join(root, SCHEMA_PATH));
+  cpSync(join(guard.root, 'prisma/migrations'), join(root, 'prisma/migrations'), { recursive: true });
+  const file = join(root, CLIENT_DIR, 'internal/class.ts');
+  const text = readFileSync(file, 'utf8');
+  const original = /"value": "(\/[^"\n]+)\/lib\/generated\/prisma"/.exec(text)[1];
+  writeFileSync(file, text.split(original).join(root));
+  return root;
+};
+const pinnedDeps = root => ({ root, pinned: { compat: COMPAT_BINDINGS } });
+const withRoots = (labels, body) => { const roots = labels.map(portableRoot); try { return body(...roots); } finally { for (const root of roots) rmSync(root, { recursive: true, force: true }); } };
+
+test('B2.0 portability: the same frozen source verifies at the original checkout and at two other paths, while raw hashing would not', () => {
+  withRoots(['a', 'b'], (a, b) => {
+    assert.doesNotThrow(() => verifyCompatBindings(realDeps()), 'the original checkout');
+    assert.doesNotThrow(() => verifyCompatBindings(pinnedDeps(a)), 'path A');
+    assert.doesNotThrow(() => verifyCompatBindings(pinnedDeps(b)), 'path B');
+    const rawA = readTree(join(a, CLIENT_DIR)).get('internal/class.ts'), rawB = readTree(join(b, CLIENT_DIR)).get('internal/class.ts');
+    assert.notEqual(rawA, rawB, 'the raw bytes depend on the checkout path');
+    assert.notEqual(rawA, COMPAT_BINDINGS.generatedFiles[`${CLIENT_DIR}/internal/class.ts`], 'so the pre-B2.0 raw pin could not hold at another path');
+    assert.equal(normalizedClientTreeHash(a), normalizedClientTreeHash(b)); assert.equal(normalizedClientTreeHash(a), COMPAT_BINDINGS.generatedTreeSha256);
+    const normalizedA = readNormalizedClientTree(join(a, CLIENT_DIR)), rawTreeA = readTree(join(a, CLIENT_DIR));
+    assert.deepEqual([...rawTreeA].filter(([path, hash]) => normalizedA.get(path) !== hash).map(([path]) => path), ['internal/class.ts'], 'the normalization changes exactly one file\'s hash');
+  });
+});
+
+test('B2.0 portability: the normalization changes exactly the two root lines and only for the audited shape', () => {
+  const text = readFileSync(join(guard.root, CLIENT_DIR, 'internal/class.ts'), 'utf8');
+  const normalized = normalizeGeneratedClassFile(text);
+  assert.ok(normalized && normalized.includes(`${CLIENT_ROOT_TOKEN}/lib/generated/prisma"`) && normalized.includes(`${CLIENT_ROOT_TOKEN}/prisma/schema.prisma"`));
+  const before = text.split('\n'), after = normalized.split('\n');
+  assert.equal(before.length, after.length); assert.equal(before.filter((line, index) => line !== after[index]).length, 2);
+  assert.equal(normalizeGeneratedClassFile(normalized), null, 'an already-normalized file no longer has the absolute-path shape, so it is hashed as is (and equals the pin only when it is exactly the normalized bytes)');
+  for (const [label, mutate] of [
+    ['no root lines', t => t.replace(/"value": "\/[^"\n]+\/lib\/generated\/prisma"/, '"value": "relative"')],
+    ['a second output line', t => t.replace(/(\n\s*"value": "\/[^"\n]+\/lib\/generated\/prisma",?)/, '$1$1')],
+    ['a second schema line', t => t.replace(/(\n\s*"sourceFilePath": "\/[^"\n]+\/prisma\/schema\.prisma",?)/, '$1$1')],
+    ['different roots in the two lines', t => t.replace(/"sourceFilePath": "\/[^"\n]+/, '"sourceFilePath": "/elsewhere')],
+    ['a quote injected into the root', t => t.replace(/"value": "\/[^"\n]+\/lib\/generated\/prisma"/, '"value": "/a\\"b/lib/generated/prisma"')],
+  ]) assert.equal(normalizeGeneratedClassFile(mutate(text)), null, label);
+});
+
+test('B2.0 negative: a modified Prisma schema, a tampered generated client, an unexpected client difference and migration drift each fail at another path', () => {
+  const cases = {
+    'modified Prisma schema': [root => writeFileSync(join(root, SCHEMA_PATH), readFileSync(join(root, SCHEMA_PATH), 'utf8') + '\n// drift\n'), /FROZEN_SCHEMA_DRIFT/],
+    'tampered bound client file': [root => writeFileSync(join(root, CLIENT_DIR, 'models/PreparedImport.ts'), 'tampered\n'), /FROZEN_CLIENT_FILE_DRIFT/],
+    'tampered engine binary': [root => writeFileSync(join(root, CLIENT_DIR, ENGINE_FILE), Buffer.from([9])), /FROZEN_CLIENT_FILE_DRIFT/],
+    'class.ts edited outside the two root lines': [root => { const file = join(root, CLIENT_DIR, 'internal/class.ts'); writeFileSync(file, readFileSync(file, 'utf8').replace('"engineVersion"', '"engineVersionX"')); }, /FROZEN_CLIENT_FILE_DRIFT/],
+    'class.ts with a second root-shaped line': [root => { const file = join(root, CLIENT_DIR, 'internal/class.ts'); writeFileSync(file, readFileSync(file, 'utf8').replace(/(\n\s*"value": "\/[^"\n]+\/lib\/generated\/prisma",?)/, '$1$1')); }, /FROZEN_CLIENT_FILE_DRIFT/],
+    'class.ts roots that disagree': [root => { const file = join(root, CLIENT_DIR, 'internal/class.ts'); writeFileSync(file, readFileSync(file, 'utf8').replace(/"sourceFilePath": "\/[^"\n]+/, '"sourceFilePath": "/elsewhere')); }, /FROZEN_CLIENT_FILE_DRIFT/],
+    'unbound generated file edited': [root => writeFileSync(join(root, CLIENT_DIR, 'models/Dataset.ts'), 'tampered\n'), /FROZEN_CLIENT_DRIFT/],
+    'generated file added': [root => writeFileSync(join(root, CLIENT_DIR, 'models/Extra.ts'), 'x'), /FROZEN_CLIENT_DRIFT/],
+    'generated file deleted': [root => rmSync(join(root, CLIENT_DIR, 'models/Dataset.ts')), /FROZEN_CLIENT_DRIFT/],
+    'migration SQL edited': [root => { const dir = join(root, 'prisma/migrations'); const name = readdirSync(dir).filter(n => /^\d{14}_/.test(n)).sort().at(-1); writeFileSync(join(dir, name, 'migration.sql'), readFileSync(join(dir, name, 'migration.sql'), 'utf8') + '\n-- drift\n'); }, /FROZEN_ACTIVE_CHAIN_DRIFT/],
+    'migration added': [root => { const dir = join(root, 'prisma/migrations/29990101000000_extra'); mkdirSync(dir); writeFileSync(join(dir, 'migration.sql'), 'select 1;'); }, /FROZEN_ACTIVE_CHAIN_DRIFT/],
+  };
+  for (const [label, [mutate, expected]] of Object.entries(cases)) withRoots(['neg'], root => { mutate(root); assert.throws(() => verifyCompatBindings(pinnedDeps(root)), expected, label); });
 });
