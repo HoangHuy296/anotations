@@ -804,7 +804,8 @@
       "tests/workspace/g5-engine-ui.test.ts",
       "tests/workspace/image-video-flush-regression.test.ts",
       "tests/workspace/path-interaction.test.ts",
-      "tests/workspace/audio-properties.test.ts"
+      "tests/workspace/audio-properties.test.ts",
+      "tests/datasets-ui/popover-focus.test.ts"
     ]
   },
   "web:test:asset-guard-transitions": {
