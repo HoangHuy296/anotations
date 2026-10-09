@@ -57,6 +57,7 @@ const MATRIX = {
   'apps/web/src/lib/workflow/asset-workflow-service.ts': { counts: { assetUpdateMany: 2 }, class: 'G' },
   'apps/web/src/lib/workspace/image-mutations.ts': { counts: { assetUpdateMany: 1 }, class: 'G' },
   'apps/web/src/lib/workspace/text-mutations.ts': { counts: { assetUpdateMany: 1 }, class: 'G' },
+  'apps/web/src/lib/workspace/audio-mutations.ts': { counts: { assetUpdateMany: 1 }, class: 'G' }, // B2.1: AUDIO-scoped description update (modality predicate AUDIO), same class as the VIDEO one
   'apps/web/src/lib/workspace/video-mutations.ts': { counts: { assetUpdateMany: 1 }, class: 'G' },
   'apps/worker/src/jobs/ai-prediction-writer.ts': { counts: { assetUpdateMany: 1 }, class: 'G' },
   'apps/worker/src/jobs/bulk-delete-assets.ts': { counts: { assetUpdateMany: 1 }, class: 'G' },
