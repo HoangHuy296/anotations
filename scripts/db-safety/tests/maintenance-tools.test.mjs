@@ -6,7 +6,8 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 import { BASELINE_SCHEMA, CONTAINERS, baselineFrom, candidateSql, collectInventory, evaluate } from '../backfill-window-inventory.mjs';
 import { RECEIPT_SCHEMA, REQUEST_SCHEMA, runBackupProof, validateRequest } from '../backup-proof.mjs';
-import { PINNED, SERVICE_SOURCE, verifyImage } from '../release-image-verify.mjs';
+import { PINNED, PINNED_M26, SERVICE_SOURCE, verifyImage } from '../release-image-verify.mjs';
+import { readTree as stageReadTree, treeHash as stageTreeHash } from '../prisma-client-stage.mjs';
 import { historyDigest, manifestDigest } from '../backfill-binding.mjs';
 
 // Offline: Docker, PostgreSQL, Redis and Git are faked. These tests pin the decision rules and the "read-only / fail closed" shape of the three operational tools.
@@ -284,9 +285,9 @@ function fakeImageWorld(options = {}) {
   return { exec, calls };
 }
 const ENV_PROBES = ['.env', '.env.local', '.env.review', '.env.production', '.env.development', 'apps/web/.env', 'apps/web/.env.local', 'apps/worker/.env', 'apps/realtime/.env'];
-const verifyWith = (options = {}, service = 'web') => {
+const verifyWith = (options = {}, service = 'web', chain = '25') => {
   const world = fakeImageWorld({ ...options });
-  return { ...verifyImage({ image: 'candidate-web:release', service, revision: REVISION }, { root: REPO, exec: world.exec, newName: () => 'phase029-imgverify-test' }), calls: world.calls };
+  return { ...verifyImage({ image: 'candidate-web:release', service, revision: REVISION, chain }, { root: REPO, exec: world.exec, newName: () => 'phase029-imgverify-test' }), calls: world.calls };
 };
 test('image verification: a correct image passes every check, the container is created stopped without network and removed by id', () => {
   const result = verifyWith({}); // trees are compared with the pinned hashes: the fake trees differ, so only those two checks are expected to fail
@@ -329,4 +330,16 @@ test('image verification: bad arguments, a missing image and a failed create are
   const failed = verifyWith({ createFails: true }); assert.equal(failed.ok, false); assert.ok(!failed.calls.some(call => call.args[0] === 'cp'));
   const source = readSource('release-image-verify.mjs');
   assert.doesNotMatch(source, /'(start|run|exec|build|push|pull|tag|rmi|prune|stop|kill)'/);
+});
+
+test('image verification, 26-migration chain: the default pins are untouched; --chain 26 swaps only the two tree digests, and they equal the frozen repository trees', () => {
+  assert.equal(PINNED.clientTreeSha256, 'a750e6b900e00991e818b660f7af67866d1c8ea2ec7774ff2f92f0b40fb54a52');
+  assert.equal(PINNED.migrationsTreeSha256, 'f0da8710b3c874f842de6b686ae5b025dffd59f8acdab74a6e1c00faadb54ca8');
+  const root = new URL('../../..', import.meta.url).pathname;
+  assert.equal(PINNED_M26.migrationsTreeSha256, stageTreeHash(stageReadTree(`${root}prisma/migrations`)), 'the 26-migration chain tree');
+  assert.equal(PINNED_M26.clientTreeSha256, stageTreeHash(stageReadTree(`${root}lib/generated/prisma`)), 'the committed generated client tree (raw bytes; an image holds the committed bytes)');
+  assert.notEqual(PINNED_M26.clientTreeSha256, PINNED.clientTreeSha256); assert.notEqual(PINNED_M26.migrationsTreeSha256, PINNED.migrationsTreeSha256);
+  const failed26 = verifyWith({}, 'web', '26').checks.filter(check => !check.pass).map(check => check.id).sort();
+  assert.deepEqual(failed26, ['client-tree', 'migration-chain-tree'], 'fake trees still fail the pinned digests under --chain 26');
+  assert.equal(verifyImage({ image: 'x', service: 'web', revision: 'a'.repeat(40), chain: '27' }, {}).ok, false, 'an unknown chain is refused');
 });

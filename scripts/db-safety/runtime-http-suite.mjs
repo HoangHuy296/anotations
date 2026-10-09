@@ -11,6 +11,7 @@ import { randomUUID, randomBytes } from 'node:crypto';
 import { mkdtempSync, mkdirSync, cpSync, symlinkSync, writeFileSync, readFileSync, rmSync, existsSync, readdirSync, realpathSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
+import { createServer } from 'node:net';
 import { verify, root, cleanEnv, registry, sha, walk, redact } from './guard.mjs';
 const require = createRequire(import.meta.url);
 const authority = require('./runtime-authority.cjs');
@@ -25,6 +26,10 @@ const checked = await verify(baseReceipt, 'test');
 process.env.DATABASE_URL = checked.target.url.toString();
 assert.equal(checked.r.command, HTTP_RUNTIME_COMMAND, 'the HTTP runtime must be entered through its exact approved command');
 assert.notEqual(HTTP_RUNTIME_WEB_PORT, 3000, 'the canonical application port is never a test target');
+// The web port must be a G1 loopback port that is not the disposable PostgreSQL's (or any other receipt-owned provider's) and must be free: the runtime never falls back to another port.
+const claimedPorts = [Number(checked.target.url.port), ...Object.entries(checked.env).flatMap(([key, value]) => { if (/PORT$/.test(key)) return [Number(value)]; try { return [Number(new URL(String(value)).port)]; } catch { return []; } })].filter(Number.isInteger);
+assert.ok(!claimedPorts.includes(HTTP_RUNTIME_WEB_PORT), 'the runtime web port collides with a receipt-owned provider port');
+await new Promise((resolveProbe, rejectProbe) => { const probe = createServer(); probe.once('error', () => rejectProbe(Error('RUNTIME_WEB_PORT_IN_USE'))); probe.listen(HTTP_RUNTIME_WEB_PORT, '127.0.0.1', () => probe.close(() => resolveProbe())); });
 const privateRoot = mkdtempSync('/tmp/phase029-g1-runtime-');
 const id = randomUUID();
 const ledger = join(privateRoot, 'processes'); mkdirSync(ledger, { mode: 0o700 });
