@@ -36,6 +36,12 @@ export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:datase
  * promoted 26-migration chain: the reviewed M24, M25 and M26 are applied from their pinned bytes, exactly as in release:phase029-a2-chain.
  */
 export const A2_RUNTIME_COMMANDS = Object.freeze(['worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap']);
+/**
+ * Focused commands whose tracked-client reads need the migrations after 24 (here: PreparedImport.creationRequestHash, migration 25) but are otherwise unrelated to the A2
+ * verification tables. They run the same reviewed, pinned 26-migration chain as A2_RUNTIME_COMMANDS; nothing about their command line or fixtures changes. (Restored from
+ * the a5aa248 lineage, adapted from its 25-migration chain to the frozen 26.)
+ */
+export const FOCUSED_FULL_CHAIN = Object.freeze(['web:test:local-folder-modality-idempotency']);
 const PROMOTED = 'prisma/migrations';
 /**
  * Ordered, frozen Phase029 chain applied AFTER the 23 historical migrations. Since the release-chain promotion these two
@@ -193,7 +199,7 @@ export function resolvePlan(name) {
   if (Object.hasOwn(RELEASES, name)) return { kind: 'release', id: name, ...RELEASES[name] };
   if (Object.hasOwn(BACKFILLS, name)) return { kind: 'backfill', id: name, ...BACKFILLS[name] };
   if (Object.hasOwn(MAINTENANCE, name)) return { kind: 'maintenance', id: name, ...MAINTENANCE[name] };
-  return { kind: 'test', id: name, through: A2_RUNTIME_COMMANDS.includes(name) ? 3 : 1 };
+  return { kind: 'test', id: name, through: A2_RUNTIME_COMMANDS.includes(name) || FOCUSED_FULL_CHAIN.includes(name) ? PROPOSAL_CHAIN.length : 1 };
 }
 
 const activeNames = root => readdirSync(join(root, 'prisma/migrations'), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name).sort();

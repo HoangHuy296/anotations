@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import * as guard from '../guard.mjs';
 import { loadExpectations } from '../cleanup-verify.mjs';
 import { isDeepStrictEqual } from 'node:util';
-import { A2_RUNTIME_COMMANDS,
+import { A2_RUNTIME_COMMANDS, FOCUSED_FULL_CHAIN,
   SUPPORTED_COMMANDS, PROPOSAL_CHAIN, REHEARSALS, REHEARSAL_ID, FIXTURE_COMMAND, FIXTURE_FILE, FIXTURE_SPEC, FIXTURE_ROWS, HISTORY_SQL,
   MAINTENANCE_ID, MAINT_SEED_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_SEED_SPEC, MAINT_OBJECTS_SPEC, MAINT_CHECK_SPEC, MAINTENANCE_FILES, MAINTENANCE_COMMANDS,
   BACKFILL_ID, BACKFILL_SEED_COMMAND, BACKFILL_VERIFY_COMMAND, BACKFILL_SEED_FILE, BACKFILL_VERIFY_FILE, BACKFILL_SEED_SPEC, BACKFILL_VERIFY_SPEC, BACKFILL_TOPOLOGY, BACKFILL_ALLOWED_IMPORTS,
@@ -620,7 +620,7 @@ test('rehearsal: tampered, missing, reordered or renamed proposal migrations are
 });
 
 test('the three existing focused commands still apply only the historical chain plus migration 24 (migration 25 is never staged or applied)', async () => {
-  for (const name of SUPPORTED_COMMANDS.filter(command => !A2_RUNTIME_COMMANDS.includes(command))) {
+  for (const name of SUPPORTED_COMMANDS.filter(command => !A2_RUNTIME_COMMANDS.includes(command) && !FOCUSED_FULL_CHAIN.includes(command))) {
     assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 1 });
     const w = world();
     try {
@@ -1115,7 +1115,7 @@ test('compat plan failure paths: clientCompatibilityProven stays false, primary 
 });
 
 test('existing plans are unchanged: the three focused commands stay migration-24-only and the migration-25 rehearsal keeps its own evidence and topology', async () => {
-  for (const name of SUPPORTED_COMMANDS.filter(command => !A2_RUNTIME_COMMANDS.includes(command))) assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 1 });
+  for (const name of SUPPORTED_COMMANDS.filter(command => !A2_RUNTIME_COMMANDS.includes(command) && !FOCUSED_FULL_CHAIN.includes(command))) assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 1 });
   assert.equal(resolvePlan(REHEARSAL_ID).kind, 'rehearsal'); assert.equal(resolvePlan(COMPAT_ID).kind, 'compat'); assert.equal(resolvePlan(COMPAT_ID).through, 2);
   assertSupportedSet('supported set');
   const rehearsal = world();
@@ -1716,7 +1716,20 @@ test('A2.4 runtime commands: exactly three reviewed names, all supported, and on
   for (const name of A2_RUNTIME_COMMANDS) { assert.ok(SUPPORTED_COMMANDS.includes(name), name); assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 3 }); }
   assert.equal(PROPOSAL_CHAIN.length, 3);
   assert.deepEqual(PROPOSAL_CHAIN.map(entry => entry.sha256), ['13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7', 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859', 'ede5e8c511705521e1e6a18563ebaa602e9c24430946acddbed91340d923df5a']);
-  assert.equal(SUPPORTED_COMMANDS.filter(name => resolvePlan(name).through === 3).length, 3);
+  assert.equal(SUPPORTED_COMMANDS.filter(name => resolvePlan(name).through === 3).length, A2_RUNTIME_COMMANDS.length + FOCUSED_FULL_CHAIN.length, 'only the reviewed A2 commands and the reviewed full-chain focused command apply the 26-migration chain');
   const commands = JSON.parse(readFileSync(new URL('../commands.json', import.meta.url), 'utf8'));
   for (const name of A2_RUNTIME_COMMANDS) assert.equal(commands[name].kind, 'test');
+});
+
+test('full-chain focused commands (tracked client needs migration 25) resolve to the reviewed 26-migration chain, are supported, and are disjoint from the A2 runtime list', () => {
+  // The fake world stages only the 24-chain fixture, so the applied chain itself is proven against a real disposable database (web:test:local-folder-modality-idempotency run).
+  assert.deepEqual([...FOCUSED_FULL_CHAIN], ['web:test:local-folder-modality-idempotency']);
+  assert.equal(PROPOSAL_CHAIN.length, 3);
+  for (const name of FOCUSED_FULL_CHAIN) {
+    assert.ok(SUPPORTED_COMMANDS.includes(name), name);
+    assert.ok(!A2_RUNTIME_COMMANDS.includes(name), 'the two reviewed lists are disjoint');
+    assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: PROPOSAL_CHAIN.length });
+    const commands = JSON.parse(readFileSync(new URL('../commands.json', import.meta.url), 'utf8'));
+    assert.equal(commands[name].kind, 'test');
+  }
 });
