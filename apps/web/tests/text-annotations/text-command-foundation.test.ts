@@ -34,7 +34,7 @@ async function genericCreateApply(tx: Parameters<Parameters<typeof runGuardedTex
 
 test("runGuardedTextAssetCommand: a generic guarded create succeeds under a real Serializable transaction and advances the parent Asset revision", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const asset = await seedTextAsset(dataset.id);
   try {
     const outcome = await runGuardedTextAssetCommand(owner, { datasetId: dataset.id, assetId: asset.id, operationId: "op-create-1", hash: { commandKind: "test.create", data: { seed: 1 } } }, genericCreateApply);
@@ -53,7 +53,7 @@ test("runGuardedTextAssetCommand: a generic guarded create succeeds under a real
 
 test("runGuardedTextAssetCommand: identical receipt replay returns the committed outcome without advancing Asset revision or creating a second row", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const asset = await seedTextAsset(dataset.id);
   try {
     const input = { datasetId: dataset.id, assetId: asset.id, operationId: "op-replay-1", hash: { commandKind: "test.create", data: { seed: 42 } } };
@@ -87,7 +87,7 @@ test("runGuardedTextAssetCommand: identical receipt replay returns the committed
 
 test("runGuardedTextAssetCommand: a duplicate operation id with a changed payload conflicts instead of silently replaying", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const asset = await seedTextAsset(dataset.id);
   try {
     const operationId = "op-conflict-1";
@@ -103,7 +103,7 @@ test("runGuardedTextAssetCommand: a duplicate operation id with a changed payloa
 
 test("runGuardedTextAssetCommand: a stale expected revision inside apply rolls back the parent guard claim entirely", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const asset = await seedTextAsset(dataset.id);
   const seeded = await db.annotation.create({
     data: { datasetId: dataset.id, assetId: asset.id, createdById: owner.id, modality: Modality.TEXT, type: "NAMED_ENTITY_RECOGNITION", source: AnnotationSource.MANUAL, geometry: {}, properties: {}, status: AnnotationStatus.DRAFT },
@@ -140,7 +140,7 @@ test("runGuardedTextAssetCommand: a stale expected revision inside apply rolls b
 
 test("runGuardedTextAssetCommand: NOT_FOUND for a nonexistent asset, FORBIDDEN concealed as NOT_FOUND for a non-member", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const outsider = await createWorkspaceUser(UserRole.LABELER);
   const asset = await seedTextAsset(dataset.id);
   try {
@@ -156,7 +156,7 @@ test("runGuardedTextAssetCommand: NOT_FOUND for a nonexistent asset, FORBIDDEN c
 
 test("runGuardedTextDatasetCommand: a dataset-only policy-style command claims the Dataset guard without touching any Asset revision", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const asset = await seedTextAsset(dataset.id);
   try {
     const outcome = await runGuardedTextDatasetCommand(owner, { datasetId: dataset.id, permission: "label.manage" }, async (tx, ctx) => {
@@ -179,7 +179,7 @@ test("runGuardedTextDatasetCommand: a dataset-only policy-style command claims t
 test("runGuardedTextDatasetCommand: LABELER lacks label.manage and is forbidden", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const labeler = await createWorkspaceUser(UserRole.LABELER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   await addWorkspaceMember(dataset.id, labeler.id, DatasetMemberRole.LABELER);
   try {
     const outcome = await runGuardedTextDatasetCommand(labeler, { datasetId: dataset.id, permission: "label.manage" }, async () => ({ never: true }));

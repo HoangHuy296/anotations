@@ -72,7 +72,7 @@ async function seedPreparedTextAsset(datasetId: string) {
 test(enabled ? "readTextSource returns READY with the exact decoded source and full boundary map for a real prepared fixture" : skip, { skip: !enabled }, async (t) => {
   __resetTextBoundaryCacheForTests();
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const labeler = await createWorkspaceUser(UserRole.LABELER);
   await addWorkspaceMember(dataset.id, labeler.id, DatasetMemberRole.LABELER);
   const fixture = await seedPreparedTextAsset(dataset.id);
@@ -99,7 +99,7 @@ test(enabled ? "readTextSource returns READY with the exact decoded source and f
 test(enabled ? "readTextSource degrades to SOURCE_MISMATCH when the object is replaced after preparation" : skip, { skip: !enabled }, async (t) => {
   __resetTextBoundaryCacheForTests();
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const fixture = await seedPreparedTextAsset(dataset.id);
 
   t.after(async () => {
@@ -121,7 +121,7 @@ test(enabled ? "readTextSource degrades to SOURCE_MISMATCH when the object is re
 test(enabled ? "readTextSource conceals a TEXT asset from a non-member as NOT_FOUND, never a source excerpt" : skip, { skip: !enabled }, async (t) => {
   __resetTextBoundaryCacheForTests();
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const outsider = await createWorkspaceUser(UserRole.LABELER);
   const fixture = await seedPreparedTextAsset(dataset.id);
 
@@ -140,7 +140,7 @@ test(enabled ? "readTextSource conceals a TEXT asset from a non-member as NOT_FO
 test(enabled ? "readTextSource reports UNPREPARED for a TEXT asset with an object but no verified metadata yet" : skip, { skip: !enabled }, async (t) => {
   __resetTextBoundaryCacheForTests();
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const { config, minio } = getWebProviders();
   const marker = workspaceUnique("text-source-unprepared");
   const storageKey = `text-sources/__test-fixtures__/${marker}/source.txt`;

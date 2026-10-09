@@ -28,7 +28,7 @@ async function seedTextAssetWithRealSource(datasetId: string, text: string) {
 
 test(enabled ? "requestTextSourcePreparation authorizes on dataset.read alone, independent of annotation.create, and idempotently reuses the Job for a repeated request" : skip, { skip: !enabled }, async (t) => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const fixture = await seedTextAssetWithRealSource(dataset.id, "requestTextSourcePreparation fixture");
 
   t.after(async () => {
@@ -64,7 +64,7 @@ test(enabled ? "requestTextSourcePreparation authorizes on dataset.read alone, i
 
 test(enabled ? "requestTextSourcePreparation conceals a TEXT asset from a non-member as NOT_FOUND" : skip, { skip: !enabled }, async (t) => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const outsider = await createWorkspaceUser(UserRole.LABELER);
   const fixture = await seedTextAssetWithRealSource(dataset.id, "concealed fixture");
 
@@ -82,7 +82,7 @@ test(enabled ? "requestTextSourcePreparation conceals a TEXT asset from a non-me
 
 test(enabled ? "requestTextSourcePreparation reports SOURCE_UNAVAILABLE for a TEXT asset with no uploaded object" : skip, { skip: !enabled }, async (t) => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const asset = await db.asset.create({
     data: { datasetId: dataset.id, modality: Modality.TEXT, filename: "no-object.txt", mimeType: "text/plain", sourceFingerprint: workspaceUnique("no-object") },
     select: { id: true },

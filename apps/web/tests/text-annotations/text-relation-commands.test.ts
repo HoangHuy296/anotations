@@ -37,7 +37,7 @@ function barrier(count: number) {
 async function makeReadyTextAsset(marker: string, text: string) {
   const { config, minio } = getWebProviders();
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const storageKey = `text-sources/__test-fixtures__/${marker}/source.txt`;
   const bytes = Buffer.from(text, "utf8");
   await minio.putObject(config.MINIO_BUCKET, storageKey, bytes, bytes.length, { "Content-Type": "text/plain" });
