@@ -105,7 +105,10 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
   const setConflictDraft = useAnnotationStore((state) => state.setConflictDraft);
   const clearConflictDraft = useAnnotationStore((state) => state.clearConflictDraft);
   const [activeLabelId, setActiveLabelId] = useState<string | null>(labels[0]?.id ?? null);
-  const [draft, setDraft] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  // The box/circle draft rectangle lives in a ref plus two Konva nodes mutated directly: pointer movement never re-renders React or persists (canvas rule). React state changes only at mouse down / up.
+  const draftRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
+  const draftRectRef = useRef<Konva.Rect>(null);
+  const draftCircleRef = useRef<Konva.Circle>(null);
   const [drawingStart, setDrawingStart] = useState<{ x: number; y: number } | null>(null);
   const [pathPoints, setPathPoints] = useState<NormalizedPoint[]>([]);
   // Live path preview: Konva nodes mutated directly. Pointer movement must not re-render React or persist anything (canvas rule); only a click changes React state.
@@ -298,8 +301,8 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
     const point = pointerInImage();
     if (!point) return;
     if (tool === "box" || tool === "circle") {
+      draftRef.current = { x: point.x, y: point.y, width: 0, height: 0 };
       setDrawingStart(point);
-      setDraft({ x: point.x, y: point.y, width: 0, height: 0 });
       return;
     }
     if (tool === "point") {
@@ -335,13 +338,24 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
     if (!drawingStart || (tool !== "box" && tool !== "circle")) return;
     const point = pointerInImage();
     if (!point) return;
-    setDraft({ x: Math.min(drawingStart.x, point.x), y: Math.min(drawingStart.y, point.y), width: Math.abs(point.x - drawingStart.x), height: Math.abs(point.y - drawingStart.y) });
+    const rect = { x: Math.min(drawingStart.x, point.x), y: Math.min(drawingStart.y, point.y), width: Math.abs(point.x - drawingStart.x), height: Math.abs(point.y - drawingStart.y) };
+    draftRef.current = rect;
+    draftRectRef.current?.setAttrs(rect);
+    draftCircleRef.current?.radius(Math.hypot(rect.width, rect.height));
+    (draftRectRef.current ?? draftCircleRef.current)?.getLayer()?.batchDraw();
+  }
+
+  /** Drops an in-progress box/circle drag. Nothing was persisted while dragging, so there is nothing to undo. */
+  function cancelDraft() {
+    draftRef.current = null;
+    setDrawingStart(null);
   }
 
   function finishCanvasInteraction() {
     delete document.documentElement.dataset.annotationInteraction;
     if (readOnly) return;
-    if (!draft || !drawingStart) { setDrawingStart(null); return; }
+    const draft = draftRef.current;
+    if (!draft || !drawingStart) { draftRef.current = null; setDrawingStart(null); return; }
     if (tool === "box") {
       const geometry = normalizeBoundingBox(draft, originalWidth, originalHeight);
       if (geometry) { const id = beginOptimisticCreate("BOUNDING_BOX", geometry); scheduleAutosave(`create-${id}`, () => persistCreate(id, "BOUNDING_BOX", geometry), 0); }
@@ -355,13 +369,21 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
         scheduleAutosave(`create-${id}`, () => persistCreate(id, "CIRCLE", geometry), 0);
       }
     }
-    setDraft(null);
+    draftRef.current = null;
     setDrawingStart(null);
   }
 
   // A half-drawn path never survives a tool change (polygon <-> polyline need different lengths) and is cancelled with Escape. Asset navigation remounts this component
   // (key = asset id in image-engine.tsx), which drops the path without a write.
-  useEffect(() => { previewCursorRef.current = null; setPathPoints([]); }, [tool]);
+  useEffect(() => { previewCursorRef.current = null; setPathPoints([]); draftRef.current = null; setDrawingStart(null); }, [tool]);
+  useEffect(() => {
+    if (readOnly || !drawingStart) return;
+    const cancelOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape" && !event.defaultPrevented) { event.preventDefault(); cancelDraft(); } };
+    window.addEventListener("keydown", cancelOnEscape);
+    return () => window.removeEventListener("keydown", cancelOnEscape);
+    // cancelDraft only resets a ref and state
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawingStart, readOnly]);
   useEffect(() => {
     if (readOnly || !isPathTool(tool) || pathPoints.length === 0) return;
     const cancelOnEscape = (event: KeyboardEvent) => {
@@ -441,8 +463,8 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
             <Rect x={p.geometry.x * originalWidth} y={p.geometry.y * originalHeight} width={p.geometry.width * originalWidth} height={p.geometry.height * originalHeight} stroke={p.color} strokeWidth={2} strokeScaleEnabled={false} dash={[8, 4]} />
             <Text x={p.geometry.x * originalWidth} y={Math.max(0, p.geometry.y * originalHeight - 20)} text={`#${p.index + 1} ${p.labelKey} ${Math.round(p.confidence * 100)}%`} fontSize={16} fill={p.color} />
           </Group>)}
-          {draft && tool === "box" && <Rect x={draft.x} y={draft.y} width={draft.width} height={draft.height} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}
-          {draft && tool === "circle" && drawingStart && <Circle x={drawingStart.x} y={drawingStart.y} radius={Math.hypot(draft.width, draft.height)} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} />}
+          {drawingStart && tool === "box" && <Rect ref={draftRectRef} x={draftRef.current?.x ?? drawingStart.x} y={draftRef.current?.y ?? drawingStart.y} width={draftRef.current?.width ?? 0} height={draftRef.current?.height ?? 0} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} listening={false} />}
+          {drawingStart && tool === "circle" && <Circle ref={draftCircleRef} x={drawingStart.x} y={drawingStart.y} radius={draftRef.current ? Math.hypot(draftRef.current.width, draftRef.current.height) : 0} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} listening={false} />}
           {pathPoints.length > 0 && isPathTool(tool) && <>
             <Line ref={previewLineRef} points={pathPreviewPoints(pathPoints, previewCursorRef.current, originalWidth, originalHeight)} stroke="#7dd3fc" dash={[6, 4]} strokeWidth={2} listening={false} />
             {pathPoints.map(([x, y], index) => <Circle key={`draft-vertex-${index}`} x={x * originalWidth} y={y * originalHeight} radius={index === 0 ? 6 : 5} fill={index === 0 ? "#34d399" : "#ffffff"} stroke="#0284c7" strokeWidth={2} listening={false} />)}

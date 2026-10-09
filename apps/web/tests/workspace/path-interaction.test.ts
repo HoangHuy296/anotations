@@ -59,7 +59,7 @@ test("canvas contract: only finishing a path persists; cancel, tool change and E
   const finish = body("finishPath"), cancel = body("cancelPath");
   assert.ok(finish.includes("canFinishPath(tool, pathPoints.length)") && finish.includes("beginOptimisticCreate") && finish.includes("persistCreate"), "finish commits once");
   assert.ok(!/persist|scheduleAutosave|putAssetAnnotations|beginOptimisticCreate/.test(cancel), "cancel writes nothing");
-  assert.match(canvas, /useEffect\(\(\) => \{ previewCursorRef\.current = null; setPathPoints\(\[\]\); \}, \[tool\]\)/, "a tool change drops the half-drawn path");
+  assert.match(canvas, /useEffect\(\(\) => \{ previewCursorRef\.current = null; setPathPoints\(\[\]\); draftRef\.current = null; setDrawingStart\(null\); \}, \[tool\]\)/, "a tool change drops the half-drawn path and any box/circle drag");
   assert.match(canvas, /event\.key !== "Escape"/); assert.match(canvas, /cancelPath\(\)/);
   const down = body("startCanvasInteraction");
   assert.ok(down.includes("classifyPathClick(") && down.includes('action === "finish"'), "mouse-down uses the pure rule");
@@ -71,4 +71,21 @@ test("canvas contract: navigation remounts the canvas per Asset, so an unfinishe
   assert.match(engine, /<CanvasStage key=\{`canvas-\$\{currentImage\.id\}`\}/);
   const toolbar = source("components/workspace/toolbar.tsx");
   assert.ok(toolbar.includes("onCancelPath") && toolbar.includes("canCancelPath") && toolbar.includes("Cancel path") && toolbar.includes("Finish shape"), "both polygon and polyline offer Finish and Cancel");
+});
+
+test("canvas contract: dragging a box or circle updates a ref and Konva nodes only - no React state, no persistence", () => {
+  const move = body("updateCanvasDraft");
+  assert.ok(!/\bset[A-Z]\w*\(/.test(move.slice(move.indexOf('tool !== "box"'))), "the box/circle move path calls no React state setter");
+  assert.ok(!/persist|scheduleAutosave|putAssetAnnotations|beginOptimisticCreate|upsertSafeAnnotation/.test(move), "no persistence while dragging");
+  assert.ok(/draftRef\.current = rect/.test(move) && /draftRectRef\.current\?\.setAttrs\(rect\)/.test(move) && /draftCircleRef\.current\?\.radius\(/.test(move) && /batchDraw\(\)/.test(move), "the draft is drawn imperatively");
+  assert.ok(!/useState<\{ x: number; y: number; width: number; height: number \} \| null>/.test(canvas) && !/setDraft\b/.test(canvas), "the per-move draft state no longer exists");
+});
+
+test("canvas contract: a box or circle is created once at mouse up from the ref; cancel, Escape and tool change write nothing", () => {
+  const finish = body("finishCanvasInteraction");
+  assert.ok(finish.includes("const draft = draftRef.current") && finish.includes("normalizeBoundingBox(draft, originalWidth, originalHeight)"), "final geometry comes from the ref, in image coordinates");
+  assert.ok(/draftRef\.current = null;\s*setDrawingStart\(null\);\s*\}\s*$/.test(finish.trimEnd() + "") || finish.includes("draftRef.current = null"), "the draft is cleared when the drag ends");
+  const cancel = body("cancelDraft");
+  assert.ok(!/persist|scheduleAutosave|putAssetAnnotations|beginOptimisticCreate/.test(cancel) && cancel.includes("draftRef.current = null") && cancel.includes("setDrawingStart(null)"), "cancel writes nothing");
+  assert.match(canvas, /cancelOnEscape[\s\S]*event\.key === "Escape"[\s\S]*cancelDraft\(\)/, "Escape cancels an in-progress drag");
 });
