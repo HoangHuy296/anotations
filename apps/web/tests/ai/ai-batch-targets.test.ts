@@ -5,7 +5,8 @@ import test, { after } from "node:test";
 import { Modality, StorageProvider, UserRole } from "@internal/db";
 
 import { db } from "@/lib/db";
-import { resolveAiTarget } from "@/lib/ai/ai-target-service";
+import { aiTargetChanged, resolveAiTarget } from "@/lib/ai/ai-target-service";
+import { createAiTaskSchema } from "@/lib/validation/ai-task";
 import { AI_BATCH_VERIFIED_MAX_ASSETS } from "@annotationplatform/domain/ai-batch";
 import { cleanupWorkspaceFixture, createWorkspaceDataset, createWorkspaceUser, workspaceUnique } from "../workspace/helpers";
 
@@ -163,4 +164,55 @@ test("legacy assetIds callers resolve through the same path and are deduplicated
   const result = await resolveAiTarget(datasetId, { mode: "LEGACY_ASSET_IDS", assetIds: [a.id, a.id] });
   assert.equal(result.ok, true);
   if (result.ok) { assert.equal(result.targets.length, 1); assert.equal(result.targetMode, "LEGACY_ASSET_IDS"); }
+});
+
+// ---- Phase 030.1-B1: Dataset-authoritative target contract (D-2: a cross-modality target stays 422 TARGET_MIXED_MODALITY; the older 409 ASSET_MODALITY_MISMATCH is NOT used here).
+const targetAsset = (id: string, modality: Modality) => ({ id, modality, sourceFingerprint: "fp", currentVersionId: null, sourceRevision: null, sizeBytes: BigInt(10), checksum: null, cacheChecksum: null, storageProvider: "MINIO", storageBucket: "bucket", storageKey: `k/${id}`, cacheBucket: null, cacheKey: null });
+const fakeClient = (datasetRead: (where: unknown) => { modality: Modality | null } | null, assetModality: Modality) => ({
+  dataset: { findFirst: async (args: { where: unknown }) => datasetRead(args.where) },
+  asset: { findMany: async (args: { select: Record<string, boolean> }) => Object.keys(args.select).length === 1 ? [{ id: "a1" }] : [targetAsset("a1", assetModality)] },
+}) as unknown as Parameters<typeof resolveAiTarget>[2];
+
+test("an Asset of another modality than its Dataset is refused with the existing 422 TARGET_MIXED_MODALITY (not 409 ASSET_MODALITY_MISMATCH)", async () => {
+  const result = await resolveAiTarget("dataset", { mode: "CURRENT_ASSET", assetId: "a1" }, fakeClient(() => ({ modality: Modality.IMAGE }), Modality.VIDEO));
+  assert.equal(result.ok, false);
+  if (!result.ok) { assert.equal(result.code, "TARGET_MIXED_MODALITY"); assert.equal(result.status, 422); }
+});
+
+test("the Dataset lookup is restricted to live Datasets: deleted and archived Datasets (and a missing one) have no verified AI capability", async () => {
+  let where: Record<string, unknown> = {};
+  const archived = await resolveAiTarget("dataset", { mode: "CURRENT_ASSET", assetId: "a1" }, fakeClient((w) => { where = w as Record<string, unknown>; return null; }, Modality.IMAGE));
+  assert.deepEqual(where, { id: "dataset", deletedAt: null, archivedAt: null }, "the same live-Dataset predicate every other read uses");
+  assert.equal(archived.ok, false);
+  if (!archived.ok) assert.equal(archived.code, "AI_CAPABILITY_UNVERIFIED");
+});
+
+test("the persisted Dataset modality wins over every Asset row; each capability-less modality fails closed", async () => {
+  for (const [datasetModality, expected] of [[Modality.IMAGE, "OK:IMAGE"], [Modality.VIDEO, "TARGET_MIXED_MODALITY"], [Modality.AUDIO, "AI_CAPABILITY_UNVERIFIED"], [Modality.TEXT, "AI_CAPABILITY_UNVERIFIED"], [null, "AI_CAPABILITY_UNVERIFIED"]] as const) {
+    const r = await resolveAiTarget("dataset", { mode: "CURRENT_ASSET", assetId: "a1" }, fakeClient(() => ({ modality: datasetModality }), Modality.IMAGE));
+    assert.equal(r.ok ? `OK:${r.modality}` : r.code, expected, String(datasetModality));
+  }
+});
+
+test("a VIDEO Dataset resolves a single VIDEO Asset through its authoritative modality; a VIDEO batch stays unverified", async () => {
+  const one = await resolveAiTarget("dataset", { mode: "CURRENT_ASSET", assetId: "a1" }, fakeClient(() => ({ modality: Modality.VIDEO }), Modality.VIDEO));
+  assert.equal(one.ok ? one.modality : one.code, "VIDEO");
+});
+
+test("the previewed and the in-transaction resolution must agree on modality and targets; nothing the browser sends takes part", () => {
+  const target = { assetId: "a", inputIndex: 0, sourceIdentityDigest: "d" };
+  assert.equal(aiTargetChanged({ modality: Modality.IMAGE, targets: [target] }, { modality: Modality.IMAGE, targets: [{ ...target }] }), false);
+  assert.equal(aiTargetChanged({ modality: Modality.IMAGE, targets: [target] }, { modality: Modality.VIDEO, targets: [{ ...target }] }), true, "same assets, different modality");
+  assert.equal(aiTargetChanged({ modality: Modality.IMAGE, targets: [target] }, { modality: Modality.IMAGE, targets: [{ ...target, sourceIdentityDigest: "e" }] }), true);
+  assert.equal(aiTargetChanged({ modality: Modality.IMAGE, targets: [target] }, { modality: Modality.IMAGE, targets: [] }), true);
+  const parsed = createAiTaskSchema.parse({ datasetId: "20028572-c535-4efe-a151-8d73128d17b7", modelId: "m", target: { mode: "CURRENT_ASSET", assetId: "a" }, modality: "VIDEO", engine: "VIDEO", assetModality: "VIDEO", previewModality: "VIDEO" });
+  for (const hint of ["modality", "engine", "assetModality", "previewModality"]) assert.equal(hint in parsed, false, `${hint} is not part of the request contract and is dropped`);
+});
+
+test("a real archived Dataset (its Assets still exist) has no verified AI capability", { skip: !enabled }, async () => {
+  const datasetId = await fixtureDataset();
+  const hinted = await asset(datasetId);
+  await db.dataset.update({ where: { id: datasetId }, data: { archivedAt: new Date() } });
+  const r = await resolveAiTarget(datasetId, { mode: "CURRENT_ASSET", assetId: hinted.id });
+  assert.equal(r.ok ? "OK" : r.code, "AI_CAPABILITY_UNVERIFIED");
 });
