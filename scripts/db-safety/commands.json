@@ -805,7 +805,8 @@
       "tests/workspace/image-video-flush-regression.test.ts",
       "tests/workspace/path-interaction.test.ts",
       "tests/workspace/audio-properties.test.ts",
-      "tests/datasets-ui/popover-focus.test.ts"
+      "tests/datasets-ui/popover-focus.test.ts",
+      "tests/workspace/label-library.test.ts"
     ]
   },
   "web:test:asset-guard-transitions": {
