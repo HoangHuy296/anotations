@@ -75,7 +75,7 @@ test("canvas contract: navigation remounts the canvas per Asset, so an unfinishe
 
 test("canvas contract: dragging a box or circle updates a ref and Konva nodes only - no React state, no persistence", () => {
   const move = body("updateCanvasDraft");
-  assert.ok(!/\bset[A-Z]\w*\(/.test(move.slice(move.indexOf('tool !== "box"'))), "the box/circle move path calls no React state setter");
+  assert.ok(!/(?<![.\w])set[A-Z]\w*\(/.test(move.slice(move.indexOf('tool !== "box"'))), "the box/circle move path calls no React state setter (Konva node methods such as .setAttrs are not React state)");
   assert.ok(!/persist|scheduleAutosave|putAssetAnnotations|beginOptimisticCreate|upsertSafeAnnotation/.test(move), "no persistence while dragging");
   assert.ok(/draftRef\.current = rect/.test(move) && /draftRectRef\.current\?\.setAttrs\(rect\)/.test(move) && /draftCircleRef\.current\?\.radius\(/.test(move) && /batchDraw\(\)/.test(move), "the draft is drawn imperatively");
   assert.ok(!/useState<\{ x: number; y: number; width: number; height: number \} \| null>/.test(canvas) && !/setDraft\b/.test(canvas), "the per-move draft state no longer exists");
