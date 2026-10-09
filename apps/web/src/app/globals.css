@@ -116,6 +116,11 @@ a {
   color: #18181b;
 }
 
+[data-theme="dark"][data-high-contrast="true"] .text-zinc-400,
+[data-theme="dark"][data-high-contrast="true"] .text-zinc-500 {
+  color: #f4f4f5;
+}
+
 [data-high-contrast="true"] .border-zinc-100,
 [data-high-contrast="true"] .border-zinc-200 {
   border-color: #71717a;
