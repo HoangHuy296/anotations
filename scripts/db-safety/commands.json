@@ -765,7 +765,8 @@
       "--test",
       "--test-concurrency=1",
       "tests/repository-import/classification-boundary.test.ts",
-      "tests/repository-import/repository-asset-mirror.test.ts"
+      "tests/repository-import/repository-asset-mirror.test.ts",
+      "tests/repository-import/repository-mime-contract.test.ts"
     ]
   },
   "worker:test:sealed-namespace": {
