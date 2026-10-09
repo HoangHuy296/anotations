@@ -973,5 +973,34 @@
       "--test-concurrency=1",
       "tests/media-verification/cap-contention.test.ts"
     ]
+  },
+  "web:test:workspace-engines:vitest": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "tests/workspace/text-annotation-client.vitest.spec.ts",
+      "tests/workspace/text-annotation-store.vitest.spec.ts",
+      "tests/workspace/text-dom-segments.vitest.spec.ts",
+      "tests/workspace/text-engine-capabilities.vitest.spec.ts",
+      "tests/workspace/text-properties-editor.vitest.spec.ts",
+      "tests/workspace/text-read-client.vitest.spec.ts",
+      "tests/workspace/text-span-selection.vitest.spec.ts",
+      "tests/workspace/text-workspace.vitest.spec.ts",
+      "tests/workspace/video-autosave.vitest.spec.ts",
+      "tests/workspace/video-interaction-ownership.vitest.spec.ts",
+      "tests/workspace/video-interpolation.vitest.spec.ts",
+      "tests/workspace/video-playback-controller.vitest.spec.ts",
+      "tests/workspace/video-temporal-boundary.vitest.spec.ts",
+      "tests/workspace/workspace-engine-registry.vitest.spec.ts",
+      "tests/workspace/ai-batch-selection.vitest.spec.ts",
+      "tests/workspace/collaboration-presence.vitest.spec.tsx",
+      "tests/workspace/collaboration-workspace-ui.vitest.spec.tsx",
+      "tests/workspace/use-collaboration-realtime.vitest.spec.ts",
+      "--pool=threads",
+      "--environment",
+      "node"
+    ]
   }
 }
