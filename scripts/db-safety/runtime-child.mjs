@@ -108,6 +108,46 @@ if (role === 'probe') {
   // B2.0: the fifth file of the guarded dataset-metadata command (`tests/dataset-metadata/**`). It is not part of the legacy role above, whose list the G4/G5 supervisor relies on.
   require('../../apps/web/tests/auth-ownership/register-server-only.cjs');
   await import('../../apps/web/tests/dataset-metadata/dataset-patch-route.test.ts');
+} else if (role === 'suite') {
+  // B2.2: one approved integration test file per process (selector validated against this frozen list, never a path from the caller).
+  require('../../apps/web/tests/auth-ownership/register-server-only.cjs');
+  const approved = new Set([
+    'annotation-api/annotation-service.test.ts',
+    'annotation-api/annotation-validation.test.ts',
+    'annotation-api/annotation-create-authorization.test.ts',
+    'annotation-api/video-foundation.test.ts',
+    'workspace/annotation-mutations.test.ts',
+    'workspace/annotation-shape-editing.test.ts',
+    'workspace/annotation-locking.test.ts',
+    'workspace/video-engine-read.test.ts',
+    'workspace/video-timeline-ownership.test.ts',
+    'workspace/autosave-state.test.ts',
+    'annotation-api/text-generic-reader.test.ts',
+    'text-annotations/text-classification-commands.test.ts',
+    'text-annotations/text-classification-races.test.ts',
+    'text-annotations/text-command-foundation.test.ts',
+    'text-annotations/text-label-eligibility.test.ts',
+    'text-annotations/text-policy-service.test.ts',
+    'text-annotations/text-properties.test.ts',
+    'text-annotations/text-relation-commands.test.ts',
+    'text-annotations/text-span-command-races.test.ts',
+    'text-annotations/text-span-commands.test.ts',
+    'text-annotations/text-span-isolation.test.ts',
+    'text-annotations/text-span-unicode-fixtures.test.ts',
+    'text-annotations/workspace-selection-text.test.ts',
+    'text-source/text-access-denial.test.ts',
+    'text-source/text-boundary-loader.test.ts',
+    'text-source/text-prepare-route.test.ts',
+    'text-source/text-read-route.test.ts',
+    'text-source/text-reader-browser.test.ts',
+    'text-source/text-reader-fixtures.test.ts',
+    'text-source/text-source-prepare-service.test.ts',
+    'text-source/text-source-readiness.test.ts',
+    'text-source/text-source-service.test.ts'
+  ]);
+  const files = JSON.parse(process.env.G1_RUNTIME_SUITE_FILES ?? '[]');
+  if (!Array.isArray(files) || files.length !== 1 || !files.every(file => approved.has(file))) throw Error('RUNTIME_SUITE_FILE_UNAPPROVED');
+  for (const file of files) await import(`../../apps/web/tests/${file}`);
 } else if (role === 'provider') {
   const image = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64');
   const text = Buffer.from('verified fixture text\n');

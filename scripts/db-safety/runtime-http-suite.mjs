@@ -1,10 +1,12 @@
 // Stage-1 receipt-owned disposable HTTP runtime (design: specs/029-modality-specific-datasets/release/disposable-http-runtime-plan.md, Stage 1).
-// Entered ONLY through a G1 test receipt scoped to the exact command `web:test:dataset-metadata` (the focused runner issues it on a fresh disposable PostgreSQL with the
-// frozen 26-migration chain). That is the ONE guarded way to run the complete 21-test dataset-metadata contract: it starts one receipt-owned web role (the same
-// `runtime-child.mjs web` the G4/G5 supervisor uses), then runs the four HTTP-bound files as the `legacy` role and `dataset-patch-route.test.ts` as the `dataset-patch` role,
-// both under the same runtime receipt, and requires the executed test count to equal the declared count of `tests/dataset-metadata/*.test.ts` (nothing skipped or counted twice). It is a reduced form of runtime-suite.mjs: no provider, worker or browser, and none of the G4/G5
-// negative scenarios. It starts from the same private source snapshot, the same project hash pinning, the same compiler-ancestry ledger and the same exact-PID cleanup.
-// It is not G3 or G5 evidence and does not touch runtime-suite.mjs, runtime-child.mjs, runtime-authority.cjs, runtime-compilers.cjs or the network fence.
+// Entered ONLY through a G1 test receipt scoped to one of the exact commands in HTTP_RUNTIME_COMMANDS (the focused runner issues it on a fresh disposable PostgreSQL, Redis and
+// MinIO with the frozen 26-migration chain). It starts one receipt-owned web role (the same `runtime-child.mjs web` the G4/G5 supervisor uses) from the same private source
+// snapshot, project hash pinning and compiler-ancestry ledger, then runs the command's test files as receipt-owned roles and requires the executed counts to match:
+//   web:test:dataset-metadata       the complete 21-test dataset-metadata contract (four HTTP-bound files as `legacy`, dataset-patch-route as `dataset-patch`).
+//   web:test:workspace-integration  the annotation/workspace persistence suites that are opt-in outside Compose (WORKSPACE_INTEGRATION_TESTS, ANNOTATION_API_INTEGRATION_TESTS,
+//                                   VIDEO_VIEW_INTEGRATION_TESTS) and the TEXT suites, one process per file (role `suite`). The opt-in flags are part of the receipt-verified
+//                                   environment of THIS run only, a disposable MinIO bucket is created for it, and any skipped test fails the run.
+// It is not G3 or G5 evidence and does not touch runtime-suite.mjs, runtime-authority.cjs, runtime-compilers.cjs or the network fence.
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { randomUUID, randomBytes } from 'node:crypto';
@@ -16,15 +18,48 @@ import { verify, root, cleanEnv, registry, sha, walk, redact } from './guard.mjs
 const require = createRequire(import.meta.url);
 const authority = require('./runtime-authority.cjs');
 const compilerAuthority = require('./runtime-compilers.cjs');
+export const HTTP_RUNTIME_ROLES = Object.freeze(['web', 'legacy', 'dataset-patch', 'suite']);
+/** Test files (relative to apps/web/tests) the `suite` role may import, one per process. Kept in step with runtime-child.mjs and offline-tested for equality. */
+export const WORKSPACE_INTEGRATION_FILES = Object.freeze([
+  'annotation-api/annotation-service.test.ts', 'annotation-api/annotation-validation.test.ts', 'annotation-api/annotation-create-authorization.test.ts', 'annotation-api/video-foundation.test.ts',
+  'workspace/annotation-mutations.test.ts', 'workspace/annotation-shape-editing.test.ts', 'workspace/annotation-locking.test.ts', 'workspace/video-engine-read.test.ts', 'workspace/video-timeline-ownership.test.ts', 'workspace/autosave-state.test.ts',
+  'annotation-api/text-generic-reader.test.ts',
+  'text-annotations/text-classification-commands.test.ts',
+  'text-annotations/text-classification-races.test.ts',
+  'text-annotations/text-command-foundation.test.ts',
+  'text-annotations/text-label-eligibility.test.ts',
+  'text-annotations/text-policy-service.test.ts',
+  'text-annotations/text-properties.test.ts',
+  'text-annotations/text-relation-commands.test.ts',
+  'text-annotations/text-span-command-races.test.ts',
+  'text-annotations/text-span-commands.test.ts',
+  'text-annotations/text-span-isolation.test.ts',
+  'text-annotations/text-span-unicode-fixtures.test.ts',
+  'text-annotations/workspace-selection-text.test.ts',
+  'text-source/text-access-denial.test.ts',
+  'text-source/text-boundary-loader.test.ts',
+  'text-source/text-prepare-route.test.ts',
+  'text-source/text-read-route.test.ts',
+  'text-source/text-reader-browser.test.ts',
+  'text-source/text-reader-fixtures.test.ts',
+  'text-source/text-source-prepare-service.test.ts',
+  'text-source/text-source-readiness.test.ts',
+  'text-source/text-source-service.test.ts'
+]);
+export const HTTP_RUNTIME_COMMANDS = Object.freeze({
+  'web:test:dataset-metadata': Object.freeze({ flags: Object.freeze({}), bucket: false, roleFiles: Object.freeze({ legacy: ['assets', 'datasets', 'labels', 'http-routes'], 'dataset-patch': ['dataset-patch-route'] }), dir: 'dataset-metadata' }),
+  'web:test:workspace-integration': Object.freeze({ flags: Object.freeze({ WORKSPACE_INTEGRATION_TESTS: '1', ANNOTATION_API_INTEGRATION_TESTS: '1', VIDEO_VIEW_INTEGRATION_TESTS: '1' }), bucket: true, suites: WORKSPACE_INTEGRATION_FILES }),
+});
+/** Kept for the dataset-metadata plan (and its offline tests). */
 export const HTTP_RUNTIME_COMMAND = 'web:test:dataset-metadata';
-export const HTTP_RUNTIME_ROLES = Object.freeze(['web', 'legacy', 'dataset-patch']);
-/** Which test files each test role runs (kept in step with runtime-child.mjs; offline-tested against the directory so a new file cannot be silently left out). */
-export const HTTP_RUNTIME_ROLE_FILES = Object.freeze({ legacy: ['assets', 'datasets', 'labels', 'http-routes'], 'dataset-patch': ['dataset-patch-route'] });
+export const HTTP_RUNTIME_ROLE_FILES = HTTP_RUNTIME_COMMANDS[HTTP_RUNTIME_COMMAND].roleFiles;
 export const HTTP_RUNTIME_WEB_PORT = 55470;
 const baseReceipt = process.env.DB_SAFETY_RECEIPT;
 const checked = await verify(baseReceipt, 'test');
 process.env.DATABASE_URL = checked.target.url.toString();
-assert.equal(checked.r.command, HTTP_RUNTIME_COMMAND, 'the HTTP runtime must be entered through its exact approved command');
+const COMMAND = checked.r.command;
+const PLAN = Object.hasOwn(HTTP_RUNTIME_COMMANDS, COMMAND) ? HTTP_RUNTIME_COMMANDS[COMMAND] : null;
+assert.ok(PLAN, 'the HTTP runtime must be entered through one of its exact approved commands');
 assert.notEqual(HTTP_RUNTIME_WEB_PORT, 3000, 'the canonical application port is never a test target');
 // The web port must be a G1 loopback port that is not the disposable PostgreSQL's (or any other receipt-owned provider's) and must be free: the runtime never falls back to another port.
 const claimedPorts = [Number(checked.target.url.port), ...Object.entries(checked.env).flatMap(([key, value]) => { if (/PORT$/.test(key)) return [Number(value)]; try { return [Number(new URL(String(value)).port)]; } catch { return []; } })].filter(Number.isInteger);
@@ -42,7 +77,7 @@ for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => {
   }
   setTimeout(() => process.exit(130), 3000).unref();
 });
-const evidence = { mode: 'http', command: HTTP_RUNTIME_COMMAND, owner: authority.identity(process.pid), scenarios: [], processes: [], cleanup: null };
+const evidence = { mode: 'http', command: COMMAND, owner: authority.identity(process.pid), scenarios: [], processes: [], cleanup: null };
 assert.equal(process.env.G1_RUNTIME_EVIDENCE, undefined);
 const entryHash = sha(readFileSync(join(root, 'scripts/db-safety/runtime-child.mjs')));
 const roles = Object.fromEntries(HTTP_RUNTIME_ROLES.map(role => [role, { port: role === 'web' ? HTTP_RUNTIME_WEB_PORT : null, entryHash }]));
@@ -52,6 +87,7 @@ const environment = {
   MINIO_PUBLIC_ENDPOINT: checked.env.MINIO_ENDPOINT, MINIO_CORS_ALLOWED_ORIGIN: `http://127.0.0.1:${HTTP_RUNTIME_WEB_PORT}`,
   UPLOAD_CAPABILITY_SECRET: randomBytes(32).toString('hex'), SOURCE_CONNECTION_ENCRYPTION_KEY: randomBytes(32).toString('base64'),
   COOKIE_SECURE: 'false', NEXT_TELEMETRY_DISABLED: '1', TSX_TSCONFIG_PATH: join(root, 'apps/web/tsconfig.json'),
+  ...PLAN.flags, // opt-in test flags exist ONLY in this receipt-verified environment, never in the caller's
 };
 writeFileSync(config, JSON.stringify(environment), { mode: 0o600 });
 const runtimePath = join(privateRoot, 'runtime.json');
@@ -59,11 +95,12 @@ let runtime;
 let successful = false;
 const registration = join(registry, `runtime-${id}.json`);
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function launch(role) {
+async function launch(role, extraEnv = {}) {
+  assert.ok(Object.keys(extraEnv).every(key => key === 'G1_RUNTIME_SUITE_FILES'), 'a child may receive only its approved suite selector');
   // Recheck container/PG identity and the entire migration set before each child.
   await verify(baseReceipt, 'test');
   Object.assign(process.env, environment);
-  const childEnv = { ...cleanEnv(), ...environment, DB_SAFETY_RECEIPT: baseReceipt, G1_RUNTIME_RECEIPT: runtimePath, G1_RUNTIME_ROLE: role, NODE_OPTIONS: `--require=${join(root, 'scripts/db-safety/network-fence.cjs')}` };
+  const childEnv = { ...cleanEnv(), ...environment, DB_SAFETY_RECEIPT: baseReceipt, G1_RUNTIME_RECEIPT: runtimePath, G1_RUNTIME_ROLE: role, ...extraEnv, NODE_OPTIONS: `--require=${join(root, 'scripts/db-safety/network-fence.cjs')}` };
   const child = spawn(process.execPath, ['--import', 'tsx', join(root, 'scripts/db-safety/runtime-child.mjs'), role], { cwd: root, env: childEnv, stdio: ['ignore', 'pipe', 'pipe'] });
   let output = ''; child.stdout.on('data', b => { output += b; }); child.stderr.on('data', b => { output += b; });
   const done = new Promise(resolve => child.once('exit', (code, signal) => resolve({ code, signal })));
@@ -102,25 +139,52 @@ try {
   writeFileSync(registration, JSON.stringify({ path: runtimePath, hash: sha(readFileSync(runtimePath)) }), { mode: 0o400, flag: 'wx' });
   Object.assign(process.env, environment, { G1_RUNTIME_RECEIPT: runtimePath });
 
+  if (PLAN.bucket) {
+    // A disposable bucket on the receipt-owned MinIO (the generic focused plan provisions the server but no bucket). It dies with the MinIO container.
+    assert.match(String(checked.env.MINIO_BUCKET), /^g1-[a-z0-9-]+$/); assert.match(String(checked.env.MINIO_ENDPOINT), /^http:\/\/127\.0\.0\.1:\d+$/);
+    const { Client } = createRequire(join(root, 'apps/web/package.json'))('minio');
+    const endpoint = new URL(checked.env.MINIO_ENDPOINT);
+    await new Client({ endPoint: endpoint.hostname, port: Number(endpoint.port), useSSL: false, accessKey: checked.env.MINIO_ACCESS_KEY, secretKey: checked.env.MINIO_SECRET_KEY }).makeBucket(checked.env.MINIO_BUCKET);
+    evidence.scenarios.push({ name: 'disposable-bucket-created', pass: true, bucket: checked.env.MINIO_BUCKET });
+  }
   const web = await launch('web'); await ready(web, 'RUNTIME_WEB_READY');
   evidence.scenarios.push({ name: 'receipt-owned-web-runtime-ready', pass: true });
-  // The complete dataset-metadata contract under the same runtime receipt: the four HTTP-bound files, then the PATCH-route file. Counts are checked, not assumed.
-  const declared = file => (readFileSync(join(root, `apps/web/tests/dataset-metadata/${file}.test.ts`), 'utf8').match(/^test\(/gm) ?? []).length;
-  let executed = 0, expected = 0;
-  for (const [role, files] of Object.entries(HTTP_RUNTIME_ROLE_FILES)) {
-    const run = await launch(role); const exit = await run.done;
-    const output = safeOutput(run.output());
-    console.log('DATASET_METADATA_RESULTS', role, output);
-    assert.equal(exit.code, 0, `dataset-metadata ${role} files failed`);
-    const count = key => Number(new RegExp(`^# ${key} (\\d+)`, 'm').exec(output)?.[1] ?? NaN);
-    const want = files.reduce((sum, file) => sum + declared(file), 0);
-    assert.equal(count('tests'), want, `${role}: every declared test ran exactly once`);
-    assert.equal(count('pass'), want); assert.equal(count('fail'), 0); assert.equal(count('skipped'), 0);
-    executed += count('tests'); expected += want;
-    evidence.scenarios.push({ name: `dataset-metadata-${role}`, pass: true, files, tests: want });
+  const tap = (output, key) => Number(new RegExp(`^# ${key} (\\d+)`, 'm').exec(output)?.[1] ?? NaN);
+  const declared = path => (readFileSync(join(root, `apps/web/tests/${path}`), 'utf8').match(/^test\(/gm) ?? []).length;
+  let executed = 0;
+  if (PLAN.roleFiles) {
+    // The complete dataset-metadata contract under the same runtime receipt. Counts are checked, not assumed.
+    let expected = 0;
+    for (const [role, files] of Object.entries(PLAN.roleFiles)) {
+      const run = await launch(role); const exit = await run.done;
+      const output = safeOutput(run.output());
+      console.log('DATASET_METADATA_RESULTS', role, output);
+      assert.equal(exit.code, 0, `dataset-metadata ${role} files failed`);
+      const want = files.reduce((sum, file) => sum + declared(`${PLAN.dir}/${file}.test.ts`), 0);
+      assert.equal(tap(output, 'tests'), want, `${role}: every declared test ran exactly once`);
+      assert.equal(tap(output, 'pass'), want); assert.equal(tap(output, 'fail'), 0); assert.equal(tap(output, 'skipped'), 0);
+      executed += tap(output, 'tests'); expected += want;
+      evidence.scenarios.push({ name: `dataset-metadata-${role}`, pass: true, files, tests: want });
+    }
+    assert.equal(executed, expected);
+    evidence.scenarios.push({ name: 'dataset-metadata-contract-complete', pass: true, tests: executed });
+  } else {
+    // Opt-in integration suites and TEXT suites, one process per file. A skipped test is a failure here: these flags exist so that nothing is skipped.
+    const perFile = [];
+    for (const file of PLAN.suites) {
+      const run = await launch('suite', { G1_RUNTIME_SUITE_FILES: JSON.stringify([file]) }); const exit = await run.done;
+      const output = safeOutput(run.output());
+      const counts = { tests: tap(output, 'tests'), pass: tap(output, 'pass'), fail: tap(output, 'fail'), skipped: tap(output, 'skipped'), todo: tap(output, 'todo') };
+      perFile.push({ file, exit: exit.code, ...counts, declared: declared(file) });
+      if (exit.code !== 0 || counts.fail !== 0) console.log('SUITE_FAILURE', file, output.slice(-3000));
+      assert.equal(exit.code, 0, `${file} failed`);
+      assert.ok(counts.tests >= declared(file) && counts.tests > 0, `${file}: every declared test ran`);
+      assert.equal(counts.pass, counts.tests, `${file}: all passed`); assert.equal(counts.fail, 0); assert.equal(counts.skipped, 0, `${file}: no test may be skipped`); assert.equal(counts.todo, 0);
+      executed += counts.tests;
+    }
+    console.log('WORKSPACE_INTEGRATION_RESULTS', JSON.stringify(perFile));
+    evidence.scenarios.push({ name: 'workspace-integration-suites-complete', pass: true, files: perFile.length, tests: executed, skipped: 0, perFile });
   }
-  assert.equal(executed, expected);
-  evidence.scenarios.push({ name: 'dataset-metadata-contract-complete', pass: true, tests: executed });
   await verify(baseReceipt, 'test'); successful = true;
 } finally {
   const stopped = [];

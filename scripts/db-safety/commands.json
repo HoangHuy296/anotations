@@ -1026,5 +1026,14 @@
       "tests/workspace/autosave-state.test.ts",
       "tests/text-annotations/workspace-selection-text.test.ts"
     ]
+  },
+  "web:test:workspace-integration": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/db-safety/runtime-http-suite.mjs"
+    ]
   }
 }
