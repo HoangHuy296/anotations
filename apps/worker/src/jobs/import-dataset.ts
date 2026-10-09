@@ -87,7 +87,7 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
           safeFailureCode = "SOURCE_DOWNLOAD_FAILED";
           const downloaded = await downloadRepositoryCandidate(candidate, access);
           safeFailureCode = "MINIO_UPLOAD_FAILED";
-          published = await mirrorRepositoryObject({ objectKey, body: downloaded.body, sizeBytes: downloaded.sizeBytes });
+          published = await mirrorRepositoryObject({ objectKey, body: downloaded.body, sizeBytes: downloaded.sizeBytes, mimeType: candidate.mimeType });
           await applyRepositoryImportTestPoint(db, job.id, "CANCEL_AFTER_UPLOAD");
           if (await acknowledgeCancellation(db, job.id, lockToken)) {
             await safeCleanupUnpublishedObject(db, { bucket: published.bucket, objectKey: published.objectKey, datasetId: job.datasetId });

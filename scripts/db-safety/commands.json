@@ -764,7 +764,8 @@
       "tsx",
       "--test",
       "--test-concurrency=1",
-      "tests/repository-import/classification-boundary.test.ts"
+      "tests/repository-import/classification-boundary.test.ts",
+      "tests/repository-import/repository-asset-mirror.test.ts"
     ]
   },
   "worker:test:sealed-namespace": {
