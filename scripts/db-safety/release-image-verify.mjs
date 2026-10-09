@@ -23,6 +23,16 @@ export const PINNED = Object.freeze({
   migrationsTreeSha256: 'f0da8710b3c874f842de6b686ae5b025dffd59f8acdab74a6e1c00faadb54ca8',
   m24: '20260930030000_dataset_modality_g2', m25: '20261006000000_prepared_import_creation_request_hash',
 });
+/**
+ * The 26-migration chain (M26 promoted). PINNED above is the 25-migration rollout pin set and stays the default (the shared-dev rollout package and its tests reference it); an image built
+ * from the frozen 26-migration tree is verified with `--chain 26`, which swaps ONLY the two tree digests and adds the M26 migration to the byte-compared sources. The generated client is
+ * compared raw: an image holds the committed bytes (the checkout path embedded in internal/class.ts is the committed one), so no normalization is needed or applied here.
+ */
+export const PINNED_M26 = Object.freeze({
+  clientTreeSha256: 'b88f7a3dc76134aaf11d4962159bafde47a5904f9eb7e11e0edc4247cd79083c',
+  migrationsTreeSha256: 'ad6cf07925c9422a715e0ea90616b45ca1e54a58d1ea0f55ea1496dd8b9ec54a',
+  m26: '20261007000000_media_verification_a2',
+});
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const BAD_STARTUP = /\b(migrate|prisma|seed|db:push|db:migrate|db:seed|db:reset)\b/i;
 const SECRET_NAME = /(PASSWORD|SECRET|TOKEN|PRIVATE|CREDENTIAL|ACCESS_KEY)/i;
@@ -42,10 +52,11 @@ const realExec = (command, args, options = {}) => {
 export const realDeps = () => ({ root: ROOT, exec: realExec, newName: () => `phase029-imgverify-${randomBytes(6).toString('hex')}` });
 
 /** Returns { ok, checks:[{id,pass,detail}] }. Never starts a container; always removes the one it created. */
-export function verifyImage({ image, service, revision }, deps = realDeps()) {
+export function verifyImage({ image, service, revision, chain = '25' }, deps = realDeps()) {
+  const pins = chain === '26' ? PINNED_M26 : PINNED;
   const checks = [];
   const record = (id, pass, detail) => { checks.push({ id, pass: Boolean(pass), detail }); return pass; };
-  if (!/^[A-Za-z0-9][A-Za-z0-9_.:/@-]{1,200}$/.test(image ?? '') || !['web', 'worker'].includes(service) || !/^[0-9a-f]{40}$/.test(revision ?? '')) return { ok: false, checks: [{ id: 'arguments', pass: false, detail: 'ARGUMENTS_INVALID' }] };
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.:/@-]{1,200}$/.test(image ?? '') || !['25', '26'].includes(chain) || !['web', 'worker'].includes(service) || !/^[0-9a-f]{40}$/.test(revision ?? '')) return { ok: false, checks: [{ id: 'arguments', pass: false, detail: 'ARGUMENTS_INVALID' }] };
   const inspect = deps.exec('docker', ['image', 'inspect', image]);
   if (inspect.status !== 0) return { ok: false, checks: [{ id: 'image', pass: false, detail: 'IMAGE_NOT_FOUND' }] };
   const info = JSON.parse(inspect.stdout)[0];
@@ -69,7 +80,7 @@ export function verifyImage({ image, service, revision }, deps = realDeps()) {
     const cwd = info.Config?.WorkingDir || '/workspace';
     const copy = (path, target) => deps.exec('docker', ['cp', `${containerId}:${cwd}/${path}`, target]).status === 0;
     // source byte-identity against the Git revision
-    for (const path of SERVICE_SOURCE[service]) {
+    for (const path of [...SERVICE_SOURCE[service], ...(chain === '26' ? [`prisma/migrations/${PINNED_M26.m26}/migration.sql`] : [])]) {
       const target = join(tmp, path.replace(/\//g, '__'));
       const present = copy(path, target);
       const expected = deps.exec('git', ['show', `${revision}:${path}`], { cwd: deps.root });
@@ -78,8 +89,8 @@ export function verifyImage({ image, service, revision }, deps = realDeps()) {
     }
     // generated client and migration chain trees
     const clientDir = join(tmp, 'client'), chainDir = join(tmp, 'chain');
-    record('client-tree', copy('lib/generated/prisma', clientDir) && treeHash(readTree(clientDir)) === PINNED.clientTreeSha256, PINNED.clientTreeSha256.slice(0, 12));
-    record('migration-chain-tree', copy('prisma/migrations', chainDir) && treeHash(readTree(chainDir)) === PINNED.migrationsTreeSha256, PINNED.migrationsTreeSha256.slice(0, 12));
+    record('client-tree', copy('lib/generated/prisma', clientDir) && treeHash(readTree(clientDir)) === pins.clientTreeSha256, pins.clientTreeSha256.slice(0, 12));
+    record('migration-chain-tree', copy('prisma/migrations', chainDir) && treeHash(readTree(chainDir)) === pins.migrationsTreeSha256, pins.migrationsTreeSha256.slice(0, 12));
     const dataset = join(tmp, 'lib__generated__prisma__models__Dataset.ts'), prepared = join(tmp, 'lib__generated__prisma__models__PreparedImport.ts');
     const datasetText = existsSync(dataset) ? readFileSync(dataset, 'utf8') : '', preparedText = existsSync(prepared) ? readFileSync(prepared, 'utf8') : '';
     record('client-dataset-modality-fields', /\bmodality\b/.test(datasetText) && MODALITY_FIELDS.every(field => datasetText.includes(field)), MODALITY_FIELDS.join(','));
@@ -103,7 +114,8 @@ export function verifyImage({ image, service, revision }, deps = realDeps()) {
 
 if (process.argv[1] && import.meta.filename === resolve(process.argv[1])) {
   const args = process.argv.slice(2), value = flag => { const index = args.indexOf(flag); return index >= 0 ? args[index + 1] : undefined; };
-  const result = verifyImage({ image: value('--image'), service: value('--service'), revision: value('--revision') });
+  const chain = value('--chain') ?? '25';
+  const result = verifyImage({ image: value('--image'), service: value('--service'), revision: value('--revision'), chain });
   const out = value('--out');
   if (out) writeFileSync(resolve(out), JSON.stringify({ image: value('--image'), service: value('--service'), revision: value('--revision'), ...result }, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
   console.log(JSON.stringify({ ok: result.ok, failed: result.checks.filter(check => !check.pass).map(check => check.id) }));

@@ -51,6 +51,14 @@ test('isolation: only receipt-owned loopback resources; the canonical port, ambi
   assert.match(suite, /await verify\(baseReceipt, 'test'\);\s*\n\s*Object\.assign/, 'the disposable target and migration set are re-verified before every child');
 });
 
+test('the web port is a fixed loopback port that cannot collide with the receipt-owned PostgreSQL or fall back to another port', () => {
+  assert.match(suite, /claimedPorts\.includes\(HTTP_RUNTIME_WEB_PORT\)/); assert.match(suite, /RUNTIME_WEB_PORT_IN_USE/);
+  assert.match(suite, /probe\.listen\(HTTP_RUNTIME_WEB_PORT, '127\.0\.0\.1'/);
+  assert.ok(suite.indexOf('RUNTIME_WEB_PORT_IN_USE') < suite.indexOf('mkdtempSync('), 'the port is checked before any directory or child exists');
+  assert.match(child, /server\.listen\(spec\.port, '127\.0\.0\.1'/, 'the web role listens exactly on its receipt port (EADDRINUSE fails the child, no fallback)');
+  assert.ok(!/port:\s*0\b|listen\(0\b|findFreePort|get-port/.test(suite + child), 'no ephemeral or fallback port selection');
+});
+
 test('exact-PID cleanup, the compiler ancestry ledger and interruption handling are present; the private stage and registration are removed', () => {
   for (const kept of ['authority.same(actual, owned.identity)', 'no unverified kill permitted', 'compilerAuthority.claim', 'owned compiler remains after cleanup', 'rmSync(registration', 'rmSync(privateRoot', "['SIGINT', 'SIGTERM']", 'authority.same(authority.identity(owned.identity.pid), owned.identity)']) assert.ok(suite.includes(kept), kept);
   assert.ok(!/process\.kill\((?!c\.observed\.pid)/.test(suite), 'the only direct kill targets the verified, identity-checked compiler PID');
