@@ -51,6 +51,10 @@ reconciles it. Duplicate delivery of a Job and retry of its successor lineage
 must never create a second asset or artifact solely because delivery happened
 again.
 
+## Dataset modality in ingestion Jobs
+
+Every Job that can create Assets (imports, repository ingestion, and any future verification Job) is subordinate to the target Dataset's fixed `Dataset.modality`. Job input never carries or overrides a modality; the worker reads the Dataset from PostgreSQL, refuses an unresolved Dataset (`DATASET_MODALITY_UNRESOLVED`), and rejects any item whose verified class differs from the Dataset modality (`ASSET_MODALITY_MISMATCH`) without publishing it. Valid items already published are kept, and the Job reports an explicit incomplete outcome with accurate aggregate counts rather than success. Retries and duplicate deliveries re-validate the current Dataset and must not create a duplicate Asset.
+
 ## Explicit exclusions
 
 - Do not create separate `ImportJob`, `ExportJob`, or `RepositorySyncJob`
