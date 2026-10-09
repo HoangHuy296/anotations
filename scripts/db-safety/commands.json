@@ -13,14 +13,11 @@
   },
   "web:test:dataset-metadata": {
     "kind": "test",
-    "cwd": "apps/web",
+    "cwd": ".",
     "args": [
-      "--require",
-      "./tests/auth-ownership/register-server-only.cjs",
       "--import",
       "tsx",
-      "--test",
-      "tests/dataset-metadata/**/*.test.ts"
+      "scripts/db-safety/runtime-http-suite.mjs"
     ]
   },
   "web:test:dataset-patch-route": {
@@ -818,15 +815,6 @@
       "--test-concurrency=1",
       "tests/dataset-modality/asset-guard-transitions.test.ts",
       "tests/dataset-modality/creation-paths.test.ts"
-    ]
-  },
-  "http:dataset-metadata": {
-    "kind": "test",
-    "cwd": ".",
-    "args": [
-      "--import",
-      "tsx",
-      "scripts/db-safety/runtime-http-suite.mjs"
     ]
   },
   "web:test:ai-batch-targets": {

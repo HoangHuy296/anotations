@@ -19,15 +19,16 @@ import { readTree, treeHash, CLIENT_DIR, SCHEMA_PATH, ENGINE_FILE } from '../pri
 
 // Offline only: a fake docker/node world, a temp repository fixture and fake identity/cleanup checkers.
 // Nothing here starts Docker, PostgreSQL, Redis or MinIO or opens a network connection.
-const COMMAND = 'web:test:dataset-metadata';
+// The generic 24-chain focused command the fake-world lifecycle tests drive. (web:test:dataset-metadata now runs the HTTP runtime on the full chain, so it is no longer the generic one.)
+const COMMAND = 'web:test:dataset-patch-route';
 const sha = text => createHash('sha256').update(text).digest('hex');
 const PROPOSAL1_SQL = '-- fake migration 24 bytes\n';
 const PROPOSAL2_SQL = '-- fake migration 25 bytes\n';
 const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1];
 const FAKE_CHAIN = [{ ...P1, sha256: sha(PROPOSAL1_SQL) }, { ...P2, sha256: sha(PROPOSAL2_SQL) }];
-const REVIEWED_EXTRA_COMMANDS = ['http:dataset-metadata', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap'];
+const REVIEWED_EXTRA_COMMANDS = ['web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap'];
 const assertSupportedSet = (message) => {
-  assert.deepEqual(SUPPORTED_COMMANDS.slice(0, 5), [COMMAND, 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'], message);
+  assert.deepEqual(SUPPORTED_COMMANDS.slice(0, 5), ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'], message);
   assert.deepEqual([...SUPPORTED_COMMANDS.slice(5)].sort(), [...REVIEWED_EXTRA_COMMANDS].sort(), 'every additional supported command is a deliberate, reviewed catalog addition');
 };
 const CATALOG = { ...Object.fromEntries(REVIEWED_EXTRA_COMMANDS.map(name => [name, { kind: 'test' }])), [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [BACKFILL_SEED_COMMAND]: BACKFILL_SEED_SPEC, [BACKFILL_VERIFY_COMMAND]: BACKFILL_VERIFY_SPEC, [MAINT_SEED_COMMAND]: MAINT_SEED_SPEC, [MAINT_OBJECTS_COMMAND]: MAINT_OBJECTS_SPEC, [MAINT_CHECK_COMMAND]: MAINT_CHECK_SPEC, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
@@ -1725,7 +1726,7 @@ test('A2.4 runtime commands: exactly three reviewed names, all supported, and on
 
 test('full-chain focused commands (tracked client needs migration 25) resolve to the reviewed 26-migration chain, are supported, and are disjoint from the A2 runtime list', () => {
   // The fake world stages only the 24-chain fixture, so the applied chain itself is proven against a real disposable database (web:test:local-folder-modality-idempotency run).
-  assert.deepEqual([...FOCUSED_FULL_CHAIN], ['web:test:local-folder-modality-idempotency', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'http:dataset-metadata']);
+  assert.deepEqual([...FOCUSED_FULL_CHAIN], ['web:test:local-folder-modality-idempotency', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'web:test:dataset-metadata']);
   assert.equal(PROPOSAL_CHAIN.length, 3);
   for (const name of FOCUSED_FULL_CHAIN) {
     assert.ok(SUPPORTED_COMMANDS.includes(name), name);

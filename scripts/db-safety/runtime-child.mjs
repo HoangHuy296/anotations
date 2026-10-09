@@ -104,6 +104,10 @@ if (role === 'probe') {
   for (const file of ['assets','datasets','labels','http-routes']) {
     await import(`../../apps/web/tests/dataset-metadata/${file}.test.ts`);
   }
+} else if (role === 'dataset-patch') {
+  // B2.0: the fifth file of the guarded dataset-metadata command (`tests/dataset-metadata/**`). It is not part of the legacy role above, whose list the G4/G5 supervisor relies on.
+  require('../../apps/web/tests/auth-ownership/register-server-only.cjs');
+  await import('../../apps/web/tests/dataset-metadata/dataset-patch-route.test.ts');
 } else if (role === 'provider') {
   const image = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64');
   const text = Buffer.from('verified fixture text\n');

@@ -1,7 +1,8 @@
 // Stage-1 receipt-owned disposable HTTP runtime (design: specs/029-modality-specific-datasets/release/disposable-http-runtime-plan.md, Stage 1).
-// Entered ONLY through a G1 test receipt scoped to the exact command `http:dataset-metadata` (the focused runner issues it on a fresh disposable PostgreSQL with the
-// frozen 26-migration chain). It starts one receipt-owned web role (the same `runtime-child.mjs web` the G4/G5 supervisor uses), then runs the existing dataset-metadata
-// test files as the `legacy` role under the same runtime receipt. It is a reduced form of runtime-suite.mjs: no provider, worker or browser, and none of the G4/G5
+// Entered ONLY through a G1 test receipt scoped to the exact command `web:test:dataset-metadata` (the focused runner issues it on a fresh disposable PostgreSQL with the
+// frozen 26-migration chain). That is the ONE guarded way to run the complete 21-test dataset-metadata contract: it starts one receipt-owned web role (the same
+// `runtime-child.mjs web` the G4/G5 supervisor uses), then runs the four HTTP-bound files as the `legacy` role and `dataset-patch-route.test.ts` as the `dataset-patch` role,
+// both under the same runtime receipt, and requires the executed test count to equal the declared count of `tests/dataset-metadata/*.test.ts` (nothing skipped or counted twice). It is a reduced form of runtime-suite.mjs: no provider, worker or browser, and none of the G4/G5
 // negative scenarios. It starts from the same private source snapshot, the same project hash pinning, the same compiler-ancestry ledger and the same exact-PID cleanup.
 // It is not G3 or G5 evidence and does not touch runtime-suite.mjs, runtime-child.mjs, runtime-authority.cjs, runtime-compilers.cjs or the network fence.
 import assert from 'node:assert/strict';
@@ -14,18 +15,28 @@ import { verify, root, cleanEnv, registry, sha, walk, redact } from './guard.mjs
 const require = createRequire(import.meta.url);
 const authority = require('./runtime-authority.cjs');
 const compilerAuthority = require('./runtime-compilers.cjs');
-export const HTTP_RUNTIME_COMMAND = 'http:dataset-metadata';
-export const HTTP_RUNTIME_ROLES = Object.freeze(['web', 'legacy']);
+export const HTTP_RUNTIME_COMMAND = 'web:test:dataset-metadata';
+export const HTTP_RUNTIME_ROLES = Object.freeze(['web', 'legacy', 'dataset-patch']);
+/** Which test files each test role runs (kept in step with runtime-child.mjs; offline-tested against the directory so a new file cannot be silently left out). */
+export const HTTP_RUNTIME_ROLE_FILES = Object.freeze({ legacy: ['assets', 'datasets', 'labels', 'http-routes'], 'dataset-patch': ['dataset-patch-route'] });
 export const HTTP_RUNTIME_WEB_PORT = 55470;
 const baseReceipt = process.env.DB_SAFETY_RECEIPT;
 const checked = await verify(baseReceipt, 'test');
 process.env.DATABASE_URL = checked.target.url.toString();
 assert.equal(checked.r.command, HTTP_RUNTIME_COMMAND, 'the HTTP runtime must be entered through its exact approved command');
+assert.notEqual(HTTP_RUNTIME_WEB_PORT, 3000, 'the canonical application port is never a test target');
 const privateRoot = mkdtempSync('/tmp/phase029-g1-runtime-');
 const id = randomUUID();
 const ledger = join(privateRoot, 'processes'); mkdirSync(ledger, { mode: 0o700 });
 const project = join(privateRoot, 'project'); mkdirSync(project, { mode: 0o700 });
 const children = [];
+// An interrupted supervisor must not leave its web runtime behind: terminate each owned child by exact identity, then exit (the finally block below covers ordinary failures).
+for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => {
+  for (const owned of children) {
+    try { if (owned.child.exitCode === null && authority.same(authority.identity(owned.identity.pid), owned.identity)) owned.child.kill('SIGTERM'); } catch { /* already gone */ }
+  }
+  setTimeout(() => process.exit(130), 3000).unref();
+});
 const evidence = { mode: 'http', command: HTTP_RUNTIME_COMMAND, owner: authority.identity(process.pid), scenarios: [], processes: [], cleanup: null };
 assert.equal(process.env.G1_RUNTIME_EVIDENCE, undefined);
 const entryHash = sha(readFileSync(join(root, 'scripts/db-safety/runtime-child.mjs')));
@@ -88,11 +99,23 @@ try {
 
   const web = await launch('web'); await ready(web, 'RUNTIME_WEB_READY');
   evidence.scenarios.push({ name: 'receipt-owned-web-runtime-ready', pass: true });
-  // The existing dataset-metadata suite (assets, datasets, labels and the HTTP routes) runs as the `legacy` role under the same runtime receipt.
-  const legacy = await launch('legacy'); const exit = await legacy.done;
-  console.log('DATASET_METADATA_RESULTS', safeOutput(legacy.output()));
-  assert.equal(exit.code, 0, 'dataset-metadata suite failed');
-  evidence.scenarios.push({ name: 'dataset-metadata-suite-under-http-runtime', pass: true });
+  // The complete dataset-metadata contract under the same runtime receipt: the four HTTP-bound files, then the PATCH-route file. Counts are checked, not assumed.
+  const declared = file => (readFileSync(join(root, `apps/web/tests/dataset-metadata/${file}.test.ts`), 'utf8').match(/^test\(/gm) ?? []).length;
+  let executed = 0, expected = 0;
+  for (const [role, files] of Object.entries(HTTP_RUNTIME_ROLE_FILES)) {
+    const run = await launch(role); const exit = await run.done;
+    const output = safeOutput(run.output());
+    console.log('DATASET_METADATA_RESULTS', role, output);
+    assert.equal(exit.code, 0, `dataset-metadata ${role} files failed`);
+    const count = key => Number(new RegExp(`^# ${key} (\\d+)`, 'm').exec(output)?.[1] ?? NaN);
+    const want = files.reduce((sum, file) => sum + declared(file), 0);
+    assert.equal(count('tests'), want, `${role}: every declared test ran exactly once`);
+    assert.equal(count('pass'), want); assert.equal(count('fail'), 0); assert.equal(count('skipped'), 0);
+    executed += count('tests'); expected += want;
+    evidence.scenarios.push({ name: `dataset-metadata-${role}`, pass: true, files, tests: want });
+  }
+  assert.equal(executed, expected);
+  evidence.scenarios.push({ name: 'dataset-metadata-contract-complete', pass: true, tests: executed });
   await verify(baseReceipt, 'test'); successful = true;
 } finally {
   const stopped = [];
