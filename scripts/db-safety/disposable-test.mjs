@@ -30,6 +30,33 @@ import { computeImplementation as maintenanceImplementation, manifestDigest as m
 import { runMaintenanceRehearsal } from './backfill-maintenance-rehearsal.mjs';
 import { readTree as readClientTree, treeHash as clientTreeHash } from './prisma-client-stage.mjs';
 
+/**
+ * Root-independent verification of the tracked generated Prisma client (Phase 030.1-B2.0).
+ * `internal/class.ts` is the only generated file that embeds the absolute path of the checkout that ran `prisma generate`: exactly one `"value": "<root>/lib/generated/prisma"`
+ * line and exactly one `"sourceFilePath": "<root>/prisma/schema.prisma"` line (prisma-client-stage.mjs audits the same two occurrences). Those two lines, and nothing else, are
+ * replaced by a fixed token before hashing, so the same frozen source verifies at any checkout path. The normalization applies only when the file has exactly that shape
+ * (one match of each line, with the same root); any other shape falls back to the raw bytes, which cannot equal the pin, so tampering still fails as FROZEN_CLIENT_FILE_DRIFT.
+ * Every other generated file, every added or deleted file and the whole tree digest are still hashed byte for byte.
+ */
+export const CLIENT_ROOT_TOKEN = '<REPOSITORY_ROOT>';
+const CLIENT_OUTPUT_LINE = /^(\s*"value": ")(\/[^"\n]+)(\/lib\/generated\/prisma",?)$/gm;
+const CLIENT_SCHEMA_LINE = /^(\s*"sourceFilePath": ")(\/[^"\n]+)(\/prisma\/schema\.prisma",?)$/gm;
+export function normalizeGeneratedClassFile(text) {
+  const output = [...text.matchAll(CLIENT_OUTPUT_LINE)], schema = [...text.matchAll(CLIENT_SCHEMA_LINE)];
+  if (output.length !== 1 || schema.length !== 1 || output[0][2] !== schema[0][2]) return null;
+  return text.replace(CLIENT_OUTPUT_LINE, `$1${CLIENT_ROOT_TOKEN}$3`).replace(CLIENT_SCHEMA_LINE, `$1${CLIENT_ROOT_TOKEN}$3`);
+}
+export function readNormalizedClientTree(dir) {
+  const tree = readClientTree(dir);
+  const classFile = join(dir, 'internal/class.ts');
+  if (tree.has('internal/class.ts') && existsSync(classFile)) {
+    const normalized = normalizeGeneratedClassFile(readFileSync(classFile, 'utf8'));
+    if (normalized !== null) tree.set('internal/class.ts', sha(normalized));
+  }
+  return tree;
+}
+export const normalizedClientTreeHash = root => (existsSync(join(root, 'lib/generated/prisma')) ? clientTreeHash(readNormalizedClientTree(join(root, 'lib/generated/prisma'))) : null);
+
 export const SUPPORTED_COMMANDS = ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'http:dataset-metadata'];
 /**
  * A2.4 runtime commands. They exercise the verification tables, so (unlike every other focused test, which runs on the 24-migration chain) they run on the
@@ -78,9 +105,11 @@ export const COMPAT_SPEC = {
 /** Frozen inputs of the compatibility plan: the accepted canonical schema, the complete tracked generated client, and the active migration chain. */
 export const COMPAT_BINDINGS = Object.freeze({
   schemaSha256: '4a85c754d067ae64f0f767d5e6cd49f37c6d5f004865257faef66025d6000993',
-  generatedTreeSha256: 'b88f7a3dc76134aaf11d4962159bafde47a5904f9eb7e11e0edc4247cd79083c',
+  // Root-normalized pins (B2.0). Before: tree b88f7a3d…083c, class.ts 9b6b2597…db967 (raw bytes, valid only at /home/aioz-huy/anotations). After: only the two root lines of
+  // internal/class.ts are tokenized (2 lines changed, every other file's hash identical to the previous pin).
+  generatedTreeSha256: '38f157f20c2275a5e8e5e349a472de97df30d62e45f8191ad1d7521bc4a2af46',
   generatedFiles: Object.freeze({
-    'lib/generated/prisma/internal/class.ts': '9b6b2597bc60aec0108647f44c869dc1eaa7e9413d5c3e9ae91ae4fdbc2db967',
+    'lib/generated/prisma/internal/class.ts': '0942ef4695c47560264c981dce7a7bc504215a1a403bc9eefa24aa40870d6c33',
     'lib/generated/prisma/internal/prismaNamespace.ts': 'f73d435a34eb6b47093d2dde8bd13ac56af3be81a1abd240c438be466f3ab115',
     'lib/generated/prisma/internal/prismaNamespaceBrowser.ts': 'fdd5dc8da705cc502370c4785226175f7b1fcf08b96a9305c3bff73ccdb2d20b',
     'lib/generated/prisma/models/PreparedImport.ts': 'd48ac861e7e8d6020d614a6faf706f9f4a146447c0599faabe798a02251af45d',
@@ -444,7 +473,7 @@ export function verifyCompatBindings(deps) {
   must(bindings && typeof bindings === 'object', 'COMPAT_BINDINGS_MISSING');
   must(sha(readFileSync(join(deps.root, 'prisma/schema.prisma'))) === bindings.schemaSha256, 'FROZEN_SCHEMA_DRIFT');
   const prefix = 'lib/generated/prisma/';
-  const client = readClientTree(join(deps.root, 'lib/generated/prisma'));
+  const client = readNormalizedClientTree(join(deps.root, 'lib/generated/prisma'));
   for (const [path, hash] of Object.entries(bindings.generatedFiles)) must(client.get(path.slice(prefix.length)) === hash, 'FROZEN_CLIENT_FILE_DRIFT');
   must(clientTreeHash(client) === bindings.generatedTreeSha256, 'FROZEN_CLIENT_DRIFT'); // any added, deleted or changed generated file
   must(clientTreeHash(readClientTree(join(deps.root, 'prisma/migrations'))) === bindings.activeChainTreeSha256, 'FROZEN_ACTIVE_CHAIN_DRIFT');
@@ -616,7 +645,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
   }
   const generatedModel = join(deps.root, 'lib/generated/prisma/models/Dataset.ts');
   must(existsSync(generatedModel) && readFileSync(generatedModel, 'utf8').includes('modalityContentRevision'), 'GENERATED_CLIENT_NOT_PHASE029'); // never regenerated here
-  const protectedBefore = { migrations: treeHash(deps.root, 'prisma/migrations'), generated: treeHash(deps.root, 'lib/generated/prisma'), schema: sha(readFileSync(join(deps.root, 'prisma/schema.prisma'))) };
+  const protectedBefore = { migrations: treeHash(deps.root, 'prisma/migrations'), generated: normalizedClientTreeHash(deps.root), schema: sha(readFileSync(join(deps.root, 'prisma/schema.prisma'))) };
 
   // ---- Run identity ----
   const token = deps.newToken();
@@ -892,7 +921,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
     }
 
     must(treeHash(deps.root, 'prisma/migrations') === protectedBefore.migrations, 'BASELINE_MIGRATIONS_CHANGED');
-    must(treeHash(deps.root, 'lib/generated/prisma') === protectedBefore.generated, 'GENERATED_CLIENT_CHANGED');
+    must(normalizedClientTreeHash(deps.root) === protectedBefore.generated, 'GENERATED_CLIENT_CHANGED');
     must(sha(readFileSync(join(deps.root, 'prisma/schema.prisma'))) === protectedBefore.schema, 'PRISMA_SCHEMA_CHANGED');
   } catch (error) {
     state.failures.push(safe(error));
