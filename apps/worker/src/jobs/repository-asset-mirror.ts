@@ -5,8 +5,13 @@ import { createWorkerMinio } from "../providers/minio.js";
 import { getWorkerConfig } from "../config.js";
 import type { RepositoryCandidate } from "./repository-import-source.js";
 
+/** The only Content-Types the extension mapping in repository-import-source.ts can produce; anything else is stored as an opaque download, never as a browser-interpreted type. */
+export const REPOSITORY_OBJECT_CONTENT_TYPES: ReadonlySet<string> = new Set([
+  "image/jpeg", "image/png", "image/webp", "video/mp4", "video/webm", "text/plain", "application/json", "text/csv", "audio/mpeg", "audio/ogg", "audio/wav",
+]);
+
 export function repositoryObjectMetadata(candidate: Pick<RepositoryCandidate, "mimeType">) {
-  return { "Content-Type": candidate.mimeType };
+  return { "Content-Type": REPOSITORY_OBJECT_CONTENT_TYPES.has(candidate.mimeType) ? candidate.mimeType : "application/octet-stream" };
 }
 
 export async function mirrorRepositoryObject(input: { objectKey: string; body: ReadableStream<Uint8Array>; sizeBytes: number; mimeType: RepositoryCandidate["mimeType"] }) {
