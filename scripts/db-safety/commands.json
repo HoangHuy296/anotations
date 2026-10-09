@@ -793,6 +793,33 @@
       "tests/direct-upload/upload-verification-boundary.test.ts"
     ]
   },
+  "web:test:modality-workspace-feasibility": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/workspace/modality-engine-feasibility.test.ts"
+    ]
+  },
+  "web:test:asset-guard-transitions": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/asset-guard-transitions.test.ts",
+      "tests/dataset-modality/creation-paths.test.ts"
+    ]
+  },
   "web:test:ai-batch-targets": {
     "kind": "test",
     "cwd": "apps/web",
