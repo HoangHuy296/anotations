@@ -3,11 +3,16 @@ import { Readable } from "node:stream";
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { createWorkerMinio } from "../providers/minio.js";
 import { getWorkerConfig } from "../config.js";
+import type { RepositoryCandidate } from "./repository-import-source.js";
 
-export async function mirrorRepositoryObject(input: { objectKey: string; body: ReadableStream<Uint8Array>; sizeBytes: number }) {
+export function repositoryObjectMetadata(candidate: Pick<RepositoryCandidate, "mimeType">) {
+  return { "Content-Type": candidate.mimeType };
+}
+
+export async function mirrorRepositoryObject(input: { objectKey: string; body: ReadableStream<Uint8Array>; sizeBytes: number; mimeType: RepositoryCandidate["mimeType"] }) {
   const config = getWorkerConfig();
   const client = createWorkerMinio(config);
-  await client.putObject(config.MINIO_BUCKET, input.objectKey, Readable.fromWeb(input.body as never), input.sizeBytes, { "Content-Type": "application/octet-stream" });
+  await client.putObject(config.MINIO_BUCKET, input.objectKey, Readable.fromWeb(input.body as never), input.sizeBytes, repositoryObjectMetadata({ mimeType: input.mimeType }));
   const stat = await client.statObject(config.MINIO_BUCKET, input.objectKey);
   if (stat.size !== input.sizeBytes) throw new Error("MINIO_OBJECT_VERIFICATION_FAILED");
   return { bucket: config.MINIO_BUCKET, objectKey: input.objectKey };
