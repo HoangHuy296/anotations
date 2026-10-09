@@ -15,6 +15,7 @@ import { reviewAnnotationInputSchema } from "@/lib/validation/annotation";
 import {
   updateImageDescription,
 } from "@/lib/workspace/image-mutations";
+import { updateAudioDescription } from "@/lib/workspace/audio-mutations";
 import { updateVideoDescription } from "@/lib/workspace/video-mutations";
 import { updateTextDescription } from "@/lib/workspace/text-mutations";
 import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
@@ -89,6 +90,15 @@ export async function updateVideoDescriptionAction(input: unknown) {
   const actor = await getRequestActor();
   if (!actor) return unauthenticated();
   const result = await updateVideoDescription(actor, parsed.data);
+  return result.ok ? { ok: true as const, status: 200 as const, asset: result.value } : fromStatus(result.status);
+}
+
+export async function updateAudioDescriptionAction(input: unknown) {
+  const parsed = updateAssetDescriptionInputSchema.safeParse(input);
+  if (!parsed.success) return invalid();
+  const actor = await getRequestActor();
+  if (!actor) return unauthenticated();
+  const result = await updateAudioDescription(actor, parsed.data);
   return result.ok ? { ok: true as const, status: 200 as const, asset: result.value } : fromStatus(result.status);
 }
 

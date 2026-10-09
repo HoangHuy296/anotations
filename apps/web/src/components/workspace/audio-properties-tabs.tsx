@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { AssetStatus } from "@internal/db";
 
-import { updateVideoDescriptionAction } from "@/app/(app)/workspace/[datasetId]/actions";
+import { updateAudioDescriptionAction } from "@/app/(app)/workspace/[datasetId]/actions";
 import { AssetBrowserFilters } from "@/components/workspace/asset-browser-filters";
 import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
 import { BulkActionBar } from "@/components/workspace/bulk-action-bar";
@@ -12,17 +12,13 @@ import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-pa
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
 import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import { Badge } from "@/components/ui/badge";
-import { deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { useDatasetLabels, useDatasetLabelsStore, type DatasetLabel } from "@/stores/dataset-labels-store";
-import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
-import type { SafeVideoTrack } from "@/types/video-annotation";
 import type { WorkspaceSelection } from "@/types/workspace";
 
-type PanelTab = "description" | "labels" | "tracks" | "assets";
-type TrackDraft = { objectId: string; name: string; labelId: string; interpolationMode: "LINEAR" | "NONE" };
+type PanelTab = "description" | "labels" | "assets";
 type LabelUpdate = { name: string; color: string; description: string; hotkey: string };
 
 export type AudioPropertiesTabsProps = {
@@ -42,29 +38,10 @@ export type AudioPropertiesTabsProps = {
 };
 
 /**
- * VIDEO's `PropertiesPanel` tabs content -- description/labels/shapes/tracks/
- * assets, mirroring `image-properties-tabs.tsx`'s structure and autosave
- * conventions but reading/writing VIDEO's own stores and endpoints:
- * `useVideoAnnotationStore` for tracks/keyframes (kept in sync by
- * `video-engine.tsx`'s `setSnapshot`), `updateVideoDescriptionAction` for the
- * asset description, and `useDatasetLabelsStore` (`dataset-labels-store.ts`)
- * for the taxonomy -- VIDEO has no server-projected `labels` in
- * `WorkspaceSelection` (unlike IMAGE), so this component is what asks the
- * shared store to load them, the same store `ImagePropertiesTabs` reads.
- *
- * "Shapes" lists every persisted keyframe -- each one *is* one bounding-box
- * video annotation. Its Object ID/Name are read from the keyframe's own
- * `properties.objectId`/`properties.name` (the user-typed values from the
- * create-annotation dialog in `video-engine.tsx`), never from the parent
- * Track -- a Track is routinely shared by many keyframes (that's what makes
- * it a track), so displaying or editing a shared Track field here would
- * silently relabel every other box on that track. Per-shape label
- * assignment follows the same rule: it writes the *keyframe's own*
- * `labelId` column via `updateVideoKeyframe`, not the Track's `labelId`.
- * Clicking a shape card sets `useVideoAnnotationStore`'s
- * `selectedKeyframeId`, which `video-engine.tsx` reacts to by switching to
- * that keyframe's track, seeking to its timestamp, and pausing -- so
- * selecting a shape here highlights it on the paused frame.
+ * AUDIO's `PropertiesPanel` tabs content: description / labels / assets. Everything shown here comes from AUDIO data - the asset row and the AUDIO media readiness
+ * (`selection.readiness.audio`: duration, sample rate, channels, codec, waveform) - never from the VIDEO annotation store, which is a module-level singleton that can still
+ * hold the tracks of a VIDEO asset opened earlier in the same browser session. There is no AUDIO annotation model in this phase ("Audio annotation editing is intentionally
+ * unavailable", audio-engine.tsx), so there is no track/keyframe/time-range editor here and none is simulated. The description autosave uses the AUDIO-scoped mutation.
  */
 export function AudioPropertiesTabs({ datasetId, selection, assets, page, pageSize, totalAssets, completedAssets, search, statuses, selectedAssetId, filters, tab, setTab }: AudioPropertiesTabsProps) {
   const asset = selection.asset;
@@ -76,40 +53,15 @@ export function AudioPropertiesTabs({ datasetId, selection, assets, page, pageSi
   const [descriptionState, setDescriptionState] = useState<"idle" | "pending" | "saving" | "saved" | "failed" | "conflict">("idle");
   const [conflictDraft, setConflictDraft] = useState<string | null>(null);
   const [labelError, setLabelError] = useState<string | null>(null);
-  const [shapeError, setShapeError] = useState<string | null>(null);
   const [newLabelName, setNewLabelName] = useState("");
   const [newLabelColor, setNewLabelColor] = useState("#0EA5E9");
   const [expandedLabelId, setExpandedLabelId] = useState<string | null>(null);
   const [labelUpdate, setLabelUpdate] = useState<Record<string, LabelUpdate>>({});
   const [savingLabelId, setSavingLabelId] = useState<string | null>(null);
   const taxonomy = useDatasetLabels(datasetId);
-  const [expandedTrackId, setExpandedTrackId] = useState<string | null>(null);
-  const [trackDrafts, setTrackDrafts] = useState<Record<string, TrackDraft>>({});
-  const [savingTrackId, setSavingTrackId] = useState<string | null>(null);
   const lastAttemptedDescriptionRef = useRef<string | null>(null);
   const scheduleAutosave = useAnnotationStore((store) => store.scheduleAutosave);
   const setConflictDraftInStore = useAnnotationStore((store) => store.setConflictDraft);
-  const tracks = useVideoAnnotationStore((store) => store.tracks);
-  const keyframes = useVideoAnnotationStore((store) => store.keyframes);
-  const storeTrackList = useVideoAnnotationStore((store) => store.trackList);
-  const storeKeyframeList = useVideoAnnotationStore((store) => store.keyframeList);
-  const markSaved = useVideoAnnotationStore((store) => store.markSaved);
-  const removeTrackFromStore = useVideoAnnotationStore((store) => store.removeTrack);
-  const removeKeyframeFromStore = useVideoAnnotationStore((store) => store.removeKeyframe);
-  const selectedKeyframeId = useVideoAnnotationStore((store) => store.selectedKeyframeId);
-  const setSelectedKeyframeId = useVideoAnnotationStore((store) => store.setSelectedKeyframeId);
-  const requestedTab = useVideoAnnotationStore((store) => store.requestedTab);
-
-  // Applies `video-engine.tsx`'s toolbar "Create track" tab request (see
-  // `requestedTab`'s doc comment in the store): switching here, then
-  // clearing the flag, is what makes a track created via the toolbar
-  // appear in the Tracks tab immediately, with no reload and no re-fire on
-  // unrelated re-renders.
-  useEffect(() => {
-    if (!requestedTab) return;
-    setTab(requestedTab);
-    useVideoAnnotationStore.getState().clearRequestedTab();
-  }, [requestedTab, setTab]);
 
   // `useDatasetLabelsStore` is a module-level singleton, not component
   // state -- once loaded for `datasetId`, this resolves immediately without
@@ -121,12 +73,12 @@ export function AudioPropertiesTabs({ datasetId, selection, assets, page, pageSi
   useEffect(() => {
     if (readOnly) return;
     if (description === serverDescription || lastAttemptedDescriptionRef.current === description) return;
-    const resourceKey = `video-description:${asset.id}`;
+    const resourceKey = `audio-description:${asset.id}`;
     setDescriptionState("pending");
     scheduleAutosave(resourceKey, async () => {
       lastAttemptedDescriptionRef.current = description;
       setDescriptionState("saving");
-      const result = await updateVideoDescriptionAction({ datasetId, assetId: asset.id, version, description: description.trim() || null });
+      const result = await updateAudioDescriptionAction({ datasetId, assetId: asset.id, version, description: description.trim() || null });
       if (result.ok) {
         setVersion(result.asset.version);
         setServerDescription(result.asset.description ?? "");
@@ -230,84 +182,6 @@ export function AudioPropertiesTabs({ datasetId, selection, assets, page, pageSi
     setExpandedLabelId(null);
   }
 
-  /**
-   * A Track *is* a shape/object identity in this UI (spec: "Each shape card
-   * corresponds to a VideoObjectTrack"). It is never created from this tab --
-   * only from `video-engine.tsx`'s toolbar ("Create track", or drawing a box
-   * via `confirmPendingBox`, which creates a track and its first keyframe
-   * together) -- this tab is view/expand/edit/delete only.
-   */
-
-  function draftFromTrack(track: SafeVideoTrack): TrackDraft {
-    return { objectId: typeof track.properties.objectId === "string" ? track.properties.objectId : "", name: track.name ?? "", labelId: track.labelId ?? "", interpolationMode: track.interpolationMode };
-  }
-
-  /** Seeds a fresh draft only on the collapsed->expanded transition, so an in-progress edit is never silently clobbered by the track updating elsewhere while its card stays open. */
-  function toggleTrackExpanded(track: SafeVideoTrack) {
-    const opening = expandedTrackId !== track.id;
-    setExpandedTrackId(opening ? track.id : null);
-    if (opening) setTrackDrafts((current) => ({ ...current, [track.id]: draftFromTrack(track) }));
-  }
-
-  function updateTrackDraft(trackId: string, changes: Partial<TrackDraft>) {
-    setTrackDrafts((current) => ({ ...current, [trackId]: { ...(current[trackId] ?? draftFromTrack(tracks[trackId])), ...changes } }));
-  }
-
-  function cancelTrackEdit(trackId: string) {
-    setTrackDrafts((current) => { const next = { ...current }; delete next[trackId]; return next; });
-    setExpandedTrackId(null);
-  }
-
-  /**
-   * The only path that saves a track's Object ID/Name/Label/Interpolation --
-   * one revision-guarded PATCH sending all four fields from the draft
-   * together, replacing the previous implicit save-per-field-blur behavior.
-   * Touches Track metadata only; it never creates, updates, or deletes a
-   * keyframe.
-   */
-  async function saveTrackEdit(trackId: string) {
-    if (readOnly) return;
-    const track = tracks[trackId];
-    const draft = trackDrafts[trackId];
-    if (!track || !draft) return;
-    setShapeError(null);
-    setSavingTrackId(trackId);
-    try {
-      const result = await updateVideoTrack(trackId, { expectedTrackRevision: track.revision, name: draft.name.trim() || undefined, labelId: draft.labelId || null, interpolationMode: draft.interpolationMode, properties: { ...track.properties, objectId: draft.objectId.trim() } });
-      markSaved(result.track);
-      setTrackDrafts((current) => { const next = { ...current }; delete next[trackId]; return next; });
-      setExpandedTrackId(null);
-    } catch (error) {
-      setShapeError((error as { code?: string }).code === "VIDEO_TRACK_REVISION_CONFLICT" ? "This track changed elsewhere. Reload and try again." : "This shape could not be saved.");
-    } finally {
-      setSavingTrackId(null);
-    }
-  }
-
-  async function removeKeyframeRow(keyframeId: string) {
-    if (readOnly) return;
-    const keyframe = keyframes[keyframeId];
-    const track = keyframe ? tracks[keyframe.trackId] : undefined;
-    if (!keyframe || !track) return;
-    setShapeError(null);
-    try {
-      const result = await deleteVideoKeyframe(keyframeId, track.revision);
-      markSaved(result.track);
-      removeKeyframeFromStore(keyframeId);
-    } catch { setShapeError("The keyframe could not be deleted."); }
-  }
-
-  async function removeTrackRow(trackId: string) {
-    if (readOnly) return;
-    const track = tracks[trackId];
-    if (!track || !window.confirm("Delete this track and its keyframes?")) return;
-    setShapeError(null);
-    try {
-      await deleteVideoTrack(trackId, track.revision);
-      removeTrackFromStore(trackId);
-    } catch { setShapeError("The track could not be deleted."); }
-  }
-
   async function guardNavigation(event: MouseEvent<HTMLAnchorElement>, href: string) {
     event.preventDefault();
     if (!(await flushBeforeNavigation())) return;
@@ -319,18 +193,24 @@ export function AudioPropertiesTabs({ datasetId, selection, assets, page, pageSi
     return flushed.ok || window.confirm("An audio edit could not be saved or has a conflict. Discard the local draft and leave this asset?");
   }
 
-  const activeTab = (["description", "labels", "tracks", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";
-  const trackList = storeTrackList;
-  const keyframeList = [...storeKeyframeList].sort((left, right) => left.timestampMs - right.timestampMs);
+  const activeTab = (["description", "labels", "assets"] as const).includes(tab as PanelTab) ? (tab as PanelTab) : "description";
+  const audio = selection.readiness.audio;
 
   return <aside className="min-h-0 overflow-y-auto border-l border-zinc-200 bg-white">
     <div className="border-b border-zinc-200 p-4">
-      <div className="flex items-center justify-between gap-3"><h2 className="text-sm font-bold text-zinc-950">Video details</h2><Badge variant="info">VIDEO</Badge></div>
+      <div className="flex items-center justify-between gap-3"><h2 className="text-sm font-bold text-zinc-950">Audio details</h2><Badge variant="info">AUDIO</Badge></div>
       <p className="mt-3 break-all text-xs font-semibold text-zinc-800">{asset.filename}</p>
-      <dl className="mt-4 space-y-2 text-xs"><Detail label="Tracks" value={String(trackList.length)} /><Detail label="Keyframes" value={String(keyframeList.length)} /></dl>
+      <dl className="mt-4 space-y-2 text-xs">
+        <Detail label="Duration" value={formatDuration(audio?.durationMs ?? null)} />
+        <Detail label="Sample rate" value={audio?.sampleRate ? `${audio.sampleRate} Hz` : "-"} />
+        <Detail label="Channels" value={audio?.channels ? String(audio.channels) : "-"} />
+        <Detail label="Codec" value={audio?.codec ?? "-"} />
+        <Detail label="Waveform" value={audio?.waveformReady ? "ready" : "not ready"} />
+        <Detail label="Annotations" value="not available" />
+      </dl>
     </div>
-    <nav aria-label="Video management" className="grid grid-cols-4 border-b border-zinc-200">
-      {(["description", "labels", "tracks", "assets"] as const).map((entry) => <button key={entry} type="button" onClick={() => setTab(entry)} className={`px-1.5 py-3 text-[11px] font-semibold capitalize ${activeTab === entry ? "border-b-2 border-sky-600 text-sky-700" : "text-zinc-500"}`}>{entry}</button>)}
+    <nav aria-label="Audio management" className="grid grid-cols-3 border-b border-zinc-200">
+      {(["description", "labels", "assets"] as const).map((entry) => <button key={entry} type="button" onClick={() => setTab(entry)} className={`px-1.5 py-3 text-[11px] font-semibold capitalize ${activeTab === entry ? "border-b-2 border-sky-600 text-sky-700" : "text-zinc-500"}`}>{entry}</button>)}
     </nav>
     {activeTab === "description" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Description</h2><span className="text-[11px] text-zinc-400">{descriptionState === "pending" ? "Saving after inactivity…" : descriptionState === "saving" ? "Saving…" : descriptionState === "saved" ? "Saved" : descriptionState === "failed" ? "Save failed" : ""}</span></div>
@@ -377,57 +257,6 @@ export function AudioPropertiesTabs({ datasetId, selection, assets, page, pageSi
       })}</div>
       {labelError && <p role="alert" className="mt-3 text-xs text-rose-700">{labelError}</p>}
     </section>}
-    {activeTab === "tracks" && <section className="p-4">
-      <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Tracks</h2><span className="text-xs text-zinc-400">{trackList.length}</span></div>
-      <p className="mt-1 text-[11px] leading-4 text-zinc-400">Each track is one shape/object tracked across frames. Click a track to view and manage its keyframes. Create a new track from the video toolbar.</p>
-      {readOnly ? <p className="mt-2 text-xs text-amber-700">Review mode: video annotations are read-only.</p> : null}
-      <div className="mt-3 space-y-2">{trackList.length === 0 ? <p className="text-xs text-zinc-500">No tracks yet.</p> : trackList.map((track) => {
-        const trackKeyframes = keyframeList.filter((keyframe) => keyframe.trackId === track.id);
-        const isExpanded = expandedTrackId === track.id;
-        const draft = trackDrafts[track.id] ?? draftFromTrack(track);
-        const isSaving = savingTrackId === track.id;
-        return <div key={track.id} className={`rounded-xl border ${isExpanded ? "border-sky-300" : "border-zinc-200"}`}>
-          <div role="button" tabIndex={0} onClick={() => toggleTrackExpanded(track)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleTrackExpanded(track); } }} className="cursor-pointer p-2">
-            <div className="flex items-center justify-between gap-2"><span className="truncate font-mono text-[11px] text-zinc-500">Track ID: {track.id ?? "(none)"}</span><span className="shrink-0 text-[11px] text-zinc-400">{trackKeyframes.length} keyframes</span></div>
-            <p className="mt-1 truncate text-xs font-semibold text-zinc-800">{track.name ?? "(unnamed shape)"}</p>
-            {track.label ? <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-500"><span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: track.label.color }} />{track.label.name}</span> : null}
-          </div>
-          {isExpanded && <div className="space-y-2 border-t border-zinc-100 p-2">
-            <div className="grid grid-cols-2 gap-2">
-              <label className="text-[11px] text-zinc-500">Object ID<input disabled={readOnly} value={draft.objectId} onChange={(event) => updateTrackDraft(track.id, { objectId: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
-              <label className="text-[11px] text-zinc-500">Name<input disabled={readOnly} value={draft.name} onChange={(event) => updateTrackDraft(track.id, { name: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 px-2 py-1 text-xs" /></label>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="text-[11px] text-zinc-500">Label
-                <select disabled={readOnly} value={draft.labelId} onChange={(event) => updateTrackDraft(track.id, { labelId: event.target.value })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
-                  <option value="">No label</option>
-                  {taxonomy.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-                </select>
-              </label>
-              <label className="text-[11px] text-zinc-500">Interpolation
-                <select disabled={readOnly} value={draft.interpolationMode} onChange={(event) => updateTrackDraft(track.id, { interpolationMode: event.target.value as "LINEAR" | "NONE" })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">
-                  <option value="LINEAR">Linear</option>
-                  <option value="NONE">None</option>
-                </select>
-              </label>
-            </div>
-            <div className="flex justify-end gap-2">
-              <button type="button" onClick={() => cancelTrackEdit(track.id)} disabled={isSaving} className="rounded-lg border border-zinc-200 px-3 py-1.5 text-[11px] font-semibold text-zinc-600 hover:bg-zinc-50 disabled:opacity-50">Cancel</button>
-              {!readOnly ? <button type="button" onClick={() => void saveTrackEdit(track.id)} disabled={isSaving} className="rounded-lg bg-sky-600 px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{isSaving ? "Saving…" : "Save"}</button> : null}
-            </div>
-            <div>
-              <h4 className="text-[11px] font-semibold text-zinc-600">Keyframes</h4>
-              <div className="mt-1 space-y-1">{trackKeyframes.length === 0 ? <p className="text-[11px] text-zinc-400">No keyframes yet -- draw on the frame or use &quot;Add keyframe here&quot;.</p> : trackKeyframes.sort((left, right) => left.timestampMs - right.timestampMs).map((keyframe) => <div key={keyframe.id} className={`flex items-center justify-between gap-2 rounded-lg px-2 py-1 text-[11px] ${keyframe.id === selectedKeyframeId ? "bg-sky-50 text-sky-800" : "text-zinc-600 hover:bg-zinc-50"}`}>
-                <button type="button" onClick={() => setSelectedKeyframeId(keyframe.id)} className="flex-1 text-left">{(keyframe.timestampMs / 1000).toFixed(2)}s</button>
-                {!readOnly ? <button type="button" onClick={() => void removeKeyframeRow(keyframe.id)} className="font-semibold text-rose-700">Delete</button> : null}
-              </div>)}</div>
-            </div>
-            {!readOnly ? <button type="button" onClick={() => void removeTrackRow(track.id)} className="w-full rounded-lg px-2 py-1.5 text-[11px] font-semibold text-rose-700 hover:bg-rose-50">Delete track</button> : null}
-          </div>}
-        </div>;
-      })}</div>
-      {shapeError && <p role="alert" className="mt-3 text-xs text-rose-700">{shapeError}</p>}
-    </section>}
     {activeTab === "assets" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Assets</h2><span className="text-xs text-zinc-400">Page {page}</span></div>
       <p className="mt-1 text-xs text-zinc-500">This workspace page is limited to {pageSize} assets.</p>
@@ -437,6 +266,12 @@ export function AudioPropertiesTabs({ datasetId, selection, assets, page, pageSi
       <BulkActionBar datasetId={datasetId} labels={taxonomy} />
     </section>}
   </aside>;
+}
+
+function formatDuration(durationMs: number | null) {
+  if (durationMs === null) return "-";
+  const seconds = Math.round(durationMs / 100) / 10;
+  return seconds >= 60 ? `${Math.floor(seconds / 60)}m ${(seconds % 60).toFixed(1)}s` : `${seconds.toFixed(1)}s`;
 }
 
 function Detail({ label, value }: { label: string; value: string }) {
