@@ -12,6 +12,10 @@ import {
   probeMinioProvisioning,
 } from "./providers/index.js";
 import { assertVerifierReadinessWhenEnabled } from "./providers/verifier-readiness.js";
+import { assertNoSealedWriteAuthority } from "./providers/sealed-namespace.js";
+import { createVerifierDeps } from "./verification/deps.js";
+import { purgeTerminalMediaVerifications, reconcileMediaVerifications, redeliverRetryingVerificationJobs } from "./queue/media-verification-scanners.js";
+import { isMediaVerificationEnabled } from "@annotationplatform/domain/media-verification";
 import { createFoundationWorker } from "./queue/bullmq-worker.js";
 import { failExpiredPreparedImports } from "./queue/import-timeout-scanner.js";
 import { pollDueAiTasks } from "./queue/ai-poll-scanner.js";
@@ -66,7 +70,10 @@ export async function startWorkerReadiness() {
     // 5-minute claim lease (`job-claim-lock.ts`) before it could even start,
     // instead of the intended ~2s (`POLL_BASE_DELAY_MS`).
     const workerId = `worker-${randomBytes(12).toString("hex")}`;
-    const foundationWorker = createFoundationWorker({ config, db, workerId });
+    // A2: the verifier exists only when enabled. When it does, the GENERAL identity must be unable to write the sealed namespace (fail closed, contract section 5.5).
+    const verifier = isMediaVerificationEnabled() ? createVerifierDeps(config) : null;
+    if (verifier) await assertNoSealedWriteAuthority(minio, config.MINIO_BUCKET);
+    const foundationWorker = createFoundationWorker({ config, db, workerId, verifier });
     closeOnError = async () => {
       await Promise.allSettled([foundationWorker.close(), queue.close(), connection.quit(), db.$disconnect()]);
     };
@@ -94,6 +101,12 @@ export async function startWorkerReadiness() {
     schedule("pending delivery recovery", 60_000, () => runPendingJobRecovery({ db, redeliverExistingJob }));
     schedule("expired lease recovery", 60_000, () => recoverExpiredLeaseJobs({ db, leaseGraceMs: hardening.JOB_RECOVERY_LEASE_GRACE_MS }));
     schedule("runaway job detection", 60_000, () => failRunawayJobs({ db, maxRuntimeMs: hardening.JOB_MAX_RUNTIME_MS }));
+    if (verifier) {
+      // A2 verification housekeeping: in-place retry delivery, allowance expiry/cancel reconciliation, and 30-day terminal retention.
+      schedule("verification retry delivery", 10_000, () => redeliverRetryingVerificationJobs({ db, queue }));
+      schedule("verification expiry", 30_000, () => reconcileMediaVerifications({ db, deps: verifier, graceMs: hardening.JOB_RECOVERY_LEASE_GRACE_MS }));
+      schedule("verification retention", 60 * 60_000, () => purgeTerminalMediaVerifications({ db, deps: verifier }));
+    }
 
     // Cross-replica GC coordination remains inside each scanner. The local
     // scheduler prevents overlap and catches failures between interval ticks.

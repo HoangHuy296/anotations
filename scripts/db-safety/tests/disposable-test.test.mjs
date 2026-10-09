@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import * as guard from '../guard.mjs';
 import { loadExpectations } from '../cleanup-verify.mjs';
 import { isDeepStrictEqual } from 'node:util';
-import {
+import { A2_RUNTIME_COMMANDS,
   SUPPORTED_COMMANDS, PROPOSAL_CHAIN, REHEARSALS, REHEARSAL_ID, FIXTURE_COMMAND, FIXTURE_FILE, FIXTURE_SPEC, FIXTURE_ROWS, HISTORY_SQL,
   MAINTENANCE_ID, MAINT_SEED_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_SEED_SPEC, MAINT_OBJECTS_SPEC, MAINT_CHECK_SPEC, MAINTENANCE_FILES, MAINTENANCE_COMMANDS,
   BACKFILL_ID, BACKFILL_SEED_COMMAND, BACKFILL_VERIFY_COMMAND, BACKFILL_SEED_FILE, BACKFILL_VERIFY_FILE, BACKFILL_SEED_SPEC, BACKFILL_VERIFY_SPEC, BACKFILL_TOPOLOGY, BACKFILL_ALLOWED_IMPORTS,
@@ -25,7 +25,7 @@ const PROPOSAL1_SQL = '-- fake migration 24 bytes\n';
 const PROPOSAL2_SQL = '-- fake migration 25 bytes\n';
 const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1];
 const FAKE_CHAIN = [{ ...P1, sha256: sha(PROPOSAL1_SQL) }, { ...P2, sha256: sha(PROPOSAL2_SQL) }];
-const REVIEWED_EXTRA_COMMANDS = ['web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation'];
+const REVIEWED_EXTRA_COMMANDS = ['web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap'];
 const assertSupportedSet = (message) => {
   assert.deepEqual(SUPPORTED_COMMANDS.slice(0, 5), [COMMAND, 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'], message);
   assert.deepEqual([...SUPPORTED_COMMANDS.slice(5)].sort(), [...REVIEWED_EXTRA_COMMANDS].sort(), 'every additional supported command is a deliberate, reviewed catalog addition');
@@ -620,7 +620,7 @@ test('rehearsal: tampered, missing, reordered or renamed proposal migrations are
 });
 
 test('the three existing focused commands still apply only the historical chain plus migration 24 (migration 25 is never staged or applied)', async () => {
-  for (const name of SUPPORTED_COMMANDS) {
+  for (const name of SUPPORTED_COMMANDS.filter(command => !A2_RUNTIME_COMMANDS.includes(command))) {
     assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 1 });
     const w = world();
     try {
@@ -1115,7 +1115,7 @@ test('compat plan failure paths: clientCompatibilityProven stays false, primary 
 });
 
 test('existing plans are unchanged: the three focused commands stay migration-24-only and the migration-25 rehearsal keeps its own evidence and topology', async () => {
-  for (const name of SUPPORTED_COMMANDS) assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 1 });
+  for (const name of SUPPORTED_COMMANDS.filter(command => !A2_RUNTIME_COMMANDS.includes(command))) assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 1 });
   assert.equal(resolvePlan(REHEARSAL_ID).kind, 'rehearsal'); assert.equal(resolvePlan(COMPAT_ID).kind, 'compat'); assert.equal(resolvePlan(COMPAT_ID).through, 2);
   assertSupportedSet('supported set');
   const rehearsal = world();
@@ -1709,4 +1709,14 @@ test('maintenance plan: preflight tampering aborts before anything is provisione
     const w = world();
     try { setup(w); await assert.rejects(() => failuresOf(w, MAINTENANCE_ID), expected, label); assert.equal(w.calls.length, 0, label); assert.equal(w.stages.length, 0, label); assert.equal(readdirSync(w.outBase).length, 0, label); } finally { cleanup(w); }
   }
+});
+
+test('A2.4 runtime commands: exactly three reviewed names, all supported, and only they apply the 26-migration chain (M24, M25, M26 in pinned order); every other focused test stays on migration 24', () => {
+  assert.deepEqual([...A2_RUNTIME_COMMANDS], ['worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap']);
+  for (const name of A2_RUNTIME_COMMANDS) { assert.ok(SUPPORTED_COMMANDS.includes(name), name); assert.deepEqual(resolvePlan(name), { kind: 'test', id: name, through: 3 }); }
+  assert.equal(PROPOSAL_CHAIN.length, 3);
+  assert.deepEqual(PROPOSAL_CHAIN.map(entry => entry.sha256), ['13f0e977d1b809da84cdfc5cc415a41adc18b354f9218596e14b9efd8e7aeab7', 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859', 'ede5e8c511705521e1e6a18563ebaa602e9c24430946acddbed91340d923df5a']);
+  assert.equal(SUPPORTED_COMMANDS.filter(name => resolvePlan(name).through === 3).length, 3);
+  const commands = JSON.parse(readFileSync(new URL('../commands.json', import.meta.url), 'utf8'));
+  for (const name of A2_RUNTIME_COMMANDS) assert.equal(commands[name].kind, 'test');
 });

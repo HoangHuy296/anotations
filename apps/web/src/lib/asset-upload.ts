@@ -180,6 +180,12 @@ export async function publishUploadedAsset(input: {
   return { asset: safeAsset(created.asset), replayed: created.replayed };
 }
 
+/** The safe, browser-facing DTO of one already-published Asset (A2: the status endpoint returns it once a verification is PUBLISHED). */
+export async function loadSafeUploadedAsset(assetId: string): Promise<SafeUploadedAsset | null> {
+  const asset = await db.asset.findFirst({ where: { id: assetId, deletedAt: null }, select: assetWithChildren });
+  return asset ? safeAsset(asset) : null;
+}
+
 /** Best-effort cleanup only; no object identifier is returned to a browser. */
 export async function cleanupUnpublishedObject(minio: MinioClient, bucket: string, objectKey: string) {
   try {

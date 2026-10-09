@@ -128,3 +128,44 @@ test("the logging sink refuses verifier credential field names outside productio
     assert.ok(captured.some(line => line.includes("[REDACTED]")));
   } finally { console.info = originalInfo; (process.env as Record<string, string | undefined>).NODE_ENV = original; }
 });
+
+import { MEDIA_VERIFICATION_RETRY_BACKOFF_MS, a2SourceFingerprintInput, buildSealedKey, containerMimeType, isMediaVerificationEligible, nextRetryDelayMs } from "../src/media-verification.js";
+
+test("eligibility: only a VIDEO Dataset with a declared video/mp4 or video/webm is eligible; the declared type never decides the class", () => {
+  assert.equal(isMediaVerificationEligible({ declaredContentType: "video/mp4", datasetModality: "VIDEO" }), true);
+  assert.equal(isMediaVerificationEligible({ declaredContentType: "video/webm", datasetModality: "VIDEO" }), true);
+  for (const declared of ["audio/ogg", "audio/mpeg", "audio/wav", "image/png", "text/plain", "application/octet-stream", "video/quicktime", "video/x-matroska"]) assert.equal(isMediaVerificationEligible({ declaredContentType: declared, datasetModality: "VIDEO" }), false, declared);
+  for (const modality of ["IMAGE", "AUDIO", "TEXT", null]) assert.equal(isMediaVerificationEligible({ declaredContentType: "video/mp4", datasetModality: modality }), false, String(modality));
+});
+
+test("sealed key is deterministic, under the sealed prefix, and refuses path-shaped input", () => {
+  assert.equal(buildSealedKey("ds1", id), `verified-uploads/ds1/${id}/source`);
+  assert.equal(buildSealedKey("ds1", id), buildSealedKey("ds1", id));
+  for (const bad of ["../x", "a/b", "", "a b", "x".repeat(65)]) assert.throws(() => buildSealedKey(bad, id), { message: "SEALED_KEY_INPUT_INVALID" });
+  assert.throws(() => buildSealedKey("ds1", "a/../b"), { message: "SEALED_KEY_INPUT_INVALID" });
+});
+
+test("container MIME is derived from the probed container only", () => {
+  assert.equal(containerMimeType("mov,mp4,m4a,3gp,3g2,mj2"), "video/mp4");
+  assert.equal(containerMimeType("matroska,webm"), "video/webm");
+  for (const other of ["ogg", "avi", "mpegts", "image2", "gif", "", null, undefined, "matroska", "webm", "mp4"]) assert.equal(containerMimeType(other as string | null), null, String(other));
+});
+
+test("source fingerprint input and retry backoff are stable and bounded", () => {
+  assert.equal(a2SourceFingerprintInput("verified-uploads/d/v/source", "f".repeat(64)), `a2v1:verified-uploads/d/v/source:${"f".repeat(64)}`);
+  assert.equal(nextRetryDelayMs(1), MEDIA_VERIFICATION_RETRY_BACKOFF_MS[0]);
+  assert.equal(nextRetryDelayMs(2), MEDIA_VERIFICATION_RETRY_BACKOFF_MS[1]);
+  assert.equal(nextRetryDelayMs(99), MEDIA_VERIFICATION_RETRY_BACKOFF_MS[1]);
+  assert.equal(nextRetryDelayMs(0), MEDIA_VERIFICATION_RETRY_BACKOFF_MS[0]);
+});
+
+import { IMPORT_VERIFICATION_TAIL_CAP_MS, importVerificationTailEnd } from "../src/media-verification.js";
+
+test("folder tail: no verification -> plain deadline governs; otherwise the latest allowance, hard-capped at deadlineAt + 30 minutes", () => {
+  const deadlineAt = new Date("2026-10-07T10:00:00Z");
+  assert.equal(importVerificationTailEnd({ deadlineAt, verificationDeadlines: [] }), null);
+  const inside = new Date(deadlineAt.getTime() + 10 * 60_000);
+  assert.deepEqual(importVerificationTailEnd({ deadlineAt, verificationDeadlines: [new Date(deadlineAt.getTime() - 5 * 60_000), inside] }), inside);
+  assert.deepEqual(importVerificationTailEnd({ deadlineAt, verificationDeadlines: [new Date(deadlineAt.getTime() + 3 * 3_600_000)] }), new Date(deadlineAt.getTime() + IMPORT_VERIFICATION_TAIL_CAP_MS));
+  assert.equal(IMPORT_VERIFICATION_TAIL_CAP_MS, MEDIA_VERIFICATION_ALLOWANCE_MS);
+});

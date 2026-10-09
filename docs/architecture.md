@@ -102,7 +102,7 @@ Dataset is the central organizational entity for imported and processed work. As
 
 ### Workspace selection and annotation concurrency
 
-`Asset.modality` is the sole source of truth for selecting the workspace engine. All assets open through one workspace route; the route selects an appropriate engine from the asset's recorded modality instead of branching application routing by media type. An absent or unsupported modality must result in a safe unsupported state, not a guessed engine.
+`Dataset.modality` is the sole source of truth for selecting the workspace engine. Every Dataset has exactly one fixed modality (IMAGE, VIDEO, AUDIO or TEXT) and every Asset in it must carry the same modality, so a workspace never mixes engines. All Datasets open through one workspace route; the route selects the engine from the persisted Dataset modality instead of branching application routing by media type. A selected Asset, a filename, a MIME hint, a query parameter or state left over from a previously opened Dataset can never choose or change the engine. An unresolved legacy Dataset (no modality) never guesses an engine: it renders an explicit unresolved state.
 
 `Annotation.geometry` is the canonical shape for every annotation. Labels, display properties, and derived UI state must not replace or reinterpret it as the authoritative shape. `Annotation.revision` is the required optimistic concurrency value for every annotation update or autosave:
 

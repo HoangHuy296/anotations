@@ -1,4 +1,5 @@
 import { logJobEvent } from "@annotationplatform/domain";
+import { importVerificationTailEnd } from "@annotationplatform/domain/media-verification";
 
 import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
@@ -6,11 +7,15 @@ import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 export async function failExpiredPreparedImports(db: PrismaClient, now = new Date()) {
   const candidates = await db.preparedImport.findMany({
     where: { status: "PREPARING", deadlineAt: { lt: now }, job: { status: { in: ["RUNNING", "RETRYING"] } } },
-    select: { id: true, jobId: true, createdAt: true },
+    select: { id: true, jobId: true, createdAt: true, deadlineAt: true },
     take: 100,
   });
   let failed = 0;
   for (const candidate of candidates) {
+    // A2 (contract section 7): an import with requested verifications settles them before it can expire, bounded by deadlineAt + 30 min.
+    const verifications = await db.mediaVerification.findMany({ where: { preparedImportItem: { preparedImportId: candidate.id } }, select: { verificationDeadlineAt: true } });
+    const tailEnd = importVerificationTailEnd({ deadlineAt: candidate.deadlineAt, verificationDeadlines: verifications.map((row) => row.verificationDeadlineAt) });
+    if (tailEnd && now < tailEnd) continue;
     const transitioned = await db.$transaction(async (tx) => {
       const job = await tx.job.updateMany({
         where: { id: candidate.jobId, status: { in: ["RUNNING", "RETRYING"] }, preparedImport: { status: "PREPARING", deadlineAt: { lt: now } } },

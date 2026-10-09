@@ -26,6 +26,10 @@
       "types": "./dist/media-verification.d.ts",
       "default": "./dist/media-verification.js"
     },
+    "./import-item-accounting": {
+      "types": "./dist/import-item-accounting.d.ts",
+      "default": "./dist/import-item-accounting.js"
+    },
     "./media-processing": {
       "types": "./dist/media-processing.d.ts",
       "default": "./dist/media-processing.js"

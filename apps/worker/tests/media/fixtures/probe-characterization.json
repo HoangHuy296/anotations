@@ -1,0 +1,128 @@
+{
+ "schema": "phase029-a2-probe-characterization/v1",
+ "image": "annotationplatformmain-worker:main-dcd540b7c665",
+ "ffprobeVersion": "5.1.9-0+deb12u1",
+ "probeArgs": "-v error -hide_banner -probesize 10000000 -analyzeduration 5000000 -show_entries format=format_name,duration,size,nb_streams:format_tags=major_brand,compatible_brands:stream=index,codec_type,codec_name,width,height,avg_frame_rate,nb_frames,duration:stream_disposition=default,attached_pic,still_image,timed_thumbnails -of json",
+ "cases": [
+  {
+   "class": "control",
+   "name": "control_good_mp4",
+   "exitCode": 0,
+   "stderr": ""
+  },
+  {
+   "class": "control",
+   "name": "control_good_webm",
+   "exitCode": 0,
+   "stderr": ""
+  },
+  {
+   "class": "content",
+   "name": "content_truncated_mp4_no_moov",
+   "exitCode": 1,
+   "stderr": "[mov,mp4,m4a,3gp,3g2,mj2 @ 0xADDR] moov atom not found a.mp4: Invalid data found when processing input"
+  },
+  {
+   "class": "content",
+   "name": "content_random_bytes_mp4",
+   "exitCode": 1,
+   "stderr": "b.mp4: Invalid data found when processing input"
+  },
+  {
+   "class": "content",
+   "name": "content_text_named_mp4",
+   "exitCode": 1,
+   "stderr": "[mov,mp4,m4a,3gp,3g2,mj2 @ 0xADDR] moov atom not found c.mp4: Invalid data found when processing input"
+  },
+  {
+   "class": "content",
+   "name": "content_empty_file",
+   "exitCode": 1,
+   "stderr": "[mov,mp4,m4a,3gp,3g2,mj2 @ 0xADDR] moov atom not found d.mp4: Invalid data found when processing input"
+  },
+  {
+   "class": "content",
+   "name": "content_zero_bytes",
+   "exitCode": 1,
+   "stderr": "[mov,mp4,m4a,3gp,3g2,mj2 @ 0xADDR] moov atom not found e.mp4: Invalid data found when processing input"
+  },
+  {
+   "class": "content",
+   "name": "content_random_bytes_webm",
+   "exitCode": 1,
+   "stderr": "Truncating packet of size 8472 to 4093 [matroska,webm @ 0xADDR] EBML header parsing failed f.webm: Invalid data found when processing input"
+  },
+  {
+   "class": "content",
+   "name": "content_ebml_magic_garbage",
+   "exitCode": 1,
+   "stderr": "Truncating packet of size 8551 to 22 [matroska,webm @ 0xADDR] EBML header parsing failed g.webm: Invalid data found when processing input"
+  },
+  {
+   "class": "content",
+   "name": "content_truncated_webm_100",
+   "exitCode": 1,
+   "stderr": "[matroska,webm @ 0xADDR] File ended prematurely at pos. 100 (0xADDR) Last message repeated 1 times h.webm: Input/output error"
+  },
+  {
+   "class": "content",
+   "name": "content_truncated_webm_40",
+   "exitCode": 1,
+   "stderr": "[matroska,webm @ 0xADDR] File ended prematurely at pos. 40 (0xADDR) i.webm: End of file"
+  },
+  {
+   "class": "content",
+   "name": "content_truncated_webm_half",
+   "exitCode": 0,
+   "stderr": ""
+  },
+  {
+   "class": "fault",
+   "name": "fault_missing_file",
+   "exitCode": 1,
+   "stderr": "<PATH>: No such file or directory"
+  },
+  {
+   "class": "fault",
+   "name": "fault_is_directory",
+   "exitCode": 1,
+   "stderr": "/tmp: Is a directory"
+  },
+  {
+   "class": "fault",
+   "name": "fault_permission_denied",
+   "exitCode": 1,
+   "stderr": "k.mp4: Permission denied"
+  },
+  {
+   "class": "fault",
+   "name": "fault_read_eio",
+   "exitCode": 1,
+   "stderr": "/proc/self/mem: Input/output error"
+  },
+  {
+   "class": "fault",
+   "name": "fault_dangling_symlink",
+   "exitCode": 1,
+   "stderr": "<PATH>: No such file or directory"
+  },
+  {
+   "class": "fault",
+   "name": "fault_memory_exhaustion",
+   "exitCode": 127,
+   "stderr": "ffprobe: error while loading shared libraries: libm.so.6: failed to map segment from shared object"
+  },
+  {
+   "class": "fault",
+   "name": "fault_sigkill",
+   "exitCode": 137,
+   "stderr": ""
+  },
+  {
+   "class": "fault",
+   "name": "fault_sigterm_timeout",
+   "exitCode": 124,
+   "stderr": ""
+  }
+ ]
+}

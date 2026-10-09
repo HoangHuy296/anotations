@@ -166,3 +166,57 @@ export function assertMediaVerificationJobCreationAllowed(environment: NodeJS.Pr
   if (environment.MEDIA_VERIFICATION_ENABLED !== "1") throw new MediaVerificationNotEnabledError();
 }
 export const isMediaVerificationEnabled = (environment: NodeJS.ProcessEnv = process.env): boolean => environment.MEDIA_VERIFICATION_ENABLED === "1";
+
+// ---- A2.4 runtime helpers shared by web admission and the worker verifier (pure; no I/O)
+export const SEALED_UPLOAD_PREFIX = "verified-uploads/" as const;
+/** Declared types that make an upload ELIGIBLE for verification. They bound resource use only; they are never an input to the verified class (contract section 2). */
+export const MEDIA_VERIFICATION_ELIGIBLE_DECLARED_TYPES = ["video/mp4", "video/webm"] as const;
+export const MEDIA_VERIFICATION_MAX_ATTEMPTS = 3;
+/** Initial worker-side re-delivery backoff between in-place retries (per consumed attempt); the allowance is the only hard bound. */
+export const MEDIA_VERIFICATION_RETRY_BACKOFF_MS = [5_000, 20_000] as const;
+
+export function isMediaVerificationEligible(input: { declaredContentType: string; datasetModality: string | null }): boolean {
+  return input.datasetModality === "VIDEO" && (MEDIA_VERIFICATION_ELIGIBLE_DECLARED_TYPES as readonly string[]).includes(input.declaredContentType);
+}
+
+const UUID_PART = /^[A-Za-z0-9_-]{1,64}$/;
+/** Deterministic sealed key (a retried copy rewrites the same key idempotently). Only the worker's verifier identity can write below this prefix. */
+export function buildSealedKey(datasetId: string, verificationId: string): string {
+  if (!UUID_PART.test(datasetId) || !UUID_PART.test(verificationId)) throw new Error("SEALED_KEY_INPUT_INVALID");
+  return `${SEALED_UPLOAD_PREFIX}${datasetId}/${verificationId}/source`;
+}
+
+/** Container-derived MIME of a verified object. The declared type is never trusted for the published Asset. */
+export function containerMimeType(formatName: string | null | undefined): "video/mp4" | "video/webm" | null {
+  if (formatName === "mov,mp4,m4a,3gp,3g2,mj2") return "video/mp4";
+  if (formatName === "matroska,webm") return "video/webm";
+  return null;
+}
+
+/** Stable synthetic fingerprint for an A2-published Asset (contract section 5.3 step 3). */
+export function a2SourceFingerprintInput(sealedKey: string, contentSha256: string): string {
+  return `a2v1:${sealedKey}:${contentSha256}`;
+}
+
+export class MediaVerificationLimitError extends Error {
+  constructor(readonly scope: "ACTOR" | "DATASET") { super("UPLOAD_VERIFICATION_LIMIT_REACHED"); this.name = "MediaVerificationLimitError"; }
+}
+
+/** Backoff before the next in-place attempt, given the number of attempts already consumed (1-based). Never exceeds the last configured step. */
+export function nextRetryDelayMs(attemptsConsumed: number): number {
+  const steps = MEDIA_VERIFICATION_RETRY_BACKOFF_MS;
+  return steps[Math.min(Math.max(attemptsConsumed, 1), steps.length) - 1]!;
+}
+
+/** Contract section 7 (folder deadline interplay). A verification can only start before `deadlineAt`, so the tail never extends past `deadlineAt + allowance`. */
+export const IMPORT_VERIFICATION_TAIL_CAP_MS = MEDIA_VERIFICATION_ALLOWANCE_MS;
+/**
+ * End of the settlement tail of a folder import: the latest verification allowance among its requested verifications, hard-capped at `deadlineAt + 30 min`.
+ * `null` when the import has no verification (the plain `deadlineAt` governs). Inside the tail only already-requested verifications may settle and the import may be
+ * committed; no NEW item completion is admitted after `deadlineAt`.
+ */
+export function importVerificationTailEnd(input: { deadlineAt: Date; verificationDeadlines: readonly Date[] }): Date | null {
+  if (input.verificationDeadlines.length === 0) return null;
+  const latest = Math.max(...input.verificationDeadlines.map((date) => date.getTime()));
+  return new Date(Math.min(latest, input.deadlineAt.getTime() + IMPORT_VERIFICATION_TAIL_CAP_MS));
+}

@@ -901,8 +901,47 @@
       "--test",
       "--test-concurrency=1",
       "tests/media/classification-policy.test.ts",
+      "tests/media/video-metadata.test.ts",
       "tests/queue/media-verification-router-guard.test.ts",
       "tests/providers/verifier-readiness.test.ts"
+    ]
+  },
+  "worker:test:media-verification-processor": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/verification/processor.test.ts",
+      "tests/verification/scanners.test.ts"
+    ]
+  },
+  "web:test:media-verification-admission": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media-verification/admission.test.ts"
+    ]
+  },
+  "web:test:media-verification-cap": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media-verification/cap-contention.test.ts"
     ]
   }
 }

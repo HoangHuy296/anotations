@@ -55,6 +55,12 @@ export const defaultReferenceCheckers: ReferenceChecker[] = [
   async ({ db, key }) => Boolean(await db.audioAsset.findFirst({ where: { waveformKey: key }, select: { id: true } })),
   async ({ db, key }) => Boolean(await db.job.findFirst({ where: { resultStorageKey: key }, select: { id: true } })),
   async ({ db, key }) => Boolean(await db.aiTask.findFirst({ where: { resultStorageKey: key }, select: { id: true } })),
+  // A2 (contract section 11): a NON-terminal MediaVerification protects both its staged and its sealed object; a terminal row releases them
+  // (a PUBLISHED sealed object stays protected by its Asset reference above).
+  async ({ db, bucket, key }) => Boolean(await db.mediaVerification.findFirst({
+    where: { stagedBucket: bucket, status: { in: ["PENDING", "SEALED", "VERIFIED"] }, OR: [{ stagedKey: key }, { sealedKey: key }] },
+    select: { id: true },
+  })),
   // Deliberately narrower than "any PreparedImportItem row with this key":
   // a completed item (assetId set) is already covered by the Asset check
   // above — publishing never renames the key — and is kept here only for

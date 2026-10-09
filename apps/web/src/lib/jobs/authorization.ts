@@ -47,6 +47,8 @@ export async function authorizeFoundationJobSubmission(actor: RequestActor, inpu
   if (!parsed.success) return { ok: false as const, status: 400 as const };
   // Visualization submissions resolve generation server-side through their dedicated management service.
   if (parsed.data.type === "VISUALIZATION_CAPTURE" || parsed.data.type === "VISUALIZATION_DERIVE") return { ok: false as const, status: 400 as const };
+  // A2: verification Jobs are created only by the admission transaction (lib/media-verification/admission.ts), never from a browser-supplied Job request.
+  if (parsed.data.type === "VERIFY_UPLOADED_MEDIA") return { ok: false as const, status: 400 as const };
   const queueName = resolveQueueName(parsed.data.type);
   if (!queueName) return { ok: false as const, status: 400 as const };
   const access = await requireJobPermission(actor, parsed.data.datasetId, "job.createExport");

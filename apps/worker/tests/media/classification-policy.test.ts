@@ -107,6 +107,9 @@ test("probe completion (R5): only a completed probe may classify; timeout, signa
   for (const patch of [{ signal: "SIGKILL" }, { spawnError: true }, { exitCode: null }, { stdoutTruncated: true }, { stdout: "not json" }, { stdout: "[]" }, { exitCode: 1, stderr: "Invalid data found when processing input" }, { exitCode: 69, stderr: "moov atom not found" }]) {
     assert.equal(operational(patch as Partial<ProbeCompletionInput>), "UPLOAD_VERIFICATION_PROBE_FAILED", JSON.stringify(patch));
   }
-  assert.deepEqual({ ...FFPROBE_INVALID_MARKERS }, {}, "no marker is frozen until G-PROBE proves non-overlap for a pinned ffprobe version, so a malformed fixture is operational rather than guessed");
+  assert.deepEqual(Object.keys(FFPROBE_INVALID_MARKERS), ["5.1.9-0+deb12u1"], "a marker exists only for a version whose non-overlap G-PROBE has proved (probe-markers.test.ts); any other ffprobe version stays operational rather than guessed");
+  assert.deepEqual(FFPROBE_INVALID_MARKERS["5.1.9-0+deb12u1"].map(m => [m.exitCode, m.stderr.source]), [[1, ": Invalid data found when processing input\\s*$"]]);
+  assert.equal(interpretProbeCompletion({ ...base, ffprobeVersion: "5.1.9-0+deb12u1", exitCode: 1, stderr: "x.mp4: Invalid data found when processing input\n", stdout: "" }).kind, "COMPLETED_INVALID");
+  assert.equal(interpretProbeCompletion({ ...base, ffprobeVersion: "6.0", exitCode: 1, stderr: "x.mp4: Invalid data found when processing input\n", stdout: "" }).kind, "NOT_COMPLETED", "an unpinned ffprobe version never produces an authoritative verdict");
   for (const file of ["mp4_truncated.mp4", "data_only.mp4"]) assert.equal(operational({ exitCode: fixture(file).ffprobeExit, stdout: "", stderr: "x" }), "UPLOAD_VERIFICATION_PROBE_FAILED", file);
 });

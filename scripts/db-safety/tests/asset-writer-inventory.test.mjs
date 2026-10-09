@@ -34,6 +34,9 @@ const AUDITED = {
   'apps/web/src/lib/asset-upload.ts': { assetCreate: 4, subtypeNestedCreate: 4 },
   // Repository mirror: create + exact-reuse; parent modality asserted on create, reuse and reconcile.
   'apps/worker/src/jobs/repository-asset-upsert.ts': { assetCreate: 1, subtypeNestedCreate: 4 },
+  // A2 durable verification publisher: the ONLY publisher of a VERIFIED upload. One VIDEO branch in ONE transaction that also flips the MediaVerification to PUBLISHED;
+  // parent Dataset re-read in-transaction (modality must be VIDEO and equal the bound/verified modality), exact-match reuse of an existing Asset, M24 trigger as backstop.
+  'apps/worker/src/verification/publish.ts': { assetCreate: 1, subtypeNestedCreate: 1 },
   // DORMANT (no production caller): hardcoded IMAGE, existing-Dataset modality guard. Intentionally unmodified; see the inventory document.
   'apps/web/src/lib/dataset-import.ts': { assetUpsert: 1, subtypeNestedCreate: 1 },
   // Subtype rows for EXISTING Assets, each guarded by an Asset lookup that filters on its own modality.
@@ -71,6 +74,15 @@ test('the publishers keep the modality assertion on creation AND on every replay
   assert.ok(countOf(mirror, /assertAssetModality\(/g) >= 2, 'reconcile reuse and upsert');
   const folder = read(join(root, 'apps/web/src/lib/imports/complete-local-folder-item.ts'));
   assert.match(folder, /completedAsset\.modality !== parent\.modality/, 'prepared completed-item replay compares against the parent');
+});
+
+test('the A2 publisher re-validates the Dataset modality in the publication transaction and never trusts the declared type', () => {
+  const publish = read(join(root, 'apps/worker/src/verification/publish.ts'));
+  assert.match(publish, /parent\.modality !== "VIDEO"/, 'in-transaction parent modality check');
+  assert.match(publish, /dataset\.modality !== row\.boundDatasetModality \|\| dataset\.modality !== row\.verifiedModality/, 'bound and verified modality equality');
+  assert.match(publish, /containerMimeType\(probe\?\.formatName\)/, 'MIME is container-derived');
+  assert.doesNotMatch(publish, /declaredContentType/, 'the declared type is never read at publication');
+  assert.match(publish, /existing\.datasetId !== row\.datasetId \|\| existing\.modality !== "VIDEO" \|\| !existing\.videoAsset/, 'replay reuses only an exactly matching Asset');
 });
 
 test('the dormant legacy importer has no production caller (so it cannot be reached)', () => {
