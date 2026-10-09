@@ -54,7 +54,7 @@ Status: planning research complete after user policy confirmation. Implementatio
 
 **Alternatives:** retain legacy ingestion temporarily (requires a clear isolation/rollout boundary), all-at-once forced backfill (unsafe), automatically split MIXED (not authorized).
 
-**Decision:** EMPTY resolution is restricted to the dataset owner or system ADMIN, as confirmed by the user; `dataset.update` alone is insufficient. Use a separately authorized command and bounded audit event through existing durable audit infrastructure after verifying its schema; do not expose generic modality PATCH. No new audit table is planned. The exact persisted event representation must pass implementation review before the command is released.
+**Decision:** EMPTY resolution is restricted to the dataset owner or system ADMIN, as confirmed by the user; `dataset.update` alone is insufficient. Use the dedicated resolution command; do not expose generic modality PATCH. **T027 contract reconciliation, 2026-10-07:** the approved M24 immutable first-assignment receipt is the bounded durable audit record (Dataset id, assigned modality, opaque resolver subject and database-stamped resolution time; `release/t007-m24-sql-review.md`). It is atomic with assignment, cannot be overwritten by replay, and survives deletion of the resolver. No separate audit table or JobEvent is introduced. This supersedes the earlier unspecified audit-event representation; failed attempts are not represented as successful assignments or as an append-only request history.
 
 ## R6. Mixed import outcomes
 
