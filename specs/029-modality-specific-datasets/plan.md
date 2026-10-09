@@ -121,3 +121,7 @@ No second service/model or package is justified. Additional serialization/constr
 ## Final review proposal (2026-09-30)
 
 [implementation-review.md](./implementation-review.md) refines the baseline into the proposed Prisma delta, named DB guards/fence protocol, owner/admin EMPTY endpoint, behavior matrix, partial-result contract and release criteria. It supersedes the earlier list of enforcement alternatives for review purposes only. Custom SQL, schema and backfill remain unexecuted and require the approvals listed there.
+
+## Workspace and AI transition feasibility (2026-10-06)
+
+[workspace-transition-feasibility.md](./workspace-transition-feasibility.md) supplements this plan with the current response-contract matrix, Dataset engine and AI capability gaps, an ordered transition/test plan, and fresh focused-test evidence. It preserves the existing task and release gates and makes no application or shared-dev change.
