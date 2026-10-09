@@ -1003,5 +1003,28 @@
       "--environment",
       "node"
     ]
+  },
+  "web:test:annotation-persistence": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/annotation-api/annotation-service.test.ts",
+      "tests/annotation-api/annotation-validation.test.ts",
+      "tests/annotation-api/annotation-create-authorization.test.ts",
+      "tests/annotation-api/video-foundation.test.ts",
+      "tests/workspace/annotation-mutations.test.ts",
+      "tests/workspace/annotation-shape-editing.test.ts",
+      "tests/workspace/annotation-locking.test.ts",
+      "tests/workspace/video-engine-read.test.ts",
+      "tests/workspace/video-timeline-ownership.test.ts",
+      "tests/workspace/autosave-state.test.ts",
+      "tests/text-annotations/workspace-selection-text.test.ts"
+    ]
   }
 }
