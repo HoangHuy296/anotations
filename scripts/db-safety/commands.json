@@ -999,6 +999,7 @@
       "tests/workspace/collaboration-presence.vitest.spec.tsx",
       "tests/workspace/collaboration-workspace-ui.vitest.spec.tsx",
       "tests/workspace/use-collaboration-realtime.vitest.spec.ts",
+      "tests/workspace/audio-tool-capabilities.vitest.spec.tsx",
       "--pool=threads",
       "--environment",
       "node"

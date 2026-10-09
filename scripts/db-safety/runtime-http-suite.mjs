@@ -173,6 +173,8 @@ try {
     const perFile = [];
     for (const file of PLAN.suites) {
       const run = await launch('suite', { G1_RUNTIME_SUITE_FILES: JSON.stringify([file]) }); const exit = await run.done;
+      // The suite role is launched once per file: its exited child's ledger entry is retired so the next child registers its own identity (a live child is never replaced).
+      rmSync(join(ledger, 'suite.json'), { force: true });
       const output = safeOutput(run.output());
       const counts = { tests: tap(output, 'tests'), pass: tap(output, 'pass'), fail: tap(output, 'fail'), skipped: tap(output, 'skipped'), todo: tap(output, 'todo') };
       perFile.push({ file, exit: exit.code, ...counts, declared: declared(file) });
