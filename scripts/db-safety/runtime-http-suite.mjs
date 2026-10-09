@@ -177,12 +177,20 @@ try {
       const counts = { tests: tap(output, 'tests'), pass: tap(output, 'pass'), fail: tap(output, 'fail'), skipped: tap(output, 'skipped'), todo: tap(output, 'todo') };
       perFile.push({ file, exit: exit.code, ...counts, declared: declared(file) });
       if (exit.code !== 0 || counts.fail !== 0) console.log('SUITE_FAILURE', file, output.slice(-3000));
-      assert.equal(exit.code, 0, `${file} failed`);
-      assert.ok(counts.tests >= declared(file) && counts.tests > 0, `${file}: every declared test ran`);
-      assert.equal(counts.pass, counts.tests, `${file}: all passed`); assert.equal(counts.fail, 0); assert.equal(counts.skipped, 0, `${file}: no test may be skipped`); assert.equal(counts.todo, 0);
+      // every file runs even after a failure, so one run reports the complete picture; the run still fails below
+      const problems = [];
+      if (exit.code !== 0) problems.push(`exit ${exit.code}`);
+      if (!(counts.tests >= declared(file) && counts.tests > 0)) problems.push('a declared test did not run');
+      if (counts.pass !== counts.tests) problems.push('not all passed');
+      if (counts.fail !== 0) problems.push('failures');
+      if (counts.skipped !== 0) problems.push('skipped tests');
+      if (counts.todo !== 0) problems.push('todo tests');
+      perFile[perFile.length - 1].problems = problems;
       executed += counts.tests;
     }
     console.log('WORKSPACE_INTEGRATION_RESULTS', JSON.stringify(perFile));
+    const failed = perFile.filter(entry => entry.problems.length > 0);
+    assert.equal(failed.length, 0, `suites with problems: ${failed.map(entry => `${entry.file} (${entry.problems.join(', ')})`).join('; ')}`);
     evidence.scenarios.push({ name: 'workspace-integration-suites-complete', pass: true, files: perFile.length, tests: executed, skipped: 0, perFile });
   }
   await verify(baseReceipt, 'test'); successful = true;

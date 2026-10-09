@@ -58,7 +58,7 @@ test('workspace-integration: exactly the three opt-in flags, only inside the rec
   assert.deepEqual([...flags.matchAll(/(\w+): '1'/g)].map(match => match[1]).sort(), ['ANNOTATION_API_INTEGRATION_TESTS', 'VIDEO_VIEW_INTEGRATION_TESTS', 'WORKSPACE_INTEGRATION_TESTS']);
   assert.match(suite, /\.\.\.PLAN\.flags/, 'the flags are spread into the runtime environment config (which every child must match exactly)');
   assert.match(suite, /makeBucket\(checked\.env\.MINIO_BUCKET\)/); assert.match(suite, /\/\^g1-\[a-z0-9-\]\+\$\//); assert.match(suite, /127\\\.0\\\.0\\\.1/);
-  for (const required of ['assert.equal(counts.skipped, 0', 'assert.equal(counts.todo, 0', 'every declared test ran', 'all passed']) assert.ok(suite.includes(required), required);
+  for (const required of ["problems.push('skipped tests')", "problems.push('todo tests')", "problems.push('a declared test did not run')", "problems.push('not all passed')", 'suites with problems:']) assert.ok(suite.includes(required), required);
   assert.match(suite, /key === 'G1_RUNTIME_SUITE_FILES'/, 'a child receives no other extra environment');
   // the VIDEO view test keeps its Compose topology and gains the runtime topology without weakening an assertion
   const view = readFileSync(new URL('workspace/video-engine-read.test.ts', testsDir), 'utf8');
