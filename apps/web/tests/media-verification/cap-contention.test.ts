@@ -108,3 +108,60 @@ test(`G-CAP actor scope: ${N} requests from ONE actor spread over several Datase
   for (const id of targets) assert.ok(await db.mediaVerification.count({ where: { datasetId: id, status: { in: [...NON_TERMINAL] } } }) <= LIMIT);
   await invariants(targets.map((id) => ({ datasetId: id })));
 });
+
+/**
+ * G-CAP boundary crossing (contract section 8: "enough distinct concurrent requests to CROSS the limit"). The three bursts above can settle below 50 because the Serializable
+ * retries are bounded, so they alone do not prove the limit holds while concurrent requests straddle it. Each scope here is first filled to 40 committed rows, a burst of
+ * N distinct requests then has only 10 free slots, and finally a second burst hits a SATURATED scope. Committed non-terminal rows never exceed 50 at any sampled instant;
+ * the saturated burst admits nothing and leaves the count at exactly 50.
+ */
+async function boundaryRun(label: string, scope: Array<{ datasetId?: string; requestedById?: string }>, countWhere: { datasetId?: string; requestedById?: string }, fire: (n: number) => Array<Promise<Awaited<ReturnType<typeof admit>>>>, one: () => Promise<Awaited<ReturnType<typeof admit>>>) {
+  const live = () => db.mediaVerification.count({ where: { ...countWhere, status: { in: [...NON_TERMINAL] } } });
+  while ((await live()) < 40) assert.ok((await one()).ok, "seeding below the limit is admitted");
+  assert.equal(await live(), 40);
+  const crossing = await sampleWhile(Promise.all(fire(N)), scope);
+  const t = tally(crossing.value.map(outcomeOf));
+  const afterCrossing = await live();
+  console.log(`# G-CAP boundary ${label} crossing tally=${JSON.stringify(t)} samples=${crossing.samples()} maxObserved=${crossing.max()} committed=${afterCrossing}`);
+  assert.ok(crossing.max() <= LIMIT, `observed ${crossing.max()} > ${LIMIT} while the burst straddled the limit`);
+  assert.ok(afterCrossing <= LIMIT && afterCrossing === 40 + (t.ADMITTED ?? 0), "committed rows equal the seed plus the admitted answers, and never exceed the limit");
+  assert.ok((t.ADMITTED ?? 0) <= LIMIT - 40, "no more than the 10 free slots were admitted");
+  let guard = 0;
+  while ((await live()) < LIMIT && guard++ < 200) await one();
+  assert.equal(await live(), LIMIT, "capacity is reached exactly");
+  const saturated = await sampleWhile(Promise.all(fire(N)), scope);
+  const s = tally(saturated.value.map(outcomeOf));
+  console.log(`# G-CAP boundary ${label} saturated tally=${JSON.stringify(s)} samples=${saturated.samples()} maxObserved=${saturated.max()}`);
+  assert.equal(s.ADMITTED ?? 0, 0, "a saturated scope admits nothing, however many concurrent requests arrive");
+  assert.equal((s.LIMIT_ACTOR ?? 0) + (s.LIMIT_DATASET ?? 0) + (s.BUSY ?? 0), N, "every request is refused 429 or 503");
+  assert.ok((s.LIMIT_ACTOR ?? 0) + (s.LIMIT_DATASET ?? 0) > 0, "at least one request reached the limit check and was refused 429");
+  assert.equal(await live(), LIMIT);
+  assert.ok(saturated.max() <= LIMIT);
+  await invariants(scope);
+}
+
+test(`G-CAP boundary actor+Dataset: ${N} concurrent requests from ONE actor into ONE Dataset straddling the limit (40 seeded, 10 free) then saturated`, { skip, timeout: 600_000 }, async () => {
+  const { actor, datasetId } = await actorWithDataset();
+  await boundaryRun("actor+dataset", [{ datasetId }, { requestedById: actor.id }], { datasetId }, (n) => Array.from({ length: n }, () => admit(actor.id, datasetId, { staged: staged() })), () => admit(actor.id, datasetId, { staged: staged() }));
+});
+
+test(`G-CAP boundary Dataset: ${N} concurrent requests from distinct actors into ONE Dataset straddling the limit then saturated`, { skip, timeout: 600_000 }, async () => {
+  const { datasetId } = await actorWithDataset();
+  const stamp = randomUUID().slice(0, 8);
+  await db.user.createMany({ data: Array.from({ length: N + 60 }, (_, i) => ({ email: `cap-b-${stamp}-${i}@test.invalid`, name: `capb-${i}`, role: "MANAGER" as const })) });
+  const ids = (await db.user.findMany({ where: { email: { startsWith: `cap-b-${stamp}-` } }, select: { id: true } })).map((u) => u.id);
+  users.push(...ids);
+  let next = 0;
+  const actor = () => ids[next++ % ids.length]!;
+  // seeding (60 sequential requests) uses actors 0..59; the bursts reuse actors but each request carries a distinct staged object, so no actor approaches its own limit of 50
+  await boundaryRun("dataset", [{ datasetId }], { datasetId }, (n) => Array.from({ length: n }, () => admit(actor(), datasetId, { staged: staged() })), () => admit(actor(), datasetId, { staged: staged() }));
+});
+
+test(`G-CAP boundary actor: ${N} concurrent requests from ONE actor across several Datasets straddling the actor limit then saturated`, { skip, timeout: 600_000 }, async () => {
+  const { actor, datasetId } = await actorWithDataset();
+  const targets = [datasetId];
+  for (let i = 0; i < 5; i += 1) { const dataset = await createWorkspaceDataset(actor.id, Modality.VIDEO); datasets.push(dataset.id); targets.push(dataset.id); }
+  let turn = 0;
+  const pick = () => targets[turn++ % targets.length]!;
+  await boundaryRun("actor", [{ requestedById: actor.id }, ...targets.map((id) => ({ datasetId: id }))], { requestedById: actor.id }, (n) => Array.from({ length: n }, () => admit(actor.id, pick(), { staged: staged() })), () => admit(actor.id, pick(), { staged: staged() }));
+});
