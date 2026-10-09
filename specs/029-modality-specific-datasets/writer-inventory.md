@@ -103,6 +103,7 @@ No unresolved active writer. Every production writer is either guarded by an app
 - `apps/web/src/lib/workflow/asset-workflow-service.ts`
 - `apps/web/src/lib/workspace/image-mutations.ts`
 - `apps/web/src/lib/workspace/text-mutations.ts`
+- `apps/web/src/lib/workspace/audio-mutations.ts`
 - `apps/web/src/lib/workspace/video-mutations.ts`
 - `apps/worker/src/jobs/ai-prediction-writer.ts`
 - `apps/worker/src/jobs/bulk-delete-assets.ts`
