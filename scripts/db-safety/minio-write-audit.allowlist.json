@@ -57,6 +57,11 @@
     },
     {
       "file": "apps/worker/src/jobs/repository-asset-mirror.ts",
+      "method": "copyObject",
+      "count": 1
+    },
+    {
+      "file": "apps/worker/src/jobs/repository-asset-mirror.ts",
       "method": "putObject",
       "count": 1
     },
