@@ -11,7 +11,7 @@ import { A2_RUNTIME_COMMANDS, FOCUSED_FULL_CHAIN,
   SUPPORTED_COMMANDS, PROPOSAL_CHAIN, REHEARSALS, REHEARSAL_ID, FIXTURE_COMMAND, FIXTURE_FILE, FIXTURE_SPEC, FIXTURE_ROWS, HISTORY_SQL,
   MAINTENANCE_ID, MAINT_SEED_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_SEED_SPEC, MAINT_OBJECTS_SPEC, MAINT_CHECK_SPEC, MAINTENANCE_FILES, MAINTENANCE_COMMANDS,
   BACKFILL_ID, BACKFILL_SEED_COMMAND, BACKFILL_VERIFY_COMMAND, BACKFILL_SEED_FILE, BACKFILL_VERIFY_FILE, BACKFILL_SEED_SPEC, BACKFILL_VERIFY_SPEC, BACKFILL_TOPOLOGY, BACKFILL_ALLOWED_IMPORTS,
-  RELEASE_ID, RELEASE_COUNTS, RELEASE_SPECS, RELEASE_TOPOLOGY, RECOVERY_REVIEW, assertRelease24, assertRelease25, manifestDiff, extractManifestSql, releaseManifestSqlFrom, releaseExtraSql, captureScript,
+  RELEASE_ID, RELEASE_M26_ID, RELEASE_M26_ENTRIES, RELEASE_M26_TOPOLOGY, assertRelease26, RELEASE_COUNTS, RELEASE_SPECS, RELEASE_TOPOLOGY, RECOVERY_REVIEW, assertRelease24, assertRelease25, manifestDiff, extractManifestSql, releaseManifestSqlFrom, releaseExtraSql, captureScript,
   realDeps, runFocusedTest, validateCommand, validateChain, checkHistory, assertMigration25, primaryCleanup, resolvePlan,
   COMPAT_ID, COMPAT_COMMAND, COMPAT_FILE, COMPAT_SPEC, COMPAT_BINDINGS, COMPATIBILITY, T015_ID, T015_COMMAND, T015_FILE, T015_SPEC, T015_ALLOWED_IMPORTS, INGEST_ID, INGEST_COMMAND, INGEST_FILE, INGEST_SPEC, INGEST_ALLOWED_IMPORTS, INGEST_ALLOWED_REQUIRES, verifyCompatBindings, scanCompatTestSource, assertCompatTestSource, assertCompatColumn,
 } from '../disposable-test.mjs';
@@ -1732,4 +1732,35 @@ test('full-chain focused commands (tracked client needs migration 25) resolve to
     const commands = JSON.parse(readFileSync(new URL('../commands.json', import.meta.url), 'utf8'));
     assert.equal(commands[name].kind, 'test');
   }
+});
+
+test('M26-aware release plan: a separate, selectable-by-name plan on the frozen 26-migration chain; the historical 25-migration plan is untouched', () => {
+  assert.notEqual(RELEASE_M26_ID, RELEASE_ID);
+  const historical = resolvePlan(RELEASE_ID), m26 = resolvePlan(RELEASE_M26_ID);
+  assert.equal(historical.kind, 'release'); assert.equal(historical.through, 2); assert.equal(historical.scope, 'release-chain-25'); assert.equal(historical.m26, undefined, 'the historical plan is not repurposed');
+  assert.equal(RELEASE_TOPOLOGY.length, 9);
+  assert.equal(m26.kind, 'release'); assert.equal(m26.through, 3); assert.equal(m26.m26, true); assert.equal(m26.scope, 'release-chain-26');
+  assert.equal(m26.through, PROPOSAL_CHAIN.length, 'every pinned migration (M24, M25, M26) is applied');
+  assert.equal(m26.fixtureAfter, 1, 'the M24 -> M25 fixture position is unchanged');
+  assert.deepEqual(RELEASE_M26_TOPOLOGY.map(row => row[0]), ['baseline-deploy', 'generate', 'baseline-seed', 'proposal-1-deploy', 'fixture', 'proposal-2-deploy', 'proposal-3-deploy', 'schema-compat', 'client-compat', 'candidate-contracts']);
+  assert.deepEqual(RELEASE_M26_TOPOLOGY.filter(row => row[0] !== 'proposal-3-deploy'), [...RELEASE_TOPOLOGY.map(row => [...row])].map(row => row), 'the M26 topology is the historical one plus exactly one deploy step');
+  assert.equal(validateCommand(RELEASE_M26_ID, CATALOG), RELEASE_M26_ID);
+  assert.ok(!SUPPORTED_COMMANDS.includes(RELEASE_M26_ID), 'not selectable as a plain command');
+  assert.equal(RELEASE_M26_ENTRIES, 1942); assert.equal(RELEASE_M26_ENTRIES, RELEASE_COUNTS.m25 + 100);
+});
+
+test('assertRelease26: purely additive M26 delta, unchanged Dataset rows, M26 last in the history; any removal, change, count or history deviation fails closed', () => {
+  const m25Manifest = Array.from({ length: RELEASE_COUNTS.m25 }, (_, index) => ['relation', JSON.stringify(['public', `t${index}`]), [index]]);
+  const added = Array.from({ length: RELEASE_M26_ENTRIES - RELEASE_COUNTS.m25 }, (_, index) => ['column', JSON.stringify(['public', 'MediaVerification', `c${index}`]), [index]]);
+  const migrations = [{ migration_name: '20260930030000_dataset_modality_g2' }, { migration_name: '20261006000000_prepared_import_creation_request_hash' }];
+  const proposal = { name: '20261007000000_media_verification_a2' };
+  const pre = { schemaManifest: m25Manifest, datasetModality: [{ id: 'd', m: null }], migrations };
+  const post = { schemaManifest: [...m25Manifest, ...added], datasetModality: [{ id: 'd', m: null }], migrations: [...migrations, { migration_name: proposal.name }] };
+  const evidence = assertRelease26(pre, post, { proposal });
+  assert.deepEqual(evidence.map(item => item.name), ['schema-delta-additive-only', 'datasets-unchanged', 'history-26-last-is-m26']);
+  assert.throws(() => assertRelease26(pre, { ...post, schemaManifest: post.schemaManifest.slice(1) }, { proposal }), /RELEASE_M26_SCHEMA_COUNT_UNEXPECTED|RELEASE_M26_SCHEMA_DELTA_UNEXPECTED/, 'a removed entry');
+  assert.throws(() => assertRelease26(pre, { ...post, schemaManifest: [['relation', JSON.stringify(['public', 'changed']), [1]], ...post.schemaManifest.slice(1)] }, { proposal }), /RELEASE_M26_SCHEMA_DELTA_UNEXPECTED/, 'a changed/replaced entry');
+  assert.throws(() => assertRelease26(pre, { ...post, schemaManifest: post.schemaManifest.slice(0, -1) }, { proposal }), /RELEASE_M26_SCHEMA_COUNT_UNEXPECTED/, 'a short delta');
+  assert.throws(() => assertRelease26(pre, { ...post, datasetModality: [{ id: 'd', m: 'IMAGE' }] }, { proposal }), /RELEASE_M26_DATASETS_CHANGED/, 'M26 must not touch Datasets');
+  assert.throws(() => assertRelease26(pre, { ...post, migrations }, { proposal }), /RELEASE_M26_HISTORY_UNEXPECTED/, 'M26 missing from the history');
 });

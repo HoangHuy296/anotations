@@ -130,12 +130,24 @@ export const RELEASE_SPECS = Object.freeze({
   'g2:compatibility': Object.freeze({ kind: 'test', cwd: '.', args: ['scripts/db-safety/g2-compatibility.mjs'] }),
   'g2:candidate': Object.freeze({ kind: 'test', cwd: 'apps/web', args: [...G2_ARGS, 'tests/dataset-modality/g2-candidate.test.ts'] }),
 });
+/**
+ * M26-aware release chain (Phase 030.1-B1.5). The historical `release:phase029-chain` above is the 25-migration proof and is deliberately left as it was: since M26 was promoted
+ * its schema-compat step (current schema vs a 25-migration database) fails by design. This plan runs the SAME reviewed steps on the frozen 26-migration chain: M26 is deployed
+ * after M25, the M25 assertions are taken at the M25 boundary, the M26 delta is asserted separately (additive only), and schema-compat / client-compat / the G2 candidate
+ * contracts then run on the final 26-migration database. Nothing about RELEASE_SCHEMA_COMPAT_FAILED is relaxed.
+ */
+export const RELEASE_M26_ID = 'release:phase029-chain-m26';
+export const RELEASE_M26_ENTRIES = 1942;
 export const RELEASES = Object.freeze({
+  [RELEASE_M26_ID]: Object.freeze({ through: 3, fixtureAfter: 1, fixtureCommand: FIXTURE_COMMAND, fixtureRows: FIXTURE_ROWS, newColumn: NEW_COLUMN, scope: 'release-chain-26', m26: true, compatCommand: COMPAT_COMMAND, compatFile: COMPAT_FILE, compatSpec: COMPAT_SPEC }),
   [RELEASE_ID]: Object.freeze({ through: 2, fixtureAfter: 1, fixtureCommand: FIXTURE_COMMAND, fixtureRows: FIXTURE_ROWS, newColumn: NEW_COLUMN, scope: 'release-chain-25', compatCommand: COMPAT_COMMAND, compatFile: COMPAT_FILE, compatSpec: COMPAT_SPEC }),
 });
 export const RELEASE_TOPOLOGY = Object.freeze([
   ['baseline-deploy', 'deploy', null], ['generate', 'test', 'g2:generate'], ['baseline-seed', 'test', 'g2:baseline'], ['proposal-1-deploy', 'deploy', null],
   ['fixture', 'test', FIXTURE_COMMAND], ['proposal-2-deploy', 'deploy', null], ['schema-compat', 'test', 'g2:compatibility'], ['client-compat', 'test', COMPAT_COMMAND], ['candidate-contracts', 'test', 'g2:candidate'],
+]);
+export const RELEASE_M26_TOPOLOGY = Object.freeze([
+  ...RELEASE_TOPOLOGY.slice(0, 5), ['proposal-2-deploy', 'deploy', null], ['proposal-3-deploy', 'deploy', null], ...RELEASE_TOPOLOGY.slice(6),
 ]);
 // ---- T029/T031 backfill rehearsal: the canonical 25-migration chain plus the evidence-bound SINGLE-modality backfill, on disposable PostgreSQL only ----
 export const BACKFILL_ID = 'release:phase029-backfill';
@@ -395,6 +407,20 @@ export function assertRelease24(pre, post, ctx) {
 
   must(post.datasetModality.length === pre.datasetLegacy[0] && post.datasetModality.every(unresolved), 'RELEASE_M24_DATASET_NOT_UNRESOLVED');
   pass('historical-datasets-unresolved', { rows: post.datasetModality.length });
+  return evidence;
+}
+/** Migration 26 on top: purely additive (nothing removed or changed), exactly the reviewed entry count, every Dataset row identical, history of 26 finished migrations. */
+export function assertRelease26(pre, post, ctx) {
+  const evidence = [];
+  const pass = (name, detail = {}) => evidence.push({ name, pass: true, ...detail });
+  must(pre.schemaManifest.length === RELEASE_COUNTS.m25 && post.schemaManifest.length === RELEASE_M26_ENTRIES, 'RELEASE_M26_SCHEMA_COUNT_UNEXPECTED');
+  const diff = manifestDiff(pre.schemaManifest, post.schemaManifest);
+  must(diff.removed.length === 0 && diff.changed.length === 0 && diff.added.length === RELEASE_M26_ENTRIES - RELEASE_COUNTS.m25, 'RELEASE_M26_SCHEMA_DELTA_UNEXPECTED');
+  pass('schema-delta-additive-only', { from: pre.schemaManifest.length, to: post.schemaManifest.length, added: diff.added.length });
+  must(isDeepStrictEqual(pre.datasetModality, post.datasetModality), 'RELEASE_M26_DATASETS_CHANGED');
+  pass('datasets-unchanged', { rows: post.datasetModality.length });
+  must(post.migrations.length === pre.migrations.length + 1 && post.migrations.at(-1)?.migration_name === ctx.proposal.name, 'RELEASE_M26_HISTORY_UNEXPECTED');
+  pass('history-26-last-is-m26', { last: ctx.proposal.name });
   return evidence;
 }
 /** Migration 25 on top: exactly one added schema entry (the nullable column), nothing else; every Dataset row identical before and after. */
@@ -770,6 +796,7 @@ export async function runFocusedTest(command, deps = realDeps()) {
         save('release-m24-assertions.json', m24Assertions);
         save('release-m24-datasets.json', releaseCaptures.m24.datasetModality);
       }
+      if (plan.kind === 'release' && plan.m26 && entry.order === 2) releaseCaptures.m25 = capture();
       if ((plan.kind === 'rehearsal' || plan.kind === 'release') && entry.order === plan.fixtureAfter) {
         // The fixture is the one fixed internal child step; its receipt is scoped to FIXTURE_COMMAND (the catalog entry was bound in preflight).
         const fixtureReceipt = issue('fixture', { ...deployRequest(), operation: 'test', command: plan.fixtureCommand, providerFile: join(stage, 'providers.json'), providers: state.pins.filter(pin => pin.role !== 'postgres') }, plan.fixtureCommand);
@@ -817,13 +844,19 @@ export async function runFocusedTest(command, deps = realDeps()) {
       save('backfill-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, releaseCaptures.m25.schemaManifest.length, final.schemaManifest.length], datasetsResolved: final.datasetModality.filter(row => row.m !== null).length, datasetsUnresolved: final.datasetModality.filter(row => row.m === null).length, migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })) });
     } else if (plan.kind === 'release') {
       must(pre !== null, 'REHEARSAL_PRECAPTURE_MISSING');
-      const post = capture();
+      const post = plan.m26 ? releaseCaptures.m25 : capture(); // the M25 boundary: for the M26 plan the M26 delta is asserted separately below
       save('m25-pre-fingerprint.json', pre); save('m25-post-fingerprint.json', post);
-      const m25 = assertMigration25(pre, post, { newColumn: plan.newColumn, fixtureRows: plan.fixtureRows, proposal: chain.at(-1) });
+      const m25 = assertMigration25(pre, post, { newColumn: plan.newColumn, fixtureRows: plan.fixtureRows, proposal: chain[1] });
       const schema25 = assertRelease25(pre, post, { newColumn: plan.newColumn });
       // Historical Datasets (present before migration 25) must be exactly as migration 24 left them.
       must(isDeepStrictEqual(post.datasetModality.filter(row => releaseCaptures.m24.datasetModality.some(old => old.id === row.id)), releaseCaptures.m24.datasetModality), 'RELEASE_HISTORICAL_DATASETS_CHANGED');
       save('release-m25-assertions.json', [...m25, ...schema25]);
+      let finalBoundary = post;
+      if (plan.m26) {
+        finalBoundary = capture();
+        save('release-m26-assertions.json', assertRelease26(post, finalBoundary, { proposal: chain.at(-1) }));
+        save('m26-post-fingerprint.json', finalBoundary);
+      }
       // Drift, history/status and client compatibility on the final 25-migration database, then the runtime contracts of the historical states.
       testStep('schema-compat', 'g2:compatibility', 'RELEASE_SCHEMA_COMPAT_FAILED');
       testStep('client-compat', plan.compatCommand, 'COMPAT_TEST_FAILED');
@@ -831,9 +864,9 @@ export async function runFocusedTest(command, deps = realDeps()) {
       testStep('candidate-contracts', 'g2:candidate', 'RELEASE_CANDIDATE_CONTRACTS_FAILED');
       const final = capture();
       save('release-final-fingerprint.json', { schemaEntries: final.schemaManifest.length, migrations: final.migrations.length });
-      must(isDeepStrictEqual(final.schemaManifest, post.schemaManifest) && isDeepStrictEqual(final.migrations, post.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
+      must(isDeepStrictEqual(final.schemaManifest, finalBoundary.schemaManifest) && isDeepStrictEqual(final.migrations, finalBoundary.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
       verifyHistory('FINAL', chain);
-      must(isDeepStrictEqual(state.topology.map(({ step, operation, command: receiptCommand }) => [step, operation, receiptCommand]), RELEASE_TOPOLOGY.map(row => [...row])), 'RECEIPT_TOPOLOGY_UNEXPECTED');
+      must(isDeepStrictEqual(state.topology.map(({ step, operation, command: receiptCommand }) => [step, operation, receiptCommand]), (plan.m26 ? RELEASE_M26_TOPOLOGY : RELEASE_TOPOLOGY).map(row => [...row])), 'RECEIPT_TOPOLOGY_UNEXPECTED');
       save('release-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, post.schemaManifest.length], migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })) });
     } else if (plan.kind === 'compat') {
       // Read-only structural check, then the one guarded child: the compatibility test (normal application-client operations only).
