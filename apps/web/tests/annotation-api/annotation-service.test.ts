@@ -22,8 +22,11 @@ test("shared service reads every modality and atomically persists the five appro
   const dataset = await createAnnotationDataset(user.id);
   const image = await createAnnotationAsset(dataset.id);
   const label = await createAnnotationLabel(dataset.id);
-  const otherAssets = await Promise.all([Modality.VIDEO, Modality.TEXT, Modality.AUDIO].map((modality) => db.asset.create({
-    data: { datasetId: dataset.id, modality, filename: `${modality}.fixture`, mimeType: "application/octet-stream", sourceFingerprint: `${dataset.id}-${modality}` },
+  // Phase 029: a Dataset has exactly one modality and the M24 trigger refuses an Asset of another one (ASSET_MODALITY_MISMATCH), so "every modality" means one Dataset per modality.
+  const others = await Promise.all([Modality.VIDEO, Modality.TEXT, Modality.AUDIO].map(async (modality) => ({ modality, dataset: await createAnnotationDataset(user.id, modality) })));
+  const otherDatasets = others.map((other) => other.dataset);
+  const otherAssets = await Promise.all(others.map(({ modality, dataset: otherDataset }) => db.asset.create({
+    data: { datasetId: otherDataset.id, modality, filename: `${modality}.fixture`, mimeType: "application/octet-stream", sourceFingerprint: `${otherDataset.id}-${modality}` },
     select: { id: true },
   })));
   const actor = { id: user.id, email: user.email, name: user.name, role: user.role };
@@ -32,6 +35,10 @@ test("shared service reads every modality and atomically persists the five appro
       const listed = await readAssetAnnotations(actor, asset.id);
       assert.equal(listed.ok, true);
       if (listed.ok) assert.deepEqual(listed.value, []);
+    }
+    for (const other of otherAssets) {
+      const refused = await mutateImageAnnotations(actor, other.id, { creates: [{ id: "x", type: "BOUNDING_BOX", geometry: { x: 0.1, y: 0.1, width: 0.2, height: 0.2 } }], updates: [], deletes: [] });
+      assert.deepEqual(refused, { ok: false, reason: "WRITE_UNSUPPORTED" }, "the IMAGE shape service never writes a non-IMAGE Asset");
     }
     const created = await mutateImageAnnotations(actor, image.id, {
       creates: [
@@ -57,7 +64,7 @@ test("shared service reads every modality and atomically persists the five appro
       assert.equal(after.value.find((annotation) => annotation.id === "box")?.revision, 1);
     }
   } finally {
-    await cleanupAnnotationFixture([user.id], [dataset.id]);
+    await cleanupAnnotationFixture([user.id], [dataset.id, ...otherDatasets.map((otherDataset) => otherDataset.id)]);
   }
 });
 
