@@ -59,6 +59,14 @@ function toSelection(target: AiTargetInput): { selection: BulkSelectionInput; ta
   return { selection: target.selection, targetMode: target.selection.mode };
 }
 
+/**
+ * Whether the target the user previewed is no longer the target the server would run. The comparison is between two SERVER resolutions (the advisory pass outside the
+ * transaction and the in-transaction pass): the modality is the Dataset's persisted one both times, and a browser-supplied hint can influence neither.
+ */
+export function aiTargetChanged(previewed: { modality: Modality; targets: AiBatchTarget[] }, resolved: { modality: Modality; targets: AiBatchTarget[] }): boolean {
+  return resolved.modality !== previewed.modality || JSON.stringify(resolved.targets) !== JSON.stringify(previewed.targets);
+}
+
 export async function resolveAiTarget(
   datasetId: string,
   target: AiTargetInput,
@@ -77,7 +85,7 @@ export async function resolveAiTarget(
 
   // Dataset.modality is the sole authority for the target kind. Asset rows are only checked against it: they never select it, and an
   // unresolved (EMPTY/legacy MIXED) Dataset has no verified AI capability.
-  const dataset = await client.dataset.findFirst({ where: { id: datasetId, deletedAt: null }, select: { modality: true } });
+  const dataset = await client.dataset.findFirst({ where: { id: datasetId, deletedAt: null, archivedAt: null }, select: { modality: true } });
   const modality = dataset?.modality ?? null;
   if (modality !== Modality.IMAGE && modality !== Modality.VIDEO) return fail("AI_CAPABILITY_UNVERIFIED");
   if (rows.some((row) => row.modality !== modality)) return fail("TARGET_MIXED_MODALITY");
