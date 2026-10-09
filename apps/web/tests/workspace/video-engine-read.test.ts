@@ -2,7 +2,7 @@ import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable 
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import test, { after, before } from "node:test";
 
@@ -91,7 +91,7 @@ test("private VIDEO capability is object-scoped, browser-direct, and foreign acc
 });
 
 test("VideoEngine uses the authorized capability rather than a Next.js binary proxy", async () => {
-  const source = await readFile(path.resolve(process.cwd(), "src/components/workspace/video-engine.tsx"), "utf8");
+  const source = await readFile(fileURLToPath(new URL("../../src/components/workspace/video-engine.tsx", import.meta.url)), "utf8");
   // `getViewUrl` (a private, in-flight-deduped/TTL-cached wrapper -- mirrors
   // `canvas-stage.tsx`'s own copy, added to stop Strict Mode's double mount
   // effect from firing this fetch twice) is the one place that calls the

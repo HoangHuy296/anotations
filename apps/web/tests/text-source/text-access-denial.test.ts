@@ -33,7 +33,7 @@ async function seedTextAssetWithRealSource(datasetId: string, text: string) {
 test("a removed member (was a LABELER, then revoked) is concealed exactly like a stranger -- no source excerpt anywhere in either outcome", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const removedMember = await createWorkspaceUser(UserRole.LABELER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const fixture = await seedTextAssetWithRealSource(dataset.id, "OpenAI builds AI.");
 
   const membership = await addWorkspaceMember(dataset.id, removedMember.id, DatasetMemberRole.LABELER);
@@ -60,8 +60,8 @@ test("a removed member (was a LABELER, then revoked) is concealed exactly like a
 test("a member of a different dataset cannot read or prepare a TEXT asset that belongs to another dataset -- concealed as NOT_FOUND, not FORBIDDEN", { skip: !hasIntegrationDatabase }, async () => {
   const ownerA = await createWorkspaceUser(UserRole.MANAGER);
   const ownerB = await createWorkspaceUser(UserRole.MANAGER);
-  const datasetA = await createWorkspaceDataset(ownerA.id);
-  const datasetB = await createWorkspaceDataset(ownerB.id);
+  const datasetA = await createWorkspaceDataset(ownerA.id, Modality.TEXT);
+  const datasetB = await createWorkspaceDataset(ownerB.id, Modality.TEXT);
   const crossDatasetActor = await createWorkspaceUser(UserRole.LABELER);
   await addWorkspaceMember(datasetB.id, crossDatasetActor.id, DatasetMemberRole.LABELER);
   const fixture = await seedTextAssetWithRealSource(datasetA.id, "cross-dataset fixture");

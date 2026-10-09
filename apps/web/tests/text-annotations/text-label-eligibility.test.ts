@@ -19,7 +19,7 @@ const hasIntegrationDatabase = Boolean(process.env.DATABASE_URL);
 
 test("createLabelWithTextEligibility creates an eligible ENTITY label and bumps textPolicyRevision atomically", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   try {
     const before = await db.dataset.findUniqueOrThrow({ where: { id: dataset.id }, select: { textPolicyRevision: true, textMutationRevision: true } });
     const created = await createLabelWithTextEligibility(owner, {
@@ -40,7 +40,7 @@ test("createLabelWithTextEligibility creates an eligible ENTITY label and bumps 
 
 test("createLabelWithTextEligibility with no eligibility never claims the TEXT dataset guard", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   try {
     const before = await db.dataset.findUniqueOrThrow({ where: { id: dataset.id }, select: { textPolicyRevision: true, textMutationRevision: true } });
     const created = await createLabelWithTextEligibility(owner, {
@@ -61,7 +61,7 @@ test("createLabelWithTextEligibility with no eligibility never claims the TEXT d
 
 test("updateLabelWithTextEligibility can toggle an unreferenced label's eligibility on and back off", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   try {
     const created = await createLabelWithTextEligibility(owner, { datasetId: dataset.id, name: workspaceUnique("Togglable"), color: "#0EA5E9", description: null, hotkey: null, textEligibility: undefined });
     assert.equal(created.ok, true);
@@ -81,7 +81,7 @@ test("updateLabelWithTextEligibility can toggle an unreferenced label's eligibil
 
 test("a plain color/description edit of an already-eligible label leaves its eligibility and the TEXT guard untouched", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   try {
     const created = await createLabelWithTextEligibility(owner, { datasetId: dataset.id, name: workspaceUnique("Sentiment"), color: "#0EA5E9", description: null, hotkey: null, textEligibility: "SENTIMENT" });
     assert.equal(created.ok, true);
@@ -102,7 +102,7 @@ test("a plain color/description edit of an already-eligible label leaves its eli
 
 test("a referenced label is locked to its current eligibility -- REFERENCED_SCOPE_LOCKED, not a silent change", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   try {
     const created = await createLabelWithTextEligibility(owner, { datasetId: dataset.id, name: workspaceUnique("Referenced Entity"), color: "#0EA5E9", description: null, hotkey: null, textEligibility: "ENTITY" });
     assert.equal(created.ok, true);
@@ -124,7 +124,7 @@ test("a referenced label is locked to its current eligibility -- REFERENCED_SCOP
 
 test("duplicate label names are rejected on both the guarded and plain create paths", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   try {
     const name = workspaceUnique("Dup");
     const first = await createLabelWithTextEligibility(owner, { datasetId: dataset.id, name, color: "#0EA5E9", description: null, hotkey: null, textEligibility: "ENTITY" });
@@ -139,7 +139,7 @@ test("duplicate label names are rejected on both the guarded and plain create pa
 test("a LABELER without label.manage is forbidden from creating or updating eligibility", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const labeler = await createWorkspaceUser(UserRole.LABELER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   await addWorkspaceMember(dataset.id, labeler.id, DatasetMemberRole.LABELER);
   try {
     const created = await createLabelWithTextEligibility(labeler, { datasetId: dataset.id, name: workspaceUnique("Forbidden"), color: "#0EA5E9", description: null, hotkey: null, textEligibility: "ENTITY" });

@@ -52,7 +52,7 @@ test("the route source gates on dataset.read (via requestTextSourcePreparation) 
 test("requestTextSourcePreparation (what the route calls): preparation is authorized for a REVIEWER on a review-frozen (NEEDS_REVIEW) asset -- dataset.read, independent of workflow state", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const reviewer = await createWorkspaceUser(UserRole.REVIEWER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   await addWorkspaceMember(dataset.id, reviewer.id, DatasetMemberRole.REVIEWER);
   const { config, minio } = getWebProviders();
   const marker = workspaceUnique("prepare-route-frozen");
@@ -82,7 +82,7 @@ test("requestTextSourcePreparation (what the route calls): preparation is author
 test("requestTextSourcePreparation: a non-member is concealed as NOT_FOUND (404), and a real 403-capable visible-resource denial is distinguishable in principle from concealment", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const outsider = await createWorkspaceUser(UserRole.LABELER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const { config, minio } = getWebProviders();
   const marker = workspaceUnique("prepare-route-concealed");
   const storageKey = `text-sources/__test-fixtures__/${marker}/source.txt`;
