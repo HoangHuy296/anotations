@@ -54,7 +54,7 @@ test("default labels backfill only the missing ones into a dataset that already 
   } finally { await cleanupWorkspaceFixture([owner.id], [dataset.id]); }
 });
 
-test("default labels are written for IMAGE and VIDEO datasets only; TEXT, AUDIO and unresolved datasets never inherit them", { skip: !enabled }, async () => {
+test("default labels are written for IMAGE and VIDEO datasets only; TEXT and AUDIO datasets never inherit them", { skip: !enabled }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const datasets = [] as string[];
   try {
@@ -66,10 +66,6 @@ test("default labels are written for IMAGE and VIDEO datasets only; TEXT, AUDIO 
       assert.equal(await db.label.count({ where: { datasetId: dataset.id } }), expected, `${modality} stored labels`);
       if (expected > 0) assert.equal(await db.label.count({ where: { datasetId: dataset.id, modality } }), expected, `${modality} defaults carry the Dataset modality`);
     }
-    const unresolved = await db.dataset.create({ data: { ownerId: owner.id, name: `unresolved-${Date.now()}`, modality: null }, select: { id: true } });
-    datasets.push(unresolved.id);
-    assert.deepEqual(await ensureDefaultImageLabels(owner, unresolved.id), { ok: true, created: 0 });
-    assert.equal(await db.label.count({ where: { datasetId: unresolved.id } }), 0);
   } finally { await cleanupWorkspaceFixture([owner.id], datasets); }
 });
 

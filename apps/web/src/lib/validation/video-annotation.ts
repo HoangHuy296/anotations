@@ -5,6 +5,9 @@ const finite = z.number().finite();
 const normalized = finite.min(0).max(1);
 const timestamp = z.number().int().finite().min(0);
 const properties = z.record(z.string(), z.unknown()).default({});
+/** Update payloads: an omitted `properties` must stay omitted. (`properties.optional()` re-applies the create default in Zod 4 and would overwrite stored properties,
+ *  erasing AI provenance such as `predictedClass`, `resultFingerprint` and `providerTrackId`, on any rename/relabel/geometry edit.) */
+const propertiesUpdate = z.record(z.string(), z.unknown());
 
 export const videoBoundingBoxSchema = z.object({
   kind: z.literal("BOUNDING_BOX").default("BOUNDING_BOX"),
@@ -31,7 +34,7 @@ export const videoTrackUpdateSchema = z.object({
   name: z.string().trim().min(1).max(160).optional(),
   status: z.enum(["DRAFT", "IN_PROGRESS", "COMPLETED", "SUBMITTED", "REVIEWED", "ACCEPTED", "REJECTED"]).optional(),
   interpolationMode: z.enum(["LINEAR", "NONE"]).optional(),
-  properties: properties.optional(),
+  properties: propertiesUpdate.optional(),
 }).strict().refine((value) => Object.keys(value).some((key) => key !== "expectedTrackRevision"), { message: "Track update is empty." });
 
 export const videoKeyframeCreateSchema = z.object({
@@ -45,7 +48,7 @@ export const videoKeyframeUpdateSchema = z.object({
   expectedTrackRevision: z.number().int().positive(),
   timestampMs: timestamp.optional(),
   geometry: videoBoundingBoxSchema.optional(),
-  properties: properties.optional(),
+  properties: propertiesUpdate.optional(),
   // Per-shape label override. A keyframe Annotation always has its own
   // `labelId` column (it does not need to match its Track's `labelId`) --
   // this just lets the Shapes tab in `video-properties-tabs.tsx` assign a
@@ -73,7 +76,7 @@ export const videoTemporalLabelUpdateSchema = z.object({
   labelId: id.nullable().optional(),
   startMs: timestamp.optional(),
   endMs: timestamp.optional(),
-  properties: properties.optional(),
+  properties: propertiesUpdate.optional(),
 }).strict().refine((value) => value.labelId !== undefined || value.startMs !== undefined || value.endMs !== undefined || value.properties !== undefined, { message: "Temporal label update is empty." });
 
 export const videoTemporalLabelDeleteSchema = z.object({

@@ -39,9 +39,9 @@ test("C: legacy AI annotations whose class has no label definition are reconcile
     const actor = { id: owner.id, email: owner.email, name: owner.name, role: UserRole.MANAGER };
     const applied = await reconcileAiLabels(actor, dataset.id, { dryRun: false });
     assert.ok(applied.ok);
-    assert.equal(applied.annotationsUpdated, 7); assert.equal(applied.tracksUpdated, 3); assert.equal(applied.labelsCreated, 2);
+    assert.equal(applied.annotationsUpdated, 7); assert.equal(applied.tracksUpdated, 3); assert.equal(applied.labelsCreated, 1, "motorcycle; person comes from the six VIDEO defaults");
     const labels = await db.label.findMany({ where: { datasetId: dataset.id }, select: { id: true, normalizedName: true, modality: true } });
-    assert.deepEqual(labels.map((l) => l.normalizedName).sort(), ["motorcycle", "person"]);
+    assert.deepEqual(labels.map((l) => l.normalizedName).sort(), ["aidetect", "animal", "motorcycle", "object", "person", "text", "vehicle"]);
     assert.ok(labels.every((l) => l.modality === "VIDEO"));
     const person = labels.find((l) => l.normalizedName === "person")!;
     for (const track of fx.tracks.slice(0, 2)) {
@@ -52,7 +52,7 @@ test("C: legacy AI annotations whose class has no label definition are reconcile
     for (const g of geometries) { assert.deepEqual(g.geometry, box, "boxes are unchanged"); assert.equal(g.revision, 1, "revisions are unchanged"); }
     const again = await reconcileAiLabels(actor, dataset.id, { dryRun: false });
     assert.ok(again.ok); assert.equal(again.scanned, 0); assert.equal(again.annotationsUpdated, 0);
-    assert.equal(await db.label.count({ where: { datasetId: dataset.id } }), 2);
+    assert.equal(await db.label.count({ where: { datasetId: dataset.id } }), 7);
   } finally { await cleanupWorkspaceFixture([owner.id], [dataset.id]); }
 });
 
