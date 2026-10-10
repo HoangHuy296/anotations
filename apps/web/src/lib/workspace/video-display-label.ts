@@ -51,3 +51,8 @@ export function resolveDisplayLabel(input: {
   }
   return { text: UNLABELED_TEXT, color: null, source: "NONE", predictedClass: null };
 }
+
+/** The only text drawn above a bounding box: the effective label or class, never a track id, an "AI track" prefix, a badge or a confidence value. */
+export function boxLabelText(display: DisplayLabel): string {
+  return display.text;
+}

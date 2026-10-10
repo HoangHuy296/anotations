@@ -1,7 +1,7 @@
 import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable target before fixtures.
 import { describe, expect, it } from "vitest";
 
-import { aiClassColor, recordedAiClass, resolveDisplayLabel, UNLABELED_TEXT } from "@/lib/workspace/video-display-label";
+import { aiClassColor, boxLabelText, recordedAiClass, resolveDisplayLabel, UNLABELED_TEXT } from "@/lib/workspace/video-display-label";
 
 const person = { name: "person", color: "#ff99fc", modality: "VIDEO", scope: "OBJECT" };
 
@@ -49,6 +49,18 @@ describe("VIDEO display label resolution (assigned label > matching dataset labe
   it("`unlabeled` appears only when there is no assigned label, no matching label and no usable class", () => {
     for (const properties of [undefined, null, {}, { predictedClass: "" }, { predictedClass: "unknown" }, { predictedClass: 5 }, { predictedClass: "bad\u0000" }]) {
       expect(resolveDisplayLabel({ assigned: null, trackProperties: properties, datasetLabels: [person] })).toMatchObject({ text: UNLABELED_TEXT, source: "NONE", color: null });
+    }
+  });
+
+  it("the box overlay text is only the effective class or label: no track id, no \"AI track\" prefix, no badge, no confidence", () => {
+    const props = { predictedClass: "person", providerTrackId: 42, aiTaskId: "t", confidence: 0.93 };
+    expect(boxLabelText(resolveDisplayLabel({ assigned: null, trackProperties: props, keyframeProperties: props, datasetLabels: [] }))).toBe("person");
+    expect(boxLabelText(resolveDisplayLabel({ assigned: null, trackProperties: { predictedClass: "sports ball", providerTrackId: 73 }, datasetLabels: [] }))).toBe("sports ball");
+    expect(boxLabelText(resolveDisplayLabel({ assigned: { name: "pedestrian", color: "#123456" }, trackProperties: props, datasetLabels: [] }))).toBe("pedestrian");
+    expect(boxLabelText(resolveDisplayLabel({ assigned: null, trackProperties: {}, datasetLabels: [] }))).toBe("unlabeled");
+    for (const cls of ["person", "motorcycle", "sports ball"]) {
+      const text = boxLabelText(resolveDisplayLabel({ assigned: null, trackProperties: { predictedClass: cls, providerTrackId: 18 }, datasetLabels: [] }));
+      expect(text).toBe(cls); expect(text).not.toMatch(/AI|track|\d|%/i);
     }
   });
 });
