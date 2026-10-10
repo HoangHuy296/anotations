@@ -119,3 +119,22 @@ test("isolation and authorization: other datasets are untouched; a labeler canno
     void mine;
   } finally { await cleanupWorkspaceFixture([owner.id, labeler.id, outsider.id], [dataset.id, other.id, text.id, audio.id]); }
 });
+
+test("legacy defaults: a VIDEO dataset holding the six defaults as IMAGE labels is repaired in place first, then `person` annotations link to that same label row (dry run reports it without writing)", { skip: !enabled }, async () => {
+  const owner = await createWorkspaceUser(UserRole.MANAGER);
+  const dataset = await createWorkspaceDataset(owner.id, "VIDEO");
+  const actor = { id: owner.id, email: owner.email, name: owner.name, role: UserRole.MANAGER };
+  try {
+    const legacy = await db.label.create({ data: { datasetId: dataset.id, modality: "IMAGE", name: "person", normalizedName: "person", color: "#ff99fc" }, select: { id: true } });
+    await videoFixture(dataset.id, owner.id, [{ cls: "person", frames: 2 }]);
+    const preview = await reconcileAiLabels(actor, dataset.id, { dryRun: true });
+    assert.ok(preview.ok); assert.deepEqual(preview.classes.map((c) => [c.predictedClass, c.outcome]), [["person", "REUSED"]]);
+    assert.equal((await db.label.findUniqueOrThrow({ where: { id: legacy.id }, select: { modality: true } })).modality, "IMAGE", "a dry run writes nothing");
+    const applied = await reconcileAiLabels(actor, dataset.id, { dryRun: false });
+    assert.ok(applied.ok); assert.equal(applied.annotationsUpdated, 2);
+    const row = await db.label.findUniqueOrThrow({ where: { id: legacy.id }, select: { modality: true, color: true, name: true } });
+    assert.deepEqual([row.modality, row.color, row.name], ["VIDEO", "#ff99fc", "person"]);
+    assert.equal(await db.annotation.count({ where: { datasetId: dataset.id, labelId: legacy.id } }), 2);
+    assert.equal(await db.label.count({ where: { datasetId: dataset.id, normalizedName: "person" } }), 1);
+  } finally { await cleanupWorkspaceFixture([owner.id], [dataset.id]); }
+});

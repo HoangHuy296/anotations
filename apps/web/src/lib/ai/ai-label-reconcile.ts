@@ -5,10 +5,12 @@ import { AiLabelClassInvalidError, canonicalAiLabelKey, resolveAiClassLabels } f
 import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { DEFAULT_IMAGE_LABELS, ensureDefaultImageLabels } from "@/lib/workspace/label-management";
 
 const FROZEN_ASSET_STATUSES = ["NEEDS_REVIEW", "REVIEWED", "REJECTED"] as const;
 const READ_BATCH = 2000;
 const WRITE_CHUNK = 1000;
+const DEFAULT_KEYS = new Set<string>(DEFAULT_IMAGE_LABELS.map((label) => label.name.trim().toLocaleLowerCase("en-US")));
 
 export type AiLabelReconcileClassReport = {
   predictedClass: string;
@@ -38,6 +40,10 @@ export async function reconcileAiLabels(actor: RequestActor, datasetId: string, 
   if (access.forbidden) return { ok: false, status: 403, code: "FORBIDDEN" };
   const modality = (await db.dataset.findUnique({ where: { id: datasetId }, select: { modality: true } }))?.modality ?? null;
   if (modality !== "IMAGE" && modality !== "VIDEO") return { ok: false, status: 409, code: "UNSUPPORTED_MODALITY" };
+
+  // 0. Datasets written before defaults carried the Dataset modality hold the six defaults as IMAGE labels inside a VIDEO dataset. The shared default-label
+  //    service repairs exactly those rows (same id/name/colour, modality only), so apply it first; a dry run reports the outcome without writing.
+  if (!options.dryRun) await ensureDefaultImageLabels(actor, datasetId);
 
   // 1. Read candidates (read-only, batched by id cursor).
   type Candidate = { id: string; trackId: string | null; predictedClass: string | null; trackClass: string | null };
@@ -89,7 +95,8 @@ export async function reconcileAiLabels(actor: RequestActor, datasetId: string, 
       if (entry.invalid) { classes.push({ predictedClass: entry.display, outcome: "INVALID", annotations: entry.annotationIds.length, tracks: entry.trackIds.size }); continue; }
       if (entry.unknown) { classes.push({ predictedClass: entry.display, outcome: "UNKNOWN", annotations: entry.annotationIds.length, tracks: entry.trackIds.size }); continue; }
       const row = existing.find((label) => label.normalizedName === key);
-      const compatible = row ? (row.modality === null || row.modality === modality) && row.scope === "OBJECT" : true;
+      const repairableDefault = Boolean(row) && modality === "VIDEO" && row!.modality === "IMAGE" && row!.scope === "OBJECT" && DEFAULT_KEYS.has(key);
+      const compatible = row ? ((row.modality === null || row.modality === modality) && row.scope === "OBJECT") || (!write && repairableDefault) : true;
       const labelId = write ? preResolution!.labelIds.get(key) ?? null : row && compatible ? row.id : null;
       const outcome: AiLabelReconcileClassReport["outcome"] = !compatible ? "CONFLICT" : row ? "REUSED" : "CREATED";
       classes.push({ predictedClass: entry.display, outcome, annotations: entry.annotationIds.length, tracks: entry.trackIds.size });
