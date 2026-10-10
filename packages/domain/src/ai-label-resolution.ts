@@ -1,26 +1,20 @@
 /**
- * AI class -> Dataset label resolution (one contract for the IMAGE and VIDEO prediction writers and the reconcile operation).
+ * AI class vs Dataset label (one contract for the IMAGE and VIDEO prediction writers and the workspace display).
  *
- * Identity is the existing `Label.normalizedName`, unique per Dataset across modalities. Normalization is exactly the documented, deterministic
- * `trim()` + `toLocaleLowerCase("en-US")` that `normalizeLabelName` already applies everywhere; there is no fuzzy or alias matching, so two
- * distinct classes can never be merged.
+ * Two distinct concepts:
+ *   - `predictedClass`: the class the AI Service returned. It is recorded on every AI annotation and track (`properties.predictedClass`) and is never rewritten.
+ *   - a Dataset `Label`: annotation configuration owned by the Dataset. A Label row is NEVER created because a class was predicted.
  *
- * Rules, per distinct class:
- *   1. canonicalize; blank, over-long or control-character classes are rejected (`AiLabelClassInvalidError`), the literal class `unknown` stays unlabeled;
- *   2. an existing Dataset label whose modality is null or the Dataset's own modality, and whose scope is OBJECT, is reused as is (name, colour, settings untouched);
- *   3. an existing label of any other modality/scope under the same key is a CONFLICT: it is never reused and never modified, the class is reported and
- *      its annotations stay unlabeled (the unique key forbids a second label, and an IMAGE-only label must not become a VIDEO label because the key matches);
- *   4. otherwise a Dataset-scoped label is created with the Dataset's modality and a deterministic colour. Creation is `createMany(skipDuplicates)`
- *      (INSERT .. ON CONFLICT DO NOTHING), so concurrent tasks and retries cannot create a duplicate nor abort the surrounding transaction.
- * Global/default label templates are never read or written here.
+ * A writer links an AI result to an existing Label only when one matches by the existing canonical key (`Label.normalizedName` = `trim()` +
+ * `toLocaleLowerCase("en-US")`, no fuzzy or alias matching) and is compatible (modality null or the Dataset's own, scope OBJECT). Otherwise `labelId` stays
+ * null and the original class is what the workspace shows. A same-key Label of another modality or scope is reported as a conflict and is never reused or
+ * modified.
  */
 
 export type AiLabelModality = "IMAGE" | "VIDEO";
 
 export const AI_LABEL_KEY_MAX_LENGTH = 256;
 export const AI_UNKNOWN_CLASS_KEY = "unknown";
-
-const LABEL_PALETTE = ["#38bdf8", "#f97316", "#22c55e", "#e11d48", "#a855f7", "#eab308", "#14b8a6", "#ec4899"] as const;
 
 export class AiLabelClassInvalidError extends Error {
   constructor(readonly reason: "BLANK" | "TOO_LONG" | "CONTROL_CHARACTER") {
@@ -31,29 +25,19 @@ export class AiLabelClassInvalidError extends Error {
 
 export type AiLabelConflict = { classKey: string; reason: "INCOMPATIBLE_MODALITY" | "INCOMPATIBLE_SCOPE"; existingModality: string | null };
 
-export type AiClassLabelResolution = {
-  /** canonical class key -> Label.id for every resolved class (never contains `unknown` or a conflicting class) */
+export type AiClassLabelMatch = {
+  /** canonical class key -> Label.id for every class that matched a compatible existing Dataset label (never `unknown`, never a conflicting class) */
   labelIds: ReadonlyMap<string, string>;
-  /** canonical class keys whose Dataset label was created by this call */
-  created: readonly string[];
   conflicts: readonly AiLabelConflict[];
 };
 
 type LabelRow = { id: string; normalizedName: string; modality: string | null; scope: string };
 
-/** The structural subset of a Prisma client/transaction this resolver needs (the worker and web pass their own). */
-export interface AiLabelStore {
+/** The structural subset of a Prisma client/transaction the matcher needs: reads only. */
+export interface AiLabelReader {
   label: {
     findMany(args: { where: { datasetId: string; normalizedName: { in: string[] } }; select: { id: true; normalizedName: true; modality: true; scope: true } }): Promise<LabelRow[]>;
-    createMany(args: { data: Array<{ datasetId: string; modality: AiLabelModality; name: string; normalizedName: string; color: string }>; skipDuplicates: true }): Promise<{ count: number }>;
   };
-}
-
-/** Deterministic colour so a class keeps one colour across tasks, datasets and retries. */
-export function aiLabelColor(classKey: string): string {
-  let hash = 0;
-  for (const char of classKey) hash = (hash * 31 + char.codePointAt(0)!) >>> 0;
-  return LABEL_PALETTE[hash % LABEL_PALETTE.length]!;
 }
 
 /** `null` means the explicit "no class" value (`unknown`); every malformed value throws. */
@@ -67,47 +51,28 @@ export function canonicalAiLabelKey(raw: string): { key: string; display: string
   return key === AI_UNKNOWN_CLASS_KEY ? null : { key, display };
 }
 
-function compatible(label: LabelRow, modality: AiLabelModality) {
+/** Never throws: a usable class for display, or null (blank, malformed, over-long or `unknown`). */
+export function usableAiClass(raw: unknown): { key: string; display: string } | null {
+  if (typeof raw !== "string") return null;
+  try { return canonicalAiLabelKey(raw); } catch { return null; }
+}
+
+/** Can an existing Dataset label carry an AI class of this modality? */
+export function isAiLabelCompatible(label: { modality: string | null; scope: string }, modality: AiLabelModality): boolean {
   return (label.modality === null || label.modality === modality) && label.scope === "OBJECT";
 }
 
-export async function resolveAiClassLabels(
-  store: AiLabelStore, datasetId: string, modality: AiLabelModality, rawClasses: Iterable<string>,
-): Promise<AiClassLabelResolution> {
-  // Validate everything first: one malformed class rejects the whole result before any write.
-  const classes = new Map<string, string>();
-  for (const raw of rawClasses) {
-    const canonical = canonicalAiLabelKey(raw);
-    if (canonical && !classes.has(canonical.key)) classes.set(canonical.key, canonical.display);
-  }
+/** Read-only: which of the result's classes map to an existing compatible Dataset label. One malformed class rejects the whole result before any write. */
+export async function matchAiClassLabels(reader: AiLabelReader, datasetId: string, modality: AiLabelModality, rawClasses: Iterable<string>): Promise<AiClassLabelMatch> {
+  const keys = new Set<string>();
+  for (const raw of rawClasses) { const canonical = canonicalAiLabelKey(raw); if (canonical) keys.add(canonical.key); }
   const labelIds = new Map<string, string>();
   const conflicts: AiLabelConflict[] = [];
-  if (classes.size === 0) return { labelIds, created: [], conflicts };
-  const keys = [...classes.keys()];
-  const select = { id: true, normalizedName: true, modality: true, scope: true } as const;
-  const classify = (rows: LabelRow[]) => {
-    labelIds.clear(); conflicts.length = 0;
-    const byKey = new Map(rows.map((row) => [row.normalizedName, row]));
-    const missing: string[] = [];
-    for (const key of keys) {
-      const row = byKey.get(key);
-      if (!row) { missing.push(key); continue; }
-      if (compatible(row, modality)) labelIds.set(key, row.id);
-      else conflicts.push({ classKey: key, reason: row.scope !== "OBJECT" && (row.modality === null || row.modality === modality) ? "INCOMPATIBLE_SCOPE" : "INCOMPATIBLE_MODALITY", existingModality: row.modality });
-    }
-    return missing;
-  };
-  const missing = classify(await store.label.findMany({ where: { datasetId, normalizedName: { in: keys } }, select }));
-  const created: string[] = [];
-  if (missing.length) {
-    await store.label.createMany({
-      data: missing.map((key) => ({ datasetId, modality, name: classes.get(key)!, normalizedName: key, color: aiLabelColor(key) })),
-      skipDuplicates: true,
-    });
-    // Re-read: a concurrent task may have created the same key first (then it is reused, or reported if incompatible).
-    const stillMissing = classify(await store.label.findMany({ where: { datasetId, normalizedName: { in: keys } }, select }));
-    created.push(...missing.filter((key) => !stillMissing.includes(key)));
-    if (stillMissing.length) throw new Error("AI_LABEL_RESOLUTION_FAILED");
+  if (keys.size === 0) return { labelIds, conflicts };
+  const rows = await reader.label.findMany({ where: { datasetId, normalizedName: { in: [...keys] } }, select: { id: true, normalizedName: true, modality: true, scope: true } });
+  for (const row of rows) {
+    if (isAiLabelCompatible(row, modality)) labelIds.set(row.normalizedName, row.id);
+    else conflicts.push({ classKey: row.normalizedName, reason: row.scope !== "OBJECT" && (row.modality === null || row.modality === modality) ? "INCOMPATIBLE_SCOPE" : "INCOMPATIBLE_MODALITY", existingModality: row.modality });
   }
-  return { labelIds, created, conflicts };
+  return { labelIds, conflicts };
 }

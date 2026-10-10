@@ -5,6 +5,8 @@ import type { SafeVideoAnnotations, SafeVideoTrack } from "@/types/video-annotat
 import { resolveVideoKeyframeDisplayState } from "@/lib/workspace/video-keyframe-state";
 
 export type VideoToolbarProps = {
+  /** Effective label text for a track (assigned label, matching dataset label, or the AI class); `null` falls back to the track name. */
+  trackDisplayLabel?: (track: SafeVideoTrack) => string | null;
   // Transport (spec FR-047/US9). Every value/action here is a prop --
   // `video-engine.tsx` owns the playback controller, the video element ref,
   // and the `currentTime` state, and hands down only the data and callbacks
@@ -67,6 +69,7 @@ export type VideoToolbarProps = {
  * `video-engine.tsx`, exactly as before the merge.
  */
 export function VideoToolbar({
+  trackDisplayLabel,
   playbackState,
   playbackDisabled,
   onTogglePlayback,
@@ -124,7 +127,7 @@ export function VideoToolbar({
           >
             <option value="">No track</option>
             {tracks.map((track) => (
-              <option key={track.id} value={track.id}>{track.label?.name ?? track.name ?? track.id.slice(0, 8)}</option>
+              <option key={track.id} value={track.id}>{trackDisplayLabel?.(track) ?? track.label?.name ?? track.name ?? track.id.slice(0, 8)}</option>
             ))}
           </select>
         </label>

@@ -1,42 +1,42 @@
-# AI class to Dataset label mapping
+# AI predicted class vs Dataset label
 
-**Rule.** AI classes are mapped automatically to Dataset labels; the user decides the final label. A class missing from the Dataset's labels is never a reason
-for an AI result to stay `unlabeled`, and never a reason to re-run inference.
+**Rule.** The VIDEO workspace displays the exact class the AI Service detected, even when no Dataset Label defines it. A Label is annotation
+configuration owned by the Dataset; `predictedClass` is a recognition result. Users never have to predefine labels, no Label row is created to display a
+prediction, and the user's own label choice always wins.
 
-Implementation: `packages/domain/src/ai-label-resolution.ts` (one contract), used by the VIDEO writer (`apps/worker/src/jobs/ai-video-prediction-writer.ts`),
-the IMAGE writer (`apps/worker/src/jobs/ai-prediction-writer.ts`) and the reconcile operation (`apps/web/src/lib/ai/ai-label-reconcile.ts`).
+## Concepts
 
-## Data model (unchanged)
+| Concept | Where | Meaning |
+| --- | --- | --- |
+| `predictedClass` | `properties.predictedClass` on every AI keyframe (`Annotation`) and track (`VideoObjectTrack`) | What the AI Service returned. Never rewritten, also after manual edits. |
+| Label link | `Annotation.labelId` / `VideoObjectTrack.labelId` | Optional reference to an existing Dataset Label. Set by a user, or by the writer only when a compatible Label already exists. |
+| `displayLabel` | computed in the browser (`apps/web/src/lib/workspace/video-display-label.ts`) | The effective text/colour shown on the box, in the track selector and in the Tracks tab. |
 
-No new model or column. Identity is the existing `Label.normalizedName`, unique per Dataset across modalities. The provider's `labelKey` is the class name;
-its canonical key is `trim()` + `toLocaleLowerCase("en-US")`, the same normalization `normalizeLabelName` applies everywhere. There is no fuzzy or alias
-matching (`traffic light` and `traffic-light` stay distinct). The original class is recorded on every AI annotation and track as
-`properties.predictedClass` (plus `providerTrackId`, `aiTaskId`, `modelKey`, `resultFingerprint`).
+No schema change, no new endpoint, no read-side database write.
 
-## Resolution, per distinct class in a result
+## Display resolution (deterministic, no fuzzy matching)
 
-1. Canonicalize. Blank, over-long (> 256) or control-character classes reject the whole result before any write (`AI_LABEL_CLASS_INVALID`). The literal class
-   `unknown` stays unlabeled by definition.
-2. A Dataset label with that key whose modality is `null` or the Dataset's own modality, and whose scope is `OBJECT`, is reused unchanged (name, colour, settings).
-3. A label under that key with another modality or scope is a **conflict**: never reused, never modified. The class is reported in the task output
-   (`labelConflicts`) and its annotations keep their boxes but stay unlabeled. An IMAGE-only label never becomes a VIDEO label because the key matches.
-4. Otherwise a Dataset-scoped label is created with the Dataset's modality and a deterministic colour, using `createMany(skipDuplicates)` so concurrent tasks and
-   retries cannot create a duplicate or abort the transaction.
+1. A label the track explicitly carries (`track.label`): a user's choice, or a link the writer made to an existing label.
+2. An existing compatible Dataset label whose canonical name equals the AI class (so a label defined later applies to older AI results).
+3. The original AI class, exactly as returned (`properties.predictedClass`, track first, then the keyframe).
+4. `unlabeled`, only when none of the above exists.
 
-Global/default label templates are never read or written. Default labels (`ensureDefaultImageLabels`) exist for IMAGE and VIDEO datasets only and carry the
-Dataset's own modality; TEXT and AUDIO datasets never receive them.
+Canonical key = `trim()` + `toLocaleLowerCase("en-US")` (the existing `normalizeLabelName` rule). Compatible = label modality is null or the Dataset's own, scope
+`OBJECT`. A same-name label of another modality or scope is never used or modified; the original class is still displayed. Blank, over-long,
+control-character or `unknown` classes are not displayable classes.
 
-## Idempotency and manual edits
+## Persistence (`packages/domain/src/ai-label-resolution.ts`, worker writers)
 
-- A duplicate delivery of one Job writes nothing (the completion claim in the same transaction).
-- A repeated AI task over the same asset with an identical result (same model, class, provider track id and keyframe boxes) is recognised through
-  `properties.resultFingerprint` and skipped. A row a human has since relabeled, moved or edited still counts as "already persisted", so it is never
-  overwritten or duplicated. A genuinely new result is appended.
-- The writers never update or delete an existing annotation, track or label.
+- The VIDEO writer links a track and its keyframes to an existing compatible Label when the canonical key matches, otherwise `labelId` stays null. It never
+  creates a Label. A malformed class rejects the whole result before any write. An incompatible same-key label is reported in the task output
+  (`labelConflicts`).
+- The IMAGE writer keeps its original contract (a detection is persisted only for a class that matches an existing compatible Label) with the same read-only
+  match, the result fingerprint and the claim-first concurrency guard.
+- Repeated AI tasks: an identical result (same model, class, provider track id and keyframe boxes) carries the same `properties.resultFingerprint` and is skipped
+  even if a human has since relabeled or edited it; a new result is appended. A duplicate delivery of one Job writes nothing.
+- Updating a track, keyframe or temporal label no longer overwrites stored `properties` (Zod 4 re-applied the create default), so provenance survives edits.
 
-## Reconciling existing unlabeled AI annotations
+## Legacy data
 
-`POST /api/datasets/{datasetId}/ai-label-reconcile` (permission `label.manage`; IMAGE and VIDEO datasets; body `{ "dryRun": true | false }`, default dry run).
-It resolves the recorded `predictedClass` through the same contract and links tracks and keyframes. It only considers AI-sourced rows that are still unlabeled at
-revision 1 (tracks too), on non-frozen assets, and every write re-checks that predicate, so a concurrent edit wins. Rows without recorded class metadata are
-counted (`skipped.noOriginalClass`) and left alone; it never guesses, never reruns inference, never deletes or moves a box.
+Existing AI rows with `properties.predictedClass` and no label simply render their class; no repair is needed. Rows without a recorded class remain
+`unlabeled`. The JSON export carries `labelId` (null when unassigned) and the sanitized `properties`, so the original class is exported with every annotation.

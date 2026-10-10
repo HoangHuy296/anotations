@@ -11,6 +11,8 @@ import { findPendingAiTaskClient } from "@/lib/ai/ai-task-api-client";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
 import { useMediaProcessing } from "@/components/workspace/use-media-processing";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
+import { useDatasetLabels } from "@/stores/dataset-labels-store";
+import { resolveDisplayLabel } from "@/lib/workspace/video-display-label";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
 import { readVideoAnnotationsClient, readVideoAnnotationsAcrossDurationClient, addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoTrack, updateVideoKeyframe } from "@/lib/workspace/video-annotation-client";
 import { createVideoPlaybackController, type VideoPlaybackController } from "@/lib/workspace/video-playback-controller";
@@ -221,6 +223,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   const [newTrackError, setNewTrackError] = useState<string | null>(null);
   const [newTrackSaving, setNewTrackSaving] = useState(false);
   const { datasetId } = useParams<{ datasetId: string }>();
+  const datasetLabels = useDatasetLabels(datasetId);
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackCoordinators = useRef(new Map<string, TrackAutosaveCoordinator>());
   const keyframeDraftChanges = useRef(new Map<string, KeyframeChanges>());
@@ -692,9 +695,10 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
         {pendingBox ? <div aria-label="Unsaved drawn box, pending the create-annotation dialog" className="pointer-events-none absolute border-2 border-dashed border-amber-400" style={{ left: `${pendingBox.geometry.x * 100}%`, top: `${pendingBox.geometry.y * 100}%`, width: `${pendingBox.geometry.width * 100}%`, height: `${pendingBox.geometry.height * 100}%` }} /> : null}
         {aiFramesAtTime.map((frame) => {
           const track = trackList.find((item) => item.id === frame.trackId);
-          const color = track?.label?.color ?? "#38bdf8";
+          const display = resolveDisplayLabel({ assigned: track?.label ?? null, trackProperties: track?.properties, keyframeProperties: frame.properties, datasetLabels, modality: "VIDEO" });
+          const color = display.color ?? "#38bdf8";
           return <div key={frame.id} aria-label={`AI track ${frame.properties.providerTrackId ?? ""}`} className="pointer-events-none absolute border-2" style={{ left: `${frame.geometry.x * 100}%`, top: `${frame.geometry.y * 100}%`, width: `${frame.geometry.width * 100}%`, height: `${frame.geometry.height * 100}%`, borderColor: color }}>
-            <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: color }}>{track?.name ?? "AI track"}{track?.label ? ` · ${track.label.name}` : " · unlabeled"}</span>
+            <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: color }} data-ai-display-label={display.source} title={display.source === "AI_CLASS" ? "Class detected by the AI Service (no dataset label is assigned)" : undefined}>{track?.name ?? "AI track"} · {display.text}</span>
           </div>;
         })}
         {selectedKeyframe && showsPersistedOverlay ? (() => {
@@ -756,6 +760,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
        down here. Track/keyframe field editing lives in the Tracks/Shapes
        properties tab instead of duplicating it here. */}
     <VideoToolbar
+      trackDisplayLabel={(track) => { const display = resolveDisplayLabel({ assigned: track.label, trackProperties: track.properties, datasetLabels, modality: "VIDEO" }); return display.source === "NONE" ? null : display.text; }}
       playbackState={playbackState}
       playbackDisabled={loadState !== "ready"}
       onTogglePlayback={() => { if (playbackState === "playing") playbackController.pause(); else playbackController.play(); }}
