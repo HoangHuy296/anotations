@@ -53,3 +53,21 @@ test("default labels backfill only the missing ones into a dataset that already 
     assert.deepEqual(new Set(labels.map((label) => label.normalizedName)), new Set(["traffic sign", "aidetect", "animal", "object", "person", "text", "vehicle"]));
   } finally { await cleanupWorkspaceFixture([owner.id], [dataset.id]); }
 });
+
+test("default labels are written for IMAGE and VIDEO datasets only; TEXT, AUDIO and unresolved datasets never inherit them", { skip: !enabled }, async () => {
+  const owner = await createWorkspaceUser(UserRole.MANAGER);
+  const datasets = [] as string[];
+  try {
+    for (const [modality, expected] of [["IMAGE", 6], ["VIDEO", 6], ["TEXT", 0], ["AUDIO", 0]] as const) {
+      const dataset = await createWorkspaceDataset(owner.id, modality);
+      datasets.push(dataset.id);
+      assert.deepEqual(await ensureDefaultImageLabels(owner, dataset.id), { ok: true, created: expected }, modality);
+      assert.deepEqual(await ensureDefaultImageLabels(owner, dataset.id), { ok: true, created: 0 }, `${modality} replay`);
+      assert.equal(await db.label.count({ where: { datasetId: dataset.id } }), expected, `${modality} stored labels`);
+    }
+    const unresolved = await db.dataset.create({ data: { ownerId: owner.id, name: `unresolved-${Date.now()}`, modality: null }, select: { id: true } });
+    datasets.push(unresolved.id);
+    assert.deepEqual(await ensureDefaultImageLabels(owner, unresolved.id), { ok: true, created: 0 });
+    assert.equal(await db.label.count({ where: { datasetId: unresolved.id } }), 0);
+  } finally { await cleanupWorkspaceFixture([owner.id], datasets); }
+});
