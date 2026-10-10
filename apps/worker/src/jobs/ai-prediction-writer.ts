@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { handleVideoAiTaskCompleted } from "./ai-video-prediction-writer.js";
-import { canonicalAiLabelKey, resolveAiClassLabels } from "@annotationplatform/domain/ai-label-resolution";
+import { matchAiClassLabels, usableAiClass } from "@annotationplatform/domain/ai-label-resolution";
 
 import type { AiProviderPrediction } from "@annotationplatform/domain/ai-provider";
 
@@ -54,7 +54,6 @@ export async function handleAiTaskCompleted(
   const inScope = candidates.filter((prediction) => submittedAssetIds.has(prediction.assetId));
   const annotationType = aiTask.type ? annotationTypeByAiTaskType[aiTask.type] : undefined;
 
-  let labelsCreated = 0;
   let skippedAsDuplicateTotal = 0;
   let labelConflicts: unknown[] = [];
   await db.$transaction(async (tx) => {
@@ -67,11 +66,10 @@ export async function handleAiTaskCompleted(
     });
     if (completed.count !== 1) return;
     if (annotationType) {
-      // Shared deterministic class -> Dataset label contract: reuse, create when missing, report (never merge) a conflict. A detection whose class is
-      // `unknown` or conflicts keeps its geometry and stays unlabeled instead of being dropped.
-      const resolution = await resolveAiClassLabels(tx, aiTask.datasetId, "IMAGE", inScope.map((prediction) => prediction.labelKey));
-      labelsCreated = resolution.created.length;
-      labelConflicts = [...resolution.conflicts];
+      // IMAGE keeps its original contract: a detection is persisted only when its class matches an existing compatible Dataset label (the match is the same
+      // read-only canonical-key rule VIDEO uses; no Label is ever created for a predicted class). Others are skipped, as before.
+      const match = await matchAiClassLabels(tx, aiTask.datasetId, "IMAGE", inScope.map((prediction) => usableAiClass(prediction.labelKey)?.display).filter((value): value is string => value !== undefined));
+      labelConflicts = [...match.conflicts];
       // AI output changes reviewable content too. Claim each parent Asset once, FIRST: the row lock this takes is held to commit, so a concurrent task over
       // the same asset waits here and then sees this task's rows when it reads the fingerprints below (no duplicate under a race). A review-frozen Asset is
       // skipped rather than receiving late predictions, and no queue payload changes.
@@ -91,9 +89,10 @@ export async function handleAiTaskCompleted(
       }
       for (const [predictionIndex, prediction] of inScope.entries()) {
         if (!claimedAssets.has(prediction.assetId)) continue;
-        const canonical = canonicalAiLabelKey(prediction.labelKey);
-        const label = { id: canonical ? resolution.labelIds.get(canonical.key) ?? null : null };
-        const resultFingerprint = aiResultFingerprint({ modelKey: aiTask.modelKeySnapshot, assetId: prediction.assetId, classKey: canonical ? canonical.key : "unknown", frames: [{ box: prediction.boundingBoxes as never }] });
+        const canonical = usableAiClass(prediction.labelKey);
+        const labelId = canonical ? match.labelIds.get(canonical.key) : undefined;
+        if (!canonical || !labelId) continue; // Unresolvable label: skip this prediction, do not fail the task.
+        const resultFingerprint = aiResultFingerprint({ modelKey: aiTask.modelKeySnapshot, assetId: prediction.assetId, classKey: canonical.key, frames: [{ box: prediction.boundingBoxes as never }] });
         const known = knownByAsset.get(prediction.assetId)!;
         if (known.has(resultFingerprint)) { skippedAsDuplicateTotal++; continue; }
 
@@ -101,7 +100,7 @@ export async function handleAiTaskCompleted(
           data: {
             datasetId: aiTask.datasetId,
             assetId: prediction.assetId,
-            labelId: label.id,
+            labelId,
             createdById: aiTask.createdById,
             modality: aiTask.modality!,
             type: annotationType,
@@ -121,7 +120,7 @@ export async function handleAiTaskCompleted(
 
     await tx.aiTask.update({
       where: { id: aiTask.id },
-      data: { status: "SUCCEEDED", output: JSON.parse(JSON.stringify({ predictions: inScope, labelsCreated, labelConflicts, skippedAsDuplicate: skippedAsDuplicateTotal })) },
+      data: { status: "SUCCEEDED", output: JSON.parse(JSON.stringify({ predictions: inScope, labelConflicts, skippedAsDuplicate: skippedAsDuplicateTotal })) },
     });
 
   });

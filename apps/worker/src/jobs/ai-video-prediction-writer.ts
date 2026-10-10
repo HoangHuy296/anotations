@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { AiTask, PrismaClient, Prisma } from "../../../../lib/generated/prisma/client.js";
 import { normalizedVideoPredictionSchema } from "../providers/ai/aioz-video-normalization.js";
-import { canonicalAiLabelKey, resolveAiClassLabels } from "@annotationplatform/domain/ai-label-resolution";
+import { canonicalAiLabelKey, matchAiClassLabels } from "@annotationplatform/domain/ai-label-resolution";
 import { releaseLock } from "../queue/job-lock.js";
 import { aiResultFingerprint } from "./ai-result-fingerprint.js";
 
@@ -26,9 +26,10 @@ export async function handleVideoAiTaskCompleted(
       data: { status: "COMPLETED", stage: "FINISHED", finishedAt: new Date() },
     });
     if (claimed.count !== 1) return;
-    // Provider classes become Dataset labels through the shared deterministic contract (packages/domain/src/ai-label-resolution.ts): reuse a compatible
-    // label, create a Dataset-scoped one when missing, report (never merge) an incompatible one. A malformed class throws and rolls the whole result back.
-    const resolution = await resolveAiClassLabels(tx, task.datasetId, "VIDEO", predictions.map((p) => p.labelKey));
+    // A Label row is never created for a predicted class. A track links to an existing compatible Dataset label only when one matches by the canonical key;
+    // otherwise labelId stays null and `properties.predictedClass` (the exact class the AI Service returned) is what the workspace displays. A malformed class
+    // throws and rolls the whole result back; an incompatible same-key label is reported, never reused or modified.
+    const match = await matchAiClassLabels(tx, task.datasetId, "VIDEO", predictions.map((p) => p.labelKey));
     let tracksCreated = 0;
     let tracksSkippedAsDuplicate = 0;
     let keyframesCreated = 0;
@@ -71,7 +72,7 @@ export async function handleVideoAiTaskCompleted(
         const timestamps = new Set(items.map((p) => p.video.timestampMs));
         if (timestamps.size !== items.length || items.some((p) => p.video.classId !== first.video.classId || p.video.fps !== first.video.fps || canonicalAiLabelKey(p.labelKey)?.key !== canonicalAiLabelKey(first.labelKey)?.key)) throw new Error("AI_VIDEO_RESULT_INVALID");
         const canonical = canonicalAiLabelKey(first.labelKey);
-        const labelId = canonical ? resolution.labelIds.get(canonical.key) ?? null : null;
+        const labelId = canonical ? match.labelIds.get(canonical.key) ?? null : null;
         const resultFingerprint = aiResultFingerprint({
           modelKey: task.modelKeySnapshot, assetId, classKey: canonical ? canonical.key : "unknown", providerTrackId,
           frames: items.map((p) => ({ frameIndex: p.video.frameIndex, box: p.boundingBoxes as never })),
@@ -97,7 +98,7 @@ export async function handleVideoAiTaskCompleted(
         keyframesCreated += rows.length;
       }
     }
-    await tx.aiTask.update({ where: { id: task.id }, data: { status: "SUCCEEDED", output: { tracksCreated, keyframesCreated, labelsCreated: resolution.created.length, labelConflicts: resolution.conflicts, tracksSkippedAsDuplicate } } });
+    await tx.aiTask.update({ where: { id: task.id }, data: { status: "SUCCEEDED", output: { tracksCreated, keyframesCreated, labelConflicts: match.conflicts, tracksSkippedAsDuplicate } } });
   }, { timeout: 30_000 });
   await releaseLock(db, jobId, lockToken, workerId);
 }

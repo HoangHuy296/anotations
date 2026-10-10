@@ -18,7 +18,8 @@ function world(seedLabels: Array<Partial<Label> & { normalizedName: string }> = 
     job: { updateMany: async ({ where }: any) => { const used = claims.get(where.id) ?? 0; if (used >= 1 || where.status !== "RUNNING") return { count: 0 }; claims.set(where.id, used + 1); return { count: 1 }; } },
     label: {
       findMany: async ({ where }: any) => labels.filter((l) => l.datasetId === where.datasetId && where.normalizedName.in.includes(l.normalizedName)),
-      createMany: async ({ data }: any) => { let count = 0; for (const d of data) { if (labels.some((l) => l.datasetId === d.datasetId && l.normalizedName === d.normalizedName)) continue; labels.push({ id: `new-${labels.length}`, scope: "OBJECT", ...d }); count++; } return { count }; },
+      createMany: async () => { throw new Error("A Label row must never be created because a class was predicted"); },
+      create: async () => { throw new Error("A Label row must never be created because a class was predicted"); },
     },
     asset: { updateMany: async () => ({ count: 1 }) },
     videoAsset: { upsert: async () => ({ id: "va-1" }), updateMany: async () => ({ count: 0 }) },
@@ -49,19 +50,20 @@ function providerOutput(tracks: Array<{ id: number; cls: number; name: string; f
 const videoTask = { id: "task-1", datasetId: "ds", createdById: "u1", modality: "VIDEO", type: "TRACKING", modelKeySnapshot: "cb29e022", input: { assetIds: ["vid"] } } as any;
 const run = (w: ReturnType<typeof world>, predictions: unknown, jobId = "job-1", task = videoTask) => handleAiTaskCompleted(w.db, jobId, task, predictions, "lock", "worker");
 
-test("A + G: VIDEO tracking with several classes (two persons, motorcycle, sports ball, tennis racket) labels every track and keyframe; only the missing classes create labels", async () => {
+test("A + G: several classes (two persons, motorcycle, sports ball, tennis racket): every track and keyframe is persisted with its exact predicted class; only a class with an existing compatible Label links to it; no Label is created", async () => {
   const w = world(D);
   const predictions = providerOutput([{ id: 1, cls: 0, name: "person", frames: [10, 11, 12] }, { id: 2, cls: 0, name: "person", frames: [20, 21] }, { id: 3, cls: 3, name: "motorcycle", frames: [30, 31] }, { id: 4, cls: 32, name: "sports ball", frames: [40] }, { id: 5, cls: 38, name: "tennis racket", frames: [41] }]);
   await run(w, predictions);
   assert.equal(w.tracks.length, 5);
-  assert.ok(w.tracks.every((t) => t.labelId !== null) && w.annotations.every((a) => a.labelId !== null), "nothing is left unlabeled");
-  assert.equal(w.labels.filter((l) => ["motorcycle", "sports ball", "tennis racket"].includes(l.normalizedName)).length, 3);
-  assert.equal(w.labels.filter((l) => l.normalizedName === "person").length, 1, "person reuses the existing default (A)");
-  assert.equal(w.labels.length, 6 + 3, "D: two person tracks created no extra label");
+  assert.equal(w.labels.length, 6, "the Label row count is unchanged by detecting new classes");
   const personId = w.labels.find((l) => l.normalizedName === "person")!.id;
-  assert.deepEqual(w.annotations.filter((a) => a.properties.predictedClass === "person").map((a) => a.labelId), Array(5).fill(personId));
+  for (const track of w.tracks) {
+    const cls = track.properties.predictedClass as string;
+    assert.equal(track.labelId, cls === "person" ? personId : null, `${cls}: linked only to an existing Label`);
+  }
+  assert.deepEqual([...new Set(w.annotations.map((a) => a.properties.predictedClass))].sort(), ["motorcycle", "person", "sports ball", "tennis racket"], "the exact AI classes are recorded on every keyframe");
+  assert.equal(w.annotations.filter((a) => a.properties.predictedClass === "sports ball").every((a) => a.labelId === null), true);
   assert.deepEqual(w.outputs[0].labelConflicts, []);
-  assert.equal(w.outputs[0].labelsCreated, 3);
 });
 
 test("track consistency: every keyframe of a track shares one trackId and label; boxes and timestamps equal the provider's", async () => {
@@ -103,7 +105,8 @@ test("J: an incompatible same-key label is reported and never reused; the track 
   assert.equal(w.labels.filter((l) => l.normalizedName === "car").length, 1);
   assert.deepEqual([w.labels[0]!.modality, w.labels[0]!.color], ["IMAGE", "#abcdef"]);
   const byClass = new Map(w.annotations.map((a) => [a.properties.predictedClass, a.labelId]));
-  assert.equal(byClass.get("car"), null); assert.equal(byClass.get("unknown"), null); assert.ok(byClass.get("motorcycle"));
+  assert.equal(byClass.get("car"), null); assert.equal(byClass.get("unknown"), null); assert.equal(byClass.get("motorcycle"), null, "no Label for motorcycle and none is created");
+  assert.equal(w.labels.length, 1);
   assert.deepEqual(w.outputs[0].labelConflicts.map((c: any) => c.classKey), ["car"]);
   assert.equal(w.annotations.length, 3, "no detection is dropped");
 });
@@ -123,14 +126,13 @@ const imagePredictions = [
   { assetId: "img", labelKey: "fire hydrant", confidence: 0.7, boundingBoxes: { kind: "BOUNDING_BOX", x: 0.7, y: 0.1, width: 0.1, height: 0.2 } },
 ];
 
-test("IMAGE detection reuses the same contract: a missing class is created once (not dropped), duplicates of a class share one label, and a repeat is idempotent", async () => {
+test("IMAGE keeps its original contract: a detection is persisted only for a class that matches an existing compatible Label; others are skipped; no Label is ever created; a repeat is idempotent", async () => {
   const w = world([{ normalizedName: "person", modality: "IMAGE" }]);
   await run(w, imagePredictions, "job-i1", imageTask);
-  assert.equal(w.annotations.length, 3, "no detection is dropped for a missing class");
-  assert.ok(w.annotations.every((a) => a.labelId !== null));
-  assert.equal(w.labels.filter((l) => l.normalizedName === "fire hydrant").length, 1);
-  assert.equal(w.labels.find((l) => l.normalizedName === "fire hydrant")!.modality, "IMAGE");
+  assert.equal(w.annotations.length, 1, "only the Person detection matched an existing label");
+  assert.equal(w.annotations[0]!.properties.predictedClass, "Person");
+  assert.ok(w.annotations[0]!.labelId);
+  assert.equal(w.labels.length, 1);
   await run(w, imagePredictions, "job-i2", { ...imageTask, id: "task-i2" });
-  assert.equal(w.annotations.length, 3, "an identical repeated task adds nothing");
-  assert.equal(w.labels.length, 2);
+  assert.equal(w.annotations.length, 1, "an identical repeated task adds nothing");
 });

@@ -1005,7 +1005,8 @@
       "tests/workspace/audio-tool-capabilities.vitest.spec.tsx",
       "--pool=threads",
       "--environment",
-      "node"
+      "node",
+      "tests/workspace/video-display-label.vitest.spec.ts"
     ]
   },
   "web:test:annotation-persistence": {
