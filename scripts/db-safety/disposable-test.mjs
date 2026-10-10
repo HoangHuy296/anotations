@@ -27,7 +27,7 @@ import { createServer } from 'node:net';
 import { basename, join, resolve, sep } from 'node:path';
 import * as guard from './guard.mjs';
 import { computeImplementation as maintenanceImplementation, manifestDigest as maintenanceManifestDigest } from './backfill-binding.mjs';
-import { runMaintenanceRehearsal } from './backfill-maintenance-rehearsal.mjs';
+import { createMaintenance } from './backfill-maintenance-rehearsal.mjs';
 import { readTree as readClientTree, treeHash as clientTreeHash } from './prisma-client-stage.mjs';
 
 /**
@@ -178,7 +178,7 @@ export const RELEASE_TOPOLOGY = Object.freeze([
 export const RELEASE_M26_TOPOLOGY = Object.freeze([
   ...RELEASE_TOPOLOGY.slice(0, 5), ['proposal-2-deploy', 'deploy', null], ['proposal-3-deploy', 'deploy', null], ...RELEASE_TOPOLOGY.slice(6),
 ]);
-// ---- T029/T031 backfill rehearsal: the canonical 25-migration chain plus the evidence-bound SINGLE-modality backfill, on disposable PostgreSQL only ----
+// ---- T029/T031 backfill rehearsal: the canonical 26-migration chain plus the evidence-bound SINGLE-modality backfill, on disposable PostgreSQL only ----
 export const BACKFILL_ID = 'release:phase029-backfill';
 export const BACKFILL_SEED_COMMAND = 'backfill-seed:dataset-modality';
 export const BACKFILL_VERIFY_COMMAND = 'verify-test:dataset-modality-backfill';
@@ -187,11 +187,11 @@ export const BACKFILL_VERIFY_FILE = 'apps/web/tests/dataset-modality/backfill-re
 export const BACKFILL_SEED_SPEC = Object.freeze({ kind: 'test', cwd: 'apps/web', args: [...G2_ARGS, 'tests/dataset-modality/backfill-baseline.test.ts'], backfillOnly: BACKFILL_ID });
 export const BACKFILL_VERIFY_SPEC = Object.freeze({ kind: 'test', cwd: 'apps/web', args: [...G2_ARGS, 'tests/dataset-modality/backfill-rehearsal.test.ts'], backfillOnly: BACKFILL_ID });
 export const BACKFILLS = Object.freeze({
-  [BACKFILL_ID]: Object.freeze({ through: 2, newColumn: NEW_COLUMN, scope: 'release-chain-backfill-rehearsal' }),
+  [BACKFILL_ID]: Object.freeze({ through: 3, newColumn: NEW_COLUMN, scope: 'release-chain-backfill-rehearsal-26' }),
 });
 export const BACKFILL_TOPOLOGY = Object.freeze([
   ['baseline-deploy', 'deploy', null], ['generate', 'test', 'g2:generate'], ['baseline-seed', 'test', BACKFILL_SEED_COMMAND], ['proposal-1-deploy', 'deploy', null],
-  ['proposal-2-deploy', 'deploy', null], ['backfill-verify', 'test', BACKFILL_VERIFY_COMMAND], ['schema-compat', 'test', 'g2:compatibility'],
+  ['proposal-2-deploy', 'deploy', null], ['proposal-3-deploy', 'deploy', null], ['backfill-verify', 'test', BACKFILL_VERIFY_COMMAND], ['schema-compat', 'test', 'g2:compatibility'],
 ]);
 // ---- Maintenance launcher rehearsal: T029/T031 through the receipt-bound launcher against REAL PostgreSQL and REAL MinIO (disposable only) ----
 export const MAINTENANCE_ID = 'release:phase029-backfill-maintenance';
@@ -203,9 +203,10 @@ export const MAINT_SEED_SPEC = maintenanceSpec('maintenance-baseline.test.ts');
 export const MAINT_OBJECTS_SPEC = maintenanceSpec('maintenance-objects.test.ts');
 export const MAINT_CHECK_SPEC = maintenanceSpec('maintenance-check.test.ts');
 export const MAINTENANCE_FILES = Object.freeze(['apps/web/tests/dataset-modality/maintenance-baseline.test.ts', 'apps/web/tests/dataset-modality/maintenance-objects.test.ts', 'apps/web/tests/dataset-modality/maintenance-check.test.ts', 'apps/web/tests/dataset-modality/maintenance-fixture.ts', 'scripts/db-safety/backfill-launcher.mjs', 'scripts/db-safety/backfill-binding.mjs', 'scripts/db-safety/maintenance-fence.cjs', 'scripts/db-safety/backfill-maintenance-rehearsal.mjs', 'apps/web/scripts/backfill-run.ts', 'apps/web/scripts/backfill-approve.ts', 'apps/web/src/lib/datasets/modality-backfill-storage.ts']);
-export const MAINTENANCE = Object.freeze({ [MAINTENANCE_ID]: Object.freeze({ through: 2, newColumn: NEW_COLUMN, scope: 'release-chain-maintenance-launcher-real-storage' }) });
-/** Commands of the receipt topology, in order: the five chain steps, then the rehearsal's fixed child steps (names carry a counter), then the drift check. */
-export const MAINTENANCE_COMMANDS = Object.freeze([null, 'g2:generate', MAINT_SEED_COMMAND, null, null, MAINT_CHECK_COMMAND, MAINT_CHECK_COMMAND, MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND,
+// The maintenance rehearsal runs on the 26-migration chain (M24, M25 and M26 each through the launcher's guarded migration step); the 25-migration form is retired because the current schema is the M26 schema.
+export const MAINTENANCE = Object.freeze({ [MAINTENANCE_ID]: Object.freeze({ through: 3, newColumn: NEW_COLUMN, scope: 'release-chain-maintenance-launcher-real-storage-26' }) });
+/** Commands of the G1 receipt topology, in order: baseline deploy, generate, seed (M24, M25 and M26 go through the launcher, which has its own receipts), then the rehearsal's fixed child steps (names carry a counter), then the drift check. */
+export const MAINTENANCE_COMMANDS = Object.freeze([null, 'g2:generate', MAINT_SEED_COMMAND, MAINT_CHECK_COMMAND, MAINT_CHECK_COMMAND, MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND,
   MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, MAINT_OBJECTS_COMMAND, MAINT_CHECK_COMMAND, 'g2:compatibility']);
 export const PORT_RANGE = [55460, 55479];
 const COMMAND_SHAPE = /^[a-z0-9]+(?::[a-z0-9-]+)+$/;
@@ -808,16 +809,29 @@ export async function runFocusedTest(command, deps = realDeps()) {
       must(isDeepStrictEqual(releaseCaptures.seeded.schemaManifest, releaseCaptures.baseline.schemaManifest) && releaseCaptures.seeded.datasetLegacy[0] > 0, 'RELEASE_BASELINE_SEED_UNEXPECTED');
       save('release-seeded-datasets.json', releaseCaptures.seeded.datasetModality);
     }
+    let stepCounter = 0;
+    const childStep = (name, kind, payload) => {
+      writeFileSync(join(stage, kind === 'check' ? 'maintenance-check.json' : 'maintenance-step.json'), JSON.stringify(payload), { mode: 0o600 });
+      stepCounter += 1;
+      testStep(`${name}-${stepCounter}`, kind === 'check' ? MAINT_CHECK_COMMAND : MAINT_OBJECTS_COMMAND, 'MAINTENANCE_STEP_FAILED');
+    };
+    const harness = plan.kind === 'maintenance' ? createMaintenance({
+      root: deps.root, stage, runDir, save, sh: (cmd, args, options) => deps.sh(cmd, args, options), cleanEnv: () => ({ ...deps.baseEnv() }), pins: state.pins, token, password, minioUser: env.MINIO_ROOT_USER,
+      bucket: `g1-${token}`, pgPort: pg().port, minioPort: state.pins.find(pin => pin.role === 'minio').port, historyRows: [...baseline, ...chain], chainLength: baseline.length + chain.length, captures: releaseCaptures, childStep,
+    }) : null;
     for (const entry of chain) {
       const staged = join(stage, 'migrations', entry.name);
       cpSync(join(deps.root, entry.path), staged, { recursive: true });
       must(sha(readFileSync(join(staged, 'migration.sql'))) === entry.sha256, 'PROPOSAL_CHECKSUM_MISMATCH');
-      must(launch(`proposal-${entry.order}-deploy`, issue(`proposal-${entry.order}-deploy`, deployRequest(), null), 'deploy') === 0, 'PROPOSAL_DEPLOY_FAILED');
+      // The maintenance plan applies every chain migration through the launcher's guarded migration steps (the path shared dev would use), not through the G1 deploy receipt.
+      if (harness) harness.migrate(['migrate-m24', 'migrate-m25', 'migrate-m26'][entry.order - 1]);
+      else must(launch(`proposal-${entry.order}-deploy`, issue(`proposal-${entry.order}-deploy`, deployRequest(), null), 'deploy') === 0, 'PROPOSAL_DEPLOY_FAILED');
       verifyHistory('PROPOSAL', chain.slice(0, entry.order));
       if (plan.kind === 'backfill' || plan.kind === 'maintenance') {
         const snapshot = capture();
         if (entry.order === 1) { save('release-m24-assertions.json', assertRelease24(releaseCaptures.seeded, snapshot, { proposal: entry })); releaseCaptures.m24 = snapshot; }
-        else { save('release-m25-assertions.json', assertRelease25(releaseCaptures.m24, snapshot, { newColumn: plan.newColumn })); releaseCaptures.m25 = snapshot; }
+        else if (entry.order === 2) { save('release-m25-assertions.json', assertRelease25(releaseCaptures.m24, snapshot, { newColumn: plan.newColumn })); releaseCaptures.m25 = snapshot; }
+        else { save('release-m26-assertions.json', assertRelease26(releaseCaptures.m25, snapshot, { proposal: entry })); releaseCaptures.m26 = snapshot; }
       }
       if (plan.kind === 'release' && entry.order === 1) {
         releaseCaptures.m24 = capture();
@@ -836,41 +850,32 @@ export async function runFocusedTest(command, deps = realDeps()) {
     }
 
     if (plan.kind === 'maintenance') {
-      must(releaseCaptures.m25.schemaManifest.length === RELEASE_COUNTS.m25 && releaseCaptures.m25.datasetModality.every(row => row.m === null), 'BACKFILL_PRECONDITION_UNEXPECTED');
-      let stepCounter = 0;
-      const childStep = (name, kind, payload) => {
-        writeFileSync(join(stage, kind === 'check' ? 'maintenance-check.json' : 'maintenance-step.json'), JSON.stringify(payload), { mode: 0o600 });
-        stepCounter += 1;
-        testStep(`${name}-${stepCounter}`, kind === 'check' ? MAINT_CHECK_COMMAND : MAINT_OBJECTS_COMMAND, 'MAINTENANCE_STEP_FAILED');
-      };
-      const summary = await runMaintenanceRehearsal({
-        root: deps.root, stage, runDir, save, sh: (cmd, args, options) => deps.sh(cmd, args, options), cleanEnv: () => ({ ...deps.baseEnv() }), pins: state.pins, token, password, minioUser: env.MINIO_ROOT_USER,
-        bucket: `g1-${token}`, pgPort: pg().port, minioPort: state.pins.find(pin => pin.role === 'minio').port, historyRows: [...baseline, ...chain], m25: releaseCaptures.m25, childStep,
-      });
+      must(releaseCaptures.m26.schemaManifest.length === RELEASE_M26_ENTRIES && releaseCaptures.m26.datasetModality.every(row => row.m === null), 'BACKFILL_PRECONDITION_UNEXPECTED');
+      const summary = harness.run();
       save('maintenance-summary-rehearsal.json', summary);
       testStep('schema-compat', 'g2:compatibility', 'RELEASE_SCHEMA_COMPAT_FAILED');
       verifyCompatBindings(deps);
       const final = capture();
       save('backfill-final-datasets.json', final.datasetModality);
-      must(isDeepStrictEqual(final.schemaManifest, releaseCaptures.m25.schemaManifest) && isDeepStrictEqual(final.migrations, releaseCaptures.m25.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
+      must(isDeepStrictEqual(final.schemaManifest, releaseCaptures.m26.schemaManifest) && isDeepStrictEqual(final.migrations, releaseCaptures.m26.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
       verifyHistory('FINAL', chain);
       const commandsSeen = state.topology.map(({ command: receiptCommand }) => receiptCommand);
       must(isDeepStrictEqual(commandsSeen, [...MAINTENANCE_COMMANDS]), 'RECEIPT_TOPOLOGY_UNEXPECTED');
       must(maintenanceImplementationAtStart !== null && isDeepStrictEqual(maintenanceImplementation(deps.root), maintenanceImplementationAtStart), 'IMPLEMENTATION_CHANGED_DURING_RUN');
-      save('maintenance-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, releaseCaptures.m25.schemaManifest.length, final.schemaManifest.length], schemaManifestSha256: maintenanceManifestDigest(final.schemaManifest), datasetsResolved: final.datasetModality.filter(row => row.m !== null).length, datasetsUnresolved: final.datasetModality.filter(row => row.m === null).length, migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })), launcherEvidenceDirs: summary.evidenceDirs });
+      save('maintenance-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, releaseCaptures.m25.schemaManifest.length, releaseCaptures.m26.schemaManifest.length, final.schemaManifest.length], schemaManifestSha256: maintenanceManifestDigest(final.schemaManifest), datasetsResolved: final.datasetModality.filter(row => row.m !== null).length, datasetsUnresolved: final.datasetModality.filter(row => row.m === null).length, migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })), launcherEvidenceDirs: summary.evidenceDirs });
     } else if (plan.kind === 'backfill') {
-      // The chain is complete (25 records, 1842 schema entries, all historical Datasets still unresolved); only now does the evidence-bound backfill rehearsal run.
-      must(releaseCaptures.m25.schemaManifest.length === RELEASE_COUNTS.m25 && releaseCaptures.m25.datasetModality.every(row => row.m === null), 'BACKFILL_PRECONDITION_UNEXPECTED');
+      // The chain is complete (26 records, 1942 schema entries, all historical Datasets still unresolved); only now does the evidence-bound backfill rehearsal run.
+      must(releaseCaptures.m26.schemaManifest.length === RELEASE_M26_ENTRIES && releaseCaptures.m26.datasetModality.every(row => row.m === null), 'BACKFILL_PRECONDITION_UNEXPECTED');
       testStep('backfill-verify', BACKFILL_VERIFY_COMMAND, 'BACKFILL_REHEARSAL_FAILED');
       testStep('schema-compat', 'g2:compatibility', 'RELEASE_SCHEMA_COMPAT_FAILED');
       verifyCompatBindings(deps);
       const final = capture();
       save('backfill-final-datasets.json', final.datasetModality);
       // Data-only run: the schema and the migration history must be exactly what the chain left.
-      must(isDeepStrictEqual(final.schemaManifest, releaseCaptures.m25.schemaManifest) && isDeepStrictEqual(final.migrations, releaseCaptures.m25.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
+      must(isDeepStrictEqual(final.schemaManifest, releaseCaptures.m26.schemaManifest) && isDeepStrictEqual(final.migrations, releaseCaptures.m26.migrations), 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED');
       verifyHistory('FINAL', chain);
       must(isDeepStrictEqual(state.topology.map(({ step, operation, command: receiptCommand }) => [step, operation, receiptCommand]), BACKFILL_TOPOLOGY.map(row => [...row])), 'RECEIPT_TOPOLOGY_UNEXPECTED');
-      save('backfill-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, releaseCaptures.m25.schemaManifest.length, final.schemaManifest.length], datasetsResolved: final.datasetModality.filter(row => row.m !== null).length, datasetsUnresolved: final.datasetModality.filter(row => row.m === null).length, migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })) });
+      save('backfill-summary.json', { historicalMigrations: baseline.length, activeChainMigrations: baseline.length + chain.length, schemaEntries: [releaseCaptures.baseline.schemaManifest.length, releaseCaptures.m24.schemaManifest.length, releaseCaptures.m25.schemaManifest.length, releaseCaptures.m26.schemaManifest.length, final.schemaManifest.length], datasetsResolved: final.datasetModality.filter(row => row.m !== null).length, datasetsUnresolved: final.datasetModality.filter(row => row.m === null).length, migrationChecksums: final.migrations.map(row => ({ name: row.migration_name, checksum: row.checksum, finished: Boolean(row.finished_at), rolledBack: Boolean(row.rolled_back_at) })) });
     } else if (plan.kind === 'release') {
       must(pre !== null, 'REHEARSAL_PRECAPTURE_MISSING');
       const post = plan.m26 ? releaseCaptures.m25 : capture(); // the M25 boundary: for the M26 plan the M26 delta is asserted separately below
