@@ -24,8 +24,11 @@ const COMMAND = 'web:test:dataset-patch-route';
 const sha = text => createHash('sha256').update(text).digest('hex');
 const PROPOSAL1_SQL = '-- fake migration 24 bytes\n';
 const PROPOSAL2_SQL = '-- fake migration 25 bytes\n';
-const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1];
+const PROPOSAL3_SQL = '-- fake migration 26 bytes\n';
+const P1 = PROPOSAL_CHAIN[0], P2 = PROPOSAL_CHAIN[1], P3 = PROPOSAL_CHAIN[2];
 const FAKE_CHAIN = [{ ...P1, sha256: sha(PROPOSAL1_SQL) }, { ...P2, sha256: sha(PROPOSAL2_SQL) }];
+const M26_ADDED = JSON.parse(readFileSync(new URL('./fixtures/m26-added-entries.json', import.meta.url), 'utf8')).entries;
+const FAKE_CHAIN_26 = [...FAKE_CHAIN, { ...P3, sha256: sha(PROPOSAL3_SQL) }]; // the maintenance rehearsal applies the third entry (M26)
 const REVIEWED_EXTRA_COMMANDS = ['web:test:workspace-integration', 'web:test:annotation-persistence', 'web:test:workspace-engines:vitest', 'web:test:modality-workspace-feasibility', 'web:test:asset-guard-transitions', 'web:test:upload-verification-boundary', 'web:test:ai-batch-targets', 'web:test:dataset-ref-contract', 'web:test:ai-model-catalog', 'worker:test:ai-canonical-endpoint', 'web:test:media-processing-client:vitest', 'web:test:media-processing-concurrency', 'worker:test:sealed-namespace', 'worker:test:classification-boundary', 'web:test:candidate-content-types', 'worker:test:media-verification-foundation', 'worker:test:media-verification-processor', 'web:test:media-verification-admission', 'web:test:media-verification-cap'];
 const assertSupportedSet = (message) => {
   assert.deepEqual(SUPPORTED_COMMANDS.slice(0, 5), ['web:test:dataset-metadata', 'web:test:dataset-patch-route', 'web:test:local-folder-modality-idempotency', 'web:test:imports-ui:vitest', 'worker:test:ingestion-replay-reuse'], message);
@@ -33,7 +36,7 @@ const assertSupportedSet = (message) => {
 };
 const CATALOG = { ...Object.fromEntries(REVIEWED_EXTRA_COMMANDS.map(name => [name, { kind: 'test' }])), [COMMAND]: { kind: 'test' }, 'web:test:imports-ui:vitest': { kind: 'test' }, 'web:test:dataset-patch-route': { kind: 'test' }, 'web:test:local-folder-modality-idempotency': { kind: 'test' }, 'web:test:other': { kind: 'test' }, 'worker:test:ingestion-replay-reuse': { kind: 'test' }, ...RELEASE_SPECS, [BACKFILL_SEED_COMMAND]: BACKFILL_SEED_SPEC, [BACKFILL_VERIFY_COMMAND]: BACKFILL_VERIFY_SPEC, [MAINT_SEED_COMMAND]: MAINT_SEED_SPEC, [MAINT_OBJECTS_COMMAND]: MAINT_OBJECTS_SPEC, [MAINT_CHECK_COMMAND]: MAINT_CHECK_SPEC, [FIXTURE_COMMAND]: FIXTURE_SPEC, [COMPAT_COMMAND]: COMPAT_SPEC, [T015_COMMAND]: T015_SPEC, [INGEST_COMMAND]: INGEST_SPEC };
 
-function fixture() {
+function fixture({ m26 = false } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'dt-root-'));
   const put = (path, text) => { mkdirSync(join(root, path, '..'), { recursive: true }); writeFileSync(join(root, path), text); };
   put('scripts/db-safety/commands.json', JSON.stringify(CATALOG));
@@ -42,6 +45,7 @@ function fixture() {
   put('prisma/schema.prisma', 'datasource db { url = env("DATABASE_URL") }\n');
   put(`${P1.path}/migration.sql`, PROPOSAL1_SQL);
   put(`${P2.path}/migration.sql`, PROPOSAL2_SQL);
+  if (m26) put(`${P3.path}/migration.sql`, PROPOSAL3_SQL); // only plans that apply the third chain entry (the maintenance rehearsal) have migration 26 on disk
   for (const file of ['scripts/db-safety/g2-generate.mjs', 'scripts/db-safety/g2-compatibility.mjs', 'apps/web/tests/dataset-modality/g2-baseline.test.ts', 'apps/web/tests/dataset-modality/g2-candidate.test.ts']) put(file, '// release step stub\n');
   put(BACKFILL_SEED_FILE, 'import "../../../../scripts/db-safety/test-entry.cjs";\n// seed stub\n');
   put(BACKFILL_VERIFY_FILE, readFileSync(join(guard.root, BACKFILL_VERIFY_FILE), 'utf8'));
@@ -65,7 +69,7 @@ function compatBindingsFor(root) {
 }
 
 function world(overrides = {}) {
-  const root = overrides.root ?? fixture();
+  const root = overrides.root ?? fixture({ m26: overrides.m26 === true });
   const outBase = mkdtempSync(join(tmpdir(), 'dt-out-'));
   const registry = mkdtempSync(join(tmpdir(), 'dt-reg-'));
   const stages = [];
@@ -104,6 +108,7 @@ function world(overrides = {}) {
           ...['phase029_guard_asset_write()', 'phase029_guard_dataset_assignment()', 'phase029_guard_dataset_insert()'].map(n => ['routine', JSON.stringify(['public', n]), ['f']]));
         w.m24Mutation?.(w.db);
       }
+      if (name === P3.name) w.db.manifest.push(...M26_ADDED.map(([kind, identity]) => [kind, identity, ['d']]));
       if (name === P2.name) {
         w.db.manifest.push(['column', JSON.stringify(['public', 'PreparedImport', 'creationRequestHash']), ['text']]);
         const max = Math.max(...w.db.columns.filter(row => row[0] === 'PreparedImport').map(row => row[5]));
@@ -207,7 +212,7 @@ function world(overrides = {}) {
     sleep: async () => {}, mkStage: () => { const s = mkdtempSync('/tmp/phase029-g1-'); stages.push(s); return s; },
     pickPorts: async () => [55460, 55461, 55462],
     verifyCleanup: runDir => { w.verifiedRunDir = runDir; return { status: w.cleanupVerifyStatus, output: '' }; },
-    pinned: { baseline: 23, chain: FAKE_CHAIN, compat: compatBindingsFor(root) },
+    pinned: { baseline: 23, chain: overrides.m26 === true ? FAKE_CHAIN_26 : FAKE_CHAIN, compat: compatBindingsFor(root) },
     releaseManifestSql: () => "SELECT 'FAKE_SCHEMA_MANIFEST';",
     ...(overrides.deps ?? {}),
   };
@@ -1601,30 +1606,30 @@ test('release plan: failures at each stage fail the run, still clean up and are 
 // =====================================================================================================================
 test('backfill plan is a fixed plan; its catalog entries are pinned and equal the real catalog; its test file passes the source scan', () => {
   assert.equal(validateCommand(BACKFILL_ID, CATALOG), BACKFILL_ID);
-  assert.equal(resolvePlan(BACKFILL_ID).kind, 'backfill'); assert.equal(resolvePlan(BACKFILL_ID).through, 2);
+  assert.equal(resolvePlan(BACKFILL_ID).kind, 'backfill'); assert.equal(resolvePlan(BACKFILL_ID).through, 3, 'the backfill rehearsal runs on the 26-migration chain');
   assert.ok(!SUPPORTED_COMMANDS.includes(BACKFILL_ID));
   const catalog = JSON.parse(readFileSync(join(guard.root, 'scripts/db-safety/commands.json'), 'utf8'));
   assert.deepEqual(catalog[BACKFILL_SEED_COMMAND], BACKFILL_SEED_SPEC); assert.deepEqual(catalog[BACKFILL_VERIFY_COMMAND], BACKFILL_VERIFY_SPEC);
-  assert.equal(BACKFILL_TOPOLOGY.length, 7);
+  assert.equal(BACKFILL_TOPOLOGY.length, 8);
   assert.deepEqual(scanCompatTestSource(readFileSync(join(guard.root, BACKFILL_VERIFY_FILE), 'utf8'), 'backfill'), []);
   assert.ok(BACKFILL_ALLOWED_IMPORTS.has('@/lib/datasets/modality-backfill') && !BACKFILL_ALLOWED_IMPORTS.has('minio'));
   const forbidden = readFileSync(join(guard.root, BACKFILL_VERIFY_FILE), 'utf8') + '\nimport pg from "pg";\nawait db.$queryRaw`select 1`;\n';
   assert.ok(scanCompatTestSource(forbidden, 'backfill').length >= 2);
 });
-test('backfill lifecycle: 23 -> seed -> 24 -> 25 -> backfill rehearsal -> drift check -> cleanup -> independent verification', async () => {
-  const w = world();
+test('backfill lifecycle: 23 -> seed -> 24 -> 25 -> 26 -> backfill rehearsal -> drift check -> cleanup -> independent verification', async () => {
+  const w = world({ m26: true });
   try {
     const out = await failuresOf(w, BACKFILL_ID);
     assert.equal(out.result, 'PASS', JSON.stringify(out.failures));
-    assert.equal(deployCalls(w).length, 3);
+    assert.equal(deployCalls(w).length, 4); // baseline + M24 + M25 + M26
     assert.deepEqual(testCalls(w), ['g2:generate', BACKFILL_SEED_COMMAND, BACKFILL_VERIFY_COMMAND, 'g2:compatibility']);
     const results = JSON.parse(readFileSync(join(out.runDir, 'results.json'), 'utf8'));
     assert.equal(results.kind, 'dataset-modality-backfill-rehearsal'); assert.equal(results.backfillRehearsalPassed, true);
     assert.equal(results.notAuthorizationToApplyMigration, true); assert.equal(results.notAuthorizationToBackfill, true); assert.equal(results.countsAsG3Evidence, false); assert.equal(results.countsAsG5Evidence, false);
     assert.deepEqual(results.receiptTopology.map(({ step, operation, command }) => [step, operation, command]), BACKFILL_TOPOLOGY.map(row => [...row]));
     const summary = JSON.parse(readFileSync(join(out.runDir, 'backfill-summary.json'), 'utf8'));
-    assert.deepEqual(summary.schemaEntries, [1829, 1841, 1842, 1842]); assert.equal(summary.activeChainMigrations, 25); assert.equal(summary.migrationChecksums.length, 25);
-    for (const name of ['release-m24-assertions.json', 'release-m25-assertions.json', 'backfill-seeded-datasets.json', 'backfill-final-datasets.json']) assert.ok(existsSync(join(out.runDir, name)), name);
+    assert.deepEqual(summary.schemaEntries, [1829, 1841, 1842, 1942, 1942]); assert.equal(summary.activeChainMigrations, 26); assert.equal(summary.migrationChecksums.length, 26);
+    for (const name of ['release-m24-assertions.json', 'release-m25-assertions.json', 'release-m26-assertions.json', 'backfill-seeded-datasets.json', 'backfill-final-datasets.json']) assert.ok(existsSync(join(out.runDir, name)), name);
     expectCleanedAndVerified(w, out);
   } finally { cleanup(w); }
 });
@@ -1644,7 +1649,7 @@ test('backfill plan: preflight tampering aborts before anything is provisioned',
     'migration 24 bytes': w => writeFileSync(join(w.root, P1.path, 'migration.sql'), PROPOSAL1_SQL + '-- x\n'),
   };
   for (const [label, setup] of Object.entries(setups)) {
-    const w = world();
+    const w = world({ m26: true });
     try { setup(w); await assert.rejects(() => failuresOf(w, BACKFILL_ID), /./, label); assert.equal(w.calls.length, 0, label); assert.equal(w.stages.length, 0, label); assert.equal(readdirSync(w.outBase).length, 0, label); } finally { cleanup(w); }
   }
 });
@@ -1657,10 +1662,10 @@ test('backfill plan: each failing stage fails the run, still cleans up and is in
     'migration 25 modifies a historical dataset': [{ m25Mutation: db => { db.datasets[0].m = 'IMAGE'; } }, 'RELEASE_M25_DATASETS_CHANGED'],
     'the rehearsal changes the schema': [{ onBackfillVerify: db => db.manifest.push(['index', '["public","z"]', 'i']) }, 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED'],
     'the rehearsal changes migration history': [{ onBackfillVerify: db => { db.migrations.pop(); } }, 'RELEASE_FINAL_SCHEMA_OR_HISTORY_CHANGED'],
-    'history checksum differs': [{ historyMutate: rows => (rows.length === 25 ? rows.map((row, index) => (index === 24 ? { ...row, c: 'a'.repeat(64) } : row)) : rows) }, 'PROPOSAL_HISTORY_CHECKSUM_MISMATCH'],
+    'history checksum differs': [{ historyMutate: rows => (rows.length === 26 ? rows.map((row, index) => (index === 25 ? { ...row, c: 'a'.repeat(64) } : row)) : rows) }, 'PROPOSAL_HISTORY_CHECKSUM_MISMATCH'],
   };
   for (const [label, [overrides, code]] of Object.entries(scenarios)) {
-    const w = world();
+    const w = world({ m26: true });
     try {
       Object.assign(w, overrides);
       const out = await failuresOf(w, BACKFILL_ID);
@@ -1675,13 +1680,13 @@ test('backfill plan: each failing stage fails the run, still cleans up and is in
 // =====================================================================================================================
 test('maintenance plan is a fixed plan; its catalog entries are pinned and equal the real catalog; the rehearsal constants agree with the fixture', async () => {
   assert.equal(validateCommand(MAINTENANCE_ID, CATALOG), MAINTENANCE_ID);
-  assert.equal(resolvePlan(MAINTENANCE_ID).kind, 'maintenance'); assert.equal(resolvePlan(MAINTENANCE_ID).through, 2);
+  assert.equal(resolvePlan(MAINTENANCE_ID).kind, 'maintenance'); assert.equal(resolvePlan(MAINTENANCE_ID).through, 3, 'the maintenance rehearsal runs on the 26-migration chain');
   assert.ok(!SUPPORTED_COMMANDS.includes(MAINTENANCE_ID));
   const catalog = JSON.parse(readFileSync(join(guard.root, 'scripts/db-safety/commands.json'), 'utf8'));
   for (const [name, spec] of [[MAINT_SEED_COMMAND, MAINT_SEED_SPEC], [MAINT_OBJECTS_COMMAND, MAINT_OBJECTS_SPEC], [MAINT_CHECK_COMMAND, MAINT_CHECK_SPEC]]) { assert.deepEqual(catalog[name], spec, name); assert.equal(spec.maintenanceOnly, MAINTENANCE_ID); assert.ok(!SUPPORTED_COMMANDS.includes(name)); }
   const rehearsal = await import('../backfill-maintenance-rehearsal.mjs');
-  // 5 chain steps + 4 fixed child steps + (check + repair) per apply run, the last run has no repair + the drift check
-  assert.equal(MAINTENANCE_COMMANDS.length, 5 + 4 + rehearsal.APPLY_EXPECTATIONS.length * 2 - 1 + 1);
+  // baseline deploy + generate + seed (M24, M25 and M26 are the launcher's own receipted steps) + 4 fixed child steps + (check + repair) per apply run, the last run has no repair + the drift check
+  assert.equal(MAINTENANCE_COMMANDS.length, 3 + 4 + rehearsal.APPLY_EXPECTATIONS.length * 2 - 1 + 1);
   assert.equal(rehearsal.APPLY_EXPECTATIONS.at(-1).repair, null);
   const fixture = readFileSync(join(guard.root, 'apps/web/tests/dataset-modality/maintenance-fixture.ts'), 'utf8');
   const list = name => [...fixture.match(new RegExp(`export const ${name} = \\[([^\\]]*)\\]`))[1].matchAll(/"([^"]+)"/g)].map(match => match[1]);
@@ -1709,7 +1714,7 @@ test('maintenance plan: preflight tampering aborts before anything is provisione
     'implementation set unreadable': [w => { w.deps.maintenanceImplementation = () => { throw Error('IMPLEMENTATION_FILE_MISSING'); }; }, /IMPLEMENTATION_FILE_MISSING/],
   };
   for (const [label, [setup, expected]] of Object.entries(setups)) {
-    const w = world();
+    const w = world({ m26: true });
     try { setup(w); await assert.rejects(() => failuresOf(w, MAINTENANCE_ID), expected, label); assert.equal(w.calls.length, 0, label); assert.equal(w.stages.length, 0, label); assert.equal(readdirSync(w.outBase).length, 0, label); } finally { cleanup(w); }
   }
 });

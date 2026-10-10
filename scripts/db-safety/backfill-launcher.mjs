@@ -17,7 +17,7 @@ import { createRequire } from 'node:module';
 import { basename, dirname, join, resolve } from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
-  APPLICATION_SYSTEM, FROZEN_MIGRATIONS, OPERATIONS, OP_PROFILE, RECEIPT_SCHEMA, assertDatabaseTarget, assertHistory, assertImplementationMatches, assertMigrationDelta, assertNoAmbientTargets, assertPrivateFile,
+  APPLICATION_SYSTEM, FROZEN_M26, FROZEN_MIGRATIONS, OPERATIONS, OP_PROFILE, profileFor, RECEIPT_SCHEMA, assertDatabaseTarget, assertHistory, assertImplementationMatches, assertMigrationDelta, assertNoAmbientTargets, assertPrivateFile,
   assertSchemaObserved, assertStorageTarget, assertTablesUnchanged, buildBinding, computeImplementation, containsSecret, databaseUrl, historyDigest, isMigration, loadCredentials, manifestDigest, manifestSql, must, prepareEvidenceDir,
   resolveEvidenceRoots, sha256, storageConfigFingerprint, validateAuthorizationObserved, validateAuthorizationStatic, validateRequest, writeImmutable,
 } from './backfill-binding.mjs';
@@ -137,6 +137,30 @@ function verifySharedDevTarget(request) {
   if (request.storage) { const port = new URL(request.storage.expectedEndpoint).port; check(request.sharedDevPins.minio, 9000, port, 'minio'); }
   return out;
 }
+/**
+ * A COPY of the shared-dev data (Phase G-MIG-2). Same independent proof as shared-dev (the pinned container is running, publishes the bound port on loopback only, and its own
+ * control file reports the expected system identifier) plus isolation proof: it belongs to the `devcopy` Compose project and every mount is a `devcopy_*` named volume, so no
+ * container pinned here can be attached to the real data. The shared-dev system identifier is refused separately (assertDatabaseTarget).
+ */
+function verifyCopyTarget(request) {
+  const out = {};
+  const check = (pin, internalPort, hostPort, label) => {
+    const info = dockerJson(['inspect', pin.container])[0];
+    must(info.Id === pin.id && info.State.Running, 'CONTAINER_IDENTITY_MISMATCH');
+    must(info.Config?.Labels?.['com.docker.compose.project'] === 'devcopy', 'COPY_PROJECT_MISMATCH');
+    const mounts = info.Mounts ?? [];
+    must(mounts.length >= 1 && mounts.every(mount => mount.Type === 'volume' && /^devcopy_[a-z0-9-]+$/.test(mount.Name ?? '')), 'COPY_VOLUME_NOT_ISOLATED');
+    const binds = info.NetworkSettings.Ports[`${internalPort}/tcp`];
+    must(Array.isArray(binds) && binds.length > 0 && binds.every(bind => bind.HostIp === '127.0.0.1') && binds.some(bind => String(bind.HostPort) === String(hostPort)), 'CONTAINER_BINDING_MISMATCH');
+    out[label] = { container: pin.container, id: info.Id, image: info.Image, startedAt: info.State.StartedAt, volumes: mounts.map(mount => mount.Name) };
+  };
+  check(request.copyPins.postgres, 5432, request.postgres.port, 'postgres');
+  const control = pgControlIdentifier(request.copyPins.postgres.container);
+  must(control && control === request.postgres.expectedSystemIdentifier, 'SYSTEM_IDENTITY_MISMATCH');
+  out.postgres.systemIdentifier = control;
+  if (request.storage) { const port = new URL(request.storage.expectedEndpoint).port; check(request.copyPins.minio, 9000, port, 'minio'); }
+  return out;
+}
 async function verifyDisposableTarget(request) {
   // Reuses the committed G1 identity checks: container id/labels, loopback-only binding, system identifier != the application's.
   const guard = await import('./guard.mjs');
@@ -152,7 +176,7 @@ function realDeps() {
     root: ROOT, now: () => Date.now(), sharedDevEnabled: SHARED_DEV_ENABLED, computeImplementation: () => computeImplementation(ROOT),
     loadCredentials: request => loadCredentials(request, ROOT), probeDatabase: (request, credentials, options) => probeDatabase(request, credentials, ROOT, options), spawnChild,
     runMigration: (request, credentials) => runMigration(request, credentials, ROOT), evidenceRoots: () => resolveEvidenceRoots(ROOT),
-    verifyTarget: request => (request.targetKind === 'disposable' ? verifyDisposableTarget(request) : verifySharedDevTarget(request)),
+    verifyTarget: request => (request.targetKind === 'disposable' ? verifyDisposableTarget(request) : request.targetKind === 'copy' ? verifyCopyTarget(request) : verifySharedDevTarget(request)),
   };
 }
 const intendedEvidencePath = path => join(realpathSync(dirname(path)), basename(path));
@@ -169,7 +193,7 @@ export async function runLauncher(argv, env, deps = realDeps()) {
     const requestBytes = readFileSync(requestPath);
     const request = validateRequest(JSON.parse(requestBytes.toString('utf8')), deps.now());
     must(request.operation === argv[0], 'REQUEST_OPERATION_MISMATCH');
-    const profile = OP_PROFILE[request.operation];
+    const profile = profileFor(request.operation, request.postgres.expectedHistory.length);
     const credentials = deps.loadCredentials(request);
     const dbUrl = databaseUrl(request, credentials);
     const secrets = [credentials.postgresPassword, credentials.storageAccessKey, credentials.storageSecretKey, dbUrl, encodeURIComponent(credentials.postgresPassword)];
@@ -196,7 +220,7 @@ export async function runLauncher(argv, env, deps = realDeps()) {
     must(containers.postgres.systemIdentifier === dbObserved.systemIdentifier, 'SYSTEM_IDENTITY_MISMATCH');
     assertHistory(request.postgres.expectedHistory, dbObserved.history, profile.history);
     assertSchemaObserved(request, dbObserved);
-    must(dbObserved.systemIdentifier === APPLICATION_SYSTEM ? request.targetKind === 'shared-dev' : request.targetKind === 'disposable', 'TARGET_KIND_SYSTEM_MISMATCH');
+    must(dbObserved.systemIdentifier === APPLICATION_SYSTEM ? request.targetKind === 'shared-dev' : request.targetKind === 'disposable' || request.targetKind === 'copy', 'TARGET_KIND_SYSTEM_MISMATCH');
 
     // 4. exact storage target (identity probe is the child's adapter, so there is a single implementation)
     let storageObserved = null;
@@ -257,8 +281,10 @@ export async function runLauncher(argv, env, deps = realDeps()) {
           assertHistory(expectedAfterHistory.map(row => ({ name: row.name, checksum: row.checksum })), after.history, profile.after.history);
           must(after.schemaEntries === profile.after.entries, 'MIGRATION_SCHEMA_DELTA_UNEXPECTED');
           verification.delta = assertMigrationDelta(request.operation, before.manifestRows, after.manifestRows);
-          verification.tables = assertTablesUnchanged(before.tables, after.tables);
-          must(after.datasets.total === before.datasets.total && after.datasets.resolved === 0 && after.datasets.unresolved === after.datasets.total, 'MIGRATION_DATASETS_RESOLVED');
+          const isM26 = step === FROZEN_M26;
+          verification.tables = assertTablesUnchanged(before.tables, after.tables, isM26 ? FROZEN_M26.newTables : []);
+          // M24/M25 run on a database with no resolved Dataset; M26 may run after a backfill, and then it must leave every Dataset exactly as it was
+          must(isM26 ? JSON.stringify(after.datasets) === JSON.stringify(before.datasets) : after.datasets.total === before.datasets.total && after.datasets.resolved === 0 && after.datasets.unresolved === after.datasets.total, 'MIGRATION_DATASETS_RESOLVED');
           postState = { migrationCount: after.history.length, historySha256: verification.after.historySha256, schemaManifestSha256: after.schemaManifestSha256, schemaEntries: after.schemaEntries };
         }
       } catch (error) { verification.verificationFailure = code(error); exitCode = 1; }

@@ -20,8 +20,9 @@ export const RECEIPT_SCHEMA = 'phase029-backfill-execution-receipt/v2';
 export const BINDING_SCHEMA = 'phase029-backfill-binding/v2';
 export const AUTHORIZATION_SCHEMA = 'phase029-backfill-authorization/v2';
 export const CREDENTIALS_SCHEMA = 'phase029-maintenance-credentials/v1';
-export const OPERATIONS = ['observe', 'apply', 'migrate-m24', 'migrate-m25'];
-export const TARGET_KINDS = ['disposable', 'shared-dev'];
+export const OPERATIONS = ['observe', 'apply', 'migrate-m24', 'migrate-m25', 'migrate-m26'];
+// 'copy' is a non-production COPY of the shared-dev data (never the shared-dev system itself): pinned containers whose volumes are all `devcopy_*`, see verifyCopyTarget.
+export const TARGET_KINDS = ['disposable', 'shared-dev', 'copy'];
 /** The application database's system identifier. A disposable run must never match it; a shared-dev run must. */
 export const APPLICATION_SYSTEM = '7662655305624969250';
 export const MAX_REQUEST_LIFETIME_MS = 30 * 60 * 1000;
@@ -35,13 +36,31 @@ export const FROZEN_MIGRATIONS = Object.freeze({
   m25: Object.freeze({ name: '20261006000000_prepared_import_creation_request_hash', checksum: 'a8ffbc84bde7f18aac93bbb2e87423e6cfcbf6efd95c01e6650824fdcc3ed859' }),
   schemaEntries: 1842,
 });
+/**
+ * M26 (media verification, additive): the reviewed bytes and the exact delta it must add to a 25-migration database. Measured on a scratch PostgreSQL by applying the
+ * reviewed chain (25 -> 26): 100 entries added (58 columns, 11 enums, 10 relations, 9 indexes, 6 constraints, 6 types), none removed or changed, and every added column
+ * belongs to the NEW table MediaVerification, so no existing table's rows or columns move.
+ */
+export const FROZEN_M26 = Object.freeze({
+  name: '20261007000000_media_verification_a2', checksum: 'ede5e8c511705521e1e6a18563ebaa602e9c24430946acddbed91340d923df5a',
+  entriesBefore: 1842, entriesAfter: 1942, added: 100, addedKeysSha256: '8977f5b98d14d1d75958a5dec37207d83de9e6cb9abfc92b1a34918b453640d6', newTables: Object.freeze(['MediaVerification']),
+});
 /** What each operation expects to find BEFORE it runs: history length, schema-manifest entries, and (migrations) the step it applies. */
 export const OP_PROFILE = Object.freeze({
   observe: Object.freeze({ history: 25, entries: 1842, storage: true, manifests: false }),
   apply: Object.freeze({ history: 25, entries: 1842, storage: true, manifests: true }),
   'migrate-m24': Object.freeze({ history: 23, entries: 1829, storage: false, manifests: false, step: FROZEN_MIGRATIONS.m24, after: Object.freeze({ history: 24, entries: 1841 }) }),
   'migrate-m25': Object.freeze({ history: 24, entries: 1841, storage: false, manifests: false, step: FROZEN_MIGRATIONS.m25, after: Object.freeze({ history: 25, entries: 1842 }) }),
+  'migrate-m26': Object.freeze({ history: 25, entries: 1842, storage: false, manifests: false, step: FROZEN_M26, after: Object.freeze({ history: 26, entries: 1942 }) }),
 });
+/** observe / apply run on the 25-migration chain (historical proof) or on the 26-migration chain (current); the request's history length selects which. Anything else is refused. */
+export function profileFor(operation, historyLength) {
+  const base = OP_PROFILE[operation];
+  must(base, 'REQUEST_OPERATION_INVALID');
+  if (base.step) return base;
+  must(historyLength === 25 || historyLength === 26, 'REQUEST_POSTGRES_INVALID');
+  return historyLength === 25 ? base : Object.freeze({ ...base, history: 26, entries: FROZEN_M26.entriesAfter });
+}
 export const isMigration = operation => Object.hasOwn(OP_PROFILE, operation) && OP_PROFILE[operation].step !== undefined;
 
 /** Files whose bytes decide what the launcher, T029 and T031 do. The request must pin every one of them (and the two trees) to the reviewed hashes. */
@@ -59,6 +78,7 @@ export const IMPLEMENTATION_FILES = Object.freeze([
   'specs/proposals/phase029-modality/recovery.v2.review.sql',
   `prisma/migrations/${FROZEN_MIGRATIONS.m24.name}/migration.sql`,
   `prisma/migrations/${FROZEN_MIGRATIONS.m25.name}/migration.sql`,
+  `prisma/migrations/${FROZEN_M26.name}/migration.sql`,
 ]);
 
 export function computeImplementation(root) {
@@ -133,16 +153,19 @@ const only = (object, keys, code) => must(object && typeof object === 'object' &
 
 /** The request holds NO secret: credentials live in a separate private file outside the repository, referenced by path and pinned by hash. */
 export function validateRequest(raw, now = Date.now()) {
-  only(raw, ['schema', 'operation', 'targetKind', 'requestId', 'issuedAt', 'expiresAt', 'runToken', 'postgres', 'storage', 'credentials', 'implementation', 'manifests', 'evidenceDir', 'disposablePins', 'sharedDevPins', 'authorization'], 'REQUEST_SHAPE_INVALID');
+  only(raw, ['schema', 'operation', 'targetKind', 'requestId', 'issuedAt', 'expiresAt', 'runToken', 'postgres', 'storage', 'credentials', 'implementation', 'manifests', 'evidenceDir', 'disposablePins', 'sharedDevPins', 'copyPins', 'authorization'], 'REQUEST_SHAPE_INVALID');
   must(raw.schema === REQUEST_SCHEMA, 'REQUEST_SCHEMA_UNSUPPORTED');
   must(OPERATIONS.includes(raw.operation), 'REQUEST_OPERATION_INVALID');
-  const profile = OP_PROFILE[raw.operation];
   must(TARGET_KINDS.includes(raw.targetKind), 'REQUEST_TARGET_KIND_INVALID');
   must(UUID.test(raw.requestId ?? ''), 'REQUEST_ID_INVALID');
   const issued = Date.parse(raw.issuedAt), expiry = Date.parse(raw.expiresAt);
   must(Number.isFinite(issued) && Number.isFinite(expiry) && issued <= now && now < expiry && expiry - issued <= MAX_REQUEST_LIFETIME_MS, 'REQUEST_EXPIRED_OR_UNBOUNDED');
   must(TOKEN.test(raw.runToken ?? ''), 'RUN_TOKEN_INVALID');
   only(raw.postgres, ['host', 'port', 'database', 'user', 'expectedSystemIdentifier', 'expectedHistory', 'expectedSchemaManifestSha256', 'expectedSchemaEntries'], 'REQUEST_POSTGRES_INVALID');
+  must(Array.isArray(raw.postgres.expectedHistory), 'REQUEST_POSTGRES_INVALID');
+  // an unsupported history length keeps the base (25) profile so the existing, specific REQUEST_HISTORY_INVALID refusal below still applies
+  const length = raw.postgres.expectedHistory.length;
+  const profile = length === 25 || length === 26 || OP_PROFILE[raw.operation]?.step ? profileFor(raw.operation, length) : OP_PROFILE[raw.operation];
   str(raw.postgres.host, 'REQUEST_POSTGRES_INVALID', 255); str(raw.postgres.user, 'REQUEST_POSTGRES_INVALID', 63); str(raw.postgres.database, 'REQUEST_POSTGRES_INVALID', 63);
   must(/^[A-Za-z0-9.-]+$/.test(raw.postgres.host) && /^[A-Za-z0-9_]+$/.test(raw.postgres.user) && /^[A-Za-z0-9_]+$/.test(raw.postgres.database), 'REQUEST_POSTGRES_INVALID');
   must(Number.isInteger(raw.postgres.port) && raw.postgres.port > 0 && raw.postgres.port < 65536, 'REQUEST_POSTGRES_INVALID');
@@ -165,8 +188,15 @@ export function validateRequest(raw, now = Date.now()) {
   str(raw.evidenceDir, 'EVIDENCE_DIR_INVALID');
   if (raw.targetKind === 'disposable') {
     only(raw.disposablePins, ['postgres', 'minio'], 'REQUEST_PINS_INVALID');
-    must(raw.disposablePins.postgres && (raw.disposablePins.minio || !profile.storage) && raw.authorization === undefined && raw.sharedDevPins === undefined, 'REQUEST_PINS_INVALID');
+    must(raw.disposablePins.postgres && (raw.disposablePins.minio || !profile.storage) && raw.authorization === undefined && raw.sharedDevPins === undefined && raw.copyPins === undefined, 'REQUEST_PINS_INVALID');
+  } else if (raw.targetKind === 'copy') {
+    // A copy is pinned by container id exactly like shared-dev, but it is a different system, needs no per-run authorization artifact, and is verified against `devcopy_*` volumes.
+    must(raw.disposablePins === undefined && raw.sharedDevPins === undefined && raw.authorization === undefined, 'REQUEST_PINS_INVALID');
+    only(raw.copyPins, ['postgres', 'minio'], 'REQUEST_PINS_INVALID');
+    for (const pin of [raw.copyPins.postgres, ...(profile.storage ? [raw.copyPins.minio] : [])]) { only(pin, ['container', 'id'], 'REQUEST_PINS_INVALID'); must(/^[a-zA-Z0-9][a-zA-Z0-9_.-]+$/.test(pin.container ?? '') && /^[a-f0-9]{64}$/.test(pin.id ?? ''), 'REQUEST_PINS_INVALID'); }
+    must(profile.storage || raw.copyPins.minio === undefined, 'REQUEST_PINS_INVALID');
   } else {
+    must(raw.copyPins === undefined, 'REQUEST_PINS_INVALID');
     must(raw.disposablePins === undefined, 'REQUEST_PINS_INVALID');
     only(raw.sharedDevPins, ['postgres', 'minio'], 'REQUEST_PINS_INVALID');
     for (const pin of [raw.sharedDevPins.postgres, ...(profile.storage ? [raw.sharedDevPins.minio] : [])]) { only(pin, ['container', 'id'], 'REQUEST_PINS_INVALID'); must(/^[a-zA-Z0-9][a-zA-Z0-9_.-]+$/.test(pin.container ?? '') && /^[a-f0-9]{64}$/.test(pin.id ?? ''), 'REQUEST_PINS_INVALID'); }
@@ -218,11 +248,12 @@ export function validateAuthorizationStatic(record, request, implementation, evi
   str(record.authorizedBy, 'AUTHORIZATION_SHAPE_INVALID', 128); str(record.statement, 'AUTHORIZATION_SHAPE_INVALID', 500);
   const issued = Date.parse(record.issuedAt), expiry = Date.parse(record.expiresAt);
   must(Number.isFinite(issued) && Number.isFinite(expiry) && issued <= now && now < expiry && expiry - issued <= MAX_AUTHORIZATION_LIFETIME_MS, 'AUTHORIZATION_EXPIRED_OR_UNBOUNDED');
-  only(record.postgres, ['systemIdentifier', 'database', 'migrationCount', 'historySha256', 'schemaManifestSha256', 'schemaEntries', 'm24', 'm25'], 'AUTHORIZATION_SHAPE_INVALID');
-  const pg = record.postgres, profile = OP_PROFILE[request.operation];
+  only(record.postgres, ['systemIdentifier', 'database', 'migrationCount', 'historySha256', 'schemaManifestSha256', 'schemaEntries', 'm24', 'm25', 'm26'], 'AUTHORIZATION_SHAPE_INVALID');
+  const pg = record.postgres, profile = profileFor(request.operation, request.postgres.expectedHistory.length);
   must(pg.systemIdentifier === request.postgres.expectedSystemIdentifier && pg.database === request.postgres.database, 'AUTHORIZATION_SCOPE_MISMATCH');
   must(pg.migrationCount === profile.history && pg.schemaEntries === profile.entries && HEX64.test(pg.historySha256 ?? '') && pg.schemaManifestSha256 === request.postgres.expectedSchemaManifestSha256, 'AUTHORIZATION_SCOPE_MISMATCH');
   must(pg.m24?.name === FROZEN_MIGRATIONS.m24.name && pg.m24?.checksum === FROZEN_MIGRATIONS.m24.checksum && pg.m25?.name === FROZEN_MIGRATIONS.m25.name && pg.m25?.checksum === FROZEN_MIGRATIONS.m25.checksum, 'AUTHORIZATION_SCOPE_MISMATCH');
+  must(profile.history >= 26 ? pg.m26?.name === FROZEN_M26.name && pg.m26?.checksum === FROZEN_M26.checksum : pg.m26 === undefined || pg.m26 === null, 'AUTHORIZATION_SCOPE_MISMATCH');
   must(pg.historySha256 === historyDigest(request.postgres.expectedHistory.map(row => ({ ...row, finished: true, rolledBack: false }))), 'AUTHORIZATION_HISTORY_MISMATCH');
   must(record.implementationSha256 === implementationDigest(implementation), 'AUTHORIZATION_IMPLEMENTATION_MISMATCH');
   if (profile.storage) {
@@ -261,11 +292,13 @@ export function assertHistory(expectedHistory, observed, count = FROZEN_MIGRATIO
   must(observed.every(row => row.finished === true && row.rolledBack === false), 'HISTORY_INCOMPLETE');
   if (count >= 24) must(observed[23].name === FROZEN_MIGRATIONS.m24.name && observed[23].checksum === FROZEN_MIGRATIONS.m24.checksum, 'FROZEN_MIGRATION_MISMATCH');
   if (count >= 25) must(observed[24].name === FROZEN_MIGRATIONS.m25.name && observed[24].checksum === FROZEN_MIGRATIONS.m25.checksum, 'FROZEN_MIGRATION_MISMATCH');
+  if (count >= 26) must(observed[25].name === FROZEN_M26.name && observed[25].checksum === FROZEN_M26.checksum, 'FROZEN_MIGRATION_MISMATCH');
+  if (count === 25) must(!observed.some(row => row.name === FROZEN_M26.name), 'FROZEN_MIGRATION_MISMATCH');
   if (count < 24) must(!observed.some(row => row.name === FROZEN_MIGRATIONS.m24.name || row.name === FROZEN_MIGRATIONS.m25.name), 'FROZEN_MIGRATION_MISMATCH');
   if (count === 24) must(!observed.some(row => row.name === FROZEN_MIGRATIONS.m25.name), 'FROZEN_MIGRATION_MISMATCH');
 }
 export function assertSchemaObserved(request, observed) {
-  const profile = OP_PROFILE[request.operation];
+  const profile = profileFor(request.operation, request.postgres.expectedHistory.length);
   must(observed.schemaEntries === profile.entries && observed.schemaEntries === request.postgres.expectedSchemaEntries, 'SCHEMA_ENTRY_COUNT_MISMATCH');
   must(observed.schemaManifestSha256 === request.postgres.expectedSchemaManifestSha256, 'SCHEMA_MANIFEST_MISMATCH');
 }
@@ -275,6 +308,10 @@ export function assertDatabaseTarget(request, observed) {
     must(request.postgres.host === '127.0.0.1' && /^554[67][0-9]$/.test(String(request.postgres.port)) && request.postgres.user === 'postgres' && request.postgres.database === 'fieldframe', 'DISPOSABLE_TARGET_REQUIRED');
     must(observed.systemIdentifier !== APPLICATION_SYSTEM && request.postgres.expectedSystemIdentifier !== APPLICATION_SYSTEM, 'APPLICATION_SYSTEM_FORBIDDEN_FOR_DISPOSABLE');
     must(request.disposablePins.postgres.port === request.postgres.port, 'URL_CONTAINER_MISMATCH');
+  } else if (request.targetKind === 'copy') {
+    // never the shared-dev system, loopback only, the same database name the application uses
+    must(request.postgres.host === '127.0.0.1' && request.postgres.database === 'fieldframe', 'COPY_TARGET_REQUIRED');
+    must(observed.systemIdentifier !== APPLICATION_SYSTEM && request.postgres.expectedSystemIdentifier !== APPLICATION_SYSTEM, 'APPLICATION_SYSTEM_FORBIDDEN_FOR_COPY');
   } else must(observed.systemIdentifier === APPLICATION_SYSTEM, 'SHARED_DEV_SYSTEM_REQUIRED');
 }
 export function assertStorageTarget(request, observedIdentity) {
@@ -282,6 +319,7 @@ export function assertStorageTarget(request, observedIdentity) {
   must(s.endpoint === s.expectedEndpoint && s.bucket === s.expectedBucket, 'STORAGE_TARGET_MISMATCH');
   const endpoint = new URL(s.endpoint);
   must(/^https?:$/.test(endpoint.protocol) && !endpoint.username && !endpoint.password && !endpoint.search && !endpoint.hash && (endpoint.pathname === '/' || endpoint.pathname === ''), 'STORAGE_ENDPOINT_INVALID');
+  if (request.targetKind === 'copy') must(endpoint.hostname === '127.0.0.1', 'COPY_STORAGE_REQUIRED');
   if (request.targetKind === 'disposable') {
     must(endpoint.hostname === '127.0.0.1' && endpoint.port === String(request.disposablePins.minio.port) && /^g1-[a-z0-9-]+$/.test(s.bucket), 'DISPOSABLE_STORAGE_REQUIRED');
   }
@@ -298,6 +336,7 @@ const rowKey = row => `${row[0]}\u0000${row[1]}`;
 /** Exact schema delta of one migration step: only the named objects were added; nothing removed; no existing entry changed. */
 export function assertMigrationDelta(operation, pre, post) {
   must(Array.isArray(pre) && Array.isArray(post), 'MANIFEST_MISSING');
+  if (operation === 'migrate-m26') return assertM26Delta(pre, post);
   const expected = ADDED_BY[operation];
   const before = new Map(pre.map(row => [rowKey(row), row])), after = new Map(post.map(row => [rowKey(row), row]));
   must(before.size === pre.length && after.size === post.length, 'MANIFEST_DUPLICATE_IDENTITY');
@@ -316,16 +355,34 @@ export function assertMigrationDelta(operation, pre, post) {
   else must(names('column').every(parts => parts[1] === 'PreparedImport'), 'MIGRATION_SCHEMA_DELTA_UNEXPECTED');
   return { added: added.length, removed: 0, changed: 0, kinds: Object.fromEntries(['column', 'constraint', 'trigger', 'routine'].map(kind => [kind, names(kind).length])) };
 }
+/** The exact M26 delta: 100 added entries whose identity digest is pinned, none removed or changed, every added column on the new table. */
+export function assertM26Delta(pre, post) {
+  const before = new Map(pre.map(row => [rowKey(row), row])), after = new Map(post.map(row => [rowKey(row), row]));
+  must(before.size === pre.length && after.size === post.length, 'MANIFEST_DUPLICATE_IDENTITY');
+  must(pre.length === FROZEN_M26.entriesBefore && post.length === FROZEN_M26.entriesAfter, 'MIGRATION_SCHEMA_DELTA_UNEXPECTED');
+  const removed = pre.filter(row => !after.has(rowKey(row))), added = post.filter(row => !before.has(rowKey(row)));
+  const changed = post.filter(row => before.has(rowKey(row)) && JSON.stringify(before.get(rowKey(row))[2]) !== JSON.stringify(row[2]));
+  must(removed.length === 0 && changed.length === 0, 'MIGRATION_CHANGED_EXISTING_SCHEMA');
+  must(added.length === FROZEN_M26.added && sha256(JSON.stringify(added.map(row => `${row[0]}\u0000${row[1]}`).sort())) === FROZEN_M26.addedKeysSha256, 'MIGRATION_SCHEMA_DELTA_UNEXPECTED');
+  const columns = added.filter(row => row[0] === 'column').map(row => JSON.parse(row[1]));
+  must(columns.every(parts => FROZEN_M26.newTables.includes(String(parts[1])) || parts[1].startsWith('MediaVerification')), 'MIGRATION_SCHEMA_DELTA_UNEXPECTED');
+  const kinds = Object.fromEntries(['column', 'constraint', 'enum', 'index', 'relation', 'type'].map(kind => [kind, added.filter(row => row[0] === kind).length]));
+  return { added: added.length, removed: 0, changed: 0, kinds };
+}
 /** Row data must not move: the per-table (count, md5) fingerprints are equal before and after (the columns a step adds are excluded by the probe's SQL). */
-export function assertTablesUnchanged(pre, post) {
-  must(JSON.stringify(pre.map(row => row[0])) === JSON.stringify(post.map(row => row[0])), 'MIGRATION_TABLE_SET_CHANGED');
-  for (let index = 0; index < pre.length; index += 1) must(pre[index][1] === post[index][1] && pre[index][2] === post[index][2], 'MIGRATION_DATA_CHANGED');
-  return { tables: pre.length };
+export function assertTablesUnchanged(pre, post, newTables = []) {
+  // a step may ADD whole new tables (M26: MediaVerification, which must be empty); every table that existed before must be identical
+  const fresh = post.filter(row => !pre.some(old => old[0] === row[0]));
+  must(JSON.stringify(fresh.map(row => row[0]).sort()) === JSON.stringify([...newTables].sort()) && fresh.every(row => Number(row[1]) === 0), 'MIGRATION_TABLE_SET_CHANGED');
+  const kept = post.filter(row => !fresh.includes(row));
+  must(JSON.stringify(pre.map(row => row[0])) === JSON.stringify(kept.map(row => row[0])), 'MIGRATION_TABLE_SET_CHANGED');
+  for (let index = 0; index < pre.length; index += 1) must(pre[index][1] === kept[index][1] && pre[index][2] === kept[index][2], 'MIGRATION_DATA_CHANGED');
+  return { tables: pre.length, newTables: fresh.map(row => row[0]) };
 }
 
 /** Everything a human or an auditor needs to know about what the run was bound to, with no secret in it. */
 export function buildBinding({ request, requestSha256, implementation, dbObserved, storageObserved, containers, evidence, now }) {
-  const profile = OP_PROFILE[request.operation];
+  const profile = profileFor(request.operation, request.postgres.expectedHistory.length);
   return {
     schema: BINDING_SCHEMA,
     boundAt: new Date(now).toISOString(),
@@ -337,7 +394,7 @@ export function buildBinding({ request, requestSha256, implementation, dbObserve
     resolverSubject: `system:phase029-backfill:${request.runToken}`,
     postgres: {
       systemIdentifier: dbObserved.systemIdentifier, database: dbObserved.database, host: request.postgres.host, port: request.postgres.port, user: request.postgres.user,
-      migrationCount: dbObserved.history.length, historySha256: historyDigest(dbObserved.history), m24: FROZEN_MIGRATIONS.m24, m25: FROZEN_MIGRATIONS.m25,
+      migrationCount: dbObserved.history.length, historySha256: historyDigest(dbObserved.history), m24: FROZEN_MIGRATIONS.m24, m25: FROZEN_MIGRATIONS.m25, m26: dbObserved.history.length >= 26 ? { name: FROZEN_M26.name, checksum: FROZEN_M26.checksum } : null,
       schemaEntries: dbObserved.schemaEntries, schemaManifestSha256: dbObserved.schemaManifestSha256, datasets: dbObserved.datasets,
     },
     storage: profile.storage ? { endpointHost: storageObserved.endpointHost, endpointPort: storageObserved.endpointPort, useSSL: storageObserved.useSSL, bucket: storageObserved.bucket, bucketExists: storageObserved.bucketExists, configFingerprint: storageObserved.configFingerprint } : null,

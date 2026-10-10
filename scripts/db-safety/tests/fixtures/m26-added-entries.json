@@ -1,0 +1,405 @@
+{
+ "note": "The exact 100 schema-manifest identities (kind, identity) that migration 20261007000000_media_verification_a2 adds to a 25-migration database, measured on a scratch PostgreSQL. Definitions are omitted on purpose.",
+ "entries": [
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"assetId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"boundDatasetModality\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"contentSha256\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"createdAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"currentJobId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"datasetId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"declaredContentType\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"declaredSizeBytes\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"filename\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"finishedAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"generation\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"id\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"lastFailureAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"lastFailureCode\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"lastFailureReason\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"objectsClearedAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"policyVersion\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"preparedImportItemId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"probe\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"processorVersion\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"publishedAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"relativePathHint\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"requestedById\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"resultCode\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"resultReason\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"sealedAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"sealedEtag\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"sealedKey\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"sealedLastModified\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"sealedSizeBytes\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"sealedVersionId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"source\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"stagedBucket\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"stagedEtag\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"stagedKey\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"stagedLastModified\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"stagedSizeBytes\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"stagedVersionId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"status\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"updatedAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"verificationDeadlineAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"verifiedAt\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification\", \"verifiedModality\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_assetId_key\", \"assetId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_currentJobId_idx\", \"currentJobId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_datasetId_status_idx\", \"datasetId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_datasetId_status_idx\", \"status\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_pkey\", \"id\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_preparedImportItemId_generation_key\", \"generation\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_preparedImportItemId_generation_key\", \"preparedImportItemId\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_requestedById_status_idx\", \"requestedById\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_requestedById_status_idx\", \"status\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_sealedKey_key\", \"sealedKey\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_stagedBucket_stagedKey_generation_key\", \"generation\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_stagedBucket_stagedKey_generation_key\", \"stagedBucket\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_stagedBucket_stagedKey_generation_key\", \"stagedKey\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_status_verificationDeadlineAt_idx\", \"status\"]"
+  ],
+  [
+   "column",
+   "[\"public\", \"MediaVerification_status_verificationDeadlineAt_idx\", \"verificationDeadlineAt\"]"
+  ],
+  [
+   "constraint",
+   "[\"public\", \"relation\", \"\\\"MediaVerification\\\"\", \"MediaVerification_assetId_fkey\"]"
+  ],
+  [
+   "constraint",
+   "[\"public\", \"relation\", \"\\\"MediaVerification\\\"\", \"MediaVerification_currentJobId_fkey\"]"
+  ],
+  [
+   "constraint",
+   "[\"public\", \"relation\", \"\\\"MediaVerification\\\"\", \"MediaVerification_datasetId_fkey\"]"
+  ],
+  [
+   "constraint",
+   "[\"public\", \"relation\", \"\\\"MediaVerification\\\"\", \"MediaVerification_pkey\"]"
+  ],
+  [
+   "constraint",
+   "[\"public\", \"relation\", \"\\\"MediaVerification\\\"\", \"MediaVerification_preparedImportItemId_fkey\"]"
+  ],
+  [
+   "constraint",
+   "[\"public\", \"relation\", \"\\\"MediaVerification\\\"\", \"MediaVerification_requestedById_fkey\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"JobType\", \"VERIFY_UPLOADED_MEDIA\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationSource\", \"DIRECT_UPLOAD\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationSource\", \"LOCAL_FOLDER_ITEM\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationStatus\", \"CANCELED\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationStatus\", \"EXPIRED\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationStatus\", \"PENDING\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationStatus\", \"PUBLISHED\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationStatus\", \"REJECTED\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationStatus\", \"SEALED\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationStatus\", \"STALE\"]"
+  ],
+  [
+   "enum",
+   "[\"public\", \"MediaVerificationStatus\", \"VERIFIED\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_assetId_key\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_currentJobId_idx\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_datasetId_status_idx\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_pkey\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_preparedImportItemId_generation_key\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_requestedById_status_idx\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_sealedKey_key\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_stagedBucket_stagedKey_generation_key\"]"
+  ],
+  [
+   "index",
+   "[\"public\", \"MediaVerification_status_verificationDeadlineAt_idx\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_assetId_key\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_currentJobId_idx\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_datasetId_status_idx\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_pkey\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_preparedImportItemId_generation_key\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_requestedById_status_idx\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_sealedKey_key\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_stagedBucket_stagedKey_generation_key\"]"
+  ],
+  [
+   "relation",
+   "[\"public\", \"MediaVerification_status_verificationDeadlineAt_idx\"]"
+  ],
+  [
+   "type",
+   "[\"public\", \"MediaVerification\"]"
+  ],
+  [
+   "type",
+   "[\"public\", \"MediaVerificationSource\"]"
+  ],
+  [
+   "type",
+   "[\"public\", \"MediaVerificationStatus\"]"
+  ],
+  [
+   "type",
+   "[\"public\", \"_MediaVerification\"]"
+  ],
+  [
+   "type",
+   "[\"public\", \"_MediaVerificationSource\"]"
+  ],
+  [
+   "type",
+   "[\"public\", \"_MediaVerificationStatus\"]"
+  ]
+ ]
+}
