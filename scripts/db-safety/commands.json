@@ -329,7 +329,8 @@
       "--import",
       "tsx",
       "--test",
-      "tests/providers/ai/aioz-video-normalization.test.ts"
+      "tests/providers/ai/aioz-video-normalization.test.ts",
+      "tests/jobs/ai-label-mapping-writers.test.ts"
     ]
   },
   "worker:test:queue": {
