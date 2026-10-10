@@ -24,6 +24,33 @@ test("supplied 850-frame output becomes 10 tracks and 38 frame-accurate observat
   assert.equal(JSON.stringify(predictions).includes("https://"), false);
 });
 
+// Captured from the real development AI service (ByteTrack YOLOX_S COCO, 2026-10-10) for a synthetic 3 s clip; signed URL replaced. The 45 frames carry no detections.
+const live = JSON.parse(readFileSync(new URL("./fixtures/aioz-video-output-live-empty.json", import.meta.url), "utf8"));
+
+test("live provider capture (no detections) validates and normalizes to nothing; the platform's own fps/totalFrames metadata is not needed", () => {
+  assert.equal(live[0].total_frames, 45); assert.equal(live[0].frames.length, 45); assert.equal(live[0].fps, 15);
+  assert.deepEqual(normalizeAiozVideoOutput(live, [{ assetId: "live-asset", imageUrl: live[0].video_path }]), []);
+});
+
+test("live capture shape with detections added: pixel boxes convert against the provider-reported frame size and timestamps use the provider fps", () => {
+  const output = structuredClone(live);
+  output[0].frames[30].tracks = [{ track_id: 7, class_id: 0, class_name: "person", score: 0.9, bbox_xyxy: [32, 24, 160, 120] }];
+  const [prediction] = normalizeAiozVideoOutput(output, [{ assetId: "live-asset", imageUrl: output[0].video_path }]);
+  assert.deepEqual(prediction.boundingBoxes, { kind: "BOUNDING_BOX", x: 32 / 320, y: 24 / 240, width: 128 / 320, height: 96 / 240 });
+  assert.deepEqual(prediction.video, { trackId: 7, frameIndex: 30, timestampMs: 2000, classId: 0, fps: 15, totalFrames: 45 });
+  assert.equal(prediction.labelKey, "person");
+});
+
+test("live capture shape: a truncated frame list, a provider-side error and an out-of-frame box all fail closed", () => {
+  const files2 = [{ assetId: "live-asset", imageUrl: live[0].video_path }];
+  const truncated = structuredClone(live); truncated[0].frames.pop();
+  assert.throws(() => normalizeAiozVideoOutput(truncated, files2), /AIOZ_INVALID_OUTPUT/);
+  const failed = structuredClone(live); failed[0].status = "failed"; failed[0].error_message = "decode error";
+  assert.throws(() => normalizeAiozVideoOutput(failed, files2), /AIOZ_INVALID_OUTPUT/);
+  const outside = structuredClone(live); outside[0].frames[3].tracks = [{ track_id: 1, class_id: 0, class_name: "person", score: 0.5, bbox_xyxy: [300, 200, 400, 260] }];
+  assert.throws(() => normalizeAiozVideoOutput(outside, files2), /AIOZ_INVALID_BOUNDING_BOX/);
+});
+
 test("video class_name maps to the Annotation Platform label key", () => {
   const output = clone();
   output[0].frames[54].tracks[0].class_name = "dog";

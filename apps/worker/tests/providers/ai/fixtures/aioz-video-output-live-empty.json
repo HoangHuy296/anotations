@@ -1,0 +1,206 @@
+[
+ {
+  "fps": 15.0,
+  "width": 320,
+  "frames": [
+   {
+    "tracks": [],
+    "frame_id": 0
+   },
+   {
+    "tracks": [],
+    "frame_id": 1
+   },
+   {
+    "tracks": [],
+    "frame_id": 2
+   },
+   {
+    "tracks": [],
+    "frame_id": 3
+   },
+   {
+    "tracks": [],
+    "frame_id": 4
+   },
+   {
+    "tracks": [],
+    "frame_id": 5
+   },
+   {
+    "tracks": [],
+    "frame_id": 6
+   },
+   {
+    "tracks": [],
+    "frame_id": 7
+   },
+   {
+    "tracks": [],
+    "frame_id": 8
+   },
+   {
+    "tracks": [],
+    "frame_id": 9
+   },
+   {
+    "tracks": [],
+    "frame_id": 10
+   },
+   {
+    "tracks": [],
+    "frame_id": 11
+   },
+   {
+    "tracks": [],
+    "frame_id": 12
+   },
+   {
+    "tracks": [],
+    "frame_id": 13
+   },
+   {
+    "tracks": [],
+    "frame_id": 14
+   },
+   {
+    "tracks": [],
+    "frame_id": 15
+   },
+   {
+    "tracks": [],
+    "frame_id": 16
+   },
+   {
+    "tracks": [],
+    "frame_id": 17
+   },
+   {
+    "tracks": [],
+    "frame_id": 18
+   },
+   {
+    "tracks": [],
+    "frame_id": 19
+   },
+   {
+    "tracks": [],
+    "frame_id": 20
+   },
+   {
+    "tracks": [],
+    "frame_id": 21
+   },
+   {
+    "tracks": [],
+    "frame_id": 22
+   },
+   {
+    "tracks": [],
+    "frame_id": 23
+   },
+   {
+    "tracks": [],
+    "frame_id": 24
+   },
+   {
+    "tracks": [],
+    "frame_id": 25
+   },
+   {
+    "tracks": [],
+    "frame_id": 26
+   },
+   {
+    "tracks": [],
+    "frame_id": 27
+   },
+   {
+    "tracks": [],
+    "frame_id": 28
+   },
+   {
+    "tracks": [],
+    "frame_id": 29
+   },
+   {
+    "tracks": [],
+    "frame_id": 30
+   },
+   {
+    "tracks": [],
+    "frame_id": 31
+   },
+   {
+    "tracks": [],
+    "frame_id": 32
+   },
+   {
+    "tracks": [],
+    "frame_id": 33
+   },
+   {
+    "tracks": [],
+    "frame_id": 34
+   },
+   {
+    "tracks": [],
+    "frame_id": 35
+   },
+   {
+    "tracks": [],
+    "frame_id": 36
+   },
+   {
+    "tracks": [],
+    "frame_id": 37
+   },
+   {
+    "tracks": [],
+    "frame_id": 38
+   },
+   {
+    "tracks": [],
+    "frame_id": 39
+   },
+   {
+    "tracks": [],
+    "frame_id": 40
+   },
+   {
+    "tracks": [],
+    "frame_id": 41
+   },
+   {
+    "tracks": [],
+    "frame_id": 42
+   },
+   {
+    "tracks": [],
+    "frame_id": 43
+   },
+   {
+    "tracks": [],
+    "frame_id": 44
+   }
+  ],
+  "height": 240,
+  "status": "success",
+  "model_name": "bytetrack_yolox_s_coco",
+  "video_path": "https://storage.test/live-capture.mp4",
+  "class_names": [
+   "person",
+   "bicycle",
+   "car",
+   "motorcycle",
+   "airplane",
+   "bus",
+   "train",
+   "truck",
+   "boat",
+   "traffic light"
+  ],
+  "total_frames": 45,
+  "error_message": null
+ }
+]
