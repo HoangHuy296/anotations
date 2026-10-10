@@ -114,6 +114,7 @@ if (role === 'probe') {
   const approved = new Set([
     'annotation-api/annotation-service.test.ts',
     'workspace/ai-label-reconcile.test.ts',
+    'workspace/video-update-schema.test.ts',
     'workspace/label-management.test.ts',
     'annotation-api/annotation-validation.test.ts',
     'annotation-api/annotation-create-authorization.test.ts',
