@@ -23,3 +23,16 @@ test("the catalog entry is pinned, and the entrypoint has the standard receipt g
   assert.match(source.split("\n")[0], /^import "\.\/db-safety\/test-entry\.cjs";/);
   assert.equal(source.includes("deny-entry"), false);
 });
+
+const TRACK_KEY = "cb29e022-1ba7-4349-9dce-4fb3074e84d6";
+test("the second sanctioned model is exactly ByteTrack VIDEO/TRACKING; models cannot be mixed or widened", async () => {
+  const { SANCTIONED_AIOZ_REGISTRATIONS, SANCTIONED_AIOZ_TRACKING_REGISTRATION } = await import("../../register-aioz-model-scope.ts");
+  assert.deepEqual({ ...SANCTIONED_AIOZ_TRACKING_REGISTRATION }, { provider: "aioz-company", key: TRACK_KEY, displayName: "ByteTrack YOLOX_S COCO", modality: "VIDEO", taskType: "TRACKING" });
+  assert.equal(SANCTIONED_AIOZ_REGISTRATIONS.length, 2);
+  assert.equal(requireSanctionedRegistration(["--apply", TRACK_KEY, "ByteTrack YOLOX_S COCO"]).taskType, "TRACKING");
+  for (const args of [["--apply", TRACK_KEY, "YOLO26s_COCO"], ["--apply", KEY, "ByteTrack YOLOX_S COCO"], ["--apply", TRACK_KEY], ["--apply", TRACK_KEY, "ByteTrack YOLOX_S COCO", "x"], ["--apply", TRACK_KEY.toUpperCase(), "ByteTrack YOLOX_S COCO"]]) {
+    assert.throws(() => requireSanctionedRegistration(args), RegistrationNotSanctionedError);
+  }
+  const catalog = JSON.parse(readFileSync(new URL("../commands.json", import.meta.url), "utf8"));
+  assert.deepEqual(catalog["seed:register-aioz-model:bytetrack-yolox-s-coco"], { kind: "seed", cwd: ".", args: ["--import", "tsx", "scripts/register-aioz-model.ts", "--apply", TRACK_KEY, "ByteTrack YOLOX_S COCO"] });
+});
