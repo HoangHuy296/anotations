@@ -2,13 +2,15 @@ import { z } from "zod";
 import type { PrismaClient } from "../../../../../lib/generated/prisma/client.js";
 
 /** Explicit operator declaration, not inference from upstream modality/name. */
-const registrationSchema = z.object({
+const registrationBase = {
   key: z.string().uuid(),
   displayName: z.string().trim().min(1).max(256),
   provider: z.literal("aioz-company"),
-  modality: z.literal("IMAGE"),
-  taskType: z.literal("DETECTION"),
-}).strict();
+};
+const registrationSchema = z.union([
+  z.object({ ...registrationBase, modality: z.literal("IMAGE"), taskType: z.literal("DETECTION") }).strict(),
+  z.object({ ...registrationBase, modality: z.literal("VIDEO"), taskType: z.literal("TRACKING") }).strict(),
+]);
 
 export class AiozRegistrationError extends Error {
   constructor(readonly code: "AIOZ_MODEL_CAPABILITY_UNSUPPORTED" | "AIOZ_MODEL_REGISTRATION_CONFLICT") {
