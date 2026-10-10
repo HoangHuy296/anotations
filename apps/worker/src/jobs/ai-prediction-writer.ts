@@ -72,38 +72,30 @@ export async function handleAiTaskCompleted(
       const resolution = await resolveAiClassLabels(tx, aiTask.datasetId, "IMAGE", inScope.map((prediction) => prediction.labelKey));
       labelsCreated = resolution.created.length;
       labelConflicts = [...resolution.conflicts];
+      // AI output changes reviewable content too. Claim each parent Asset once, FIRST: the row lock this takes is held to commit, so a concurrent task over
+      // the same asset waits here and then sees this task's rows when it reads the fingerprints below (no duplicate under a race). A review-frozen Asset is
+      // skipped rather than receiving late predictions, and no queue payload changes.
+      const claimedAssets = new Set<string>();
+      for (const assetId of new Set(inScope.map((prediction) => prediction.assetId))) {
+        const claimed = await tx.asset.updateMany({
+          where: { id: assetId, datasetId: aiTask.datasetId, modality: "IMAGE", deletedAt: null, archivedAt: null, status: { notIn: ["NEEDS_REVIEW", "REVIEWED", "REJECTED"] } },
+          data: { revision: { increment: 1 } },
+        });
+        if (claimed.count === 1) claimedAssets.add(assetId);
+      }
       // Identical detections already persisted for these assets by an earlier task are skipped, not duplicated (edited/relabeled rows still count).
       const knownByAsset = new Map<string, Set<string>>();
-      for (const assetId of new Set(inScope.map((prediction) => prediction.assetId))) {
+      for (const assetId of claimedAssets) {
         const rows = await tx.annotation.findMany({ where: { assetId, datasetId: aiTask.datasetId, source: "AI", modality: "IMAGE" }, select: { properties: true } });
         knownByAsset.set(assetId, new Set(rows.map((row) => (row.properties as { resultFingerprint?: unknown } | null)?.resultFingerprint).filter((v): v is string => typeof v === "string")));
       }
-      const claimedAssets = new Set<string>();
       for (const [predictionIndex, prediction] of inScope.entries()) {
+        if (!claimedAssets.has(prediction.assetId)) continue;
         const canonical = canonicalAiLabelKey(prediction.labelKey);
         const label = { id: canonical ? resolution.labelIds.get(canonical.key) ?? null : null };
         const resultFingerprint = aiResultFingerprint({ modelKey: aiTask.modelKeySnapshot, assetId: prediction.assetId, classKey: canonical ? canonical.key : "unknown", frames: [{ box: prediction.boundingBoxes as never }] });
         const known = knownByAsset.get(prediction.assetId)!;
         if (known.has(resultFingerprint)) { skippedAsDuplicateTotal++; continue; }
-
-        // AI output changes reviewable content too. Claim each parent Asset
-        // once in this transaction; a review-frozen Asset is skipped rather
-        // than receiving late predictions, and no queue payload changes.
-        if (!claimedAssets.has(prediction.assetId)) {
-          const claimed = await tx.asset.updateMany({
-            where: {
-              id: prediction.assetId,
-              datasetId: aiTask.datasetId,
-              modality: "IMAGE",
-              deletedAt: null,
-              archivedAt: null,
-              status: { notIn: ["NEEDS_REVIEW", "REVIEWED", "REJECTED"] },
-            },
-            data: { revision: { increment: 1 } },
-          });
-          if (claimed.count !== 1) continue;
-          claimedAssets.add(prediction.assetId);
-        }
 
         await tx.annotation.create({
           data: {
