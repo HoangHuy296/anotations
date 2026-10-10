@@ -704,17 +704,12 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
         {selectedKeyframe && showsPersistedOverlay ? (() => {
           const geometry = playbackState === "paused" ? draftGeometry ?? selectedKeyframe.geometry : selectedKeyframe.geometry;
           const resizeCursor: Record<"nw" | "ne" | "sw" | "se", string> = { nw: "cursor-nw-resize", ne: "cursor-ne-resize", sw: "cursor-sw-resize", se: "cursor-se-resize" };
-          // Preserves the objectId a user typed into the create-annotation
-          // dialog (stored on the Track's own `properties.objectId`, see
-          // `confirmPendingBox`) as a tag anchored to the box's top-left
-          // corner, so it stays identifiable on the frame after saving. The
-          // tag/border color distinguishes shapes by label (falling back to
-          // the previous fixed sky-blue when none is assigned) -- the tag's
-          // text is always the objectId, never the label.
-          const objectId = typeof selectedTrack?.properties.objectId === "string" && selectedTrack.properties.objectId ? selectedTrack.properties.objectId : null;
-          const labelColor = selectedTrack?.label?.color ?? "#38bdf8";
-          return <div aria-label="Selected video keyframe" className="absolute border-2" style={{ left: `${geometry.x * 100}%`, top: `${geometry.y * 100}%`, width: `${geometry.width * 100}%`, height: `${geometry.height * 100}%`, borderColor: labelColor }}>
-            {objectId ? <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: labelColor }}>{objectId}</span> : null}
+          // The tag above the selected box is the same effective label/class the other boxes show (assigned label, matching dataset label, or the AI class;
+          // `unlabeled` only when none exists) -- never a track id or the objectId. The objectId stays in the Track's properties and the Tracks tab.
+          const selectedDisplay = resolveDisplayLabel({ assigned: selectedTrack?.label ?? null, trackProperties: selectedTrack?.properties, keyframeProperties: selectedKeyframe.properties, datasetLabels, modality: "VIDEO" });
+          const labelColor = selectedDisplay.color ?? "#38bdf8";
+          return <div aria-label="Selected video keyframe" data-track-id={selectedTrack?.id} className="absolute border-2" style={{ left: `${geometry.x * 100}%`, top: `${geometry.y * 100}%`, width: `${geometry.width * 100}%`, height: `${geometry.height * 100}%`, borderColor: labelColor }}>
+            <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: labelColor }} data-ai-display-label={selectedDisplay.source}>{boxLabelText(selectedDisplay)}</span>
             <div aria-label="Move keyframe" className="absolute inset-0 cursor-move" onPointerDown={(event) => beginGeometryDrag(event, "move")} />
             {(["nw", "ne", "sw", "se"] as const).map((corner) => <div key={corner} aria-label={`Resize keyframe ${corner}`} onPointerDown={(event) => beginGeometryDrag(event, corner)} className={`absolute size-2.5 rounded-full border border-sky-100 bg-sky-400 ${resizeCursor[corner]} ${corner.includes("n") ? "-top-1" : "-bottom-1"} ${corner.includes("w") ? "-left-1" : "-right-1"}`} />)}
           </div>;
