@@ -35,7 +35,10 @@ export function pickLabelLibraryDataset(datasets: LabelLibraryDataset[], request
   return datasets.find((dataset) => dataset.id === requestedId) ?? datasets[0] ?? null;
 }
 
-/** The default IMAGE categories are reference data for IMAGE datasets only; opening a TEXT, VIDEO or AUDIO taxonomy must never write them. */
+/**
+ * The default object categories (object, person, vehicle, animal, text, aidetect) are reference data for the two modalities whose workspaces annotate objects: IMAGE and VIDEO
+ * (the VIDEO workspace and AI Tracking use the same taxonomy). Opening a TEXT or AUDIO taxonomy, or an unresolved Dataset, must never write them.
+ */
 export function shouldBackfillDefaultImageLabels(modality: Modality | null): boolean {
-  return modality === "IMAGE";
+  return modality === "IMAGE" || modality === "VIDEO";
 }

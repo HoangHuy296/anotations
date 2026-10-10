@@ -64,8 +64,8 @@ test("the shown dataset is chosen from the user's own list: a foreign or unknown
   assert.equal(pickLabelLibraryDataset([], "o1"), null);
 });
 
-test("default IMAGE categories are written only into IMAGE datasets, never into TEXT, VIDEO, AUDIO or unresolved ones", () => {
-  assert.deepEqual([Modality.IMAGE, Modality.TEXT, Modality.VIDEO, Modality.AUDIO, null].map(shouldBackfillDefaultImageLabels), [true, false, false, false, false]);
+test("default object categories are written into IMAGE and VIDEO datasets only, never into TEXT, AUDIO or unresolved ones", () => {
+  assert.deepEqual([Modality.IMAGE, Modality.VIDEO, Modality.TEXT, Modality.AUDIO, null].map(shouldBackfillDefaultImageLabels), [true, true, false, false, false]);
   assert.match(page, /dataset && shouldBackfillDefaultImageLabels\(dataset\.modality\)/, "the page applies the rule before backfilling");
 });
 
