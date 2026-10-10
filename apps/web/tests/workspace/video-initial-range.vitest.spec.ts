@@ -23,3 +23,14 @@ describe("initial loaded range of a server-rendered annotation page", () => {
     expect(initialLoadedRange(page(true, []))).toEqual({ fromMs: 0, toMs: 0 });
   });
 });
+
+describe("window bookkeeping that matches a re-applied server page", () => {
+  it("seeds exactly the page's ranges and ids; a truncated page is not claimed as a full window", async () => {
+    const { seedWindowBookkeeping } = await import("@/lib/annotations/video-window-ranges");
+    const seeded = seedWindowBookkeeping({ effectiveFromMs: 0, effectiveToMs: 30_000, hasMore: true, keyframes: [{ id: "k1", timestampMs: 100 }, { id: "k2", timestampMs: 6_800 }], tracks: [{ id: "t1" }] });
+    expect(seeded.loadedRanges).toEqual([{ fromMs: 0, toMs: 6_799 }]);
+    expect(seeded.ledger).toEqual([{ range: { fromMs: 0, toMs: 6_799 }, keyframeIds: ["k1", "k2"], trackIds: ["t1"] }]);
+    const complete = seedWindowBookkeeping({ effectiveFromMs: 0, effectiveToMs: 30_000, hasMore: false, keyframes: [], tracks: [] });
+    expect(complete.loadedRanges).toEqual([{ fromMs: 0, toMs: 30_000 }]);
+  });
+});

@@ -69,3 +69,14 @@ export function initialLoadedRange(page: { effectiveFromMs: number; effectiveToM
   const last = page.keyframes.reduce((max, keyframe) => Math.max(max, keyframe.timestampMs), page.effectiveFromMs);
   return { fromMs: page.effectiveFromMs, toMs: Math.min(page.effectiveToMs, Math.max(page.effectiveFromMs, last - 1)) };
 }
+
+export type WindowLedgerEntry = { range: TimeRange; keyframeIds: string[]; trackIds: string[] };
+
+/**
+ * The coverage bookkeeping that matches a store holding exactly this server-rendered page. Used both to seed the engine and to RESET it whenever the page is
+ * re-applied to the store (the store is replaced wholesale then, so any earlier window cached beyond this page is gone and must not stay marked as loaded).
+ */
+export function seedWindowBookkeeping(page: { effectiveFromMs: number; effectiveToMs: number; hasMore: boolean; keyframes: ReadonlyArray<{ id: string; timestampMs: number }>; tracks: ReadonlyArray<{ id: string }> }): { loadedRanges: TimeRange[]; ledger: WindowLedgerEntry[] } {
+  const range = initialLoadedRange(page);
+  return { loadedRanges: [range], ledger: [{ range, keyframeIds: page.keyframes.map((keyframe) => keyframe.id), trackIds: page.tracks.map((track) => track.id) }] };
+}

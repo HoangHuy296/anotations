@@ -19,7 +19,7 @@ import { createVideoPlaybackController, type VideoPlaybackController } from "@/l
 import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotations/video-time";
 import { deriveInterpolationAt } from "@/lib/annotations/video-interpolation";
 import { VIDEO_ANNOTATION_LIMITS } from "@/lib/annotations/video-limits";
-import { distanceFromRange, isCovered, mergeRange, windowAround, type TimeRange, initialLoadedRange } from "@/lib/annotations/video-window-ranges";
+import { distanceFromRange, isCovered, mergeRange, windowAround, type TimeRange, type WindowLedgerEntry, seedWindowBookkeeping } from "@/lib/annotations/video-window-ranges";
 
 type VideoEngineProps = {
   video: { id: string; filename: string; description: string | null; status: string };
@@ -96,7 +96,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // that instead of assuming the whole asset loaded. Pure bookkeeping, not
   // render state: nothing here is read during render, only by
   // `ensureWindowLoaded`/`evictFarWindows` below, so refs are enough.
-  const loadedRangesRef = useRef<TimeRange[]>([initialLoadedRange(annotations)]);
+  const loadedRangesRef = useRef<TimeRange[]>(seedWindowBookkeeping(annotations).loadedRanges);
   const fetchingWindowsRef = useRef(new Set<string>());
   // One entry per completed `mergeWindow` fetch, recording exactly which ids
   // it contributed -- eviction needs to remove *those specific* ids, never a
@@ -105,9 +105,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // `applyAiResults`'s `mergeAiResults` merge below -- AI-detect results are
   // new content the user just added this session, not passive read-ahead
   // cache, and are therefore never eviction candidates.
-  const windowLedgerRef = useRef<Array<{ range: TimeRange; keyframeIds: string[]; trackIds: string[] }>>([
-    { range: initialLoadedRange(annotations), keyframeIds: annotations.keyframes.map((k) => k.id), trackIds: annotations.tracks.map((t) => t.id) },
-  ]);
+  const windowLedgerRef = useRef<WindowLedgerEntry[]>(seedWindowBookkeeping(annotations).ledger);
   // Mirrors `selectedTrackId` (declared below) for `evictFarWindows`, which
   // is a stable `useCallback` and must not go stale by closing over state
   // directly.
@@ -302,7 +300,13 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
 
   useEffect(() => {
     setSnapshot(annotations.tracks, annotations.keyframes);
-  }, [annotations.keyframes, annotations.tracks, setSnapshot]);
+    // Re-applying the server page replaces the store, so windows fetched earlier (beyond this page) are gone: reset the coverage bookkeeping to what the
+    // store now holds and re-cover the playhead, instead of leaving them marked loaded while their boxes silently disappear (dense datasets).
+    const seeded = seedWindowBookkeeping(annotations);
+    loadedRangesRef.current = seeded.loadedRanges;
+    windowLedgerRef.current = seeded.ledger;
+    ensureWindowLoaded(useVideoAnnotationStore.getState().currentTimeMs, resolveVideoTimelineDurationMs(readiness.video));
+  }, [annotations, readiness.video, setSnapshot, ensureWindowLoaded]);
   // The AI dialog owns pending-task lookup and polling but only mounts for the
   // "aidetect" tool, which resets on remount. Re-open it when this Dataset
   // still has an in-flight task for this video so the pending status shows.
