@@ -64,10 +64,26 @@ test("default labels are written for IMAGE and VIDEO datasets only; TEXT, AUDIO 
       assert.deepEqual(await ensureDefaultImageLabels(owner, dataset.id), { ok: true, created: expected }, modality);
       assert.deepEqual(await ensureDefaultImageLabels(owner, dataset.id), { ok: true, created: 0 }, `${modality} replay`);
       assert.equal(await db.label.count({ where: { datasetId: dataset.id } }), expected, `${modality} stored labels`);
+      if (expected > 0) assert.equal(await db.label.count({ where: { datasetId: dataset.id, modality } }), expected, `${modality} defaults carry the Dataset modality`);
     }
     const unresolved = await db.dataset.create({ data: { ownerId: owner.id, name: `unresolved-${Date.now()}`, modality: null }, select: { id: true } });
     datasets.push(unresolved.id);
     assert.deepEqual(await ensureDefaultImageLabels(owner, unresolved.id), { ok: true, created: 0 });
     assert.equal(await db.label.count({ where: { datasetId: unresolved.id } }), 0);
   } finally { await cleanupWorkspaceFixture([owner.id], datasets); }
+});
+
+test("a VIDEO dataset whose defaults were stored as IMAGE is repaired in place without duplicating or losing labels", { skip: !enabled }, async () => {
+  const owner = await createWorkspaceUser(UserRole.MANAGER);
+  const dataset = await createWorkspaceDataset(owner.id, "VIDEO");
+  try {
+    await db.label.createMany({ data: ["person", "object"].map((name) => ({ datasetId: dataset.id, modality: "IMAGE" as const, name, normalizedName: name, color: "#123456" })) });
+    const before = await db.label.findMany({ where: { datasetId: dataset.id }, select: { id: true, normalizedName: true } });
+    assert.deepEqual(await ensureDefaultImageLabels(owner, dataset.id), { ok: true, created: 4 });
+    const after = await db.label.findMany({ where: { datasetId: dataset.id }, select: { id: true, normalizedName: true, modality: true, color: true } });
+    assert.equal(after.length, 6);
+    assert.ok(after.every((label) => label.modality === "VIDEO"));
+    for (const old of before) assert.ok(after.some((label) => label.id === old.id && label.normalizedName === old.normalizedName), `${old.normalizedName} keeps its id`);
+    assert.deepEqual(await ensureDefaultImageLabels(owner, dataset.id), { ok: true, created: 0 });
+  } finally { await cleanupWorkspaceFixture([owner.id], [dataset.id]); }
 });
