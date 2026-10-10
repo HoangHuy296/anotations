@@ -1006,7 +1006,8 @@
       "--pool=threads",
       "--environment",
       "node",
-      "tests/workspace/video-display-label.vitest.spec.ts"
+      "tests/workspace/video-display-label.vitest.spec.ts",
+      "tests/workspace/video-initial-range.vitest.spec.ts"
     ]
   },
   "web:test:annotation-persistence": {

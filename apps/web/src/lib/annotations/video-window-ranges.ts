@@ -57,3 +57,15 @@ export function distanceFromRange(ms: number, range: TimeRange): number {
   if (ms > range.toMs) return ms - range.toMs;
   return 0;
 }
+
+/**
+ * What a server-rendered (single-page) annotation payload has genuinely loaded. A page holds at most `keyframesPerPage` keyframes ordered by time, so when
+ * `hasMore` is set only `[from, lastKeyframe)` is complete -- claiming the whole requested window would leave its remainder unfetched and invisible (dense
+ * datasets, e.g. several AI runs over one clip, ended their first page seconds into the 30 s window). One millisecond is held back so keyframes sharing the
+ * last timestamp across the page boundary are refetched (the store merges by id).
+ */
+export function initialLoadedRange(page: { effectiveFromMs: number; effectiveToMs: number; hasMore: boolean; keyframes: ReadonlyArray<{ timestampMs: number }> }): TimeRange {
+  if (!page.hasMore) return { fromMs: page.effectiveFromMs, toMs: page.effectiveToMs };
+  const last = page.keyframes.reduce((max, keyframe) => Math.max(max, keyframe.timestampMs), page.effectiveFromMs);
+  return { fromMs: page.effectiveFromMs, toMs: Math.min(page.effectiveToMs, Math.max(page.effectiveFromMs, last - 1)) };
+}

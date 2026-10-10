@@ -19,7 +19,7 @@ import { createVideoPlaybackController, type VideoPlaybackController } from "@/l
 import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotations/video-time";
 import { deriveInterpolationAt } from "@/lib/annotations/video-interpolation";
 import { VIDEO_ANNOTATION_LIMITS } from "@/lib/annotations/video-limits";
-import { distanceFromRange, isCovered, mergeRange, windowAround, type TimeRange } from "@/lib/annotations/video-window-ranges";
+import { distanceFromRange, isCovered, mergeRange, windowAround, type TimeRange, initialLoadedRange } from "@/lib/annotations/video-window-ranges";
 
 type VideoEngineProps = {
   video: { id: string; filename: string; description: string | null; status: string };
@@ -96,7 +96,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // that instead of assuming the whole asset loaded. Pure bookkeeping, not
   // render state: nothing here is read during render, only by
   // `ensureWindowLoaded`/`evictFarWindows` below, so refs are enough.
-  const loadedRangesRef = useRef<TimeRange[]>([{ fromMs: annotations.effectiveFromMs, toMs: annotations.effectiveToMs }]);
+  const loadedRangesRef = useRef<TimeRange[]>([initialLoadedRange(annotations)]);
   const fetchingWindowsRef = useRef(new Set<string>());
   // One entry per completed `mergeWindow` fetch, recording exactly which ids
   // it contributed -- eviction needs to remove *those specific* ids, never a
@@ -106,7 +106,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // new content the user just added this session, not passive read-ahead
   // cache, and are therefore never eviction candidates.
   const windowLedgerRef = useRef<Array<{ range: TimeRange; keyframeIds: string[]; trackIds: string[] }>>([
-    { range: { fromMs: annotations.effectiveFromMs, toMs: annotations.effectiveToMs }, keyframeIds: annotations.keyframes.map((k) => k.id), trackIds: annotations.tracks.map((t) => t.id) },
+    { range: initialLoadedRange(annotations), keyframeIds: annotations.keyframes.map((k) => k.id), trackIds: annotations.tracks.map((t) => t.id) },
   ]);
   // Mirrors `selectedTrackId` (declared below) for `evictFarWindows`, which
   // is a stable `useCallback` and must not go stale by closing over state
