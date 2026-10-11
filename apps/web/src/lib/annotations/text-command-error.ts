@@ -25,6 +25,7 @@ const MESSAGES: Record<string, string> = {
   WORKFLOW_LOCKED: "This asset's review state does not allow edits right now.",
   DATASET_LOCKED: "Another change to this dataset is in progress. Try again in a moment.",
   FORBIDDEN: "You do not have permission for this action.",
+  CROSS_ORIGIN: "Saving was blocked: the address of this page does not match the address the server received. Reload from the address you normally use; behind a proxy, the Host header must be forwarded unchanged.",
   NOT_FOUND: "That resource could not be found.",
   DUPLICATE_SPAN: "An identical span already exists.",
   DUPLICATE_RELATION: "An identical relation already exists.",
