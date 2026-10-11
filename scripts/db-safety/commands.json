@@ -886,6 +886,18 @@
       "YOLO26s_COCO"
     ]
   },
+  "seed:register-aioz-model:bytetrack-yolox-s-coco": {
+    "kind": "seed",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/register-aioz-model.ts",
+      "--apply",
+      "cb29e022-1ba7-4349-9dce-4fb3074e84d6",
+      "ByteTrack YOLOX_S COCO"
+    ]
+  },
   "web:test:media-processing-client:vitest": {
     "kind": "test",
     "cwd": "apps/web",

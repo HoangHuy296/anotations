@@ -16,13 +16,20 @@ import { isDeepStrictEqual } from 'node:util';
 import * as guard from '../db-safety/guard.mjs';
 
 const ROOT = resolve(import.meta.dirname, '../..');
-const COMMAND = 'seed:register-aioz-model:yolo26s-coco';
-const KEY = '68d7f474-6982-446c-8c5a-121d56d12dc9', NAME = 'YOLO26s_COCO';
+const must = (ok, code, detail) => { if (!ok) throw Object.assign(Error(code), { detail }); };
+// Reviewed, exact models (no wildcard): `--model yolo` (default, IMAGE/DETECTION) or `--model bytetrack` (VIDEO/TRACKING).
+const MODELS = Object.freeze({
+  yolo: { command: 'seed:register-aioz-model:yolo26s-coco', key: '68d7f474-6982-446c-8c5a-121d56d12dc9', name: 'YOLO26s_COCO', modality: 'IMAGE', taskType: 'DETECTION' },
+  bytetrack: { command: 'seed:register-aioz-model:bytetrack-yolox-s-coco', key: 'cb29e022-1ba7-4349-9dce-4fb3074e84d6', name: 'ByteTrack YOLOX_S COCO', modality: 'VIDEO', taskType: 'TRACKING' },
+});
+const modelFlag = (process.argv.includes('--model') ? process.argv[process.argv.indexOf('--model') + 1] : 'yolo');
+must(Object.hasOwn(MODELS, modelFlag), 'MODEL_NOT_SANCTIONED');
+const MODEL = MODELS[modelFlag];
+const COMMAND = MODEL.command, KEY = MODEL.key, NAME = MODEL.name;
 const PINNED_SPEC = { kind: 'seed', cwd: '.', args: ['--import', 'tsx', 'scripts/register-aioz-model.ts', '--apply', KEY, NAME] };
 const OTHER_KEY = '11111111-1111-4111-8111-111111111111';
 const MINIO_IMAGE = 'minio/minio:RELEASE.2025-04-22T22-12-26Z';
 const sha = value => createHash('sha256').update(value).digest('hex');
-const must = (ok, code, detail) => { if (!ok) throw Object.assign(Error(code), { detail }); };
 const argv = process.argv.slice(2);
 const mode = argv[0];
 const flag = name => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : null);
@@ -33,7 +40,7 @@ const secrets = new Set();
 const redact = text => { let out = guard.redact(text); for (const s of secrets) if (s) out = out.split(s).join('[REDACTED]'); return out; };
 const abortCode = text => text.match(/SAFETY_ABORT (\S+)/)?.[1] ?? text.match(/(REGISTRATION_NOT_SANCTIONED|AIOZ_MODEL_REGISTRATION_CONFLICT|AIOZ_MODEL_CAPABILITY_UNSUPPORTED|DB_SAFETY_ENTRY_DENIED|AIOZ_MODEL_REGISTRATION_FAILED)/)?.[1] ?? null;
 
-const evidence = { schema: 'phase029-aioz-registration-g1/v1', mode, startedAt: new Date().toISOString(), command: COMMAND, checks: [], failure: null };
+const evidence = { schema: 'phase029-aioz-registration-g1/v1', mode, model: modelFlag, startedAt: new Date().toISOString(), command: COMMAND, checks: [], failure: null };
 const check = (id, pass, detail) => { evidence.checks.push({ id, pass: Boolean(pass), detail }); must(pass, `CHECK_FAILED_${id}`, detail); };
 const owned = [];
 const stage = mkdtempSync(join(tmpdir(), 'aioz-reg-')); chmodSync(stage, 0o700);
@@ -63,10 +70,10 @@ try {
   } else {
     const envFile = flag('--env-file'); must(envFile && existsSync(envFile), 'ENV_FILE_REQUIRED');
     const env = Object.fromEntries(readFileSync(envFile, 'utf8').split('\n').filter(l => /^[A-Za-z_][A-Za-z0-9_]*=/.test(l)).map(l => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]));
-    password = env.MVP_POSTGRES_PASSWORD; must(password && Number(env.MVP_POSTGRES_PORT || 55475) === 55475, 'MVP_POSTGRES_SETTINGS_INVALID'); secrets.add(password);
-    const inspected = JSON.parse(run('docker', ['inspect', 'phase029-g1-mvp-postgres']).stdout || '[]')[0];
+    password = env.MVP_POSTGRES_PASSWORD; const pgPort = Number(env.MVP_POSTGRES_PORT || 55475), pgName = env.MVP_POSTGRES_CONTAINER || 'phase029-g1-mvp-postgres'; must(password && pgPort >= 55460 && pgPort <= 55479 && ![55478, 55479].includes(pgPort) && /^phase029-g1-[a-z0-9]+-postgres$/.test(pgName), 'MVP_POSTGRES_SETTINGS_INVALID'); secrets.add(password);
+    const inspected = JSON.parse(run('docker', ['inspect', pgName]).stdout || '[]')[0];
     must(inspected?.State.Running, 'MVP_POSTGRES_NOT_RUNNING');
-    pg = { name: 'phase029-g1-mvp-postgres', id: inspected.Id, role: 'postgres', port: 55475, internalPort: 5432 };
+    pg = { name: pgName, id: inspected.Id, role: 'postgres', port: pgPort, internalPort: 5432 };
   }
   pg.systemIdentifier = run('docker', ['exec', pg.name, 'sh', '-c', 'LC_ALL=C pg_controldata "$PGDATA"']).stdout.match(/^Database system identifier:\s+(\d+)/m)?.[1];
   check('target-is-not-the-application-database', pg.systemIdentifier && pg.systemIdentifier !== guard.applicationSystem, { mode, systemIdentifier: pg.systemIdentifier });
@@ -77,7 +84,8 @@ try {
     must(r.status === 0, 'PSQL_FAILED', redact(r.stderr).slice(0, 200));
     return r.stdout.trim();
   };
-  const rows = () => JSON.parse(psql(`SELECT coalesce(json_agg(json_build_object('key',key,'displayName',"displayName",'provider',provider,'modality',modality::text,'taskType',"taskType"::text,'isActive',"isActive")),'[]'::json) FROM public."AiModel"`));
+  const allRows = () => JSON.parse(psql(`SELECT coalesce(json_agg(json_build_object('key',key,'displayName',"displayName",'provider',provider,'modality',modality::text,'taskType',"taskType"::text,'isActive',"isActive")),'[]'::json) FROM public."AiModel"`));
+  const rows = () => allRows().filter(r => r.key === KEY);
 
   // ---- reviewed bytes, config, and the isolated providers G1 requires for any seed receipt
   cpSync(join(ROOT, 'prisma/migrations'), join(stage, 'migrations'), { recursive: true });
@@ -86,12 +94,13 @@ try {
   writeFileSync(join(stage, 'prisma.config.ts'), `import {defineConfig} from ${JSON.stringify(join(ROOT, 'node_modules/prisma/config.js'))}; export default defineConfig(${JSON.stringify({ schema: join(stage, 'schema.prisma'), migrations: { path: join(stage, 'migrations') }, engine: 'classic', datasource: { url } })});`, { mode: 0o600 });
   const providerSecret = randomBytes(18).toString('hex'); secrets.add(providerSecret);
   const token = randomBytes(4).toString('hex');
-  const redis = startContainer('phase029-g1-aiozreg-redis', 'redis', 55477, 6379, 'redis:7-alpine', { cmd: ['redis-server', '--requirepass', providerSecret] });
+  const redis = startContainer('phase029-g1-aiozreg-redis', 'redis', 55479, 6379, 'redis:7-alpine', { cmd: ['redis-server', '--requirepass', providerSecret] });
   const minio = startContainer('phase029-g1-aiozreg-minio', 'minio', 55478, 9000, MINIO_IMAGE, { env: ['MINIO_ROOT_USER=g1' + token, `MINIO_ROOT_PASSWORD=${providerSecret}`], cmd: ['server', '/data'] });
-  const providers = { MINIO_ENDPOINT: 'http://127.0.0.1:55478', MINIO_ACCESS_KEY: 'g1' + token, MINIO_SECRET_KEY: providerSecret, MINIO_BUCKET: `g1-${token}`, REDIS_HOST: '127.0.0.1', REDIS_PORT: '55477', REDIS_PASSWORD: providerSecret, REDIS_DB: '0', BULLMQ_PREFIX: `g1-${token}` };
+  const providers = { MINIO_ENDPOINT: 'http://127.0.0.1:55478', MINIO_ACCESS_KEY: 'g1' + token, MINIO_SECRET_KEY: providerSecret, MINIO_BUCKET: `g1-${token}`, REDIS_HOST: '127.0.0.1', REDIS_PORT: '55479', REDIS_PASSWORD: providerSecret, REDIS_DB: '0', BULLMQ_PREFIX: `g1-${token}` };
   writeFileSync(join(stage, 'providers.json'), JSON.stringify(providers), { mode: 0o600 });
   waitFor('providers', () => run('docker', ['exec', redis.name, 'redis-cli', '-a', providerSecret, 'ping']).stdout.includes('PONG'));
   const migrationHashes = Object.fromEntries(guard.migrationFiles(join(stage, 'migrations')).map(file => [file, sha(readFileSync(file))]));
+  const chainLength = Object.keys(migrationHashes).length;
   const requestBase = () => ({ config: join(stage, 'prisma.config.ts'), configSha256: sha(readFileSync(join(stage, 'prisma.config.ts'))), postgres: pg, schemaSha256: sha(readFileSync(join(stage, 'schema.prisma'))), migrationHashes });
 
   let seq = 0;
@@ -127,9 +136,9 @@ try {
   if (mode === 'prove') {
     const deploy = issue('deploy', null);
     const d = run(process.execPath, [join(ROOT, 'scripts/db-safety/cli.mjs'), 'deploy'], { env: { ...base, DB_SAFETY_RECEIPT: deploy }, cwd: ROOT });
-    check('guarded-deploy-of-25-migrations', d.status === 0 && psql('SELECT count(*) FROM public._prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL') === '25', { status: d.status });
+    check('guarded-deploy-of-the-full-chain', d.status === 0 && psql('SELECT count(*) FROM public._prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL') === String(chainLength), { status: d.status, chainLength });
   } else {
-    check('mvp-target-has-the-25-migration-chain', psql('SELECT count(*) FROM public._prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL') === '25', 'history');
+    check('mvp-target-has-the-full-migration-chain', psql('SELECT count(*) FROM public._prisma_migrations WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL') === String(chainLength), { chainLength });
   }
   const before = rows();
   check('no-registration-exists-yet', before.length === 0, { rows: before.length });
@@ -169,7 +178,7 @@ try {
   // ---- the sanctioned registration (receipt bound), then an exact replay
   const first = launch(seedReceipt());
   check('sanctioned-registration-succeeds', first.status === 0 && /"created":true/.test(first.out), { status: first.status, code: first.code, created: /"created":true/.test(first.out) });
-  const exact = r => r.length === 1 && r[0].key === KEY && r[0].displayName === NAME && r[0].provider === 'aioz-company' && r[0].modality === 'IMAGE' && r[0].taskType === 'DETECTION' && r[0].isActive === true;
+  const exact = r => r.length === 1 && r[0].key === KEY && r[0].displayName === NAME && r[0].provider === 'aioz-company' && r[0].modality === MODEL.modality && r[0].taskType === MODEL.taskType && r[0].isActive === true;
   check('exactly-one-active-registration-for-the-canonical-model', exact(rows()), rows());
   const replay = launch(seedReceipt());
   check('replay-is-idempotent-no-duplicate', replay.status === 0 && /"created":false/.test(replay.out) && exact(rows()), { status: replay.status, created: /"created":false/.test(replay.out), rows: rows().length });
@@ -193,7 +202,7 @@ try {
   evidence.cleanup = { removed: owned.length, remaining: run('docker', ['ps', '-a', '--format', '{{.Names}}', '--filter', 'name=phase029-g1-aiozreg']).stdout.trim().split('\n').filter(Boolean) };
   rmSync(stage, { recursive: true, force: true });
   evidence.finishedAt = new Date().toISOString();
-  const out = resolve(join(ROOT, 'specs/029-modality-specific-datasets/verification/mvp-aioz', `aioz-registration-${mode}-${evidence.startedAt.replace(/[-:.]/g, '').slice(0, 15)}Z`));
+  const out = resolve(join(ROOT, 'specs/029-modality-specific-datasets/verification/mvp-aioz', `aioz-registration-${modelFlag}-${mode}-${evidence.startedAt.replace(/[-:.]/g, '').slice(0, 15)}Z`));
   mkdirSync(out, { recursive: true, mode: 0o700 });
   const text = JSON.stringify(evidence, null, 2) + '\n';
   for (const s of secrets) must(!s || !text.includes(s), 'SECRET_IN_EVIDENCE');
