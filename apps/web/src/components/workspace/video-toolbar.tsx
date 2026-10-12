@@ -4,6 +4,12 @@ import { Pause, Play, PlusCircle, FloppyDisk, TrashSimple, VideoCamera } from "@
 import type { SafeVideoAnnotations, SafeVideoTrack } from "@/types/video-annotation";
 import { resolveVideoKeyframeDisplayState } from "@/lib/workspace/video-keyframe-state";
 
+/**
+ * The bottom "Video track controls" bar (create track, track selector, add keyframe, save, delete) is hidden for now (owner request). Set to `true` to
+ * restore it unchanged. Tracks, keyframes and labels remain manageable from the Tracks tab; boxes can still be drawn with the box tool.
+ */
+const SHOW_TRACK_CONTROLS_BAR = false;
+
 export type VideoToolbarProps = {
   /** Effective label text for a track (assigned label, matching dataset label, or the AI class); `null` falls back to the track name. */
   trackDisplayLabel?: (track: SafeVideoTrack) => string | null;
@@ -115,28 +121,31 @@ export function VideoToolbar({
         <button type="button" title="Next keyframe" aria-label="Next keyframe" disabled={!hasTrackKeyframes} onClick={onNextKeyframe} className="rounded border border-zinc-700 px-1.5 py-1 text-[11px] disabled:opacity-50">KF▶</button>
       </div>
       <TimelineTrack annotations={annotations} durationMs={durationMs} currentTimeMs={currentTimeMs} selectedKeyframeId={selectedKeyframeId} mutationState={mutationState} onSelectKeyframe={onSelectKeyframe} onSelectDerived={onSelectDerived} onSeek={onSeek} />
-      <div className="-mx-3 -mb-2 mt-2 flex flex-wrap items-center gap-1.5 border-t border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[11px]" aria-label="Video track controls">
-        <IconButton label="Create track" onClick={onCreateTrack} disabled={!canCreateTrack} tone="neutral"><PlusCircle size={16} /></IconButton>
-        <label className="inline-flex items-center gap-1 text-zinc-400">
-          <VideoCamera aria-hidden="true" size={14} />
-          <span className="sr-only">Select track</span>
-          <select
-            value={selectedTrackId ?? ""}
-            onChange={(event) => onSelectTrack(event.target.value)}
-            className="h-8 max-w-36 rounded-lg border border-zinc-700 bg-zinc-800 px-2 text-zinc-200 outline-none"
-          >
-            <option value="">No track</option>
-            {tracks.map((track) => (
-              <option key={track.id} value={track.id}>{trackDisplayLabel?.(track) ?? track.label?.name ?? track.name ?? track.id.slice(0, 8)}</option>
-            ))}
-          </select>
-        </label>
-        <span className="mx-0.5 h-5 w-px bg-zinc-800" aria-hidden="true" />
-        <IconButton label="Add keyframe at current time" onClick={onAddKeyframeHere} disabled={!canAddKeyframe} tone="violet">KF</IconButton>
-        <IconButton label="Save track" onClick={onSaveTrack} disabled={!canSaveTrack} tone="emerald"><FloppyDisk size={15} /></IconButton>
-        <IconButton label="Delete track" onClick={onDeleteTrack} disabled={!canDeleteTrack} tone="rose"><TrashSimple size={15} /></IconButton>
-        {actionError ? <span role="alert" className="text-rose-300">{actionError}</span> : null}
-      </div>
+      {SHOW_TRACK_CONTROLS_BAR ? (
+        <div className="-mx-3 -mb-2 mt-2 flex flex-wrap items-center gap-1.5 border-t border-zinc-800 bg-zinc-900 px-3 py-1.5 text-[11px]" aria-label="Video track controls">
+          <IconButton label="Create track" onClick={onCreateTrack} disabled={!canCreateTrack} tone="neutral"><PlusCircle size={16} /></IconButton>
+          <label className="inline-flex items-center gap-1 text-zinc-400">
+            <VideoCamera aria-hidden="true" size={14} />
+            <span className="sr-only">Select track</span>
+            <select
+              value={selectedTrackId ?? ""}
+              onChange={(event) => onSelectTrack(event.target.value)}
+              className="h-8 max-w-36 rounded-lg border border-zinc-700 bg-zinc-800 px-2 text-zinc-200 outline-none"
+            >
+              <option value="">No track</option>
+              {tracks.map((track) => (
+                <option key={track.id} value={track.id}>{trackDisplayLabel?.(track) ?? track.label?.name ?? track.name ?? track.id.slice(0, 8)}</option>
+              ))}
+            </select>
+          </label>
+          <span className="mx-0.5 h-5 w-px bg-zinc-800" aria-hidden="true" />
+          <IconButton label="Add keyframe at current time" onClick={onAddKeyframeHere} disabled={!canAddKeyframe} tone="violet">KF</IconButton>
+          <IconButton label="Save track" onClick={onSaveTrack} disabled={!canSaveTrack} tone="emerald"><FloppyDisk size={15} /></IconButton>
+          <IconButton label="Delete track" onClick={onDeleteTrack} disabled={!canDeleteTrack} tone="rose"><TrashSimple size={15} /></IconButton>
+        </div>
+      ) : null}
+      {/* Errors from any track/keyframe action stay visible even while the bar is hidden. */}
+      {actionError ? <div role="alert" className="mt-2 text-[11px] text-rose-300">{actionError}</div> : null}
     </div>
   );
 }

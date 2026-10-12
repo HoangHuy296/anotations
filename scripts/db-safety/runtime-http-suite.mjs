@@ -26,6 +26,7 @@ export const WORKSPACE_INTEGRATION_FILES = Object.freeze([
   'annotation-api/text-generic-reader.test.ts',
   'workspace/video-update-schema.test.ts',
   'workspace/label-management.test.ts',
+  'workspace/dataset-library-counts.test.ts',
   'text-annotations/text-classification-commands.test.ts',
   'text-annotations/text-classification-races.test.ts',
   'text-annotations/text-command-foundation.test.ts',
