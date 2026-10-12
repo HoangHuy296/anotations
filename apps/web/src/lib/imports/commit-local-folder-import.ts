@@ -3,7 +3,10 @@ import "server-only";
 import { JobStage, JobStatus, PreparedImportStatus } from "@internal/db";
 
 import type { RequestActor } from "@/lib/auth";
+import { importVerificationTailEnd } from "@annotationplatform/domain/media-verification";
+
 import { db } from "@/lib/db";
+import { computeFolderAggregate, folderCounts } from "@/lib/imports/folder-accounting";
 import { requireImportJobAccess } from "@/lib/imports/authorization";
 
 export async function commitLocalFolderImport(actor: RequestActor, jobId: string) {
@@ -21,20 +24,17 @@ export async function commitLocalFolderImport(actor: RequestActor, jobId: string
   if (job.status !== JobStatus.RUNNING && job.status !== JobStatus.RETRYING) return { ok: false as const, status: 409 as const };
   return db.$transaction(async (tx) => {
     const preparation = await tx.preparedImport.findUnique({ where: { jobId }, select: { id: true, status: true, expectedItemCount: true, deadlineAt: true } });
-    if (!preparation || preparation.status === PreparedImportStatus.EXPIRED || preparation.deadlineAt <= new Date()) return { ok: false as const, status: 409 as const };
-    const linkedItems = await tx.preparedImportItem.findMany({ where: { preparedImportId: preparation.id, assetId: { not: null } }, select: { id: true, assetId: true } });
-    const completed = linkedItems.length;
-    const events = await tx.jobEvent.findMany({ where: { jobId, message: { in: ["IMPORT_ITEM_SUCCEEDED", "IMPORT_ITEM_REJECTED", "IMPORT_ITEM_RETRYABLE"] } }, select: { message: true, data: true } });
-    const linkedIds = new Set(linkedItems.map((item) => item.id));
-    const acceptedIds = new Set(events.filter((event) => event.message === "IMPORT_ITEM_SUCCEEDED" && (event.data as { disposition?: unknown }).disposition === "accepted").map((event) => (event.data as { itemId?: unknown }).itemId).filter((id): id is string => typeof id === "string" && linkedIds.has(id)));
-    const accepted = acceptedIds.size;
-    const unchanged = Math.max(0, completed - accepted);
-    const rejectedIds = new Set(events.filter((event) => event.message === "IMPORT_ITEM_REJECTED").map((event) => (event.data as { itemId?: unknown }).itemId).filter((id): id is string => typeof id === "string" && !linkedIds.has(id)));
-    const retryableIds = new Set(events.filter((event) => event.message === "IMPORT_ITEM_RETRYABLE").map((event) => (event.data as { itemId?: unknown }).itemId).filter((id): id is string => typeof id === "string" && !linkedIds.has(id) && !rejectedIds.has(id)));
-    const linkedItemIds = new Set(linkedItems.map((item) => item.id));
-    const rejected = [...rejectedIds].filter((id) => !linkedItemIds.has(id)).length;
-    const retryable = [...retryableIds].filter((id) => !linkedItemIds.has(id) && !rejectedIds.has(id)).length;
-    const unprocessed = Math.max(0, preparation.expectedItemCount - completed - rejected - retryable);
+    if (!preparation || preparation.status === PreparedImportStatus.EXPIRED) return { ok: false as const, status: 409 as const };
+    // A2 (contract section 7): past `deadlineAt` the import may still be committed, but only inside the settlement tail of its requested verifications.
+    if (preparation.deadlineAt <= new Date()) {
+      const requested = await tx.mediaVerification.findMany({ where: { preparedImportItem: { preparedImportId: preparation.id } }, select: { verificationDeadlineAt: true } });
+      const tailEnd = importVerificationTailEnd({ deadlineAt: preparation.deadlineAt, verificationDeadlines: requested.map((row) => row.verificationDeadlineAt) });
+      if (!tailEnd || tailEnd <= new Date()) return { ok: false as const, status: 409 as const };
+    }
+    const aggregate = await computeFolderAggregate(tx, preparation.id, jobId, preparation.expectedItemCount);
+    const { accepted, unchanged, rejected, retryable, unprocessed, completed } = aggregate;
+    // D9: a pending verification blocks the commit; the import Job is NOT failed and the commit can be repeated once the verifications settle.
+    if (aggregate.verifying > 0) return { ok: false as const, status: 409 as const, code: "UPLOAD_VERIFICATION_PENDING" as const, ...folderCounts(aggregate) };
     if (completed !== preparation.expectedItemCount) {
       const summary = { outcome: "incomplete", accepted, unchanged, rejected, retryable, unprocessed };
       await tx.job.updateMany({ where: { id: jobId, status: { in: [JobStatus.RUNNING, JobStatus.RETRYING] } }, data: { status: JobStatus.FAILED, stage: JobStage.FINISHED, progress: 100, processedItems: completed + rejected + retryable + unprocessed, successItems: completed, failedItems: rejected + retryable, skippedItems: unprocessed, errorCode: "IMPORT_INCOMPLETE", finishedAt: new Date(), summary } });

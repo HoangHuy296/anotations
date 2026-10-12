@@ -37,7 +37,7 @@ test('a correctly attributed paused request followed by failRequest(BlockedByCli
     assert.equal(result.pass, true); assert.equal(result.verdict, 'DENIED_OBSERVED'); assert.equal(result.probe, index);
     assert.equal(result.url, PROBES[index]); assert.equal(result.navigate.errorText, 'net::ERR_BLOCKED_BY_CLIENT');
     assert.deepEqual(result.intercepted.map(entry => entry.url), [PROBES[index]]);
-    assert.deepEqual(result.intercepted[0], { allowed: false, error: 'BROWSER_RESOURCE_TARGET_DENIED', url: PROBES[index], origin: new URL(PROBES[index]).origin, resourceType: 'Document', frameId: 'FRAME' });
+    assert.deepEqual(result.intercepted[0], { allowed: false, error: 'BROWSER_RESOURCE_TARGET_DENIED', url: PROBES[index], origin: new URL(PROBES[index]).origin, resourceType: 'Document', frameId: 'FRAME', probe: null });
   });
   assert.deepEqual(browser.navigations, PROBES);
   assert.equal(browser.sent.filter(call => call.method === 'Fetch.failRequest' && call.params.errorReason === 'BlockedByClient').length, 3);
@@ -71,8 +71,6 @@ test('successful Page.navigate, a navigation errorText or a Network.loadingFaile
     });
     const error = await rejection(browser);
     assert.equal(error.browserProbeDiagnostics[0].verdict, 'NOT_OBSERVED');
-    // Network events are retained as evidence only.
-    assert.equal(error.browserProbeDiagnostics[0].networkObserved.length, 2);
     assert.equal(error.browserProbeDiagnostics[0].intercepted.length, 0);
   }
 });

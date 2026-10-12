@@ -1,0 +1,15 @@
+{
+  "schema": "phase029-s0-frozen-images/v1",
+  "frozen": true,
+  "note": "FROZEN by the release owner on 2026-10-06 (Decision 1 APPROVED) at exactly these digests: minio/mc and minio/minio. Floating tags are never authoritative; any change to this file requires a new owner decision.",
+  "minio": {
+    "repository": "minio/minio",
+    "tag": "RELEASE.2025-04-22T22-12-26Z",
+    "digest": "sha256:a1ea29fa28355559ef137d71fc570e508a214ec84ff8083e39bc5428980b015e"
+  },
+  "mc": {
+    "repository": "minio/mc",
+    "digest": "sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727",
+    "version": "RELEASE.2025-08-13T08-35-41Z"
+  }
+}

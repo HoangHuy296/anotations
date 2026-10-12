@@ -59,6 +59,8 @@ export async function upsertMirroredRepositoryAsset(input: {
   provider: "GITHUB" | "GITEA";
   candidate: RepositoryCandidate;
   verifiedModality: "IMAGE" | "VIDEO" | "AUDIO" | "TEXT";
+  /** Content-verified MIME (see repository-media-classification.ts). Defaults to the extension-derived candidate type only for callers that do not classify bytes. */
+  verifiedMimeType?: string;
   sourceFingerprint: string;
   bucket: string;
   objectKey: string;
@@ -98,7 +100,7 @@ export async function upsertMirroredRepositoryAsset(input: {
     return tx.asset.create({
       data: {
         datasetId: input.datasetId, uploadedById: input.uploadedById, modality: input.verifiedModality,
-        filename: input.candidate.filename, relativePath, originalFilename: input.candidate.filename, mimeType: input.candidate.mimeType,
+        filename: input.candidate.filename, relativePath, originalFilename: input.candidate.filename, mimeType: input.verifiedMimeType ?? input.candidate.mimeType,
         sizeBytes: BigInt(input.candidate.sizeBytes), sourceMode: "MIRROR_TO_MINIO",
         storageProvider: "MINIO", storageBucket: input.bucket, storageKey: input.objectKey,
         sourceProvider: input.provider, sourceRef: input.candidate.revision, sourceRevision: input.candidate.revision,

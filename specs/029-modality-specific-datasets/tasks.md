@@ -1,0 +1,126 @@
+---
+description: "Task list for Phase 029 — Modality-Specific Datasets"
+---
+
+# Tasks: Phase 029 — Modality-Specific Datasets
+
+**Input**: `specs/029-modality-specific-datasets/` (spec.md, plan.md, research.md, data-model.md, contracts/, quickstart.md, implementation-review.md)
+
+**Generated**: 2026-10-05, against commit `e8f0955` (Phase 029 candidate). Items already present in that commit are marked `[X]`; this file does not claim they are release-verified (G5 is OPEN per `verification/mvp-modality-card-status-20261005.md`).
+
+**Tests**: Requested by spec §10 / quickstart.md, so test tasks are included.
+
+## Format: `[ID] [P?] [Story] Description`
+
+## HARD GATES (AGENTS.md + spec §11 + implementation-review §11)
+
+Tasks tagged **[GATE]** MUST NOT be executed without explicit, scoped user approval. Implementing agents stop at each one and report.
+
+- **G-SQL**: Custom Phase 029 trigger SQL / receipt fields / counter (new SQL approval, not inherited).
+- **G-MIG**: Applying any migration to the shared dev DB (`annotationplatformdev-postgres-1`) or regenerating the Prisma client from an unapplied schema. Never rewrite existing migrations or `.env*`.
+- **G-DATA**: Any historical backfill/assignment/EMPTY resolution against real Datasets (approved IDs only; 66 historical duplicate Assets and MIXED data stay untouched).
+- **G-DEPLOY**: Rebuilding/restarting `annotationplatformdev-*` containers (would 500 on `Dataset.modality` until G-MIG is done).
+- No new npm packages. Tests run only against disposable DB/storage.
+
+---
+
+## Phase 1: Setup
+
+- [X] T001 Point `.specify/feature.json` at the 029 feature
+- [X] T002 Spec, plan, research, data-model, contracts, quickstart authored in `specs/029-modality-specific-datasets/`
+- [X] T003 Update `docs/architecture.md`, `docs/job-system.md` and `AGENTS.md` ("Asset.modality selects the workspace engine") to state Dataset.modality selects the engine (spec §1 requires an explicit edit; AGENTS.md edit needs user sign-off). **DONE 2026-10-07 on branch `a2/a2-4-runtime`:** `AGENTS.md` (Non-negotiable data rules) and `docs/architecture.md` (Workspace selection) now state that `Dataset.modality` selects the engine, each Dataset has exactly one fixed modality and `Asset.modality` must equal it, a selected Asset/filename/MIME/query/stale state never chooses the engine, and an unresolved legacy Dataset never guesses one. `docs/job-system.md` already stated the Dataset-authoritative invariant (no contradicting text). The AGENTS.md edit was made on the owner's explicit instruction to complete the remaining Phase 029 tasks and to make the Dataset-authoritative expectations hold; the owner may revert it
+
+---
+
+## Phase 2: Foundational (blocks all stories)
+
+- [X] T004 Add nullable `Dataset.modality`, `modalityContentRevision`, `modalityResolvedAt`, resolver attribution to `prisma/schema.prisma`
+- [X] T005 [P] Pure compatibility/classification contracts and `dataset-modality` subpath export in `packages/domain/src/`
+- [X] T006 Candidate migration SQL kept as a proposal in `specs/proposals/phase029-modality/` (not in `prisma/migrations/`). **Superseded 2026-10-05 (release-chain commit):** migrations 24 and 25 were promoted byte-for-byte into `prisma/migrations/` (the canonical active chain is now 25 migrations, tree `f0da8710…`); neither is applied to the shared dev database
+- [X] T007 **[GATE G-SQL]** Obtain approval for triggers/counter/receipt SQL and resolver-FK `Restrict` behaviour (implementation-review §11 items 1–2). **APPROVED 2026-10-05** for the exact frozen SQL (SHA-256 `13f0e977…`); decision record in `release/t007-m24-sql-review.md`. The opaque resolver actor-subject design is accepted and replaces the User-FK concept. The observed performance regression is accepted as a known shared-dev/release capacity risk, NOT a performance PASS; production capacity acceptance stays open and correctness fencing must not be weakened for performance. Approval is not an authorization to apply the migration
+- [X] T008 **[GATE G-MIG]** Resolve the migration-candidate provenance gap (SHA `abf72fd2…` → `13f0e977…`, no diff record) at release review; record the decision in `verification/`. **ACCEPTED 2026-10-05 as exception RPE-029-M24** (`release/t008-provenance-exception.md`): the missing provenance between `abf72fd2…` and `13f0e977…` is accepted, not reconstructed or erased; the reconstructed installed definitions (one function differs) are supporting evidence only; the old bytes and any contemporaneous approval remain unavailable
+- [ ] T009 **[GATE G-MIG]** Apply migration to a *disposable* database and prove apply/rollback/replay; then, only with approval, to shared dev DB. **Disposable apply proof of the canonical 25-migration chain DONE 2026-10-05** (`release:phase029-chain` PASS, `focused-runs/20261005T160813Z-2c4c4b77`, `release/release-chain-proof.md`; history 25, schema entries 1829→1841→1842, no drift). Forward-only rollback/replay rehearsal and the shared-dev application remain OPEN and ungranted
+
+**Checkpoint**: Schema exists in an applied, reviewed migration. Until then the committed code cannot run against the dev DB (P2022).
+
+---
+
+## Phase 3: US1 — Explicit modality at Dataset creation (P1)
+
+**Goal**: Every new Dataset has a required, immutable modality chosen by the user.
+**Independent test**: Create four empty Datasets (IMAGE/VIDEO/AUDIO/TEXT); missing/invalid modality is rejected; PATCH cannot change it.
+
+- [X] T010 [US1] Require `modality` on `POST /api/datasets`, `/api/datasets/from-repository`, `/api/imports/local-folder` (Zod in `apps/web/src/lib/validation/`)
+- [X] T011 [US1] `ModalityCard` on `/datasets/imports` and `/datasets/local-folder`; append mode shows parent modality fixed
+- [X] T012 [P] [US1] `ClassEntry` component + `lib/imports/recommended-classes.ts` boundary (returns `none`)
+- [X] T013 [US1] CLOSED 2026-10-05: PATCH `/api/datasets/[datasetId]` returns `409 DATASET_MODALITY_IMMUTABLE` when the body contains `modality` (presence dominates value). Verified by focused disposable run `verification/focused-runs/20261005T082805Z-c1585901` (9/9 PASS; cleanup + independent cleanup PASS; focused-disposable-test, not G3/G5 evidence) via `web:test:dataset-patch-route` (`apps/web/tests/dataset-metadata/dataset-patch-route.test.ts`). Also fixed pre-existing Dataset PATCH metadata-loss defect (`apps/web/src/lib/validation/dataset.ts`: update schema no longer inherits create-time `metadata` default; proof run `…T082449Z-7152eed7` FAILED 3/9 as characterization, earlier `…T080604Z`/`…T081722Z` kept as FAILED harness/test-topology runs)
+- [X] T014 [US1] CORRECTION of earlier "NOT FOUND": modality is ALREADY in both idempotency identities — repository: `creationRequestHash` includes `modality` (`apps/web/src/lib/repository-import/types.ts`, asserted by `tests/repository-import-request/acceptance-service.test.ts`); folder: `createPreparation` treats a modality change under a reused key as `IDEMPOTENCY_KEY_CONFLICT` (`prepare-local-folder-import.ts`). Remaining: (a) modality-idempotency portion VERIFIED: `apps/web/tests/local-folder-import/prepare-modality-idempotency.test.ts` 4/4 PASS in focused disposable run `verification/focused-runs/20261005T083827Z-12a06674` via `web:test:local-folder-modality-idempotency` (cleanup + independent cleanup PASS); Redis/queue state is not asserted by that test (DB counts only); (b) the normalized-confirmed-taxonomy half is UNBLOCKED (T015 closed 2026-10-05; its taxonomy-identity behavior is exercised by `verify:confirmed-taxonomy-creation` PASS `focused-runs/20261005T101254Z-b148440d`, disposable only, not G3/G5); T014 CLOSED 2026-10-05 after explicit assessment against its acceptance (modality and normalized taxonomy in both idempotency identities; replay/conflict/no-class behavior verified in disposable runs `…T083827Z-12a06674` and `…T101254Z-b148440d`; not G3/G5). CAVEAT preserved: Redis/queue state is not asserted by these tests (database counts only)
+- [X] T015 [US1] CLOSED 2026-10-05 (disposable verification only; not G3/G5; no shared-dev migration/regeneration authorized). Contract as resolved: optional strict `confirmedClasses: string[]` 0..100 (101 → 400 before side effects); absent/[] = none; normalized duplicate → 400; `normalizeLabelName` unchanged; identity = sorted normalized set; Labels `modality = Dataset.modality`, `scope = OBJECT`; deterministic bounded color from the 24 presets; `POST /api/datasets` stays non-idempotent; folder identity in nullable `PreparedImport.creationRequestHash` (NULL for no-class). Evidence: `verify:confirmed-taxonomy-creation` PASS `focused-runs/20261005T101254Z-b148440d` (earlier FAILED `…T101135Z-15df4e63` preserved: test-helper defect); `compat:prepared-import-creation-request-hash` PASS `…T095654Z-7aeb542a`; migration-25 rehearsal PASS `…T090512Z-7478b8a9`; UI vitest 70/70 PASS `…T142520Z-89ad53a6` (earlier FAILED `…T102702Z-4f5e22ab`, `…T141451Z-af4119c4` and orphaned `…T142448Z-6f068c7e` preserved: infra findings). Migration 25 remains a PROPOSAL (`specs/proposals/phase029-modality/…`), not in `prisma/migrations`, not applied to shared dev. DOM visual error rendering is out of T015 scope. See `verification/closure-matrix-20261005.md`
+- [X] T016 [P] [US1] DONE 2026-10-07 (bundle intentionally NOT rebuilt: needs approval; `python3 scripts/validate-openapi.py` PASS after the change; `PATCH /api/datasets/{datasetId}` 409 `DATASET_MODALITY_IMMUTABLE` is now documented). Earlier status (PARTIAL, per evidence): `specs/api/schemas/dataset.yaml` (create request: required `modality`, `confirmedClasses` 0..100) and `schemas/import-repository.yaml` (repository import and local-folder start: `modality`, `confirmedClasses`) are updated and the resolution route documents `DATASET_MODALITY_IMMUTABLE`/UNRESOLVED. NOT evidenced: `pnpm docs:validate-openapi` has not been run this phase; `specs/api/dist/openapi.bundle.yaml` has no `confirmedClasses` (stale/unbundled); `PATCH /api/datasets/{datasetId}` 409 `DATASET_MODALITY_IMMUTABLE` (T013 behavior) is not found in the OpenAPI source. Remaining: document the PATCH 409, run `docs:validate-openapi`, rebuild the bundle only if approved
+
+---
+
+## Phase 4: US2 — Ingestion cannot publish mismatched content (P1)
+
+**Goal**: Zero mismatched Asset commits for resolved Datasets on every writer path.
+**Independent test**: Spoofed extension/MIME and ambiguous media never publish; valid-then-incompatible import keeps valid Assets and ends failed/incomplete with correct counts.
+
+- [X] T017 [US2] Guards on direct, prepared, folder and repository publication; `ASSET_MODALITY_MISMATCH` / `DATASET_MODALITY_UNRESOLVED` codes
+- [X] T018 [US2] CLOSED 2026-10-05: the pinned writer-matrix tests (14/14) and the current audit show no unresolved active writer. AUDIT COMPLETE (static analysis + disposable-trigger evidence; not G5): every production Dataset writer and every Asset create/update/delete writer is classified in `writer-inventory.md` and pinned by `scripts/db-safety/tests/dataset-asset-writer-matrix.test.mjs` and `asset-writer-inventory.test.mjs`. Result: no unresolved writer; guarded and verified: 3 Dataset creators, resolution service, metadata/archive/policy/visualization updaters, hard-delete cascade, 2 Asset creators and 24 Asset update sites; dormant: `persistDatasetImport` (no caller), `027-backfill-relative-path.ts`; intentionally incompatible (fail closed, not wired): `prisma/review.seed.ts`, `visualization-phase4-smoke.ts`, `027-verify-trigger.ts`, disabled `sync-dev-to-review.sh`. Triggers were not weakened. Limit: no writer was exercised end-to-end against a migrated shared database
+- [ ] T019 [US2] VERIFIED for the four replay paths in disposable runs (not G3/G5; limitation kept): outer upload replay, in-transaction concurrent duplicate, prepared completed-item replay (unchanged / unresolved parent / changed parent) and mismatched publish incl. M24 trigger bypass: `verify:ingestion-replay-summary` PASS 12/12 `focused-runs/20261005T151306Z-8ef5d532` (chain through M25, disposable); repository reconciliation reuse ×4 modalities: `worker:test:ingestion-replay-reuse` PASS 4/4 `…T151630Z-444947ca` (M24 plan). Assertions are Asset/subtype row counts, not only status codes. LIMITATIONS: providers were an in-memory object store behind a module-load stub (real capability signing/byte verification/publish/commit ran; real MinIO and HTTP upload did not); unresolved/changed-parent guards were proven by fault injection because M24 makes those parent states unreachable by real rows; T019 does not close T018 or T021. Item stays open only for the T018 audit/other acceptance items
+- [X] T020 [US2] VERIFIED in disposable runs (not G3/G5): mixed batch (2 accepted, 1 rejected by wrong bytes, 1 unprocessed) → 409 `IMPORT_INCOMPLETE` with exact counts, Job FAILED, PreparedImport not COMMITTED, published Assets preserved, no Asset for the rejected item, retry cannot publish it without verified bytes, stable rejection event, replayed commit identical; fully completed control → COMPLETED, `unprocessed` 0, replay creates nothing. Evidence: `verify:ingestion-replay-summary` PASS 12/12 `focused-runs/20261005T151306Z-8ef5d532` (tests 11, 12). Earlier M24-only run `…T150248Z-87f15204` FAILED 11/12 (test 12: tracked client needs migration 25's column) and is preserved as an environment/plan finding. Same stub/fault-injection limitations as T019
+- [ ] T021 [P] [US2] PARTIAL (g4-upload-publisher, g4-modality-boundary, g5-modality-routing tests exist; spoofed MIME/ambiguous/old-job cases not confirmed): integration tests per implementation-review §10 (spoofed MIME/ext, ambiguous containers, source identity change, queued old jobs) in `apps/web/tests/` and `apps/worker/tests/` — OPEN (unchanged; no run covers spoofed MIME/ambiguous containers/source identity change/queued old jobs)
+- [ ] T022 [US2] Document fail-closed limitation for ambiguous synchronous formats (implementation-review §11 item 4 needs user confirmation) — OPEN (unchanged, separated)
+
+---
+
+## Phase 5: US3 — Dataset-driven workspace engine (P2)
+
+**Goal**: `/workspace/[datasetId]` picks the engine from Dataset.modality only.
+**Independent test**: Four empty Datasets render their own engine; wrong-modality Asset in query/client state cannot override; COMPLETED → visualization, others → workspace.
+
+- [X] T023 [US3] Server-side Dataset load and engine dispatch from Dataset.modality; unresolved/EMPTY/MIXED states
+- [X] T024 [US3] Modality-resolution route (code present; authorization contract verified and resolved in T027)
+- [ ] T025 [US3] Validate selected Asset datasetId/modality/state and fail closed on mismatch; preserve flush-before-navigation and revisions. PARTIAL EVIDENCE UPDATED 2026-10-07: T025a below verifies server boundaries and the shared flush/revision contract. Full closure still requires actual browser navigation/flush acceptance under the post-rollout runtime; direct store/coordinator tests do not establish navigation event ordering.
+- [X] T025a [US3] CLOSED 2026-10-07 (focused disposable evidence only): extend `modality-engine-feasibility.test.ts` with current revision reload, unknown/archived/deleted Asset refusal and restoration, member revocation and archived/deleted Dataset refusal for all four modalities. Preserve F2's foreign/forged selection and engine-authority coverage. The existing guarded command now also runs unchanged `image-video-flush-regression.test.ts`: pending IMAGE/VIDEO/TEXT saves complete before revision reads; failed/conflicting saves or unavailable revisions fail closed. Evidence: `web:test:modality-workspace-feasibility` PASS **40/40**, no skips, `focused-runs/20261007T093654Z-d261d3ac`, primary cleanup and independent cleanup PASS. Earlier workspace-only increment PASS 19/19 `…T091031Z-24c61e93` (baseline 3/3 `…T090847Z-56ad7588`). Network fetch responses in the flush suite are stubs; no browser navigation or G3/G5 claim.
+- [ ] T026 [P] [US3] Workspace tests: four empty shells, stale/foreign Asset in query, lifecycle destinations, reopened-viewer guard. PARTIAL EVIDENCE UPDATED 2026-10-07: T026a covers fresh server lifecycle/access checks and actual engine SSR; the full browser/a11y acceptance remains OPEN. The legacy history-dependent `g5-modality-routing` suite is unchanged and not reused as a generic fixture suite.
+- [X] T026a [P] [US3] CLOSED 2026-10-07 (focused disposable evidence only): four-modality tests prove exact `COMPLETED` routing, non-completed/invalid lifecycle refusal, reopening after lifecycle change, fresh membership revocation and archive/delete checks. `readVisualizationDataset` returns safe 401/404/409 outcomes as appropriate. Include unchanged `g5-engine-ui.test.ts` in the same guarded command to prove four actual empty-engine SSR shells, forged selection refusal and unresolved states without an engine. Evidence: the same **40/40** run `…T093654Z-d261d3ac`; no skipped tests, cleanup independently verified. SSR establishes neither hydration nor browser interaction; this command still counts as neither G3 nor G5 evidence.
+- [X] T027 [US3] CLOSED 2026-10-07: audit contract resolved to the reviewed M24 immutable first-assignment receipt (`Dataset id`, modality, opaque resolver subject, DB-stamped resolution time; `release/t007-m24-sql-review.md`), atomic with assignment, unchanged by replay, and durable after actor deletion. This meets bounded attribution/audit needs; it is not an append-only record of rejected attempts. No separate audit table or JobEvent misuse. `release:phase029-chain` PASS `focused-runs/20261007T091140Z-6c359ed7`: candidate contracts 10/10 prove owner/ADMIN allow, MANAGER/stale-ADMIN deny, same-value replay preserves original receipt, nonempty refusal and rollback, and serialized insert/resolve outcomes. No raw SQL, shared-dev resolution, or G3/G5 closure.
+- [X] T027a [US3] CLOSED 2026-10-07 (disposable service evidence only): add three synthetic EMPTY Datasets before M24 in the existing `g2:baseline` fixture and three real Prisma tests in `g2-candidate.test.ts`. Insert-first publication fails `DATASET_MODALITY_UNRESOLVED` and rolls its fence back. Independent Serializable writers competing with the real `resolveEmptyDataset` fence encounter one genuine transaction conflict and retry the entire transaction: matching insertion commits exactly once; incompatible insertion fails `ASSET_MODALITY_MISMATCH` with zero Asset rows and no retained failed-attempt fence. Original actor/timestamp receipt and replay stay immutable. Existing MANAGER/stale-ADMIN denial, owner/ADMIN success, all-state nonempty refusal and complete rollback assertions remain. Evidence: unchanged `release:phase029-chain` PASS `focused-runs/20261007T091140Z-6c359ed7`, candidate contracts **10/10** (previously 7), client compatibility 12/12, primary/independent cleanup PASS. No raw SQL added, shared-dev resolution, or G3/G5 closure.
+- [X] T028 [US3] CLOSED 2026-10-07 (separate UI change authorized by the owner's remaining-task implementation request): replace centered `showModal()` with a native auto popover in `dataset-row-actions.tsx`. Position beside the trigger with viewport clamping/flipping; track resize/scroll/content size and dismiss when the trigger is offscreen; one native auto popover at a time; Escape/outside/Close dismissal, keyboard invocation, accessible dialog labels and focus return (including after pending mutation). Existing PATCH/DELETE request shapes, archive confirmation and page/server RBAC are unchanged. Verification: actual component and generated application CSS in Chrome, **14/14** focused checks including narrow viewport, scrolling, focus, request bodies and error retention; original HEAD component fails the intended adjacent-position assertion. This is a local UI fixture with fetch/router boundaries observed through stubs, not an authenticated application/G5 acceptance run. Modified-file ESLint and non-incremental web typecheck PASS. No packages, deployment, schema or storage changes.
+
+---
+
+## Phase 6: US4 — Historical data resolution (P3) — all **[GATE G-DATA]**
+
+- [X] T029 [US4] BUILT and disposable-verified 2026-10-06 (not executed on shared dev; no shared-dev backfill authorized): select-only manifest builder `buildBackfillManifest` (`apps/web/src/lib/datasets/modality-backfill.ts`, pure rules in `modality-backfill-evidence.ts`). SINGLE modality only from Asset evidence; rejects EMPTY, MIXED, inconsistent, insufficient-evidence, in-flight, non-live and already-resolved Datasets; binds Dataset id, modality, fence revision, a deterministic Asset-evidence digest and object metadata (D-3); never reads `primaryModality`. Rehearsal `release:phase029-backfill` PASS (`focused-runs/20261006T070008Z-15b5db36`); details `release/t029-t031-backfill.md`. The window-time run on shared dev, with real object metadata, remains a separate G-DATA step
+- [ ] T030 [US4] Remediate 523 unverified source assets / 22 missing subtypes before affected backfill
+- [X] T031 [US4] BUILT and disposable-verified 2026-10-06 (not executed on shared dev): `applyBackfillManifest`, one Serializable transaction per approved Dataset with a compare-and-swap fence claim against the manifest revision (no `+1` assumed), in-transaction Asset-evidence digest comparison, in-flight re-check, assignment with the opaque `system:phase029-backfill:<run-token>` subject, deterministic stopped/committed accounting and idempotent replay. Fence semantics: `release/t031-fence-semantics.md`. A receipt-bound shared-dev launcher and storage adapter are NOT built
+- [X] T031a [US4] Maintenance launcher, storage adapter and real-storage disposable proof BUILT and verified 2026-10-06 (not enabled for shared dev, nothing run there): `scripts/db-safety/backfill-launcher.mjs` binds the exact PostgreSQL target and system identifier, the 25-migration history with the frozen M24/M25, the schema manifest (1,842 entries), 13 implementation file hashes plus the client and chain trees, the approved-ID manifest hash, the run token/subject, the storage endpoint, bucket and configuration fingerprint, and the evidence directory identity, and refuses inherited targets; three distinct artifacts (observed manifest, release-owner approved-ID manifest, execution receipt); `apps/web/src/lib/datasets/modality-backfill-storage.ts` is the one adapter; plan `release:phase029-backfill-maintenance` PASS against real PostgreSQL + MinIO (`focused-runs/20261006T073242Z-6f397fd5`). Object metadata is not transactionally locked with PostgreSQL; semantics in `release/t029-t031-launcher.md`
+- [ ] T032 [US4] MIXED stays null/blocked; no split/move/delete/relabel (separate future approval)
+
+---
+
+## Phase 7: US5 — DB backstop and release validation (P3)
+
+- [ ] T033 [US5] **[GATE G-SQL]** Install triggers/fence in a new reviewed migration; direct-DB tests: null rejected, non-null immutable (even with zero Assets), all-Asset equality incl. reparent/restore
+- [ ] T034 [US5] Two-connection race tests (publish vs assignment, empty-resolution vs insert, reparent both directions, deadlock/serialization retry)
+- [ ] T035 [US5] Final composite FK / NOT NULL only after all history resolved; otherwise stop at nullable and report blocked
+- [ ] T036 [US5] Regression: Phases 022–028 + visualization suites per quickstart.md (`pnpm db:validate typecheck lint docs:validate-openapi build` and web/worker suites)
+- [ ] T037 [US5] **[GATE G-DEPLOY]** Coordinated web+worker+realtime rebuild with migration already applied; browser/a11y smoke on disposable fixtures
+- [ ] T038 [US5] Rollback/evidence report; note G5 remains OPEN until the `localhost:9000` probe interception and independent cleanup receipt generator/verifier (status note, defects 1–2) are fixed and re-run
+
+---
+
+## Dependencies
+
+T004–T006 (done) → T007–T009 (gates) → US1 T013–T016 ∥ US2 T018–T022 → US3 T025–T028 → US4 (needs T033 protocol design + G-DATA) → US5 T033–T038.
+US1, US2, US3 code tasks that don't need a live DB can proceed now using disposable DB; everything touching the shared dev DB or deploy waits on gates.
+
+## Parallel opportunities
+
+T012/T016 (US1), T021 (US2), T026 (US3) touch separate files and can run together.
+
+## Suggested next step
+
+MVP of remaining work: **T013, T014, T018–T021, T025–T027** (no gate required, disposable DB only). Ask the user to decide T015 and the G-SQL/G-MIG approvals before anything else.

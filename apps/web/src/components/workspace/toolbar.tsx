@@ -28,7 +28,9 @@ type ToolbarProps = {
   activeLabelId: string | null;
   onActiveLabelChange: (labelId: string | null) => void;
   onFinishPath?: () => void;
+  onCancelPath?: () => void;
   canFinishPath?: boolean;
+  canCancelPath?: boolean;
 };
 
 export function Toolbar({
@@ -43,7 +45,9 @@ export function Toolbar({
   activeLabelId,
   onActiveLabelChange,
   onFinishPath,
+  onCancelPath,
   canFinishPath = false,
+  canCancelPath = false,
 }: ToolbarProps) {
   return (
     <div className="flex min-h-12 flex-wrap items-center justify-between gap-3 border-t border-zinc-800 bg-zinc-900 px-3 py-1.5">
@@ -72,7 +76,10 @@ export function Toolbar({
         <ToolButton tool="circle" currentTool={tool} onToolChange={onToolChange} label="Draw circle"><Circle aria-hidden="true" size={18} /></ToolButton>
         <ToolButton tool="point" currentTool={tool} onToolChange={onToolChange} label="Place point"><MapPin aria-hidden="true" size={18} /></ToolButton>
         <ToolButton tool="polyline" currentTool={tool} onToolChange={onToolChange} label="Draw polyline"><LineSegment aria-hidden="true" size={18} /></ToolButton>
-        {(tool === "polygon" || tool === "polyline") && <button type="button" onClick={onFinishPath} disabled={!canFinishPath} className="h-9 rounded-lg px-2 text-xs font-semibold text-sky-200 hover:bg-sky-950/50 disabled:opacity-35">Finish shape</button>}
+        {(tool === "polygon" || tool === "polyline") && <>
+          <button type="button" onClick={onFinishPath} disabled={!canFinishPath} className="h-9 rounded-lg px-2 text-xs font-semibold text-sky-200 hover:bg-sky-950/50 disabled:opacity-35">Finish shape</button>
+          <button type="button" onClick={onCancelPath} disabled={!canCancelPath} className="h-9 rounded-lg px-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800 disabled:opacity-35">Cancel path</button>
+        </>}
         <button
           type="button"
           aria-label="Pan by dragging the canvas"

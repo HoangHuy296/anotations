@@ -6,6 +6,7 @@ import type { RequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { labelMetadataSelect } from "@/lib/dataset-metadata";
+import { shouldBackfillDefaultImageLabels } from "@/lib/labels/label-library";
 import { normalizeLabelName, type TextEligibilityField } from "@/lib/validation/label";
 import { runGuardedTextDatasetCommand, rejectTextCommand, type TextCommandFailure } from "@/lib/annotations/text-command-service";
 import { dispatchTextPolicyChangedOutboxEvent, enqueueCollaborationOutboxDispatch } from "@/lib/collaboration/collaboration-outbox-service";
@@ -27,8 +28,21 @@ export async function ensureDefaultImageLabels(actor: RequestActor, datasetId: s
   const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
   if (!access) return { ok: false as const, status: 404 as const };
   if (access.forbidden) return { ok: false as const, status: 403 as const };
+  // The object taxonomy is reference data for the modalities whose workspaces annotate objects (IMAGE, VIDEO) only. Reading a TEXT or AUDIO
+  // taxonomy, or an unresolved Dataset, must never write it, whichever entry point (API route, page, action) asks.
+  const dataset = await db.dataset.findUnique({ where: { id: datasetId }, select: { modality: true } });
+  if (!dataset || !shouldBackfillDefaultImageLabels(dataset.modality)) return { ok: true as const, created: 0 };
+  // The defaults carry the Dataset's own modality: a label is eligible for a modality only when it is shared (null) or equal to it, so VIDEO defaults
+  // written as IMAGE could neither be assigned in the VIDEO workspace nor be matched by the AI Tracking writer (every `person` track stayed unlabeled).
+  const modality = dataset.modality as typeof Modality.IMAGE | typeof Modality.VIDEO;
+  const normalized = DEFAULT_IMAGE_LABELS.map((label) => normalizeLabelName(label.name));
+  if (modality === Modality.VIDEO) {
+    // Idempotent repair of defaults created before this rule (IMAGE modality inside a VIDEO Dataset). A VIDEO Dataset has no IMAGE assets, so no
+    // annotation can legitimately reference an IMAGE-modality label there; the row keeps its id, name and colour.
+    await db.label.updateMany({ where: { datasetId, modality: Modality.IMAGE, normalizedName: { in: normalized } }, data: { modality } });
+  }
   const created = await db.label.createMany({
-    data: DEFAULT_IMAGE_LABELS.map((label) => ({ datasetId, modality: Modality.IMAGE, name: label.name, normalizedName: normalizeLabelName(label.name), color: label.color })),
+    data: DEFAULT_IMAGE_LABELS.map((label) => ({ datasetId, modality, name: label.name, normalizedName: normalizeLabelName(label.name), color: label.color })),
     skipDuplicates: true,
   });
   return { ok: true as const, created: created.count };

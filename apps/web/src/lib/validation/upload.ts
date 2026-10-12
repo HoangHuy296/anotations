@@ -8,7 +8,7 @@ export const candidateContentTypes = [
   "image/png", "image/jpeg", "image/webp",
   "video/mp4", "video/webm",
   "text/plain", "text/csv", "application/json",
-  "audio/wav", "audio/mpeg", "audio/ogg",
+  "audio/wav", "audio/mpeg",
 ] as const;
 
 export const presignedUploadSchema = z.object({

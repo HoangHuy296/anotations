@@ -49,7 +49,7 @@ test("the route source sends Cache-Control: private, no-store on every response 
 test("readTextSource (what the route calls): each contract-relevant outcome the route must map correctly actually occurs", { skip: !hasIntegrationDatabase }, async () => {
   const owner = await createWorkspaceUser(UserRole.MANAGER);
   const outsider = await createWorkspaceUser(UserRole.LABELER);
-  const dataset = await createWorkspaceDataset(owner.id);
+  const dataset = await createWorkspaceDataset(owner.id, Modality.TEXT);
   const { config, minio } = getWebProviders();
   const marker = workspaceUnique("route-contract");
   const storageKey = `text-sources/__test-fixtures__/${marker}/source.txt`;

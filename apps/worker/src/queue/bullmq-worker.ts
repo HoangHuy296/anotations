@@ -10,6 +10,7 @@ import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
 import { getProductionHardeningPolicy } from "../config.js";
 import { routeQueueDelivery } from "./queue-router.js";
+import type { VerifierDeps } from "../verification/types.js";
 
 
 export type RedisConnectionOwnership = "RUNTIME" | "CALLER";
@@ -31,6 +32,8 @@ export function createFoundationWorker(input: {
   db: PrismaClient;
   connection?: Redis;
   workerId?: string;
+  /** A2: the verifier dependencies, present only when `MEDIA_VERIFICATION_ENABLED=1` and the I-VERIFIER identity is ready. */
+  verifier?: VerifierDeps | null;
   /**
    * 021-production-hardening-garbage-collection: BullMQ's own stalled-job
    * detection (FR-019). BullMQ ships enabled by default even unconfigured
@@ -69,7 +72,7 @@ export function createFoundationWorker(input: {
   const hardening = getProductionHardeningPolicy();
   const worker = new Worker(
     annotationPlatformQueueName,
-    async (delivery) => routeQueueDelivery({ db: input.db, payload: delivery.data, workerId }),
+    async (delivery) => routeQueueDelivery({ db: input.db, payload: delivery.data, workerId, verifier: input.verifier ?? null }),
     {
       connection,
       prefix: input.config.BULLMQ_PREFIX,

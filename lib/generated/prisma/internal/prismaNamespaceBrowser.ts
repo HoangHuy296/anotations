@@ -83,7 +83,8 @@ export const ModelName = {
   AiTask: 'AiTask',
   AiModel: 'AiModel',
   DatasetSnapshot: 'DatasetSnapshot',
-  VisualizationArtifact: 'VisualizationArtifact'
+  VisualizationArtifact: 'VisualizationArtifact',
+  MediaVerification: 'MediaVerification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -296,6 +297,7 @@ export const PreparedImportScalarFieldEnum = {
   deadlineAt: 'deadlineAt',
   committedAt: 'committedAt',
   idempotencyKey: 'idempotencyKey',
+  creationRequestHash: 'creationRequestHash',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -833,6 +835,55 @@ export const VisualizationArtifactScalarFieldEnum = {
 } as const
 
 export type VisualizationArtifactScalarFieldEnum = (typeof VisualizationArtifactScalarFieldEnum)[keyof typeof VisualizationArtifactScalarFieldEnum]
+
+
+export const MediaVerificationScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  requestedById: 'requestedById',
+  source: 'source',
+  preparedImportItemId: 'preparedImportItemId',
+  currentJobId: 'currentJobId',
+  generation: 'generation',
+  boundDatasetModality: 'boundDatasetModality',
+  stagedBucket: 'stagedBucket',
+  stagedKey: 'stagedKey',
+  stagedEtag: 'stagedEtag',
+  stagedSizeBytes: 'stagedSizeBytes',
+  stagedLastModified: 'stagedLastModified',
+  stagedVersionId: 'stagedVersionId',
+  filename: 'filename',
+  relativePathHint: 'relativePathHint',
+  declaredContentType: 'declaredContentType',
+  declaredSizeBytes: 'declaredSizeBytes',
+  sealedKey: 'sealedKey',
+  sealedEtag: 'sealedEtag',
+  sealedSizeBytes: 'sealedSizeBytes',
+  sealedLastModified: 'sealedLastModified',
+  sealedVersionId: 'sealedVersionId',
+  contentSha256: 'contentSha256',
+  status: 'status',
+  verifiedModality: 'verifiedModality',
+  resultCode: 'resultCode',
+  resultReason: 'resultReason',
+  probe: 'probe',
+  policyVersion: 'policyVersion',
+  processorVersion: 'processorVersion',
+  lastFailureCode: 'lastFailureCode',
+  lastFailureReason: 'lastFailureReason',
+  lastFailureAt: 'lastFailureAt',
+  objectsClearedAt: 'objectsClearedAt',
+  assetId: 'assetId',
+  verificationDeadlineAt: 'verificationDeadlineAt',
+  sealedAt: 'sealedAt',
+  verifiedAt: 'verifiedAt',
+  publishedAt: 'publishedAt',
+  finishedAt: 'finishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MediaVerificationScalarFieldEnum = (typeof MediaVerificationScalarFieldEnum)[keyof typeof MediaVerificationScalarFieldEnum]
 
 
 export const SortOrder = {

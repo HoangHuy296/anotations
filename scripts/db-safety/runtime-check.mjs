@@ -16,7 +16,7 @@ try {
   must(loader || resolve(process.argv[2] || '') === (compiler ? r.compiler.entry : entry), 'RUNTIME_ENTRY_UNAPPROVED');
   must(loader || JSON.stringify(JSON.parse(process.argv[3] || '[]')) === JSON.stringify(compiler ? [] : [role]), 'RUNTIME_ARGUMENT_MISMATCH');
   const { target, env, r: base } = await verify(r.baseReceipt, 'test');
-  must(['g4:runtime:safety','g4:runtime:e2e','g5:runtime:e2e'].includes(base.command), 'RUNTIME_COMMAND_SCOPE_REQUIRED');
+  must(['g4:runtime:safety','g4:runtime:e2e','g5:runtime:e2e','web:test:dataset-metadata','web:test:workspace-integration'].includes(base.command), 'RUNTIME_COMMAND_SCOPE_REQUIRED');
   must(incoming.DATABASE_URL === target.url.toString(), 'RUNTIME_DATASOURCE_MISMATCH');
   for (const [key, value] of Object.entries(env)) must(incoming[key] === value, 'RUNTIME_PROVIDER_MISMATCH');
   // The checker is a subprocess: validate the actual child, not this checker PID.

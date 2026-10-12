@@ -2,6 +2,7 @@ import "server-only";
 
 import type { RequestActor } from "@/lib/auth";
 import { canCreateDataset } from "@/lib/authorization";
+import { readPersistedDatasetRef } from "@/lib/datasets/dataset-ref";
 import { createAndEnqueueNewDatasetSourceImportJob } from "@/lib/queue/enqueue-job";
 import { preflightRepository } from "@/lib/providers/preflight-repository";
 import type { PreflightResult } from "@/lib/providers/provider.types";
@@ -140,6 +141,7 @@ export async function acceptRepositoryImportRequest(
       visibility: preflight.result.visibility,
     },
     manifest: safePreviewAggregates(preflight.result),
+    confirmedClasses: request.confirmedClasses,
   });
 
   if (!accepted.ok) {
@@ -151,10 +153,14 @@ export async function acceptRepositoryImportRequest(
     return { ok: false, status: 409, code: "JOB_CONFLICT" };
   }
 
+  // Fresh and replayed acceptances both report the persisted Dataset modality; the request value is never echoed.
+  const persisted = await readPersistedDatasetRef(accepted.datasetId);
+  if (!persisted) return { ok: false, status: 409, code: "JOB_CONFLICT" };
+
   return {
     ok: true,
     acceptance: {
-      dataset: { id: accepted.datasetId, name: request.datasetName },
+      dataset: { id: persisted.id, name: request.datasetName, modality: persisted.modality },
       job: {
         id: accepted.job.id,
         datasetId: accepted.datasetId,

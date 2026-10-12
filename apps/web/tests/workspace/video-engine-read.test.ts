@@ -2,7 +2,8 @@ import "../../../../scripts/db-safety/test-entry.cjs"; // G1: verify disposable 
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import test, { after, before } from "node:test";
 
 import { Modality, StorageProvider, UserRole } from "@internal/db";
@@ -12,7 +13,12 @@ import { getDirectUploadProviders } from "@/lib/providers";
 import { cleanupAnnotationFixture, createAnnotationDataset, createAnnotationUser } from "../annotation-api/helpers";
 
 const enabled = process.env.VIDEO_VIEW_INTEGRATION_TESTS === "1";
-const baseUrl = process.env.VIDEO_ANNOTATION_HTTP_BASE_URL ?? "http://127.0.0.1:3000";
+// Two topologies, same assertions: the Compose stack (web on :3000, MinIO public endpoint on :9000), or a receipt-owned disposable HTTP runtime
+// (web on the runtime receipt's port, MinIO public endpoint = the disposable MinIO the runner provisioned). In the runtime nothing is hard-coded to :3000 or :9000.
+const authority = createRequire(import.meta.url)("../../../../scripts/db-safety/runtime-authority.cjs");
+const runtime = enabled && process.env.G1_RUNTIME_RECEIPT ? authority.receipt() : null;
+const baseUrl = runtime ? `http://127.0.0.1:${runtime.roles.web.port}` : (process.env.VIDEO_ANNOTATION_HTTP_BASE_URL ?? "http://127.0.0.1:3000");
+const expectedViewHosts = runtime ? [new URL(String(process.env.MINIO_PUBLIC_ENDPOINT)).host] : ["localhost:9000", "127.0.0.1:9000"];
 const password = "workspace-test-password";
 const suffix = randomBytes(6).toString("hex");
 let owner: { id: string; email: string };
@@ -23,7 +29,7 @@ let objectKey = "";
 let ownerCookie = "";
 let outsiderCookie = "";
 
-if (enabled) {
+if (enabled && !runtime) {
   // Test-runner topology only; the Compose web service keeps its internal
   // verification endpoint while emitted browser capability URLs stay public.
   process.env.MINIO_ENDPOINT = "http://localhost:9000";
@@ -69,8 +75,9 @@ test("private VIDEO capability is object-scoped, browser-direct, and foreign acc
   const response = await fetch(`${baseUrl}/api/assets/${assetId}/view-url`, { headers: { Cookie: ownerCookie } });
   assert.equal(response.status, 200);
   const body = await response.json() as { data: { viewUrl: string; expiresAt: string; storageKey?: string; storageBucket?: string } };
-  assert.ok(["localhost:9000", "127.0.0.1:9000"].includes(new URL(body.data.viewUrl).host));
+  assert.ok(expectedViewHosts.includes(new URL(body.data.viewUrl).host));
   assert.equal(body.data.viewUrl.includes("minio:9000"), false);
+  if (runtime) assert.ok(!baseUrl.includes(":3000") && !body.data.viewUrl.includes(":3000"), "the canonical port is never a target");
   assert.equal("storageKey" in body.data, false);
   assert.equal("storageBucket" in body.data, false);
   assert.ok(Number.isFinite(Date.parse(body.data.expiresAt)));
@@ -84,7 +91,7 @@ test("private VIDEO capability is object-scoped, browser-direct, and foreign acc
 });
 
 test("VideoEngine uses the authorized capability rather than a Next.js binary proxy", async () => {
-  const source = await readFile(path.resolve(process.cwd(), "src/components/workspace/video-engine.tsx"), "utf8");
+  const source = await readFile(fileURLToPath(new URL("../../src/components/workspace/video-engine.tsx", import.meta.url)), "utf8");
   // `getViewUrl` (a private, in-flight-deduped/TTL-cached wrapper -- mirrors
   // `canvas-stage.tsx`'s own copy, added to stop Strict Mode's double mount
   // effect from firing this fetch twice) is the one place that calls the

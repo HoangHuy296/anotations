@@ -26,12 +26,15 @@ import { sweepUnreferencedObjects, type SweepOutcome } from "./minio-orphan-scan
  *   must stay comfortably longer than upload + publish latency (FR-032 —
  *   "when uncertain, don't delete").
  *
+ * `verified-uploads/` (A2) is the sealed namespace: its objects are protected by a non-terminal MediaVerification or, once published, by their Asset; a terminal
+ * unpublished sealed object is released and collected (deletion is routed to the verifier identity by key, never by caller choice).
+ *
  * A published object under either prefix keeps the same key as its Asset's
  * `storageKey` (publishing never renames it), so it is already protected
  * by the ordinary `Asset` reference checker once committed — this module
  * adds no separate "is it published" check of its own.
  */
-export const DEFAULT_TEMP_UPLOAD_PREFIXES = ["prepared-imports/", "direct-uploads/"] as const;
+export const DEFAULT_TEMP_UPLOAD_PREFIXES = ["prepared-imports/", "direct-uploads/", "verified-uploads/"] as const;
 
 export async function cleanupTempUploads(input: {
   db: PrismaClient;

@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { handleVideoAiTaskCompleted } from "./ai-video-prediction-writer.js";
+import { matchAiClassLabels, usableAiClass } from "@annotationplatform/domain/ai-label-resolution";
 
 import type { AiProviderPrediction } from "@annotationplatform/domain/ai-provider";
 
+import { aiResultFingerprint } from "./ai-result-fingerprint.js";
 import { releaseLock } from "../queue/job-lock.js";
 import type { AiTask, PrismaClient } from "../../../../lib/generated/prisma/client.js";
 
@@ -12,11 +14,6 @@ const predictionSchema = z.object({
   confidence: z.number().min(0).max(1),
   boundingBoxes: z.unknown(),
 });
-
-/** Mirrors apps/web/src/lib/validation/label.ts#normalizeLabelName — apps/worker cannot import apps/web/src/lib. */
-function normalizeLabelName(name: string) {
-  return name.trim().toLocaleLowerCase("en-US");
-}
 
 /**
  * AiModel.taskType -> Annotation.type. Only DETECT_OBJECTS is implemented in
@@ -57,6 +54,8 @@ export async function handleAiTaskCompleted(
   const inScope = candidates.filter((prediction) => submittedAssetIds.has(prediction.assetId));
   const annotationType = aiTask.type ? annotationTypeByAiTaskType[aiTask.type] : undefined;
 
+  let skippedAsDuplicateTotal = 0;
+  let labelConflicts: unknown[] = [];
   await db.$transaction(async (tx) => {
     // Claim completion in the same transaction as Annotation writes. A replay
     // or a cancellation that already won cannot append a second result batch.
@@ -67,38 +66,41 @@ export async function handleAiTaskCompleted(
     });
     if (completed.count !== 1) return;
     if (annotationType) {
+      // IMAGE keeps its original contract: a detection is persisted only when its class matches an existing compatible Dataset label (the match is the same
+      // read-only canonical-key rule VIDEO uses; no Label is ever created for a predicted class). Others are skipped, as before.
+      const match = await matchAiClassLabels(tx, aiTask.datasetId, "IMAGE", inScope.map((prediction) => usableAiClass(prediction.labelKey)?.display).filter((value): value is string => value !== undefined));
+      labelConflicts = [...match.conflicts];
+      // AI output changes reviewable content too. Claim each parent Asset once, FIRST: the row lock this takes is held to commit, so a concurrent task over
+      // the same asset waits here and then sees this task's rows when it reads the fingerprints below (no duplicate under a race). A review-frozen Asset is
+      // skipped rather than receiving late predictions, and no queue payload changes.
       const claimedAssets = new Set<string>();
-      for (const [predictionIndex, prediction] of inScope.entries()) {
-        const label = await tx.label.findFirst({
-          where: { datasetId: aiTask.datasetId, normalizedName: normalizeLabelName(prediction.labelKey), OR: [{ modality: null }, { modality: "IMAGE" }] },
-          select: { id: true },
+      for (const assetId of new Set(inScope.map((prediction) => prediction.assetId))) {
+        const claimed = await tx.asset.updateMany({
+          where: { id: assetId, datasetId: aiTask.datasetId, modality: "IMAGE", deletedAt: null, archivedAt: null, status: { notIn: ["NEEDS_REVIEW", "REVIEWED", "REJECTED"] } },
+          data: { revision: { increment: 1 } },
         });
-        if (!label) continue; // Unresolvable label: skip this prediction, do not fail the task.
-
-        // AI output changes reviewable content too. Claim each parent Asset
-        // once in this transaction; a review-frozen Asset is skipped rather
-        // than receiving late predictions, and no queue payload changes.
-        if (!claimedAssets.has(prediction.assetId)) {
-          const claimed = await tx.asset.updateMany({
-            where: {
-              id: prediction.assetId,
-              datasetId: aiTask.datasetId,
-              modality: "IMAGE",
-              deletedAt: null,
-              archivedAt: null,
-              status: { notIn: ["NEEDS_REVIEW", "REVIEWED", "REJECTED"] },
-            },
-            data: { revision: { increment: 1 } },
-          });
-          if (claimed.count !== 1) continue;
-          claimedAssets.add(prediction.assetId);
-        }
+        if (claimed.count === 1) claimedAssets.add(assetId);
+      }
+      // Identical detections already persisted for these assets by an earlier task are skipped, not duplicated (edited/relabeled rows still count).
+      const knownByAsset = new Map<string, Set<string>>();
+      for (const assetId of claimedAssets) {
+        const rows = await tx.annotation.findMany({ where: { assetId, datasetId: aiTask.datasetId, source: "AI", modality: "IMAGE" }, select: { properties: true } });
+        knownByAsset.set(assetId, new Set(rows.map((row) => (row.properties as { resultFingerprint?: unknown } | null)?.resultFingerprint).filter((v): v is string => typeof v === "string")));
+      }
+      for (const [predictionIndex, prediction] of inScope.entries()) {
+        if (!claimedAssets.has(prediction.assetId)) continue;
+        const canonical = usableAiClass(prediction.labelKey);
+        const labelId = canonical ? match.labelIds.get(canonical.key) : undefined;
+        if (!canonical || !labelId) continue; // Unresolvable label: skip this prediction, do not fail the task.
+        const resultFingerprint = aiResultFingerprint({ modelKey: aiTask.modelKeySnapshot, assetId: prediction.assetId, classKey: canonical.key, frames: [{ box: prediction.boundingBoxes as never }] });
+        const known = knownByAsset.get(prediction.assetId)!;
+        if (known.has(resultFingerprint)) { skippedAsDuplicateTotal++; continue; }
 
         await tx.annotation.create({
           data: {
             datasetId: aiTask.datasetId,
             assetId: prediction.assetId,
-            labelId: label.id,
+            labelId,
             createdById: aiTask.createdById,
             modality: aiTask.modality!,
             type: annotationType,
@@ -107,17 +109,18 @@ export async function handleAiTaskCompleted(
             // Providers normalize into the existing geometry schema before
             // this writer is called; AIOZ pixel xyxy conversion stays there.
             geometry: (prediction.boundingBoxes ?? {}) as object,
-            properties: { confidence: prediction.confidence, aiTaskId: aiTask.id, modelKey: aiTask.modelKeySnapshot, aiPredictionIndex: predictionIndex },
+            properties: { confidence: prediction.confidence, aiTaskId: aiTask.id, modelKey: aiTask.modelKeySnapshot, aiPredictionIndex: predictionIndex, predictedClass: prediction.labelKey, resultFingerprint },
             // reviewedById intentionally left unset — only a human review action
             // (existing Phase 017/019 review UI) ever sets it.
           },
         });
+        known.add(resultFingerprint);
       }
     }
 
     await tx.aiTask.update({
       where: { id: aiTask.id },
-      data: { status: "SUCCEEDED", output: JSON.parse(JSON.stringify({ predictions: inScope })) },
+      data: { status: "SUCCEEDED", output: JSON.parse(JSON.stringify({ predictions: inScope, labelConflicts, skippedAsDuplicate: skippedAsDuplicateTotal })) },
     });
 
   });

@@ -3,9 +3,9 @@ import type { PrismaClient } from "../../../../lib/generated/prisma/client.js";
 import { cancelJob, completeJob, failJob, heartbeatJob, updateJobProgress } from "./job-claim-lock.js";
 import { buildMirrorObjectKey, buildSourceFingerprint } from "./source-fingerprint.js";
 import { chunkRepositoryCandidates, downloadRepositoryCandidate, listRepositoryCandidateListing, parseRepositoryImportInput } from "./repository-import-source.js";
-import { mirrorRepositoryObject, safeCleanupUnpublishedObject } from "./repository-asset-mirror.js";
+import { correctRepositoryObjectContentType, mirrorRepositoryObject, repositoryObjectMetadata, safeCleanupUnpublishedObject } from "./repository-asset-mirror.js";
 import { reconcileMirroredRepositoryAsset, upsertMirroredRepositoryAsset } from "./repository-asset-upsert.js";
-import { verifyRepositoryObjectModality } from "./repository-media-classification.js";
+import { verifyRepositoryObject } from "./repository-media-classification.js";
 import { writeSafeJobEvent } from "./job-event-writer.js";
 import { resolveSourceAccessForJob, sourceAccessToRepositoryAccess } from "../source/source-access.js";
 import { applyRepositoryImportTestPoint } from "./repository-import-test-hooks.js";
@@ -87,7 +87,7 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
           safeFailureCode = "SOURCE_DOWNLOAD_FAILED";
           const downloaded = await downloadRepositoryCandidate(candidate, access);
           safeFailureCode = "MINIO_UPLOAD_FAILED";
-          published = await mirrorRepositoryObject({ objectKey, body: downloaded.body, sizeBytes: downloaded.sizeBytes });
+          published = await mirrorRepositoryObject({ objectKey, body: downloaded.body, sizeBytes: downloaded.sizeBytes, mimeType: candidate.mimeType });
           await applyRepositoryImportTestPoint(db, job.id, "CANCEL_AFTER_UPLOAD");
           if (await acknowledgeCancellation(db, job.id, lockToken)) {
             await safeCleanupUnpublishedObject(db, { bucket: published.bucket, objectKey: published.objectKey, datasetId: job.datasetId });
@@ -95,10 +95,16 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
           }
           await applyRepositoryImportTestPoint(db, job.id, "AFTER_UPLOAD_BEFORE_PERSIST");
           await updateJobProgress(db, { jobId: job.id, lockToken, stage: "WRITING_ASSETS", progress: Math.max(1, Math.floor(((imported + unchanged + rejected + retryable + skipped) / totalItems) * 80) + 10), processedItems: imported + unchanged + rejected + retryable + skipped, successItems: imported + unchanged, failedItems: rejected + retryable, skippedItems: skipped });
-          const verifiedModality = await verifyRepositoryObjectModality({ jobId: job.id, bucket: published.bucket, objectKey: published.objectKey, expectedSizeBytes: downloaded.sizeBytes });
+          const verifiedObject = await verifyRepositoryObject({ jobId: job.id, bucket: published.bucket, objectKey: published.objectKey, expectedSizeBytes: downloaded.sizeBytes });
+          const verifiedModality = verifiedObject.modality;
           if (verifiedModality !== datasetModality) throw new Error("ASSET_MODALITY_MISMATCH");
+          // The extension decided only the upload-time label; the bytes decide the stored type.
+          if (repositoryObjectMetadata(candidate)["Content-Type"] !== verifiedObject.mimeType) {
+            safeFailureCode = "MINIO_UPLOAD_FAILED";
+            await correctRepositoryObjectContentType({ objectKey: published.objectKey, contentType: verifiedObject.mimeType });
+          }
           safeFailureCode = "ASSET_PERSIST_FAILED";
-          const publication = await upsertMirroredRepositoryAsset({ db, datasetId: job.datasetId, uploadedById: job.createdById, provider: source.repository.provider, candidate, verifiedModality, sourceFingerprint: fingerprint, bucket: published.bucket, objectKey: published.objectKey, sourceRootPath: job.dataset.sourceRootPath });
+          const publication = await upsertMirroredRepositoryAsset({ db, datasetId: job.datasetId, uploadedById: job.createdById, provider: source.repository.provider, candidate, verifiedModality, verifiedMimeType: verifiedObject.mimeType, sourceFingerprint: fingerprint, bucket: published.bucket, objectKey: published.objectKey, sourceRootPath: job.dataset.sourceRootPath });
           if (publication.modality !== datasetModality) throw new Error("ASSET_MODALITY_MISMATCH");
           imported += 1;
         } catch (error) {

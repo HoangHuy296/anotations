@@ -424,7 +424,8 @@ export const ModelName = {
   AiTask: 'AiTask',
   AiModel: 'AiModel',
   DatasetSnapshot: 'DatasetSnapshot',
-  VisualizationArtifact: 'VisualizationArtifact'
+  VisualizationArtifact: 'VisualizationArtifact',
+  MediaVerification: 'MediaVerification'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -440,7 +441,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "authSession" | "job" | "jobEvent" | "externalRepository" | "sourceConnection" | "dataset" | "preparedImport" | "preparedImportItem" | "datasetMember" | "datasetInvitation" | "asset" | "assetAssignment" | "assetAssignmentEvent" | "assetComment" | "commentMention" | "notification" | "datasetMembershipEvent" | "collaborationOutboxEvent" | "assetWorkflowEvent" | "assetLabel" | "assetVersion" | "label" | "annotation" | "annotationMutationReceipt" | "imageAsset" | "videoAsset" | "videoObjectTrack" | "textAsset" | "audioAsset" | "audioSpeaker" | "aiTask" | "aiModel" | "datasetSnapshot" | "visualizationArtifact"
+    modelProps: "user" | "authSession" | "job" | "jobEvent" | "externalRepository" | "sourceConnection" | "dataset" | "preparedImport" | "preparedImportItem" | "datasetMember" | "datasetInvitation" | "asset" | "assetAssignment" | "assetAssignmentEvent" | "assetComment" | "commentMention" | "notification" | "datasetMembershipEvent" | "collaborationOutboxEvent" | "assetWorkflowEvent" | "assetLabel" | "assetVersion" | "label" | "annotation" | "annotationMutationReceipt" | "imageAsset" | "videoAsset" | "videoObjectTrack" | "textAsset" | "audioAsset" | "audioSpeaker" | "aiTask" | "aiModel" | "datasetSnapshot" | "visualizationArtifact" | "mediaVerification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3034,6 +3035,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MediaVerification: {
+      payload: Prisma.$MediaVerificationPayload<ExtArgs>
+      fields: Prisma.MediaVerificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MediaVerificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MediaVerificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>
+        }
+        findFirst: {
+          args: Prisma.MediaVerificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MediaVerificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>
+        }
+        findMany: {
+          args: Prisma.MediaVerificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>[]
+        }
+        create: {
+          args: Prisma.MediaVerificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>
+        }
+        createMany: {
+          args: Prisma.MediaVerificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MediaVerificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>[]
+        }
+        delete: {
+          args: Prisma.MediaVerificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>
+        }
+        update: {
+          args: Prisma.MediaVerificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.MediaVerificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MediaVerificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MediaVerificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.MediaVerificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MediaVerificationPayload>
+        }
+        aggregate: {
+          args: Prisma.MediaVerificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMediaVerification>
+        }
+        groupBy: {
+          args: Prisma.MediaVerificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MediaVerificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MediaVerificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MediaVerificationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3267,6 +3342,7 @@ export const PreparedImportScalarFieldEnum = {
   deadlineAt: 'deadlineAt',
   committedAt: 'committedAt',
   idempotencyKey: 'idempotencyKey',
+  creationRequestHash: 'creationRequestHash',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -3804,6 +3880,55 @@ export const VisualizationArtifactScalarFieldEnum = {
 } as const
 
 export type VisualizationArtifactScalarFieldEnum = (typeof VisualizationArtifactScalarFieldEnum)[keyof typeof VisualizationArtifactScalarFieldEnum]
+
+
+export const MediaVerificationScalarFieldEnum = {
+  id: 'id',
+  datasetId: 'datasetId',
+  requestedById: 'requestedById',
+  source: 'source',
+  preparedImportItemId: 'preparedImportItemId',
+  currentJobId: 'currentJobId',
+  generation: 'generation',
+  boundDatasetModality: 'boundDatasetModality',
+  stagedBucket: 'stagedBucket',
+  stagedKey: 'stagedKey',
+  stagedEtag: 'stagedEtag',
+  stagedSizeBytes: 'stagedSizeBytes',
+  stagedLastModified: 'stagedLastModified',
+  stagedVersionId: 'stagedVersionId',
+  filename: 'filename',
+  relativePathHint: 'relativePathHint',
+  declaredContentType: 'declaredContentType',
+  declaredSizeBytes: 'declaredSizeBytes',
+  sealedKey: 'sealedKey',
+  sealedEtag: 'sealedEtag',
+  sealedSizeBytes: 'sealedSizeBytes',
+  sealedLastModified: 'sealedLastModified',
+  sealedVersionId: 'sealedVersionId',
+  contentSha256: 'contentSha256',
+  status: 'status',
+  verifiedModality: 'verifiedModality',
+  resultCode: 'resultCode',
+  resultReason: 'resultReason',
+  probe: 'probe',
+  policyVersion: 'policyVersion',
+  processorVersion: 'processorVersion',
+  lastFailureCode: 'lastFailureCode',
+  lastFailureReason: 'lastFailureReason',
+  lastFailureAt: 'lastFailureAt',
+  objectsClearedAt: 'objectsClearedAt',
+  assetId: 'assetId',
+  verificationDeadlineAt: 'verificationDeadlineAt',
+  sealedAt: 'sealedAt',
+  verifiedAt: 'verifiedAt',
+  publishedAt: 'publishedAt',
+  finishedAt: 'finishedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MediaVerificationScalarFieldEnum = (typeof MediaVerificationScalarFieldEnum)[keyof typeof MediaVerificationScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -4426,6 +4551,34 @@ export type EnumAiTaskStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
 export type ListEnumAiTaskStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AiTaskStatus[]'>
     
 
+
+/**
+ * Reference to a field of type 'MediaVerificationSource'
+ */
+export type EnumMediaVerificationSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MediaVerificationSource'>
+    
+
+
+/**
+ * Reference to a field of type 'MediaVerificationSource[]'
+ */
+export type ListEnumMediaVerificationSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MediaVerificationSource[]'>
+    
+
+
+/**
+ * Reference to a field of type 'MediaVerificationStatus'
+ */
+export type EnumMediaVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MediaVerificationStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'MediaVerificationStatus[]'
+ */
+export type ListEnumMediaVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MediaVerificationStatus[]'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -4548,6 +4701,7 @@ export type GlobalOmitConfig = {
   aiModel?: Prisma.AiModelOmit
   datasetSnapshot?: Prisma.DatasetSnapshotOmit
   visualizationArtifact?: Prisma.VisualizationArtifactOmit
+  mediaVerification?: Prisma.MediaVerificationOmit
 }
 
 /* Types for Logging */

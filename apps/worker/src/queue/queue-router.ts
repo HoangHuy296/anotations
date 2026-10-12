@@ -17,6 +17,9 @@ import { processCollaborationOutboxDispatch } from "../jobs/collaboration-outbox
 import { processTextSourcePrepare } from "../jobs/text-source-prepare.processor.js";
 
 import { processVisualization } from "../jobs/visualization.processor.js";
+import { isMediaVerificationProcessorRegistered } from "../jobs/media-verification-registration.js";
+import { processVerifyUploadedMedia } from "../verification/process.js";
+import type { VerifierDeps } from "../verification/types.js";
 
 export type QueueRouteResult =
   | { kind: "received"; jobId: string }
@@ -28,7 +31,7 @@ export type QueueRouteResult =
  * 008 claim establishes ownership and deliberately stops before a future
  * workflow-specific business handler could run.
  */
-export async function routeQueueDelivery(input: { db: PrismaClient; payload: unknown; workerId?: string }): Promise<QueueRouteResult> {
+export async function routeQueueDelivery(input: { db: PrismaClient; payload: unknown; workerId?: string; /** Present only when media verification is enabled and the verifier identity is ready. */ verifier?: VerifierDeps | null }): Promise<QueueRouteResult> {
   const payload = jobQueuePayloadSchema.safeParse(input.payload);
   if (!payload.success) return { kind: "skipped", reason: "MALFORMED_PAYLOAD" };
 
@@ -50,7 +53,9 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
       : !["QUEUED", "RETRYING"].includes(job.status) ? "NOT_QUEUED"
         : job.dataset.archivedAt || job.dataset.deletedAt ? "INACTIVE_DATASET"
           : !queueNameForJobType(job.type) ? "UNSUPPORTED_TYPE"
-            : null;
+            // A2: transport-supported but processable only with a registered verifier; refuse before claiming so such a Job can never be left RUNNING without one.
+            : job.type === "VERIFY_UPLOADED_MEDIA" && !isMediaVerificationProcessorRegistered(input.verifier) ? "UNSUPPORTED_TYPE"
+              : null;
   if (reason) {
     await writeSafeJobEvent(input.db, { jobId: job.id, kind: "QUEUE_SKIPPED", reason });
     return { kind: "skipped", reason };
@@ -87,5 +92,6 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
   if (job.type === "BULK_EXPORT_SELECTED") await processBulkExportSelected(input.db, job.id, claim.lockToken);
   if (job.type === "COLLABORATION_OUTBOX_DISPATCH") await processCollaborationOutboxDispatch(input.db, job.id, claim.lockToken);
   if (job.type === "TEXT_SOURCE_PREPARE") await processTextSourcePrepare(input.db, job.id, claim.lockToken);
+  if (job.type === "VERIFY_UPLOADED_MEDIA" && input.verifier) await processVerifyUploadedMedia(input.db, job.id, claim.lockToken, input.verifier);
   return { kind: "claimed", jobId: job.id };
 }

@@ -52,6 +52,7 @@ model User {
   outboxEventsActed    CollaborationOutboxEvent[] @relation("CollaborationOutboxActor")
   outboxEventsFor      CollaborationOutboxEvent[] @relation("CollaborationOutboxRecipient")
   annotationMutationReceipts AnnotationMutationReceipt[] @relation("AnnotationMutationReceiptActor")
+  requestedMediaVerifications MediaVerification[] @relation("MediaVerificationRequester")
 }
 
 model AuthSession {
@@ -149,6 +150,7 @@ model Job {
   preparedImport       PreparedImport?
   collaborationOutboxEvent CollaborationOutboxEvent?
 
+  currentMediaVerifications MediaVerification[] @relation("MediaVerificationCurrentJob")
   @@unique([datasetId, idempotencyKey])
   @@index([datasetId, status])
   @@index([createdById])
@@ -305,6 +307,7 @@ model Dataset {
   notifications          Notification[]
   outboxEvents           CollaborationOutboxEvent[]
 
+  mediaVerifications MediaVerification[]
   @@unique([ownerId, creationIdempotencyKey])
   @@index([ownerId])
   @@index([ownerId, primaryModality])
@@ -330,6 +333,7 @@ model PreparedImport {
   deadlineAt        DateTime
   committedAt       DateTime?
   idempotencyKey    String
+  creationRequestHash String?
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   createdBy         User                 @relation("PreparedImportCreatedBy", fields: [createdById], references: [id])
@@ -362,6 +366,7 @@ model PreparedImportItem {
   asset            Asset?         @relation(fields: [assetId], references: [id])
   preparedImport   PreparedImport @relation(fields: [preparedImportId], references: [id], onDelete: Cascade)
 
+  mediaVerifications MediaVerification[]
   @@unique([preparedImportId, normalizedPath])
   @@unique([preparedImportId, position])
   @@index([preparedImportId, completedAt])
@@ -496,6 +501,7 @@ model Asset {
   outboxEvents         CollaborationOutboxEvent[]
   mutationReceipts     AnnotationMutationReceipt[]
 
+  mediaVerification MediaVerification?
   @@unique([storageProvider, storageBucket, storageKey])
   @@unique([cacheProvider, cacheBucket, cacheKey])
   @@unique([datasetId, sourceFingerprint])
@@ -1305,6 +1311,7 @@ enum JobType {
   BULK_EXPORT_SELECTED
   COLLABORATION_OUTBOX_DISPATCH
   TEXT_SOURCE_PREPARE
+  VERIFY_UPLOADED_MEDIA
 }
 
 enum JobStatus {
@@ -1444,4 +1451,84 @@ model VisualizationArtifact {
   @@unique([bucket, key])
   @@unique([datasetId, snapshotId, kind, algorithm, scope])
   @@index([datasetId, snapshotId])
+}
+
+enum MediaVerificationSource {
+  DIRECT_UPLOAD
+  LOCAL_FOLDER_ITEM
+}
+
+enum MediaVerificationStatus {
+  PENDING
+  SEALED
+  VERIFIED
+  PUBLISHED
+  REJECTED
+  STALE
+  CANCELED
+  EXPIRED
+}
+
+/// A2 durable pre-publication media verification (frozen contract: specs/029-modality-specific-datasets/contracts/premedia-verification-a2.md section 4).
+model MediaVerification {
+  id                   String                  @id @default(uuid())
+  datasetId            String
+  requestedById        String
+  source               MediaVerificationSource
+  preparedImportItemId String?
+  currentJobId         String?
+  generation           Int                     @default(1)
+  boundDatasetModality Modality
+
+  stagedBucket       String
+  stagedKey          String
+  stagedEtag         String
+  stagedSizeBytes    BigInt
+  stagedLastModified DateTime
+  stagedVersionId    String?
+
+  filename            String
+  relativePathHint    String?
+  declaredContentType String
+  declaredSizeBytes   BigInt
+
+  sealedKey          String?   @unique
+  sealedEtag         String?
+  sealedSizeBytes    BigInt?
+  sealedLastModified DateTime?
+  sealedVersionId    String?
+  contentSha256      String?
+
+  status                 MediaVerificationStatus @default(PENDING)
+  verifiedModality       Modality?
+  resultCode             String?
+  resultReason           String?
+  probe                  Json?
+  policyVersion          String?
+  processorVersion       String?
+  lastFailureCode        String?
+  lastFailureReason      String?
+  lastFailureAt          DateTime?
+  objectsClearedAt       DateTime?
+  assetId                String?                 @unique
+  verificationDeadlineAt DateTime
+  sealedAt               DateTime?
+  verifiedAt             DateTime?
+  publishedAt            DateTime?
+  finishedAt             DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  dataset            Dataset             @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  requestedBy        User                @relation("MediaVerificationRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  preparedImportItem PreparedImportItem? @relation(fields: [preparedImportItemId], references: [id], onDelete: Cascade)
+  currentJob         Job?                @relation("MediaVerificationCurrentJob", fields: [currentJobId], references: [id], onDelete: SetNull)
+  asset              Asset?              @relation(fields: [assetId], references: [id], onDelete: SetNull)
+
+  @@unique([stagedBucket, stagedKey, generation])
+  @@unique([preparedImportItemId, generation])
+  @@index([status, verificationDeadlineAt])
+  @@index([requestedById, status])
+  @@index([datasetId, status])
+  @@index([currentJobId])
 }

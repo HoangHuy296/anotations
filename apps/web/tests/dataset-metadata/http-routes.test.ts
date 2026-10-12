@@ -82,6 +82,9 @@ test("Dataset CRUD, archive, and server-derived ownership work through HTTP", { 
 
   const updated = await fetch(`${baseUrl}/api/datasets/${datasetId}`, { method: "PATCH", headers: { "Content-Type": "application/json", Cookie: managerCookie }, body: JSON.stringify({ description: "safe metadata" }) });
   assert.equal(updated.status, 200);
+  const immutable = await fetch(`${baseUrl}/api/datasets/${datasetId}`, { method: "PATCH", headers: { "Content-Type": "application/json", Cookie: managerCookie }, body: JSON.stringify({ modality: "VIDEO" }) });
+  assert.equal(immutable.status, 409);
+  assert.equal(((await immutable.json()) as { error?: { code?: string } }).error?.code, "DATASET_MODALITY_IMMUTABLE");
   const archived = await fetch(`${baseUrl}/api/datasets/${datasetId}`, { method: "DELETE", headers: { Cookie: managerCookie } });
   assert.equal(archived.status, 200);
   assert.ok((await db.dataset.findUnique({ where: { id: datasetId }, select: { archivedAt: true } }))?.archivedAt);

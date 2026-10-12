@@ -4,6 +4,7 @@ import { BoundingBox, Circle, Cursor, Hand, LineSegment, MapPin, Pentagon, Video
 import type { ReactNode } from "react";
 
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
+import { videoShapeToolGate } from "@/lib/workspace/video-tool-capabilities";
 
 /**
  * Video's `DatasetSidebar` toolbox content. This is the pre-registry
@@ -26,16 +27,16 @@ export function VideoToolbox() {
       <ToolButton active={tool === "pan"} label="Pan" onClick={() => setTool("pan")}><Hand size={17} /></ToolButton>
     </div>
     <div className="mt-2 grid grid-cols-2 gap-1.5">
-      <ToolButton active={tool === "polygon"} label="Polygon" onClick={() => setTool("polygon")}><Pentagon size={15} /></ToolButton>
-      <ToolButton active={tool === "circle"} label="Circle" onClick={() => setTool("circle")}><Circle size={15} /></ToolButton>
-      <ToolButton active={tool === "point"} label="Point" onClick={() => setTool("point")}><MapPin size={15} /></ToolButton>
-      <ToolButton active={tool === "polyline"} label="Polyline" onClick={() => setTool("polyline")}><LineSegment size={15} /></ToolButton>
+      <ToolButton active={tool === "polygon"} label="Polygon" gate={videoShapeToolGate("polygon")} onClick={() => setTool("polygon")}><Pentagon size={15} /></ToolButton>
+      <ToolButton active={tool === "circle"} label="Circle" gate={videoShapeToolGate("circle")} onClick={() => setTool("circle")}><Circle size={15} /></ToolButton>
+      <ToolButton active={tool === "point"} label="Point" gate={videoShapeToolGate("point")} onClick={() => setTool("point")}><MapPin size={15} /></ToolButton>
+      <ToolButton active={tool === "polyline"} label="Polyline" gate={videoShapeToolGate("polyline")} onClick={() => setTool("polyline")}><LineSegment size={15} /></ToolButton>
       <ToolButton active={tool === "track"} label="Video" onClick={() => setTool("track")}><VideoConferenceIcon size={15} /></ToolButton>
       <ToolButton active={tool === "aidetect"} label="AI Tracking" onClick={() => setTool("aidetect")}><Atom size={15} /></ToolButton>
     </div>
   </>;
 }
 
-function ToolButton({ active, label, onClick, children }: { active: boolean; label: string; onClick: () => void; children: ReactNode }) {
-  return <button type="button" title={label} aria-label={label} aria-pressed={active} onClick={onClick} className={`grid min-h-12 place-items-center rounded-lg border transition-colors ${active ? "border-sky-500 bg-sky-50 text-sky-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>{children}<span className="sr-only">{label}</span></button>;
+function ToolButton({ active, label, onClick, children, gate }: { active: boolean; label: string; onClick: () => void; children: ReactNode; gate?: { disabled: boolean; reason: string | undefined } }) {
+  return <button type="button" title={gate?.reason ?? label} aria-label={label} aria-pressed={active} disabled={gate?.disabled} onClick={onClick} className={`grid min-h-12 place-items-center rounded-lg border transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${active ? "border-sky-500 bg-sky-50 text-sky-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>{children}<span className="sr-only">{label}</span></button>;
 }

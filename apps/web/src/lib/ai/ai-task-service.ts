@@ -11,7 +11,7 @@ import { enqueueExistingJob, type EnqueueOptions } from "@/lib/queue/enqueue-job
 import { resolveQueueName } from "@/lib/queue/queue-names";
 import { AiTaskError } from "@/lib/ai/ai-task-errors";
 import { isModelInDeployedCatalog, loadModelClasses } from "@/lib/ai/ai-model-service";
-import { computeAiPreviewFingerprint, resolveAiTarget, type AiTargetFailureCode, type AiTargetInput } from "@/lib/ai/ai-target-service";
+import { aiTargetChanged, computeAiPreviewFingerprint, resolveAiTarget, type AiTargetFailureCode, type AiTargetInput } from "@/lib/ai/ai-target-service";
 import type { BulkSelectionInput } from "@/lib/assets/asset-bulk-service";
 import { createAiTaskSchema } from "@/lib/validation/ai-task";
 
@@ -76,6 +76,7 @@ export async function createAiTask(actor: RequestActor, input: unknown, enqueueO
   // and class reads, which must never run inside a database transaction.
   const preview = await resolveAiTarget(parsed.data.datasetId, targetInput);
   if (!preview.ok) return { ok: false, status: preview.status, code: preview.code };
+  const previewTarget = { modality: preview.modality, targets: preview.targets };
 
   if (model.provider === "aioz-company") {
     const supported = (model.modality === "IMAGE" && ["DETECTION", "DETECT_OBJECTS"].includes(model.taskType)) || (model.modality === "VIDEO" && ["TRACKING", "DETECT_OBJECTS"].includes(model.taskType));
@@ -124,7 +125,7 @@ export async function createAiTask(actor: RequestActor, input: unknown, enqueueO
     return db.$transaction(async (tx) => {
       const resolved = await resolveAiTarget(parsed.data!.datasetId, targetInput, tx);
       if (!resolved.ok) return { kind: "failure", failure: resolved } as const;
-      if (JSON.stringify(resolved.targets) !== JSON.stringify(preview.ok ? preview.targets : [])) return { kind: "changed" } as const;
+      if (aiTargetChanged(previewTarget, resolved)) return { kind: "changed" } as const;
 
       const jobInput = aiBatchJobInputV1Schema.parse({
         schemaVersion: 1,

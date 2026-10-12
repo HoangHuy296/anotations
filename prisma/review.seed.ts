@@ -82,7 +82,8 @@ async function main() {
       where: { ownerId: admin.id, name: datasetName },
     })) ??
     (await prisma.dataset.create({
-      data: { ownerId: admin.id, name: datasetName },
+      // Phase 029: every Dataset has exactly one fixed modality from creation. The demo labels (pedestrian, vehicle, …) are image-detection classes.
+      data: { ownerId: admin.id, name: datasetName, modality: "IMAGE", primaryModality: "IMAGE", modalityResolverSubject: admin.id },
     }));
 
   await prisma.$transaction(

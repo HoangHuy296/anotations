@@ -137,7 +137,6 @@ PresignedUploadRequest:
         - application/json
         - audio/wav
         - audio/mpeg
-        - audio/ogg
     sizeBytes:
       type: integer
       minimum: 1
@@ -197,6 +196,35 @@ CompleteUploadResponse:
         call for the same upload capability (idempotent replay), rather than newly
         created by this request.
   additionalProperties: false
+
+UploadVerification:
+  type: object
+  description: >-
+    One durable upload verification (A2). `status` is a view: VERIFYING covers the internal SEALED and VERIFIED states; VERIFICATION_FAILED is the DERIVED
+    operational-failure view (the verification is still retryable until `expiresAt`) and is never a rejection of the media. Nothing here exposes a storage key,
+    bucket, ETag, hash or probe detail.
+  required: [id, status, expiresAt]
+  properties:
+    id: { type: string, format: uuid }
+    status:
+      type: string
+      enum: [PENDING, VERIFYING, VERIFICATION_FAILED, PUBLISHED, REJECTED, STALE, CANCELED, EXPIRED]
+    code: { type: string, description: Safe upper-case reason code for a terminal non-published outcome or an operational failure. }
+    reason: { type: string }
+    retryable: { type: boolean }
+    expiresAt: { $ref: './common.yaml#/Timestamp' }
+    pollAfterMs: { type: integer, minimum: 0 }
+    asset:
+      $ref: '#/Asset'
+  additionalProperties: false
+
+UploadVerificationAccepted:
+  type: object
+  required: [verification]
+  properties:
+    verification:
+      $ref: '#/UploadVerification'
+  additionalProperties: true
 
 AssetViewUrlResponse:
   type: object

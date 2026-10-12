@@ -39,6 +39,9 @@ const safeErrorCodes = new Set([
   // safeTextSourcePrepareErrorCodeSchema).
   "TEXT_SOURCE_MISSING", "TEXT_SOURCE_STALE", "TEXT_SOURCE_OVERSIZED_BYTES",
   "TEXT_SOURCE_OVERSIZED_CODE_UNITS", "TEXT_SOURCE_INVALID_ENCODING",
+  // A2 VERIFY_UPLOADED_MEDIA (contract sections 6.4 and 9): deterministic verdict codes and operational codes. Never a key, hash or probe internal.
+  "UNSUPPORTED_MEDIA", "INVALID_MEDIA", "ASSET_MODALITY_MISMATCH", "INVALID_RELATIVE_PATH", "UPLOAD_SOURCE_CHANGED", "UPLOAD_VERIFICATION_EXPIRED",
+  "VERIFICATION_EXECUTION_EXHAUSTED", "VERIFICATION_INFRASTRUCTURE_FAILED",
 ]);
 
 const textSourceErrorMessages: Record<string, string> = {
@@ -49,6 +52,14 @@ const textSourceErrorMessages: Record<string, string> = {
   TEXT_SOURCE_OVERSIZED_BYTES: "This source is larger than the supported reader size.",
   TEXT_SOURCE_OVERSIZED_CODE_UNITS: "This source has more characters than the supported reader size.",
   TEXT_SOURCE_INVALID_ENCODING: "This source is not valid, complete UTF-8 text.",
+  UNSUPPORTED_MEDIA: "This file is not a supported video (container or codec).",
+  INVALID_MEDIA: "This file could not be read as a valid video.",
+  ASSET_MODALITY_MISMATCH: "This file is not a video, so it cannot be added to a video dataset.",
+  INVALID_RELATIVE_PATH: "This file's name or path is not allowed.",
+  UPLOAD_SOURCE_CHANGED: "The uploaded file changed while it was being verified. Upload it again.",
+  UPLOAD_VERIFICATION_EXPIRED: "Verification did not finish in time. Upload the file again.",
+  VERIFICATION_EXECUTION_EXHAUSTED: "Verification could not complete and can be retried.",
+  VERIFICATION_INFRASTRUCTURE_FAILED: "Verification hit a temporary storage problem and can be retried.",
 };
 
 function safeError(code: string | null) {

@@ -18,7 +18,7 @@ test("synthetic unresolved history is seeded only after complete recovered 23-mi
       for (const [id,role] of [["g2-owner","MANAGER"],["g2-admin","ADMIN"],["g2-manager","MANAGER"],["g2-former-admin","LABELER"],["g2-receipt-actor","ADMIN"]]) {
         await tx.user.create({data:{id,email:`${id}@test.invalid`,role},select:{id:true}});
       }
-      for (const name of ["empty","admin-empty","mixed","single","deleted-child","archived","deleted","former-admin-empty"]) {
+      for (const name of ["empty","admin-empty","mixed","single","deleted-child","archived","deleted","former-admin-empty","insert-first-empty","resolve-compatible-empty","resolve-incompatible-empty"]) {
         await tx.dataset.create({data:{id:`g2-${name}`,name,ownerId:"g2-owner",...(name==="archived"?{archivedAt:new Date()}:{}),...(name==="deleted"?{deletedAt:new Date()}:{}),metadata:{workflowStatus:"COMPLETED"}},select:{id:true}});
       }
       await tx.datasetMember.create({data:{datasetId:"g2-empty",userId:"g2-manager",role:"MANAGER"},select:{id:true}});

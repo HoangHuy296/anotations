@@ -13,6 +13,15 @@
   },
   "web:test:dataset-metadata": {
     "kind": "test",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/db-safety/runtime-http-suite.mjs"
+    ]
+  },
+  "web:test:dataset-patch-route": {
+    "kind": "test",
     "cwd": "apps/web",
     "args": [
       "--require",
@@ -20,8 +29,80 @@
       "--import",
       "tsx",
       "--test",
-      "tests/dataset-metadata/**/*.test.ts"
+      "--test-concurrency=1",
+      "tests/dataset-metadata/dataset-patch-route.test.ts"
     ]
+  },
+  "web:test:local-folder-modality-idempotency": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/local-folder-import/prepare-modality-idempotency.test.ts"
+    ]
+  },
+  "web:test:imports-ui:vitest": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "tests/imports/class-combobox-state.vitest.spec.ts",
+      "tests/imports/confirmed-classes.vitest.spec.ts",
+      "tests/imports/creation-form-model.vitest.spec.ts",
+      "tests/imports/modality-class-card.vitest.spec.tsx",
+      "tests/imports/source-import-preflight-schema.vitest.spec.ts",
+      "--pool=threads",
+      "--environment",
+      "node"
+    ]
+  },
+  "rehearsal-fixture:prepared-import-creation-request-hash": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/prepared-import-rehearsal/seed-prepared-imports.test.ts"
+    ],
+    "rehearsalOnly": "rehearse:prepared-import-creation-request-hash"
+  },
+  "compat-test:prepared-import-creation-request-hash": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/prepared-import-compat/client-compat.test.ts"
+    ],
+    "compatOnly": "compat:prepared-import-creation-request-hash"
+  },
+  "verify-test:confirmed-taxonomy-creation": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/confirmed-taxonomy/creation-paths.test.ts"
+    ],
+    "verifyOnly": "verify:confirmed-taxonomy-creation"
   },
   "web:test:direct-upload": {
     "kind": "test",
@@ -248,7 +329,8 @@
       "--import",
       "tsx",
       "--test",
-      "tests/providers/ai/aioz-video-normalization.test.ts"
+      "tests/providers/ai/aioz-video-normalization.test.ts",
+      "tests/jobs/ai-label-mapping-writers.test.ts"
     ]
   },
   "worker:test:queue": {
@@ -575,6 +657,402 @@
       "tests/text-annotations/workspace-selection-text.test.ts",
       "tests/assets-bulk/delete-sync.test.ts",
       "tests/workspace/workspace-shell-boundary.test.ts"
+    ]
+  },
+  "worker:test:ingestion-replay-reuse": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import/ingestion-replay-reuse.test.ts"
+    ]
+  },
+  "verify-test:ingestion-replay-summary": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/ingestion-replay-summary.test.ts"
+    ],
+    "verifyOnly": "verify:ingestion-replay-summary"
+  },
+  "backfill-seed:dataset-modality": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/backfill-baseline.test.ts"
+    ],
+    "backfillOnly": "release:phase029-backfill"
+  },
+  "verify-test:dataset-modality-backfill": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/backfill-rehearsal.test.ts"
+    ],
+    "backfillOnly": "release:phase029-backfill"
+  },
+  "maintenance-seed:dataset-modality": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/maintenance-baseline.test.ts"
+    ],
+    "maintenanceOnly": "release:phase029-backfill-maintenance"
+  },
+  "maintenance-objects:dataset-modality": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/maintenance-objects.test.ts"
+    ],
+    "maintenanceOnly": "release:phase029-backfill-maintenance"
+  },
+  "maintenance-check:dataset-modality": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/maintenance-check.test.ts"
+    ],
+    "maintenanceOnly": "release:phase029-backfill-maintenance"
+  },
+  "worker:test:classification-boundary": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/repository-import/classification-boundary.test.ts",
+      "tests/repository-import/repository-asset-mirror.test.ts",
+      "tests/repository-import/repository-mime-contract.test.ts"
+    ]
+  },
+  "worker:test:sealed-namespace": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/queue/sealed-namespace.test.ts"
+    ]
+  },
+  "web:test:upload-verification-boundary": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/direct-upload/upload-verification-boundary.test.ts"
+    ]
+  },
+  "web:test:modality-workspace-feasibility": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/workspace/modality-engine-feasibility.test.ts",
+      "tests/workspace/g5-engine-ui.test.ts",
+      "tests/workspace/image-video-flush-regression.test.ts",
+      "tests/workspace/path-interaction.test.ts",
+      "tests/workspace/audio-properties.test.ts",
+      "tests/datasets-ui/popover-focus.test.ts",
+      "tests/workspace/label-library.test.ts"
+    ]
+  },
+  "web:test:asset-guard-transitions": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/asset-guard-transitions.test.ts",
+      "tests/dataset-modality/creation-paths.test.ts"
+    ]
+  },
+  "web:test:ai-batch-targets": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/ai/ai-batch-targets.test.ts"
+    ]
+  },
+  "web:test:dataset-ref-contract": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/dataset-modality/dataset-ref-contract.test.ts"
+    ]
+  },
+  "web:test:ai-model-catalog": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/ai/ai-model-catalog.test.ts"
+    ]
+  },
+  "worker:test:ai-canonical-endpoint": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/providers/ai/canonical-endpoint.test.ts"
+    ]
+  },
+  "seed:register-aioz-model:yolo26s-coco": {
+    "kind": "seed",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/register-aioz-model.ts",
+      "--apply",
+      "68d7f474-6982-446c-8c5a-121d56d12dc9",
+      "YOLO26s_COCO"
+    ]
+  },
+  "seed:register-aioz-model:bytetrack-yolox-s-coco": {
+    "kind": "seed",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/register-aioz-model.ts",
+      "--apply",
+      "cb29e022-1ba7-4349-9dce-4fb3074e84d6",
+      "ByteTrack YOLOX_S COCO"
+    ]
+  },
+  "web:test:media-processing-client:vitest": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "tests/workspace/media-processing-client.vitest.spec.ts",
+      "tests/workspace/video-tool-capabilities.vitest.spec.tsx",
+      "--pool=threads",
+      "--environment",
+      "node"
+    ]
+  },
+  "web:test:media-processing-concurrency": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media-processing/ensure-concurrency.test.ts"
+    ]
+  },
+  "web:test:candidate-content-types": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/direct-upload/candidate-content-types.test.ts"
+    ]
+  },
+  "worker:test:media-verification-foundation": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media/classification-policy.test.ts",
+      "tests/media/video-metadata.test.ts",
+      "tests/media/probe-markers.test.ts",
+      "tests/queue/media-verification-router-guard.test.ts",
+      "tests/providers/verifier-readiness.test.ts"
+    ]
+  },
+  "worker:test:media-verification-processor": {
+    "kind": "test",
+    "cwd": "apps/worker",
+    "args": [
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/verification/processor.test.ts",
+      "tests/verification/scanners.test.ts"
+    ]
+  },
+  "web:test:media-verification-admission": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media-verification/admission.test.ts"
+    ]
+  },
+  "web:test:media-verification-cap": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/media-verification/cap-contention.test.ts"
+    ]
+  },
+  "web:test:workspace-engines:vitest": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "tests/workspace/text-annotation-client.vitest.spec.ts",
+      "tests/workspace/text-annotation-store.vitest.spec.ts",
+      "tests/workspace/text-dom-segments.vitest.spec.ts",
+      "tests/workspace/text-engine-capabilities.vitest.spec.ts",
+      "tests/workspace/text-properties-editor.vitest.spec.ts",
+      "tests/workspace/text-read-client.vitest.spec.ts",
+      "tests/workspace/text-span-selection.vitest.spec.ts",
+      "tests/workspace/text-workspace.vitest.spec.ts",
+      "tests/workspace/video-autosave.vitest.spec.ts",
+      "tests/workspace/video-interaction-ownership.vitest.spec.ts",
+      "tests/workspace/video-interpolation.vitest.spec.ts",
+      "tests/workspace/video-playback-controller.vitest.spec.ts",
+      "tests/workspace/video-temporal-boundary.vitest.spec.ts",
+      "tests/workspace/workspace-engine-registry.vitest.spec.ts",
+      "tests/workspace/ai-batch-selection.vitest.spec.ts",
+      "tests/workspace/collaboration-presence.vitest.spec.tsx",
+      "tests/workspace/collaboration-workspace-ui.vitest.spec.tsx",
+      "tests/workspace/use-collaboration-realtime.vitest.spec.ts",
+      "tests/workspace/audio-tool-capabilities.vitest.spec.tsx",
+      "--pool=threads",
+      "--environment",
+      "node",
+      "tests/workspace/video-display-label.vitest.spec.ts",
+      "tests/workspace/video-initial-range.vitest.spec.ts",
+      "tests/workspace/text-command-error.vitest.spec.ts"
+    ]
+  },
+  "web:test:annotation-persistence": {
+    "kind": "test",
+    "cwd": "apps/web",
+    "args": [
+      "--require",
+      "./tests/auth-ownership/register-server-only.cjs",
+      "--import",
+      "tsx",
+      "--test",
+      "--test-concurrency=1",
+      "tests/annotation-api/annotation-service.test.ts",
+      "tests/annotation-api/annotation-validation.test.ts",
+      "tests/annotation-api/annotation-create-authorization.test.ts",
+      "tests/annotation-api/video-foundation.test.ts",
+      "tests/workspace/annotation-mutations.test.ts",
+      "tests/workspace/annotation-shape-editing.test.ts",
+      "tests/workspace/annotation-locking.test.ts",
+      "tests/workspace/video-engine-read.test.ts",
+      "tests/workspace/video-timeline-ownership.test.ts",
+      "tests/workspace/autosave-state.test.ts",
+      "tests/text-annotations/workspace-selection-text.test.ts"
+    ]
+  },
+  "web:test:workspace-integration": {
+    "kind": "test",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/db-safety/runtime-http-suite.mjs"
     ]
   }
 }

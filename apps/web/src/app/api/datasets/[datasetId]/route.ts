@@ -29,7 +29,9 @@ export async function PATCH(request: Request, context: Context) {
   const actor = await getRequestActor();
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
   const result = await resolve(actor, context, "dataset.update"); if ("response" in result) return result.response;
-  const parsed = updateDatasetSchema.safeParse(await request.json().catch(() => null));
+  const body = await request.json().catch(() => null);
+  if (body && typeof body === "object" && !Array.isArray(body) && "modality" in body) return apiError(409, "DATASET_MODALITY_IMMUTABLE", "Dataset modality cannot be changed.");
+  const parsed = updateDatasetSchema.safeParse(body);
   if (!parsed.success) return apiError(400, "INVALID_REQUEST", "Dataset input is invalid.", parsed.error.flatten().fieldErrors);
   const { workflowStatus, ...update } = parsed.data;
   let metadata = update.metadata;

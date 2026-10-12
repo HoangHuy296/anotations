@@ -6,6 +6,7 @@ import { canCreateDataset } from "@/lib/authorization";
 import { db } from "@/lib/db";
 import { projectDatasetWorkflowStatus } from "@/lib/datasets/dataset-destination";
 import { datasetMetadataSelect } from "@/lib/dataset-metadata";
+import { prepareConfirmedClasses } from "@/lib/imports/confirmed-classes-server";
 import { parsePageRequest } from "@/lib/pagination";
 import { createDatasetSchema } from "@/lib/validation/dataset";
 
@@ -39,7 +40,15 @@ export async function POST(request: Request) {
   if (!canCreateDataset(actor)) return apiError(403, "FORBIDDEN", "You cannot create datasets.");
   const parsed = createDatasetSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return apiError(400, "INVALID_REQUEST", "Dataset input is invalid.", parsed.error.flatten().fieldErrors);
-  const { modality, ...legacyFields } = parsed.data;
-  const dataset = await db.dataset.create({ data: { ...legacyFields, modality, primaryModality: modality, modalityResolverSubject: actor.id, description: parsed.data.description || null, ownerId: actor.id }, select: datasetMetadataSelect });
+  const { modality, confirmedClasses, ...legacyFields } = parsed.data;
+  const confirmed = prepareConfirmedClasses(confirmedClasses, modality);
+  // Nested create: Dataset and its confirmed Labels are one atomic write. This route stays non-idempotent (no key, no replay).
+  const dataset = await db.dataset.create({
+    data: {
+      ...legacyFields, modality, primaryModality: modality, modalityResolverSubject: actor.id, description: parsed.data.description || null, ownerId: actor.id,
+      ...(confirmed.labels.length > 0 ? { labels: { create: confirmed.labels.map((label) => ({ ...label })) } } : {}),
+    },
+    select: datasetMetadataSelect,
+  });
   return apiSuccess(dataset, { status: 201 });
 }

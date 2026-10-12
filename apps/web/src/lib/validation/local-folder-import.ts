@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { confirmedClassesSchema } from "@/lib/validation/confirmed-classes";
 import { candidateContentTypes, MAX_DIRECT_UPLOAD_BYTES } from "@/lib/validation/upload";
 
 const relativePath = z.string().trim().min(1).max(1_024)
@@ -30,6 +31,7 @@ export const startLocalFolderImportSchema = localFolderImportManifestSchema.exte
   name: z.string().trim().min(1).max(160),
   description: z.string().trim().max(2_000).optional(),
   modality: z.enum(["IMAGE", "VIDEO", "AUDIO", "TEXT"]),
+  confirmedClasses: confirmedClassesSchema,
 }).superRefine(manifestRefinement);
 
 /** A workspace append uses the Dataset selected by the route, never browser input. */

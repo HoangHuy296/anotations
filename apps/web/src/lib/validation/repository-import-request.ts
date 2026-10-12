@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { confirmedClassesSchema } from "@/lib/validation/confirmed-classes";
+
 const repositorySegment = z
   .string()
   .trim()
@@ -58,6 +60,7 @@ export const repositoryImportRequestSchema = z
     connectionName: z.string().trim().min(1).max(80).optional(),
     datasetName: z.string().trim().min(1).max(160),
     idempotencyKey: z.string().trim().min(16).max(160),
+    confirmedClasses: confirmedClassesSchema,
   })
   .strict()
   .superRefine((value, context) => {

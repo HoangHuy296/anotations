@@ -1,15 +1,9 @@
 import { z } from "zod";
 import type { AiTask, PrismaClient, Prisma } from "../../../../lib/generated/prisma/client.js";
 import { normalizedVideoPredictionSchema } from "../providers/ai/aioz-video-normalization.js";
+import { canonicalAiLabelKey, matchAiClassLabels } from "@annotationplatform/domain/ai-label-resolution";
 import { releaseLock } from "../queue/job-lock.js";
-
-const LABEL_PALETTE = ["#38bdf8", "#f97316", "#22c55e", "#e11d48", "#a855f7", "#eab308", "#14b8a6", "#ec4899"];
-/** Deterministic color so a class keeps one color across tasks. */
-function labelColor(normalizedName: string) {
-  let hash = 0;
-  for (const char of normalizedName) hash = (hash * 31 + char.codePointAt(0)!) >>> 0;
-  return LABEL_PALETTE[hash % LABEL_PALETTE.length];
-}
+import { aiResultFingerprint } from "./ai-result-fingerprint.js";
 
 /** Append video tracks and their observed keyframes atomically with Job completion. */
 export async function handleVideoAiTaskCompleted(
@@ -32,23 +26,12 @@ export async function handleVideoAiTaskCompleted(
       data: { status: "COMPLETED", stage: "FINISHED", finishedAt: new Date() },
     });
     if (claimed.count !== 1) return;
-    // Provider classes become Dataset labels: reuse an existing label by
-    // normalized name, otherwise create it so tracks are never left unlabeled.
-    // "unknown" stays unlabeled. Names are unique per Dataset across modalities.
-    const classNames = new Map<string, string>();
-    for (const p of predictions) {
-      const key = p.labelKey.trim().toLocaleLowerCase("en-US");
-      if (key !== "unknown" && !classNames.has(key)) classNames.set(key, p.labelKey.trim());
-    }
-    const existing = await tx.label.findMany({ where: { datasetId: task.datasetId, normalizedName: { in: [...classNames.keys()] } }, select: { id: true, normalizedName: true, modality: true } });
-    const labelsByName = new Map(existing.filter((label) => label.modality === null || label.modality === "VIDEO").map((label) => [label.normalizedName, label.id]));
-    const taken = new Set(existing.map((label) => label.normalizedName));
-    for (const [normalizedName, name] of classNames) {
-      if (taken.has(normalizedName)) continue;
-      const created = await tx.label.create({ data: { datasetId: task.datasetId, modality: "VIDEO", name, normalizedName, color: labelColor(normalizedName) }, select: { id: true } });
-      labelsByName.set(normalizedName, created.id);
-    }
+    // A Label row is never created for a predicted class. A track links to an existing compatible Dataset label only when one matches by the canonical key;
+    // otherwise labelId stays null and `properties.predictedClass` (the exact class the AI Service returned) is what the workspace displays. A malformed class
+    // throws and rolls the whole result back; an incompatible same-key label is reported, never reused or modified.
+    const match = await matchAiClassLabels(tx, task.datasetId, "VIDEO", predictions.map((p) => p.labelKey));
     let tracksCreated = 0;
+    let tracksSkippedAsDuplicate = 0;
     let keyframesCreated = 0;
     for (const [assetId, observations] of grouped) {
       const assetClaim = await tx.asset.updateMany({
@@ -73,6 +56,11 @@ export async function handleVideoAiTaskCompleted(
       if (Number.isFinite(durationMs) && durationMs > 0) {
         await tx.asset.updateMany({ where: { id: assetId, durationMs: null }, data: { durationMs } });
       }
+      // Identical results already persisted for this asset (any earlier task, whatever a human did to them since) are skipped, not duplicated.
+      const knownFingerprints = new Set(
+        (await tx.videoObjectTrack.findMany({ where: { videoAssetId: video.id }, select: { properties: true } }))
+          .map((row) => (row.properties as { resultFingerprint?: unknown } | null)?.resultFingerprint).filter((value): value is string => typeof value === "string"),
+      );
       const tracks = new Map<number, typeof observations>();
       for (const observation of observations) {
         const items = tracks.get(observation.video.trackId) ?? [];
@@ -82,10 +70,16 @@ export async function handleVideoAiTaskCompleted(
       for (const [providerTrackId, items] of tracks) {
         const first = items[0];
         const timestamps = new Set(items.map((p) => p.video.timestampMs));
-        if (timestamps.size !== items.length || items.some((p) => p.video.classId !== first.video.classId || p.video.fps !== first.video.fps)) throw new Error("AI_VIDEO_RESULT_INVALID");
-        const labelName = first.labelKey.trim().toLocaleLowerCase("en-US");
-        const labelId = labelName === "unknown" ? null : labelsByName.get(labelName) ?? null;
-        const provenance = { aiTaskId: task.id, modelKey: task.modelKeySnapshot, providerTrackId, objectId: String(providerTrackId), predictedClass: first.labelKey, providerClassId: first.video.classId };
+        if (timestamps.size !== items.length || items.some((p) => p.video.classId !== first.video.classId || p.video.fps !== first.video.fps || canonicalAiLabelKey(p.labelKey)?.key !== canonicalAiLabelKey(first.labelKey)?.key)) throw new Error("AI_VIDEO_RESULT_INVALID");
+        const canonical = canonicalAiLabelKey(first.labelKey);
+        const labelId = canonical ? match.labelIds.get(canonical.key) ?? null : null;
+        const resultFingerprint = aiResultFingerprint({
+          modelKey: task.modelKeySnapshot, assetId, classKey: canonical ? canonical.key : "unknown", providerTrackId,
+          frames: items.map((p) => ({ frameIndex: p.video.frameIndex, box: p.boundingBoxes as never })),
+        });
+        if (knownFingerprints.has(resultFingerprint)) { tracksSkippedAsDuplicate++; continue; }
+        knownFingerprints.add(resultFingerprint);
+        const provenance = { resultFingerprint, aiTaskId: task.id, modelKey: task.modelKeySnapshot, providerTrackId, objectId: String(providerTrackId), predictedClass: first.labelKey, providerClassId: first.video.classId };
         const track = await tx.videoObjectTrack.create({ data: {
           videoAssetId: video.id, createdById: task.createdById, labelId,
           name: `AI track ${providerTrackId}`, status: "DRAFT", annotationType: "BOUNDING_BOX",
@@ -104,7 +98,7 @@ export async function handleVideoAiTaskCompleted(
         keyframesCreated += rows.length;
       }
     }
-    await tx.aiTask.update({ where: { id: task.id }, data: { status: "SUCCEEDED", output: { tracksCreated, keyframesCreated } } });
+    await tx.aiTask.update({ where: { id: task.id }, data: { status: "SUCCEEDED", output: { tracksCreated, keyframesCreated, labelConflicts: match.conflicts, tracksSkippedAsDuplicate } } });
   }, { timeout: 30_000 });
   await releaseLock(db, jobId, lockToken, workerId);
 }

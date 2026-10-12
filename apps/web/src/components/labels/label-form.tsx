@@ -12,6 +12,7 @@ import {
   type LabelActionResult,
 } from "@/app/(app)/labels/actions";
 import { Button } from "@/components/ui/button";
+import { LABEL_COLOR_PRESETS as LABEL_COLORS } from "@/lib/labels/label-color-presets";
 import { labelSchema, textEligibilityScopeValues, type LabelInput } from "@/lib/validation/label";
 
 const TEXT_ELIGIBILITY_OPTIONS = [
@@ -47,7 +48,7 @@ function currentTextEligibility(label: LabelFormProps["label"]): LabelInput["tex
 }
 
 const inputClassName =
-  "mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500";
+  "mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-sky-900 dark:disabled:bg-zinc-900";
 
 export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps) {
   const router = useRouter();
@@ -150,7 +151,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
               aria-controls={`label-color-palette-${label?.id ?? "new"}`}
               aria-expanded={paletteOpen}
               aria-haspopup="dialog"
-              className="mt-0 grid h-10 w-full place-items-center rounded-xl border border-zinc-200 bg-white outline-none transition hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-400 disabled:opacity-50"
+              className="mt-0 grid h-10 w-full place-items-center rounded-xl border border-zinc-200 bg-white outline-none transition hover:border-sky-400 focus-visible:ring-2 focus-visible:ring-sky-400 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-800"
               disabled={!canManage || isPending}
               onClick={() => setPaletteOpen((open) => !open)}
               type="button"
@@ -165,7 +166,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
             {paletteOpen ? (
               <div
                 aria-label="Label color palette"
-                className="absolute z-20 mt-2 grid w-48 grid-cols-6 gap-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-xl"
+                className="absolute z-20 mt-2 grid w-48 grid-cols-6 gap-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
                 id={`label-color-palette-${label?.id ?? "new"}`}
                 role="dialog"
               >
@@ -201,8 +202,8 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
         </Field>
       </div>
 
-      <details className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2" open={Boolean(label?.description || label?.hotkey || currentTextEligibility(label))}>
-        <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold text-zinc-600">
+      <details className="rounded-xl border border-zinc-200 bg-zinc-50/70 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-800/50" open={Boolean(label?.description || label?.hotkey || currentTextEligibility(label))}>
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold text-zinc-600 dark:text-zinc-300">
           <Palette aria-hidden="true" size={14} />
           Advanced label metadata
         </summary>
@@ -210,7 +211,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
           <Field label="Description" error={errors.description?.message}>
             <textarea
               {...register("description")}
-              className="mt-2 min-h-20 w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm leading-6 text-zinc-900 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500"
+              className="mt-2 min-h-20 w-full resize-y rounded-xl border border-zinc-200 bg-white px-3 py-2.5 text-sm leading-6 text-zinc-900 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-sky-400 focus:ring-2 focus:ring-sky-100 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-sky-900 dark:disabled:bg-zinc-900"
               disabled={!canManage || isPending}
               placeholder="Describe when annotators should apply this label."
             />
@@ -238,7 +239,7 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
               ))}
             </select>
           </Field>
-          <p className="mt-1.5 text-[11px] leading-4 text-zinc-500">
+          <p className="mt-1.5 text-[11px] leading-4 text-zinc-500 dark:text-zinc-400">
             Controls whether this label can be used for TEXT spans, document classification, sentiment, intent, or relations. A label already assigned to an annotation cannot change eligibility.
           </p>
         </div>
@@ -278,13 +279,6 @@ export function LabelForm({ mode, canManage, datasetId, label }: LabelFormProps)
   );
 }
 
-const LABEL_COLORS = [
-  "#0EA5E9", "#2563EB", "#4F46E5", "#7C3AED", "#9333EA", "#C026D3",
-  "#DB2777", "#E11D48", "#EA580C", "#F97316", "#CA8A04", "#EAB308",
-  "#65A30D", "#16A34A", "#059669", "#0F766E", "#0891B2", "#475569",
-  "#334155", "#78350F", "#BE123C", "#A21CAF", "#1D4ED8", "#047857",
-] as const;
-
 function Field({
   label,
   error,
@@ -296,9 +290,9 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="text-xs font-semibold text-zinc-700">{label}</span>
+      <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{label}</span>
       {children}
-      <span className="mt-1.5 block min-h-4 text-[11px] leading-4 text-rose-600">
+      <span className="mt-1.5 block min-h-4 text-[11px] leading-4 text-rose-600 dark:text-rose-400">
         {error}
       </span>
     </label>

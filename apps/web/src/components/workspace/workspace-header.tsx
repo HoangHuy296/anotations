@@ -28,6 +28,7 @@ import { CollaborationPresence } from "@/components/workspace/collaboration-pres
 import { useWorkspacePresence } from "@/components/workspace/use-workspace-presence";
 import type { SafeWorkspaceWorkflow } from "@/types/workspace";
 import { workflowAssetStateSchema } from "@/lib/validation/asset-workflow";
+import type { AccountTheme } from "@/lib/validation/account-preferences";
 
 type WorkspaceHeaderProps = {
   datasetName: string;
@@ -38,6 +39,7 @@ type WorkspaceHeaderProps = {
   engine: Modality | null;
   /** Signed-in actor, used to populate the account dropdown. `null` renders the trigger disabled. */
   actor: { email: string; name: string } | null;
+  theme: AccountTheme;
   workflow?: SafeWorkspaceWorkflow | null;
   discussion?: { datasetId: string; assetId: string | null; commentId?: string | null };
 };
@@ -55,6 +57,7 @@ export function WorkspaceHeader({
   rootPath,
   engine,
   actor,
+  theme,
   workflow = null,
   discussion,
 }: WorkspaceHeaderProps) {
@@ -71,7 +74,7 @@ export function WorkspaceHeader({
   const presence = useWorkspacePresence({ datasetId: discussion?.datasetId, assetId: discussion?.assetId });
 
   return (
-    <header className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-zinc-200 bg-white px-3 py-3 sm:px-5">
+    <header data-theme={theme === "dark" ? "dark" : undefined} className="flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-zinc-200 bg-white px-3 py-3 sm:px-5 dark:border-zinc-800 dark:bg-zinc-950">
       <div className="flex min-w-0 items-center gap-3">
         <Button asChild variant="icon" aria-label="Back to datasets">
           <Link href="/datasets">

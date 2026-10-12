@@ -4,8 +4,10 @@ import { createHash } from "node:crypto";
 
 import type { JobStatus, RepoProvider } from "@internal/db";
 
+import { analyzeConfirmedClasses, repositoryTaxonomyIdentity } from "@annotationplatform/domain/confirmed-classes";
 import type { RequestActor } from "@/lib/auth";
 import type { PreflightResult } from "@/lib/providers/provider.types";
+import { normalizeLabelName } from "@/lib/validation/label-name";
 import type { RepositoryImportRequest } from "@/lib/validation/repository-import-request";
 
 export type SafeRepositoryImportJobInput = {
@@ -28,7 +30,7 @@ export type SafeRepositoryImportJobInput = {
 };
 
 export type RepositoryImportAcceptance = {
-  dataset: { id: string; name: string };
+  dataset: { id: string; name: string; modality: "IMAGE" | "VIDEO" | "AUDIO" | "TEXT" };
   job: { id: string; datasetId: string; type: "IMPORT_DATASET"; status: JobStatus };
   progressPath: string;
   reused: boolean;
@@ -79,6 +81,9 @@ export function creationRequestHash(
   normalizedRootPath: string | null,
   normalizedServerUrl: string | null = null,
 ) {
+  const analysis = analyzeConfirmedClasses(input.confirmedClasses, normalizeLabelName);
+  if (!analysis.ok) throw new Error("CONFIRMED_CLASSES_INVALID");
+  const taxonomy = repositoryTaxonomyIdentity(analysis.sortedNormalized);
   const canonical = JSON.stringify({
     version: 1,
     provider: input.provider,
@@ -94,6 +99,8 @@ export function creationRequestHash(
     connectionName: input.credentialMode === "ONE_TIME_PAT" ? input.connectionName?.trim() ?? null : null,
     datasetName: input.datasetName.trim(),
     modality: input.modality,
+    // Present only for a non-empty confirmed taxonomy (sorted normalized names), so every no-class identity stays byte-identical.
+    ...(taxonomy ? { taxonomy } : {}),
   });
   return createHash("sha256").update(canonical).digest("hex");
 }

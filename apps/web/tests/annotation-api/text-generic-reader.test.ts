@@ -24,9 +24,11 @@ const hasIntegrationDatabase = Boolean(process.env.DATABASE_URL);
 
 test("readAssetAnnotations: a TEXT_RELATION row carries its fromAnnotationId/toAnnotationId; span rows and IMAGE annotations carry null for both, additive-only", { skip: !hasIntegrationDatabase }, async () => {
   const user = await createAnnotationUser(UserRole.MANAGER);
-  const dataset = await createAnnotationDataset(user.id);
-  const image = await createAnnotationAsset(dataset.id);
-  const label = await createAnnotationLabel(dataset.id);
+  // One fixed modality per Dataset: the IMAGE point and the TEXT rows live in their own Datasets.
+  const dataset = await createAnnotationDataset(user.id, Modality.TEXT);
+  const imageDataset = await createAnnotationDataset(user.id, Modality.IMAGE);
+  const image = await createAnnotationAsset(imageDataset.id);
+  const label = await createAnnotationLabel(imageDataset.id);
   const textAsset = await db.asset.create({
     data: { datasetId: dataset.id, modality: Modality.TEXT, filename: "generic-reader.txt", mimeType: "text/plain", sourceFingerprint: `${dataset.id}-text-generic-reader` },
     select: { id: true },
@@ -41,7 +43,7 @@ test("readAssetAnnotations: a TEXT_RELATION row carries its fromAnnotationId/toA
       ],
     });
     const image_ = await db.annotation.create({
-      data: { datasetId: dataset.id, assetId: image.id, labelId: label.id, createdById: user.id, modality: Modality.IMAGE, type: AnnotationType.POINT, source: AnnotationSource.MANUAL, status: AnnotationStatus.DRAFT, geometry: { px: 0.4, py: 0.4 }, properties: {} },
+      data: { datasetId: imageDataset.id, assetId: image.id, labelId: label.id, createdById: user.id, modality: Modality.IMAGE, type: AnnotationType.POINT, source: AnnotationSource.MANUAL, status: AnnotationStatus.DRAFT, geometry: { px: 0.4, py: 0.4 }, properties: {} },
       select: { id: true },
     });
 
@@ -63,6 +65,6 @@ test("readAssetAnnotations: a TEXT_RELATION row carries its fromAnnotationId/toA
     assert.equal(imagePoint?.fromAnnotationId, null, "IMAGE annotations are unaffected -- the new fields are additive-only");
     assert.equal(imagePoint?.toAnnotationId, null);
   } finally {
-    await cleanupAnnotationFixture([user.id], [dataset.id]);
+    await cleanupAnnotationFixture([user.id], [dataset.id, imageDataset.id]);
   }
 });

@@ -54,8 +54,9 @@ Use Prisma for database access. Do not use raw SQL unless explicitly approved.
   duplicate delivery of either Job must not create a duplicate asset or
   artifact.
 - `Dataset` is the central entity for imported and processed assets.
-- `Asset.modality` selects the workspace engine. Do not create workspace routes
-  by modality.
+- `Dataset.modality` selects the workspace engine; every Dataset has exactly one
+  fixed modality and `Asset.modality` must equal it. Do not create workspace
+  routes by modality.
 - `Annotation.geometry` is the canonical shape. `Annotation.revision` is
   required on every autosave/update and must reject stale overwrites.
 

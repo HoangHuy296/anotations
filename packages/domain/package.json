@@ -22,6 +22,18 @@
       "types": "./dist/source-access-policy.d.ts",
       "default": "./dist/source-access-policy.js"
     },
+    "./ai-label-resolution": {
+      "types": "./dist/ai-label-resolution.d.ts",
+      "default": "./dist/ai-label-resolution.js"
+    },
+    "./media-verification": {
+      "types": "./dist/media-verification.d.ts",
+      "default": "./dist/media-verification.js"
+    },
+    "./import-item-accounting": {
+      "types": "./dist/import-item-accounting.d.ts",
+      "default": "./dist/import-item-accounting.js"
+    },
     "./media-processing": {
       "types": "./dist/media-processing.d.ts",
       "default": "./dist/media-processing.js"
@@ -93,6 +105,10 @@
     "./export-format-capability": {
       "types": "./dist/export-format-capability.d.ts",
       "default": "./dist/export-format-capability.js"
+    },
+    "./confirmed-classes": {
+      "types": "./dist/confirmed-classes.d.ts",
+      "default": "./dist/confirmed-classes.js"
     }
   },
   "scripts": {

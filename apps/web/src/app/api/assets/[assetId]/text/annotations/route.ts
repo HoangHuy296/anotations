@@ -22,7 +22,7 @@ export async function GET(request: Request, context: Context) {
 }
 
 export async function POST(request: Request, context: Context) {
-  if (isCrossOriginRequest(request)) return apiError(403, "FORBIDDEN", "Cross-origin writes are not allowed.");
+  if (isCrossOriginRequest(request)) return apiError(403, "FORBIDDEN", "Cross-origin writes are not allowed.", undefined, undefined, { reason: "CROSS_ORIGIN" });
   const actor = await getRequestActor();
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
   const input = await request.json().catch(() => null);

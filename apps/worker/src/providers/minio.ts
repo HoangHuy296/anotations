@@ -13,10 +13,31 @@ export function createWorkerMinio(config: ProviderConfig) {
   });
 }
 
-export async function ensureBucket(client: MinioClient, bucket: string) {
-  if (!(await client.bucketExists(bucket))) {
-    await client.makeBucket(bucket);
+export class BucketNotProvisionedError extends Error {
+  readonly code = "MINIO_BUCKET_NOT_PROVISIONED";
+  constructor() {
+    super("MINIO_BUCKET_NOT_PROVISIONED");
+    this.name = "BucketNotProvisionedError";
   }
+}
+
+/**
+ * Decision R11: bucket creation and lifecycle administration belong to infrastructure provisioning, not to application identities.
+ * `MINIO_LEGACY_APP_ADMIN=1` re-enables the previous application-side bootstrap for environments that have not been provisioned yet
+ * (dev stacks that still use one root credential); it is off by default and must not be set once identities are provisioned.
+ */
+export function legacyAppAdminAllowed(env: NodeJS.ProcessEnv = process.env) {
+  return env.MINIO_LEGACY_APP_ADMIN === "1";
+}
+
+/** Verify-only by default: the bucket must already exist (a missing bucket fails closed instead of being created). */
+export async function ensureBucket(client: MinioClient, bucket: string, options?: { legacyAdmin?: boolean }) {
+  if (await client.bucketExists(bucket)) return;
+  if (options?.legacyAdmin ?? legacyAppAdminAllowed()) {
+    await client.makeBucket(bucket);
+    return;
+  }
+  throw new BucketNotProvisionedError();
 }
 
 /**
@@ -52,4 +73,18 @@ export async function ensureTempUploadLifecyclePolicy(client: MinioClient, bucke
       { ID: "annotationplatform-expire-direct-uploads", Status: "Enabled", Filter: { Prefix: "direct-uploads/" }, Expiration: { Days: expirationDays } },
     ],
   });
+}
+
+/**
+ * MinIO readiness without administrative authority (decision R11): the bucket must already be provisioned. The temp-upload lifecycle rule is
+ * provisioned by infrastructure; the application only (re)applies it in the explicit legacy mode.
+ */
+export async function probeMinioProvisioning(minio: MinioClient, bucket: string, lifecycleDays: number, env: NodeJS.ProcessEnv = process.env) {
+  await ensureBucket(minio, bucket, { legacyAdmin: legacyAppAdminAllowed(env) });
+  if (legacyAppAdminAllowed(env)) {
+    // Legacy bootstrap only (secondary GC safety net, 021-…): never blocks startup, prefix-scoped to `direct-uploads/`.
+    await ensureTempUploadLifecyclePolicy(minio, bucket, lifecycleDays).catch(() => {
+      console.warn("MinIO temp-upload lifecycle policy could not be applied (non-fatal).");
+    });
+  }
 }
