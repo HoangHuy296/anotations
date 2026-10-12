@@ -21,6 +21,7 @@ carries a Job ID; MinIO holds every binary object.
 
 ## Contents
 
+- [Quick Start](#quick-start)
 - [Core capabilities](#core-capabilities)
 - [Architecture](#architecture)
 - [Data model](#data-model)
@@ -33,6 +34,42 @@ carries a Job ID; MinIO holds every binary object.
 - [API documentation](#api-documentation)
 - [Useful commands](#useful-commands)
 - [Delivery status](#delivery-status)
+
+## Quick Start
+
+Requires Node.js 22+, pnpm 11.10+, and Docker Compose v2.
+
+```bash
+git clone <repository-url> annotation-platform
+cd annotation-platform
+pnpm install --frozen-lockfile
+
+# 1. Create .env and fill in every secret (see the comments in the file)
+cp .env.example .env
+#    openssl rand -hex 32      -> POSTGRES_PASSWORD
+#    openssl rand -base64 32   -> REDIS_PASSWORD, SOURCE_CONNECTION_ENCRYPTION_KEY
+#    Set MINIO_ROOT_PASSWORD and MINIO_SECRET_KEY the same way.
+
+# 2. Start PostgreSQL, Redis, and MinIO
+docker compose up -d postgres redis minio
+
+# 3. Point the app at the host-mapped ports in .env (not the Docker DNS names):
+#    DATABASE_URL=postgresql://<user>:<password>@localhost:5433/<db>?schema=public
+#    REDIS_HOST=localhost
+#    MINIO_ENDPOINT=localhost
+
+# 4. Generate the Prisma client and apply migrations
+pnpm db:generate
+pnpm exec prisma migrate deploy
+
+# 5. Run the web app (and, in a second terminal, the private worker)
+pnpm run dev
+pnpm run dev:worker
+```
+
+Open `http://localhost:3000`. `pnpm run dev` loads the root `.env`
+automatically. Imports, AI tasks, and exports need the worker running. See
+[Getting started](#getting-started) for details and troubleshooting.
 
 ## Core capabilities
 
