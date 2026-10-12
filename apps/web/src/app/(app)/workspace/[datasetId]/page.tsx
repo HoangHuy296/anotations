@@ -116,9 +116,9 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   return <div key={datasetId} className="flex min-h-100dvh flex-col bg-zinc-100">
     <WorkspaceHeader key={datasetId} datasetName={workspace.dataset.name} branch={`${engine.toLowerCase()} workspace`} repositoryFullName="Dataset storage" rootPath="" engine={engine} actor={{ email: actor.email, name: actor.name }} theme={theme} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId, commentId: safeDiscussionCommentId }} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
-      <DatasetSidebar key={datasetId} datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={engine} filters={filters} />
+      <DatasetSidebar key={`sidebar-${datasetId}`} datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={engine} filters={filters} />
       <WorkspaceEngine dataset={workspace.dataset} selection={selected} />
-      <PropertiesPanel key={datasetId} datasetId={datasetId} engine={engine} selection={selected} assets={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetId} filters={filters} />
+      <PropertiesPanel key={`properties-${datasetId}`} datasetId={datasetId} engine={engine} selection={selected} assets={workspace.page.items} page={workspace.page.page} pageSize={workspace.page.pageSize} totalAssets={workspace.page.total} completedAssets={workspace.page.completed} search={listQuery.q} statuses={listQuery.statuses} selectedAssetId={selectedAssetId} filters={filters} />
     </div>
   </div>;
 }
