@@ -197,6 +197,34 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+  # Infrastructure provisioning (decision R11): the worker only verifies the bucket, so this one-shot job, which holds the MinIO root
+  # credential and nothing else, creates it and applies the direct-uploads/ lifecycle rule. Idempotent; exits 0 when already provisioned.
+  minio-init:
+    extends:
+      service: worker
+    restart: "no"
+    working_dir: /workspace/apps/worker
+    depends_on: !override
+      minio:
+        condition: service_healthy
+    entrypoint:
+      - node
+      - -e
+      - |
+        const { Client } = require("minio");
+        const u = new URL(process.env.MINIO_ENDPOINT);
+        const c = new Client({ endPoint: u.hostname, port: Number(u.port || 9000), useSSL: u.protocol === "https:", accessKey: process.env.MINIO_ACCESS_KEY, secretKey: process.env.MINIO_SECRET_KEY });
+        const bucket = process.env.MINIO_BUCKET;
+        const days = Number(process.env.MINIO_TEMP_UPLOAD_LIFECYCLE_DAYS || 7);
+        (async () => {
+          if (!(await c.bucketExists(bucket))) await c.makeBucket(bucket);
+          await c.setBucketLifecycle(bucket, { Rule: [{ ID: "annotationplatform-expire-direct-uploads", Status: "Enabled", Filter: { Prefix: "direct-uploads/" }, Expiration: { Days: days } }] });
+          console.log("MinIO bucket ready: " + bucket);
+        })().catch((error) => { console.error("MinIO provisioning failed: " + (error.code || error.message)); process.exit(1); });
+    command: []
 
   realtime:
     build:

@@ -462,3 +462,8 @@ integration (020); and production hardening plus garbage collection (021).
 See [`docs/architecture.md`](docs/architecture.md) and
 [`docs/phases.md`](docs/phases.md) for the locked architecture and
 implementation sequence.
+
+# RUN: 
+```bash
+docker compose -p annotationplatformmvp -f docker-compose.yaml -f docker-compose.mvp.yaml --env-file mvp.env up -d --build
+```
