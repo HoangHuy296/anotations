@@ -6,7 +6,7 @@ import type { AssetStatus } from "@internal/db";
 
 import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
-import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
+// ARCHIVED: import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { WorkspaceSelection } from "@/types/workspace";
 
@@ -94,7 +94,7 @@ export function PlaceholderPropertiesTabs({ datasetId, selection, assets, page, 
       {tabLabels.map((label) => <span key={label} className="rounded-lg border border-zinc-100 px-2 py-1.5 text-[11px] font-medium text-zinc-300" title="Not yet available in this phase">{label}</span>)}
     </nav>
     <p className="mt-2 text-[11px] leading-5 text-zinc-400">This modality&apos;s annotation panel is not yet implemented; asset navigation and Details stay available.</p>
-    <WorkflowHistoryPanel datasetId={datasetId} assetId={selection.asset.id} />
+    {/* ARCHIVED (unimplemented UI, hidden for now; components kept in asset-assignment-panel.tsx / workflow-history-panel.tsx): <WorkflowHistoryPanel datasetId={datasetId} assetId={selection.asset.id} /> */}
     <div className="mt-4 border-t border-zinc-100 pt-3">
       <h3 className="text-xs font-bold text-zinc-950">Assets</h3>
       <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} filters={filters} onNavigate={guardNavigation} />

@@ -11,9 +11,9 @@ import {
 import { AssetBrowserFilters } from "@/components/workspace/asset-browser-filters";
 import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
 import { BulkActionBar } from "@/components/workspace/bulk-action-bar";
-import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-panel";
+// ARCHIVED: import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-panel";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
-import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
+// ARCHIVED: import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import { Badge } from "@/components/ui/badge";
 import { imageStatusPresentation } from "@/lib/image-status";
 import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
@@ -284,8 +284,8 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
       {descriptionState === "conflict" && <div className="mt-3"><SaveConflictPanel message="Your description draft is still visible and was not sent again." onReload={() => window.location.reload()} onDiscard={() => { setDescription(serverDescription); setConflictDraft(null); setDescriptionState("idle"); }} /></div>}
       {descriptionState === "failed" && <p role="alert" className="mt-3 text-xs text-rose-700">Description was not saved. Edit it again to retry.</p>}
       {conflictDraft && <p className="sr-only">Local draft preserved.</p>}
-      <AssetAssignmentPanel datasetId={datasetId} assetId={image.id} />
-      <WorkflowHistoryPanel datasetId={datasetId} assetId={image.id} />
+      {/* ARCHIVED (unimplemented UI, hidden for now; components kept in asset-assignment-panel.tsx / workflow-history-panel.tsx): <AssetAssignmentPanel datasetId={datasetId} assetId={image.id} /> */}
+      {/* ARCHIVED (unimplemented UI, hidden for now; components kept in asset-assignment-panel.tsx / workflow-history-panel.tsx): <WorkflowHistoryPanel datasetId={datasetId} assetId={image.id} /> */}
     </section>}
     {activeTab === "labels" && <section className="p-4">
       <div className="flex items-center justify-between">
