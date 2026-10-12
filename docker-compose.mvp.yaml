@@ -1,6 +1,7 @@
 # Phase 029 fresh-install MVP stack (isolated from the existing shared-dev stack).
 # Use together with the base file and a PRIVATE env file outside the repository:
-#   docker compose -p annotationplatformmvp -f docker-compose.yaml -f docker-compose.mvp.yaml --env-file ~/.config/annotation-mvp/mvp.env ...
+#   docker compose -p annotationplatformmvp -f docker-compose.yaml -f docker-compose.mvp.yaml --env-file ~/.config/annotation-mvp/mvp.env up -d --build
+# The images are built from this checkout; set MVP_WEB_IMAGE / MVP_WORKER_IMAGE / MVP_REALTIME_IMAGE only to run prebuilt images instead.
 # Isolation guarantees: its own project name, container names, networks, volumes (the base file pins `anotations_*` volume names; they are renamed here so the
 # existing database is never attached) and host ports. No secret is stored in this file.
 name: annotationplatformmvp
@@ -36,16 +37,16 @@ services:
       - "${MVP_MINIO_S3_BIND_HOST:-127.0.0.1}:${MVP_MINIO_PORT:-59000}:9000"
       - "127.0.0.1:${MVP_MINIO_CONSOLE_PORT:-59001}:9001"
   web:
-    image: ${MVP_WEB_IMAGE:?MVP_WEB_IMAGE is required}
-    build: !reset null
+    image: ${MVP_WEB_IMAGE:-annotationplatformmvp-web:local}
     environment: *mvp-source-env
     volumes:
       - ${MVP_TLS_DIR:?MVP_TLS_DIR is required}/gitea.crt:/etc/mvp-tls/gitea.crt:ro
+    # Reachable at http://localhost:3300 and at the LAN address http://10.0.0.123:3300 (override MVP_WEB_LAN_HOST if the DHCP address changes).
     ports: !override
       - "127.0.0.1:${MVP_WEB_PORT:-3300}:3000"
+      - "${MVP_WEB_LAN_HOST:-10.0.0.123}:${MVP_WEB_PORT:-3300}:3000"
   worker:
-    image: ${MVP_WORKER_IMAGE:?MVP_WORKER_IMAGE is required}
-    build: !reset null
+    image: ${MVP_WORKER_IMAGE:-annotationplatformmvp-worker:local}
     environment: *mvp-source-env
     volumes:
       - ${MVP_TLS_DIR:?MVP_TLS_DIR is required}/gitea.crt:/etc/mvp-tls/gitea.crt:ro
@@ -54,7 +55,7 @@ services:
     ports: !override
       - "127.0.0.1:${MVP_REALTIME_PORT:-3304}:3002"
   gitea:
-    # HTTPS fixture: the production web build rejects http: source URLs, so the acceptance Gitea serves a throwaway self-signed cert (kept outside the repo).
+    # HTTPS fixture: the production web build rejects http: source URLs, so Gitea serves a throwaway self-signed cert (kept outside the repo).
     environment:
       GITEA__server__PROTOCOL: https
       GITEA__server__CERT_FILE: /etc/mvp-tls/gitea.crt
