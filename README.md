@@ -425,3 +425,16 @@ integration (020); and production hardening plus garbage collection (021).
 See [`docs/architecture.md`](docs/architecture.md) and
 [`docs/phases.md`](docs/phases.md) for the locked architecture and
 implementation sequence.
+
+# RUN
+```bash
+cd /home/aioz-huy/anotations
+M=~/.config/annotation-mvp
+export MVP_WEB_IMAGE=annotationplatformmvp-web:ui-5840f409c35f \
+       MVP_WORKER_IMAGE=annotationplatformmvp-worker:ro-44993c3d1d29 \
+       MVP_REALTIME_IMAGE=annotationplatformmvp-realtime:main-5ec0c17980f2
+docker compose -p annotationplatformmvp \
+  -f docker-compose.yaml -f docker-compose.mvp.yaml -f $M/docker-compose.a24.yaml \
+  --env-file $M/mvp.env --env-file $M/a24-keys.env up -d --no-build
+(cd $M && docker compose -f docker-compose.lan.yaml up -d)   # 10.0.0.123:3300 proxy
+```

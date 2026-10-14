@@ -22,6 +22,10 @@
       "types": "./dist/source-access-policy.d.ts",
       "default": "./dist/source-access-policy.js"
     },
+    "./ai-label-resolution": {
+      "types": "./dist/ai-label-resolution.d.ts",
+      "default": "./dist/ai-label-resolution.js"
+    },
     "./media-verification": {
       "types": "./dist/media-verification.d.ts",
       "default": "./dist/media-verification.js"

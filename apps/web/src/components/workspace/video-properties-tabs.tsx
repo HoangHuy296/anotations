@@ -8,14 +8,15 @@ import { updateVideoDescriptionAction } from "@/app/(app)/workspace/[datasetId]/
 import { AssetBrowserFilters } from "@/components/workspace/asset-browser-filters";
 import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
 import { BulkActionBar } from "@/components/workspace/bulk-action-bar";
-import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-panel";
+// ARCHIVED: import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-panel";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
-import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
+// ARCHIVED: import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import { Badge } from "@/components/ui/badge";
 import { deleteVideoKeyframe, deleteVideoTrack, updateVideoTrack } from "@/lib/workspace/video-annotation-client";
 import { workspaceEngineRegistry } from "@/lib/workspace/workspace-engine-registry";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import { useDatasetLabels, useDatasetLabelsStore, type DatasetLabel } from "@/stores/dataset-labels-store";
+import { recordedAiClass, resolveDisplayLabel } from "@/lib/workspace/video-display-label";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
 import type { SafeWorkspaceAsset } from "@/types/workspace";
 import type { SafeVideoTrack } from "@/types/video-annotation";
@@ -338,8 +339,8 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
       {descriptionState === "conflict" && <div className="mt-3"><SaveConflictPanel message="Your description draft is still visible and was not sent again." onReload={() => window.location.reload()} onDiscard={() => { setDescription(serverDescription); setConflictDraft(null); setDescriptionState("idle"); }} /></div>}
       {descriptionState === "failed" && <p role="alert" className="mt-3 text-xs text-rose-700">Description was not saved. Edit it again to retry.</p>}
       {conflictDraft && <p className="sr-only">Local draft preserved.</p>}
-      <AssetAssignmentPanel datasetId={datasetId} assetId={asset.id} />
-      <WorkflowHistoryPanel datasetId={datasetId} assetId={asset.id} />
+      {/* ARCHIVED (unimplemented UI, hidden for now; components kept in asset-assignment-panel.tsx / workflow-history-panel.tsx): <AssetAssignmentPanel datasetId={datasetId} assetId={asset.id} /> */}
+      {/* ARCHIVED (unimplemented UI, hidden for now; components kept in asset-assignment-panel.tsx / workflow-history-panel.tsx): <WorkflowHistoryPanel datasetId={datasetId} assetId={asset.id} /> */}
     </section>}
     {activeTab === "labels" && <section className="p-4">
       <h2 className="text-sm font-bold text-zinc-950">Labels</h2>
@@ -390,7 +391,11 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
           <div role="button" tabIndex={0} onClick={() => toggleTrackExpanded(track)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleTrackExpanded(track); } }} className="cursor-pointer p-2">
             <div className="flex items-center justify-between gap-2"><span className="truncate font-mono text-[11px] text-zinc-500">Track ID: {track.id ?? "(none)"}</span><span className="shrink-0 text-[11px] text-zinc-400">{trackKeyframes.length} keyframes</span></div>
             <p className="mt-1 truncate text-xs font-semibold text-zinc-800">{track.name ?? "(unnamed shape)"}</p>
-            {track.label ? <span className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-500"><span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: track.label.color }} />{track.label.name}</span> : null}
+            {(() => {
+              const display = resolveDisplayLabel({ assigned: track.label, trackProperties: track.properties, datasetLabels: taxonomy, modality: "VIDEO" });
+              if (display.source === "NONE") return null;
+              return <span data-track-display-label={display.source} title={display.source === "AI_CLASS" ? "Class detected by the AI Service (no dataset label is assigned)" : undefined} className="mt-1 inline-flex items-center gap-1 text-[10px] text-zinc-500"><span aria-hidden="true" className="h-2 w-2 rounded-full" style={{ backgroundColor: display.color ?? "#38bdf8" }} />{display.text}{display.source === "AI_CLASS" ? <span className="rounded bg-zinc-100 px-1 text-[9px] font-semibold uppercase tracking-wide text-zinc-500">AI</span> : null}</span>;
+            })()}
           </div>
           {isExpanded && <div className="space-y-2 border-t border-zinc-100 p-2">
             <div className="grid grid-cols-2 gap-2">
@@ -403,6 +408,7 @@ export function VideoPropertiesTabs({ datasetId, selection, assets, page, pageSi
                   <option value="">No label</option>
                   {taxonomy.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                 </select>
+                {(() => { const ai = recordedAiClass(track.properties); return ai ? <span data-ai-predicted-class={ai.display} className="mt-1 block text-[10px] text-zinc-400">AI detected: {ai.display}</span> : null; })()}
               </label>
               <label className="text-[11px] text-zinc-500">Interpolation
                 <select disabled={readOnly} value={draft.interpolationMode} onChange={(event) => updateTrackDraft(track.id, { interpolationMode: event.target.value as "LINEAR" | "NONE" })} className="mt-1 w-full rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs">

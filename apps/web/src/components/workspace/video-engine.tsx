@@ -11,13 +11,15 @@ import { findPendingAiTaskClient } from "@/lib/ai/ai-task-api-client";
 import { VideoToolbar } from "@/components/workspace/video-toolbar";
 import { useMediaProcessing } from "@/components/workspace/use-media-processing";
 import { useVideoAnnotationStore } from "@/stores/video-annotation-store";
+import { useDatasetLabels } from "@/stores/dataset-labels-store";
+import { boxLabelText, resolveDisplayLabel } from "@/lib/workspace/video-display-label";
 import { TrackAutosaveCoordinator, type VideoSaveState } from "@/lib/workspace/video-autosave";
 import { readVideoAnnotationsClient, readVideoAnnotationsAcrossDurationClient, addKeyframeHere, createVideoKeyframe, createVideoTrack, deleteVideoTrack, updateVideoKeyframe } from "@/lib/workspace/video-annotation-client";
 import { createVideoPlaybackController, type VideoPlaybackController } from "@/lib/workspace/video-playback-controller";
 import { deriveFrameIndex, resolveVideoTimelineDurationMs } from "@/lib/annotations/video-time";
 import { deriveInterpolationAt } from "@/lib/annotations/video-interpolation";
 import { VIDEO_ANNOTATION_LIMITS } from "@/lib/annotations/video-limits";
-import { distanceFromRange, isCovered, mergeRange, windowAround, type TimeRange } from "@/lib/annotations/video-window-ranges";
+import { distanceFromRange, isCovered, mergeRange, windowAround, type TimeRange, type WindowLedgerEntry, seedWindowBookkeeping } from "@/lib/annotations/video-window-ranges";
 
 type VideoEngineProps = {
   video: { id: string; filename: string; description: string | null; status: string };
@@ -94,7 +96,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // that instead of assuming the whole asset loaded. Pure bookkeeping, not
   // render state: nothing here is read during render, only by
   // `ensureWindowLoaded`/`evictFarWindows` below, so refs are enough.
-  const loadedRangesRef = useRef<TimeRange[]>([{ fromMs: annotations.effectiveFromMs, toMs: annotations.effectiveToMs }]);
+  const loadedRangesRef = useRef<TimeRange[]>(seedWindowBookkeeping(annotations).loadedRanges);
   const fetchingWindowsRef = useRef(new Set<string>());
   // One entry per completed `mergeWindow` fetch, recording exactly which ids
   // it contributed -- eviction needs to remove *those specific* ids, never a
@@ -103,9 +105,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   // `applyAiResults`'s `mergeAiResults` merge below -- AI-detect results are
   // new content the user just added this session, not passive read-ahead
   // cache, and are therefore never eviction candidates.
-  const windowLedgerRef = useRef<Array<{ range: TimeRange; keyframeIds: string[]; trackIds: string[] }>>([
-    { range: { fromMs: annotations.effectiveFromMs, toMs: annotations.effectiveToMs }, keyframeIds: annotations.keyframes.map((k) => k.id), trackIds: annotations.tracks.map((t) => t.id) },
-  ]);
+  const windowLedgerRef = useRef<WindowLedgerEntry[]>(seedWindowBookkeeping(annotations).ledger);
   // Mirrors `selectedTrackId` (declared below) for `evictFarWindows`, which
   // is a stable `useCallback` and must not go stale by closing over state
   // directly.
@@ -221,6 +221,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
   const [newTrackError, setNewTrackError] = useState<string | null>(null);
   const [newTrackSaving, setNewTrackSaving] = useState(false);
   const { datasetId } = useParams<{ datasetId: string }>();
+  const datasetLabels = useDatasetLabels(datasetId);
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackCoordinators = useRef(new Map<string, TrackAutosaveCoordinator>());
   const keyframeDraftChanges = useRef(new Map<string, KeyframeChanges>());
@@ -299,7 +300,13 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
 
   useEffect(() => {
     setSnapshot(annotations.tracks, annotations.keyframes);
-  }, [annotations.keyframes, annotations.tracks, setSnapshot]);
+    // Re-applying the server page replaces the store, so windows fetched earlier (beyond this page) are gone: reset the coverage bookkeeping to what the
+    // store now holds and re-cover the playhead, instead of leaving them marked loaded while their boxes silently disappear (dense datasets).
+    const seeded = seedWindowBookkeeping(annotations);
+    loadedRangesRef.current = seeded.loadedRanges;
+    windowLedgerRef.current = seeded.ledger;
+    ensureWindowLoaded(useVideoAnnotationStore.getState().currentTimeMs, resolveVideoTimelineDurationMs(readiness.video));
+  }, [annotations, readiness.video, setSnapshot, ensureWindowLoaded]);
   // The AI dialog owns pending-task lookup and polling but only mounts for the
   // "aidetect" tool, which resets on remount. Re-open it when this Dataset
   // still has an in-flight task for this video so the pending status shows.
@@ -692,25 +699,21 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
         {pendingBox ? <div aria-label="Unsaved drawn box, pending the create-annotation dialog" className="pointer-events-none absolute border-2 border-dashed border-amber-400" style={{ left: `${pendingBox.geometry.x * 100}%`, top: `${pendingBox.geometry.y * 100}%`, width: `${pendingBox.geometry.width * 100}%`, height: `${pendingBox.geometry.height * 100}%` }} /> : null}
         {aiFramesAtTime.map((frame) => {
           const track = trackList.find((item) => item.id === frame.trackId);
-          const color = track?.label?.color ?? "#38bdf8";
-          return <div key={frame.id} aria-label={`AI track ${frame.properties.providerTrackId ?? ""}`} className="pointer-events-none absolute border-2" style={{ left: `${frame.geometry.x * 100}%`, top: `${frame.geometry.y * 100}%`, width: `${frame.geometry.width * 100}%`, height: `${frame.geometry.height * 100}%`, borderColor: color }}>
-            <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: color }}>{track?.name ?? "AI track"}{track?.label ? ` · ${track.label.name}` : " · unlabeled"}</span>
+          const display = resolveDisplayLabel({ assigned: track?.label ?? null, trackProperties: track?.properties, keyframeProperties: frame.properties, datasetLabels, modality: "VIDEO" });
+          const color = display.color ?? "#38bdf8";
+          return <div key={frame.id} aria-label={boxLabelText(display)} data-track-id={frame.trackId} className="pointer-events-none absolute border-2" style={{ left: `${frame.geometry.x * 100}%`, top: `${frame.geometry.y * 100}%`, width: `${frame.geometry.width * 100}%`, height: `${frame.geometry.height * 100}%`, borderColor: color }}>
+            <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: color }} data-ai-display-label={display.source}>{boxLabelText(display)}</span>
           </div>;
         })}
         {selectedKeyframe && showsPersistedOverlay ? (() => {
           const geometry = playbackState === "paused" ? draftGeometry ?? selectedKeyframe.geometry : selectedKeyframe.geometry;
           const resizeCursor: Record<"nw" | "ne" | "sw" | "se", string> = { nw: "cursor-nw-resize", ne: "cursor-ne-resize", sw: "cursor-sw-resize", se: "cursor-se-resize" };
-          // Preserves the objectId a user typed into the create-annotation
-          // dialog (stored on the Track's own `properties.objectId`, see
-          // `confirmPendingBox`) as a tag anchored to the box's top-left
-          // corner, so it stays identifiable on the frame after saving. The
-          // tag/border color distinguishes shapes by label (falling back to
-          // the previous fixed sky-blue when none is assigned) -- the tag's
-          // text is always the objectId, never the label.
-          const objectId = typeof selectedTrack?.properties.objectId === "string" && selectedTrack.properties.objectId ? selectedTrack.properties.objectId : null;
-          const labelColor = selectedTrack?.label?.color ?? "#38bdf8";
-          return <div aria-label="Selected video keyframe" className="absolute border-2" style={{ left: `${geometry.x * 100}%`, top: `${geometry.y * 100}%`, width: `${geometry.width * 100}%`, height: `${geometry.height * 100}%`, borderColor: labelColor }}>
-            {objectId ? <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: labelColor }}>{objectId}</span> : null}
+          // The tag above the selected box is the same effective label/class the other boxes show (assigned label, matching dataset label, or the AI class;
+          // `unlabeled` only when none exists) -- never a track id or the objectId. The objectId stays in the Track's properties and the Tracks tab.
+          const selectedDisplay = resolveDisplayLabel({ assigned: selectedTrack?.label ?? null, trackProperties: selectedTrack?.properties, keyframeProperties: selectedKeyframe.properties, datasetLabels, modality: "VIDEO" });
+          const labelColor = selectedDisplay.color ?? "#38bdf8";
+          return <div aria-label="Selected video keyframe" data-track-id={selectedTrack?.id} className="absolute border-2" style={{ left: `${geometry.x * 100}%`, top: `${geometry.y * 100}%`, width: `${geometry.width * 100}%`, height: `${geometry.height * 100}%`, borderColor: labelColor }}>
+            <span className="absolute -top-5 left-0 whitespace-nowrap rounded px-1.5 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: labelColor }} data-ai-display-label={selectedDisplay.source}>{boxLabelText(selectedDisplay)}</span>
             <div aria-label="Move keyframe" className="absolute inset-0 cursor-move" onPointerDown={(event) => beginGeometryDrag(event, "move")} />
             {(["nw", "ne", "sw", "se"] as const).map((corner) => <div key={corner} aria-label={`Resize keyframe ${corner}`} onPointerDown={(event) => beginGeometryDrag(event, corner)} className={`absolute size-2.5 rounded-full border border-sky-100 bg-sky-400 ${resizeCursor[corner]} ${corner.includes("n") ? "-top-1" : "-bottom-1"} ${corner.includes("w") ? "-left-1" : "-right-1"}`} />)}
           </div>;
@@ -756,6 +759,7 @@ export function VideoEngine({ video, readiness, annotations, readOnly = false }:
        down here. Track/keyframe field editing lives in the Tracks/Shapes
        properties tab instead of duplicating it here. */}
     <VideoToolbar
+      trackDisplayLabel={(track) => { const display = resolveDisplayLabel({ assigned: track.label, trackProperties: track.properties, datasetLabels, modality: "VIDEO" }); return display.source === "NONE" ? null : display.text; }}
       playbackState={playbackState}
       playbackDisabled={loadState !== "ready"}
       onTogglePlayback={() => { if (playbackState === "playing") playbackController.pause(); else playbackController.play(); }}

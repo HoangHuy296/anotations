@@ -2,6 +2,7 @@ import "server-only";
 
 import { Prisma, UserRole } from "@internal/db";
 
+import { ACTIVE_ASSET_WHERE } from "@/lib/datasets/active-asset";
 import { projectDatasetWorkflowStatus } from "@/lib/datasets/dataset-destination";
 
 import type { RequestActor } from "@/lib/auth";
@@ -52,7 +53,7 @@ export async function getDatasetLibrary(actor: RequestActor, query: DatasetLibra
         ownerId: true, metadata: true, createdAt: true,
         externalRepository: { select: { fullName: true } },
         members: { where: { userId: actor.id }, select: { role: true } },
-        _count: { select: { assets: true } },
+        _count: { select: { assets: { where: ACTIVE_ASSET_WHERE } } },
       },
     }),
     db.dataset.count({ where }),
@@ -60,7 +61,7 @@ export async function getDatasetLibrary(actor: RequestActor, query: DatasetLibra
   const overflow = rows.length > DATASET_PAGE_SIZE;
   const datasets = rows.slice(0, DATASET_PAGE_SIZE);
   if (backwards) datasets.reverse();
-  const assetWhere = { datasetId: { in: datasets.map(({ id }) => id) } };
+  const assetWhere = { datasetId: { in: datasets.map(({ id }) => id) }, ...ACTIVE_ASSET_WHERE };
   const [statusCounts, modalityCounts] = await Promise.all([
     db.asset.groupBy({ by: ["datasetId", "status"], where: assetWhere, _count: { _all: true } }),
     db.asset.groupBy({ by: ["datasetId", "modality"], where: assetWhere, _count: { _all: true } }),

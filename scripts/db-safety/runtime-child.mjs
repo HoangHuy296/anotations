@@ -113,6 +113,9 @@ if (role === 'probe') {
   require('../../apps/web/tests/auth-ownership/register-server-only.cjs');
   const approved = new Set([
     'annotation-api/annotation-service.test.ts',
+    'workspace/video-update-schema.test.ts',
+    'workspace/label-management.test.ts',
+    'workspace/dataset-library-counts.test.ts',
     'annotation-api/annotation-validation.test.ts',
     'annotation-api/annotation-create-authorization.test.ts',
     'annotation-api/video-foundation.test.ts',

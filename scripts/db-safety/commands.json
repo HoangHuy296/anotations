@@ -329,7 +329,8 @@
       "--import",
       "tsx",
       "--test",
-      "tests/providers/ai/aioz-video-normalization.test.ts"
+      "tests/providers/ai/aioz-video-normalization.test.ts",
+      "tests/jobs/ai-label-mapping-writers.test.ts"
     ]
   },
   "worker:test:queue": {
@@ -885,6 +886,18 @@
       "YOLO26s_COCO"
     ]
   },
+  "seed:register-aioz-model:bytetrack-yolox-s-coco": {
+    "kind": "seed",
+    "cwd": ".",
+    "args": [
+      "--import",
+      "tsx",
+      "scripts/register-aioz-model.ts",
+      "--apply",
+      "cb29e022-1ba7-4349-9dce-4fb3074e84d6",
+      "ByteTrack YOLOX_S COCO"
+    ]
+  },
   "web:test:media-processing-client:vitest": {
     "kind": "test",
     "cwd": "apps/web",
@@ -1004,7 +1017,10 @@
       "tests/workspace/audio-tool-capabilities.vitest.spec.tsx",
       "--pool=threads",
       "--environment",
-      "node"
+      "node",
+      "tests/workspace/video-display-label.vitest.spec.ts",
+      "tests/workspace/video-initial-range.vitest.spec.ts",
+      "tests/workspace/text-command-error.vitest.spec.ts"
     ]
   },
   "web:test:annotation-persistence": {

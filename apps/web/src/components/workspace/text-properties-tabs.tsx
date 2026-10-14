@@ -10,9 +10,9 @@ import { updateTextDescriptionAction } from "@/app/(app)/workspace/[datasetId]/a
 import { AssetBrowserFilters } from "@/components/workspace/asset-browser-filters";
 import { AssetNavigator, type AssetNavigatorFilters } from "@/components/workspace/asset-navigator";
 import { BulkActionBar } from "@/components/workspace/bulk-action-bar";
-import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-panel";
+// ARCHIVED: import { AssetAssignmentPanel } from "@/components/workspace/asset-assignment-panel";
 import { SaveConflictPanel } from "@/components/workspace/save-conflict-panel";
-import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
+// ARCHIVED: import { WorkflowHistoryPanel } from "@/components/workspace/workflow-history-panel";
 import { TextAnnotationEditor } from "@/components/workspace/text-annotation-editor";
 import { enableTextRelationLabel } from "@/lib/workspace/text-policy-client";
 import { TextStatusFields } from "@/components/workspace/text-status-fields";
@@ -320,8 +320,8 @@ export function TextPropertiesTabs({ datasetId, selection, assets, page, pageSiz
       {descriptionState === "failed" && <p role="alert" className="mt-3 text-xs text-rose-700">Description was not saved. Edit it again to retry.</p>}
       {conflictDraft && <p className="sr-only">Local draft preserved.</p>}
       <section className="mt-5 border-t border-zinc-100 pt-4"><h3 className="text-sm font-semibold">Text details</h3><div className="mt-2"><TextStatusFields selection={selection} details /></div></section>
-      <AssetAssignmentPanel datasetId={datasetId} assetId={asset.id} />
-      <WorkflowHistoryPanel datasetId={datasetId} assetId={asset.id} />
+      {/* ARCHIVED (unimplemented UI, hidden for now; components kept in asset-assignment-panel.tsx / workflow-history-panel.tsx): <AssetAssignmentPanel datasetId={datasetId} assetId={asset.id} /> */}
+      {/* ARCHIVED (unimplemented UI, hidden for now; components kept in asset-assignment-panel.tsx / workflow-history-panel.tsx): <WorkflowHistoryPanel datasetId={datasetId} assetId={asset.id} /> */}
     </section>}
     {activeTab === "labels" && <section className="p-4">
       <h2 className="text-sm font-bold text-zinc-950">Labels</h2>

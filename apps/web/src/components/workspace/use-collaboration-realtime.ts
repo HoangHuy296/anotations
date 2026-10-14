@@ -4,6 +4,18 @@ import { useEffect, useRef } from "react";
 
 type Options = { datasetIds: string[]; onInvalidate: () => void };
 
+/**
+ * Presence events (heartbeat/join/leave) only carry the member list and are consumed by `useWorkspacePresence`; they never change server-rendered
+ * state. Treating them as invalidations made every 20 s heartbeat run `router.refresh()`, which re-applied the first server page to the video store.
+ */
+export function isInvalidatingGatewayMessage(raw: unknown): boolean {
+  if (typeof raw !== "string") return true;
+  try {
+    const type = (JSON.parse(raw) as { type?: unknown } | null)?.type;
+    return !(typeof type === "string" && type.startsWith("presence."));
+  } catch { return true; }
+}
+
 function gatewayUrl(ticket: string) {
   const explicit = process.env.NEXT_PUBLIC_REALTIME_URL;
   if (explicit) return `${explicit.replace(/\/$/, "")}?ticket=${encodeURIComponent(ticket)}`;
@@ -33,7 +45,7 @@ export function useCollaborationRealtime({ datasetIds, onInvalidate }: Options) 
         const payload = await response.json() as { data?: { token?: string } };
         if (!response.ok || !payload.data?.token || stopped) return;
         socket = new WebSocket(gatewayUrl(payload.data.token));
-        socket.onmessage = () => callback.current();
+        socket.onmessage = (event) => { if (isInvalidatingGatewayMessage(event.data)) callback.current(); };
         socket.onopen = () => {
           const reconnected = hasConnected;
           hasConnected = true;

@@ -20,6 +20,7 @@ import { DatasetActionMenu } from "@/components/dashboard/dataset-action-menu";
 import { Button } from "@/components/ui/button";
 import { getRequestActor } from "@/lib/auth";
 import { db, isDatabaseConfigured } from "@/lib/db";
+import { ACTIVE_ASSET_WHERE } from "@/lib/datasets/active-asset";
 import { datasetStatusLabels, readDatasetWorkflowStatus } from "@/lib/datasets/dataset-library-query";
 import { datasetDestination } from "@/lib/datasets/dataset-destination";
 
@@ -225,10 +226,10 @@ async function loadActiveDatasets(actor: NonNullable<Awaited<ReturnType<typeof g
       take: 5,
       include: {
         externalRepository: { select: { fullName: true } },
-        _count: { select: { assets: true } },
+        _count: { select: { assets: { where: ACTIVE_ASSET_WHERE } } },
       },
     });
-    const assetWhere = { datasetId: { in: datasets.map((dataset) => dataset.id) }, deletedAt: null };
+    const assetWhere = { datasetId: { in: datasets.map((dataset) => dataset.id) }, ...ACTIVE_ASSET_WHERE };
     const [counts, modalityCounts] = await Promise.all([
       db.asset.groupBy({ by: ["datasetId", "status"], where: assetWhere, _count: { _all: true } }),
       db.asset.groupBy({ by: ["datasetId", "modality"], where: assetWhere, _count: { _all: true } }),
