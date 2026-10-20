@@ -38,7 +38,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
   const theme = readAccountPreferences(actor.preferences).theme;
   const dataset = await readDatasetModality(actor, datasetId);
   if (!dataset) notFound();
-  if (dataset.modality === null) return <div key={dataset.id} className="flex min-h-100dvh flex-col bg-zinc-100">
+  if (dataset.modality === null) return <div key={dataset.id} data-theme={theme === "dark" ? "dark" : undefined} className="ws-themed flex min-h-100dvh flex-col bg-zinc-100">
     <WorkspaceHeader datasetName={dataset.name} branch="Unresolved dataset" repositoryFullName="Dataset storage" rootPath="" engine={null} actor={{ email: actor.email, name: actor.name }} theme={theme} />
     <WorkspaceEngine dataset={dataset} selection={null} />
   </div>;
@@ -113,7 +113,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
     updatedFrom: listQuery.updatedFrom, updatedTo: listQuery.updatedTo,
     sort: listQuery.sort, order: listQuery.order,
   };
-  return <div key={datasetId} className="flex min-h-100dvh flex-col bg-zinc-100">
+  return <div key={datasetId} data-theme={theme === "dark" ? "dark" : undefined} className="ws-themed flex min-h-100dvh flex-col bg-zinc-100">
     <WorkspaceHeader key={datasetId} datasetName={workspace.dataset.name} branch={`${engine.toLowerCase()} workspace`} repositoryFullName="Dataset storage" rootPath="" engine={engine} actor={{ email: actor.email, name: actor.name }} theme={theme} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId, commentId: safeDiscussionCommentId }} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
       <DatasetSidebar key={datasetId} datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={engine} filters={filters} />

@@ -1,7 +1,7 @@
 "use client";
 
 import { BellSimple, Export, Eye, Lifebuoy, Translate, UserCircle } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { accountSectionFromHash, accountSectionIds, type AccountSectionId } from "@/lib/account/account-section";
 
 const sections = [
@@ -15,13 +15,36 @@ const sections = [
 
 export function AccountSectionNav() {
   const [active, setActive] = useState<AccountSectionId>(sections[0].id);
+  // A click or hash change scrolls to its section; scroll-spy stays quiet until that scroll settles so the clicked item is not overridden mid-animation.
+  const lockedUntil = useRef(0);
 
   useEffect(() => {
-    const syncHash = () => setActive(accountSectionFromHash(window.location.hash));
+    const syncHash = () => { lockedUntil.current = Date.now() + 900; setActive(accountSectionFromHash(window.location.hash)); };
     syncHash();
+    lockedUntil.current = 0;
+    // Scroll-spy: the active section is the last one whose top has passed the reading line near the top of the viewport; at the page bottom it is the final section.
+    let frame = 0;
+    const spy = () => {
+      frame = 0;
+      if (Date.now() < lockedUntil.current) return;
+      const line = Math.min(160, window.innerHeight * 0.3);
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      let current: AccountSectionId = sections[0].id;
+      for (const section of sections) {
+        const element = document.getElementById(section.id);
+        if (element && element.getBoundingClientRect().top <= line) current = section.id;
+      }
+      setActive(atBottom && window.scrollY > 0 ? sections[sections.length - 1].id : current);
+    };
+    const onScroll = () => { if (!frame) frame = window.requestAnimationFrame(spy); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     window.addEventListener("hashchange", syncHash);
     window.addEventListener("popstate", syncHash);
     return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       window.removeEventListener("hashchange", syncHash);
       window.removeEventListener("popstate", syncHash);
     };

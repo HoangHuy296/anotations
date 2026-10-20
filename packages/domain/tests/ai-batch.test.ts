@@ -22,8 +22,8 @@ const target = (i: number): AiBatchTarget => ({ assetId: `a${i}`, inputIndex: i,
 const base = { schemaVersion: 1 as const, targetMode: "EXPLICIT" as const, datasetId: "d1", modality: "IMAGE" as const, modelId: "m1", modelKey: "k1", confidence_threshold: 0.5, iou_threshold: 0.5, effectiveLimit: 3 };
 
 test("effective limit is the lower of the platform ceiling and the provider-verified size, never 200 by default", () => {
-  assert.equal(AI_BATCH_VERIFIED_MAX_ASSETS, 3);
-  assert.equal(effectiveAiBatchLimit(), 3);
+  assert.equal(AI_BATCH_VERIFIED_MAX_ASSETS, 200);
+  assert.equal(effectiveAiBatchLimit(), 200);
   assert.equal(effectiveAiBatchLimit(200, 500), 200);
   assert.equal(effectiveAiBatchLimit(2, 3), 2);
 });

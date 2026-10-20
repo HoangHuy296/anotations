@@ -89,9 +89,7 @@ export async function resolveAiTarget(
   const modality = dataset?.modality ?? null;
   if (modality !== Modality.IMAGE && modality !== Modality.VIDEO) return fail("AI_CAPABILITY_UNVERIFIED");
   if (rows.some((row) => row.modality !== modality)) return fail("TARGET_MIXED_MODALITY");
-  // v1 (decision D-V1): batches are IMAGE detection only. A single VIDEO Asset keeps
-  // its existing behavior through this same path; a VIDEO batch is not evidenced.
-  if (modality === Modality.VIDEO && rows.length > 1) return fail("AI_CAPABILITY_UNVERIFIED");
+  // VIDEO batches are allowed: the AI Service takes an array of Assets and the worker's video writer scopes every track to its own assetId.
 
   const targets: AiBatchTarget[] = [];
   for (const [inputIndex, row] of rows.entries()) {

@@ -14,8 +14,9 @@ function world(seedLabels: Array<Partial<Label> & { normalizedName: string }> = 
   const tracks: Array<{ id: string; videoAssetId: string; labelId: string | null; properties: Record<string, unknown>; name: string }> = [];
   const annotations: Array<Record<string, any>> = [];
   const claims = new Map<string, number>();
+  const jobState: { input: unknown } = { input: {} };
   const tx: any = {
-    job: { updateMany: async ({ where }: any) => { const used = claims.get(where.id) ?? 0; if (used >= 1 || where.status !== "RUNNING") return { count: 0 }; claims.set(where.id, used + 1); return { count: 1 }; } },
+    job: { findUniqueOrThrow: async () => ({ input: jobState.input }), updateMany: async ({ where }: any) => { const used = claims.get(where.id) ?? 0; if (used >= 1 || where.status !== "RUNNING") return { count: 0 }; claims.set(where.id, used + 1); return { count: 1 }; } },
     label: {
       findMany: async ({ where }: any) => labels.filter((l) => l.datasetId === where.datasetId && where.normalizedName.in.includes(l.normalizedName)),
       createMany: async () => { throw new Error("A Label row must never be created because a class was predicted"); },
@@ -36,7 +37,7 @@ function world(seedLabels: Array<Partial<Label> & { normalizedName: string }> = 
   };
   const outputs: any[] = [];
   const db: any = { $transaction: async (fn: any) => fn(tx), job: { updateMany: async () => ({ count: 1 }) } };
-  return { db, labels, tracks, annotations, outputs };
+  return { db, labels, tracks, annotations, outputs, jobState };
 }
 
 const live = JSON.parse(readFileSync(new URL("../providers/ai/fixtures/aioz-video-output-live-empty.json", import.meta.url), "utf8"));
@@ -135,4 +136,20 @@ test("IMAGE keeps its original contract: a detection is persisted only for a cla
   assert.equal(w.labels.length, 1);
   await run(w, imagePredictions, "job-i2", { ...imageTask, id: "task-i2" });
   assert.equal(w.annotations.length, 1, "an identical repeated task adds nothing");
+});
+
+test("a multi-video batch writes every video's tracks under its own asset and reports one outcome per accepted target", async () => {
+  const w = world(D);
+  const digest = `sha256:${"a".repeat(64)}`;
+  w.jobState.input = {
+    schemaVersion: 1, targetMode: "EXPLICIT", datasetId: "ds", modality: "VIDEO", modelId: "m", modelKey: "cb29e022", confidence_threshold: 0.5, iou_threshold: 0.5, effectiveLimit: 200,
+    targets: ["vid", "vid2", "vid3", "vid4"].map((assetId, inputIndex) => ({ assetId, inputIndex, sourceIdentityDigest: digest })),
+  };
+  const first = providerOutput([{ id: 1, cls: 0, name: "person", frames: [10, 11] }]) as any[];
+  const predictions = [...first, ...first.map((p) => ({ ...p, assetId: "vid2" })), ...first.map((p) => ({ ...p, assetId: "vid3" }))];
+  const task = { ...videoTask, input: { assetIds: ["vid", "vid2", "vid3", "vid4"] } };
+  await run(w, predictions, "job-batch", task);
+  assert.deepEqual([...new Set(w.annotations.map((a) => a.assetId))].sort(), ["vid", "vid2", "vid3"]);
+  const perAsset = w.outputs[0].perAsset as Array<{ assetId: string; inputIndex: number; outcome: string; predictionCount: number }>;
+  assert.deepEqual(perAsset.map((o) => [o.assetId, o.inputIndex, o.outcome, o.predictionCount]), [["vid", 0, "SUCCEEDED", 2], ["vid2", 1, "SUCCEEDED", 2], ["vid3", 2, "SUCCEEDED", 2], ["vid4", 3, "SUCCEEDED", 0]], "a video with no detections is an explicit zero-count success");
 });

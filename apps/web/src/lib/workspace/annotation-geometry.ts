@@ -37,3 +37,24 @@ export function resizeNormalizedCircle(geometry: { cx: number; cy: number; r: nu
   if (!Number.isFinite(r) || r <= 0 || geometry.cx - r < 0 || geometry.cx + r > 1 || geometry.cy - r < 0 || geometry.cy + r > 1) return null;
   return { ...geometry, r };
 }
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+/** Moves a circle to a new normalized center, clamped so the whole circle stays inside the image (a drag past the edge stops at the edge). */
+export function moveNormalizedCircle(geometry: { cx: number; cy: number; r: number }, cx: number, cy: number) {
+  if (!Number.isFinite(cx) || !Number.isFinite(cy) || geometry.r * 2 > 1) return null;
+  return { ...geometry, cx: clamp(cx, geometry.r, 1 - geometry.r), cy: clamp(cy, geometry.r, 1 - geometry.r) };
+}
+
+/** Moves a point to a new normalized position, clamped to the image. */
+export function moveNormalizedPoint(px: number, py: number) {
+  if (!Number.isFinite(px) || !Number.isFinite(py)) return null;
+  return { px: clamp(px, 0, 1), py: clamp(py, 0, 1) };
+}
+
+/** Shrinks a circle drawn past an image edge so it fits, instead of dropping it. Returns null for a zero-size circle. */
+export function fitNormalizedCircle(cx: number, cy: number, r: number) {
+  if (![cx, cy, r].every(Number.isFinite) || cx < 0 || cx > 1 || cy < 0 || cy > 1) return null;
+  const fitted = Math.min(r, cx, 1 - cx, cy, 1 - cy);
+  return fitted > 0 ? { cx, cy, r: fitted } : null;
+}

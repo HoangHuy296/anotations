@@ -2,6 +2,7 @@ import {
   ArrowSquareOut,
   Export,
   House,
+  ListChecks,
   Tag,
 } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
@@ -22,6 +23,7 @@ import { readAccountPreferences } from "@/lib/validation/account-preferences";
 const navigation = [
   { href: "/dashboard", label: "Overview", icon: House },
   { href: "/labels", label: "Labels", icon: Tag },
+  { href: "/jobs", label: "Jobs", icon: ListChecks },
   { href: "/exports", label: "Exports", icon: Export },
 ];
 

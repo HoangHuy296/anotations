@@ -1,0 +1,58 @@
+/* Dark theme for the annotation workspace (src/components/workspace/**).
+   The workspace components are written with light-surface Tailwind classes only, so under `data-theme="dark"` (set on the workspace root together
+   with `.ws-themed`) each light-surface class is remapped to its dark counterpart. Classes that are already dark (canvas area, tool strips, solid
+   brand buttons) and mid greys (text-zinc-400/500) are intentionally NOT remapped. Where a component also has a `dark:` variant, these rules agree
+   with it (same colour family). When a new light-surface class is added to a workspace component, add its dark counterpart below. */
+
+.ws-themed[data-theme="dark"] {
+  color-scheme: dark;
+  background-color: #09090b;
+  color: #fafafa;
+}
+
+.ws-themed[data-theme="dark"] .bg-amber-100 { background-color: #78350f; }
+.ws-themed[data-theme="dark"] .bg-amber-200 { background-color: #92400e; }
+.ws-themed[data-theme="dark"] .bg-amber-50 { background-color: #451a03; }
+.ws-themed[data-theme="dark"] .bg-emerald-50 { background-color: #022c22; }
+.ws-themed[data-theme="dark"] .bg-rose-50 { background-color: #4c0519; }
+.ws-themed[data-theme="dark"] .bg-sky-50 { background-color: #082f49; }
+.ws-themed[data-theme="dark"] .bg-white { background-color: #18181b; }
+.ws-themed[data-theme="dark"] .bg-zinc-100 { background-color: #27272a; }
+.ws-themed[data-theme="dark"] .bg-zinc-50 { background-color: #202024; }
+.ws-themed[data-theme="dark"] .bg-zinc-50\/70 { background-color: color-mix(in srgb, #202024 70%, transparent); }
+.ws-themed[data-theme="dark"] .border-amber-200 { border-color: #92400e; }
+.ws-themed[data-theme="dark"] .border-amber-300 { border-color: #b45309; }
+.ws-themed[data-theme="dark"] .border-emerald-200 { border-color: #065f46; }
+.ws-themed[data-theme="dark"] .border-rose-200 { border-color: #9f1239; }
+.ws-themed[data-theme="dark"] .border-sky-100 { border-color: #0c4a6e; }
+.ws-themed[data-theme="dark"] .border-sky-200 { border-color: #075985; }
+.ws-themed[data-theme="dark"] .border-sky-300 { border-color: #0369a1; }
+.ws-themed[data-theme="dark"] .border-zinc-100 { border-color: #202024; }
+.ws-themed[data-theme="dark"] .border-zinc-200 { border-color: #27272a; }
+.ws-themed[data-theme="dark"] .border-zinc-300 { border-color: #3f3f46; }
+.ws-themed[data-theme="dark"] .focus\:bg-zinc-50:focus { background-color: #202024; }
+.ws-themed[data-theme="dark"] .focus\:ring-sky-100:focus { --tw-ring-color: #0c4a6e; }
+.ws-themed[data-theme="dark"] .hover\:bg-rose-50:hover { background-color: #4c0519; }
+.ws-themed[data-theme="dark"] .hover\:bg-sky-50:hover { background-color: #082f49; }
+.ws-themed[data-theme="dark"] .hover\:bg-white:hover { background-color: #18181b; }
+.ws-themed[data-theme="dark"] .hover\:bg-zinc-100:hover { background-color: #27272a; }
+.ws-themed[data-theme="dark"] .hover\:bg-zinc-50:hover { background-color: #202024; }
+.ws-themed[data-theme="dark"] .hover\:text-sky-800:hover { color: #bae6fd; }
+.ws-themed[data-theme="dark"] .hover\:text-zinc-700:hover { color: #d4d4d8; }
+.ws-themed[data-theme="dark"] .ring-amber-300 { --tw-ring-color: #b45309; }
+.ws-themed[data-theme="dark"] .ring-sky-100 { --tw-ring-color: #0c4a6e; }
+.ws-themed[data-theme="dark"] .text-amber-700 { color: #fcd34d; }
+.ws-themed[data-theme="dark"] .text-amber-900 { color: #fef3c7; }
+.ws-themed[data-theme="dark"] .text-emerald-600 { color: #34d399; }
+.ws-themed[data-theme="dark"] .text-emerald-700 { color: #6ee7b7; }
+.ws-themed[data-theme="dark"] .text-rose-600 { color: #fb7185; }
+.ws-themed[data-theme="dark"] .text-rose-700 { color: #fda4af; }
+.ws-themed[data-theme="dark"] .text-rose-900 { color: #ffe4e6; }
+.ws-themed[data-theme="dark"] .text-sky-600 { color: #38bdf8; }
+.ws-themed[data-theme="dark"] .text-sky-700 { color: #7dd3fc; }
+.ws-themed[data-theme="dark"] .text-sky-800 { color: #bae6fd; }
+.ws-themed[data-theme="dark"] .text-zinc-600 { color: #a1a1aa; }
+.ws-themed[data-theme="dark"] .text-zinc-700 { color: #d4d4d8; }
+.ws-themed[data-theme="dark"] .text-zinc-800 { color: #e4e4e7; }
+.ws-themed[data-theme="dark"] .text-zinc-900 { color: #f4f4f5; }
+.ws-themed[data-theme="dark"] .text-zinc-950 { color: #fafafa; }

@@ -3,6 +3,8 @@ import type { AiTask, PrismaClient, Prisma } from "../../../../lib/generated/pri
 import { normalizedVideoPredictionSchema } from "../providers/ai/aioz-video-normalization.js";
 import { canonicalAiLabelKey, matchAiClassLabels } from "@annotationplatform/domain/ai-label-resolution";
 import { releaseLock } from "../queue/job-lock.js";
+import { resolveAiBatchInput } from "./ai-batch-state.js";
+import type { AiPerAssetOutcome } from "@annotationplatform/domain/ai-batch";
 import { aiResultFingerprint } from "./ai-result-fingerprint.js";
 
 /** Append video tracks and their observed keyframes atomically with Job completion. */
@@ -33,12 +35,15 @@ export async function handleVideoAiTaskCompleted(
     let tracksCreated = 0;
     let tracksSkippedAsDuplicate = 0;
     let keyframesCreated = 0;
+    // Per-Asset accounting. Every prediction carries the assetId the provider echoed for its own file (matched by URL digest), so this is never positional.
+    const perAssetKeyframes = new Map<string, number>();
+    const notEditable = new Set<string>();
     for (const [assetId, observations] of grouped) {
       const assetClaim = await tx.asset.updateMany({
         where: { id: assetId, datasetId: task.datasetId, modality: "VIDEO", deletedAt: null, archivedAt: null, status: { notIn: ["NEEDS_REVIEW", "REVIEWED", "REJECTED"] } },
         data: { revision: { increment: 1 } },
       });
-      if (assetClaim.count !== 1) continue;
+      if (assetClaim.count !== 1) { notEditable.add(assetId); continue; }
       const video = await tx.videoAsset.upsert({
         where: { assetId }, update: {},
         create: { assetId, fps: observations[0].video.fps, totalFrames: observations[0].video.totalFrames }, select: { id: true },
@@ -96,9 +101,17 @@ export async function handleVideoAiTaskCompleted(
         for (let offset = 0; offset < rows.length; offset += 500) await tx.annotation.createMany({ data: rows.slice(offset, offset + 500) });
         tracksCreated++;
         keyframesCreated += rows.length;
+        perAssetKeyframes.set(assetId, (perAssetKeyframes.get(assetId) ?? 0) + rows.length);
       }
     }
-    await tx.aiTask.update({ where: { id: task.id }, data: { status: "SUCCEEDED", output: { tracksCreated, keyframesCreated, labelConflicts: match.conflicts, tracksSkippedAsDuplicate } } });
-  }, { timeout: 30_000 });
+    // A versioned operation reports one outcome per accepted target (an Asset with no detections is an explicit zero-count success); historical tasks keep their summary only.
+    const batch = resolveAiBatchInput((await tx.job.findUniqueOrThrow({ where: { id: jobId }, select: { input: true } })).input);
+    const perAsset: AiPerAssetOutcome[] | null = batch.kind === "v1"
+      ? batch.input.targets.map((target) => notEditable.has(target.assetId)
+        ? { assetId: target.assetId, inputIndex: target.inputIndex, outcome: "SKIPPED" as const, predictionCount: 0, reason: "ASSET_NOT_EDITABLE" }
+        : { assetId: target.assetId, inputIndex: target.inputIndex, outcome: "SUCCEEDED" as const, predictionCount: perAssetKeyframes.get(target.assetId) ?? 0 })
+      : null;
+    await tx.aiTask.update({ where: { id: task.id }, data: { status: "SUCCEEDED", output: { tracksCreated, keyframesCreated, labelConflicts: match.conflicts, tracksSkippedAsDuplicate, ...(perAsset ? { perAsset } : {}) } } });
+  }, { timeout: 120_000, maxWait: 10_000 });
   await releaseLock(db, jobId, lockToken, workerId);
 }

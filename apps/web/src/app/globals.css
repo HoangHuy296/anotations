@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./workspace-dark.css";
 
 /* Explicit, persisted light/dark toggle (Account > the header theme button) --
    not OS `prefers-color-scheme`. `dark:` utilities apply under a

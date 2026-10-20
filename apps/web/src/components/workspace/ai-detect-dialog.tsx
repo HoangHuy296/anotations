@@ -179,7 +179,9 @@ export function AiDetectDialog({ assetId, modality: openModality, problem: openP
       setPhase("succeeded");
       try {
         const applied = await onCompleted?.(taskId, result.task.batch?.outcomes.filter((outcome) => outcome.predictionCount > 0).map((outcome) => outcome.assetId));
-        setAppliedCount(typeof applied === "number" ? applied : null);
+        // A multi-Asset run reports what the whole run produced, not only what landed on the Asset open in the workspace.
+        const batchTotal = result.task.batch && result.task.batch.count > 1 ? result.task.batch.outcomes.reduce((sum, outcome) => sum + outcome.predictionCount, 0) : null;
+        setAppliedCount(batchTotal !== null ? batchTotal : typeof applied === "number" ? applied : null);
       } catch { setErrorMessage("Processing completed, but annotations could not be refreshed. Reload the workspace to view them."); }
     } else if (result.task.status === "FAILED") {
       setPhase("failed");

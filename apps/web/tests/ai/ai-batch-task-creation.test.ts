@@ -270,7 +270,7 @@ test("regression: an Asset missing its size or storage location is rejected at a
   assert.equal(await db.aiTask.count({ where: { datasetId: f.datasetId } }), 0);
 });
 
-test("regression: existing single-Asset VIDEO AI (real provider path, deployed catalog) is still accepted through the unified path, while a VIDEO batch is refused before any Job", { skip: !enabled }, async (t) => {
+test("regression: existing single-Asset VIDEO AI (real provider path, deployed catalog) is still accepted through the unified path, and a VIDEO batch is accepted too", { skip: !enabled }, async (t) => {
   const f = await setup(1);
   const key = randomUUID();
   await db.aiModel.update({ where: { id: f.modelId }, data: { provider: "aioz-company", key, modality: Modality.VIDEO, taskType: "TRACKING" } });
@@ -286,9 +286,9 @@ test("regression: existing single-Asset VIDEO AI (real provider path, deployed c
   assert.equal(job.aiTasks?.type, "TRACKING");
 
   const batch = await createAiTask(f.actor, { datasetId: f.datasetId, modelId: f.modelId, assetIds: [v1.id, v2.id] });
-  assert.equal(batch.ok, false);
-  if (!batch.ok) assert.equal(batch.code, "AI_CAPABILITY_UNVERIFIED");
-  assert.equal(await jobCount(f.datasetId), 1, "the refused batch created nothing");
+  assert.equal(batch.ok, true, "a VIDEO batch is accepted");
+  if (batch.ok) assert.equal(batch.target.count, 2);
+  assert.equal(await jobCount(f.datasetId), 2, "the batch created its own Job");
 });
 
 test("canceling a still-queued operation closes its AiTask and accounts for every accepted target (no stuck QUEUED task)", { skip: !enabled }, async () => {

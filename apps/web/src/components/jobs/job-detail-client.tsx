@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { shouldPollJob, type JobDisplayEvent, type JobDisplayStatus } from "@/lib/jobs/job-progress-view";
 import { repositoryImportProgressPath, repositoryImportProgressState } from "@/lib/repository-import/progress-state";
 
+// Imports of a few small files finish in well under a second; a slower poll never observes the intermediate states.
+const JOB_POLL_INTERVAL_MS = 1_500;
+
 async function readJson<T>(path: string): Promise<T> {
   const response = await fetch(path, { cache: "no-store" });
   const body = await response.json() as { data?: T; error?: { message?: string } };
@@ -62,7 +65,7 @@ export function JobDetailClient({ initialJob, initialEvents, variant = "generic"
   useEffect(() => {
     if (!shouldPollJob(job.status, typeof document === "undefined" ? false : !document.hidden)) return;
     const quietlyRefresh = () => { void refresh().catch(() => { setRefreshError("Could not refresh this job. Try again shortly."); setRefreshing(false); }); };
-    const timer = window.setInterval(() => { if (!document.hidden) quietlyRefresh(); }, 10_000);
+    const timer = window.setInterval(() => { if (!document.hidden) quietlyRefresh(); }, JOB_POLL_INTERVAL_MS);
     const visibility = () => { if (!document.hidden && shouldPollJob(job.status)) quietlyRefresh(); };
     document.addEventListener("visibilitychange", visibility);
     return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", visibility); };
@@ -71,7 +74,7 @@ export function JobDetailClient({ initialJob, initialEvents, variant = "generic"
     // Covers loading straight into a job that finished uploading (all items
     // durably accounted for) but never got committed — e.g. the upload tab's
     // own commit call was lost, or this page was opened fresh. Runs once per
-    // mount rather than waiting for the next 10s poll tick.
+    // mount rather than waiting for the next poll tick.
     let active = true;
     void finalizeIfReady(initialJob, variant).then((next) => { if (active) setJob(next); });
     return () => { active = false; };

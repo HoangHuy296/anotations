@@ -10,7 +10,7 @@ import { isAiPredictionAnnotation } from "@/lib/ai/ai-detect-view";
 import { putAssetAnnotations } from "@/lib/annotations/annotation-api-client";
 import { randomUUIDAuto } from "@/lib/browser-random-uuid";
 import { normalizeBoundingBox, viewportPointToImage } from "@/lib/workspace/geometry";
-import { replacePathVertex, resizeNormalizedCircle, translateImageGeometry } from "@/lib/workspace/annotation-geometry";
+import { fitNormalizedCircle, moveNormalizedCircle, moveNormalizedPoint, replacePathVertex, resizeNormalizedCircle, translateImageGeometry } from "@/lib/workspace/annotation-geometry";
 import { canCancelPath, canFinishPath, classifyPathClick, isPathClosing, isPathTool, isWithinPathCloseThreshold, pathPreviewPoints, POLYGON_CLOSE_THRESHOLD_PX } from "@/lib/workspace/path-interaction";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
 import type { AnnotationTool } from "@/types/annotation";
@@ -201,12 +201,13 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
   // confirm. `persistCreate` (scheduled separately, after the autosave
   // debounce) reconciles this placeholder with the durable row, or rolls it
   // back if the save ultimately fails.
-  function beginOptimisticCreate(type: SafeImageAnnotation["type"], geometry: ImageAnnotationGeometry) {
+  function beginOptimisticCreate(type: SafeImageAnnotation["type"], geometry: ImageAnnotationGeometry, options: { keepTool?: boolean } = {}) {
     const id = randomUUIDAuto();
     const optimistic: SafeImageAnnotation = { id, assetId: asset.id, labelId: activeLabelId, revision: 0, type, geometry, status: "DRAFT", updatedAt: new Date().toISOString() };
     upsertSafeAnnotation(optimistic);
     setSelectedId(id);
-    onToolChange("select");
+    // The point tool stays active so several points can be placed in a row; every other tool returns to Select.
+    if (!options.keepTool) onToolChange("select");
     setPendingCreateIds((current) => new Set(current).add(id));
     setSaveState("pending");
     return id;
@@ -307,7 +308,7 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
     }
     if (tool === "point") {
       const geometry: ImageAnnotationGeometry = { px: point.x / originalWidth, py: point.y / originalHeight };
-      const id = beginOptimisticCreate("POINT", geometry);
+      const id = beginOptimisticCreate("POINT", geometry, { keepTool: true });
       scheduleAutosave(`create-${id}`, () => persistCreate(id, "POINT", geometry), 0);
       return;
     }
@@ -363,8 +364,9 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
       const cx = drawingStart.x / originalWidth;
       const cy = drawingStart.y / originalHeight;
       const r = Math.hypot(draft.width, draft.height) / originalWidth;
-      if (r > 0 && cx - r >= 0 && cx + r <= 1 && cy - r >= 0 && cy + r <= 1) {
-        const geometry: ImageAnnotationGeometry = { cx, cy, r };
+      const fitted = fitNormalizedCircle(cx, cy, r);
+      if (fitted) {
+        const geometry: ImageAnnotationGeometry = fitted;
         const id = beginOptimisticCreate("CIRCLE", geometry);
         scheduleAutosave(`create-${id}`, () => persistCreate(id, "CIRCLE", geometry), 0);
       }
@@ -446,7 +448,15 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
             if (annotation.type === "CIRCLE" && typeof geometry.cx === "number" && typeof geometry.cy === "number" && typeof geometry.r === "number") {
               const circle = geometry as { cx: number; cy: number; r: number };
               return <Group key={annotation.id}>
-                <Circle x={circle.cx * originalWidth} y={circle.cy * originalHeight} radius={circle.r * originalWidth} draggable={tool === "select" && interactive} {...common} onDragEnd={persistTranslation} />
+                <Circle x={circle.cx * originalWidth} y={circle.cy * originalHeight} radius={circle.r * originalWidth} draggable={tool === "select" && interactive} {...common} onDragEnd={(event) => {
+                  // A Circle node's x/y is its absolute center (not a delta like a Line's), clamped to the image so a drag past the edge stops at the edge.
+                  const next = moveNormalizedCircle(circle, event.target.x() / originalWidth, event.target.y() / originalHeight);
+                  event.target.position({ x: (next?.cx ?? circle.cx) * originalWidth, y: (next?.cy ?? circle.cy) * originalHeight });
+                  if (!next) return;
+                  upsertSafeAnnotation({ ...annotation, geometry: next });
+                  setSaveState("pending");
+                  scheduleAutosave(`annotation:${annotation.id}`, () => persistGeometry(annotation, next));
+                }} />
                 {interactive && tool === "select" && <Circle x={(circle.cx + circle.r) * originalWidth} y={circle.cy * originalHeight} radius={5} fill="#ffffff" stroke={colorFor(annotation, labels)} strokeWidth={2} draggable onDragEnd={(event) => {
                   const next = resizeNormalizedCircle(circle, [event.target.x() / originalWidth, event.target.y() / originalHeight]);
                   if (!next) { event.target.position({ x: (circle.cx + circle.r) * originalWidth, y: circle.cy * originalHeight }); return; }
@@ -456,7 +466,14 @@ export default function CanvasStage({ image: asset, annotations: initialAnnotati
                 }} />}
               </Group>;
             }
-            if (annotation.type === "POINT" && typeof geometry.px === "number" && typeof geometry.py === "number") return <Circle key={annotation.id} x={geometry.px * originalWidth} y={geometry.py * originalHeight} radius={5} fill={colorFor(annotation, labels)} draggable={tool === "select" && interactive} {...common} onDragEnd={persistTranslation} />;
+            if (annotation.type === "POINT" && typeof geometry.px === "number" && typeof geometry.py === "number") return <Circle key={annotation.id} x={geometry.px * originalWidth} y={geometry.py * originalHeight} radius={5} fill={colorFor(annotation, labels)} draggable={tool === "select" && interactive} {...common} onDragEnd={(event) => {
+              const next = moveNormalizedPoint(event.target.x() / originalWidth, event.target.y() / originalHeight);
+              event.target.position({ x: (next?.px ?? geometry.px as number) * originalWidth, y: (next?.py ?? geometry.py as number) * originalHeight });
+              if (!next) return;
+              upsertSafeAnnotation({ ...annotation, geometry: next });
+              setSaveState("pending");
+              scheduleAutosave(`annotation:${annotation.id}`, () => persistGeometry(annotation, next));
+            }} />;
             return null;
           })}
           {aiPreviews.map((p) => <Group key={`ai-preview-${p.index}`} listening={false}>

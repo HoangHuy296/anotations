@@ -26,7 +26,9 @@ const roleLabels: Record<string, string> = {
   ADMIN: "Administrator", MANAGER: "Manager", LABELER: "Labeler", REVIEWER: "Reviewer",
 };
 
-export default async function AccountPage() {
+export default async function AccountPage({ searchParams }: { searchParams: Promise<{ embed?: string | string[] }> }) {
+  // The workspace Settings overlay frames this page with ?embed=1: it must show only the settings content, never a second copy of the app shell (sidebar, dashboard navigation).
+  const embedded = (await searchParams).embed === "1";
   const actor = await getRequestActor();
   if (!actor) redirect("/unauthorized");
   const preferences = readAccountPreferences(actor.preferences);
@@ -34,8 +36,7 @@ export default async function AccountPage() {
     ? await listSafeExportJobsForActor(actor, { limit: 10 })
     : { items: [], nextCursor: null };
 
-  return (
-    <AppShell currentPath="/account">
+  const content = (
       <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <header className="border-b border-zinc-200 pb-7 dark:border-zinc-800">
           <p className="text-xs font-bold uppercase tracking-[0.14em] text-sky-700 dark:text-sky-400">Account</p>
@@ -98,8 +99,8 @@ export default async function AccountPage() {
           </div>
         </div>
       </div>
-    </AppShell>
   );
+  return embedded ? content : <AppShell currentPath="/account">{content}</AppShell>;
 }
 
 function SectionHeading({ icon: Icon, title, description }: { icon: typeof UserCircle; title: string; description: string }) {

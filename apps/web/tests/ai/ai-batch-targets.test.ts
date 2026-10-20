@@ -116,7 +116,7 @@ async function modalityDataset(modality: Modality | null) {
 }
 const targetCode = async (datasetId: string, assetIds: string[]) => { const r = await resolveAiTarget(datasetId, { mode: "BULK_SELECTION", selection: { mode: "EXPLICIT", assetIds } }); return r.ok ? `OK:${r.modality}:${r.targets.length}` : r.code; };
 
-test("Dataset.modality alone selects the AI target kind: IMAGE batches stay capped at the verified limit and VIDEO stays single-asset", { skip: !enabled }, async () => {
+test("Dataset.modality alone selects the AI target kind: IMAGE and VIDEO batches are both accepted up to the platform ceiling", { skip: !enabled }, async () => {
   const image = await modalityDataset(Modality.IMAGE);
   const images = await Promise.all(Array.from({ length: AI_BATCH_VERIFIED_MAX_ASSETS + 1 }, () => asset(image)));
   const ids = images.map((row) => row.id);
@@ -127,7 +127,7 @@ test("Dataset.modality alone selects the AI target kind: IMAGE batches stay capp
   const videoA = await asset(video, { modality: Modality.VIDEO, mimeType: "video/mp4", filename: "v1.mp4" });
   const videoB = await asset(video, { modality: Modality.VIDEO, mimeType: "video/mp4", filename: "v2.mp4" });
   assert.equal(await targetCode(video, [videoA.id]), "OK:VIDEO:1", "one VIDEO Asset keeps working");
-  assert.equal(await targetCode(video, [videoA.id, videoB.id]), "AI_CAPABILITY_UNVERIFIED", "a VIDEO batch is not evidenced");
+  assert.equal(await targetCode(video, [videoA.id, videoB.id]), "OK:VIDEO:2", "a VIDEO batch is accepted");
 
   const audio = await modalityDataset(Modality.AUDIO);
   const wav = await asset(audio, { modality: Modality.AUDIO, mimeType: "audio/wav", filename: "a.wav" });
@@ -194,7 +194,7 @@ test("the persisted Dataset modality wins over every Asset row; each capability-
   }
 });
 
-test("a VIDEO Dataset resolves a single VIDEO Asset through its authoritative modality; a VIDEO batch stays unverified", async () => {
+test("a VIDEO Dataset resolves a single VIDEO Asset through its authoritative modality; a VIDEO batch is accepted too", async () => {
   const one = await resolveAiTarget("dataset", { mode: "CURRENT_ASSET", assetId: "a1" }, fakeClient(() => ({ modality: Modality.VIDEO }), Modality.VIDEO));
   assert.equal(one.ok ? one.modality : one.code, "VIDEO");
 });

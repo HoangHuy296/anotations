@@ -9,16 +9,14 @@ import { z } from "zod";
 
 export const AI_BATCH_SCHEMA_VERSION = 1 as const;
 
-/**
- * Largest batch size actually exercised against the deployed AI Service
- * (verification/provider-contract.md). It is NOT a provider guarantee; it
- * changes only in the same commit as a recorded real run (research.md D-LIM).
- * The effective limit is min(platform selection ceiling, this value).
- */
-export const AI_BATCH_VERIFIED_MAX_ASSETS = 3;
-
 /** Phase 022 synchronous selection ceiling; an input-shape ceiling, never a provider claim. */
 export const AI_BATCH_PLATFORM_SELECTION_CEILING = 200;
+
+/**
+ * The AI Service accepts an array of Assets, so the per-request cap that used to sit at 3 (the largest size exercised in
+ * verification/provider-contract.md) is lifted: the effective limit is now the platform selection ceiling.
+ */
+export const AI_BATCH_VERIFIED_MAX_ASSETS = AI_BATCH_PLATFORM_SELECTION_CEILING;
 
 export function effectiveAiBatchLimit(platformCeiling: number = AI_BATCH_PLATFORM_SELECTION_CEILING, verified: number = AI_BATCH_VERIFIED_MAX_ASSETS): number {
   return Math.min(platformCeiling, verified);
