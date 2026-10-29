@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { TextDecoder } from "node:util";
 import type { Readable } from "node:stream";
 
+import { readImageDimensions } from "@annotationplatform/domain";
 import { Modality } from "@internal/db";
 import type { Client as MinioClient } from "minio";
 
@@ -52,8 +53,9 @@ function imageMetadata(bytes: Buffer) {
     if (bytes.length < 24) throw new UploadVerificationFailure("INVALID_MEDIA");
     return { mimeType: "image/png", width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20) };
   }
-  if (startsWith(bytes, [0xff, 0xd8, 0xff])) return { mimeType: "image/jpeg" };
-  if (bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP") return { mimeType: "image/webp" };
+  // JPEG/WebP carry their size in a header segment; it is optional metadata (a header beyond the inspected prefix leaves it unknown, never invalid).
+  if (startsWith(bytes, [0xff, 0xd8, 0xff])) return { mimeType: "image/jpeg", ...(readImageDimensions(bytes) ?? {}) };
+  if (bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP") return { mimeType: "image/webp", ...(readImageDimensions(bytes) ?? {}) };
   return null;
 }
 

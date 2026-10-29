@@ -1,7 +1,11 @@
 import "server-only";
 
-import { AssetStatus, type Prisma } from "@internal/db";
+import { randomUUID } from "node:crypto";
 
+import { AssetStatus, CollaborationOutboxEventType, NotificationType, type Prisma } from "@internal/db";
+
+import { createOrReuseCollaborationOutboxEvent, runCollaborationTransaction } from "@/lib/collaboration/collaboration-outbox-service";
+import { createDurableNotification } from "@/lib/collaboration/notification-service";
 import { db } from "@/lib/db";
 import { buildAssetListWhere } from "@/lib/workspace/workspace-assets";
 import { BULK_SYNC_MAX_ASSETS, type AssetListQuery, type BulkOperationResult } from "@/types/workspace";
@@ -160,14 +164,36 @@ export async function deleteAssetsBulk(datasetId: string, assetIds: string[], no
   return result;
 }
 
-/** `assignedToId`, when non-null, must already be a DatasetMember of this dataset -- the 022 assignment boundary (FR-018), not a full collaboration system. */
-export async function assignBulk(datasetId: string, assetIds: string[], notFoundIds: string[], assignedToId: string | null): Promise<{ ok: true; result: BulkOperationResult } | { ok: false; reason: "INVALID_ASSIGNEE" }> {
+/**
+ * `assignedToId`, when non-null, must already be a DatasetMember of this dataset -- the 022 assignment boundary (FR-018), not a full collaboration system.
+ * Assigning to someone notifies them (an ASSET_ASSIGNED notification naming up to three of the assets); unassigning notifies nobody.
+ */
+export async function assignBulk(datasetId: string, assetIds: string[], notFoundIds: string[], assignedToId: string | null, actorId: string): Promise<{ ok: true; result: BulkOperationResult; outboxJobIds: string[] } | { ok: false; reason: "INVALID_ASSIGNEE" }> {
   if (assignedToId) {
     const member = await db.datasetMember.findFirst({ where: { datasetId, userId: assignedToId }, select: { id: true } });
     if (!member) return { ok: false, reason: "INVALID_ASSIGNEE" };
   }
   const result = baseResult(assetIds, notFoundIds);
-  const updated = await db.asset.updateMany({ where: { id: { in: assetIds }, datasetId }, data: { assignedToId } });
-  result.succeeded = updated.count;
-  return { ok: true, result };
+  const outboxJobIds: string[] = [];
+  await runCollaborationTransaction(async (tx) => {
+    const updated = await tx.asset.updateMany({ where: { id: { in: assetIds }, datasetId }, data: { assignedToId } });
+    result.succeeded = updated.count;
+    if (!assignedToId || updated.count === 0) return;
+    const assets = await tx.asset.findMany({ where: { id: { in: assetIds }, datasetId }, orderBy: { filename: "asc" }, take: 3, select: { id: true, filename: true } });
+    const names = assets.map((asset) => asset.filename).join(", ");
+    const more = updated.count - assets.length;
+    const notification = await createDurableNotification(tx, {
+      userId: assignedToId, actorId, type: NotificationType.ASSET_ASSIGNED, datasetId, assetId: assets[0]?.id ?? null,
+      title: updated.count === 1 ? "1 asset assigned to you" : `${updated.count} assets assigned to you`,
+      body: `${names}${more > 0 ? ` and ${more} more` : ""}`,
+      dedupeKey: `bulk-assign:${randomUUID()}:${assignedToId}`,
+    });
+    if (notification.kind !== "stored") return;
+    const event = await createOrReuseCollaborationOutboxEvent(tx, {
+      datasetId, actorId, recipientUserId: assignedToId, type: CollaborationOutboxEventType.NOTIFICATION_CREATED,
+      dedupeKey: `notification:bulk-assign:${notification.notification.id}`, payload: { notificationId: notification.notification.id },
+    });
+    outboxJobIds.push(event.jobId);
+  });
+  return { ok: true, result, outboxJobIds };
 }

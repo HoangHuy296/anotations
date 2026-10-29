@@ -57,3 +57,21 @@ test("notification retry and a failed parent transaction cannot leave duplicate 
     assert.equal(await db.notification.count({ where: { userId: fixture.reviewer.id, dedupeKey: "rollback-proof" } }), 0);
   } finally { await fixture.cleanup(); }
 });
+
+test("a notification carries its asset's modality so the bell can open the right workspace selection", { skip: !hasIntegrationDatabase }, async () => {
+  const fixture = await createCollaborationFixture();
+  try {
+    await runCollaborationTransaction(async (tx) => {
+      await createDurableNotification(tx, { userId: fixture.labeler.id, actorId: fixture.owner.id, type: NotificationType.ASSET_ASSIGNED, datasetId: fixture.dataset.id, assetId: fixture.asset.id, title: "Assigned", body: "asset", dedupeKey: "modality-asset" });
+      await createDurableNotification(tx, { userId: fixture.labeler.id, actorId: fixture.owner.id, type: NotificationType.DATASET_INVITE, datasetId: fixture.dataset.id, title: "Joined", body: "dataset level", dedupeKey: "modality-dataset" });
+    });
+    const asset = await db.asset.findUniqueOrThrow({ where: { id: fixture.asset.id }, select: { modality: true } });
+    const items = (await listNotifications(fixture.labeler, { limit: 25 })).items;
+    assert.equal(items.find((item) => item.title === "Assigned")?.assetModality, asset.modality);
+    assert.equal(items.find((item) => item.title === "Joined")?.assetModality, null, "dataset-level notifications have no asset modality");
+    // Once the member loses access the context (including the modality) is redacted.
+    await db.datasetMember.deleteMany({ where: { datasetId: fixture.dataset.id, userId: fixture.labeler.id } });
+    const redacted = (await listNotifications(fixture.labeler, { limit: 25 })).items;
+    assert.ok(redacted.every((item) => item.unavailable && item.assetModality === null && item.assetId === null));
+  } finally { await fixture.cleanup(); }
+});

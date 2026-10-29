@@ -61,6 +61,9 @@ export async function upsertMirroredRepositoryAsset(input: {
   verifiedModality: "IMAGE" | "VIDEO" | "AUDIO" | "TEXT";
   /** Content-verified MIME (see repository-media-classification.ts). Defaults to the extension-derived candidate type only for callers that do not classify bytes. */
   verifiedMimeType?: string;
+  /** Pixel size of an IMAGE read from its verified header; omitted when the header does not carry one. */
+  verifiedWidth?: number;
+  verifiedHeight?: number;
   sourceFingerprint: string;
   bucket: string;
   objectKey: string;
@@ -102,6 +105,7 @@ export async function upsertMirroredRepositoryAsset(input: {
         datasetId: input.datasetId, uploadedById: input.uploadedById, modality: input.verifiedModality,
         filename: input.candidate.filename, relativePath, originalFilename: input.candidate.filename, mimeType: input.verifiedMimeType ?? input.candidate.mimeType,
         sizeBytes: BigInt(input.candidate.sizeBytes), sourceMode: "MIRROR_TO_MINIO",
+        ...(input.verifiedWidth && input.verifiedHeight ? { width: input.verifiedWidth, height: input.verifiedHeight } : {}),
         storageProvider: "MINIO", storageBucket: input.bucket, storageKey: input.objectKey,
         sourceProvider: input.provider, sourceRef: input.candidate.revision, sourceRevision: input.candidate.revision,
         sourcePath: input.candidate.path, sourceFileSha: input.candidate.providerFileIdentity,

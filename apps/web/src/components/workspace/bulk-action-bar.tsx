@@ -194,7 +194,7 @@ export function BulkActionBar({ datasetId, labels, onRunAi }: { datasetId: strin
     {openAction === "DELETE" && <div className="mt-2 space-y-2 rounded-lg border border-rose-200 bg-rose-50 p-2 text-[11px] text-rose-900">
       <p>
         Delete {mode === "FILTERED" ? `all ${selectedCount.toLocaleString()} matching` : selectedCount.toLocaleString()} asset{selectedCount === 1 ? "" : "s"}?
-        This will remove the asset{selectedCount === 1 ? "" : "s"} from the dataset. Associated storage objects will be cleaned up asynchronously.
+        If you own this dataset, the asset{selectedCount === 1 ? "" : "s"} and {selectedCount === 1 ? "its" : "their"} annotations and stored files are permanently deleted and cannot be recovered. Other roles remove them from the dataset only.
         {deleteRunsInBackground && " This affects a large number of assets and will run in the background."}
       </p>
       <div className="flex justify-end gap-2">

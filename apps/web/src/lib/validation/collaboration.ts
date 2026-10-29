@@ -52,3 +52,14 @@ export const collaborationRouteParamsSchema = z.object({
   invitationId: identifier.optional(),
   notificationId: identifier.optional(),
 }).strict();
+
+/** Share links always grant LABELER; the role is deliberately not caller-selectable. */
+export const shareLinkCreateSchema = z.object({
+  expiresInDays: z.number().int().min(1).max(30).default(7),
+  maxUses: z.number().int().min(1).max(1_000).nullable().default(null),
+}).strict();
+
+/** The raw token is 32 random bytes, base64url encoded (43 characters). */
+export const shareLinkTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/);
+
+export const shareLinkAcceptSchema = z.object({ token: shareLinkTokenSchema }).strict();

@@ -2,13 +2,23 @@
 
 import { Bell, Check, Checks, X } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 
 import { useNotifications } from "@/lib/collaboration/notification-client";
+import type { SafeNotification } from "@/types/collaboration";
 
-function notificationHref(item: { datasetId?: string | null; assetId?: string | null; commentId?: string | null }) {
-  if (!item.datasetId || !item.assetId) return "#";
-  return `/workspace/${item.datasetId}?image=${item.assetId}${item.commentId ? `&discussion=${item.commentId}` : ""}`;
+/**
+ * Where a notification leads. Asset notifications open that asset in its dataset workspace using the
+ * modality's own query key (`image|video|audio|text`); dataset-level ones (for example "joined via share link")
+ * open the dataset workspace. Unavailable items lead nowhere.
+ */
+function notificationHref(item: Pick<SafeNotification, "datasetId" | "assetId" | "commentId" | "assetModality" | "unavailable">) {
+  if (item.unavailable || !item.datasetId) return null;
+  if (!item.assetId) return `/workspace/${item.datasetId}`;
+  const key = (item.assetModality ?? "IMAGE").toLowerCase();
+  return `/workspace/${item.datasetId}?${key}=${item.assetId}${item.commentId ? `&discussion=${item.commentId}` : ""}`;
 }
 
 function notificationTime(createdAt: string) {
@@ -27,7 +37,33 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const notifications = useNotifications();
+  const router = useRouter();
   const count = notifications.unreadCount;
+  // Items whose asset the member can no longer open (checked through /view-url when the item is clicked).
+  const [revoked, setRevoked] = useState<ReadonlySet<string>>(() => new Set());
+  const [opening, setOpening] = useState<string | null>(null);
+
+  async function openNotification(event: ReactMouseEvent<HTMLAnchorElement>, item: SafeNotification, href: string) {
+    // Let the browser handle new-tab / new-window gestures natively.
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    if (item.assetId) {
+      setOpening(item.id);
+      // The member must be able to view the asset: this is the same authorization the workspace image request uses.
+      // 403/404 mean access was removed or the asset is gone; anything else (including 409 "object unavailable") still opens
+      // the workspace, which explains the problem in context.
+      const probe = await fetch(`/api/assets/${item.assetId}/view-url`, { credentials: "same-origin", cache: "no-store" }).catch(() => null);
+      setOpening(null);
+      if (probe && (probe.status === 403 || probe.status === 404)) {
+        setRevoked((current) => new Set(current).add(item.id));
+        if (!item.readAt) void notifications.markRead(item.id);
+        return;
+      }
+    }
+    if (!item.readAt) void notifications.markRead(item.id);
+    setOpen(false);
+    router.push(href);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -82,7 +118,7 @@ export function NotificationBell() {
               <ul className="space-y-1">
                 {notifications.items.map((item) => (
                   <li key={item.id}>
-                    <Link href={notificationHref(item)} aria-disabled={item.unavailable || !item.datasetId || !item.assetId} onClick={(event) => { if (item.unavailable || !item.datasetId || !item.assetId) event.preventDefault(); else { if (!item.readAt) void notifications.markRead(item.id); setOpen(false); } }} className={`group flex gap-3 rounded-xl p-3 transition-colors focus-visible:outline-2 focus-visible:outline-sky-500 ${item.readAt ? "hover:bg-zinc-50 dark:hover:bg-zinc-800/70" : "bg-sky-50/75 hover:bg-sky-50 dark:bg-sky-950/35 dark:hover:bg-sky-950/55"} ${item.unavailable ? "cursor-default opacity-60" : ""}`}>
+                    <Link href={notificationHref(item) ?? "#"} aria-disabled={!notificationHref(item) || revoked.has(item.id)} aria-busy={opening === item.id} onClick={(event) => { const target = notificationHref(item); if (!target || revoked.has(item.id)) { event.preventDefault(); return; } void openNotification(event, item, target); }} className={`group flex gap-3 rounded-xl p-3 transition-colors focus-visible:outline-2 focus-visible:outline-sky-500 ${item.readAt ? "hover:bg-zinc-50 dark:hover:bg-zinc-800/70" : "bg-sky-50/75 hover:bg-sky-50 dark:bg-sky-950/35 dark:hover:bg-sky-950/55"} ${item.unavailable || revoked.has(item.id) ? "cursor-default opacity-60" : ""}`}>
                       <span className={`mt-1.5 size-2 shrink-0 rounded-full ${item.readAt ? "bg-transparent" : "bg-sky-600 dark:bg-sky-400"}`} aria-label={item.readAt ? undefined : "Unread"} />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-start justify-between gap-3">
@@ -91,6 +127,7 @@ export function NotificationBell() {
                         </span>
                         <span className="mt-1 block text-xs leading-5 text-zinc-600 dark:text-zinc-400">{item.body}</span>
                         {item.unavailable ? <span className="mt-1.5 block text-[10px] font-medium text-zinc-400 dark:text-zinc-500">This item is no longer available.</span> : null}
+                        {revoked.has(item.id) ? <span role="status" className="mt-1.5 block text-[10px] font-medium text-rose-700 dark:text-rose-400">You no longer have access to this asset.</span> : null}
                         {!item.readAt ? <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-sky-700 dark:text-sky-400"><Check aria-hidden="true" size={12} />Unread</span> : null}
                       </span>
                     </Link>

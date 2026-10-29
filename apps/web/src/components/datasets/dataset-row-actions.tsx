@@ -13,9 +13,13 @@ type DatasetRowActionsProps = {
   datasetId: string;
   datasetName: string;
   workflowStatus: (typeof statuses)[number];
+  /** Dataset owner (or system admin) only: shows the permanent delete. The server enforces the same rule. */
+  canDelete?: boolean;
 };
 
-export function DatasetRowActions({ datasetId, datasetName, workflowStatus }: DatasetRowActionsProps) {
+export function DatasetRowActions({ datasetId, datasetName, workflowStatus, canDelete = false }: DatasetRowActionsProps) {
+  const [confirming, setConfirming] = useState(false);
+  const [confirmName, setConfirmName] = useState("");
   const router = useRouter();
   const panel = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement | null>(null);
@@ -128,17 +132,19 @@ export function DatasetRowActions({ datasetId, datasetName, workflowStatus }: Da
     });
   }
 
-  function archive() {
-    if (!window.confirm(`Archive “${datasetName}”? Its data will remain recoverable and no binary is deleted.`)) return;
+  function deletePermanently() {
     setError(null);
     startTransition(async () => {
-      await fetch(`/api/datasets/${datasetId}`, { method: "DELETE" })
+      await fetch(`/api/datasets/${datasetId}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirmName }) })
         .then(async (response) => {
-          if (!response.ok) throw new Error("The dataset could not be archived.");
+          if (!response.ok) {
+            const body = await response.json().catch(() => null) as { error?: { message?: string } } | null;
+            throw new Error(body?.error?.message ?? "The dataset could not be deleted.");
+          }
           closePanel();
           router.refresh();
         })
-        .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : "The dataset could not be archived."));
+        .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : "The dataset could not be deleted."));
     });
   }
 
@@ -158,7 +164,16 @@ export function DatasetRowActions({ datasetId, datasetName, workflowStatus }: Da
             </select>
           </label>
           <button className="mt-2 flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800" disabled={isPending || status === workflowStatus} onClick={() => update({ workflowStatus: status })} type="button"><CheckCircle aria-hidden="true" size={15} /> Update status</button>
-          <div className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800"><button className="flex h-9 w-full items-center justify-center gap-2 rounded-lg text-xs font-semibold text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50" disabled={isPending} onClick={archive} type="button"><Trash aria-hidden="true" size={15} /> Archive dataset</button></div>
+          {canDelete ? <div className="mt-4 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+            {confirming ? <div className="space-y-2">
+              <p className="text-xs leading-5 text-rose-800 dark:text-rose-300">This permanently deletes the dataset, its assets, annotations and every stored file. It cannot be undone. Type <b className="break-all">{datasetName}</b> to confirm.</p>
+              <input aria-label="Type the dataset name to confirm" autoComplete="off" value={confirmName} onChange={(event) => setConfirmName(event.target.value)} className="h-9 w-full rounded-lg border border-rose-200 px-2 text-sm outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 dark:border-rose-900 dark:bg-zinc-800 dark:text-zinc-100" />
+              <div className="flex gap-2">
+                <button type="button" className="h-9 flex-1 rounded-lg border border-zinc-200 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300" onClick={() => { setConfirming(false); setConfirmName(""); }}>Cancel</button>
+                <button type="button" className="flex h-9 flex-1 items-center justify-center gap-2 rounded-lg bg-rose-700 text-xs font-semibold text-white disabled:opacity-40" disabled={isPending || confirmName.trim() !== datasetName} onClick={deletePermanently}><Trash aria-hidden="true" size={15} /> Delete permanently</button>
+              </div>
+            </div> : <button className="flex h-9 w-full items-center justify-center gap-2 rounded-lg text-xs font-semibold text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50" disabled={isPending} onClick={() => setConfirming(true)} type="button"><Trash aria-hidden="true" size={15} /> Delete dataset permanently</button>}
+          </div> : null}
           {error ? <p className="mt-2 text-xs text-rose-700 dark:text-rose-400" role="alert">{error}</p> : null}
       </div>
     </div>

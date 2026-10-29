@@ -109,7 +109,7 @@ export default async function DatasetsPage({ searchParams }: { searchParams: Pro
                   </div>
                   <div className="col-start-1 row-start-3 self-center xl:col-auto xl:row-auto"><Badge className="gap-1.5 whitespace-nowrap" variant={workflowStatus === "IN_PROGRESS" ? "warning" : "success"}><span aria-hidden="true" className="size-1.5 rounded-full bg-current" />{datasetStatusLabels[workflowStatus]}</Badge></div>
                   <div className="relative z-10 col-start-2 row-start-3 flex items-center justify-end gap-2 sm:row-start-1 xl:col-auto xl:row-auto">
-                    {canManage ? <DatasetRowActions datasetId={dataset.id} datasetName={dataset.name} workflowStatus={workflowStatus} /> : null}
+                    {canManage ? <DatasetRowActions datasetId={dataset.id} datasetName={dataset.name} workflowStatus={workflowStatus} canDelete={actor.role === UserRole.ADMIN || dataset.ownerId === actor.id} /> : null}
                     <Button asChild variant="icon" aria-label={`Open ${dataset.name}`}><Link href={destination} prefetch={false}><ArrowRight aria-hidden="true" size={17} /></Link></Button>
                   </div>
                 </article>;

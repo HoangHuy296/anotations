@@ -1,7 +1,10 @@
+import { z } from "zod";
+
 import { apiError, apiSuccess } from "@/lib/api-response";
 import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { requestDatasetPurge } from "@/lib/purge/purge-service";
 import { datasetMetadataSelect } from "@/lib/dataset-metadata";
 import { datasetIdSchema, updateDatasetSchema } from "@/lib/validation/dataset";
 
@@ -46,10 +49,21 @@ export async function PATCH(request: Request, context: Context) {
   return apiSuccess(dataset);
 }
 
-export async function DELETE(_request: Request, context: Context) {
+const purgeDatasetSchema = z.object({ confirmName: z.string().min(1).max(200) }).strict();
+
+/** Owner-only PERMANENT delete: the body must carry the exact dataset name; the data is removed by a background purge Job. */
+export async function DELETE(request: Request, context: Context) {
   const actor = await getRequestActor();
   if (!actor) return apiError(401, "AUTH_REQUIRED", "Authentication is required.");
-  const result = await resolve(actor, context, "dataset.delete"); if ("response" in result) return result.response;
-  const dataset = await db.dataset.update({ where: { id: result.datasetId }, data: { archivedAt: new Date() }, select: datasetMetadataSelect });
-  return apiSuccess(dataset);
+  const parsedDataset = datasetIdSchema.safeParse((await context.params).datasetId);
+  if (!parsedDataset.success) return apiError(400, "INVALID_REQUEST", "Dataset identifier is invalid.");
+  const parsed = purgeDatasetSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return apiError(400, "INVALID_REQUEST", "Type the dataset name to confirm the permanent delete.");
+  const result = await requestDatasetPurge(actor, parsedDataset.data, parsed.data.confirmName);
+  if (result.ok) return apiSuccess({ jobId: result.jobId, deliveryPending: result.deliveryPending }, { status: 202 });
+  if (result.code === "NOT_FOUND") return apiError(404, "GITEA_NOT_FOUND", "The dataset was not found.");
+  if (result.code === "FORBIDDEN") return apiError(403, "FORBIDDEN", "Only the dataset owner can permanently delete it.");
+  if (result.code === "NAME_MISMATCH") return apiError(400, "CONFIRMATION_MISMATCH", "The typed name does not match the dataset name.");
+  if (result.code === "ACTIVE_JOBS") return apiError(409, "ACTIVE_JOBS", "Wait for running imports, exports or AI tasks to finish (or cancel them) before deleting.");
+  return apiError(400, "INVALID_REQUEST", "The delete request is invalid.");
 }

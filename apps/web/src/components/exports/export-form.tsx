@@ -30,6 +30,8 @@ export function ExportForm({ datasets }: { datasets: Array<{ id: string; name: s
   const [job, setJob] = useState<ExportJob | null>(null);
   const [download, setDownload] = useState<Download>(null);
   const [message, setMessage] = useState<string | null>(null);
+  // Seconds left before the per-minute export limit lets this user create another export; null when not rate limited.
+  const [cooldown, setCooldown] = useState<number | null>(null);
 
   function refreshStatus(jobId: string) {
     return fetch(`/api/export/${jobId}`, { cache: "no-store" })
@@ -48,14 +50,27 @@ export function ExportForm({ datasets }: { datasets: Array<{ id: string; name: s
     return () => window.clearTimeout(timer);
   }, [job]);
 
+  useEffect(() => {
+    if (cooldown === null) return;
+    if (cooldown <= 0) { setCooldown(null); return; }
+    const timer = window.setTimeout(() => setCooldown((current) => (current === null ? null : current - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
+
   function createExport() {
     setMessage(null);
-    setDownload(null);
     startTransition(() => {
       void fetch("/api/export", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ datasetId, format, manifestSchemaVersion: "1" }) })
         .then(async (response) => {
+          // A rate-limited request created nothing: keep the previous export and its download untouched and only pause this form.
+          if (response.status === 429) {
+            const retryAfter = Number(response.headers.get("Retry-After"));
+            setCooldown(Number.isFinite(retryAfter) && retryAfter > 0 ? Math.ceil(retryAfter) : 60);
+            return;
+          }
           const body = await response.json() as ApiEnvelope<{ job: ExportJob; deliveryPending: boolean }>;
           if (!response.ok || !body.data) throw new Error(body.error?.message ?? "The export could not be started.");
+          setDownload(null);
           setMessage(body.data.deliveryPending ? "Export was saved and will begin when queue delivery recovers." : "Export started. This status updates automatically.");
           // The create response never carries a download capability, and its
           // Job snapshot can already be terminal -- a reused in-flight Job
@@ -79,7 +94,8 @@ export function ExportForm({ datasets }: { datasets: Array<{ id: string; name: s
       <label className="mt-6 block"><span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Dataset</span><select className="mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:ring-sky-900" disabled={isPending} onChange={(event) => setDatasetId(event.target.value)} value={datasetId}>{datasets.map((dataset) => <option key={dataset.id} value={dataset.id}>{dataset.name}</option>)}</select></label>
       <label className="mt-4 block"><span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Format</span><select className="mt-2 h-10 w-full rounded-xl border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:ring-sky-900" disabled={isPending} onChange={(event) => setFormat(event.target.value as ExportFormat)} value={format}><option value="JSON">JSON (full platform manifest)</option><option value="COCO">COCO (image annotations)</option></select></label>
       {format === "COCO" && <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">COCO export includes bounding-box annotations on IMAGE assets only. Other geometry types, unlabeled annotations, and rejected annotations are skipped and reported in the export summary.</p>}
-      <Button className="mt-6 w-full" disabled={isPending || !datasetId} onClick={createExport} type="button">{isPending ? <SpinnerGap aria-hidden="true" className="animate-spin" size={17} /> : <Export aria-hidden="true" size={17} />}{isPending ? "Starting export..." : `Create ${format} export`}</Button>
+      <Button className="mt-6 w-full" disabled={isPending || !datasetId || cooldown !== null} onClick={createExport} type="button">{isPending ? <SpinnerGap aria-hidden="true" className="animate-spin" size={17} /> : <Export aria-hidden="true" size={17} />}{isPending ? "Starting export..." : cooldown !== null ? `Too many exports - try again in ${cooldown}s` : `Create ${format} export`}</Button>
+      {cooldown !== null && <p className="mt-3 text-xs leading-5 text-amber-800 dark:text-amber-300" role="status">Export requests are limited per minute. Your previous export is unchanged.</p>}
     </section>
     <section className="min-h-80 rounded-2xl border border-zinc-200 bg-white p-5 lg:p-6 dark:border-zinc-800 dark:bg-zinc-900" aria-live="polite">
       <p className="text-xs font-bold uppercase tracking-[0.12em] text-zinc-400 dark:text-zinc-500">Export status</p>

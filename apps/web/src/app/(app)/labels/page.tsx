@@ -10,7 +10,7 @@ import { getRequestActor } from "@/lib/auth";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db, isDatabaseConfigured } from "@/lib/db";
 import { listLabelLibraryDatasets, pickLabelLibraryDataset, shouldBackfillDefaultImageLabels, type LabelLibraryDataset } from "@/lib/labels/label-library";
-import { ensureDefaultImageLabels } from "@/lib/workspace/label-management";
+import { seedDefaultImageLabelsIfEmpty } from "@/lib/workspace/label-management";
 
 type LabelSummary = {
   id: string;
@@ -263,10 +263,11 @@ async function loadLabelPageData(requestedDatasetId: string | undefined) {
       }) as LabelSummary[]
       : [];
 
-    // Keep the taxonomy consistent for every authorized reader. The shared
-    // service backfills only missing defaults, so custom labels are preserved.
+    // Keep the taxonomy consistent for every authorized reader. Defaults are
+    // seeded only into a dataset with no labels, so a removed default stays
+    // removed and custom labels are preserved.
     if (dataset && shouldBackfillDefaultImageLabels(dataset.modality)) {
-      await ensureDefaultImageLabels(actor, dataset.id);
+      await seedDefaultImageLabelsIfEmpty(actor, dataset.id);
       labels = await db.label.findMany({
         where: { datasetId: dataset.id },
         orderBy: [{ name: "asc" }],

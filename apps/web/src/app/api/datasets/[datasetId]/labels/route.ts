@@ -6,7 +6,7 @@ import { labelMetadataSelect } from "@/lib/dataset-metadata";
 import { parsePageRequest } from "@/lib/pagination";
 import { datasetIdSchema } from "@/lib/validation/dataset";
 import { labelMutationSchema } from "@/lib/validation/label";
-import { createLabelWithTextEligibility, ensureDefaultImageLabels } from "@/lib/workspace/label-management";
+import { createLabelWithTextEligibility, seedDefaultImageLabelsIfEmpty } from "@/lib/workspace/label-management";
 
 export const dynamic = "force-dynamic";
 type Context = { params: Promise<{ datasetId: string }> };
@@ -32,7 +32,7 @@ async function accessFor(context: Context, permission: "dataset.read" | "label.m
 
 export async function GET(request: Request, context: Context) {
   const result = await accessFor(context, "dataset.read"); if ("response" in result) return result.response;
-  await ensureDefaultImageLabels(result.actor, result.datasetId);
+  await seedDefaultImageLabelsIfEmpty(result.actor, result.datasetId);
   const { page, pageSize, skip, take } = parsePageRequest(new URL(request.url).searchParams, DEFAULT_PAGE_SIZE);
   const where = { datasetId: result.datasetId };
   const [labels, total] = await Promise.all([

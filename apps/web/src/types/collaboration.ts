@@ -2,6 +2,7 @@ import type {
   AssetAssignmentType,
   CollaborationOutboxEventType,
   DatasetMemberRole,
+  Modality,
   NotificationType,
 } from "@internal/db";
 
@@ -35,6 +36,8 @@ export type SafeNotification = SafeNotificationContext & {
   readAt: string | null;
   createdAt: string;
   unavailable: boolean;
+  /** Selects the workspace query key (`image|video|audio|text`) when opening `assetId`; null for dataset-level notifications. */
+  assetModality: Modality | null;
 };
 
 export type SafeRealtimeEnvelope = {

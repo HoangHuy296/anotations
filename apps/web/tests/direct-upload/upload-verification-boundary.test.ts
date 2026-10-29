@@ -64,3 +64,15 @@ test("source identity: the fingerprint binds object key, ETag and size; a replac
   const huge = MAX_DIRECT_UPLOAD_BYTES + 1;
   assert.equal(await code(verifyUploadedObject(store({ k: { bytes: png(), size: huge } }), "bucket", "k", huge, "image/png")), "UPLOAD_NOT_READY", "oversize object");
 });
+
+test("JPEG and WebP uploads report their pixel size (needed by COCO export); an unreadable size stays unknown, never invalid", async () => {
+  const jpeg = (width: number, height: number) => Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00,
+    0xff, 0xc0, 0x00, 0x11, 0x08, height >> 8, height & 0xff, width >> 8, width & 0xff, 0x03, 0x01, 0x22, 0x00, 0x02, 0x11, 0x01, 0x03, 0x11, 0x01]);
+  const webpX = (width: number, height: number) => { const b = Buffer.alloc(40); b.write("RIFF", 0, "ascii"); b.writeUInt32LE(32, 4); b.write("WEBPVP8X", 8, "ascii"); b.writeUInt32LE(10, 16); b.writeUIntLE(width - 1, 24, 3); b.writeUIntLE(height - 1, 27, 3); return b; };
+  assert.deepEqual(await verify(jpeg(640, 480), "image/jpeg"), { ...(await verify(jpeg(640, 480), "image/jpeg")), modality: "IMAGE", mimeType: "image/jpeg", width: 640, height: 480 });
+  const webp = await verify(webpX(1024, 768), "image/webp");
+  assert.equal(webp.mimeType, "image/webp"); assert.equal(webp.width, 1024); assert.equal(webp.height, 768);
+  // A JPEG whose frame header is not inside the inspected prefix is still a valid JPEG; its size is simply unknown.
+  const noFrame = await verify(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00]), "image/jpeg");
+  assert.equal(noFrame.mimeType, "image/jpeg"); assert.equal(noFrame.width, undefined); assert.equal(noFrame.height, undefined);
+});

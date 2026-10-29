@@ -104,7 +104,7 @@ export async function processImportDataset(db: PrismaClient, jobId: string, lock
             await correctRepositoryObjectContentType({ objectKey: published.objectKey, contentType: verifiedObject.mimeType });
           }
           safeFailureCode = "ASSET_PERSIST_FAILED";
-          const publication = await upsertMirroredRepositoryAsset({ db, datasetId: job.datasetId, uploadedById: job.createdById, provider: source.repository.provider, candidate, verifiedModality, verifiedMimeType: verifiedObject.mimeType, sourceFingerprint: fingerprint, bucket: published.bucket, objectKey: published.objectKey, sourceRootPath: job.dataset.sourceRootPath });
+          const publication = await upsertMirroredRepositoryAsset({ db, datasetId: job.datasetId, uploadedById: job.createdById, provider: source.repository.provider, candidate, verifiedModality, verifiedMimeType: verifiedObject.mimeType, verifiedWidth: verifiedObject.width, verifiedHeight: verifiedObject.height, sourceFingerprint: fingerprint, bucket: published.bucket, objectKey: published.objectKey, sourceRootPath: job.dataset.sourceRootPath });
           if (publication.modality !== datasetModality) throw new Error("ASSET_MODALITY_MISMATCH");
           imported += 1;
         } catch (error) {

@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { DiscussionDrawer } from "@/components/workspace/discussion-drawer";
+import { ShareDatasetButton } from "@/components/collaboration/share-dataset-button";
 import { WorkspaceSettingsOverlay } from "@/components/workspace/workspace-settings-overlay";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { useAnnotationStore } from "@/stores/image-annotation-store";
@@ -42,6 +43,8 @@ type WorkspaceHeaderProps = {
   theme: AccountTheme;
   workflow?: SafeWorkspaceWorkflow | null;
   discussion?: { datasetId: string; assetId: string | null; commentId?: string | null };
+  /** Dataset owners and managers only: shows the Share button for this dataset. */
+  shareDatasetId?: string | null;
 };
 
 /**
@@ -60,6 +63,7 @@ export function WorkspaceHeader({
   theme,
   workflow = null,
   discussion,
+  shareDatasetId = null,
 }: WorkspaceHeaderProps) {
   const StatusFields = engine ? workspaceEngineRegistry[engine].StatusFields : null;
   const saveStates = useAnnotationStore((store) => store.saveStates);
@@ -97,9 +101,10 @@ export function WorkspaceHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-2">
         {workflow && engine ? <WorkflowControls key={`${workflow.datasetId}:${workflow.assetId}:${workflow.revision}`} workflow={workflow} engine={engine} /> : null}
         {discussion ? <Button type="button" size="sm" variant="secondary" aria-label="Open asset discussion" onClick={() => setDiscussionOpen(true)}><ChatCircleText aria-hidden="true" size={17} />Discussion</Button> : null}
+        {shareDatasetId ? <ShareDatasetButton datasetId={shareDatasetId} /> : null}
         <CollaborationPresence members={presence} />
         <span className={`hidden items-center gap-2 text-xs sm:flex ${conflict ? "text-rose-700" : "text-zinc-500"}`}>
           {conflict ? <WarningCircle aria-hidden="true" className="text-rose-600" size={17} weight="fill" /> : <CloudCheck

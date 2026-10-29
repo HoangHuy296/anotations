@@ -41,8 +41,12 @@ async function createWorkflowNotificationIntents(tx: Prisma.TransactionClient, i
   const fallback = assignments.length ? [] : await tx.datasetMember.findMany({ where: { datasetId: input.datasetId, role: assignmentType === "REVIEW" ? "REVIEWER" : "LABELER" }, select: { userId: true } });
   const type = input.action === AssetWorkflowAction.APPROVE ? NotificationType.REVIEW_APPROVED : input.action === AssetWorkflowAction.REJECT ? NotificationType.REVIEW_REJECTED : NotificationType.REVIEW_SUBMITTED;
   const title = type === NotificationType.REVIEW_SUBMITTED ? "Asset submitted for review" : type === NotificationType.REVIEW_APPROVED ? "Review approved" : "Review rejected";
+  // A submission for review always reaches the dataset owner too, so work waiting for review is never invisible to them.
+  const ownerRecipients = type === NotificationType.REVIEW_SUBMITTED
+    ? await tx.dataset.findUnique({ where: { id: input.datasetId }, select: { ownerId: true } }).then((dataset) => (dataset && dataset.ownerId !== input.actorId ? [{ userId: dataset.ownerId }] : []))
+    : [];
   const jobs: string[] = [];
-  for (const recipient of [...new Set([...assignments, ...fallback].map((item) => item.userId))]) {
+  for (const recipient of [...new Set([...assignments, ...fallback, ...ownerRecipients].map((item) => item.userId))]) {
     const notification = await createDurableNotification(tx, { userId: recipient, actorId: input.actorId, type, datasetId: input.datasetId, assetId: input.assetId, title, body: "Workflow activity requires your attention.", dedupeKey: `workflow:${input.eventId}:${recipient}` });
     if (notification.kind === "stored") jobs.push((await createOrReuseCollaborationOutboxEvent(tx, { datasetId: input.datasetId, assetId: input.assetId, actorId: input.actorId, recipientUserId: recipient, type: CollaborationOutboxEventType.NOTIFICATION_CREATED, dedupeKey: `notification:workflow:${input.eventId}:${recipient}`, payload: { notificationId: notification.notification.id } })).jobId);
   }

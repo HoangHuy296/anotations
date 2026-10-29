@@ -1,6 +1,6 @@
 import "server-only";
 
-import { NotificationType, Prisma } from "@internal/db";
+import { type Modality, NotificationType, Prisma } from "@internal/db";
 
 import type { SafeNotificationContext } from "@/types/collaboration";
 import type { RequestActor } from "@/lib/auth";
@@ -58,7 +58,7 @@ export function buildSafeNotificationHref(context: SafeNotificationContext) {
 }
 
 function safeNotification(notification: {
-  id: string; type: NotificationType; title: string; body: string; datasetId: string | null; assetId: string | null; commentId: string | null; readAt: Date | null; createdAt: Date; contextUnavailableAt: Date | null;
+  id: string; type: NotificationType; title: string; body: string; datasetId: string | null; assetId: string | null; asset?: { modality: Modality } | null; commentId: string | null; readAt: Date | null; createdAt: Date; contextUnavailableAt: Date | null;
 }) {
   const unavailable = Boolean(notification.contextUnavailableAt);
   return {
@@ -69,6 +69,7 @@ function safeNotification(notification: {
     datasetId: unavailable ? null : notification.datasetId,
     assetId: unavailable ? null : notification.assetId,
     commentId: unavailable ? null : notification.commentId,
+    assetModality: unavailable ? null : notification.asset?.modality ?? null,
     readAt: notification.readAt?.toISOString() ?? null,
     createdAt: notification.createdAt.toISOString(),
     unavailable,
@@ -83,7 +84,7 @@ export async function listNotifications(actor: RequestActor, input: { cursor?: s
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: input.limit + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
-      select: { id: true, type: true, title: true, body: true, datasetId: true, assetId: true, commentId: true, readAt: true, createdAt: true, contextUnavailableAt: true },
+      select: { id: true, type: true, title: true, body: true, datasetId: true, assetId: true, asset: { select: { modality: true } }, commentId: true, readAt: true, createdAt: true, contextUnavailableAt: true },
     });
     const page = notifications.slice(0, input.limit);
     const contextDatasetIds = [...new Set(page.map((item) => item.datasetId).filter((id): id is string => Boolean(id)))];

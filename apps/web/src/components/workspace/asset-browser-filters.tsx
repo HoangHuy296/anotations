@@ -13,6 +13,8 @@ export type AssetBrowserFiltersProps = {
   search: string;
   statuses: AssetStatus[];
   filterModality?: Modality;
+  /** Shown only for labelers: "me" (default) limits the list to assets assigned to the viewer. */
+  assignedScope?: "me" | "all" | null;
   /** Runs before navigating away (autosave flush etc.); navigation is skipped if it resolves false. */
   beforeNavigate: () => Promise<boolean>;
 };
@@ -21,7 +23,7 @@ export type AssetBrowserFiltersProps = {
  * Shared Assets-tab controls. This deliberately keeps the established
  * search/status form intact and adds only the modality filter.
  */
-export function AssetBrowserFilters({ datasetId, search, statuses, filterModality, beforeNavigate }: AssetBrowserFiltersProps) {
+export function AssetBrowserFilters({ datasetId, search, statuses, filterModality, assignedScope = null, beforeNavigate }: AssetBrowserFiltersProps) {
   const router = useRouter();
 
   async function applyFilters(event: FormEvent<HTMLFormElement>) {
@@ -39,6 +41,7 @@ export function AssetBrowserFilters({ datasetId, search, statuses, filterModalit
     else if (imageStatusOptions.includes(nextStatus as AssetStatus)) params.set("status", nextStatus);
     const nextModality = String(form.get("filterModality") ?? "");
     if (nextModality) params.set("filterModality", nextModality);
+    if (assignedScope && String(form.get("scope") ?? assignedScope) === "all") params.set("scope", "all");
     router.push(`/workspace/${datasetId}?${params.toString()}`);
   }
 
@@ -60,6 +63,13 @@ export function AssetBrowserFilters({ datasetId, search, statuses, filterModalit
         {MODALITIES.map((modality) => <option key={modality} value={modality}>{modality[0]}{modality.slice(1).toLowerCase()}</option>)}
       </select>
     </div>
+    {assignedScope ? <>
+      <label className="sr-only" htmlFor="workspace-asset-scope">Which assets to show</label>
+      <select id="workspace-asset-scope" name="scope" defaultValue={assignedScope} className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-2 text-xs text-zinc-700">
+        <option value="me">Assigned to me</option>
+        <option value="all">All assets in dataset</option>
+      </select>
+    </> : null}
     <button type="submit" className="rounded-lg bg-zinc-900 px-3 py-2 text-xs font-semibold text-white hover:bg-zinc-800">Apply</button>
   </form>;
 }

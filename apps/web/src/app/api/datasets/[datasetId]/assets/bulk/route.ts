@@ -5,8 +5,10 @@ import { apiError, apiSuccess } from "@/lib/api-response";
 import { addLabelBulk, assignBulk, changeStatusBulk, deleteAssetsBulk, removeLabelBulk, resolveBulkSelection, WorkflowStatusRequiresTransitionError } from "@/lib/assets/asset-bulk-service";
 import { findAssetsWithAnnotationsReferencingLabel, resolveOrCreateLabel } from "@/lib/assets/asset-label-service";
 import { getRequestActor } from "@/lib/auth";
+import { enqueueCollaborationOutboxDispatch } from "@/lib/collaboration/collaboration-outbox-service";
 import { requireDatasetPermission } from "@/lib/authorization";
 import { db } from "@/lib/db";
+import { requestAssetsPurge } from "@/lib/purge/purge-service";
 import { createAndEnqueueBulkAssetJob } from "@/lib/queue/enqueue-job";
 import { assetBulkRequestSchema } from "@/lib/validation/asset-bulk";
 import { datasetIdSchema } from "@/lib/validation/dataset";
@@ -61,6 +63,15 @@ export async function POST(request: Request, context: Context) {
     const created = await createAndEnqueueBulkAssetJob(actor, { datasetId, type: "BULK_EXPORT_SELECTED", permission: "job.createExport", selection, resolvedCount: resolvedCountForJob });
     if (!created.ok) return apiError(created.status === 403 ? 403 : 404, created.status === 403 ? "FORBIDDEN" : "GITEA_NOT_FOUND", "The export could not be started.");
     return apiSuccess({ mode: "JOB", jobId: created.job.id }, { status: 202 });
+  }
+
+  // The dataset OWNER's Delete is permanent: explicit ids are hidden at once and a PURGE_ASSETS Job removes the MinIO objects and the rows.
+  // Other roles with asset.delete keep the recoverable soft delete below.
+  if (action === "DELETE" && (await requireDatasetPermission(actor, datasetId, "dataset.delete"))?.forbidden === false) {
+    if (!resolved.ok) return apiError(422, "SELECTION_TOO_LARGE", `A permanent delete is limited to ${resolved.max} assets at a time.`, { resolvedCount: [String(resolved.resolvedCount)], max: [String(resolved.max)] });
+    const purge = await requestAssetsPurge(actor, datasetId, resolved.assetIds);
+    if (!purge.ok) return purge.code === "ACTIVE_JOBS" ? apiError(409, "ACTIVE_JOBS", "Wait for running imports, exports or AI tasks to finish before deleting.") : apiError(purge.code === "NOT_FOUND" ? 404 : 400, purge.code === "NOT_FOUND" ? "GITEA_NOT_FOUND" : "INVALID_REQUEST", "The permanent delete could not be started.");
+    return apiSuccess({ mode: "JOB", jobId: purge.jobId, permanent: true }, { status: 202 });
   }
 
   // DELETE has a background-Job path for a selection exceeding the
@@ -122,8 +133,9 @@ export async function POST(request: Request, context: Context) {
   }
 
   if (action === "ASSIGN") {
-    const outcome = await assignBulk(datasetId, assetIds, notFoundIds, payload.assignedToId);
+    const outcome = await assignBulk(datasetId, assetIds, notFoundIds, payload.assignedToId, actor.id);
     if (!outcome.ok) { finish({ processed: resolvedCount, succeeded: 0, failed: resolvedCount, skipped: 0 }); return apiError(400, "INVALID_ASSIGNEE", "The assignee must be a current member of this dataset."); }
+    await Promise.all(outcome.outboxJobIds.map((jobId) => enqueueCollaborationOutboxDispatch(jobId)));
     finish(outcome.result);
     return apiSuccess({ mode: "SYNC", result: outcome.result });
   }

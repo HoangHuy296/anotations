@@ -20,7 +20,14 @@ const DEFAULT_IMAGE_LABELS = [
   { name: "aidetect", color: "#ff99fc" },
 ] as const;
 
-export async function ensureDefaultImageLabels(actor: RequestActor, datasetId: string) {
+/**
+ * "backfill-missing" (the explicit "Add defaults" action): create every default whose name is missing, leaving existing labels as-is.
+ * "seed-if-empty" (implicit reads: the `/labels` page and the dataset labels API): create the defaults only while the dataset has no
+ * labels at all, so a default the user removed is never resurrected by merely opening a page. Emptying the taxonomy re-seeds it.
+ */
+export type DefaultImageLabelMode = "backfill-missing" | "seed-if-empty";
+
+export async function ensureDefaultImageLabels(actor: RequestActor, datasetId: string, mode: DefaultImageLabelMode = "backfill-missing") {
   // A dataset's baseline taxonomy is reference data, not a label-management
   // mutation requested by the user. Any authorized reader must be able to
   // see the same defaults in `/labels` and the workspace Labels tab; creation
@@ -41,11 +48,17 @@ export async function ensureDefaultImageLabels(actor: RequestActor, datasetId: s
     // annotation can legitimately reference an IMAGE-modality label there; the row keeps its id, name and colour.
     await db.label.updateMany({ where: { datasetId, modality: Modality.IMAGE, normalizedName: { in: normalized } }, data: { modality } });
   }
+  if (mode === "seed-if-empty" && (await db.label.count({ where: { datasetId } })) > 0) return { ok: true as const, created: 0 };
   const created = await db.label.createMany({
     data: DEFAULT_IMAGE_LABELS.map((label) => ({ datasetId, modality, name: label.name, normalizedName: normalizeLabelName(label.name), color: label.color })),
     skipDuplicates: true,
   });
   return { ok: true as const, created: created.count };
+}
+
+/** Implicit-read seeding used by `/labels` and the dataset labels API. Never recreates a default the user removed from a non-empty taxonomy. */
+export function seedDefaultImageLabelsIfEmpty(actor: RequestActor, datasetId: string) {
+  return ensureDefaultImageLabels(actor, datasetId, "seed-if-empty");
 }
 
 export async function deleteUnreferencedLabel(actor: RequestActor, labelId: string) {

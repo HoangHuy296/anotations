@@ -51,6 +51,7 @@ export function DatasetSidebar({ datasetId, datasetName, selectedAssetId, search
     if (filters?.updatedFrom) params.set("updatedFrom", filters.updatedFrom);
     if (filters?.updatedTo) params.set("updatedTo", filters.updatedTo);
     if (filters?.sort) { params.set("sort", filters.sort); params.set("order", filters.order ?? "desc"); }
+    if (filters?.assignedScope === "all") params.set("scope", "all");
     if (target.page > 1) params.set("page", String(target.page));
     return `/workspace/${datasetId}?${params.toString()}`;
   };

@@ -133,7 +133,7 @@ function TextTabsEntry(props: PropertiesTabsProps): ReactElement | null {
 }
 
 function TextStatusFieldsEntry() {
-  return <TextStatusFields />;
+  return <TextStatusFields compact />;
 }
 
 function placeholderStatusFields(engine: Exclude<Modality, "IMAGE">) {

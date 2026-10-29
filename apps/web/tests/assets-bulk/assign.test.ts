@@ -19,14 +19,22 @@ test("Assign sets Asset.assignedToId to a current DatasetMember and can unassign
     await addWorkspaceMember(dataset.id, labeler.id, DatasetMemberRole.LABELER);
     const asset = await createImageAsset(dataset.id);
 
-    const assigned = await assignBulk(dataset.id, [asset.id], [], labeler.id);
+    const assigned = await assignBulk(dataset.id, [asset.id], [], labeler.id, owner.id);
     assert.equal(assigned.ok, true);
     if (assigned.ok) assert.deepEqual(assigned.result, { processed: 1, succeeded: 1, failed: 0, skipped: 0, failures: [] });
     assert.equal((await db.asset.findUniqueOrThrow({ where: { id: asset.id }, select: { assignedToId: true } })).assignedToId, labeler.id);
+    // The assignee is told which asset was assigned; unassigning (below) notifies nobody.
+    const notices = await db.notification.findMany({ where: { userId: labeler.id, type: "ASSET_ASSIGNED", datasetId: dataset.id }, select: { title: true, body: true, assetId: true, actorId: true } });
+    assert.equal(notices.length, 1);
+    assert.equal(notices[0]!.title, "1 asset assigned to you");
+    assert.equal(notices[0]!.assetId, asset.id);
+    assert.equal(notices[0]!.actorId, owner.id);
+    assert.ok(notices[0]!.body.includes(asset.filename ?? ""), "the notification names the assigned asset");
 
-    const unassigned = await assignBulk(dataset.id, [asset.id], [], null);
+    const unassigned = await assignBulk(dataset.id, [asset.id], [], null, owner.id);
     assert.equal(unassigned.ok, true);
     assert.equal((await db.asset.findUniqueOrThrow({ where: { id: asset.id }, select: { assignedToId: true } })).assignedToId, null);
+    assert.equal(await db.notification.count({ where: { userId: labeler.id, type: "ASSET_ASSIGNED", datasetId: dataset.id } }), 1, "unassigning must not notify");
   } finally { await cleanupWorkspaceFixture([owner.id, labeler.id], [dataset.id]); }
 });
 
@@ -36,7 +44,7 @@ test("Assign rejects an assignee who is not a member of the dataset", { skip: !e
   const dataset = await createWorkspaceDataset(owner.id);
   try {
     const asset = await createImageAsset(dataset.id);
-    const result = await assignBulk(dataset.id, [asset.id], [], outsider.id);
+    const result = await assignBulk(dataset.id, [asset.id], [], outsider.id, owner.id);
     assert.deepEqual(result, { ok: false, reason: "INVALID_ASSIGNEE" });
     assert.equal((await db.asset.findUniqueOrThrow({ where: { id: asset.id }, select: { assignedToId: true } })).assignedToId, null, "the asset must remain unassigned when the assignee is rejected");
   } finally { await cleanupWorkspaceFixture([owner.id, outsider.id], [dataset.id]); }

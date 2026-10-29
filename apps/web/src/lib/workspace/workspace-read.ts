@@ -143,7 +143,8 @@ export async function readWorkspacePage(
       select: { id: true, modality: true, filename: true, width: true, height: true, description: true, revision: true, status: true, batchIndex: true, orderIndex: true, _count: { select: { annotations: true } } },
     }),
     db.asset.count({ where }),
-    db.asset.count({ where: { datasetId, deletedAt: null, archivedAt: null, status: { not: AssetStatus.NEW } } }),
+    // With an assignee filter (labelers default to their own assignments) progress is counted over the same assignee, so "completed / total" stays coherent.
+    db.asset.count({ where: { datasetId, deletedAt: null, archivedAt: null, status: { not: AssetStatus.NEW }, ...(options.assignedToId ? { assignedToId: options.assignedToId } : {}) } }),
   ]);
   const assets = items.map(toSafeWorkspaceAsset);
   const selectedAssetId = dataset.modality === null ? null : requestedAsset?.id ?? assets[0]?.id ?? null;

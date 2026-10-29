@@ -17,6 +17,10 @@ export type AssetNavigatorFilters = {
   updatedTo?: string;
   sort?: AssetListSort;
   order?: AssetListOrder;
+  /** Effective assignee filter (applied by default for share-link labelers); part of every FILTERED selection. */
+  assignedToId?: string;
+  /** "me"/"all" when the Assigned-to-me toggle applies (labelers); null/undefined otherwise. */
+  assignedScope?: "me" | "all" | null;
 };
 
 /** The active search/filter query, excluding sort/order/pagination -- what a `FILTERED` selection actually matches (FR-013). */
@@ -26,6 +30,7 @@ function buildQuery(search: string, statuses: AssetStatus[], filters?: AssetNavi
     status: statuses.length ? statuses : undefined,
     modality: filters?.filterModality,
     labelId: filters?.labelId?.length ? filters.labelId : undefined,
+    assignedToId: filters?.assignedToId,
     createdFrom: filters?.createdFrom,
     createdTo: filters?.createdTo,
     updatedFrom: filters?.updatedFrom,
@@ -83,10 +88,17 @@ export function AssetNavigator({ datasetId, assets, page, pageSize, totalAssets,
     if (filters?.updatedFrom) params.set("updatedFrom", filters.updatedFrom);
     if (filters?.updatedTo) params.set("updatedTo", filters.updatedTo);
     if (filters?.sort) { params.set("sort", filters.sort); params.set("order", filters.order ?? "desc"); }
+    if (filters?.assignedScope === "all") params.set("scope", "all");
     if (asset) params.set(asset.modality.toLowerCase(), asset.id);
     return `/workspace/${datasetId}?${params.toString()}`;
   };
+  // Labelers see only their own assignments by default; the toggle never alters any other active filter.
+  const assignedScope = filters?.assignedScope ?? null;
+  const onlyMineEmpty = assignedScope === "me" && !search && statuses.length === 0 && !filters?.filterModality;
   return <div className="mt-3">
+    {assignedScope && <div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-sky-50 px-2.5 py-1.5 text-[11px] text-sky-800">
+      <span className="font-semibold">{assignedScope === "me" ? "Showing assets assigned to you" : "Showing all assets in this dataset"}</span>
+    </div>}
     {assets.length > 0 && <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
       <label className="flex items-center gap-1.5 font-semibold text-zinc-600"><input type="checkbox" checked={allVisibleSelected} onChange={() => selectVisible(datasetId, visibleIds)} />Select visible</label>
       {totalAssets > visibleIds.length && <button type="button" onClick={() => selectAllFiltered(datasetId, query, totalAssets)} className="font-semibold text-sky-700 hover:text-sky-800">Select all {totalAssets.toLocaleString()} filtered</button>}
@@ -97,7 +109,7 @@ export function AssetNavigator({ datasetId, assets, page, pageSize, totalAssets,
       </>}
     </div>}
     {assets.length === 0
-      ? <p role="status" className="rounded-lg border border-dashed border-zinc-200 px-3 py-4 text-center text-xs text-zinc-500">No assets match the current search and filters.</p>
+      ? <p role="status" className="rounded-lg border border-dashed border-zinc-200 px-3 py-4 text-center text-xs leading-5 text-zinc-500">{onlyMineEmpty ? "Nothing is assigned to you yet. You will get a notification as soon as the dataset owner assigns you assets." : "No assets match the current search and filters."}</p>
       : <div className="space-y-1">{assets.map((asset) => {
         const assetHref = href(page, asset);
         const checked = mode === "EXPLICIT" && activeForDataset && isSelected(asset.id);

@@ -12,6 +12,7 @@ import { processVideoMetadata } from "../jobs/video-metadata.js";
 import { processAudioWaveform } from "../jobs/audio-waveform.js";
 import { processAiSubmit } from "../jobs/ai-submit.processor.js";
 import { processBulkDeleteAssets } from "../jobs/bulk-delete-assets.js";
+import { processPurge } from "../jobs/purge.js";
 import { processBulkExportSelected } from "../jobs/bulk-export-selected.js";
 import { processCollaborationOutboxDispatch } from "../jobs/collaboration-outbox-relay.js";
 import { processTextSourcePrepare } from "../jobs/text-source-prepare.processor.js";
@@ -89,6 +90,7 @@ export async function routeQueueDelivery(input: { db: PrismaClient; payload: unk
   if (job.type === "GENERATE_AUDIO_WAVEFORM") await processAudioWaveform(input.db, job.id, claim.lockToken);
   if (job.type === "AI_PREANNOTATE_ASSET" || job.type === "AI_PREANNOTATE_DATASET") await processAiSubmit(input.db, job.id, claim.lockToken);
   if (job.type === "BULK_DELETE_ASSETS") await processBulkDeleteAssets(input.db, job.id, claim.lockToken);
+  if (job.type === "PURGE_DATASET" || job.type === "PURGE_ASSETS") await processPurge(input.db, job.id, claim.lockToken);
   if (job.type === "BULK_EXPORT_SELECTED") await processBulkExportSelected(input.db, job.id, claim.lockToken);
   if (job.type === "COLLABORATION_OUTBOX_DISPATCH") await processCollaborationOutboxDispatch(input.db, job.id, claim.lockToken);
   if (job.type === "TEXT_SOURCE_PREPARE") await processTextSourcePrepare(input.db, job.id, claim.lockToken);

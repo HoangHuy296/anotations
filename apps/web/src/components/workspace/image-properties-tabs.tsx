@@ -335,7 +335,7 @@ export function ImagePropertiesTabs({ datasetId, selection, assets, page, pageSi
     {activeTab === "assets" && <section className="p-4">
       <div className="flex items-center justify-between"><h2 className="text-sm font-bold text-zinc-950">Assets</h2><span className="text-xs text-zinc-400">Page {page}</span></div>
       <p className="mt-1 text-xs text-zinc-500">This workspace page is limited to {pageSize} assets.</p>
-      <AssetBrowserFilters datasetId={datasetId} search={search} statuses={statuses} filterModality={filters.filterModality} beforeNavigate={flushBeforeNavigation} />
+      <AssetBrowserFilters datasetId={datasetId} search={search} statuses={statuses} filterModality={filters.filterModality} assignedScope={filters.assignedScope ?? null} beforeNavigate={flushBeforeNavigation} />
       <div className="mt-3" aria-label="Dataset progress"><div className="flex justify-between text-[11px] text-zinc-500"><span>Dataset progress</span><span>{completedAssets} / {totalAssets}</span></div><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-zinc-100"><div className="h-full rounded-full bg-emerald-500" style={{ width: `${totalAssets ? Math.round((completedAssets / totalAssets) * 100) : 0}%` }} /></div></div>
       <AssetNavigator datasetId={datasetId} assets={assets} page={page} pageSize={pageSize} totalAssets={totalAssets} search={search} statuses={statuses} selectedAssetId={selectedAssetId} filters={filters} onNavigate={guardImageNavigation} />
       <BulkActionBar datasetId={datasetId} labels={taxonomy} onRunAi={readOnly ? undefined : () => useAnnotationStore.getState().setTool("detection")} />

@@ -39,6 +39,7 @@ model User {
   workflowEvents       AssetWorkflowEvent[] @relation("AssetWorkflowActor")
   invitationsReceived  DatasetInvitation[]  @relation("DatasetInvitationInvitee")
   invitationsSent      DatasetInvitation[]  @relation("DatasetInvitationInvitedBy")
+  shareLinksCreated    DatasetShareLink[]   @relation("DatasetShareLinkCreator")
   assignmentSlots      AssetAssignment[]    @relation("AssetAssignmentUser")
   assignmentsCreated   AssetAssignment[]    @relation("AssetAssignmentCreatedBy")
   assignmentEvents     AssetAssignmentEvent[] @relation("AssetAssignmentEventActor")
@@ -300,6 +301,7 @@ model Dataset {
   labels                 Label[]
   preparedImports        PreparedImport[]
   invitations            DatasetInvitation[]
+  shareLinks             DatasetShareLink[]
   assignmentSlots        AssetAssignment[]
   assignmentEvents       AssetAssignmentEvent[]
   comments               AssetComment[]
@@ -414,6 +416,29 @@ model DatasetInvitation {
   @@index([inviteeUserId, status, createdAt])
   @@index([datasetId, status, createdAt])
   @@index([expiresAt])
+}
+
+/// Bearer share link that lets a signed-in user join a dataset as `role`. Only the
+/// SHA-256 of the token is stored (the raw token exists once, in the creation
+/// response), so a database read can never reveal a usable link. A link is valid
+/// while `revokedAt` is null, `expiresAt` is in the future and `maxUses` (when set)
+/// is not exhausted.
+model DatasetShareLink {
+  id          String            @id @default(cuid())
+  datasetId   String
+  createdById String
+  role        DatasetMemberRole @default(LABELER)
+  tokenHash   String            @unique
+  expiresAt   DateTime
+  maxUses     Int?
+  useCount    Int               @default(0)
+  revokedAt   DateTime?
+  createdAt   DateTime          @default(now())
+  dataset     Dataset           @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  createdBy   User              @relation("DatasetShareLinkCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([datasetId, revokedAt, expiresAt])
+  @@index([createdById])
 }
 
 model Asset {
@@ -628,6 +653,23 @@ model Notification {
   @@index([userId, readAt, createdAt])
   @@index([datasetId, createdAt])
   @@index([assetId, createdAt])
+}
+
+/// Permanent-delete audit. Deliberately has NO foreign keys: it must outlive the dataset/user rows it describes. It holds only
+/// opaque identifiers and counts (never object keys, filenames or content).
+model PurgeAudit {
+  id             String    @id @default(cuid())
+  kind           String
+  datasetId      String
+  actorId        String
+  assetCount     Int       @default(0)
+  objectCount    Int       @default(0)
+  objectsDeleted Int       @default(0)
+  startedAt      DateTime  @default(now())
+  finishedAt     DateTime?
+
+  @@index([datasetId])
+  @@index([actorId, startedAt])
 }
 
 model DatasetMembershipEvent {
@@ -1312,6 +1354,8 @@ enum JobType {
   COLLABORATION_OUTBOX_DISPATCH
   TEXT_SOURCE_PREPARE
   VERIFY_UPLOADED_MEDIA
+  PURGE_DATASET
+  PURGE_ASSETS
 }
 
 enum JobStatus {

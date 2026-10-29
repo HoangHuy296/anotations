@@ -72,14 +72,14 @@ async function expirePendingInvitations(tx: TransactionClient, where: Prisma.Dat
   });
 }
 
-async function recordMembershipEvent(
+export async function recordMembershipEvent(
   tx: TransactionClient,
   input: { datasetId: string; memberUserId: string; actorId: string; action: DatasetMembershipEventAction; previousRole?: DatasetMemberRole | null; nextRole?: DatasetMemberRole | null },
 ) {
   return tx.datasetMembershipEvent.create({ data: input });
 }
 
-async function createMembershipOutbox(
+export async function createMembershipOutbox(
   tx: TransactionClient,
   input: { datasetId: string; actorId: string; memberUserId: string; event: "invited" | "accepted" | "declined" | "revoked" | "role_changed" | "removed"; revoke?: boolean },
 ) {
@@ -125,11 +125,11 @@ async function cleanupIneligibleAssignments(
   return invalid;
 }
 
-function mergeJobIds(...values: Array<{ jobId: string } | { kind: string; jobId: string } | undefined>) {
+export function mergeJobIds(...values: Array<{ jobId: string } | { kind: string; jobId: string } | undefined>) {
   return [...new Set(values.filter((value): value is { jobId: string } => Boolean(value)).map((value) => value.jobId))];
 }
 
-async function existingOutboxJobIds(tx: TransactionClient, dedupeKeys: string[]) {
+export async function existingOutboxJobIds(tx: TransactionClient, dedupeKeys: string[]) {
   const rows = await tx.collaborationOutboxEvent.findMany({ where: { dedupeKey: { in: dedupeKeys } }, select: { jobId: true } });
   return [...new Set(rows.map((row) => row.jobId))];
 }

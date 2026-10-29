@@ -9,7 +9,8 @@ import { PropertiesPanel } from "@/components/workspace/properties-panel";
 import { WorkspaceEngine } from "@/components/workspace/workspace-engine";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { getRequestActor } from "@/lib/auth";
-import { isDatabaseConfigured } from "@/lib/db";
+import { requireDatasetPermission } from "@/lib/authorization";
+import { db, isDatabaseConfigured } from "@/lib/db";
 import { readDatasetModality } from "@/lib/datasets/modality";
 import { readAccountPreferences } from "@/lib/validation/account-preferences";
 import { datasetIdSchema } from "@/lib/validation/dataset";
@@ -23,7 +24,7 @@ type SearchParams = {
   filterModality?: string | string[]; labelId?: string | string[]; assignedToId?: string | string[];
   createdFrom?: string | string[]; createdTo?: string | string[]; updatedFrom?: string | string[]; updatedTo?: string | string[];
   sort?: string | string[]; order?: string | string[];
-  discussion?: string | string[];
+  discussion?: string | string[]; scope?: string | string[];
 };
 const first = (value: string | string[] | undefined) => Array.isArray(value) ? value[0] : value;
 const values = (value: string | string[] | undefined) => Array.isArray(value) ? value : value ? [value] : [];
@@ -82,6 +83,14 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
     sort: undefined, order: "desc" as const,
   };
   const selectedAsset = requestedId ? { id: requestedId, modality: dataset.modality } : undefined;
+  // LABELER members (e.g. joined through a share link) only ever see the assets assigned to them: `scope`, an explicit
+  // assignee filter and a direct asset link cannot widen it. Owners, managers and reviewers are never narrowed.
+  const access = await requireDatasetPermission(actor, datasetId, "dataset.read");
+  const isLabelerMember = Boolean(access && !access.forbidden && access.role === "LABELER");
+  const assignedScope: "me" | null = isLabelerMember ? "me" : null;
+  const effectiveAssignedToId = isLabelerMember ? actor.id : listQuery.assignedToId;
+  if (isLabelerMember && requestedId && !(await db.asset.findFirst({ where: { id: requestedId, datasetId, assignedToId: actor.id, deletedAt: null, archivedAt: null }, select: { id: true } }))) notFound();
+  const canShare = Boolean(access && !access.forbidden && (await requireDatasetPermission(actor, datasetId, "member.manage"))?.forbidden === false);
   const workspace = await readWorkspacePage(actor, datasetId, {
     page: listQuery.page,
     search: listQuery.q,
@@ -89,7 +98,7 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
     selectedAsset,
     modality: listQuery.filterModality,
     labelId: listQuery.labelId,
-    assignedToId: listQuery.assignedToId,
+    assignedToId: effectiveAssignedToId,
     createdFrom: listQuery.createdFrom,
     createdTo: listQuery.createdTo,
     updatedFrom: listQuery.updatedFrom,
@@ -112,9 +121,10 @@ export default async function WorkspacePage({ params, searchParams }: { params: 
     createdFrom: listQuery.createdFrom, createdTo: listQuery.createdTo,
     updatedFrom: listQuery.updatedFrom, updatedTo: listQuery.updatedTo,
     sort: listQuery.sort, order: listQuery.order,
+    assignedToId: effectiveAssignedToId, assignedScope,
   };
   return <div key={datasetId} data-theme={theme === "dark" ? "dark" : undefined} className="ws-themed flex min-h-100dvh flex-col bg-zinc-100">
-    <WorkspaceHeader key={datasetId} datasetName={workspace.dataset.name} branch={`${engine.toLowerCase()} workspace`} repositoryFullName="Dataset storage" rootPath="" engine={engine} actor={{ email: actor.email, name: actor.name }} theme={theme} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId, commentId: safeDiscussionCommentId }} />
+    <WorkspaceHeader key={datasetId} datasetName={workspace.dataset.name} branch={`${engine.toLowerCase()} workspace`} repositoryFullName="Dataset storage" rootPath="" engine={engine} actor={{ email: actor.email, name: actor.name }} theme={theme} workflow={workflow} discussion={{ datasetId, assetId: selectedAssetId, commentId: safeDiscussionCommentId }} shareDatasetId={canShare ? datasetId : null} />
     <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)_280px] lg:grid-rows-[calc(100dvh-64px)]">
       <DatasetSidebar key={datasetId} datasetId={datasetId} datasetName={workspace.dataset.name} selectedAssetId={selectedAssetId} search={listQuery.q} statuses={listQuery.statuses} page={workspace.page.page} previous={workspace.page.previous} next={workspace.page.next} engine={engine} filters={filters} />
       <WorkspaceEngine dataset={workspace.dataset} selection={selected} />

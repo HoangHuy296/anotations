@@ -1,5 +1,7 @@
 import { TextDecoder } from "node:util";
 
+import { readImageDimensions } from "@annotationplatform/domain";
+
 import { defaultMediaProcessingPolicy } from "../media/policy.js";
 import { runBoundedMediaProcess } from "../media/subprocess.js";
 import { materializePrivateSource } from "../media/source-materialization.js";
@@ -19,7 +21,7 @@ export type VerifiedRepositoryModality = "IMAGE" | "VIDEO" | "AUDIO" | "TEXT";
  * The extension only ever decides which files are candidates; it never decides the stored type.
  */
 export const UNVERIFIED_CONTENT_TYPE = "application/octet-stream";
-export type VerifiedRepositoryObject = { modality: VerifiedRepositoryModality; mimeType: string };
+export type VerifiedRepositoryObject = { modality: VerifiedRepositoryModality; mimeType: string; /** Pixel size, IMAGE only, read from the verified header prefix when it carries one. */ width?: number; height?: number };
 
 async function readPrefix(client: ReturnType<typeof createWorkerMinio>, bucket: string, key: string) {
   const stream = await client.getPartialObject(bucket, key, 0, 64 * 1024);
@@ -97,7 +99,10 @@ export async function verifyRepositoryObject(input: {
   const minio = createWorkerMinio(config);
   const prefix = await readPrefix(minio, input.bucket, input.objectKey);
   const headerClass = classifyDefinitiveHeaderDetailed(prefix);
-  if (headerClass) return headerClass;
+  if (headerClass) {
+    const dimensions = headerClass.modality === "IMAGE" ? readImageDimensions(prefix) : null;
+    return dimensions ? { ...headerClass, ...dimensions } : headerClass;
+  }
 
   return withJobTempWorkspace(input.jobId, async (workspace) => {
     const materialized = await materializePrivateSource({
